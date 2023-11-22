@@ -258,35 +258,28 @@ namespace Aspects
 More advanced vertion of the Metrics aspect can also set activity status.
 
 ```c#
-    [Aspect(
-        OnUsing   = nameof(OnUsing),
-        OnCatch   = nameof(OnCatch),
-        OnFinally = nameof(OnFinally)
-        )]
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    sealed class MetricsAttribute : Attribute
+[Aspect(
+    OnUsing   = nameof(OnUsing),
+    OnFinally = nameof(OnFinally)
+    )]
+[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+sealed class MetricsAttribute : Attribute
+{
+    static readonly ActivitySource _activitySource = new("Sample.Aspect");
+
+    public static Activity? OnUsing(InterceptCallInfo info)
     {
-        static readonly ActivitySource _activitySource = new("Sample.Aspect");
+        var activity = _activitySource.StartActivity(info.MemberInfo.Name);
 
-        public static Activity? OnUsing(InterceptCallInfo info)
-        {
-            var activity = _activitySource.StartActivity(info.MemberInfo.Name);
+        info.Tag = activity;
 
-            info.Tag = activity;
-
-            return activity;
-        }
-
-        public static void OnCatch(InterceptCallInfo info)
-        {
-            if (info.Tag is Activity activity)
-                activity.SetStatus(ActivityStatusCode.Error);
-        }
-
-        public static void OnFinally(InterceptCallInfo info)
-        {
-            if (info is { Tag: Activity activity, Exception : null})
-                activity.SetStatus(ActivityStatusCode.Ok);
-        }
+        return activity;
     }
+
+    public static void OnFinally(InterceptCallInfo info)
+    {
+        if (info is { Tag: Activity activity, Exception : var ex })
+            activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
+    }
+}
 ```
