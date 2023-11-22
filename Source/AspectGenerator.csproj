@@ -11,8 +11,8 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Igor Tkachev</Authors>
 		<Copyright>Igor Tkachev</Copyright>
-		<PackageProjectUrl>https://github.com/igor-tkachev/Aspect.Generator</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/igor-tkachev/Aspect.Generator</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/igor-tkachev/AspectGenerator</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/igor-tkachev/AspectGenerator</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>Aspect SourceGenerator </PackageTags>
 		<Description>The Aspect Generator can help you easily create your own aspects.</Description>
