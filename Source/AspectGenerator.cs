@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -53,9 +52,12 @@ namespace Aspect.Generator
 					ReThrow = Continue
 				}
 
+				struct Void
+				{
+				}
+
 				class InterceptCallInfo
 				{
-					public object?         ReturnValue;
 					public object?         Tag;
 					public InterceptType   InterceptType;
 					public InterceptResult InterceptResult;
@@ -65,6 +67,11 @@ namespace Aspect.Generator
 					public System.Reflection.MemberInfo                          MemberInfo;
 					public Type                                                  AspectType;
 					public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
+				}
+
+				class InterceptCallInfo<T> : InterceptCallInfo
+				{
+					public T ReturnValue;
 				}
 			}
 
@@ -79,7 +86,7 @@ namespace Aspect.Generator
 
 		public void Initialize(IncrementalGeneratorInitializationContext context)
 		{
-#if TRUE
+#if TRUE1
 			if (!Debugger.IsAttached)
 			{
 				Debugger.Launch();
@@ -377,9 +384,9 @@ namespace Aspect.Generator
 				sb
 					.Append(indent).AppendLine($"// {attr}")
 					.Append(indent).AppendLine("//")
-					.Append(indent).AppendLine($"var __info__{idx} = new Aspects.InterceptCallInfo")
+					.Append(indent).AppendLine($"var __info__{idx} = new Aspects.InterceptCallInfo<{(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")}>")
 					.Append(indent).AppendLine("{")
-					.Append(indent).AppendLine($"\tReturnValue     = {(idx > 0 ? $"__info__{idx - 1}.ReturnValue" : method.ReturnsVoid ? "null" : $"default({method.ReturnType})")},")
+					//.Append(indent).AppendLine($"\tReturnValue     = {(idx > 0 ? $"__info__{idx - 1}.ReturnValue" : $"default({(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")})")},")
 					.Append(indent).AppendLine($"\tMemberInfo      = {interceptorName}_MemberInfo,")
 					.Append(indent).AppendLine($"\tAspectType      = typeof({attr}),")
 					.Append(indent).AppendLine($"\tAspectArguments = {interceptorName}_AspectArguments_{idx},")
@@ -521,11 +528,8 @@ namespace Aspect.Generator
 					sb
 						.Append(indent).AppendLine("catch (Exception __ex__)")
 						.Append(indent).AppendLine("{")
+						.Append(indent).AppendLine($"\t__info__{idx}.Exception{(onCatch is null ? null : "      ")} = __ex__;")
 						;
-
-					sb.Append(indent).AppendLine(onCatch is null ?
-						$"\t__info__{idx}.Exception = __ex__;" :
-						$"\t__info__{idx}.Exception       = __ex__;");
 
 					if (onCatch is not null)
 						sb
@@ -578,7 +582,7 @@ namespace Aspect.Generator
 				if (idx > 0)
 					sb.Append(indent).AppendLine($"__info__{idx - 1}.ReturnValue = __info__{idx}.ReturnValue;");
 				else if (!method.ReturnsVoid)
-					sb.AppendLine($"\t\t\treturn ({method.ReturnType})__info__{idx}.ReturnValue;");
+					sb.AppendLine($"\t\t\treturn __info__{idx}.ReturnValue;");
 
 				TrimEnd(sb);
 			}

@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<LangVersion>preview</LangVersion>
+
+		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Aspects</InterceptorsPreviewNamespaces>
+
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Aspect.Generator"               Version="0.0.2" />
+		<PackageReference Include="OpenTelemetry"                  Version="1.6.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.6.0" />
+	</ItemGroup>
+</Project>

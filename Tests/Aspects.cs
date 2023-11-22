@@ -14,7 +14,11 @@ namespace Aspects
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class TestAspectAttribute : Attribute
 	{
-		public static void OnAfterCall(InterceptCallInfo info)
+		public static void OnAfterCall<T>(InterceptCallInfo<T> info)
+		{
+		}
+
+		public static void OnAfterCall(InterceptCallInfo<string> info)
 		{
 			if (info.InterceptType == InterceptType.OnAfterCall)
 			{
@@ -35,7 +39,11 @@ namespace Aspects
 			info.Tag = "__X__";
 		}
 
-		public static void OnCall(InterceptCallInfo info)
+		public static void OnCall(InterceptCallInfo<Aspects.Void> info)
+		{
+		}
+
+		public static void OnCall(InterceptCallInfo<string> info)
 		{
 			if (info.InterceptType == InterceptType.OnAfterCall)
 			{
@@ -52,7 +60,7 @@ namespace Aspects
 	{
 		public static int CallCount;
 
-		public static InterceptCallInfo OnInit(InterceptCallInfo info)
+		public static InterceptCallInfo<T> OnInit<T>(InterceptCallInfo<T> info)
 		{
 			CallCount++;
 			return info;
@@ -77,7 +85,7 @@ namespace Aspects
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class FinallyAttribute : Attribute
 	{
-		public static void OnFinally(InterceptCallInfo info)
+		public static void OnFinally(InterceptCallInfo<int> info)
 		{
 			info.ReturnValue = (int)info.ReturnValue! + 1;
 		}
@@ -101,7 +109,7 @@ namespace Aspects
 		public static int OnCatchCounter;
 		public static int OnFinallyCounter;
 
-		public static InterceptCallInfo OnInit(InterceptCallInfo info)
+		public static InterceptCallInfo<T> OnInit<T>(InterceptCallInfo<T> info)
 		{
 			OnInitCounter++;
 			return info;
@@ -131,7 +139,7 @@ namespace Aspects
 		public char    Arg4 { get; set; }
 		public object? Arg5 { get; set; }
 
-		public static void OnAfterCall(InterceptCallInfo info)
+		public static void OnAfterCall(InterceptCallInfo<string> info)
 		{
 			if (info.AspectArguments.TryGetValue(nameof(Arg2), out var value))
 			{

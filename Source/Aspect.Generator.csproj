@@ -4,7 +4,7 @@
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
-		<Version>0.0.1</Version>
+		<Version>0.0.2</Version>
 
 		<IsPackage>true</IsPackage>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -15,5 +15,7 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.7.0" />
 		<PackageReference Include="PolySharp" Version="1.13.2" />
+
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 	</ItemGroup>
 </Project>

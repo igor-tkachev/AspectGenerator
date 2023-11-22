@@ -22,7 +22,7 @@ namespace Aspect.Generator.Tests
 	static class TestCodeExtensions
 	{
 		[Aspects.TestAspect]
-		public static string ExtensionMethod<T>(this UnitTests @object, T value)
+		public static string ExtensionMethod<T>(this UnitTests? @object, T value)
 		{
 			return $"{value}";
 		}

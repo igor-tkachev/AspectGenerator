@@ -13,6 +13,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{E70BF960
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{C7FC6572-D698-4D79-9E51-7FCBB1DC9EE1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetryAspect", "Examples\OpenTelemetryAspect\OpenTelemetryAspect.csproj", "{912DB7B7-F07D-4158-95E4-738B1A789A3E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{91353603-C41C-42C6-8A02-A5C451DBD280} = {91353603-C41C-42C6-8A02-A5C451DBD280}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,9 +34,16 @@ Global
 		{C2CAF6CC-C10A-4A53-93AC-C02C073C0F82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2CAF6CC-C10A-4A53-93AC-C02C073C0F82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2CAF6CC-C10A-4A53-93AC-C02C073C0F82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{912DB7B7-F07D-4158-95E4-738B1A789A3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{912DB7B7-F07D-4158-95E4-738B1A789A3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{912DB7B7-F07D-4158-95E4-738B1A789A3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{912DB7B7-F07D-4158-95E4-738B1A789A3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{912DB7B7-F07D-4158-95E4-738B1A789A3E} = {C7FC6572-D698-4D79-9E51-7FCBB1DC9EE1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B698F1D-8990-4983-9EFB-707AF66E24D2}
