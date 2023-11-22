@@ -25,19 +25,35 @@ namespace Aspects
 	/// <summary>
 	/// Metrics aspect.
 	/// </summary>
-	[Aspect(
-		// Specify the name of the method used in the 'using' statement
-		// that returns a IDisposable object.
-		OnUsing = nameof(OnUsing)
-		)]
-	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-	sealed class MetricsAttribute : Attribute
-	{
-		static readonly ActivitySource _activitySource = new("Sample.Aspect");
+[Aspect(
+	OnUsing   = nameof(OnUsing),
+	OnCatch   = nameof(OnCatch),
+	OnFinally = nameof(OnFinally)
+	)]
+[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+sealed class MetricsAttribute : Attribute
+{
+	static readonly ActivitySource _activitySource = new("Sample.Aspect");
 
-		public static Activity? OnUsing(InterceptCallInfo info)
-		{
-			return _activitySource.StartActivity(info.MemberInfo.Name);
-		}
+	public static Activity? OnUsing(InterceptCallInfo info)
+	{
+		var activity = _activitySource.StartActivity(info.MemberInfo.Name);
+
+		info.Tag = activity;
+
+		return activity;
 	}
+
+	public static void OnCatch(InterceptCallInfo info)
+	{
+		if (info.Tag is Activity activity)
+			activity.SetStatus(ActivityStatusCode.Error);
+	}
+
+	public static void OnFinally(InterceptCallInfo info)
+	{
+		if (info is { Tag: Activity activity, Exception : null})
+			activity.SetStatus(ActivityStatusCode.Ok);
+	}
+}
 }
