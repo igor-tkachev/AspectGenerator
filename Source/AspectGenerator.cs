@@ -49,7 +49,8 @@ namespace AspectGenerator
 				{
 					Continue,
 					Return,
-					ReThrow = Continue
+					ReThrow     = Continue,
+					IgnoreThrow = Return
 				}
 
 				struct Void

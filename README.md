@@ -278,7 +278,7 @@ sealed class MetricsAttribute : Attribute
 
     public static void OnFinally(InterceptCallInfo info)
     {
-        if (info is { Tag: Activity activity, Exception : var ex })
+        if (info is { Tag: Activity activity, Exception: var ex })
             activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
     }
 }

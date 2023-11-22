@@ -75,7 +75,7 @@ namespace Aspects
 	{
 		public static void OnCatch(InterceptCallInfo info)
 		{
-			info.InterceptResult = InterceptResult.Return;
+			info.InterceptResult = InterceptResult.IgnoreThrow;
 		}
 	}
 

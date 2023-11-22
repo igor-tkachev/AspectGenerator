@@ -45,8 +45,23 @@ namespace Aspects
 
 		public static void OnFinally(InterceptCallInfo info)
 		{
-			if (info is { Tag: Activity activity, Exception : var ex })
+			if (info is { Tag: Activity activity, Exception: var ex })
 				activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
+		}
+	}
+
+	/// <summary>
+	/// IgnoreCatch aspect.
+	/// </summary>
+	[Aspect(
+		OnCatch = nameof(OnCatch)
+		)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	sealed class IgnoreCatchAttribute : Attribute
+	{
+		public static void OnCatch(InterceptCallInfo info)
+		{
+			info.InterceptResult = InterceptResult.IgnoreThrow;
 		}
 	}
 }

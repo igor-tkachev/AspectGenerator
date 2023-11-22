@@ -14,15 +14,7 @@ namespace OpenTelemetryAspect
 			Method1();
 			Method2();
 			Method1();
-
-			try
-			{
-				ExceptionMethod();
-			}
-			catch
-			{
-				// ignored
-			}
+			MethodException();
 		}
 
 		[Metrics]
@@ -37,8 +29,8 @@ namespace OpenTelemetryAspect
 			Thread.Sleep(200);
 		}
 
-		[Metrics]
-		public static void ExceptionMethod()
+		[IgnoreCatch, Metrics]
+		public static void MethodException()
 		{
 			throw new();
 		}
