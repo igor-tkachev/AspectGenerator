@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Aspect.Generator
+namespace AspectGenerator
 {
 	[Generator(LanguageNames.CSharp)]
 	public class AspectGenerator : IIncrementalGenerator
@@ -414,7 +414,7 @@ namespace Aspect.Generator
 				if (onUsing is not null)
 				{
 					sb
-						.Append(indent).AppendLine($"using (var _ = {attr.ContainingNamespace}.{attr.Name}.{onUsing}(__info__{idx}))")
+						.Append(indent).AppendLine($"using ({attr.ContainingNamespace}.{attr.Name}.{onUsing}(__info__{idx}))")
 						.Append(indent).AppendLine("{")
 						;
 					indent += '\t';

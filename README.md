@@ -1,11 +1,13 @@
 # Aspect Generator
 
+The Aspect Generator can help you easily create your own aspects.
+
 ## Download and Install
 
 Install nuget
 
 ```bash
-> dotnet add package Aspect.Generator
+> dotnet add package AspectGenerator
 ```
 
 Modify your project file
@@ -20,8 +22,7 @@ Modify your project file
 
 ## OpenTelemetry Aspect example
 
-Create OpenTelemetryFactory and Metrics aspect.
-
+Create OpenTelemetryFactory and Metrics aspect:
 
 ```c#
 using System;
@@ -69,7 +70,7 @@ namespace Aspects
 }
 ```
 
-Test it.
+Use it:
 
 ```c#
 using System;
@@ -193,10 +194,10 @@ namespace Aspects
         /// </summary>
         //
         // Intercepts Method1().
-        [System.Runtime.CompilerServices.InterceptsLocation(@"P:\Aspect.Generator\Examples\OpenTelemetryAspect\Program.cs", line: 14, character: 4)]
+        [System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Examples\OpenTelemetryAspect\Program.cs", line: 14, character: 4)]
         //
         // Intercepts Method1().
-        [System.Runtime.CompilerServices.InterceptsLocation(@"P:\Aspect.Generator\Examples\OpenTelemetryAspect\Program.cs", line: 16, character: 4)]
+        [System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Examples\OpenTelemetryAspect\Program.cs", line: 16, character: 4)]
         //
         [System.Runtime.CompilerServices.CompilerGenerated]
         //[System.Diagnostics.DebuggerStepThrough]
@@ -211,7 +212,7 @@ namespace Aspects
                 AspectArguments = Method1_Interceptor_AspectArguments_0,
             };
 
-            using (var _ = Aspects.MetricsAttribute.OnUsing(__info__0))
+            using (Aspects.MetricsAttribute.OnUsing(__info__0))
             {
                 OpenTelemetryAspect.Program.Method1();
             }
@@ -227,7 +228,7 @@ namespace Aspects
         /// </summary>
         //
         // Intercepts Method2().
-        [System.Runtime.CompilerServices.InterceptsLocation(@"P:\Aspect.Generator\Examples\OpenTelemetryAspect\Program.cs", line: 15, character: 4)]
+        [System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Examples\OpenTelemetryAspect\Program.cs", line: 15, character: 4)]
         //
         [System.Runtime.CompilerServices.CompilerGenerated]
         //[System.Diagnostics.DebuggerStepThrough]
@@ -242,7 +243,7 @@ namespace Aspects
                 AspectArguments = Method2_Interceptor_AspectArguments_0,
             };
 
-            using (var _ = Aspects.MetricsAttribute.OnUsing(__info__0))
+            using (Aspects.MetricsAttribute.OnUsing(__info__0))
             {
                 OpenTelemetryAspect.Program.Method2();
             }

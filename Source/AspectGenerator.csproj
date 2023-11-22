@@ -4,10 +4,20 @@
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
-		<Version>0.0.2</Version>
+
+		<Version>0.0.1-preview</Version>
 
 		<IsPackage>true</IsPackage>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>Igor Tkachev</Authors>
+		<Copyright>Igor Tkachev</Copyright>
+		<PackageProjectUrl>https://github.com/igor-tkachev/Aspect.Generator</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/igor-tkachev/Aspect.Generator</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>Aspect SourceGenerator </PackageTags>
+		<Description>The Aspect Generator can help you easily create your own aspects.</Description>
+		<PackageLicenseFile>LICENSE.TXT</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -17,5 +27,7 @@
 		<PackageReference Include="PolySharp" Version="1.13.2" />
 
 		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<None Include="..\LICENSE.TXT"                    Pack="true" PackagePath="\" />
+		<None Include="..\README.md"                      Pack="true" PackagePath="\" />
 	</ItemGroup>
 </Project>

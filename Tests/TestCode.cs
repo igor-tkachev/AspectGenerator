@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Aspect.Generator.Tests
+namespace AspectGenerator.Tests
 {
 	internal class TestCode
 	{

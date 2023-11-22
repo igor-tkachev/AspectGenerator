@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Aspects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Aspect.Generator.Tests
+namespace AspectGenerator.Tests
 {
 	[TestClass]
 	public class UnitTests
