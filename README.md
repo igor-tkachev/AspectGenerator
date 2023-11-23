@@ -5,6 +5,9 @@ The Aspect Generator can help you easily create your own aspects.
 > [!WARNING]
 > *Interceptors* are an experimental compiler feature planned to ship in .NET 8 (with support for C# only). The feature may be subject to breaking changes or removal in a future release.
 
+> [!WARNING]
+> The community still has doubts about the usefulness of this feature. On the one hand, it looks like not kosher fake AOP. On the other hand, it works just fine. This project can help you to try it and share your own opinion.
+
 ## Download and Install
 
 Install nuget
@@ -20,6 +23,10 @@ Modify your project file
     ...
     <LangVersion>preview</LangVersion>
     <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);AspectGenerator</InterceptorsPreviewNamespaces>
+
+    <!-- Add these settings to specify generated files output path -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
 </PropertyGroup>
 ```
 
