@@ -262,12 +262,13 @@ namespace Aspects
 }
 ```
 
-More advanced vertion of the Metrics aspect can also set activity status and supports `await using`.
+More advanced version of the Metrics aspect can also set activity status and support `await using`.
 
 ```c#
 [Aspect(
-    OnUsing   = nameof(OnUsing),
-    OnFinally = nameof(OnFinally)
+    OnUsing      = nameof(OnUsing),
+    OnAsyncUsing = nameof(OnAsyncUsing),
+    OnFinally    = nameof(OnFinally)
     )]
 [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
 sealed class MetricsAttribute : Attribute
