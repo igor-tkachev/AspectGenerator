@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Aspects;
+using System.Threading.Tasks;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AspectGenerator.Tests
@@ -151,7 +152,7 @@ namespace AspectGenerator.Tests
 			Console.WriteLine(str);
 		}
 
-		[AllEvents]
+		[Aspects.AllEvents]
 		internal void AllEventsMethod()
 		{
 		}
@@ -159,33 +160,33 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void AllEventsTest()
 		{
-			AllEventsAttribute.OnInitCounter       = 0;
-			AllEventsAttribute.OnUsingCounter      = 0;
-			AllEventsAttribute.OnBeforeCallCounter = 0;
-			AllEventsAttribute.OnAfterCallCounter  = 0;
-			AllEventsAttribute.OnCatchCounter      = 0;
-			AllEventsAttribute.OnFinallyCounter    = 0;
+			Aspects.AllEventsAttribute.OnInitCounter       = 0;
+			Aspects.AllEventsAttribute.OnUsingCounter      = 0;
+			Aspects.AllEventsAttribute.OnBeforeCallCounter = 0;
+			Aspects.AllEventsAttribute.OnAfterCallCounter  = 0;
+			Aspects.AllEventsAttribute.OnCatchCounter      = 0;
+			Aspects.AllEventsAttribute.OnFinallyCounter    = 0;
 
 			AllEventsMethod();
 
-			Assert.AreEqual(1, AllEventsAttribute.OnInitCounter);
-			Assert.AreEqual(1, AllEventsAttribute.OnUsingCounter);
-			Assert.AreEqual(1, AllEventsAttribute.OnBeforeCallCounter);
-			Assert.AreEqual(1, AllEventsAttribute.OnAfterCallCounter);
-			Assert.AreEqual(0, AllEventsAttribute.OnCatchCounter);
-			Assert.AreEqual(1, AllEventsAttribute.OnFinallyCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnInitCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnUsingCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnBeforeCallCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnAfterCallCounter);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnCatchCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnFinallyCounter);
 		}
 
-		[Args(Arg1 = "1", Arg2 = 2, Arg3 = [ 1, 2, 3 ])]
-		[Args(Arg3 = new int[] { 2 })]
-		[Args(Arg3 = new int[0])]
-		[Args(Arg1 = "xyz")]
-		[Args(Arg4 = 'w')]
-		[Args(Arg5 = null)]
-		[Args(Arg5 = typeof(int))]
-		[Args(Arg5 = typeof(List<>))]
-		[Args(Arg5 = typeof(List<DateTime>))]
-		[Args(Arg5 = 1.10d)]
+		[Aspects.Args(Arg1 = "1", Arg2 = 2, Arg3 = [ 1, 2, 3 ])]
+		[Aspects.Args(Arg3 = new int[] { 2 })]
+		[Aspects.Args(Arg3 = new int[0])]
+		[Aspects.Args(Arg1 = "xyz")]
+		[Aspects.Args(Arg4 = 'w')]
+		[Aspects.Args(Arg5 = null)]
+		[Aspects.Args(Arg5 = typeof(int))]
+		[Aspects.Args(Arg5 = typeof(List<>))]
+		[Aspects.Args(Arg5 = typeof(List<DateTime>))]
+		[Aspects.Args(Arg5 = 1.10d)]
 		internal string ArgsMethod()
 		{
 			return "0";
@@ -201,7 +202,7 @@ namespace AspectGenerator.Tests
 			Console.WriteLine(args);
 		}
 
-		[Using]
+		[Aspects.Using]
 		internal string UsingMethod()
 		{
 			return "0";
@@ -211,6 +212,18 @@ namespace AspectGenerator.Tests
 		public void UsingTest()
 		{
 			var args = UsingMethod();
+		}
+
+		[Aspects.Using]
+		internal Task<string> UsingMethodAsync()
+		{
+			return Task.FromResult("0");
+		}
+
+		[TestMethod]
+		public async Task UsingAsyncTest()
+		{
+			var args = await UsingMethodAsync();
 		}
 	}
 }

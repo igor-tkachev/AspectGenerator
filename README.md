@@ -19,7 +19,7 @@ Modify your project file
 <PropertyGroup>
     ...
     <LangVersion>preview</LangVersion>
-    <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Aspects</InterceptorsPreviewNamespaces>
+    <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);AspectGenerator</InterceptorsPreviewNamespaces>
 </PropertyGroup>
 ```
 
@@ -35,7 +35,7 @@ using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace Aspects
+namespace AspectGenerator
 {
     /// <summary>
     /// Initializes OpenTelemetry.
@@ -65,7 +65,7 @@ namespace Aspects
     {
         static readonly ActivitySource _activitySource = new("Sample.Aspect");
 
-        public static Activity? OnUsing(InterceptCallInfo info)
+        public static Activity? OnUsing(InterceptInfo info)
         {
             return _activitySource.StartActivity(info.MemberInfo.Name);
         }
@@ -208,7 +208,7 @@ namespace Aspects
         {
             // Aspects.MetricsAttribute
             //
-            var __info__0 = new Aspects.InterceptCallInfo<Void>
+            var __info__0 = new Aspects.InterceptInfo<Void>
             {
                 MemberInfo      = Method1_Interceptor_MemberInfo,
                 AspectType      = typeof(Aspects.MetricsAttribute),
@@ -239,7 +239,7 @@ namespace Aspects
         {
             // Aspects.MetricsAttribute
             //
-            var __info__0 = new Aspects.InterceptCallInfo<Void>
+            var __info__0 = new Aspects.InterceptInfo<Void>
             {
                 MemberInfo      = Method2_Interceptor_MemberInfo,
                 AspectType      = typeof(Aspects.MetricsAttribute),
@@ -267,7 +267,7 @@ sealed class MetricsAttribute : Attribute
 {
     static readonly ActivitySource _activitySource = new("Sample.Aspect");
 
-    public static Activity? OnUsing(InterceptCallInfo info)
+    public static Activity? OnUsing(InterceptInfo info)
     {
         var activity = _activitySource.StartActivity(info.MemberInfo.Name);
 
@@ -276,7 +276,7 @@ sealed class MetricsAttribute : Attribute
         return activity;
     }
 
-    public static void OnFinally(InterceptCallInfo info)
+    public static void OnFinally(InterceptInfo info)
     {
         if (info is { Tag: Activity activity, Exception: var ex })
             activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error);

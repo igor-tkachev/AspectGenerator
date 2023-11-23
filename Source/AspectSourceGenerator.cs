@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace AspectGenerator
 {
 	[Generator(LanguageNames.CSharp)]
-	public class AspectGenerator : IIncrementalGenerator
+	public class AspectSourceGenerator : IIncrementalGenerator
 	{
 		const string AspectAttributeText =
 			"""
@@ -22,7 +22,7 @@ namespace AspectGenerator
 
 			using System;
 
-			namespace Aspects
+			namespace AspectGenerator
 			{
 				[Aspect]
 				[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
@@ -30,6 +30,7 @@ namespace AspectGenerator
 				{
 					public string? OnInit       { get; set; }
 					public string? OnUsing      { get; set; }
+					public string? OnAsyncUsing { get; set; }
 					public string? OnBeforeCall { get; set; }
 					public string? OnAfterCall  { get; set; }
 					public string? OnCatch      { get; set; }
@@ -57,20 +58,20 @@ namespace AspectGenerator
 				{
 				}
 
-				class InterceptCallInfo
+				class InterceptInfo
 				{
 					public object?         Tag;
 					public InterceptType   InterceptType;
 					public InterceptResult InterceptResult;
 					public Exception?      Exception;
 
-					public InterceptCallInfo?                                    PreviousInfo;
+					public InterceptInfo?                                        PreviousInfo;
 					public System.Reflection.MemberInfo                          MemberInfo;
 					public Type                                                  AspectType;
 					public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
 				}
 
-				class InterceptCallInfo<T> : InterceptCallInfo
+				class InterceptInfo<T> : InterceptInfo
 				{
 					public T ReturnValue;
 				}
@@ -83,6 +84,7 @@ namespace AspectGenerator
 				{
 				}
 			}
+
 			""";
 
 		public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -96,7 +98,7 @@ namespace AspectGenerator
 			context.RegisterPostInitializationOutput(ctx => ctx.AddSource("AspectAttribute.g.cs", AspectAttributeText));
 
 			var attributes = context.SyntaxProvider
-				.ForAttributeWithMetadataName("Aspects.AspectAttribute",
+				.ForAttributeWithMetadataName("AspectGenerator.AspectAttribute",
 					predicate: static (node, _) => node is ClassDeclarationSyntax,
 					transform: static (attr, _) => attr)
 				.Collect();
@@ -173,8 +175,10 @@ namespace AspectGenerator
 				using SLE = System.Linq.Expressions;
 				using SCG = System.Collections.Generic;
 
-				namespace Aspects
+				namespace AspectGenerator
 				{
+					//using AspectGenerator = AspectGenerator;
+
 					static partial class Interceptors
 					{
 						static SR.MethodInfo GetMethodInfo(SLE.Expression expr)
@@ -317,16 +321,25 @@ namespace AspectGenerator
 				}
 
 				sb
-					.AppendLine(
-						$$"""
+					.Append(
+						$"""
 								[System.Runtime.CompilerServices.CompilerGenerated]
 								//[System.Diagnostics.DebuggerStepThrough]
-								public static {{PrintType(method.ReturnType)}} {{interceptorName}}({{PrintArguments(method)}})
+								public static{' '}
+						""")
+					;
+
+				var methodModifierPosition = sb.Length;
+
+				sb
+					.AppendLine(
+						$$"""
+						{{PrintType(method.ReturnType)}} {{interceptorName}}({{PrintArguments(method)}})
 								{
 						""")
 					;
 
-				GenerateMethodBody(sb, method, interceptorName, methods[0].attributes);
+				GenerateMethodBody(sb, method, interceptorName, methods[0].attributes, methodModifierPosition);
 
 				sb
 					.AppendLine(
@@ -348,8 +361,13 @@ namespace AspectGenerator
 			spc.AddSource("Interceptors.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
 		}
 
-		static void GenerateMethodBody(StringBuilder sb, IMethodSymbol method, string interceptorName, ImmutableArray<AttributeData> attributes)
+		static void GenerateMethodBody(StringBuilder sb, IMethodSymbol method, string interceptorName, ImmutableArray<AttributeData> attributes, int methodModifierPosition)
 		{
+			var aspectAttrs   = attributes.Select(a => a.AttributeClass!.GetAttributes().First(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }})!).ToList();
+			var isReturnsTask = method.ReturnType is { Name: "Task", ContainingNamespace: { Name : "Tasks", ContainingNamespace: { Name : "Threading", ContainingNamespace.Name : "System" }}};
+			var taskType      = isReturnsTask && method.ReturnType is INamedTypeSymbol { IsGenericType : true, TypeArguments : [var argType] } ? argType : null;
+			var generateAsync = isReturnsTask && aspectAttrs.Any(d => d.NamedArguments.Any(a => a.Key == "OnAsyncUsing"));
+
 			GenerateAttribute(0, "\t\t\t");
 
 			void GenerateAttribute(int idx, string indent)
@@ -360,32 +378,37 @@ namespace AspectGenerator
 				//
 				object? onInit       = null;
 				object? onUsing      = null;
+				object? onAsyncUsing = null;
 				object? onBeforeCall = null;
 				object? onAfterCall  = null;
 				object? onCatch      = null;
 				object? onFinally    = null;
 
-				var aa = attr.GetAttributes();
+				foreach (var arg in aspectAttrs[idx].NamedArguments)
+					switch (arg.Key)
+					{
+						case "OnInit"       : onInit       = arg.Value.Value; break;
+						case "OnUsing"      : onUsing      = arg.Value.Value; break;
+						case "OnAsyncUsing" : onAsyncUsing = arg.Value.Value; break;
+						case "OnBeforeCall" : onBeforeCall = arg.Value.Value; break;
+						case "OnAfterCall"  : onAfterCall  = arg.Value.Value; break;
+						case "OnCatch"      : onCatch      = arg.Value.Value; break;
+						case "OnFinally"    : onFinally    = arg.Value.Value; break;
+					}
 
-				foreach (var a in aa)
-					if (a is { AttributeClass : { ContainingNamespace.Name : "Aspects", Name : "AspectAttribute" }, NamedArguments : not [] })
-						foreach (var arg in a.NamedArguments)
-							switch (arg.Key)
-							{
-								case "OnInit"      : onInit       = arg.Value.Value; break;
-								case "OnUsing"     : onUsing      = arg.Value.Value; break;
-								case "OnBeforeCall": onBeforeCall = arg.Value.Value; break;
-								case "OnAfterCall" : onAfterCall  = arg.Value.Value; break;
-								case "OnCatch"     : onCatch      = arg.Value.Value; break;
-								case "OnFinally"   : onFinally    = arg.Value.Value; break;
-							}
+				if (generateAsync)
+				{
+					sb.Insert(methodModifierPosition, "async ");
+				}
+
+				var returnType = generateAsync ? taskType?.ToString() ?? "AspectGenerator.Void" : method.ReturnsVoid ? "AspectGenerator.Void" : $"{method.ReturnType}";
 
 				// Generate AspectCallInfo.
 				//
 				sb
 					.Append(indent).AppendLine($"// {attr}")
 					.Append(indent).AppendLine("//")
-					.Append(indent).AppendLine($"var __info__{idx} = new Aspects.InterceptCallInfo<{(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")}>")
+					.Append(indent).AppendLine($"var __info__{idx} = new AspectGenerator.InterceptInfo<{returnType}>")
 					.Append(indent).AppendLine("{")
 					//.Append(indent).AppendLine($"\tReturnValue     = {(idx > 0 ? $"__info__{idx - 1}.ReturnValue" : $"default({(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")})")},")
 					.Append(indent).AppendLine($"\tMemberInfo      = {interceptorName}_MemberInfo,")
@@ -405,7 +428,7 @@ namespace AspectGenerator
 				//
 				if (onInit is not null)
 					sb
-						.Append(indent).AppendLine($"__info__{idx}.InterceptType = Aspects.InterceptType.OnInit;")
+						.Append(indent).AppendLine($"__info__{idx}.InterceptType = AspectGenerator.InterceptType.OnInit;")
 						.Append(indent).AppendLine($"__info__{idx} = {attr.ContainingNamespace}.{attr.Name}.{onInit}(__info__{idx});")
 						.AppendLine()
 						;
@@ -414,8 +437,9 @@ namespace AspectGenerator
 				//
 				if (onUsing is not null)
 				{
+					var isAsync = generateAsync && onAsyncUsing != null;
 					sb
-						.Append(indent).AppendLine($"using ({attr.ContainingNamespace}.{attr.Name}.{onUsing}(__info__{idx}))")
+						.Append(indent).AppendLine($"{(isAsync ? "await " : "")}using ({attr.ContainingNamespace}.{attr.Name}.{(isAsync ? onAsyncUsing : onUsing)}(__info__{idx}))")
 						.Append(indent).AppendLine("{")
 						;
 					indent += '\t';
@@ -435,7 +459,7 @@ namespace AspectGenerator
 				if (onBeforeCall is not null)
 				{
 					sb
-						.Append(indent).AppendLine($"__info__{idx}.InterceptType = Aspects.InterceptType.OnBeforeCall;")
+						.Append(indent).AppendLine($"__info__{idx}.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;")
 						.Append(indent).AppendLine($"{attr.ContainingNamespace}.{attr.Name}.{onBeforeCall}(__info__{idx});")
 						.AppendLine()
 						.Append(indent).AppendLine($"if (__info__{idx}.InterceptResult != InterceptResult.Return)")
@@ -466,7 +490,7 @@ namespace AspectGenerator
 				{
 					sb
 						.Append(indent)
-						.Append(method.ReturnsVoid ? string.Empty : $"__info__{idx}.ReturnValue = ")
+						.Append(method.ReturnsVoid ? string.Empty : $"__info__{idx}.ReturnValue = {(generateAsync ? "await " : "")}")
 						.Append(method.IsExtensionMethod || method.IsStatic? method.OriginalDefinition.ContainingType : "__this__")
 						.Append('.')
 						.Append(method.Name)
@@ -494,7 +518,7 @@ namespace AspectGenerator
 				//
 				if (onAfterCall is not null)
 					sb
-						.Append(indent).AppendLine($"__info__{idx}.InterceptType = Aspects.InterceptType.OnAfterCall;")
+						.Append(indent).AppendLine($"__info__{idx}.InterceptType = AspectGenerator.InterceptType.OnAfterCall;")
 						.Append(indent).AppendLine($"{attr.ContainingNamespace}.{attr.Name}.{onAfterCall}(__info__{idx});")
 						.AppendLine()
 						;
@@ -535,7 +559,7 @@ namespace AspectGenerator
 					if (onCatch is not null)
 						sb
 							.Append(indent).AppendLine($"\t__info__{idx}.InterceptResult = InterceptResult.ReThrow;")
-							.Append(indent).AppendLine($"\t__info__{idx}.InterceptType   = Aspects.InterceptType.OnCatch;")
+							.Append(indent).AppendLine($"\t__info__{idx}.InterceptType   = AspectGenerator.InterceptType.OnCatch;")
 							.AppendLine()
 							.Append(indent).AppendLine($"\t{attr.ContainingNamespace}.{attr.Name}.{onCatch}(__info__{idx});")
 							.AppendLine()
@@ -554,7 +578,7 @@ namespace AspectGenerator
 						sb
 							.Append(indent).AppendLine("finally")
 							.Append(indent).AppendLine("{")
-							.Append(indent).AppendLine($"\t__info__{idx}.InterceptType = Aspects.InterceptType.OnFinally;")
+							.Append(indent).AppendLine($"\t__info__{idx}.InterceptType = AspectGenerator.InterceptType.OnFinally;")
 							.Append(indent).AppendLine($"\t{attr.ContainingNamespace}.{attr.Name}.{onFinally}(__info__{idx});")
 							.Append(indent).AppendLine("}")
 							;

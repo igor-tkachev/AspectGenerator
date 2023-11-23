@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 
+using AspectGenerator;
+
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -34,7 +36,7 @@ namespace Aspects
 	{
 		static readonly ActivitySource _activitySource = new("Sample.Aspect");
 
-		public static Activity? OnUsing(InterceptCallInfo info)
+		public static Activity? OnUsing(InterceptInfo info)
 		{
 			var activity = _activitySource.StartActivity(info.MemberInfo.Name);
 
@@ -43,7 +45,7 @@ namespace Aspects
 			return activity;
 		}
 
-		public static void OnFinally(InterceptCallInfo info)
+		public static void OnFinally(InterceptInfo info)
 		{
 			if (info is { Tag: Activity activity, Exception: var ex })
 				activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
@@ -59,7 +61,7 @@ namespace Aspects
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
 	sealed class IgnoreCatchAttribute : Attribute
 	{
-		public static void OnCatch(InterceptCallInfo info)
+		public static void OnCatch(InterceptInfo info)
 		{
 			info.InterceptResult = InterceptResult.IgnoreThrow;
 		}

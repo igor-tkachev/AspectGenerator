@@ -5,14 +5,14 @@
 		<Nullable>enable</Nullable>
 		<LangVersion>preview</LangVersion>
 
-		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Aspects</InterceptorsPreviewNamespaces>
+		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);AspectGenerator</InterceptorsPreviewNamespaces>
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AspectGenerator"                Version="0.0.2-preview" />
+		<PackageReference Include="AspectGenerator"                Version="0.0.3-preview" />
 		<PackageReference Include="OpenTelemetry"                  Version="1.6.0" />
 		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.6.0" />
 	</ItemGroup>

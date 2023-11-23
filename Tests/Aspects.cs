@@ -2,6 +2,8 @@ using System;
 
 namespace Aspects
 {
+	using AspectGenerator;
+
 	[Aspect]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class EmptyAspectAttribute : Attribute
@@ -14,11 +16,11 @@ namespace Aspects
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class TestAspectAttribute : Attribute
 	{
-		public static void OnAfterCall<T>(InterceptCallInfo<T> info)
+		public static void OnAfterCall<T>(InterceptInfo<T> info)
 		{
 		}
 
-		public static void OnAfterCall(InterceptCallInfo<string> info)
+		public static void OnAfterCall(InterceptInfo<string> info)
 		{
 			if (info.InterceptType == InterceptType.OnAfterCall)
 			{
@@ -34,16 +36,16 @@ namespace Aspects
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class TestAspect2Attribute : Attribute
 	{
-		public static void OnBeforeCall(InterceptCallInfo info)
+		public static void OnBeforeCall(InterceptInfo info)
 		{
 			info.Tag = "__X__";
 		}
 
-		public static void OnCall(InterceptCallInfo<Aspects.Void> info)
+		public static void OnCall(InterceptInfo<Void> info)
 		{
 		}
 
-		public static void OnCall(InterceptCallInfo<string> info)
+		public static void OnCall(InterceptInfo<string> info)
 		{
 			if (info.InterceptType == InterceptType.OnAfterCall)
 			{
@@ -60,7 +62,7 @@ namespace Aspects
 	{
 		public static int CallCount;
 
-		public static InterceptCallInfo<T> OnInit<T>(InterceptCallInfo<T> info)
+		public static InterceptInfo<T> OnInit<T>(InterceptInfo<T> info)
 		{
 			CallCount++;
 			return info;
@@ -73,7 +75,7 @@ namespace Aspects
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class IgnoreCatchAttribute : Attribute
 	{
-		public static void OnCatch(InterceptCallInfo info)
+		public static void OnCatch(InterceptInfo info)
 		{
 			info.InterceptResult = InterceptResult.IgnoreThrow;
 		}
@@ -85,7 +87,7 @@ namespace Aspects
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class FinallyAttribute : Attribute
 	{
-		public static void OnFinally(InterceptCallInfo<int> info)
+		public static void OnFinally(InterceptInfo<int> info)
 		{
 			info.ReturnValue = (int)info.ReturnValue! + 1;
 		}
@@ -109,22 +111,22 @@ namespace Aspects
 		public static int OnCatchCounter;
 		public static int OnFinallyCounter;
 
-		public static InterceptCallInfo<T> OnInit<T>(InterceptCallInfo<T> info)
+		public static InterceptInfo<T> OnInit<T>(InterceptInfo<T> info)
 		{
 			OnInitCounter++;
 			return info;
 		}
 
-		public static IDisposable? OnUsing(InterceptCallInfo info)
+		public static IDisposable? OnUsing(InterceptInfo info)
 		{
 			OnUsingCounter++;
 			return null;
 		}
 
-		public static void OnBeforeCall(InterceptCallInfo info) => OnBeforeCallCounter++;
-		public static void OnAfterCall (InterceptCallInfo info) => OnAfterCallCounter++;
-		public static void OnCatch     (InterceptCallInfo info) => OnCatchCounter++;
-		public static void OnFinally   (InterceptCallInfo info) => OnFinallyCounter++;
+		public static void OnBeforeCall(InterceptInfo info) => OnBeforeCallCounter++;
+		public static void OnAfterCall (InterceptInfo info) => OnAfterCallCounter++;
+		public static void OnCatch     (InterceptInfo info) => OnCatchCounter++;
+		public static void OnFinally   (InterceptInfo info) => OnFinallyCounter++;
 	}
 
 	[Aspect(
@@ -139,7 +141,7 @@ namespace Aspects
 		public char    Arg4 { get; set; }
 		public object? Arg5 { get; set; }
 
-		public static void OnAfterCall(InterceptCallInfo<string> info)
+		public static void OnAfterCall(InterceptInfo<string> info)
 		{
 			if (info.AspectArguments.TryGetValue(nameof(Arg2), out var value))
 			{
@@ -149,12 +151,18 @@ namespace Aspects
 	}
 
 	[Aspect(
-		OnUsing = nameof(OnUsing)
+		OnUsing      = nameof(OnUsing),
+		OnAsyncUsing = nameof(OnAsyncUsing)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class UsingAttribute : Attribute
 	{
-		public static IDisposable? OnUsing(InterceptCallInfo info)
+		public static IDisposable? OnUsing(InterceptInfo info)
+		{
+			return null;
+		}
+
+		public static IAsyncDisposable? OnAsyncUsing(InterceptInfo info)
 		{
 			return null;
 		}
