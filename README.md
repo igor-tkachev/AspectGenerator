@@ -262,7 +262,7 @@ namespace Aspects
 }
 ```
 
-More advanced vertion of the Metrics aspect can also set activity status.
+More advanced vertion of the Metrics aspect can also set activity status and supports `await using`.
 
 ```c#
 [Aspect(
@@ -283,10 +283,38 @@ sealed class MetricsAttribute : Attribute
         return activity;
     }
 
+    class AsyncActivity(Activity activity) : IAsyncDisposable
+    {
+        public readonly Activity Activity = activity;
+
+        public ValueTask DisposeAsync()
+        {
+            Activity.Dispose();
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    public static IAsyncDisposable? OnAsyncUsing(InterceptInfo info)
+    {
+        var activity = _activitySource.StartActivity(info.MemberInfo.Name);
+
+        if (activity == null)
+            return null;
+
+        var asyncActivity = new AsyncActivity(activity);
+
+        info.Tag = asyncActivity;
+
+        return asyncActivity;
+    }
+
     public static void OnFinally(InterceptInfo info)
     {
-        if (info is { Tag: Activity activity, Exception: var ex })
-            activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
+        switch (info)
+        {
+            case { Tag: Activity activity, Exception: var ex } : activity.   SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error); break;
+            case { Tag: AsyncActivity aa,  Exception: var ex } : aa.Activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error); break;
+        }
     }
 }
 ```

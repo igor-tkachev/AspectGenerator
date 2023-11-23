@@ -1,6 +1,6 @@
 using System;
 using System.Diagnostics;
-
+using System.Threading.Tasks;
 using AspectGenerator;
 
 using OpenTelemetry;
@@ -28,8 +28,9 @@ namespace Aspects
 	/// Metrics aspect.
 	/// </summary>
 	[Aspect(
-		OnUsing   = nameof(OnUsing),
-		OnFinally = nameof(OnFinally)
+		OnUsing      = nameof(OnUsing),
+		OnAsyncUsing = nameof(OnAsyncUsing),
+		OnFinally    = nameof(OnFinally)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
 	sealed class MetricsAttribute : Attribute
@@ -45,10 +46,38 @@ namespace Aspects
 			return activity;
 		}
 
+		class AsyncActivity(Activity activity) : IAsyncDisposable
+		{
+			public readonly Activity Activity = activity;
+
+			public ValueTask DisposeAsync()
+			{
+				Activity.Dispose();
+				return ValueTask.CompletedTask;
+			}
+		}
+
+		public static IAsyncDisposable? OnAsyncUsing(InterceptInfo info)
+		{
+			var activity = _activitySource.StartActivity(info.MemberInfo.Name);
+
+			if (activity == null)
+				return null;
+
+			var asyncActivity = new AsyncActivity(activity);
+
+			info.Tag = asyncActivity;
+
+			return asyncActivity;
+		}
+
 		public static void OnFinally(InterceptInfo info)
 		{
-			if (info is { Tag: Activity activity, Exception: var ex })
-				activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
+			switch (info)
+			{
+				case { Tag: Activity activity, Exception: var ex } : activity.   SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error); break;
+				case { Tag: AsyncActivity aa,  Exception: var ex } : aa.Activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error); break;
+			}
 		}
 	}
 
