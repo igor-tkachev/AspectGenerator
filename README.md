@@ -312,8 +312,12 @@ sealed class MetricsAttribute : Attribute
     {
         switch (info)
         {
-            case { Tag: Activity activity, Exception: var ex } : activity.   SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error); break;
-            case { Tag: AsyncActivity aa,  Exception: var ex } : aa.Activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error); break;
+            case { Tag: Activity activity, Exception: var ex } :
+                activity.   SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error); 
+                break;
+            case { Tag: AsyncActivity aa,  Exception: var ex } :
+                aa.Activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error); 
+                break;
         }
     }
 }
