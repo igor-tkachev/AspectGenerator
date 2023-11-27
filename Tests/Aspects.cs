@@ -167,4 +167,19 @@ namespace Aspects
 			return null;
 		}
 	}
+
+	[Aspect(
+		OnAfterCall = nameof(OnAfterCall)
+		)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+	sealed class OrderedAttribute : Attribute
+	{
+		public int     Order { get; set; } = int.MaxValue;
+		public string? Value { get; set; }
+
+		public static void OnAfterCall(InterceptInfo<string> info)
+		{
+			info.ReturnValue += info.AspectArguments["Value"];
+		}
+	}
 }

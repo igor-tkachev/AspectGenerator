@@ -59,7 +59,7 @@ namespace AspectGenerator
 				{
 				}
 
-				class InterceptInfo
+				abstract class InterceptInfo
 				{
 					public object?         Tag;
 					public InterceptType   InterceptType;
@@ -90,17 +90,17 @@ namespace AspectGenerator
 
 		public void Initialize(IncrementalGeneratorInitializationContext context)
 		{
-#if TRUE
+#if DEBUG && TRUE1
 			if (!Debugger.IsAttached)
 			{
 				Debugger.Launch();
 			}
 #endif
-			var @namespace = context.AnalyzerConfigOptionsProvider.Select(static (provider, _) =>
-			{
-				provider.GlobalOptions.TryGetValue("AspectGenerator_Namespace", out var projectDirectory);
-				return projectDirectory;
-			});
+//			var @namespace = context.AnalyzerConfigOptionsProvider.Select(static (provider, _) =>
+//			{
+//				provider.GlobalOptions.TryGetValue("AspectGenerator_Namespace", out var projectDirectory);
+//				return projectDirectory;
+//			});
 
 			context.RegisterPostInitializationOutput(ctx => ctx.AddSource("AspectAttribute.g.cs", AspectAttributeText));
 
@@ -220,15 +220,34 @@ namespace AspectGenerator
 				var method          = (IMethodSymbol)m.Key!;
 				var interceptorName = GetInterceptorName($"{method.Name}_Interceptor");
 				var methods         = m.ToList();
+				var attributes      = methods[0].attributes;
+
+				if (attributes.Any(a => a.NamedArguments.Any(na => na.Key == "Order")))
+				{
+					attributes =
+						(
+							from a in attributes
+							let o = a.NamedArguments.Select(na => (KeyValuePair<string,TypedConstant>?)na).FirstOrDefault(na => na!.Value.Key == "Order")
+							let n = o is null ? int.MaxValue : o.Value.Value.Value switch
+							{
+								string s => int.TryParse(s, out var n) ? n : null,
+								int    n => (int?)n,
+								_        => null
+							}
+							orderby n
+							select a
+						)
+						.ToImmutableArray();
+				}
 
 				sb.AppendLine(
 					$$"""
 							static SR. MemberInfo                 {{interceptorName}}_MemberInfo        = MethodOf{{GetMethodOf(method)}};
 					""");
 
-				for (var i = 0; i < methods[0].attributes.Length; i++)
+				for (var i = 0; i < attributes.Length; i++)
 				{
-					var attr = methods[0].attributes[i];
+					var attr = attributes[i];
 
 					sb
 						.AppendLine(
@@ -346,7 +365,7 @@ namespace AspectGenerator
 						""")
 					;
 
-				GenerateMethodBody(sb, method, interceptorName, methods[0].attributes, methodModifierPosition);
+				GenerateMethodBody(sb, method, interceptorName, attributes, methodModifierPosition);
 
 				sb
 					.AppendLine(

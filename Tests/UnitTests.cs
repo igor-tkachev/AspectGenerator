@@ -225,5 +225,31 @@ namespace AspectGenerator.Tests
 		{
 			var args = await UsingMethodAsync();
 		}
+
+		[Aspects.Ordered(Order = 2, Value = "1")]
+		[Aspects.Ordered(Order = 1, Value = "2")]
+		internal static string OrderedMethod()
+		{
+			return "0";
+		}
+
+		[Aspects.Ordered(Order = 2, Value = "1")]
+		[Aspects.Ordered(Order = 3, Value = "2")]
+		internal static string OrderedMethod2()
+		{
+			return "0";
+		}
+
+		[TestMethod]
+		public void OrderedTest()
+		{
+			var s1 = OrderedMethod();
+
+			Assert.AreEqual("012", s1);
+
+			var s2 = OrderedMethod2();
+
+			Assert.AreEqual("021", s2);
+		}
 	}
 }
