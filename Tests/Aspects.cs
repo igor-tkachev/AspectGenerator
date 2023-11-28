@@ -181,5 +181,10 @@ namespace Aspects
 		{
 			info.ReturnValue += info.AspectArguments["Value"];
 		}
+
+		public static void OnAfterCall(InterceptInfo<int> info)
+		{
+			info.ReturnValue = info.ReturnValue * 10 + int.Parse((string)info.AspectArguments["Value"]!);
+		}
 	}
 }

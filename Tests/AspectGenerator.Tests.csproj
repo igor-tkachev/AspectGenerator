@@ -5,16 +5,16 @@
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
 
-		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);AspectGenerator</InterceptorsPreviewNamespaces>
+		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);MyAspectGenerator</InterceptorsPreviewNamespaces>
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
 
-		<AspectSourceGenerator_Namespace>MyAspectGenerator</AspectSourceGenerator_Namespace>
+		<AspectGenerator_InterceptorsNamespace>MyAspectGenerator</AspectGenerator_InterceptorsNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<CompilerVisibleProperty Include="AspectSourceGenerator_Namespace" />
+		<CompilerVisibleProperty Include="AspectGenerator_InterceptorsNamespace" />
 
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
 		<PackageReference Include="MSTest.TestAdapter"     Version="3.0.4" />

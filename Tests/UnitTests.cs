@@ -233,11 +233,11 @@ namespace AspectGenerator.Tests
 			return "0";
 		}
 
-		[Aspects.Ordered(Order = 2, Value = "1")]
-		[Aspects.Ordered(Order = 3, Value = "2")]
-		internal static string OrderedMethod2()
+		[Aspects.Ordered(Order = 2, Value = "2")]
+		[Aspects.Ordered(Order = 3, Value = "3")]
+		internal static int OrderedMethod2()
 		{
-			return "0";
+			return 1;
 		}
 
 		[TestMethod]
@@ -247,9 +247,9 @@ namespace AspectGenerator.Tests
 
 			Assert.AreEqual("012", s1);
 
-			var s2 = OrderedMethod2();
+			var i2 = OrderedMethod2();
 
-			Assert.AreEqual("021", s2);
+			Assert.AreEqual(132, i2);
 		}
 	}
 }

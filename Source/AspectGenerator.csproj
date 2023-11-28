@@ -20,6 +20,8 @@
 		<PackageLicenseFile>LICENSE.TXT</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<NoWarn>$(NoWarn);NU5128</NoWarn>
+
+		<IsRoslynComponent>true</IsRoslynComponent>
 	</PropertyGroup>
 
 	<ItemGroup>
