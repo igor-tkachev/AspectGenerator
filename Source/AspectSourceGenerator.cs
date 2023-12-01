@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -29,13 +28,14 @@ namespace AspectGenerator
 				[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 				sealed class AspectAttribute : Attribute
 				{
-					public string? OnInit       { get; set; }
-					public string? OnUsing      { get; set; }
-					public string? OnAsyncUsing { get; set; }
-					public string? OnBeforeCall { get; set; }
-					public string? OnAfterCall  { get; set; }
-					public string? OnCatch      { get; set; }
-					public string? OnFinally    { get; set; }
+					public string? OnInit        { get; set; }
+					public string? OnUsing       { get; set; }
+					public string? OnAsyncUsing  { get; set; }
+					public string? OnBeforeCall  { get; set; }
+					public string? OnAfterCall   { get; set; }
+					public string? OnCatch       { get; set; }
+					public string? OnFinally     { get; set; }
+					public bool    PassArguments { get; set; }
 				}
 
 				enum InterceptType
@@ -68,6 +68,7 @@ namespace AspectGenerator
 
 					public InterceptInfo?                                        PreviousInfo;
 					public System.Reflection.MemberInfo                          MemberInfo;
+					public object?[]?                                            MethodArguments;
 					public Type                                                  AspectType;
 					public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
 				}
@@ -96,9 +97,9 @@ namespace AspectGenerator
 		public void Initialize(IncrementalGeneratorInitializationContext context)
 		{
 #if DEBUG && TRUE1
-			if (!Debugger.IsAttached)
+			if (!System.Diagnostics.Debugger.IsAttached)
 			{
-				Debugger.Launch();
+				System.Diagnostics.Debugger.Launch();
 			}
 #endif
 
@@ -246,9 +247,24 @@ namespace AspectGenerator
 						.ToImmutableArray();
 				}
 
+				foreach (var p in method.Parameters)
+				{
+					switch (p.RefKind)
+					{
+						case RefKind.Ref :
+						case RefKind.Out :
+						case RefKind.In  :
+							sb.AppendLine(
+								$$"""
+										static {{p.Type, -30}} {{interceptorName}}_Arg_{{p.Name, -13}} = default({{p.Type}});
+								""");
+							break;
+					}
+				}
+
 				sb.AppendLine(
 					$$"""
-							static SR. MemberInfo                 {{interceptorName}}_MemberInfo        = MethodOf{{GetMethodOf(method)}};
+							static SR. MemberInfo                 {{interceptorName}}_MemberInfo        = MethodOf{{GetMethodOf(method, interceptorName)}};
 					""");
 
 				for (var i = 0; i < attributes.Length; i++)
@@ -258,7 +274,7 @@ namespace AspectGenerator
 					sb
 						.AppendLine(
 							$$"""
-									static SCG.Dictionary<string,object?> {{interceptorName}}_AspectArguments_{{i}} = new ()
+									static SCG.Dictionary<string,object?> {{interceptorName}}_AspectArguments_{{i}} = new()
 									{
 							""")
 						;
@@ -366,7 +382,7 @@ namespace AspectGenerator
 				sb
 					.AppendLine(
 						$$"""
-						{{PrintType(method.ReturnType)}} {{interceptorName}}({{PrintArguments(method)}})
+						{{PrintType(method.ReturnType)}} {{interceptorName}}({{PrintParameters(method)}})
 								{
 						""")
 					;
@@ -399,6 +415,32 @@ namespace AspectGenerator
 			var isReturnsTask = method.ReturnType is { Name: "Task", ContainingNamespace: { Name : "Tasks", ContainingNamespace: { Name : "Threading", ContainingNamespace.Name : "System" }}};
 			var taskType      = isReturnsTask && method.ReturnType is INamedTypeSymbol { IsGenericType : true, TypeArguments : [var argType] } ? argType : null;
 			var generateAsync = isReturnsTask && aspectAttrs.Any(d => d.NamedArguments.Any(a => a.Key == "OnAsyncUsing"));
+			var generateArgs  = aspectAttrs.Any(d => d.NamedArguments.Any(a => a.Key == "PassArguments"));
+
+			// Generate arguments.
+			//
+			if (generateArgs)
+			{
+				sb
+					.Append("\t\t\tvar __args__ = new object?[] { ")
+					;
+
+				if (method.IsStatic == false)
+					sb.Append("__this__, ");
+
+				foreach (var p in method.Parameters)
+				{
+					if (p.RefKind == RefKind.Out)
+						sb.Append(p.Name).Append(" = default, ");
+					else
+						sb.Append(p.Name).Append(", ");
+				}
+
+				while (sb[^1] is ' ' or ',')
+					sb.Length--;
+
+				sb.Append(" };").AppendLine().AppendLine();
+			}
 
 			GenerateAttribute(0, "\t\t\t");
 
@@ -408,24 +450,26 @@ namespace AspectGenerator
 
 				// Get aspect attribute parameters.
 				//
-				object? onInit       = null;
-				object? onUsing      = null;
-				object? onAsyncUsing = null;
-				object? onBeforeCall = null;
-				object? onAfterCall  = null;
-				object? onCatch      = null;
-				object? onFinally    = null;
+				object? onInit        = null;
+				object? onUsing       = null;
+				object? onAsyncUsing  = null;
+				object? onBeforeCall  = null;
+				object? onAfterCall   = null;
+				object? onCatch       = null;
+				object? onFinally     = null;
+				var     passArguments = false;
 
 				foreach (var arg in aspectAttrs[idx].NamedArguments)
 					switch (arg.Key)
 					{
-						case "OnInit"       : onInit       = arg.Value.Value; break;
-						case "OnUsing"      : onUsing      = arg.Value.Value; break;
-						case "OnAsyncUsing" : onAsyncUsing = arg.Value.Value; break;
-						case "OnBeforeCall" : onBeforeCall = arg.Value.Value; break;
-						case "OnAfterCall"  : onAfterCall  = arg.Value.Value; break;
-						case "OnCatch"      : onCatch      = arg.Value.Value; break;
-						case "OnFinally"    : onFinally    = arg.Value.Value; break;
+						case "OnInit"        : onInit        = arg.Value.Value; break;
+						case "OnUsing"       : onUsing       = arg.Value.Value; break;
+						case "OnAsyncUsing"  : onAsyncUsing  = arg.Value.Value; break;
+						case "OnBeforeCall"  : onBeforeCall  = arg.Value.Value; break;
+						case "OnAfterCall"   : onAfterCall   = arg.Value.Value; break;
+						case "OnCatch"       : onCatch       = arg.Value.Value; break;
+						case "OnFinally"     : onFinally     = arg.Value.Value; break;
+						case "PassArguments" : passArguments = arg.Value.Value is true; break;
 					}
 
 				if (generateAsync)
@@ -438,8 +482,9 @@ namespace AspectGenerator
 				// Generate AspectCallInfo.
 				//
 				sb
-					.Append(indent).AppendLine($"// {attr}")
+					.Append(indent).AppendLine($"// {attributes[idx]}")
 					.Append(indent).AppendLine("//")
+					//.Append(indent).Append($"var __attr__{idx} = new {attributes[idx]}").Append(attributes[idx].NamedArguments.Length == 0 ? "()" : "").AppendLine(";")
 					.Append(indent).AppendLine($"var __info__{idx} = new AspectGenerator.InterceptInfo<{returnType}>")
 					.Append(indent).AppendLine("{")
 					//.Append(indent).AppendLine($"\tReturnValue     = {(idx > 0 ? $"__info__{idx - 1}.ReturnValue" : $"default({(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")})")},")
@@ -447,6 +492,11 @@ namespace AspectGenerator
 					.Append(indent).AppendLine($"\tAspectType      = typeof({attr}),")
 					.Append(indent).AppendLine($"\tAspectArguments = {interceptorName}_AspectArguments_{idx},")
 					;
+
+				if (passArguments)
+					sb
+						.Append(indent).AppendLine($"\tMethodArguments = __args__,")
+						;
 
 				if (idx > 0)
 					sb.Append(indent).AppendLine($"\tPreviousInfo    = __info__{idx - 1}");
@@ -538,7 +588,22 @@ namespace AspectGenerator
 					}
 
 					foreach (var p in method.Parameters)
-						sb.Append(p.Name);
+					{
+						sb
+							.Append(
+								p.RefKind switch
+								{
+									RefKind.Ref => "ref ",
+									RefKind.Out => "out ",
+									RefKind.In  => "in ",
+									_           => ""
+								})
+							.Append(p.Name)
+							.Append(", ");
+					}
+
+					if (method.Parameters.Length > 0)
+						sb.Length -= 2;
 
 					sb
 						.AppendLine(");")
@@ -658,23 +723,21 @@ namespace AspectGenerator
 			return $"{type}";
 		}
 
-		static string PrintArguments(IMethodSymbol method)
+		static string PrintParameters(IMethodSymbol method)
 		{
 			var parameters = method.Parameters;
 			var sb         = new StringBuilder();
 
 			if (method.IsStatic == false)
-			{
 				sb
 					.Append($"this {method.ReceiverType} __this__, ")
 					;
-			}
 
 			foreach (var p in parameters)
-			{
-				sb.Append(p);
-				sb.Append(", ");
-			}
+				sb
+					.Append(p)
+					.Append(", ")
+					;
 
 			if (parameters.Length != 0 || method.IsStatic == false)
 				sb.Length -= 2;
@@ -682,7 +745,7 @@ namespace AspectGenerator
 			return sb.ToString();
 		}
 
-		static string GetMethodOf(IMethodSymbol method)
+		static string GetMethodOf(IMethodSymbol method, string interceptorName)
 		{
 			var sb = new StringBuilder();
 
@@ -699,7 +762,13 @@ namespace AspectGenerator
 				sb.Append($"default({method.ReceiverType}), ");
 
 			foreach (var p in method.Parameters)
-				sb.Append($"default({p.Type}), ");
+				switch (p.RefKind)
+				{
+					case RefKind.Ref : sb.Append($"ref {interceptorName}_Arg_{p.Name}, "); break;
+					case RefKind.In  : sb.Append($"in {interceptorName}_Arg_{p.Name}, ");  break;
+					case RefKind.Out : sb.Append($"out {interceptorName}_Arg_{p.Name}, "); break;
+					default          : sb.Append($"default({p.Type}), ");                  break;
+				}
 
 			while (sb[^1] is ',' or ' ')
 				sb.Length--;

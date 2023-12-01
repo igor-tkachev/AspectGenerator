@@ -20,6 +20,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetryAspect", "Exam
 		{91353603-C41C-42C6-8A02-A5C451DBD280} = {91353603-C41C-42C6-8A02-A5C451DBD280}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransactionAspect", "Examples\TransactionAspect\TransactionAspect.csproj", "{68E80A51-D899-4FE0-A502-0D57244C42E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,12 +40,17 @@ Global
 		{912DB7B7-F07D-4158-95E4-738B1A789A3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{912DB7B7-F07D-4158-95E4-738B1A789A3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{912DB7B7-F07D-4158-95E4-738B1A789A3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68E80A51-D899-4FE0-A502-0D57244C42E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68E80A51-D899-4FE0-A502-0D57244C42E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68E80A51-D899-4FE0-A502-0D57244C42E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68E80A51-D899-4FE0-A502-0D57244C42E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{912DB7B7-F07D-4158-95E4-738B1A789A3E} = {C7FC6572-D698-4D79-9E51-7FCBB1DC9EE1}
+		{68E80A51-D899-4FE0-A502-0D57244C42E5} = {C7FC6572-D698-4D79-9E51-7FCBB1DC9EE1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B698F1D-8990-4983-9EFB-707AF66E24D2}

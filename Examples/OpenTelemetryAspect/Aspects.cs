@@ -38,6 +38,8 @@ namespace Aspects
 	{
 		static readonly ActivitySource _activitySource = new("Sample.Aspect");
 
+		// Start an activity and store it as Tag object.
+		//
 		public static Activity? OnUsing(InterceptInfo info)
 		{
 			var activity = _activitySource.StartActivity(info.MemberInfo.Name);
@@ -47,6 +49,8 @@ namespace Aspects
 			return activity;
 		}
 
+		// Activity async wrapper.
+		//
 		class AsyncActivity(Activity activity) : IAsyncDisposable
 		{
 			public readonly Activity Activity = activity;
@@ -58,6 +62,8 @@ namespace Aspects
 			}
 		}
 
+		// Start an activity, wrap it, and store as Tag object.
+		//
 		public static IAsyncDisposable? OnAsyncUsing(InterceptInfo info)
 		{
 			var activity = _activitySource.StartActivity(info.MemberInfo.Name);
@@ -72,6 +78,8 @@ namespace Aspects
 			return asyncActivity;
 		}
 
+		// Check activity type and set activity status depending on whether an exception occurred.
+		//
 		public static void OnFinally(InterceptInfo info)
 		{
 			switch (info)

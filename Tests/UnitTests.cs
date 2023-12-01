@@ -251,5 +251,94 @@ namespace AspectGenerator.Tests
 
 			Assert.AreEqual(132, i2);
 		}
+
+		[Aspects.Arguments]
+		internal static string ArgumentsMethod()
+		{
+			return "_";
+		}
+
+
+		[TestMethod]
+		public void ArgumentsTest()
+		{
+			var s = ArgumentsMethod();
+			Assert.AreEqual("_0", s);
+		}
+
+		[Aspects.Arguments]
+		internal static string ArgumentsMethod(string s, int i)
+		{
+			return s + i;
+		}
+
+		[TestMethod]
+		public void Arguments2Test()
+		{
+			var s = ArgumentsMethod("_", 1);
+			Assert.AreEqual("_12", s);
+		}
+
+		[Aspects.Arguments]
+		internal static string ArgumentsRefMethod(string s, int i, ref bool b)
+		{
+			return s + i + b;
+		}
+
+		[TestMethod]
+		public void ArgumentsRefTest()
+		{
+			var b = true;
+			var s = ArgumentsRefMethod("_", 1, ref b);
+
+			Assert.AreEqual("_1True3", s);
+		}
+
+		[Aspects.Arguments]
+		internal static string ArgumentsInMethod(string s, int i, in bool b, ref int? _)
+		{
+			return s + i + b;
+		}
+
+		[TestMethod]
+		public void ArgumentsInTest()
+		{
+			var  b = true;
+			int? n = 1;
+			var  s = ArgumentsInMethod("_", 1, in b, ref n);
+
+			Assert.AreEqual("_1True4", s);
+		}
+
+		[Aspects.Arguments]
+		internal static string ArgumentsInMethod(string s, int i, bool b, ref int? _)
+		{
+			return s + i + b;
+		}
+
+		[TestMethod]
+		public void ArgumentsIn1Test()
+		{
+			var  b = true;
+			int? n = 1;
+			var  s = ArgumentsInMethod("_", 1, b, ref n);
+
+			Assert.AreEqual("_1True4", s);
+		}
+
+		[Aspects.Arguments]
+		internal static string ArgumentsOutMethod(out string s)
+		{
+			s = "1";
+			return "_" + s;
+		}
+
+		[TestMethod]
+		public void ArgumentsOutTest()
+		{
+			var s1 = ArgumentsOutMethod(out _);
+
+			Assert.AreEqual("_11", s1);
+		}
 	}
 }

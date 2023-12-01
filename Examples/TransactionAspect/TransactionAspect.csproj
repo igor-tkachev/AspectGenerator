@@ -12,8 +12,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AspectGenerator"                Version="0.0.4.2-preview" />
-		<PackageReference Include="OpenTelemetry"                  Version="1.6.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.6.0" />
+		<PackageReference Include="AspectGenerator"       Version="0.0.4.2-preview" />
+		<PackageReference Include="linq2db"               Version="5.3.2" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
 	</ItemGroup>
 </Project>

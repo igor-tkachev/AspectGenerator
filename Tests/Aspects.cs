@@ -187,4 +187,20 @@ namespace Aspects
 			info.ReturnValue = info.ReturnValue * 10 + int.Parse((string)info.AspectArguments["Value"]!);
 		}
 	}
+
+	[Aspect(
+		OnAfterCall   = nameof(OnAfterCall),
+		PassArguments = true
+		)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+	sealed class ArgumentsAttribute : Attribute
+	{
+		public static void OnAfterCall<T>(InterceptInfo<T> info)
+		{
+		}
+		public static void OnAfterCall(InterceptInfo<string> info)
+		{
+			info.ReturnValue += info.MethodArguments!.Length;
+		}
+	}
 }
