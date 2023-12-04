@@ -22,6 +22,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetryAspect", "Exam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransactionAspect", "Examples\TransactionAspect\TransactionAspect.csproj", "{68E80A51-D899-4FE0-A502-0D57244C42E5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{C99EEB87-C10F-4235-9B4F-0E1E3A2FC54E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{C4B43F60-B1A2-4490-8BFE-840DDF7E3B94}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +58,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{912DB7B7-F07D-4158-95E4-738B1A789A3E} = {C7FC6572-D698-4D79-9E51-7FCBB1DC9EE1}
 		{68E80A51-D899-4FE0-A502-0D57244C42E5} = {C7FC6572-D698-4D79-9E51-7FCBB1DC9EE1}
+		{C4B43F60-B1A2-4490-8BFE-840DDF7E3B94} = {C99EEB87-C10F-4235-9B4F-0E1E3A2FC54E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B698F1D-8990-4983-9EFB-707AF66E24D2}

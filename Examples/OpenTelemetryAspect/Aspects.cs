@@ -30,7 +30,7 @@ namespace Aspects
 	/// </summary>
 	[Aspect(
 		OnUsing      = nameof(OnUsing),
-		OnAsyncUsing = nameof(OnAsyncUsing),
+		OnUsingAsync = nameof(OnUsingAsync),
 		OnFinally    = nameof(OnFinally)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
@@ -64,7 +64,7 @@ namespace Aspects
 
 		// Start an activity, wrap it, and store as Tag object.
 		//
-		public static IAsyncDisposable? OnAsyncUsing(InterceptInfo info)
+		public static IAsyncDisposable? OnUsingAsync(InterceptInfo info)
 		{
 			var activity = _activitySource.StartActivity(info.MemberInfo.Name);
 

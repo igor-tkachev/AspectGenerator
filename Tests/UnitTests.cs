@@ -160,21 +160,74 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void AllEventsTest()
 		{
-			Aspects.AllEventsAttribute.OnInitCounter       = 0;
-			Aspects.AllEventsAttribute.OnUsingCounter      = 0;
-			Aspects.AllEventsAttribute.OnBeforeCallCounter = 0;
-			Aspects.AllEventsAttribute.OnAfterCallCounter  = 0;
-			Aspects.AllEventsAttribute.OnCatchCounter      = 0;
-			Aspects.AllEventsAttribute.OnFinallyCounter    = 0;
+			Aspects.AllEventsAttribute.ClearCounters();
 
 			AllEventsMethod();
 
 			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnInitCounter);
 			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnUsingCounter);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnUsingCounterAsync);
 			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnBeforeCallCounter);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnBeforeCallCounterAsync);
 			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnAfterCallCounter);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnAfterCallCounterAsync);
 			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnCatchCounter);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnCatchCounterAsync);
 			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnFinallyCounter);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnFinallyCounterAsync);
+		}
+
+		[Aspects.AllEvents]
+		internal async Task AllEventsMethodAsync()
+		{
+			await Task.FromResult(0);
+		}
+
+		[TestMethod]
+		public async Task AllEventsTestAsync()
+		{
+			Aspects.AllEventsAttribute.ClearCounters();
+
+			await AllEventsMethodAsync();
+
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnInitCounter);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnUsingCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnUsingCounterAsync);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnBeforeCallCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnBeforeCallCounterAsync);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnAfterCallCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnAfterCallCounterAsync);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnCatchCounter);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnCatchCounterAsync);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnFinallyCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnFinallyCounterAsync);
+		}
+
+		[Aspects.AllEvents]
+		internal async Task<int> AllEventsMethodAsync2()
+		{
+			return await Task.FromResult(4);
+		}
+
+		[TestMethod]
+		public async Task AllEventsTestAsync2()
+		{
+			Aspects.AllEventsAttribute.ClearCounters();
+
+			var r = await AllEventsMethodAsync2();
+
+			Assert.AreEqual(4, r);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnInitCounter);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnUsingCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnUsingCounterAsync);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnBeforeCallCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnBeforeCallCounterAsync);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnAfterCallCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnAfterCallCounterAsync);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnCatchCounter);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnCatchCounterAsync);
+			Assert.AreEqual(0, Aspects.AllEventsAttribute.OnFinallyCounter);
+			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnFinallyCounterAsync);
 		}
 
 		[Aspects.Args(Arg1 = "1", Arg2 = 2, Arg3 = [ 1, 2, 3 ])]

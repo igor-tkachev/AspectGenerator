@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace Aspects
 {
@@ -94,22 +95,47 @@ namespace Aspects
 	}
 
 	[Aspect(
-		OnInit       = nameof(OnInit),
-		OnUsing      = nameof(OnUsing),
-		OnBeforeCall = nameof(OnBeforeCall),
-		OnAfterCall  = nameof(OnAfterCall),
-		OnCatch      = nameof(OnCatch),
-		OnFinally    = nameof(OnFinally)
+		OnInit            = nameof(OnInit),
+		OnUsing           = nameof(OnUsing),
+		OnUsingAsync      = nameof(OnUsingAsync),
+		OnBeforeCall      = nameof(OnBeforeCall),
+		OnBeforeCallAsync = nameof(OnBeforeCallAsync),
+		OnAfterCall       = nameof(OnAfterCall),
+		OnAfterCallAsync  = nameof(OnAfterCallAsync),
+		OnCatch           = nameof(OnCatch),
+		OnCatchAsync      = nameof(OnCatchAsync),
+		OnFinally         = nameof(OnFinally),
+		OnFinallyAsync    = nameof(OnFinallyAsync)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class AllEventsAttribute : Attribute
 	{
 		public static int OnInitCounter;
 		public static int OnUsingCounter;
+		public static int OnUsingCounterAsync;
 		public static int OnBeforeCallCounter;
+		public static int OnBeforeCallCounterAsync;
 		public static int OnAfterCallCounter;
+		public static int OnAfterCallCounterAsync;
 		public static int OnCatchCounter;
+		public static int OnCatchCounterAsync;
 		public static int OnFinallyCounter;
+		public static int OnFinallyCounterAsync;
+
+		public static void ClearCounters()
+		{
+			OnInitCounter            = 0;
+			OnUsingCounter           = 0;
+			OnUsingCounterAsync      = 0;
+			OnBeforeCallCounter      = 0;
+			OnBeforeCallCounterAsync = 0;
+			OnAfterCallCounter       = 0;
+			OnAfterCallCounterAsync  = 0;
+			OnCatchCounter           = 0;
+			OnCatchCounterAsync      = 0;
+			OnFinallyCounter         = 0;
+			OnFinallyCounterAsync    = 0;
+		}
 
 		public static InterceptInfo<T> OnInit<T>(InterceptInfo<T> info)
 		{
@@ -123,10 +149,21 @@ namespace Aspects
 			return null;
 		}
 
-		public static void OnBeforeCall(InterceptInfo info) => OnBeforeCallCounter++;
-		public static void OnAfterCall (InterceptInfo info) => OnAfterCallCounter++;
-		public static void OnCatch     (InterceptInfo info) => OnCatchCounter++;
-		public static void OnFinally   (InterceptInfo info) => OnFinallyCounter++;
+		public static IAsyncDisposable? OnUsingAsync(InterceptInfo info)
+		{
+			OnUsingCounterAsync++;
+			return null;
+		}
+
+		public static void OnBeforeCall     (InterceptInfo info) => OnBeforeCallCounter++;
+		public static void OnAfterCall      (InterceptInfo info) => OnAfterCallCounter++;
+		public static void OnCatch          (InterceptInfo info) => OnCatchCounter++;
+		public static void OnFinally        (InterceptInfo info) => OnFinallyCounter++;
+
+		public static Task OnBeforeCallAsync(InterceptInfo info) => Task.FromResult(OnBeforeCallCounterAsync++);
+		public static Task OnAfterCallAsync (InterceptInfo info) => Task.FromResult(OnAfterCallCounterAsync++);
+		public static Task OnCatchAsync     (InterceptInfo info) => Task.FromResult(OnCatchCounterAsync++);
+		public static Task OnFinallyAsync   (InterceptInfo info) => Task.FromResult(OnFinallyCounterAsync++);
 	}
 
 	[Aspect(
@@ -152,7 +189,7 @@ namespace Aspects
 
 	[Aspect(
 		OnUsing      = nameof(OnUsing),
-		OnAsyncUsing = nameof(OnAsyncUsing)
+		OnUsingAsync = nameof(OnUsingAsync)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class UsingAttribute : Attribute
@@ -162,7 +199,7 @@ namespace Aspects
 			return null;
 		}
 
-		public static IAsyncDisposable? OnAsyncUsing(InterceptInfo info)
+		public static IAsyncDisposable? OnUsingAsync(InterceptInfo info)
 		{
 			return null;
 		}
