@@ -36,7 +36,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts AllEventsMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 165, character: 4)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 165, character: 4)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -98,7 +98,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts AllEventsMethodAsync().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 191, character: 10)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 191, character: 10)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -160,7 +160,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts AllEventsMethodAsync2().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 217, character: 18)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 217, character: 18)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -263,7 +263,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgsMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 251, character: 15)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 251, character: 15)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -451,7 +451,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsInMethod("_", 1, in b, ref n).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 361, character: 13)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 361, character: 13)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -488,7 +488,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsInMethod("_", 1, b, ref n).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 377, character: 13)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 377, character: 13)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -524,7 +524,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 318, character: 12)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 318, character: 12)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -560,7 +560,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsMethod("_", 1).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 331, character: 12)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 331, character: 12)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -597,7 +597,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsOutMethod(out _).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 392, character: 13)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 392, character: 13)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -634,7 +634,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsRefMethod("_", 1, ref b).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 345, character: 12)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 345, character: 12)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -670,7 +670,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts EmptyMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 66, character: 4)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 66, character: 4)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -700,7 +700,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts this.ExtensionMethod(1).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 128, character: 19)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 128, character: 19)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -733,7 +733,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts new TestClassExtension().ExtensionMethod(1).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 138, character: 39)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 138, character: 39)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -766,7 +766,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts new TestStructExtension().ExtensionMethod(2).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 148, character: 40)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 148, character: 40)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -799,7 +799,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts FinallyMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 106, character: 12)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 106, character: 12)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -845,7 +845,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts TestCode.GenericMethod(1).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 39, character: 23)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 39, character: 23)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -904,10 +904,10 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts TestCode.GenericMethod(DateTime.Today).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 39, character: 51)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 39, character: 51)]
 		//
 		// Intercepts TestCode.GenericMethod(now).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 39, character: 92)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 39, character: 92)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -963,7 +963,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts IgnoreCatchMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 94, character: 4)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 94, character: 4)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -1007,7 +1007,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts InitMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 80, character: 4)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 80, character: 4)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -1030,6 +1030,39 @@ namespace MyAspectGenerator
 			return __info__0.ReturnValue;
 		}
 
+		static SR. MemberInfo                 InterceptedMethod_Interceptor_MemberInfo        = MethodOf(() => AspectGenerator.Tests.UnitTests.InterceptedMethod(default(string)));
+		static SCG.Dictionary<string,object?> InterceptedMethod_Interceptor_AspectArguments_0 = new()
+		{
+		};
+		//
+		/// <summary>
+		/// Intercepts AspectGenerator.Tests.UnitTests.InterceptedMethod(string).
+		/// </summary>
+		//
+		// Intercepts InterceptedMethod("Intercepted").
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 423, character: 12)]
+		//
+		[System.Runtime.CompilerServices.CompilerGenerated]
+		//[System.Diagnostics.DebuggerStepThrough]
+		public static string InterceptedMethod_Interceptor(string str)
+		{
+			// Aspects.InterceptMethodsAttribute
+			//
+			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			{
+				MemberInfo      = InterceptedMethod_Interceptor_MemberInfo,
+				AspectType      = typeof(Aspects.InterceptMethodsAttribute),
+				AspectArguments = InterceptedMethod_Interceptor_AspectArguments_0,
+			};
+
+			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.InterceptedMethod(str);
+
+			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
+			Aspects.InterceptMethodsAttribute.OnAfterCall(__info__0);
+
+			return __info__0.ReturnValue;
+		}
+
 		static SR. MemberInfo                 MemberMethod_Interceptor_MemberInfo        = MethodOf(() => default(AspectGenerator.Tests.UnitTests).MemberMethod(default(int)));
 		static SCG.Dictionary<string,object?> MemberMethod_Interceptor_AspectArguments_0 = new()
 		{
@@ -1040,7 +1073,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts MemberMethod(1).
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 120, character: 12)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 120, character: 12)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -1090,7 +1123,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts OrderedMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 299, character: 13)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 299, character: 13)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -1147,7 +1180,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts OrderedMethod2().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 303, character: 13)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 303, character: 13)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -1200,7 +1233,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ReturnVoidMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 54, character: 4)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 54, character: 4)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -1254,10 +1287,10 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts StaticMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 27, character: 14)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 27, character: 14)]
 		//
 		// Intercepts StaticMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 27, character: 38)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 27, character: 38)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -1290,7 +1323,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts StaticMethod("John").
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 28, character: 14)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 28, character: 14)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -1313,6 +1346,72 @@ namespace MyAspectGenerator
 			return __info__0.ReturnValue;
 		}
 
+		static SR. MemberInfo                 Substring_Interceptor_MemberInfo        = MethodOf(() => default(string).Substring(default(int)));
+		static SCG.Dictionary<string,object?> Substring_Interceptor_AspectArguments_0 = new()
+		{
+		};
+		//
+		/// <summary>
+		/// Intercepts string.Substring(int).
+		/// </summary>
+		//
+		// Intercepts "test string".Substring(5).
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 432, character: 26)]
+		//
+		[System.Runtime.CompilerServices.CompilerGenerated]
+		//[System.Diagnostics.DebuggerStepThrough]
+		public static string Substring_Interceptor(this string __this__, int startIndex)
+		{
+			// Aspects.InterceptMethodsAttribute
+			//
+			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			{
+				MemberInfo      = Substring_Interceptor_MemberInfo,
+				AspectType      = typeof(Aspects.InterceptMethodsAttribute),
+				AspectArguments = Substring_Interceptor_AspectArguments_0,
+			};
+
+			__info__0.ReturnValue = __this__.Substring(startIndex);
+
+			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
+			Aspects.InterceptMethodsAttribute.OnAfterCall(__info__0);
+
+			return __info__0.ReturnValue;
+		}
+
+		static SR. MemberInfo                 TestMethod_Interceptor_MemberInfo        = MethodOf(() => AspectGenerator.ClassLibrary.TestClass.TestMethod(default(string)));
+		static SCG.Dictionary<string,object?> TestMethod_Interceptor_AspectArguments_0 = new()
+		{
+		};
+		//
+		/// <summary>
+		/// Intercepts AspectGenerator.ClassLibrary.TestClass.TestMethod(string).
+		/// </summary>
+		//
+		// Intercepts ClassLibrary.TestClass.TestMethod("Test").
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 409, character: 35)]
+		//
+		[System.Runtime.CompilerServices.CompilerGenerated]
+		//[System.Diagnostics.DebuggerStepThrough]
+		public static string TestMethod_Interceptor(string str)
+		{
+			// Aspects.CrossProjectAttribute
+			//
+			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			{
+				MemberInfo      = TestMethod_Interceptor_MemberInfo,
+				AspectType      = typeof(Aspects.CrossProjectAttribute),
+				AspectArguments = TestMethod_Interceptor_AspectArguments_0,
+			};
+
+			__info__0.ReturnValue = AspectGenerator.ClassLibrary.TestClass.TestMethod(str);
+
+			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
+			Aspects.CrossProjectAttribute.OnAfterCall(__info__0);
+
+			return __info__0.ReturnValue;
+		}
+
 		static SR. MemberInfo                 UsingMethod_Interceptor_MemberInfo        = MethodOf(() => default(AspectGenerator.Tests.UnitTests).UsingMethod());
 		static SCG.Dictionary<string,object?> UsingMethod_Interceptor_AspectArguments_0 = new()
 		{
@@ -1323,7 +1422,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts UsingMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 267, character: 15)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 267, character: 15)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -1356,7 +1455,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts UsingMethodAsync().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Tests\UnitTests.cs", line: 279, character: 21)]
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 279, character: 21)]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]

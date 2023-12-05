@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
+
+		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);MyAspectGenerator</InterceptorsPreviewNamespaces>
+
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
+
+		<AspectGenerator_InterceptorsNamespace>MyAspectGenerator</AspectGenerator_InterceptorsNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<CompilerVisibleProperty Include="AspectGenerator_InterceptorsNamespace" />
+
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
+		<PackageReference Include="MSTest.TestAdapter" Version="3.0.4" />
+		<PackageReference Include="MSTest.TestFramework" Version="3.0.4" />
+
+		<ProjectReference Include="..\..\Source\AspectGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\ClassLibrary\AspectGenerator.ClassLibrary.csproj" />
+	</ItemGroup>
+</Project>

@@ -240,4 +240,34 @@ namespace Aspects
 			info.ReturnValue += info.MethodArguments!.Length;
 		}
 	}
+
+	[Aspect(
+		OnAfterCall = nameof(OnAfterCall)
+	)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	sealed class CrossProjectAttribute : Attribute
+	{
+		public static void OnAfterCall(InterceptInfo<string> info)
+		{
+			info.ReturnValue += " + CrossProject aspect.";
+		}
+	}
+
+	[Aspect(
+		OnAfterCall = nameof(OnAfterCall),
+		InterceptedMethods = new[]
+		{
+			"AspectGenerator.Tests.UnitTests.InterceptedMethod(string)",
+			"System.String.Substring(int)",
+			"string.Substring(int)"
+		}
+	)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	sealed class InterceptMethodsAttribute : Attribute
+	{
+		public static void OnAfterCall(InterceptInfo<string> info)
+		{
+			info.ReturnValue += " + InterceptMethods aspect.";
+		}
+	}
 }

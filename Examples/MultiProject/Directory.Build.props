@@ -1,0 +1,22 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<LangVersion>preview</LangVersion>
+
+		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);MultiProjectAspectGenerator</InterceptorsPreviewNamespaces>
+
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
+
+		<AspectGenerator_InterceptorsNamespace>MultiProjectAspectGenerator</AspectGenerator_InterceptorsNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<CompilerVisibleProperty Include="AspectGenerator_InterceptorsNamespace" />
+
+		<Compile Include="..\Aspects\*.cs" />
+
+		<PackageReference Include="AspectGenerator" Version="0.0.5-preview" />
+	</ItemGroup>
+</Project>

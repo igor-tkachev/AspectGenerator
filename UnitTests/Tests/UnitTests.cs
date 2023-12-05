@@ -393,5 +393,46 @@ namespace AspectGenerator.Tests
 
 			Assert.AreEqual("_11", s1);
 		}
+
+		[TestMethod]
+		public void MultiProjectMainTest()
+		{
+			var s = ClassLibrary.TestClass.MainMethod("Main");
+
+			Console.WriteLine(s);
+			Assert.AreEqual("Main MainMethod TestMethod + CrossProject aspect.", s);
+		}
+
+		[TestMethod]
+		public void MultiProjectTestTest()
+		{
+			var s = ClassLibrary.TestClass.TestMethod("Test");
+
+			Console.WriteLine(s);
+			Assert.AreEqual("Test TestMethod + CrossProject aspect.", s);
+		}
+
+		public static string InterceptedMethod(string str)
+		{
+			return str + " InterceptedMethod";
+		}
+
+		[TestMethod]
+		public void InterceptedMethodTest()
+		{
+			var s = InterceptedMethod("Intercepted");
+
+			Console.WriteLine(s);
+			Assert.AreEqual("Intercepted InterceptedMethod + InterceptMethods aspect.", s);
+		}
+
+		[TestMethod]
+		public void SubstringInterceptTest()
+		{
+			var s = "test string".Substring(5);
+
+			Console.WriteLine(s);
+			Assert.AreEqual("string + InterceptMethods aspect.", s);
+		}
 	}
 }

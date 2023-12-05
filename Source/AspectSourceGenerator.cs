@@ -24,24 +24,33 @@ namespace AspectGenerator
 
 			namespace AspectGenerator
 			{
+			#if !AG_NOT_GENERATE_API
+
 				[Aspect]
 				[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+			#if AG_PUBLIC
+				public
+			#endif
 				sealed class AspectAttribute : Attribute
 				{
-					public string? OnInit             { get; set; }
-					public string? OnUsing            { get; set; }
-					public string? OnUsingAsync       { get; set; }
-					public string? OnBeforeCall       { get; set; }
-					public string? OnBeforeCallAsync  { get; set; }
-					public string? OnAfterCall        { get; set; }
-					public string? OnAfterCallAsync   { get; set; }
-					public string? OnCatch            { get; set; }
-					public string? OnCatchAsync       { get; set; }
-					public string? OnFinally          { get; set; }
-					public string? OnFinallyAsync     { get; set; }
-					public bool    PassArguments      { get; set; }
+					public string?   OnInit             { get; set; }
+					public string?   OnUsing            { get; set; }
+					public string?   OnUsingAsync       { get; set; }
+					public string?   OnBeforeCall       { get; set; }
+					public string?   OnBeforeCallAsync  { get; set; }
+					public string?   OnAfterCall        { get; set; }
+					public string?   OnAfterCallAsync   { get; set; }
+					public string?   OnCatch            { get; set; }
+					public string?   OnCatchAsync       { get; set; }
+					public string?   OnFinally          { get; set; }
+					public string?   OnFinallyAsync     { get; set; }
+					public string[]? InterceptedMethods { get; set; }
+					public bool      PassArguments      { get; set; }
 				}
 
+			#if AG_PUBLIC
+				public
+			#endif
 				enum InterceptType
 				{
 					OnInit,
@@ -51,6 +60,9 @@ namespace AspectGenerator
 					OnFinally
 				}
 
+			#if AG_PUBLIC
+				public
+			#endif
 				enum InterceptResult
 				{
 					Continue,
@@ -59,10 +71,16 @@ namespace AspectGenerator
 					IgnoreThrow = Return
 				}
 
+			#if AG_PUBLIC
+				public
+			#endif
 				struct Void
 				{
 				}
 
+			#if AG_PUBLIC
+				public
+			#endif
 				abstract class InterceptInfo
 				{
 					public object?         Tag;
@@ -77,11 +95,18 @@ namespace AspectGenerator
 					public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
 				}
 
+			#if AG_PUBLIC
+				public
+			#endif
 				class InterceptInfo<T> : InterceptInfo
 				{
 					public T ReturnValue;
 				}
 			}
+
+			#endif
+
+			#if !AG_NOT_GENERATE_InterceptsLocationAttribute
 
 			namespace System.Runtime.CompilerServices
 			{
@@ -91,11 +116,17 @@ namespace AspectGenerator
 				}
 			}
 
+			#endif
+
 			""";
 
 		class Options
 		{
 			public string? InterceptorsNamespace;
+		}
+
+		record AttributeInfo(AttributeData? AttributeData, INamedTypeSymbol AttributeClass)
+		{
 		}
 
 		public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -133,7 +164,34 @@ namespace AspectGenerator
 				return;
 
 			var aspectAttributes = attrs.Select(a => a.TargetSymbol).ToImmutableHashSet(SymbolEqualityComparer.Default);
-			var aspectedMethods  = new List<(InvocationExpressionSyntax inv,IMethodSymbol method,ImmutableArray<AttributeData> attributes)>();
+			var aspectedMethods  = new List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)>();
+			var methodDic        = new Dictionary<IMethodSymbol,List<AttributeInfo>>(SymbolEqualityComparer.Default);
+			var interceptedDic    = new Dictionary<string,List<AttributeInfo>>();
+
+			foreach (var a in attrs)
+			{
+				if (a is { Attributes: [{ NamedArguments: [_, ..] args }, ..], TargetSymbol: INamedTypeSymbol ts })
+				{
+					foreach (var arg in args)
+					{
+						if (arg is { Key: "InterceptedMethods", Value.Values: [_, ..] methods })
+						{
+							foreach (var m in methods)
+							{
+								if (m.Value is string s)
+								{
+									var ai = new AttributeInfo(null, ts);
+
+									if (interceptedDic.ContainsKey(s))
+										interceptedDic[s].Add(ai);
+									else
+										interceptedDic[s] = new() { ai };
+								}
+							}
+						}
+					}
+				}
+			}
 
 			foreach (var tree in compilation.SyntaxTrees)
 			{
@@ -153,12 +211,40 @@ namespace AspectGenerator
 						//
 						if (info.Symbol is IMethodSymbol method)
 						{
-							var methodAttributes = method.GetAttributes();
+							if (!methodDic.TryGetValue(method, out var attributes))
+							{
+								attributes = new();
 
-							// .. decorated with any Aspect attribute.
-							//
-							if (methodAttributes.Any(a => aspectAttributes.Contains(a.AttributeClass!)))
-								aspectedMethods.Add(((InvocationExpressionSyntax)node, method, methodAttributes));
+								var methodAttributes = method.GetAttributes();
+
+								// .. decorated with any Aspect attribute...
+								//
+								if (methodAttributes.Length > 0)
+								{
+									foreach (var ma in methodAttributes)
+									{
+										// .. if attribute is defined in the compiling assembly...
+										//
+										if (aspectAttributes.Contains(ma.AttributeClass!))
+										{
+											attributes.Add(new AttributeInfo(ma, ma.AttributeClass!));
+										}
+										// .. or somewhere else.
+										else if (ma.AttributeClass?.GetAttributes().Any(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }}) is true)
+										{
+											attributes.Add(new AttributeInfo(ma, ma.AttributeClass!));
+										}
+									}
+								}
+
+								if (interceptedDic.TryGetValue(method.ToString(), out var mm))
+									attributes.AddRange(mm);
+
+								methodDic[method] = attributes.Distinct().ToList();
+							}
+
+							if (attributes.Count > 0)
+								aspectedMethods.Add(((InvocationExpressionSyntax)node, method, attributes));
 						}
 					}
 
@@ -176,7 +262,7 @@ namespace AspectGenerator
 			GenerateSource(spc, data.Right.Left, aspectedMethods);
 		}
 
-		static void GenerateSource(SourceProductionContext spc, Options options, List<(InvocationExpressionSyntax inv,IMethodSymbol method,ImmutableArray<AttributeData> attributes)> aspectedMethods)
+		static void GenerateSource(SourceProductionContext spc, Options options, List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)> aspectedMethods)
 		{
 			// Generate source. One file for all the interceptors.
 			// Interceptors.g.cs
@@ -233,12 +319,12 @@ namespace AspectGenerator
 				var methods         = m.ToList();
 				var attributes      = methods[0].attributes;
 
-				if (attributes.Any(a => a.NamedArguments.Any(na => na.Key == "Order")))
+				if (attributes.Any(a => a.AttributeData?.NamedArguments.Any(na => na.Key == "Order") is true))
 				{
 					attributes =
 						(
 							from a in attributes
-							let o = a.NamedArguments.Select(na => (KeyValuePair<string,TypedConstant>?)na).FirstOrDefault(na => na!.Value.Key == "Order")
+							let o = a.AttributeData?.NamedArguments.Select(na => (KeyValuePair<string,TypedConstant>?)na).FirstOrDefault(na => na!.Value.Key == "Order")
 							let n = o is null ? int.MaxValue : o.Value.Value.Value switch
 							{
 								string s => int.TryParse(s, out var n) ? n : null,
@@ -248,7 +334,7 @@ namespace AspectGenerator
 							orderby n
 							select a
 						)
-						.ToImmutableArray();
+						.ToList();
 				}
 
 				foreach (var p in method.Parameters)
@@ -271,7 +357,7 @@ namespace AspectGenerator
 							static SR. MemberInfo                 {{interceptorName}}_MemberInfo        = MethodOf{{GetMethodOf(method, interceptorName)}};
 					""");
 
-				for (var i = 0; i < attributes.Length; i++)
+				for (var i = 0; i < attributes.Count; i++)
 				{
 					var attr = attributes[i];
 
@@ -283,43 +369,44 @@ namespace AspectGenerator
 							""")
 						;
 
-					foreach (var arg in attr.NamedArguments)
-					{
-						string value;
-
-						if (arg.Value.Type is IArrayTypeSymbol arrayType)
+					if (attr.AttributeData is not null)
+						foreach (var arg in attr.AttributeData.NamedArguments)
 						{
-							value = arg.Value.Values.Length switch
-							{
-								0 => $"new {arrayType.ElementType}[0]",
-								_ => $"new {arg.Value.Type} {{ {arg.Value.Values.Select(v => PrintValue(v.Value)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
-							};
-						}
-						else
-							value = PrintValue(arg.Value.Value);
+							string value;
 
-						sb
-							.AppendLine(
-								$$"""
-											["{{arg.Key}}"] = {{value}},
-								""")
-							;
-
-						static string PrintValue(object? val)
-						{
-							return val switch
+							if (arg.Value.Type is IArrayTypeSymbol arrayType)
 							{
-								null             => "null",
-								string           => $"\"{val}\"",
-								char             => $"'{val}'",
-								double           => $"{val}d",
-								float            => $"{val}f",
-								long             => $"{val}l",
-								INamedTypeSymbol => $"typeof({val})",
-								_                => $"{val}"
-							};
+								value = arg.Value.Values.Length switch
+								{
+									0 => $"new {arrayType.ElementType}[0]",
+									_ => $"new {arg.Value.Type} {{ {arg.Value.Values.Select(v => PrintValue(v.Value)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
+								};
+							}
+							else
+								value = PrintValue(arg.Value.Value);
+
+							sb
+								.AppendLine(
+									$$"""
+												["{{arg.Key}}"] = {{value}},
+									""")
+								;
+
+							static string PrintValue(object? val)
+							{
+								return val switch
+								{
+									null             => "null",
+									string           => $"\"{val}\"",
+									char             => $"'{val}'",
+									double           => $"{val}d",
+									float            => $"{val}f",
+									long             => $"{val}l",
+									INamedTypeSymbol => $"typeof({val})",
+									_                => $"{val}"
+								};
+							}
 						}
-					}
 
 					sb
 						.AppendLine(
@@ -413,9 +500,13 @@ namespace AspectGenerator
 			spc.AddSource("Interceptors.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
 		}
 
-		static void GenerateMethodBody(StringBuilder sb, IMethodSymbol method, string interceptorName, ImmutableArray<AttributeData> attributes, int methodModifierPosition)
+		static void GenerateMethodBody(StringBuilder sb, IMethodSymbol method, string interceptorName, List<AttributeInfo> attributes, int methodModifierPosition)
 		{
-			var aspectAttrs   = attributes.Select(a => a.AttributeClass!.GetAttributes().First(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }})!).ToList();
+			if (method.Name == "InterceptedMethod")
+			{
+			}
+
+			var aspectAttrs   = attributes.Select(a => a.AttributeClass!.GetAttributes().First(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }})).ToList();
 			var isReturnsTask = method.ReturnType is { Name: "Task", ContainingNamespace: { Name : "Tasks", ContainingNamespace: { Name : "Threading", ContainingNamespace.Name : "System" }}};
 			var taskType      = isReturnsTask && method.ReturnType is INamedTypeSymbol { IsGenericType : true, TypeArguments : [var argType] } ? argType : null;
 			var generateAsync = isReturnsTask && aspectAttrs.Any(d => d.NamedArguments.Any(a => a.Key.EndsWith("Async")));
@@ -425,20 +516,13 @@ namespace AspectGenerator
 			//
 			if (generateArgs)
 			{
-				sb
-					.Append("\t\t\tvar __args__ = new object?[] { ")
-					;
+				sb.Append("\t\t\tvar __args__ = new object?[] { ");
 
 				if (method.IsStatic == false)
 					sb.Append("__this__, ");
 
 				foreach (var p in method.Parameters)
-				{
-					if (p.RefKind == RefKind.Out)
-						sb.Append(p.Name).Append(" = default, ");
-					else
-						sb.Append(p.Name).Append(", ");
-				}
+					sb.Append(p.Name).Append(p.RefKind == RefKind.Out ? " = default, " : ", ");
 
 				while (sb[^1] is ' ' or ',')
 					sb.Length--;
@@ -480,16 +564,14 @@ namespace AspectGenerator
 					}
 
 				if (generateAsync)
-				{
 					sb.Insert(methodModifierPosition, "async ");
-				}
 
 				var returnType = generateAsync ? taskType?.ToString() ?? "AspectGenerator.Void" : method.ReturnsVoid ? "AspectGenerator.Void" : $"{method.ReturnType}";
 
 				// Generate AspectCallInfo.
 				//
 				sb
-					.Append(indent).AppendLine($"// {attributes[idx]}")
+					.Append(indent).AppendLine($"// {(object?)attributes[idx].AttributeData ?? attributes[idx].AttributeClass}")
 					.Append(indent).AppendLine("//")
 					//.Append(indent).Append($"var __attr__{idx} = new {attributes[idx]}").Append(attributes[idx].NamedArguments.Length == 0 ? "()" : "").AppendLine(";")
 					.Append(indent).AppendLine($"var __info__{idx} = new AspectGenerator.InterceptInfo<{returnType}>")
@@ -561,7 +643,7 @@ namespace AspectGenerator
 
 				// Generate next attribute...
 				//
-				if (idx < attributes.Length - 1)
+				if (idx < attributes.Count - 1)
 				{
 					sb.Append(indent).AppendLine("{");
 
@@ -756,9 +838,7 @@ namespace AspectGenerator
 			var sb         = new StringBuilder();
 
 			if (method.IsStatic == false)
-				sb
-					.Append($"this {method.ReceiverType} __this__, ")
-					;
+				sb.Append($"this {method.ReceiverType} __this__, ");
 
 			foreach (var p in parameters)
 				sb
