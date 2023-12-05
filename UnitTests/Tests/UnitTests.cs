@@ -426,6 +426,26 @@ namespace AspectGenerator.Tests
 			Assert.AreEqual("Intercepted InterceptedMethod + InterceptMethods aspect.", s);
 		}
 
+		public static T InterceptedGenericMethod<T>(T p)
+		{
+			return p;
+		}
+
+		[TestMethod]
+		public void InterceptedGenericMethodTest()
+		{
+			var s = InterceptedGenericMethod("Intercepted");
+
+			Console.WriteLine(s);
+			Assert.AreEqual("Intercepted + InterceptMethods aspect.", s);
+
+			var i = InterceptedGenericMethod(10);
+
+			Console.WriteLine(i);
+
+			Assert.AreEqual(10, i);
+		}
+
 		[TestMethod]
 		public void SubstringInterceptTest()
 		{

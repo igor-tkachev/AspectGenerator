@@ -1,9 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
+
+		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);MultiProjectAspectGenerator</InterceptorsPreviewNamespaces>
+
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
+
+		<AspectGenerator_InterceptorsNamespace>MultiProjectAspectGenerator</AspectGenerator_InterceptorsNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<CompilerVisibleProperty Include="AspectGenerator_InterceptorsNamespace" />
+
 		<ProjectReference Include="..\ClassLibrary\ClassLibrary.csproj" />
 	</ItemGroup>
 </Project>

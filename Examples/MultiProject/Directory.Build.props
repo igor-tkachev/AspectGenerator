@@ -3,18 +3,9 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<LangVersion>preview</LangVersion>
-
-		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);MultiProjectAspectGenerator</InterceptorsPreviewNamespaces>
-
-		<EmitCompilerGeneratedFiles Condition="'$(Configuration)'=='Debug'">true</EmitCompilerGeneratedFiles>
-		<CompilerGeneratedFilesOutputPath Condition="'$(Configuration)'=='Debug'">$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
-
-		<AspectGenerator_InterceptorsNamespace>MultiProjectAspectGenerator</AspectGenerator_InterceptorsNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<CompilerVisibleProperty Include="AspectGenerator_InterceptorsNamespace" />
-
 		<Compile Include="..\Aspects\*.cs" />
 
 		<PackageReference Include="AspectGenerator" Version="0.0.5-preview" />
