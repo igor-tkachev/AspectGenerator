@@ -6,8 +6,8 @@
 
 		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);MultiProjectAspectGenerator</InterceptorsPreviewNamespaces>
 
-		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
+		<EmitCompilerGeneratedFiles Condition="'$(Configuration)'=='Debug'">true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath Condition="'$(Configuration)'=='Debug'">$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
 
 		<AspectGenerator_InterceptorsNamespace>MultiProjectAspectGenerator</AspectGenerator_InterceptorsNamespace>
 	</PropertyGroup>
