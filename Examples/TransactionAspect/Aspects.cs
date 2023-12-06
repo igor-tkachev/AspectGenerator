@@ -62,7 +62,7 @@ namespace Aspects
 		{
 			if (info.Tag is DataConnection con)
 			{
-				if (info.Exception is null)
+				if (info.Exception is not null)
 					con.RollbackTransaction();
 				else
 					con.CommitTransaction();
@@ -73,7 +73,7 @@ namespace Aspects
 		{
 			if (info.Tag is DataConnection con)
 			{
-				return info.Exception is null
+				return info.Exception is not null
 					? con.RollbackTransactionAsync()
 					: con.CommitTransactionAsync();
 			}

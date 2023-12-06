@@ -6,24 +6,33 @@ using System;
 
 namespace AspectGenerator
 {
+#if !AG_NOT_GENERATE_API
+
 	[Aspect]
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+#if AG_PUBLIC
+	public
+#endif
 	sealed class AspectAttribute : Attribute
 	{
-		public string? OnInit             { get; set; }
-		public string? OnUsing            { get; set; }
-		public string? OnUsingAsync       { get; set; }
-		public string? OnBeforeCall       { get; set; }
-		public string? OnBeforeCallAsync  { get; set; }
-		public string? OnAfterCall        { get; set; }
-		public string? OnAfterCallAsync   { get; set; }
-		public string? OnCatch            { get; set; }
-		public string? OnCatchAsync       { get; set; }
-		public string? OnFinally          { get; set; }
-		public string? OnFinallyAsync     { get; set; }
-		public bool    PassArguments      { get; set; }
+		public string?   OnInit             { get; set; }
+		public string?   OnUsing            { get; set; }
+		public string?   OnUsingAsync       { get; set; }
+		public string?   OnBeforeCall       { get; set; }
+		public string?   OnBeforeCallAsync  { get; set; }
+		public string?   OnAfterCall        { get; set; }
+		public string?   OnAfterCallAsync   { get; set; }
+		public string?   OnCatch            { get; set; }
+		public string?   OnCatchAsync       { get; set; }
+		public string?   OnFinally          { get; set; }
+		public string?   OnFinallyAsync     { get; set; }
+		public string[]? InterceptedMethods { get; set; }
+		public bool      PassArguments      { get; set; }
 	}
 
+#if AG_PUBLIC
+	public
+#endif
 	enum InterceptType
 	{
 		OnInit,
@@ -33,6 +42,9 @@ namespace AspectGenerator
 		OnFinally
 	}
 
+#if AG_PUBLIC
+	public
+#endif
 	enum InterceptResult
 	{
 		Continue,
@@ -41,10 +53,16 @@ namespace AspectGenerator
 		IgnoreThrow = Return
 	}
 
+#if AG_PUBLIC
+	public
+#endif
 	struct Void
 	{
 	}
 
+#if AG_PUBLIC
+	public
+#endif
 	abstract class InterceptInfo
 	{
 		public object?         Tag;
@@ -59,11 +77,18 @@ namespace AspectGenerator
 		public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
 	}
 
+#if AG_PUBLIC
+	public
+#endif
 	class InterceptInfo<T> : InterceptInfo
 	{
 		public T ReturnValue;
 	}
 }
+
+#endif
+
+#if !AG_NOT_GENERATE_InterceptsLocationAttribute
 
 namespace System.Runtime.CompilerServices
 {
@@ -72,3 +97,5 @@ namespace System.Runtime.CompilerServices
 	{
 	}
 }
+
+#endif

@@ -263,8 +263,7 @@ namespace Aspects
 			"string.Substring(int)"
 		}
 	)]
-	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-	sealed class InterceptMethodsAttribute : Attribute
+	sealed class InterceptMethodsAttribute
 	{
 		public static void OnAfterCall(InterceptInfo<string> info)
 		{

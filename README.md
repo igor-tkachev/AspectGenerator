@@ -1,11 +1,14 @@
 # Aspect Generator
 
+[![NuGet Version and Downloads count](https://buildstats.info/nuget/AspectGenerator?includePreReleases=true)](https://www.nuget.org/packages/AspectGenerator)
+
 The Aspect Generator can help you easily create your own aspects.
 
 > [!WARNING]
-> *Interceptors* are an experimental compiler feature planned to ship in .NET 8 (with support for C# only). The feature may be subject to breaking changes or removal in a future release.
+> [Interceptors](https://github.com/dotnet/roslyn/blob/d71ec683082104e9122a4937abc768710c5f7782/docs/features/interceptors.md) are an experimental compiler feature planned to ship in .NET 8 (with support for C# only).
+The feature may be subject to breaking changes or removal in a future release.
 
-> [!WARNING]
+> [!NOTE]
 > The community still has doubts about the usefulness of this feature. On the one hand, it looks like not kosher fake AOP. On the other hand, it works just fine. This project can help you to try it and share your own opinion.
 
 ## Download and Install

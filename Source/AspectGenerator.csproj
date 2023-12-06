@@ -5,7 +5,7 @@
 		<LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
 
-		<Version>0.0.5.1-preview</Version>
+		<Version>0.0.5.3-preview</Version>
 
 		<IsPackage>true</IsPackage>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
