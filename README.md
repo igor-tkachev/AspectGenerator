@@ -1,6 +1,6 @@
 # Aspect Generator
 
-[![NuGet Version and Downloads count](https://buildstats.info/nuget/AspectGenerator?includePreReleases=true)](https://www.nuget.org/packages/AspectGenerator)
+[![NuGet Version and Downloads count](https://buildstats.info/nuget/AspectGenerator?includePreReleases=true)](https://www.nuget.org/packages/AspectGenerator) [![Test workflow](https://img.shields.io/github/actions/workflow/status/igor-tkachev/AspectGenerator/dotnet.yml?branch=master&label=test&logo=github&style=flat-square)](https://github.com/igor-tkachev/AspectGenerator/actions?workflow=.NET)
 
 The Aspect Generator can help you easily create your own aspects.
 
