@@ -13,7 +13,7 @@ namespace AspectGenerator
 	/// <para>Create a new attribute decorated with this attribute to define an aspect.</para>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-#if AG_PUBLIC
+#if AG_PUBLIC_API
 	public
 #endif
 	sealed class AspectAttribute : Attribute
@@ -38,6 +38,7 @@ namespace AspectGenerator
 		public string?   OnUsingAsync       { get; set; }
 		public string?   OnBeforeCall       { get; set; }
 		public string?   OnBeforeCallAsync  { get; set; }
+		public string?   OnCall             { get; set; }
 		public string?   OnAfterCall        { get; set; }
 		public string?   OnAfterCallAsync   { get; set; }
 		public string?   OnCatch            { get; set; }
@@ -48,7 +49,7 @@ namespace AspectGenerator
 		public bool      PassArguments      { get; set; }
 	}
 
-#if AG_PUBLIC
+#if AG_PUBLIC_API
 	public
 #endif
 	enum InterceptType
@@ -60,7 +61,7 @@ namespace AspectGenerator
 		OnFinally
 	}
 
-#if AG_PUBLIC
+#if AG_PUBLIC_API
 	public
 #endif
 	enum InterceptResult
@@ -71,14 +72,14 @@ namespace AspectGenerator
 		IgnoreThrow = Return
 	}
 
-#if AG_PUBLIC
+#if AG_PUBLIC_API
 	public
 #endif
 	struct Void
 	{
 	}
 
-#if AG_PUBLIC
+#if AG_PUBLIC_API
 	public
 #endif
 	abstract class InterceptInfo
@@ -95,7 +96,7 @@ namespace AspectGenerator
 		public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
 	}
 
-#if AG_PUBLIC
+#if AG_PUBLIC_API
 	public
 #endif
 	class InterceptInfo<T> : InterceptInfo

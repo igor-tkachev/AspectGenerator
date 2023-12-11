@@ -8,31 +8,13 @@ namespace AspectGenerator
 {
 #if !AG_NOT_GENERATE_API
 
-	/// <summary>
-	/// <para>Defines an aspect.</para>
-	/// <para>Create a new attribute decorated with this attribute to define an aspect.</para>
-	/// </summary>
+	[Aspect]
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 #if AG_PUBLIC
 	public
 #endif
 	sealed class AspectAttribute : Attribute
 	{
-		/// <summary>
-		/// <para>
-		/// Defines method(s) name that initializes target method interception.
-		/// You can define multiple method overloads for different generic parameters.
-		/// </para>
-		/// <para>
-		/// The OnInit method should have the following signature:
-		/// </para>
-		/// <code>
-		/// public static InterceptInfo<T> OnInit<T>(InterceptInfo<T> info)
-		/// {
-		///     return info;
-		/// }
-		/// </code>
-		/// </summary>
 		public string?   OnInit             { get; set; }
 		public string?   OnUsing            { get; set; }
 		public string?   OnUsingAsync       { get; set; }

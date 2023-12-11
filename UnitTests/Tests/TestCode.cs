@@ -39,4 +39,33 @@ namespace AspectGenerator.Tests
 			return $"{value}";
 		}
 	}
+
+	class OnCallObject
+	{
+		public int OnCall(int n)
+		{
+			return n * 2;
+		}
+	}
+
+	[Aspect(
+		OnCall = nameof(OnCall),
+		InterceptedMethods = new[]
+		{
+			"AspectGenerator.Tests.OnCallObject.OnCall(int)"
+		}
+	)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+	sealed class OnCallAttribute : Attribute
+	{
+		public static int OnCall(int n)
+		{
+			return n * 2;
+		}
+
+		public static int OnCall(OnCallObject obj, int n)
+		{
+			return n * 3;
+		}
+	}
 }

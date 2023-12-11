@@ -676,18 +676,9 @@ namespace MyAspectGenerator
 		//[System.Diagnostics.DebuggerStepThrough]
 		public static int EmptyMethod_Interceptor()
 		{
-			// Aspects.EmptyAspectAttribute
-			//
-			var __info__0 = new AspectGenerator.InterceptInfo<int>
-			{
-				MemberInfo      = EmptyMethod_Interceptor_MemberInfo,
-				AspectType      = typeof(Aspects.EmptyAspectAttribute),
-				AspectArguments = EmptyMethod_Interceptor_AspectArguments_0,
-			};
+			var __return__ = AspectGenerator.Tests.UnitTests.EmptyMethod();
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.EmptyMethod();
-
-			return __info__0.ReturnValue;
+			return __return__;
 		}
 
 		static SR. MemberInfo                 ExtensionMethod_Interceptor_MemberInfo        = MethodOf(() => AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod(default(AspectGenerator.Tests.UnitTests), default(int)));
@@ -1137,6 +1128,48 @@ namespace MyAspectGenerator
 			}
 
 			return __info__0.ReturnValue;
+		}
+
+		static SR. MemberInfo                 OnCall_Interceptor_MemberInfo        = MethodOf(() => default(AspectGenerator.Tests.OnCallObject).OnCall(default(int)));
+		static SCG.Dictionary<string,object?> OnCall_Interceptor_AspectArguments_0 = new()
+		{
+		};
+		//
+		/// <summary>
+		/// Intercepts AspectGenerator.Tests.OnCallObject.OnCall(int).
+		/// </summary>
+		//
+		// Intercepts obj.OnCall(2).
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 477, character: 18)]
+		//
+		[System.Runtime.CompilerServices.CompilerGenerated]
+		//[System.Diagnostics.DebuggerStepThrough]
+		public static int OnCall_Interceptor(this AspectGenerator.Tests.OnCallObject __this__, int n)
+		{
+			var __return__ = AspectGenerator.Tests.OnCallAttribute.OnCall(__this__, n);
+
+			return __return__;
+		}
+
+		static SR. MemberInfo                 OnCallTestMethod_Interceptor_MemberInfo        = MethodOf(() => AspectGenerator.Tests.UnitTests.OnCallTestMethod(default(int)));
+		static SCG.Dictionary<string,object?> OnCallTestMethod_Interceptor_AspectArguments_0 = new()
+		{
+		};
+		//
+		/// <summary>
+		/// Intercepts AspectGenerator.Tests.UnitTests.OnCallTestMethod(int).
+		/// </summary>
+		//
+		// Intercepts OnCallTestMethod(2).
+		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\UnitTests\Tests\UnitTests.cs", line: 467, character: 12)]
+		//
+		[System.Runtime.CompilerServices.CompilerGenerated]
+		//[System.Diagnostics.DebuggerStepThrough]
+		public static int OnCallTestMethod_Interceptor(int n)
+		{
+			var __return__ = AspectGenerator.Tests.OnCallAttribute.OnCall(n);
+
+			return __return__;
 		}
 
 		static SR. MemberInfo                 OrderedMethod_Interceptor_MemberInfo        = MethodOf(() => AspectGenerator.Tests.UnitTests.OrderedMethod());

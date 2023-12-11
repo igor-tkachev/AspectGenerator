@@ -11,8 +11,6 @@ The feature may be subject to breaking changes or removal in a future release.
 > [!NOTE]
 > The community still has doubts about the usefulness of this feature. On the one hand, it looks like not kosher fake AOP. On the other hand, it works just fine. This project can help you to try it and share your own opinion.
 
-[How it works](https://github.com/igor-tkachev/AspectGenerator/wiki#how-it-works)
-
 ## Download and Install
 
 Install nuget
@@ -34,6 +32,10 @@ Modify your project file
     <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
 </PropertyGroup>
 ```
+
+## Read documentation
+
+[How it works](https://github.com/igor-tkachev/AspectGenerator/wiki#how-it-works)
 
 ## OpenTelemetry Aspect example
 

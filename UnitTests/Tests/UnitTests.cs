@@ -454,5 +454,30 @@ namespace AspectGenerator.Tests
 			Console.WriteLine(s);
 			Assert.AreEqual("string + InterceptMethods aspect.", s);
 		}
+
+		[OnCall]
+		public static int OnCallTestMethod(int n)
+		{
+			return n;
+		}
+
+		[TestMethod]
+		public void OnCallTest()
+		{
+			var n = OnCallTestMethod(2);
+
+			Console.WriteLine(n);
+			Assert.AreEqual(4, n);
+		}
+
+		[TestMethod]
+		public void OnCallMemberTest()
+		{
+			var obj = new OnCallObject();
+			var n   = obj.OnCall(2);
+
+			Console.WriteLine(n);
+			Assert.AreEqual(6, n);
+		}
 	}
 }
