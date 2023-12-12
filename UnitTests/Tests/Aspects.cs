@@ -12,7 +12,8 @@ namespace Aspects
 	}
 
 	[Aspect(
-		OnAfterCall  = nameof(OnAfterCall)
+		OnAfterCall      = nameof(OnAfterCall),
+		UseInterceptType = true
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class TestAspectAttribute : Attribute
@@ -31,8 +32,9 @@ namespace Aspects
 	}
 
 	[Aspect(
-		OnBeforeCall = nameof(OnBeforeCall),
-		OnAfterCall  = nameof(OnCall)
+		OnBeforeCall     = nameof(OnBeforeCall),
+		OnAfterCall      = nameof(OnCall),
+		UseInterceptType = true
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class TestAspect2Attribute : Attribute

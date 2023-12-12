@@ -31,6 +31,7 @@ namespace AspectGenerator
 		public string?   OnFinally          { get; set; }
 		public string?   OnFinallyAsync     { get; set; }
 		public string[]? InterceptedMethods { get; set; }
+		public bool      UseInterceptType   { get; set; }
 		public bool      PassArguments      { get; set; }
 	}
 
@@ -40,6 +41,7 @@ namespace AspectGenerator
 	enum InterceptType
 	{
 		OnInit,
+		OnUsing,
 		OnBeforeCall,
 		OnAfterCall,
 		OnCatch,

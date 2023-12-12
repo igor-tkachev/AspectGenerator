@@ -49,6 +49,7 @@ namespace AspectGenerator
 					public string?   OnFinally          { get; set; }
 					public string?   OnFinallyAsync     { get; set; }
 					public string[]? InterceptedMethods { get; set; }
+					public bool      UseInterceptType   { get; set; }
 					public bool      PassArguments      { get; set; }
 				}
 
@@ -58,6 +59,7 @@ namespace AspectGenerator
 				enum InterceptType
 				{
 					OnInit,
+					OnUsing,
 					OnBeforeCall,
 					OnAfterCall,
 					OnCatch,
@@ -546,15 +548,16 @@ namespace AspectGenerator
 
 				// Get aspect attribute parameters.
 				//
-				object? onInit        = null;
-				object? onUsing       = null; object? onUsingAsync      = null;
-				object? onBeforeCall  = null; object? onBeforeCallAsync = null;
-				object? onCall        = null;
-				object? onAfterCall   = null; object? onAfterCallAsync  = null;
-				object? onCatch       = null; object? onCatchAsync      = null;
-				object? onFinally     = null; object? onFinallyAsync    = null;
-				var     passArguments = false;
-				var     needInfo      = attributes.Count > 1 || generateAsync;
+				object? onInit           = null;
+				object? onUsing          = null; object? onUsingAsync      = null;
+				object? onBeforeCall     = null; object? onBeforeCallAsync = null;
+				object? onCall           = null;
+				object? onAfterCall      = null; object? onAfterCallAsync  = null;
+				object? onCatch          = null; object? onCatchAsync      = null;
+				object? onFinally        = null; object? onFinallyAsync    = null;
+				var     useInterceptType = false;
+				var     passArguments    = false;
+				var     needInfo         = attributes.Count > 1 || generateAsync;
 
 				foreach (var arg in aspect.NamedArguments)
 					switch (arg.Key)
@@ -571,6 +574,7 @@ namespace AspectGenerator
 						case "OnCatchAsync"      : onCatchAsync      = arg.Value.Value; needInfo = true; break;
 						case "OnFinally"         : onFinally         = arg.Value.Value; needInfo = true; break;
 						case "OnFinallyAsync"    : onFinallyAsync    = arg.Value.Value; needInfo = true; break;
+						case "UseInterceptType"  : useInterceptType  = arg.Value.Value is true; break;
 						case "PassArguments"     : passArguments     = arg.Value.Value is true; break;
 					}
 
@@ -612,18 +616,19 @@ namespace AspectGenerator
 				// Generate OnInit.
 				//
 				if (onInit is not null)
-					sb
-						.Append(indent).AppendLine($"__info__{idx}.InterceptType = AspectGenerator.InterceptType.OnInit;")
+				{
+					GenerateInterceptType("", "OnInit")
 						.Append(indent).AppendLine($"__info__{idx} = {attr.ContainingNamespace}.{attr.Name}.{onInit}(__info__{idx});")
 						.AppendLine()
 						;
+				}
 
 				// Generate OnUsing.
 				//
 				if (onUsing is not null)
 				{
 					var isAsync = generateAsync && onUsingAsync != null;
-					sb
+					GenerateInterceptType("", "OnUsing")
 						.Append(indent).AppendLine($"{(isAsync ? "await " : "")}using ({attr.ContainingNamespace}.{attr.Name}.{(isAsync ? onUsingAsync : onUsing)}(__info__{idx}))")
 						.Append(indent).AppendLine("{")
 						;
@@ -643,9 +648,7 @@ namespace AspectGenerator
 				//
 				if (generateAsync && onBeforeCallAsync is not null || onBeforeCall is not null)
 				{
-					sb
-						.Append(indent).AppendLine($"__info__{idx}.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;");
-
+					GenerateInterceptType("", "OnBeforeCall");
 					GenerateMethodCall(onBeforeCallAsync, onBeforeCall)
 						.AppendLine()
 						.Append(indent).AppendLine($"if (__info__{idx}.InterceptResult != AspectGenerator.InterceptResult.Return)")
@@ -757,8 +760,7 @@ namespace AspectGenerator
 				//
 				if (generateAsync && onAfterCallAsync is not null || onAfterCall is not null)
 				{
-					sb.Append(indent).AppendLine($"__info__{idx}.InterceptType = AspectGenerator.InterceptType.OnAfterCall;");
-
+					GenerateInterceptType("", "OnAfterCall");
 					GenerateMethodCall(onAfterCallAsync, onAfterCall)
 						.AppendLine();
 				}
@@ -799,9 +801,9 @@ namespace AspectGenerator
 
 					if (generateAsync && onCatchAsync is not null || onCatch is not null)
 					{
-						sb
-							.Append(indent).AppendLine($"\t__info__{idx}.InterceptResult = AspectGenerator.InterceptResult.ReThrow;")
-							.Append(indent).AppendLine($"\t__info__{idx}.InterceptType   = AspectGenerator.InterceptType.OnCatch;")
+						sb.Append(indent).AppendLine($"\t__info__{idx}.InterceptResult = AspectGenerator.InterceptResult.ReThrow;");
+
+						GenerateInterceptType("\t", "OnCatch")
 							.AppendLine()
 							.Append('\t')
 							;
@@ -825,8 +827,9 @@ namespace AspectGenerator
 					{
 						sb
 							.Append(indent).AppendLine("finally")
-							.Append(indent).AppendLine("{")
-							.Append(indent).AppendLine($"\t__info__{idx}.InterceptType = AspectGenerator.InterceptType.OnFinally;")
+							.Append(indent).AppendLine("{");
+
+						GenerateInterceptType("\t", "OnFinally")
 							.Append('\t')
 							;
 
@@ -867,6 +870,19 @@ namespace AspectGenerator
 					if (generateAsync && onAsync is not null)
 						return sb.Append(indent).AppendLine($"await {attr.ContainingNamespace}.{attr.Name}.{onAsync}(__info__{idx});");
 					return sb.Append(indent).AppendLine($"{attr.ContainingNamespace}.{attr.Name}.{call}(__info__{idx});");
+				}
+
+				StringBuilder GenerateInterceptType(string additionalIndent, string interceptType)
+				{
+					if (useInterceptType)
+					{
+						sb
+							.Append(additionalIndent)
+							.Append(indent)
+							.AppendLine($"__info__{idx}.InterceptType = AspectGenerator.InterceptType.{interceptType};");
+					}
+
+					return sb;
 				}
 			}
 		}

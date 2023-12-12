@@ -51,21 +51,18 @@ namespace MyAspectGenerator
 				AspectArguments = AllEventsMethod_Interceptor_AspectArguments_0,
 			};
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnInit;
 			__info__0 = Aspects.AllEventsAttribute.OnInit(__info__0);
 
 			using (Aspects.AllEventsAttribute.OnUsing(__info__0))
 			{
 				try
 				{
-					__info__0.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;
 					Aspects.AllEventsAttribute.OnBeforeCall(__info__0);
 
 					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
 					{
 						__this__.AllEventsMethod();
 
-						__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 						Aspects.AllEventsAttribute.OnAfterCall(__info__0);
 					}
 				}
@@ -73,7 +70,6 @@ namespace MyAspectGenerator
 				{
 					__info__0.Exception       = __ex__;
 					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
-					__info__0.InterceptType   = AspectGenerator.InterceptType.OnCatch;
 
 					Aspects.AllEventsAttribute.OnCatch(__info__0);
 
@@ -82,7 +78,6 @@ namespace MyAspectGenerator
 				}
 				finally
 				{
-					__info__0.InterceptType = AspectGenerator.InterceptType.OnFinally;
 					Aspects.AllEventsAttribute.OnFinally(__info__0);
 				}
 			}
@@ -113,21 +108,18 @@ namespace MyAspectGenerator
 				AspectArguments = AllEventsMethodAsync_Interceptor_AspectArguments_0,
 			};
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnInit;
 			__info__0 = Aspects.AllEventsAttribute.OnInit(__info__0);
 
 			await using (Aspects.AllEventsAttribute.OnUsingAsync(__info__0))
 			{
 				try
 				{
-					__info__0.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;
 					await Aspects.AllEventsAttribute.OnBeforeCallAsync(__info__0);
 
 					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
 					{
 						__this__.AllEventsMethodAsync();
 
-						__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 						await Aspects.AllEventsAttribute.OnAfterCallAsync(__info__0);
 					}
 				}
@@ -135,7 +127,6 @@ namespace MyAspectGenerator
 				{
 					__info__0.Exception       = __ex__;
 					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
-					__info__0.InterceptType   = AspectGenerator.InterceptType.OnCatch;
 
 					await Aspects.AllEventsAttribute.OnCatchAsync(__info__0);
 
@@ -144,7 +135,6 @@ namespace MyAspectGenerator
 				}
 				finally
 				{
-					__info__0.InterceptType = AspectGenerator.InterceptType.OnFinally;
 					await Aspects.AllEventsAttribute.OnFinallyAsync(__info__0);
 				}
 			}
@@ -175,21 +165,18 @@ namespace MyAspectGenerator
 				AspectArguments = AllEventsMethodAsync2_Interceptor_AspectArguments_0,
 			};
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnInit;
 			__info__0 = Aspects.AllEventsAttribute.OnInit(__info__0);
 
 			await using (Aspects.AllEventsAttribute.OnUsingAsync(__info__0))
 			{
 				try
 				{
-					__info__0.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;
 					await Aspects.AllEventsAttribute.OnBeforeCallAsync(__info__0);
 
 					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
 					{
 						__info__0.ReturnValue = await __this__.AllEventsMethodAsync2();
 
-						__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 						await Aspects.AllEventsAttribute.OnAfterCallAsync(__info__0);
 					}
 				}
@@ -197,7 +184,6 @@ namespace MyAspectGenerator
 				{
 					__info__0.Exception       = __ex__;
 					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
-					__info__0.InterceptType   = AspectGenerator.InterceptType.OnCatch;
 
 					await Aspects.AllEventsAttribute.OnCatchAsync(__info__0);
 
@@ -206,7 +192,6 @@ namespace MyAspectGenerator
 				}
 				finally
 				{
-					__info__0.InterceptType = AspectGenerator.InterceptType.OnFinally;
 					await Aspects.AllEventsAttribute.OnFinallyAsync(__info__0);
 				}
 			}
@@ -379,61 +364,51 @@ namespace MyAspectGenerator
 
 												__info__9.ReturnValue = __this__.ArgsMethod();
 
-												__info__9.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 												Aspects.ArgsAttribute.OnAfterCall(__info__9);
 
 												__info__8.ReturnValue = __info__9.ReturnValue;
 											}
 
-											__info__8.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 											Aspects.ArgsAttribute.OnAfterCall(__info__8);
 
 											__info__7.ReturnValue = __info__8.ReturnValue;
 										}
 
-										__info__7.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 										Aspects.ArgsAttribute.OnAfterCall(__info__7);
 
 										__info__6.ReturnValue = __info__7.ReturnValue;
 									}
 
-									__info__6.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 									Aspects.ArgsAttribute.OnAfterCall(__info__6);
 
 									__info__5.ReturnValue = __info__6.ReturnValue;
 								}
 
-								__info__5.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 								Aspects.ArgsAttribute.OnAfterCall(__info__5);
 
 								__info__4.ReturnValue = __info__5.ReturnValue;
 							}
 
-							__info__4.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 							Aspects.ArgsAttribute.OnAfterCall(__info__4);
 
 							__info__3.ReturnValue = __info__4.ReturnValue;
 						}
 
-						__info__3.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 						Aspects.ArgsAttribute.OnAfterCall(__info__3);
 
 						__info__2.ReturnValue = __info__3.ReturnValue;
 					}
 
-					__info__2.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 					Aspects.ArgsAttribute.OnAfterCall(__info__2);
 
 					__info__1.ReturnValue = __info__2.ReturnValue;
 				}
 
-				__info__1.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 				Aspects.ArgsAttribute.OnAfterCall(__info__1);
 
 				__info__0.ReturnValue = __info__1.ReturnValue;
 			}
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.ArgsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -471,7 +446,6 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsInMethod(s, i, in b, ref _);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -508,7 +482,6 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsInMethod(s, i, b, ref _);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -544,7 +517,6 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsMethod();
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -580,7 +552,6 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsMethod(s, i);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -617,7 +588,6 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsOutMethod(out s);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -654,7 +624,6 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsRefMethod(s, i, ref b);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -816,7 +785,6 @@ namespace MyAspectGenerator
 			}
 			finally
 			{
-				__info__0.InterceptType = AspectGenerator.InterceptType.OnFinally;
 				Aspects.FinallyAttribute.OnFinally(__info__0);
 			}
 
@@ -977,7 +945,6 @@ namespace MyAspectGenerator
 			{
 				__info__0.Exception       = __ex__;
 				__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
-				__info__0.InterceptType   = AspectGenerator.InterceptType.OnCatch;
 
 				Aspects.IgnoreCatchAttribute.OnCatch(__info__0);
 
@@ -1013,7 +980,6 @@ namespace MyAspectGenerator
 				AspectArguments = InitMethod_Interceptor_AspectArguments_0,
 			};
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnInit;
 			__info__0 = Aspects.InitAspectAttribute.OnInit(__info__0);
 
 			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.InitMethod();
@@ -1048,7 +1014,6 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.InterceptedGenericMethod(p);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.InterceptMethodsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -1081,7 +1046,6 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.InterceptedMethod(str);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.InterceptMethodsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -1123,7 +1087,6 @@ namespace MyAspectGenerator
 			}
 			finally
 			{
-				__info__0.InterceptType = AspectGenerator.InterceptType.OnFinally;
 				Aspects.FinallyAttribute.OnFinally(__info__0);
 			}
 
@@ -1217,13 +1180,11 @@ namespace MyAspectGenerator
 
 				__info__1.ReturnValue = AspectGenerator.Tests.UnitTests.OrderedMethod();
 
-				__info__1.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 				Aspects.OrderedAttribute.OnAfterCall(__info__1);
 
 				__info__0.ReturnValue = __info__1.ReturnValue;
 			}
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.OrderedAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -1274,13 +1235,11 @@ namespace MyAspectGenerator
 
 				__info__1.ReturnValue = AspectGenerator.Tests.UnitTests.OrderedMethod2();
 
-				__info__1.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 				Aspects.OrderedAttribute.OnAfterCall(__info__1);
 
 				__info__0.ReturnValue = __info__1.ReturnValue;
 			}
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.OrderedAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -1439,7 +1398,6 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = __this__.Substring(startIndex);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.InterceptMethodsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
@@ -1472,7 +1430,6 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = AspectGenerator.ClassLibrary.TestClass.TestMethod(str);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.CrossProjectAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
