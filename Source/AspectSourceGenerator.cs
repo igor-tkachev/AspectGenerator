@@ -36,21 +36,6 @@ namespace AspectGenerator
 			#endif
 				sealed class AspectAttribute : Attribute
 				{
-					/// <summary>
-					/// <para>
-					/// Defines method(s) name that initializes target method interception.
-					/// You can define multiple method overloads for different generic parameters.
-					/// </para>
-					/// <para>
-					/// The OnInit method should have the following signature:
-					/// </para>
-					/// <code>
-					/// public static InterceptInfo<T> OnInit<T>(InterceptInfo<T> info)
-					/// {
-					///     return info;
-					/// }
-					/// </code>
-					/// </summary>
 					public string?   OnInit             { get; set; }
 					public string?   OnUsing            { get; set; }
 					public string?   OnUsingAsync       { get; set; }
