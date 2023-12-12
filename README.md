@@ -36,7 +36,6 @@ Modify your project file
 ## Read documentation
 
 [How it works](https://github.com/igor-tkachev/AspectGenerator/wiki#how-it-works)
-
 [Creating your own aspect](https://github.com/igor-tkachev/AspectGenerator/wiki#creating-your-own-aspect)
 
 ## OpenTelemetry Aspect example
