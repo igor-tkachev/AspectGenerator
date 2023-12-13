@@ -53,7 +53,6 @@ namespace MultiProjectAspectGenerator
 
 			__info__0.ReturnValue = ClassLibrary.TestClass.TestMethod(str);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
 			Aspects.CrossProjectAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;

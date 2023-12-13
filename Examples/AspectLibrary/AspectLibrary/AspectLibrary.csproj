@@ -8,9 +8,11 @@
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
+
+		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);AspectGenerator</InterceptorsPreviewNamespaces>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AspectGenerator" Version="0.0.7.1-preview" />
+		<PackageReference Include="AspectGenerator" Version="0.0.8-preview" />
 	</ItemGroup>
 </Project>

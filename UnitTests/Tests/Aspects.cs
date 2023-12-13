@@ -257,13 +257,13 @@ namespace Aspects
 
 	[Aspect(
 		OnAfterCall = nameof(OnAfterCall),
-		InterceptedMethods = new[]
-		{
+		InterceptMethods =
+		[
 			"AspectGenerator.Tests.UnitTests.InterceptedMethod(string)",
 			"AspectGenerator.Tests.UnitTests.InterceptedGenericMethod<string>(string)",
 			"System.String.Substring(int)",
 			"string.Substring(int)"
-		}
+		]
 	)]
 	sealed class InterceptMethodsAttribute
 	{

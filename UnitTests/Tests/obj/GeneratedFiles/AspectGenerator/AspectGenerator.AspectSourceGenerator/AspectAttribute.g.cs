@@ -18,21 +18,21 @@ namespace AspectGenerator
 #endif
 	sealed class AspectAttribute : Attribute
 	{
-		public string?   OnInit             { get; set; }
-		public string?   OnUsing            { get; set; }
-		public string?   OnUsingAsync       { get; set; }
-		public string?   OnBeforeCall       { get; set; }
-		public string?   OnBeforeCallAsync  { get; set; }
-		public string?   OnCall             { get; set; }
-		public string?   OnAfterCall        { get; set; }
-		public string?   OnAfterCallAsync   { get; set; }
-		public string?   OnCatch            { get; set; }
-		public string?   OnCatchAsync       { get; set; }
-		public string?   OnFinally          { get; set; }
-		public string?   OnFinallyAsync     { get; set; }
-		public string[]? InterceptedMethods { get; set; }
-		public bool      UseInterceptType   { get; set; }
-		public bool      PassArguments      { get; set; }
+		public string?   OnInit            { get; set; }
+		public string?   OnUsing           { get; set; }
+		public string?   OnUsingAsync      { get; set; }
+		public string?   OnBeforeCall      { get; set; }
+		public string?   OnBeforeCallAsync { get; set; }
+		public string?   OnCall            { get; set; }
+		public string?   OnAfterCall       { get; set; }
+		public string?   OnAfterCallAsync  { get; set; }
+		public string?   OnCatch           { get; set; }
+		public string?   OnCatchAsync      { get; set; }
+		public string?   OnFinally         { get; set; }
+		public string?   OnFinallyAsync    { get; set; }
+		public string[]? InterceptMethods  { get; set; }
+		public bool      UseInterceptType  { get; set; }
+		public bool      PassArguments     { get; set; }
 	}
 
 #if AG_PUBLIC_API

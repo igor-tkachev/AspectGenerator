@@ -36,21 +36,21 @@ namespace AspectGenerator
 			#endif
 				sealed class AspectAttribute : Attribute
 				{
-					public string?   OnInit             { get; set; }
-					public string?   OnUsing            { get; set; }
-					public string?   OnUsingAsync       { get; set; }
-					public string?   OnBeforeCall       { get; set; }
-					public string?   OnBeforeCallAsync  { get; set; }
-					public string?   OnCall             { get; set; }
-					public string?   OnAfterCall        { get; set; }
-					public string?   OnAfterCallAsync   { get; set; }
-					public string?   OnCatch            { get; set; }
-					public string?   OnCatchAsync       { get; set; }
-					public string?   OnFinally          { get; set; }
-					public string?   OnFinallyAsync     { get; set; }
-					public string[]? InterceptedMethods { get; set; }
-					public bool      UseInterceptType   { get; set; }
-					public bool      PassArguments      { get; set; }
+					public string?   OnInit            { get; set; }
+					public string?   OnUsing           { get; set; }
+					public string?   OnUsingAsync      { get; set; }
+					public string?   OnBeforeCall      { get; set; }
+					public string?   OnBeforeCallAsync { get; set; }
+					public string?   OnCall            { get; set; }
+					public string?   OnAfterCall       { get; set; }
+					public string?   OnAfterCallAsync  { get; set; }
+					public string?   OnCatch           { get; set; }
+					public string?   OnCatchAsync      { get; set; }
+					public string?   OnFinally         { get; set; }
+					public string?   OnFinallyAsync    { get; set; }
+					public string[]? InterceptMethods  { get; set; }
+					public bool      UseInterceptType  { get; set; }
+					public bool      PassArguments     { get; set; }
 				}
 
 			#if AG_PUBLIC_API
@@ -137,7 +137,7 @@ namespace AspectGenerator
 
 		public void Initialize(IncrementalGeneratorInitializationContext context)
 		{
-#if DEBUG && TRUE
+#if DEBUG && TRUE1
 			if (!System.Diagnostics.Debugger.IsAttached)
 			{
 				System.Diagnostics.Debugger.Launch();
@@ -166,9 +166,6 @@ namespace AspectGenerator
 			var compilation = data.Left;
 			var attrs       = data.Right.Right;
 
-			if (attrs.Length == 0)
-				return;
-
 			var aspectAttributes = attrs.Select(a => a.TargetSymbol).ToImmutableHashSet(SymbolEqualityComparer.Default);
 			var aspectedMethods  = new List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)>();
 			var methodDic        = new Dictionary<IMethodSymbol,List<AttributeInfo>>(SymbolEqualityComparer.Default);
@@ -180,7 +177,7 @@ namespace AspectGenerator
 				{
 					foreach (var arg in args)
 					{
-						if (arg is { Key: "InterceptedMethods", Value.Values: [_, ..] methods })
+						if (arg is { Key: "InterceptMethods", Value.Values: [_, ..] methods })
 						{
 							foreach (var m in methods)
 							{

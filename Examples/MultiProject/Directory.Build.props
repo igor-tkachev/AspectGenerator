@@ -8,6 +8,6 @@
 	<ItemGroup>
 		<Compile Include="..\Aspects\*.cs" />
 
-		<PackageReference Include="AspectGenerator" Version="0.0.7-preview" />
+		<PackageReference Include="AspectGenerator" Version="0.0.8-preview" />
 	</ItemGroup>
 </Project>

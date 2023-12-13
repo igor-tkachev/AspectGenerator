@@ -57,7 +57,6 @@ namespace ExampleAspectGenerator
 
 			try
 			{
-				__info__0.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;
 				Aspects.TransactionAttribute.OnBeforeCall(__info__0);
 
 				if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
@@ -72,7 +71,6 @@ namespace ExampleAspectGenerator
 			}
 			finally
 			{
-				__info__0.InterceptType = AspectGenerator.InterceptType.OnFinally;
 				Aspects.TransactionAttribute.OnFinally(__info__0);
 			}
 
@@ -109,7 +107,6 @@ namespace ExampleAspectGenerator
 
 			try
 			{
-				__info__0.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;
 				await Aspects.TransactionAttribute.OnBeforeCallAsync(__info__0);
 
 				if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
@@ -124,7 +121,6 @@ namespace ExampleAspectGenerator
 			}
 			finally
 			{
-				__info__0.InterceptType = AspectGenerator.InterceptType.OnFinally;
 				await Aspects.TransactionAttribute.OnFinallyAsync(__info__0);
 			}
 

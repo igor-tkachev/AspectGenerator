@@ -50,7 +50,7 @@ namespace AspectGenerator.Tests
 
 	[Aspect(
 		OnCall = nameof(OnCall),
-		InterceptedMethods = new[]
+		InterceptMethods = new[]
 		{
 			"AspectGenerator.Tests.OnCallObject.OnCall(int)"
 		}

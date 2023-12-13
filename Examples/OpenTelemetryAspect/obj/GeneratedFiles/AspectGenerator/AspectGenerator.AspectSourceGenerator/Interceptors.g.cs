@@ -64,7 +64,6 @@ namespace AspectGenerator
 				}
 				finally
 				{
-					__info__0.InterceptType = AspectGenerator.InterceptType.OnFinally;
 					Aspects.MetricsAttribute.OnFinally(__info__0);
 				}
 			}
@@ -113,7 +112,6 @@ namespace AspectGenerator
 				}
 				finally
 				{
-					__info__0.InterceptType = AspectGenerator.InterceptType.OnFinally;
 					Aspects.MetricsAttribute.OnFinally(__info__0);
 				}
 			}
@@ -157,7 +155,6 @@ namespace AspectGenerator
 				}
 				finally
 				{
-					__info__0.InterceptType = AspectGenerator.InterceptType.OnFinally;
 					Aspects.MetricsAttribute.OnFinally(__info__0);
 				}
 			}
@@ -217,7 +214,6 @@ namespace AspectGenerator
 						}
 						finally
 						{
-							__info__1.InterceptType = AspectGenerator.InterceptType.OnFinally;
 							Aspects.MetricsAttribute.OnFinally(__info__1);
 						}
 					}
@@ -229,7 +225,6 @@ namespace AspectGenerator
 			{
 				__info__0.Exception       = __ex__;
 				__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
-				__info__0.InterceptType   = AspectGenerator.InterceptType.OnCatch;
 
 				Aspects.IgnoreCatchAttribute.OnCatch(__info__0);
 

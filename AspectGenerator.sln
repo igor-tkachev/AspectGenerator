@@ -19,6 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetryAspect", "Exam
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransactionAspect", "Examples\TransactionAspect\TransactionAspect.csproj", "{68E80A51-D899-4FE0-A502-0D57244C42E5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{91353603-C41C-42C6-8A02-A5C451DBD280} = {91353603-C41C-42C6-8A02-A5C451DBD280}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{C99EEB87-C10F-4235-9B4F-0E1E3A2FC54E}"
 EndProject
@@ -33,6 +36,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MultiProject", "MultiProjec
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainApp", "Examples\MultiProject\MainApp\MainApp.csproj", "{10E03499-294F-46E4-AD2F-5EEE6C9C94B3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{91353603-C41C-42C6-8A02-A5C451DBD280} = {91353603-C41C-42C6-8A02-A5C451DBD280}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary", "Examples\MultiProject\ClassLibrary\ClassLibrary.csproj", "{13F7F7AC-F932-4784-992B-261FFEA27F7B}"
 EndProject
@@ -49,11 +55,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectGenerator.ClassLibrar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AspectLibrary", "AspectLibrary", "{BB0C7C09-00AE-453A-9CE6-B750B4AB68F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectLibrary", "Examples\AspectLibrary\AspectLibrary\AspectLibrary.csproj", "{FCF37E8B-F490-4B43-AF8B-534E3310D182}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectLibrary", "Examples\AspectLibrary\AspectLibrary\AspectLibrary.csproj", "{FCF37E8B-F490-4B43-AF8B-534E3310D182}"
+	ProjectSection(ProjectDependencies) = postProject
+		{91353603-C41C-42C6-8A02-A5C451DBD280} = {91353603-C41C-42C6-8A02-A5C451DBD280}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary", "Examples\AspectLibrary\ClassLibrary\ClassLibrary.csproj", "{EB5E9193-080F-4387-9E59-A2DC221B7F16}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary", "Examples\AspectLibrary\ClassLibrary\ClassLibrary.csproj", "{EB5E9193-080F-4387-9E59-A2DC221B7F16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "Examples\AspectLibrary\ConsoleApp\ConsoleApp.csproj", "{415DCAB0-4D60-4EAF-AC05-45ED8C84A1F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "Examples\AspectLibrary\ConsoleApp\ConsoleApp.csproj", "{415DCAB0-4D60-4EAF-AC05-45ED8C84A1F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
