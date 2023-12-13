@@ -8,6 +8,7 @@ using System;
 
 namespace AspectGenerator
 {
+
 	/// <summary>
 	/// <para>Defines an aspect.</para>
 	/// <para>Create a new attribute decorated with this attribute to define an aspect.</para>

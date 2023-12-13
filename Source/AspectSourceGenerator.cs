@@ -22,10 +22,10 @@ namespace AspectGenerator
 
 			using System;
 
-			namespace AspectGenerator
-			{
 			#if !AG_NOT_GENERATE_API
 
+			namespace AspectGenerator
+			{
 				/// <summary>
 				/// <para>Defines an aspect.</para>
 				/// <para>Create a new attribute decorated with this attribute to define an aspect.</para>
@@ -137,7 +137,7 @@ namespace AspectGenerator
 
 		public void Initialize(IncrementalGeneratorInitializationContext context)
 		{
-#if DEBUG && TRUE1
+#if DEBUG && TRUE
 			if (!System.Diagnostics.Debugger.IsAttached)
 			{
 				System.Diagnostics.Debugger.Launch();
@@ -191,7 +191,7 @@ namespace AspectGenerator
 									if (interceptedDic.ContainsKey(s))
 										interceptedDic[s].Add(ai);
 									else
-										interceptedDic[s] = new() { ai };
+										interceptedDic[s] = [ai];
 								}
 							}
 						}

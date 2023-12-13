@@ -4,10 +4,10 @@
 
 using System;
 
-namespace AspectGenerator
-{
 #if !AG_NOT_GENERATE_API
 
+namespace AspectGenerator
+{
 	/// <summary>
 	/// <para>Defines an aspect.</para>
 	/// <para>Create a new attribute decorated with this attribute to define an aspect.</para>

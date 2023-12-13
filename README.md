@@ -4,6 +4,9 @@
 
 The Aspect Generator can help you easily create your own aspects.
 
+
+
+
 > [!WARNING]
 > [Interceptors](https://github.com/dotnet/roslyn/blob/d71ec683082104e9122a4937abc768710c5f7782/docs/features/interceptors.md) are an experimental compiler feature planned to ship in .NET 8 (with support for C# only).
 The feature may be subject to breaking changes or removal in a future release.
