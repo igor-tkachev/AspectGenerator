@@ -42,22 +42,22 @@ namespace AspectGenerator
 		//[System.Diagnostics.DebuggerStepThrough]
 		public static void StaticMethod_Interceptor()
 		{
-			// AspectLibrary.LogAttribute
+			// AspectLibrary.ConsoleLogAttribute
 			//
 			var __info__0 = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 			{
 				MemberInfo      = StaticMethod_Interceptor_MemberInfo,
-				AspectType      = typeof(AspectLibrary.LogAttribute),
+				AspectType      = typeof(AspectLibrary.ConsoleLogAttribute),
 				AspectArguments = StaticMethod_Interceptor_AspectArguments_0,
 			};
 
-			AspectLibrary.LogAttribute.OnBeforeCall(__info__0);
+			AspectLibrary.ConsoleLogAttribute.OnBeforeCall(__info__0);
 
 			if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
 			{
 				ClassLibrary.Class1.StaticMethod();
 
-				AspectLibrary.LogAttribute.OnAfterCall(__info__0);
+				AspectLibrary.ConsoleLogAttribute.OnAfterCall(__info__0);
 			}
 		}
 	}

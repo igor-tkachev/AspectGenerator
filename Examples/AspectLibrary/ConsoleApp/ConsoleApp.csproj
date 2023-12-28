@@ -1,11 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
-		<Nullable>enable</Nullable>
-
-		<DefineConstants>$(DefineConstants);AG_NOT_GENERATE_API</DefineConstants>
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
@@ -16,7 +11,5 @@
 	<ItemGroup>
 		<ProjectReference Include="..\AspectLibrary\AspectLibrary.csproj" />
 		<ProjectReference Include="..\ClassLibrary\ClassLibrary.csproj" />
-
-		<PackageReference Include="AspectGenerator" Version="0.0.8-preview" />
 	</ItemGroup>
 </Project>

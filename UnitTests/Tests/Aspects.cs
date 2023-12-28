@@ -13,16 +13,17 @@ namespace Aspects
 
 	[Aspect(
 		OnAfterCall      = nameof(OnAfterCall),
-		UseInterceptType = true
+		UseInterceptType = true,
+		UseInterceptData = true
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class TestAspectAttribute : Attribute
 	{
-		public static void OnAfterCall<T>(InterceptInfo<T> info)
+		public static void OnAfterCall<T>(ref InterceptData<T> info)
 		{
 		}
 
-		public static void OnAfterCall(InterceptInfo<string> info)
+		public static void OnAfterCall(ref InterceptData<string> info)
 		{
 			if (info.InterceptType == InterceptType.OnAfterCall)
 			{
@@ -190,18 +191,19 @@ namespace Aspects
 	}
 
 	[Aspect(
-		OnUsing      = nameof(OnUsing),
-		OnUsingAsync = nameof(OnUsingAsync)
+		OnUsing          = nameof(OnUsing),
+		OnUsingAsync     = nameof(OnUsingAsync),
+		UseInterceptData = true
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class UsingAttribute : Attribute
 	{
-		public static IDisposable? OnUsing(InterceptInfo info)
+		public static IDisposable? OnUsing<T>(ref InterceptData<T> info)
 		{
 			return null;
 		}
 
-		public static IAsyncDisposable? OnUsingAsync(InterceptInfo info)
+		public static IAsyncDisposable? OnUsingAsync<T>(ref InterceptData<T> info)
 		{
 			return null;
 		}

@@ -1,18 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<Nullable>enable</Nullable>
-
-		<DefineConstants>$(DefineConstants);AG_PUBLIC_API</DefineConstants>
+		<DefineConstants>$(DefineConstants);AG_PUBLIC_API;AG_GENERATE_API</DefineConstants>
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
 
 		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);AspectGenerator</InterceptorsPreviewNamespaces>
 	</PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="AspectGenerator" Version="0.0.8-preview" />
-	</ItemGroup>
 </Project>

@@ -3,11 +3,11 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<LangVersion>preview</LangVersion>
+
+		<DefineConstants>$(DefineConstants);AG_NOT_GENERATE_API</DefineConstants>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="..\Aspects\*.cs" />
-
 		<PackageReference Include="AspectGenerator" Version="0.0.8.1-preview" />
 	</ItemGroup>
 </Project>

@@ -668,7 +668,7 @@ namespace MyAspectGenerator
 		{
 			// Aspects.TestAspectAttribute
 			//
-			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			var __info__0 = new AspectGenerator.InterceptData<string>
 			{
 				MemberInfo      = ExtensionMethod_Interceptor_MemberInfo,
 				AspectType      = typeof(Aspects.TestAspectAttribute),
@@ -678,7 +678,7 @@ namespace MyAspectGenerator
 			__info__0.ReturnValue = AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod(__this__, value);
 
 			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(__info__0);
+			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -701,7 +701,7 @@ namespace MyAspectGenerator
 		{
 			// Aspects.TestAspectAttribute
 			//
-			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			var __info__0 = new AspectGenerator.InterceptData<string>
 			{
 				MemberInfo      = ExtensionMethod_Interceptor_3_MemberInfo,
 				AspectType      = typeof(Aspects.TestAspectAttribute),
@@ -711,7 +711,7 @@ namespace MyAspectGenerator
 			__info__0.ReturnValue = AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod(__this__, value);
 
 			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(__info__0);
+			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -734,7 +734,7 @@ namespace MyAspectGenerator
 		{
 			// Aspects.TestAspectAttribute
 			//
-			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			var __info__0 = new AspectGenerator.InterceptData<string>
 			{
 				MemberInfo      = ExtensionMethod_Interceptor_4_MemberInfo,
 				AspectType      = typeof(Aspects.TestAspectAttribute),
@@ -744,7 +744,7 @@ namespace MyAspectGenerator
 			__info__0.ReturnValue = AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod(__this__, value);
 
 			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(__info__0);
+			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -812,7 +812,7 @@ namespace MyAspectGenerator
 		{
 			// Aspects.TestAspectAttribute
 			//
-			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			var __info__0 = new AspectGenerator.InterceptData<string>
 			{
 				MemberInfo      = GenericMethod_Interceptor_MemberInfo,
 				AspectType      = typeof(Aspects.TestAspectAttribute),
@@ -827,7 +827,6 @@ namespace MyAspectGenerator
 					MemberInfo      = GenericMethod_Interceptor_MemberInfo,
 					AspectType      = typeof(Aspects.TestAspect2Attribute),
 					AspectArguments = GenericMethod_Interceptor_AspectArguments_1,
-					PreviousInfo    = __info__0
 				};
 
 				__info__1.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;
@@ -845,7 +844,7 @@ namespace MyAspectGenerator
 			}
 
 			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(__info__0);
+			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -874,7 +873,7 @@ namespace MyAspectGenerator
 		{
 			// Aspects.TestAspectAttribute
 			//
-			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			var __info__0 = new AspectGenerator.InterceptData<string>
 			{
 				MemberInfo      = GenericMethod_Interceptor_5_MemberInfo,
 				AspectType      = typeof(Aspects.TestAspectAttribute),
@@ -889,7 +888,6 @@ namespace MyAspectGenerator
 					MemberInfo      = GenericMethod_Interceptor_5_MemberInfo,
 					AspectType      = typeof(Aspects.TestAspect2Attribute),
 					AspectArguments = GenericMethod_Interceptor_5_AspectArguments_1,
-					PreviousInfo    = __info__0
 				};
 
 				__info__1.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;
@@ -907,7 +905,7 @@ namespace MyAspectGenerator
 			}
 
 			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(__info__0);
+			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -1266,7 +1264,7 @@ namespace MyAspectGenerator
 		{
 			// Aspects.TestAspectAttribute
 			//
-			var __info__0 = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0 = new AspectGenerator.InterceptData<AspectGenerator.Void>
 			{
 				MemberInfo      = ReturnVoidMethod_Interceptor_MemberInfo,
 				AspectType      = typeof(Aspects.TestAspectAttribute),
@@ -1281,7 +1279,6 @@ namespace MyAspectGenerator
 					MemberInfo      = ReturnVoidMethod_Interceptor_MemberInfo,
 					AspectType      = typeof(Aspects.TestAspect2Attribute),
 					AspectArguments = ReturnVoidMethod_Interceptor_AspectArguments_1,
-					PreviousInfo    = __info__0
 				};
 
 				__info__1.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;
@@ -1299,7 +1296,7 @@ namespace MyAspectGenerator
 			}
 
 			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(__info__0);
+			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 		}
 
 		static SR. MemberInfo                 StaticMethod_Interceptor_MemberInfo        = MethodOf(() => AspectGenerator.Tests.UnitTests.StaticMethod());
@@ -1323,7 +1320,7 @@ namespace MyAspectGenerator
 		{
 			// Aspects.TestAspectAttribute
 			//
-			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			var __info__0 = new AspectGenerator.InterceptData<string>
 			{
 				MemberInfo      = StaticMethod_Interceptor_MemberInfo,
 				AspectType      = typeof(Aspects.TestAspectAttribute),
@@ -1333,7 +1330,7 @@ namespace MyAspectGenerator
 			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.StaticMethod();
 
 			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(__info__0);
+			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -1356,7 +1353,7 @@ namespace MyAspectGenerator
 		{
 			// Aspects.TestAspectAttribute
 			//
-			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			var __info__0 = new AspectGenerator.InterceptData<string>
 			{
 				MemberInfo      = StaticMethod_Interceptor_6_MemberInfo,
 				AspectType      = typeof(Aspects.TestAspectAttribute),
@@ -1366,7 +1363,7 @@ namespace MyAspectGenerator
 			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.StaticMethod(name);
 
 			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(__info__0);
+			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -1453,14 +1450,14 @@ namespace MyAspectGenerator
 		{
 			// Aspects.UsingAttribute
 			//
-			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			var __info__0 = new AspectGenerator.InterceptData<string>
 			{
 				MemberInfo      = UsingMethod_Interceptor_MemberInfo,
 				AspectType      = typeof(Aspects.UsingAttribute),
 				AspectArguments = UsingMethod_Interceptor_AspectArguments_0,
 			};
 
-			using (Aspects.UsingAttribute.OnUsing(__info__0))
+			using (Aspects.UsingAttribute.OnUsing(ref __info__0))
 			{
 				__info__0.ReturnValue = __this__.UsingMethod();
 			}
@@ -1486,14 +1483,14 @@ namespace MyAspectGenerator
 		{
 			// Aspects.UsingAttribute
 			//
-			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			var __info__0 = new AspectGenerator.InterceptData<string>
 			{
 				MemberInfo      = UsingMethodAsync_Interceptor_MemberInfo,
 				AspectType      = typeof(Aspects.UsingAttribute),
 				AspectArguments = UsingMethodAsync_Interceptor_AspectArguments_0,
 			};
 
-			await using (Aspects.UsingAttribute.OnUsingAsync(__info__0))
+			await using (Aspects.UsingAttribute.OnUsingAsync(ref __info__0))
 			{
 				__info__0.ReturnValue = await __this__.UsingMethodAsync();
 			}

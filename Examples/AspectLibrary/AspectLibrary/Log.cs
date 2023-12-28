@@ -5,11 +5,11 @@ using AspectGenerator;
 namespace AspectLibrary
 {
 	[Aspect(
-		OnBeforeCall     = nameof(OnBeforeCall),
-		OnAfterCall      = nameof(OnAfterCall)
+		OnBeforeCall = nameof(OnBeforeCall),
+		OnAfterCall  = nameof(OnAfterCall)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
-	public class LogAttribute : Attribute
+	public class ConsoleLogAttribute : Attribute
 	{
 		public static void OnBeforeCall(InterceptInfo info)
 		{

@@ -4,7 +4,7 @@
 
 using System;
 
-#if !AG_NOT_GENERATE_API
+#if AG_GENERATE_API || !AG_NOT_GENERATE_API
 
 namespace AspectGenerator
 {
@@ -94,7 +94,7 @@ namespace AspectGenerator
 
 #endif
 
-#if !AG_NOT_GENERATE_InterceptsLocationAttribute
+#if AG_GENERATE_InterceptsLocationAttribute || !AG_NOT_GENERATE_InterceptsLocationAttribute
 
 namespace System.Runtime.CompilerServices
 {

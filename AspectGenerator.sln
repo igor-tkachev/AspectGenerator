@@ -41,6 +41,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainApp", "Examples\MultiPr
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary", "Examples\MultiProject\ClassLibrary\ClassLibrary.csproj", "{13F7F7AC-F932-4784-992B-261FFEA27F7B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{91353603-C41C-42C6-8A02-A5C451DBD280} = {91353603-C41C-42C6-8A02-A5C451DBD280}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspects", "Aspects", "{5A4A61C1-F7EB-47A3-9E85-8706DBC5C9E7}"
 	ProjectSection(SolutionItems) = preProject
@@ -54,6 +57,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectGenerator.ClassLibrary", "UnitTests\ClassLibrary\AspectGenerator.ClassLibrary.csproj", "{00265084-D136-41BD-AE9F-C1D620E347C5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AspectLibrary", "AspectLibrary", "{BB0C7C09-00AE-453A-9CE6-B750B4AB68F2}"
+	ProjectSection(SolutionItems) = preProject
+		Examples\AspectLibrary\Directory.Build.props = Examples\AspectLibrary\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectLibrary", "Examples\AspectLibrary\AspectLibrary\AspectLibrary.csproj", "{FCF37E8B-F490-4B43-AF8B-534E3310D182}"
 	ProjectSection(ProjectDependencies) = postProject

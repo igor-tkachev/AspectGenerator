@@ -22,7 +22,7 @@ namespace AspectGenerator
 
 			using System;
 
-			#if !AG_NOT_GENERATE_API
+			#if AG_GENERATE_API || !AG_NOT_GENERATE_API
 
 			namespace AspectGenerator
 			{
@@ -51,6 +51,7 @@ namespace AspectGenerator
 					public string[]? InterceptMethods  { get; set; }
 					public bool      UseInterceptType  { get; set; }
 					public bool      PassArguments     { get; set; }
+					public bool      UseInterceptData  { get; set; }
 				}
 
 			#if AG_PUBLIC_API
@@ -87,7 +88,7 @@ namespace AspectGenerator
 			#if AG_PUBLIC_API
 				public
 			#endif
-				abstract class InterceptInfo
+				partial class InterceptInfo
 				{
 					public object?         Tag;
 					public InterceptType   InterceptType;
@@ -104,15 +105,34 @@ namespace AspectGenerator
 			#if AG_PUBLIC_API
 				public
 			#endif
-				class InterceptInfo<T> : InterceptInfo
+				partial class InterceptInfo<T> : InterceptInfo
 				{
+					public T ReturnValue;
+				}
+
+			#if AG_PUBLIC_API
+				public
+			#endif
+				partial struct InterceptData<T>
+				{
+					public object?         Tag;
+					public InterceptType   InterceptType;
+					public InterceptResult InterceptResult;
+					public Exception?      Exception;
+
+					public InterceptInfo<T>?                                     PreviousInfo;
+					public System.Reflection.MemberInfo                          MemberInfo;
+					public object?[]?                                            MethodArguments;
+					public Type                                                  AspectType;
+					public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
+
 					public T ReturnValue;
 				}
 			}
 
 			#endif
 
-			#if !AG_NOT_GENERATE_InterceptsLocationAttribute
+			#if AG_GENERATE_InterceptsLocationAttribute || !AG_NOT_GENERATE_InterceptsLocationAttribute
 
 			namespace System.Runtime.CompilerServices
 			{
@@ -536,9 +556,9 @@ namespace AspectGenerator
 				sb.Append(" };").AppendLine().AppendLine();
 			}
 
-			GenerateAttribute(0, "\t\t\t");
+			GenerateAttribute(0, "\t\t\t", false);
 
-			void GenerateAttribute(int idx, string indent)
+			void GenerateAttribute(int idx, string indent, bool isPrevData)
 			{
 				var attr   = attributes[idx].AttributeClass!;
 				var aspect = aspectAttrs[idx];
@@ -549,11 +569,12 @@ namespace AspectGenerator
 				object? onUsing          = null; object? onUsingAsync      = null;
 				object? onBeforeCall     = null; object? onBeforeCallAsync = null;
 				object? onCall           = null;
-				object? onAfterCall      = null; object? onAfterCallAsync  = null;
-				object? onCatch          = null; object? onCatchAsync      = null;
-				object? onFinally        = null; object? onFinallyAsync    = null;
+				object? onAfterCall      = null; object? onAfterCallAsync = null;
+				object? onCatch          = null; object? onCatchAsync     = null;
+				object? onFinally        = null; object? onFinallyAsync   = null;
 				var     useInterceptType = false;
 				var     passArguments    = false;
+				var     useInterceptData = false;
 				var     needInfo         = attributes.Count > 1 || generateAsync;
 
 				foreach (var arg in aspect.NamedArguments)
@@ -573,6 +594,7 @@ namespace AspectGenerator
 						case "OnFinallyAsync"    : onFinallyAsync    = arg.Value.Value; needInfo = true; break;
 						case "UseInterceptType"  : useInterceptType  = arg.Value.Value is true; break;
 						case "PassArguments"     : passArguments     = arg.Value.Value is true; break;
+						case "UseInterceptData"  : useInterceptData  = arg.Value.Value is true; break;
 					}
 
 				if (generateAsync)
@@ -588,7 +610,7 @@ namespace AspectGenerator
 						.Append(indent).AppendLine($"// {(object?)attributes[idx].AttributeData ?? attributes[idx].AttributeClass}")
 						.Append(indent).AppendLine("//")
 						//.Append(indent).Append($"var __attr__{idx} = new {attributes[idx]}").Append(attributes[idx].NamedArguments.Length == 0 ? "()" : "").AppendLine(";")
-						.Append(indent).AppendLine($"var __info__{idx} = new AspectGenerator.InterceptInfo<{returnType}>")
+						.Append(indent).AppendLine($"var __info__{idx} = new AspectGenerator.Intercept{(useInterceptData ? "Data" : "Info")}<{returnType}>")
 						.Append(indent).AppendLine("{")
 						//.Append(indent).AppendLine($"\tReturnValue     = {(idx > 0 ? $"__info__{idx - 1}.ReturnValue" : $"default({(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")})")},")
 						.Append(indent).AppendLine($"\tMemberInfo      = {interceptorName}_MemberInfo,")
@@ -601,7 +623,7 @@ namespace AspectGenerator
 							.Append(indent).AppendLine("\tMethodArguments = __args__,")
 							;
 
-					if (idx > 0)
+					if (idx > 0 && !isPrevData)
 						sb.Append(indent).AppendLine($"\tPreviousInfo    = __info__{idx - 1}");
 
 					sb
@@ -615,7 +637,7 @@ namespace AspectGenerator
 				if (onInit is not null)
 				{
 					GenerateInterceptType("", "OnInit")
-						.Append(indent).AppendLine($"__info__{idx} = {attr.ContainingNamespace}.{attr.Name}.{onInit}(__info__{idx});")
+						.Append(indent).AppendLine($"__info__{idx} = {attr.ContainingNamespace}.{attr.Name}.{onInit}({PassInfo(idx)});")
 						.AppendLine()
 						;
 				}
@@ -626,7 +648,7 @@ namespace AspectGenerator
 				{
 					var isAsync = generateAsync && onUsingAsync != null;
 					GenerateInterceptType("", "OnUsing")
-						.Append(indent).AppendLine($"{(isAsync ? "await " : "")}using ({attr.ContainingNamespace}.{attr.Name}.{(isAsync ? onUsingAsync : onUsing)}(__info__{idx}))")
+						.Append(indent).AppendLine($"{(isAsync ? "await " : "")}using ({attr.ContainingNamespace}.{attr.Name}.{(isAsync ? onUsingAsync : onUsing)}({PassInfo(idx)}))")
 						.Append(indent).AppendLine("{")
 						;
 					indent += '\t';
@@ -691,7 +713,7 @@ namespace AspectGenerator
 
 					sb.Append(indent).AppendLine("{");
 
-					GenerateAttribute(idx + 1, indent + '\t');
+					GenerateAttribute(idx + 1, indent + '\t', useInterceptData);
 
 					TrimEnd(sb);
 
@@ -862,11 +884,16 @@ namespace AspectGenerator
 
 				TrimEnd(sb);
 
+				string PassInfo(int idx)
+				{
+					return $"{(useInterceptData ? "ref " : "")}__info__{idx}";
+				}
+
 				StringBuilder GenerateMethodCall(object? onAsync, object? call)
 				{
 					if (generateAsync && onAsync is not null)
-						return sb.Append(indent).AppendLine($"await {attr.ContainingNamespace}.{attr.Name}.{onAsync}(__info__{idx});");
-					return sb.Append(indent).AppendLine($"{attr.ContainingNamespace}.{attr.Name}.{call}(__info__{idx});");
+						return sb.Append(indent).AppendLine($"await {attr.ContainingNamespace}.{attr.Name}.{onAsync}({PassInfo(idx)});");
+					return sb.Append(indent).AppendLine($"{attr.ContainingNamespace}.{attr.Name}.{call}({PassInfo(idx)});");
 				}
 
 				StringBuilder GenerateInterceptType(string additionalIndent, string interceptType)

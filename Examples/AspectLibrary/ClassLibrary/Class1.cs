@@ -6,13 +6,13 @@ namespace ClassLibrary
 {
 	public class Class1
 	{
-		[Log]
+		[ConsoleLog]
 		public void InstanceMethod()
 		{
 			StaticMethod();
 		}
 
-		[Log]
+		[ConsoleLog]
 		public static void StaticMethod()
 		{
 		}

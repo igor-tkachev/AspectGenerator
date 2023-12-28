@@ -4,7 +4,7 @@
 
 using System;
 
-#if !AG_NOT_GENERATE_API
+#if AG_GENERATE_API || !AG_NOT_GENERATE_API
 
 namespace AspectGenerator
 {
@@ -33,6 +33,7 @@ namespace AspectGenerator
 		public string[]? InterceptMethods  { get; set; }
 		public bool      UseInterceptType  { get; set; }
 		public bool      PassArguments     { get; set; }
+		public bool      UseInterceptData  { get; set; }
 	}
 
 #if AG_PUBLIC_API
@@ -69,7 +70,7 @@ namespace AspectGenerator
 #if AG_PUBLIC_API
 	public
 #endif
-	abstract class InterceptInfo
+	partial class InterceptInfo
 	{
 		public object?         Tag;
 		public InterceptType   InterceptType;
@@ -86,15 +87,34 @@ namespace AspectGenerator
 #if AG_PUBLIC_API
 	public
 #endif
-	class InterceptInfo<T> : InterceptInfo
+	partial class InterceptInfo<T> : InterceptInfo
 	{
+		public T ReturnValue;
+	}
+
+#if AG_PUBLIC_API
+	public
+#endif
+	partial struct InterceptData<T>
+	{
+		public object?         Tag;
+		public InterceptType   InterceptType;
+		public InterceptResult InterceptResult;
+		public Exception?      Exception;
+
+		public InterceptInfo<T>?                                     PreviousInfo;
+		public System.Reflection.MemberInfo                          MemberInfo;
+		public object?[]?                                            MethodArguments;
+		public Type                                                  AspectType;
+		public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
+
 		public T ReturnValue;
 	}
 }
 
 #endif
 
-#if !AG_NOT_GENERATE_InterceptsLocationAttribute
+#if AG_GENERATE_InterceptsLocationAttribute || !AG_NOT_GENERATE_InterceptsLocationAttribute
 
 namespace System.Runtime.CompilerServices
 {
