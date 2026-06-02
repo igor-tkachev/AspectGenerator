@@ -8,6 +8,14 @@ using SR  = System.Reflection;
 using SLE = System.Linq.Expressions;
 using SCG = System.Collections.Generic;
 
+namespace System.Runtime.CompilerServices
+{
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+	file sealed class InterceptsLocationAttribute(int version, string data) : Attribute
+	{
+	}
+}
+
 namespace AspectGenerator
 {
 	using AspectGenerator = AspectGenerator;
@@ -36,7 +44,7 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts AsyncMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Examples\OpenTelemetryAspect\Program.cs", line: 19, character: 8)]
+	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKDIBAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -81,10 +89,10 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts Method1().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Examples\OpenTelemetryAspect\Program.cs", line: 15, character: 4)]
+	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKOUAAABQcm9ncmFtLmNz")]
 		//
 		// Intercepts Method1().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Examples\OpenTelemetryAspect\Program.cs", line: 17, character: 4)]
+	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKAUBAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -127,7 +135,7 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts Method2().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Examples\OpenTelemetryAspect\Program.cs", line: 16, character: 4)]
+	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKPYAAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
@@ -173,7 +181,7 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts MethodException().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Examples\OpenTelemetryAspect\Program.cs", line: 18, character: 4)]
+	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKBQBAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]

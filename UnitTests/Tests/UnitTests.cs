@@ -231,8 +231,8 @@ namespace AspectGenerator.Tests
 		}
 
 		[Aspects.Args(Arg1 = "1", Arg2 = 2, Arg3 = [ 1, 2, 3 ])]
-		[Aspects.Args(Arg3 = new int[] { 2 })]
-		[Aspects.Args(Arg3 = new int[0])]
+		[Aspects.Args(Arg3 = [2])]
+		[Aspects.Args(Arg3 = [])]
 		[Aspects.Args(Arg1 = "xyz")]
 		[Aspects.Args(Arg4 = 'w')]
 		[Aspects.Args(Arg5 = null)]

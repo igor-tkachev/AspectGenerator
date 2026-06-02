@@ -113,15 +113,3 @@ namespace AspectGenerator
 }
 
 #endif
-
-#if AG_GENERATE_InterceptsLocationAttribute || !AG_NOT_GENERATE_InterceptsLocationAttribute
-
-namespace System.Runtime.CompilerServices
-{
-	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-	sealed class InterceptsLocationAttribute(string filePath, int line, int character) : Attribute
-	{
-	}
-}
-
-#endif

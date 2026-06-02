@@ -1,0 +1,48 @@
+<Solution>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/dotnet.yml" />
+  </Folder>
+  <Folder Name="/.root/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Examples/">
+    <Project Path="Examples/OpenTelemetryAspect/OpenTelemetryAspect.csproj">
+      <BuildDependency Project="Source/AspectGenerator.csproj" />
+    </Project>
+    <Project Path="Examples/TransactionAspect/TransactionAspect.csproj">
+      <BuildDependency Project="Source/AspectGenerator.csproj" />
+    </Project>
+  </Folder>
+  <Folder Name="/Examples/AspectLibrary/">
+    <File Path="Examples/AspectLibrary/Directory.Build.props" />
+    <Project Path="Examples/AspectLibrary/AspectLibrary/AspectLibrary.csproj">
+      <BuildDependency Project="Source/AspectGenerator.csproj" />
+    </Project>
+    <Project Path="Examples/AspectLibrary/ClassLibrary/ClassLibrary.csproj" />
+    <Project Path="Examples/AspectLibrary/ConsoleApp/ConsoleApp.csproj" />
+  </Folder>
+  <Folder Name="/Examples/MultiProject/">
+    <File Path="Examples/MultiProject/Directory.Build.props" />
+    <Project Path="Examples/MultiProject/ClassLibrary/ClassLibrary.csproj">
+      <BuildDependency Project="Source/AspectGenerator.csproj" />
+    </Project>
+    <Project Path="Examples/MultiProject/MainApp/MainApp.csproj">
+      <BuildDependency Project="Source/AspectGenerator.csproj" />
+    </Project>
+  </Folder>
+  <Folder Name="/Examples/MultiProject/Aspects/">
+    <File Path="Examples/MultiProject/Aspects/Aspects.cs" />
+  </Folder>
+  <Folder Name="/UnitTests/">
+    <Project Path="UnitTests/ClassLibrary/AspectGenerator.ClassLibrary.csproj" />
+    <Project Path="UnitTests/Tests/AspectGenerator.Tests.csproj" />
+  </Folder>
+  <Project Path="Source/AspectGenerator.csproj" />
+</Solution>

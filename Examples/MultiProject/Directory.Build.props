@@ -1,13 +1,13 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<LangVersion>preview</LangVersion>
+		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<Compile Include="..\Aspects\*.cs" />
 
-		<PackageReference Include="AspectGenerator" Version="0.0.9-preview" />
+		<PackageReference Include="AspectGenerator" />
 	</ItemGroup>
 </Project>

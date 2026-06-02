@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 
-		<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);MultiProjectAspectGenerator</InterceptorsPreviewNamespaces>
+		<InterceptorsNamespaces>$(InterceptorsNamespaces);MultiProjectAspectGenerator</InterceptorsNamespaces>
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>

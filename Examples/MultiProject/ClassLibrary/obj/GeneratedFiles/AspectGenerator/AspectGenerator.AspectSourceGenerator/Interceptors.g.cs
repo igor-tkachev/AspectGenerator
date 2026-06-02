@@ -8,6 +8,14 @@ using SR  = System.Reflection;
 using SLE = System.Linq.Expressions;
 using SCG = System.Collections.Generic;
 
+namespace System.Runtime.CompilerServices
+{
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+	file sealed class InterceptsLocationAttribute(int version, string data) : Attribute
+	{
+	}
+}
+
 namespace MultiProjectAspectGenerator
 {
 	using AspectGenerator = AspectGenerator;
@@ -36,7 +44,7 @@ namespace MultiProjectAspectGenerator
 		/// </summary>
 		//
 		// Intercepts TestMethod(str + " MainMethod").
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Examples\MultiProject\ClassLibrary\TestClass.cs", line: 17, character: 11)]
+	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "jebrXVyTEu5HX6Vf5I7dVQYBAABUZXN0Q2xhc3MuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]

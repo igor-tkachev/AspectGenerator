@@ -50,10 +50,10 @@ namespace AspectGenerator.Tests
 
 	[Aspect(
 		OnCall = nameof(OnCall),
-		InterceptMethods = new[]
-		{
+		InterceptMethods =
+		[
 			"AspectGenerator.Tests.OnCallObject.OnCall(int)"
-		}
+		]
 	)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class OnCallAttribute : Attribute

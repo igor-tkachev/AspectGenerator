@@ -132,18 +132,6 @@ namespace AspectGenerator
 
 			#endif
 
-			#if AG_GENERATE_InterceptsLocationAttribute || !AG_NOT_GENERATE_InterceptsLocationAttribute
-
-			namespace System.Runtime.CompilerServices
-			{
-				[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-				sealed class InterceptsLocationAttribute(string filePath, int line, int character) : Attribute
-				{
-				}
-			}
-
-			#endif
-
 			""";
 
 		class Options
@@ -260,7 +248,7 @@ namespace AspectGenerator
 									}
 								}
 
-								if (interceptedDic.TryGetValue(method.ToString(), out var mm))
+								if (interceptedDic.TryGetValue(method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat), out var mm))
 									attributes.AddRange(mm);
 
 								methodDic[method] = attributes.Distinct().ToList();
@@ -282,10 +270,10 @@ namespace AspectGenerator
 			if (aspectedMethods.Count == 0 || spc.CancellationToken.IsCancellationRequested)
 				return;
 
-			GenerateSource(spc, data.Right.Left, aspectedMethods);
+			GenerateSource(spc, compilation, data.Right.Left, aspectedMethods);
 		}
 
-		static void GenerateSource(SourceProductionContext spc, Options options, List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)> aspectedMethods)
+		static void GenerateSource(SourceProductionContext spc, Compilation compilation, Options options, List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)> aspectedMethods)
 		{
 			// Generate source. One file for all the interceptors.
 			// Interceptors.g.cs
@@ -301,6 +289,14 @@ namespace AspectGenerator
 				using SR  = System.Reflection;
 				using SLE = System.Linq.Expressions;
 				using SCG = System.Collections.Generic;
+
+				namespace System.Runtime.CompilerServices
+				{
+					[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+					file sealed class InterceptsLocationAttribute(int version, string data) : Attribute
+					{
+					}
+				}
 
 				namespace {{(string.IsNullOrWhiteSpace(options.InterceptorsNamespace) ? "AspectGenerator" : options.InterceptorsNamespace)}}
 				{
@@ -456,18 +452,38 @@ namespace AspectGenerator
 								// Intercepts {inv}.
 						""");
 
-					void AppendInterceptsLocation(FileLinePositionSpan span)
+					void AppendInterceptsLocation(InvocationExpressionSyntax invocation)
 					{
-						sb.AppendLine(
-							$"""
-									[System.Runtime.CompilerServices.InterceptsLocation(@"{span.Path}", line: {span.Span.Start.Line + 1}, character: {span.Span.Start.Character + 1})]
-							""");
+						var semantic = compilation.GetSemanticModel(invocation.SyntaxTree);
+
+#pragma warning disable RSEXPERIMENTAL002
+						var location = semantic.GetInterceptableLocation(invocation, spc.CancellationToken);
+#pragma warning restore RSEXPERIMENTAL002
+
+						if (location is null)
+						{
+							var descriptor = new DiagnosticDescriptor(
+								"AG0003",
+								"AspectGenerator",
+								$"Invocation '{invocation}' cannot be intercepted by the compiler.",
+								"AspectGenerator",
+								DiagnosticSeverity.Warning,
+								true);
+
+							spc.ReportDiagnostic(
+								Diagnostic.Create(descriptor, invocation.GetLocation()));
+							return;
+						}
+
+#pragma warning disable RSEXPERIMENTAL002
+						sb.Append('\t').AppendLine(location.GetInterceptsLocationAttributeSyntax());
+#pragma warning restore RSEXPERIMENTAL002
 					}
 
 					switch (inv.Expression)
 					{
-						case MemberAccessExpressionSyntax { Name       : var name } : AppendInterceptsLocation(name.GetLocation().GetLineSpan()); break;
-						case IdentifierNameSyntax         { Identifier : var id   } : AppendInterceptsLocation(id.  GetLocation().GetLineSpan()); break;
+						case MemberAccessExpressionSyntax : AppendInterceptsLocation(inv); break;
+						case IdentifierNameSyntax         : AppendInterceptsLocation(inv); break;
 						default :
 							sb.AppendLine(
 								$"""

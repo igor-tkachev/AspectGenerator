@@ -8,6 +8,14 @@ using SR  = System.Reflection;
 using SLE = System.Linq.Expressions;
 using SCG = System.Collections.Generic;
 
+namespace System.Runtime.CompilerServices
+{
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+	file sealed class InterceptsLocationAttribute(int version, string data) : Attribute
+	{
+	}
+}
+
 namespace AspectGenerator
 {
 	using AspectGenerator = AspectGenerator;
@@ -36,7 +44,7 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts StaticMethod().
-		[System.Runtime.CompilerServices.InterceptsLocation(@"P:\AspectGenerator\Examples\AspectLibrary\ClassLibrary\Class1.cs", line: 12, character: 4)]
+	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "AncmHYx311mIhEhZRSZqHJMAAABDbGFzczEuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		//[System.Diagnostics.DebuggerStepThrough]
