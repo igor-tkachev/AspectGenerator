@@ -11,12 +11,12 @@ using SCG = System.Collections.Generic;
 namespace System.Runtime.CompilerServices
 {
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-	file sealed class InterceptsLocationAttribute(int version, string data) : Attribute
+	sealed class InterceptsLocationAttribute(int version, string data) : Attribute
 	{
 	}
 }
 
-namespace ExampleAspectGenerator
+namespace AspectGenerator
 {
 	using AspectGenerator = AspectGenerator;
 
@@ -45,10 +45,9 @@ namespace ExampleAspectGenerator
 		/// </summary>
 		//
 		// Intercepts GetCustomers(db).
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "J9L408asL5SLChZGOLUceYEDAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "J9L408asL5SLChZGOLUceYEDAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
-		//[System.Diagnostics.DebuggerStepThrough]
 		public static System.Collections.Generic.List<TransactionAspect.Program.Customer> GetCustomers_Interceptor(LinqToDB.Data.DataConnection db)
 		{
 			var __args__ = new object?[] { db };
@@ -95,10 +94,9 @@ namespace ExampleAspectGenerator
 		/// </summary>
 		//
 		// Intercepts GetCustomersAsync(db).
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "J9L408asL5SLChZGOLUceaIDAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "J9L408asL5SLChZGOLUceaIDAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
-		//[System.Diagnostics.DebuggerStepThrough]
 		public static async System.Threading.Tasks.Task<System.Collections.Generic.List<TransactionAspect.Program.Customer>> GetCustomersAsync_Interceptor(LinqToDB.Data.DataConnection db)
 		{
 			var __args__ = new object?[] { db };

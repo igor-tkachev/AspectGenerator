@@ -7,11 +7,11 @@
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
 
-		<AspectGenerator_InterceptorsNamespace>MultiProjectAspectGenerator</AspectGenerator_InterceptorsNamespace>
+		<AspectGeneratorInterceptorsNamespace>MultiProjectAspectGenerator</AspectGeneratorInterceptorsNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<CompilerVisibleProperty Include="AspectGenerator_InterceptorsNamespace" />
+		<CompilerVisibleProperty Include="AspectGeneratorInterceptorsNamespace" />
 
 		<ProjectReference Include="..\ClassLibrary\ClassLibrary.csproj" />
 	</ItemGroup>

@@ -9,13 +9,9 @@
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
-
-		<AspectGenerator_InterceptorsNamespace>MyAspectGenerator</AspectGenerator_InterceptorsNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<CompilerVisibleProperty Include="AspectGenerator_InterceptorsNamespace" />
-
 		<PackageReference Include="Microsoft.NET.Test.Sdk" />
 		<PackageReference Include="MSTest.TestAdapter" />
 		<PackageReference Include="MSTest.TestFramework" />

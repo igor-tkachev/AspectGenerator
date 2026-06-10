@@ -44,10 +44,9 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts TestMethod(str + " MainMethod").
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "aJ+70nNHAWZ4fneAjRgLSqkAAABUZXN0Q2xhc3MuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "aJ+70nNHAWZ4fneAjRgLSqkAAABUZXN0Q2xhc3MuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
-		//[System.Diagnostics.DebuggerStepThrough]
 		public static string TestMethod_Interceptor(string str)
 		{
 			// Aspects.CrossProjectAttribute

@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<DefineConstants>$(DefineConstants);AG_PUBLIC_API;AG_GENERATE_API</DefineConstants>
+		<AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
+		<AspectGeneratorPublicApi>true</AspectGeneratorPublicApi>
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>

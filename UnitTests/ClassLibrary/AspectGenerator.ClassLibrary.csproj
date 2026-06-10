@@ -8,17 +8,9 @@
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
-
-		<!--
-		<AspectGenerator_InterceptorsNamespace>MyAspectGenerator</AspectGenerator_InterceptorsNamespace>
-		-->
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!--
-		<CompilerVisibleProperty Include="AspectGenerator_InterceptorsNamespace" />
-		-->
-
 		<Compile Include="..\Tests\Aspects.cs" Link="Aspects.cs" />
 
 		<ProjectReference Include="..\..\Source\AspectGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

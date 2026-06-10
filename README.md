@@ -36,6 +36,29 @@ Modify your project file
 </PropertyGroup>
 ```
 
+AspectGenerator can be configured with MSBuild properties:
+
+```xml
+<PropertyGroup>
+    <AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
+    <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
+    <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
+    <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
+</PropertyGroup>
+```
+
+or with an assembly-level attribute. Attribute values override MSBuild properties:
+
+```csharp
+using AspectGenerator;
+
+[assembly: AspectGeneratorOptions(
+    GenerateApi = true,
+    PublicApi = false,
+    DebuggerStepThrough = false,
+    InterceptorsNamespace = "AspectGenerator")]
+```
+
 ## Read documentation
 
 [How it works](https://github.com/igor-tkachev/AspectGenerator/wiki#how-it-works)
@@ -222,7 +245,6 @@ namespace Aspects
         [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "...")]
         //
         [System.Runtime.CompilerServices.CompilerGenerated]
-        //[System.Diagnostics.DebuggerStepThrough]
         public static void Method1_Interceptor()
         {
             // Aspects.MetricsAttribute
@@ -253,7 +275,6 @@ namespace Aspects
         [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "...")]
         //
         [System.Runtime.CompilerServices.CompilerGenerated]
-        //[System.Diagnostics.DebuggerStepThrough]
         public static void Method2_Interceptor()
         {
             // Aspects.MetricsAttribute

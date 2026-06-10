@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Aspects;
 
 using LinqToDB;
+using LinqToDB.Async;
 using LinqToDB.Data;
 using LinqToDB.Mapping;
 
@@ -20,7 +22,7 @@ namespace TransactionAspect
 			[Column, NotNull]      public string CompanyName = default!;
 		}
 
-		static readonly DataOptions _options = new DataOptions().UseSQLiteMicrosoft("Data Source=TestDatabase.sqlite");
+		static readonly DataOptions _options = new DataOptions().UseSQLite("Data Source=TestDatabase.sqlite");
 
 		static void Main()
 		{
@@ -29,11 +31,10 @@ namespace TransactionAspect
 			db
 				.CreateTable<Customer>(tableOptions : TableOptions.CheckExistence)
 				.BulkCopy(
-					new Customer[]
-					{
-						new() { CompanyName = "Company 1" },
-						new() { CompanyName = "Company 2" }
-					});
+				[
+					new() { CompanyName = "Company 1" },
+					new() { CompanyName = "Company 2" }
+				]);
 
 			PrintList(GetCustomers(db));
 			PrintList(GetCustomersAsync(db).Result);

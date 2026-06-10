@@ -11,12 +11,12 @@ using SCG = System.Collections.Generic;
 namespace System.Runtime.CompilerServices
 {
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-	file sealed class InterceptsLocationAttribute(int version, string data) : Attribute
+	sealed class InterceptsLocationAttribute(int version, string data) : Attribute
 	{
 	}
 }
 
-namespace MultiProjectAspectGenerator
+namespace AspectGenerator
 {
 	using AspectGenerator = AspectGenerator;
 
@@ -44,10 +44,9 @@ namespace MultiProjectAspectGenerator
 		/// </summary>
 		//
 		// Intercepts TestMethod(str + " MainMethod").
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "jebrXVyTEu5HX6Vf5I7dVQYBAABUZXN0Q2xhc3MuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "jebrXVyTEu5HX6Vf5I7dVQYBAABUZXN0Q2xhc3MuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
-		//[System.Diagnostics.DebuggerStepThrough]
 		public static string TestMethod_Interceptor(string str)
 		{
 			// Aspects.CrossProjectAttribute

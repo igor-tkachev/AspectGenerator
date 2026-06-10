@@ -11,7 +11,7 @@ using SCG = System.Collections.Generic;
 namespace System.Runtime.CompilerServices
 {
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-	file sealed class InterceptsLocationAttribute(int version, string data) : Attribute
+	sealed class InterceptsLocationAttribute(int version, string data) : Attribute
 	{
 	}
 }
@@ -44,10 +44,9 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts AsyncMethod().
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKDIBAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKDIBAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
-		//[System.Diagnostics.DebuggerStepThrough]
 		public static async System.Threading.Tasks.Task<string> AsyncMethod_Interceptor()
 		{
 			// Aspects.MetricsAttribute
@@ -89,13 +88,12 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts Method1().
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKOUAAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKOUAAABQcm9ncmFtLmNz")]
 		//
 		// Intercepts Method1().
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKAUBAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKAUBAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
-		//[System.Diagnostics.DebuggerStepThrough]
 		public static void Method1_Interceptor()
 		{
 			// Aspects.MetricsAttribute
@@ -135,10 +133,9 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts Method2().
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKPYAAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKPYAAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
-		//[System.Diagnostics.DebuggerStepThrough]
 		public static void Method2_Interceptor()
 		{
 			// Aspects.MetricsAttribute
@@ -181,10 +178,9 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts MethodException().
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKBQBAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKBQBAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
-		//[System.Diagnostics.DebuggerStepThrough]
 		public static void MethodException_Interceptor()
 		{
 			// Aspects.IgnoreCatchAttribute

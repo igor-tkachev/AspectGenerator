@@ -1,6 +1,8 @@
 <Project>
+	<Import Project="..\Directory.Build.props" />
+
 	<PropertyGroup>
-		<TargetFramework Condition="'$(TargetFramework)' == ''">net10.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
@@ -11,5 +13,7 @@
 		<CompilerVisibleProperty Include="AspectGeneratorDebuggerStepThrough" />
 		<CompilerVisibleProperty Include="AspectGeneratorInterceptorsNamespace" />
 		<CompilerVisibleProperty Include="InterceptorsNamespaces" />
+
+		<PackageReference Include="AspectGenerator" />
 	</ItemGroup>
 </Project>
