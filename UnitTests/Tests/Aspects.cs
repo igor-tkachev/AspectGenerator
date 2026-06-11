@@ -190,6 +190,41 @@ namespace Aspects
 		}
 	}
 
+	enum LiteralKind
+	{
+		None,
+		Second
+	}
+
+	[Aspect(
+		OnAfterCall = nameof(OnAfterCall)
+		)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	sealed class LiteralArgsAttribute : Attribute
+	{
+		public string?      Text      { get; set; }
+		public char         Character { get; set; }
+		public double       Number    { get; set; }
+		public float        Single    { get; set; }
+		public LiteralKind  Kind      { get; set; }
+		public string[]?    Values    { get; set; }
+
+		public static void OnAfterCall(InterceptInfo<string> info)
+		{
+			var values = (string[])info.AspectArguments[nameof(Values)]!;
+
+			info.ReturnValue =
+				(string)info.AspectArguments[nameof(Text)]! == "quote\" slash\\ newline\n" &&
+				(char)info.AspectArguments[nameof(Character)]! == '\'' &&
+				(double)info.AspectArguments[nameof(Number)]! == 1.25d &&
+				(float)info.AspectArguments[nameof(Single)]! == 3.5f &&
+				(LiteralKind)info.AspectArguments[nameof(Kind)]! == LiteralKind.Second &&
+				values is ["a\"b", "c\\d", "e\nf"]
+					? "literal-ok"
+					: "literal-failed";
+		}
+	}
+
 	[Aspect(
 		OnUsing          = nameof(OnUsing),
 		OnUsingAsync     = nameof(OnUsingAsync),

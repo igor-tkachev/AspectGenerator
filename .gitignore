@@ -11,6 +11,3 @@ _ReSharper*/
 TestResults/
 .vs/
 .vscode/
-
-!**/obj/GeneratedFiles/
-!**/obj/GeneratedFiles/AspectGenerator/

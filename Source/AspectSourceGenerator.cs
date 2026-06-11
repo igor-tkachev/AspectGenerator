@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -220,6 +221,8 @@ namespace AspectGenerator
 				}
 			}
 
+			ValidateAspectHooks(spc, aspectAttributes);
+
 			var aspectedMethods  = new List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)>();
 			var methodDic        = new Dictionary<IMethodSymbol,List<AttributeInfo>>(SymbolEqualityComparer.Default);
 			var interceptedDic   = new Dictionary<string,List<AttributeInfo>>();
@@ -398,6 +401,56 @@ namespace AspectGenerator
 			return [];
 		}
 
+		static void ValidateAspectHooks(SourceProductionContext spc, Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)> aspectAttributes)
+		{
+			foreach (var item in aspectAttributes)
+			{
+				var symbol          = item.Key;
+				var aspectAttribute = item.Value;
+
+				if (symbol is not INamedTypeSymbol aspectClass)
+					continue;
+
+				foreach (var arg in aspectAttribute.Syntax.ArgumentList?.Arguments ?? default)
+				{
+					if (arg.NameEquals is null || !IsHookName(arg.NameEquals.Name.Identifier.ValueText))
+						continue;
+
+					if (GetAttributeArgumentValue(arg.Expression, aspectAttribute.SemanticModel) is not string hookName || string.IsNullOrWhiteSpace(hookName))
+						continue;
+
+					var methods = aspectClass.GetMembers(hookName).OfType<IMethodSymbol>().ToArray();
+
+					if (methods.Length == 0)
+					{
+						spc.ReportDiagnostic(
+							Diagnostic.Create(
+								"AG0101",
+								"AspectGenerator",
+								$"Aspect hook method '{hookName}' was not found on aspect type '{aspectClass.ToDisplayString()}'.",
+								DiagnosticSeverity.Error,
+								DiagnosticSeverity.Error,
+								true,
+								0,
+								location: arg.Expression.GetLocation()));
+					}
+					else if (!methods.Any(static m => m.IsStatic))
+					{
+						spc.ReportDiagnostic(
+							Diagnostic.Create(
+								"AG0102",
+								"AspectGenerator",
+								$"Aspect hook method '{hookName}' on aspect type '{aspectClass.ToDisplayString()}' must be static.",
+								DiagnosticSeverity.Error,
+								DiagnosticSeverity.Error,
+								true,
+								0,
+								location: arg.Expression.GetLocation()));
+					}
+				}
+			}
+		}
+
 		static IEnumerable<(string Key, object? Value)> GetAspectArguments(AttributeData attribute)
 		{
 			return attribute.NamedArguments.Select(static arg => (
@@ -432,6 +485,23 @@ namespace AspectGenerator
 		static bool IsAspectAttributeName(string name)
 		{
 			return name is "Aspect" or "AspectAttribute" or "AspectGenerator.Aspect" or "AspectGenerator.AspectAttribute";
+		}
+
+		static bool IsHookName(string name)
+		{
+			return name is
+				"OnInit"            or
+				"OnUsing"           or
+				"OnUsingAsync"      or
+				"OnBeforeCall"      or
+				"OnBeforeCallAsync" or
+				"OnCall"            or
+				"OnAfterCall"       or
+				"OnAfterCallAsync"  or
+				"OnCatch"           or
+				"OnCatchAsync"      or
+				"OnFinally"         or
+				"OnFinallyAsync";
 		}
 
 		static void GenerateSource(SourceProductionContext spc, Compilation compilation, Options options, List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)> aspectedMethods)
@@ -559,11 +629,11 @@ namespace AspectGenerator
 								value = arg.Value.Values.Length switch
 								{
 									0 => $"new {arrayType.ElementType}[0]",
-									_ => $"new {arg.Value.Type} {{ {arg.Value.Values.Select(v => PrintValue(v.Value)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
+									_ => $"new {arg.Value.Type} {{ {arg.Value.Values.Select(v => PrintValue(v.Value, arrayType.ElementType)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
 								};
 							}
 							else
-								value = PrintValue(arg.Value.Value);
+								value = PrintValue(arg.Value.Value, arg.Value.Type);
 
 							sb
 								.AppendLine(
@@ -572,20 +642,6 @@ namespace AspectGenerator
 									""")
 								;
 
-							static string PrintValue(object? val)
-							{
-								return val switch
-								{
-									null             => "null",
-									string           => $"\"{val}\"",
-									char             => $"'{val}'",
-									double           => $"{val}d",
-									float            => $"{val}f",
-									long             => $"{val}l",
-									INamedTypeSymbol => $"typeof({val})",
-									_                => $"{val}"
-								};
-							}
 						}
 
 					sb
@@ -1090,6 +1146,59 @@ namespace AspectGenerator
 				sb.Length--;
 
 			sb.AppendLine();
+		}
+
+		static string PrintValue(object? val, ITypeSymbol? type)
+		{
+			if (val is null)
+				return "null";
+
+			if (type?.TypeKind == TypeKind.Enum)
+				return $"({type}){PrintValue(val, null)}";
+
+			return val switch
+			{
+				string           s => SymbolDisplay.FormatLiteral(s, quote: true),
+				char             c => SymbolDisplay.FormatLiteral(c, quote: true),
+				bool             b => b ? "true" : "false",
+				byte             b => b.ToString(CultureInfo.InvariantCulture),
+				sbyte            b => b.ToString(CultureInfo.InvariantCulture),
+				short            n => n.ToString(CultureInfo.InvariantCulture),
+				ushort           n => n.ToString(CultureInfo.InvariantCulture),
+				int              n => n.ToString(CultureInfo.InvariantCulture),
+				uint             n => n.ToString(CultureInfo.InvariantCulture) + "u",
+				long             n => n.ToString(CultureInfo.InvariantCulture) + "L",
+				ulong            n => n.ToString(CultureInfo.InvariantCulture) + "uL",
+				float            f => PrintSingle(f),
+				double           d => PrintDouble(d),
+				decimal          d => d.ToString(CultureInfo.InvariantCulture) + "m",
+				INamedTypeSymbol s => $"typeof({s.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})",
+				_                  => Convert.ToString(val, CultureInfo.InvariantCulture) ?? "null"
+			};
+
+			static string PrintSingle(float value)
+			{
+				if (float.IsNaN(value))
+					return "float.NaN";
+				if (float.IsPositiveInfinity(value))
+					return "float.PositiveInfinity";
+				if (float.IsNegativeInfinity(value))
+					return "float.NegativeInfinity";
+
+				return value.ToString("R", CultureInfo.InvariantCulture) + "f";
+			}
+
+			static string PrintDouble(double value)
+			{
+				if (double.IsNaN(value))
+					return "double.NaN";
+				if (double.IsPositiveInfinity(value))
+					return "double.PositiveInfinity";
+				if (double.IsNegativeInfinity(value))
+					return "double.NegativeInfinity";
+
+				return value.ToString("R", CultureInfo.InvariantCulture) + "d";
+			}
 		}
 
 		static string PrintType(ITypeSymbol type)

@@ -255,6 +255,26 @@ namespace AspectGenerator.Tests
 			Console.WriteLine(args);
 		}
 
+		[Aspects.LiteralArgs(
+			Text = "quote\" slash\\ newline\n",
+			Character = '\'',
+			Number = 1.25d,
+			Single = 3.5f,
+			Kind = Aspects.LiteralKind.Second,
+			Values = [ "a\"b", "c\\d", "e\nf" ])]
+		internal string LiteralArgsMethod()
+		{
+			return "literal-failed";
+		}
+
+		[TestMethod]
+		public void LiteralArgsTest()
+		{
+			var args = LiteralArgsMethod();
+
+			Assert.AreEqual("literal-ok", args);
+		}
+
 		[Aspects.Using]
 		internal string UsingMethod()
 		{

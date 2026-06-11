@@ -1,53 +1,83 @@
 # Aspect Generator
 
-[![Test workflow](https://img.shields.io/github/actions/workflow/status/igor-tkachev/AspectGenerator/dotnet.yml?branch=master&label=test&logo=github&style=flat-square)](https://github.com/igor-tkachev/AspectGenerator/actions?workflow=.NET) [![NuGet Version and Downloads count](https://buildstats.info/nuget/AspectGenerator?includePreReleases=true)](https://www.nuget.org/packages/AspectGenerator)
+[![Test workflow](https://img.shields.io/github/actions/workflow/status/igor-tkachev/AspectGenerator/dotnet.yml?branch=master&label=test&logo=github&style=flat-square)](https://github.com/igor-tkachev/AspectGenerator/actions?workflow=.NET)
+[![NuGet Version and Downloads count](https://buildstats.info/nuget/AspectGenerator?includePreReleases=true)](https://www.nuget.org/packages/AspectGenerator)
 
-The Aspect Generator can help you easily create your own aspects.
-
-
-
+AspectGenerator is a source generator for compile-time call-site rewriting with C# interceptors. It lets you define attribute-based aspects that run around intercepted method calls without runtime proxies or IL weaving.
 
 > [!NOTE]
-> AspectGenerator targets the .NET 10 SDK and uses the stable Roslyn interceptor API based on `InterceptableLocation`.
-> Older .NET SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
+> AspectGenerator targets the .NET 10 SDK and uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
 
-> [!NOTE]
-> The community still has doubts about the usefulness of this feature. On the one hand, it looks like not kosher fake AOP. On the other hand, it works just fine. This project can help you to try it and share your own opinion.
+> [!IMPORTANT]
+> This is not runtime AOP. Aspects are applied by rewriting call sites visible to the current compilation. Calls made through reflection, delegates, already-compiled external assemblies, or unsupported C# constructs are outside the interception model.
 
-## Download and Install
+## Quick Start
 
-Install nuget
+Install the package:
 
 ```bash
-> dotnet add package AspectGenerator
+dotnet add package AspectGenerator
 ```
 
-Modify your project file
+Configure the consuming project:
 
 ```xml
 <PropertyGroup>
-    ...
-    <TargetFramework>net10.0</TargetFramework>
-    <InterceptorsNamespaces>$(InterceptorsNamespaces);AspectGenerator</InterceptorsNamespaces>
-
-    <!-- Add these settings to specify generated files output path -->
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
+  <TargetFramework>net10.0</TargetFramework>
+  <InterceptorsNamespaces>$(InterceptorsNamespaces);AspectGenerator</InterceptorsNamespaces>
 </PropertyGroup>
 ```
+
+Define an aspect:
+
+```csharp
+using AspectGenerator;
+
+namespace Aspects;
+
+[Aspect(OnBeforeCall = nameof(OnBeforeCall))]
+[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+sealed class LogAttribute : Attribute
+{
+    public static void OnBeforeCall(InterceptInfo info)
+    {
+        Console.WriteLine($"Calling {info.MemberInfo.Name}");
+    }
+}
+```
+
+Use it on a method:
+
+```csharp
+using Aspects;
+
+class Service
+{
+    [Log]
+    public static void DoWork()
+    {
+    }
+}
+
+Service.DoWork();
+```
+
+AspectGenerator finds interceptable call sites to `DoWork` in the current compilation and emits interceptor methods for those locations.
+
+## Configuration
 
 AspectGenerator can be configured with MSBuild properties:
 
 ```xml
 <PropertyGroup>
-    <AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
-    <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
-    <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
-    <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
+  <AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
+  <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
+  <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
+  <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
 </PropertyGroup>
 ```
 
-or with an assembly-level attribute. Attribute values override MSBuild properties:
+The same settings can be overridden with an assembly-level attribute:
 
 ```csharp
 using AspectGenerator;
@@ -59,299 +89,111 @@ using AspectGenerator;
     InterceptorsNamespace = "AspectGenerator")]
 ```
 
-## Read documentation
+`AspectGeneratorInterceptorsNamespace` must also be listed in `InterceptorsNamespaces`, otherwise the compiler will not enable generated interceptors from that namespace.
 
-[How it works](https://github.com/igor-tkachev/AspectGenerator/wiki#how-it-works)
+## Generated API Ownership
 
-[Creating your own aspect](https://github.com/igor-tkachev/AspectGenerator/wiki#creating-your-own-aspect)
+AspectGenerator normally generates the authoring/runtime API into each consuming compilation:
 
-## OpenTelemetry Aspect example
+- `GenerateApi=true`: generate `AspectAttribute`, `InterceptInfo`, `InterceptData<T>`, `InterceptResult`, and related types.
+- `GenerateApi=false`: do not generate the API. Use this when the API is supplied by an aspect library.
+- `PublicApi=false`: generated API is internal to the consuming assembly.
+- `PublicApi=true`: generated API is public. Treat this mode as experimental until the public contract is stabilized.
 
-Create OpenTelemetryFactory and Metrics aspect:
+Common modes:
 
-```c#
-using System;
-using System.Diagnostics;
+| Mode | Configuration | Intended use |
+| --- | --- | --- |
+| Single project | `GenerateApi=true`, `PublicApi=false` | App defines and uses its own aspects. |
+| Aspect library | Library: `GenerateApi=true`, `PublicApi=true`; consumer: `GenerateApi=false` | Shared aspect attributes live in a reusable assembly. |
+| Cross-project app | Same interceptor namespace in each project via `AspectGeneratorInterceptorsNamespace` and `InterceptorsNamespaces` | Intercept calls compiled in multiple projects. |
 
-using OpenTelemetry;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
+## Supported Scenarios
 
-namespace AspectGenerator
-{
-    /// <summary>
-    /// Initializes OpenTelemetry.
-    /// </summary>
-    static class OpenTelemetryFactory
-    {
-        public static TracerProvider? Create()
-        {
-            return Sdk.CreateTracerProviderBuilder()
-                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("MySample"))
-                .AddSource("Sample.Aspect")
-                .AddConsoleExporter()
-                .Build();
-        }
-    }
+| Scenario | Status | Notes |
+| --- | --- | --- |
+| Static methods | Supported | Ordinary member method calls only. |
+| Instance methods | Supported | Call site must be visible to the current compilation. |
+| Extension methods | Supported | Covered by unit tests. |
+| Generic methods | Supported | Explicit `InterceptMethods` strings must match generated display names. |
+| `Task` and `Task<T>` async methods | Supported | Async hooks are selected for `Task` targets. |
+| `ref`, `out`, `in` parameters | Supported | Covered by unit tests. |
+| Constructors | Unsupported | Platform limitation of C# interceptors. |
+| Properties and indexers | Unsupported | Not ordinary method invocation syntax. |
+| Operators | Unsupported | Not currently matched by the generator. |
+| Delegates and reflection | Unsupported | No direct call site rewrite. |
+| Local functions | Unsupported | Platform limitation. |
+| Calls compiled in external assemblies | Unsupported | Rebuild the assembly containing the call site with AspectGenerator enabled. |
+| `ValueTask` and `ValueTask<T>` | Not currently supported | Planned or explicitly documented as a limitation. |
 
-    /// <summary>
-    /// Metrics aspect.
-    /// </summary>
-    [Aspect(
-        // Specify the name of the method used in the 'using' statement
-        // that returns an IDisposable object.
-        OnUsing = nameof(OnUsing)
-        )]
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    sealed class MetricsAttribute : Attribute
-    {
-        static readonly ActivitySource _activitySource = new("Sample.Aspect");
+## Hooks
 
-        public static Activity? OnUsing(InterceptInfo info)
-        {
-            return _activitySource.StartActivity(info.MemberInfo.Name);
-        }
-    }
-}
-```
+`AspectAttribute` maps lifecycle hooks to static method names:
 
-Use it:
-
-```c#
-using System;
-using System.Threading;
-
-using Aspects;
-
-namespace OpenTelemetryAspect
-{
-    static class Program
-    {
-        static void Main()
-        {
-            using var _ = OpenTelemetryFactory.Create();
-
-            Method1();
-            Method2();
-            Method1();
-        }
-
-        [Metrics]
-        public static void Method1()
-        {
-            Thread.Sleep(100);
-        }
-
-        [Metrics]
-        public static void Method2()
-        {
-            Thread.Sleep(200);
-        }
-    }
-}
-```
-
-Application output:
-
-```
-Activity.TraceId:            d47417e726824c7b39055efb4685a9dd
-Activity.SpanId:             12fbf29f5b622e13
-Activity.TraceFlags:         Recorded
-Activity.ActivitySourceName: Sample.Aspect
-Activity.DisplayName:        Method1
-Activity.Kind:               Internal
-Activity.StartTime:          2023-11-22T00:50:15.9079068Z
-Activity.Duration:           00:00:00.1016180
-Resource associated with Activity:
-    service.name: MySample
-    service.instance.id: 86dbd377-c850-42a3-b878-be07de30faf1
-    telemetry.sdk.name: opentelemetry
-    telemetry.sdk.language: dotnet
-    telemetry.sdk.version: 1.6.0
-
-Activity.TraceId:            b90735bfb52cb0b52a504d02bc5ead2e
-Activity.SpanId:             75109ef3af25a3e9
-Activity.TraceFlags:         Recorded
-Activity.ActivitySourceName: Sample.Aspect
-Activity.DisplayName:        Method2
-Activity.Kind:               Internal
-Activity.StartTime:          2023-11-22T00:50:16.0360160Z
-Activity.Duration:           00:00:00.2058166
-Resource associated with Activity:
-    service.name: MySample
-    service.instance.id: 86dbd377-c850-42a3-b878-be07de30faf1
-    telemetry.sdk.name: opentelemetry
-    telemetry.sdk.language: dotnet
-    telemetry.sdk.version: 1.6.0
-
-Activity.TraceId:            e9653008f381b6330a8e538e02b7a61d
-Activity.SpanId:             be3d7cd1d4376bd7
-Activity.TraceFlags:         Recorded
-Activity.ActivitySourceName: Sample.Aspect
-Activity.DisplayName:        Method1
-Activity.Kind:               Internal
-Activity.StartTime:          2023-11-22T00:50:16.2517480Z
-Activity.Duration:           00:00:00.1135186
-Resource associated with Activity:
-    service.name: MySample
-    service.instance.id: 86dbd377-c850-42a3-b878-be07de30faf1
-    telemetry.sdk.name: opentelemetry
-    telemetry.sdk.language: dotnet
-    telemetry.sdk.version: 1.6.0
-```
-
-Generated code:
-
-```c#
-// <auto-generated/>
-#pragma warning disable
-#nullable enable
-
-using System;
-
-using SR  = System.Reflection;
-using SLE = System.Linq.Expressions;
-using SCG = System.Collections.Generic;
-
-namespace Aspects
-{
-    static partial class Interceptors
-    {
-        static SR.MethodInfo GetMethodInfo(SLE.Expression expr)
-        {
-            return expr switch
-            {
-                SLE.MethodCallExpression mc => mc.Method,
-                _                           => throw new InvalidOperationException()
-            };
-        }
-
-        static SR.MethodInfo MethodOf<T>(SLE.Expression<Func<T>> func) => GetMethodInfo(func.Body);
-        static SR.MethodInfo MethodOf   (SLE.Expression<Action>  func) => GetMethodInfo(func.Body);
-
-        static SR. MemberInfo                 Method1_Interceptor_MemberInfo        = MethodOf(() => OpenTelemetryAspect.Program.Method1());
-        static SCG.Dictionary<string,object?> Method1_Interceptor_AspectArguments_0 = new ()
-        {
-        };
-        //
-        /// <summary>
-        /// Intercepts OpenTelemetryAspect.Program.Method1().
-        /// </summary>
-        //
-        // Intercepts Method1().
-        [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "...")]
-        //
-        // Intercepts Method1().
-        [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "...")]
-        //
-        [System.Runtime.CompilerServices.CompilerGenerated]
-        public static void Method1_Interceptor()
-        {
-            // Aspects.MetricsAttribute
-            //
-            var __info__0 = new Aspects.InterceptInfo<Void>
-            {
-                MemberInfo      = Method1_Interceptor_MemberInfo,
-                AspectType      = typeof(Aspects.MetricsAttribute),
-                AspectArguments = Method1_Interceptor_AspectArguments_0,
-            };
-
-            using (Aspects.MetricsAttribute.OnUsing(__info__0))
-            {
-                OpenTelemetryAspect.Program.Method1();
-            }
-        }
-
-        static SR. MemberInfo                 Method2_Interceptor_MemberInfo        = MethodOf(() => OpenTelemetryAspect.Program.Method2());
-        static SCG.Dictionary<string,object?> Method2_Interceptor_AspectArguments_0 = new ()
-        {
-        };
-        //
-        /// <summary>
-        /// Intercepts OpenTelemetryAspect.Program.Method2().
-        /// </summary>
-        //
-        // Intercepts Method2().
-        [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "...")]
-        //
-        [System.Runtime.CompilerServices.CompilerGenerated]
-        public static void Method2_Interceptor()
-        {
-            // Aspects.MetricsAttribute
-            //
-            var __info__0 = new Aspects.InterceptInfo<Void>
-            {
-                MemberInfo      = Method2_Interceptor_MemberInfo,
-                AspectType      = typeof(Aspects.MetricsAttribute),
-                AspectArguments = Method2_Interceptor_AspectArguments_0,
-            };
-
-            using (Aspects.MetricsAttribute.OnUsing(__info__0))
-            {
-                OpenTelemetryAspect.Program.Method2();
-            }
-        }
-    }
-}
-```
-
-More advanced version of the Metrics aspect can also set activity status and support `await using`.
-
-```c#
+```csharp
 [Aspect(
-    OnUsing      = nameof(OnUsing),
-    OnAsyncUsing = nameof(OnAsyncUsing),
-    OnFinally    = nameof(OnFinally)
-    )]
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-sealed class MetricsAttribute : Attribute
-{
-    static readonly ActivitySource _activitySource = new("Sample.Aspect");
-
-    public static Activity? OnUsing(InterceptInfo info)
-    {
-        var activity = _activitySource.StartActivity(info.MemberInfo.Name);
-
-        info.Tag = activity;
-
-        return activity;
-    }
-
-    class AsyncActivity(Activity activity) : IAsyncDisposable
-    {
-        public readonly Activity Activity = activity;
-
-        public ValueTask DisposeAsync()
-        {
-            Activity.Dispose();
-            return ValueTask.CompletedTask;
-        }
-    }
-
-    public static IAsyncDisposable? OnAsyncUsing(InterceptInfo info)
-    {
-        var activity = _activitySource.StartActivity(info.MemberInfo.Name);
-
-        if (activity == null)
-            return null;
-
-        var asyncActivity = new AsyncActivity(activity);
-
-        info.Tag = asyncActivity;
-
-        return asyncActivity;
-    }
-
-    public static void OnFinally(InterceptInfo info)
-    {
-        switch (info)
-        {
-            case { Tag: Activity activity, Exception: var ex } : SetStatus(activity,    ex); break;
-            case { Tag: AsyncActivity aa,  Exception: var ex } : SetStatus(aa.Activity, ex); break;
-        }
-
-        static void SetStatus(Activity activity, Exception? ex) =>
-            activity.SetStatus(ex is null ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
-    }
-}
+    OnInit = nameof(OnInit),
+    OnUsing = nameof(OnUsing),
+    OnUsingAsync = nameof(OnUsingAsync),
+    OnBeforeCall = nameof(OnBeforeCall),
+    OnBeforeCallAsync = nameof(OnBeforeCallAsync),
+    OnCall = nameof(OnCall),
+    OnAfterCall = nameof(OnAfterCall),
+    OnAfterCallAsync = nameof(OnAfterCallAsync),
+    OnCatch = nameof(OnCatch),
+    OnCatchAsync = nameof(OnCatchAsync),
+    OnFinally = nameof(OnFinally),
+    OnFinallyAsync = nameof(OnFinallyAsync))]
 ```
+
+Hook names are strings, so prefer `nameof(...)`. Invalid names or signatures should be reported by AspectGenerator diagnostics; if a case still fails only through generated-code compiler errors, treat that as a bug.
+
+## Explicit Method Interception
+
+`InterceptMethods` is a low-level compatibility feature that matches methods by display string:
+
+```csharp
+[Aspect(
+    OnAfterCall = nameof(OnAfterCall),
+    InterceptMethods =
+    [
+        "System.String.Substring(int)",
+        "string.Substring(int)"
+    ])]
+```
+
+This form is brittle because it depends on compiler display strings, aliases, overloads, and generic spelling. Prefer method-level aspect attributes where possible.
+
+## Documentation And Wiki
+
+The README is the concise entry point. The wiki should contain expanded pages with the same current terminology:
+
+- [Configuration](https://github.com/igor-tkachev/AspectGenerator/wiki/Configuration)
+- [Aspect library mode](https://github.com/igor-tkachev/AspectGenerator/wiki/Aspect-library-mode)
+- [Hook lifecycle](https://github.com/igor-tkachev/AspectGenerator/wiki/Hook-lifecycle)
+- [`InterceptMethods`](https://github.com/igor-tkachev/AspectGenerator/wiki/InterceptMethods)
+- [Diagnostics](https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics)
+- [Limitations](https://github.com/igor-tkachev/AspectGenerator/wiki/Limitations)
+
+When updating docs, keep README and wiki synchronized:
+
+- use `.NET 10` and `net10.0`;
+- use `InterceptorsNamespaces`, not `InterceptorsPreviewNamespaces`;
+- use `AspectGeneratorGenerateApi`, `AspectGeneratorPublicApi`, `AspectGeneratorDebuggerStepThrough`, and `AspectGeneratorInterceptorsNamespace`;
+- describe `InterceptableLocation` as opaque compiler data;
+- keep unsupported scenarios consistent between README and wiki.
+
+Any remaining preview-era wiki page should be updated or marked with an “Obsolete preview documentation” warning.
+
+## Development
+
+Run the main checks locally:
+
+```bash
+dotnet restore
+dotnet build --no-restore
+dotnet test --no-build
+dotnet pack Source/AspectGenerator.csproj --no-build
+```
+
+Build artifacts under `bin/` and `obj/` must not be committed. If generated source snapshots are needed, store them in an explicit baseline folder under `UnitTests/`, not under `obj/GeneratedFiles`.

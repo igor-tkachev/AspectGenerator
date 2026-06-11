@@ -1,6 +1,3 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
 name: .NET
 
 on:
@@ -11,18 +8,36 @@ on:
 
 jobs:
   build:
+    env:
+      BUILD_CONFIGURATION: Release
+      SOLUTION: AspectGenerator.sln
 
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        dotnet: ['10.0.x']
+
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: ${{ matrix.dotnet }}
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ${{ env.SOLUTION }}
+    - name: Check tracked build artifacts
+      shell: bash
+      run: |
+        if git ls-files | grep -E '(^|/)obj/|(^|/)bin/'; then
+          echo "Build artifacts must not be tracked."
+          exit 1
+        fi
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build ${{ env.SOLUTION }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test ${{ env.SOLUTION }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal
+    - name: Pack
+      run: dotnet pack Source/AspectGenerator.csproj --no-build --configuration ${{ env.BUILD_CONFIGURATION }}
