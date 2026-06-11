@@ -170,12 +170,12 @@ This form is brittle because it depends on compiler display strings, aliases, ov
 
 The README is the concise entry point. The wiki should contain expanded pages with the same current terminology:
 
-- [Configuration](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/Configuration.md)
-- [Aspect library mode](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/Aspect-library-mode.md)
-- [Hook lifecycle](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/Hook-lifecycle.md)
-- [`InterceptMethods`](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/InterceptMethods.md)
-- [Diagnostics](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/Diagnostics.md)
-- [Limitations](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/Limitations.md)
+- [Configuration](https://github.com/igor-tkachev/AspectGenerator/wiki/Configuration)
+- [Aspect library mode](https://github.com/igor-tkachev/AspectGenerator/wiki/Aspect-library-mode)
+- [Hook lifecycle](https://github.com/igor-tkachev/AspectGenerator/wiki/Hook-lifecycle)
+- [`InterceptMethods`](https://github.com/igor-tkachev/AspectGenerator/wiki/InterceptMethods)
+- [Diagnostics](https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics)
+- [Limitations](https://github.com/igor-tkachev/AspectGenerator/wiki/Limitations)
 
 When updating docs, keep README and wiki synchronized:
 
