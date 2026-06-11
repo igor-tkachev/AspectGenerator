@@ -44,5 +44,6 @@
     <Project Path="UnitTests/ClassLibrary/AspectGenerator.ClassLibrary.csproj" />
     <Project Path="UnitTests/Tests/AspectGenerator.Tests.csproj" />
   </Folder>
+  <Project Path="Baselines/Baselines.csproj" />
   <Project Path="Source/AspectGenerator.csproj" />
 </Solution>

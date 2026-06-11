@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,6 +10,40 @@ namespace AspectGenerator.Tests
 	[TestClass]
 	public class UnitTests
 	{
+		[TestMethod]
+		public void GeneratedSourceBaselineTest()
+		{
+			var baseDirectory  = AppContext.BaseDirectory;
+			var repositoryRoot = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", ".."));
+			var baselineRoot   = Path.Combine(repositoryRoot, "Baselines", "GeneratedFiles");
+			var baselineFiles  = Directory.GetFiles(baselineRoot, "*.g.cs", SearchOption.AllDirectories);
+
+			foreach (var baselineFile in baselineFiles)
+			{
+				var relativeProjectPath = Path.GetRelativePath(baselineRoot, baselineFile);
+				var generatedFile       = Path.Combine(
+					repositoryRoot,
+					Path.GetDirectoryName(relativeProjectPath)!,
+					"obj",
+					"GeneratedFiles",
+					"AspectGenerator",
+					"AspectGenerator.AspectSourceGenerator",
+					Path.GetFileName(relativeProjectPath));
+
+				Assert.IsTrue(File.Exists(generatedFile), $"Generated file does not exist. Build the solution before running baseline tests: {generatedFile}");
+
+				var expected = Normalize(File.ReadAllText(baselineFile));
+				var actual   = Normalize(File.ReadAllText(generatedFile));
+
+				Assert.AreEqual(expected, actual, relativeProjectPath);
+			}
+
+			static string Normalize(string text)
+			{
+				return text.Replace("\r\n", "\n").Replace('\r', '\n');
+			}
+		}
+
 		[Aspects.TestAspect]
 		public static string StaticMethod()
 		{
