@@ -11,12 +11,12 @@ using SCG = System.Collections.Generic;
 namespace System.Runtime.CompilerServices
 {
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-	sealed class InterceptsLocationAttribute(int version, string data) : Attribute
+	file sealed class InterceptsLocationAttribute(int version, string data) : Attribute
 	{
 	}
 }
 
-namespace AspectGenerator
+namespace ExampleAspectGenerator
 {
 	using AspectGenerator = AspectGenerator;
 
@@ -37,7 +37,7 @@ namespace AspectGenerator
 		static SR. MemberInfo                 GetCustomers_Interceptor_MemberInfo        = MethodOf(() => TransactionAspect.Program.GetCustomers(default(LinqToDB.Data.DataConnection)));
 		static SCG.Dictionary<string,object?> GetCustomers_Interceptor_AspectArguments_0 = new()
 		{
-			["IsolationLevel"] = 256,
+			["IsolationLevel"] = (System.Data.IsolationLevel)256,
 		};
 		//
 		/// <summary>
@@ -45,7 +45,7 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts GetCustomers(db).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "J9L408asL5SLChZGOLUceYEDAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "ZKlJ3/dLCHFyq3z8/hvMxngDAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		public static System.Collections.Generic.List<TransactionAspect.Program.Customer> GetCustomers_Interceptor(LinqToDB.Data.DataConnection db)
@@ -94,7 +94,7 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts GetCustomersAsync(db).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "J9L408asL5SLChZGOLUceaIDAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "ZKlJ3/dLCHFyq3z8/hvMxpkDAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		public static async System.Threading.Tasks.Task<System.Collections.Generic.List<TransactionAspect.Program.Customer>> GetCustomersAsync_Interceptor(LinqToDB.Data.DataConnection db)

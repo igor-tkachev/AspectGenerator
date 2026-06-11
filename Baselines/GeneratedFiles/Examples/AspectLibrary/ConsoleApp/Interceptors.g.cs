@@ -44,10 +44,9 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts new Class1().InstanceMethod().
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "rlSSwFZlhuPl4h38tO3yfpYAAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "rlSSwFZlhuPl4h38tO3yfpYAAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
-		//[System.Diagnostics.DebuggerStepThrough]
 		public static void InstanceMethod_Interceptor(this ClassLibrary.Class1 __this__)
 		{
 			// AspectLibrary.ConsoleLogAttribute

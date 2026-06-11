@@ -44,10 +44,9 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts StaticMethod().
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "AncmHYx311mIhEhZRSZqHJMAAABDbGFzczEuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "AncmHYx311mIhEhZRSZqHJMAAABDbGFzczEuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
-		//[System.Diagnostics.DebuggerStepThrough]
 		public static void StaticMethod_Interceptor()
 		{
 			// AspectLibrary.ConsoleLogAttribute

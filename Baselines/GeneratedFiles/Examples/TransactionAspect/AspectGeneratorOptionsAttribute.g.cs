@@ -14,6 +14,7 @@ namespace AspectGenerator
 	{
 		public bool    GenerateApi           { get; set; } = true;
 		public bool    PublicApi             { get; set; }
+		public bool    DebuggerStepThrough   { get; set; }
 		public string? InterceptorsNamespace { get; set; }
 	}
 }

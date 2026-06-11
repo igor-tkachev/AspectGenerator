@@ -47,6 +47,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUakQAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static void AllEventsMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.AllEventsAttribute
@@ -103,6 +104,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUcMUAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static async System.Threading.Tasks.Task AllEventsMethodAsync_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.AllEventsAttribute
@@ -159,6 +161,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUfMYAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static async System.Threading.Tasks.Task<int> AllEventsMethodAsync2_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.AllEventsAttribute
@@ -256,6 +259,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUS0eAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string ArgsMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.ArgsAttribute(Arg1 = "1", Arg2 = 2, Arg3 = {1, 2, 3})
@@ -433,6 +437,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUYQnAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsInMethod_Interceptor(string s, int i, in bool b, ref int? _)
 		{
 			var __args__ = new object?[] { s, i, b, _ };
@@ -468,6 +473,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUckoAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsInMethod_Interceptor_1(string s, int i, bool b, ref int? _)
 		{
 			var __args__ = new object?[] { s, i, b, _ };
@@ -502,6 +508,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUUIkAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsMethod_Interceptor()
 		{
 			var __args__ = new object?[] { };
@@ -536,6 +543,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUSslAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsMethod_Interceptor_2(string s, int i)
 		{
 			var __args__ = new object?[] { s, i };
@@ -571,6 +579,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUd0pAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsOutMethod_Interceptor(out string s)
 		{
 			var __args__ = new object?[] { s = default };
@@ -606,6 +615,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUUImAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsRefMethod_Interceptor(string s, int i, ref bool b)
 		{
 			var __args__ = new object?[] { s, i, b };
@@ -640,6 +650,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUV8KAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static int EmptyMethod_Interceptor()
 		{
 			var __return__ = AspectGenerator.Tests.UnitTests.EmptyMethod();
@@ -660,6 +671,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUR8OAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string ExtensionMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__, int value)
 		{
 			// Aspects.TestAspectAttribute
@@ -692,6 +704,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUd4OAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string ExtensionMethod_Interceptor_3(this AspectGenerator.Tests.TestClassExtension __this__, int value)
 		{
 			// Aspects.TestAspectAttribute
@@ -724,6 +737,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUZ8PAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string ExtensionMethod_Interceptor_4(this AspectGenerator.Tests.TestStructExtension __this__, int value)
 		{
 			// Aspects.TestAspectAttribute
@@ -756,6 +770,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUdoMAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static int FinallyMethod_Interceptor()
 		{
 			// Aspects.FinallyAttribute
@@ -800,6 +815,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUSIIAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string GenericMethod_Interceptor(int value)
 		{
 			// Aspects.TestAspectAttribute
@@ -860,6 +876,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUWcIAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string GenericMethod_Interceptor_5(System.DateTime value)
 		{
 			// Aspects.TestAspectAttribute
@@ -914,6 +931,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUSkMAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static int IgnoreCatchMethod_Interceptor()
 		{
 			// Aspects.IgnoreCatchAttribute
@@ -956,6 +974,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUTcLAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static int InitMethod_Interceptor()
 		{
 			// Aspects.InitAspectAttribute
@@ -987,6 +1006,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUcEtAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string InterceptedGenericMethod_Interceptor(string p)
 		{
 			// Aspects.InterceptMethodsAttribute
@@ -1018,6 +1038,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUYssAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string InterceptedMethod_Interceptor(string str)
 		{
 			// Aspects.InterceptMethodsAttribute
@@ -1055,6 +1076,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUegfAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string LiteralArgsMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.LiteralArgsAttribute(Text = "quote\" slash\\ newline\n", Character = '\'', Number = 1.25, Single = 3.5, Kind = Aspects.LiteralKind.Second, Values = {"a\"b", "c\\d", "e\nf"})
@@ -1086,6 +1108,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUaMNAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static int MemberMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__, int n)
 		{
 			// Aspects.FinallyAttribute
@@ -1127,6 +1150,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUcgwAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static int OnCall_Interceptor(this AspectGenerator.Tests.OnCallObject __this__, int n)
 		{
 			var __return__ = AspectGenerator.Tests.OnCallAttribute.OnCall(__this__, n);
@@ -1147,6 +1171,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUQowAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static int OnCallTestMethod_Interceptor(int n)
 		{
 			var __return__ = AspectGenerator.Tests.OnCallAttribute.OnCall(n);
@@ -1174,6 +1199,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUSYjAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string OrderedMethod_Interceptor()
 		{
 			// Aspects.OrderedAttribute(Order = 1, Value = "2")
@@ -1228,6 +1254,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUWgjAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static int OrderedMethod2_Interceptor()
 		{
 			// Aspects.OrderedAttribute(Order = 2, Value = "2")
@@ -1278,6 +1305,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUa4JAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static void ReturnVoidMethod_Interceptor()
 		{
 			// Aspects.TestAspectAttribute
@@ -1333,6 +1361,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuURcHAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string StaticMethod_Interceptor()
 		{
 			// Aspects.TestAspectAttribute
@@ -1365,6 +1394,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUTAHAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string StaticMethod_Interceptor_6(string name)
 		{
 			// Aspects.TestAspectAttribute
@@ -1397,6 +1427,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUQwvAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string Substring_Interceptor(this string __this__, int startIndex)
 		{
 			// Aspects.InterceptMethodsAttribute
@@ -1428,6 +1459,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUWErAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string TestMethod_Interceptor(string str)
 		{
 			// Aspects.CrossProjectAttribute
@@ -1459,6 +1491,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUb4gAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static string UsingMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.UsingAttribute
@@ -1491,6 +1524,7 @@ namespace MyAspectGenerator
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "F7Su+kWqHoBlG/HsFJYuUZAhAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
 		public static async System.Threading.Tasks.Task<string> UsingMethodAsync_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.UsingAttribute

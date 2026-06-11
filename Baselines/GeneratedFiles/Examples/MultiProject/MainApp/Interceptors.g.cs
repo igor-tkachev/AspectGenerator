@@ -44,10 +44,9 @@ namespace MultiProjectAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ClassLibrary.TestClass.TestMethod("Test").
-	[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "GiHAiXc0FWJy325lBXAFteQAAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "GiHAiXc0FWJy325lBXAFteQAAABQcm9ncmFtLmNz")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
-		//[System.Diagnostics.DebuggerStepThrough]
 		public static string TestMethod_Interceptor(string str)
 		{
 			// Aspects.CrossProjectAttribute

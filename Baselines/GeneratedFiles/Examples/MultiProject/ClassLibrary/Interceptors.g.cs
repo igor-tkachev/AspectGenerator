@@ -11,12 +11,12 @@ using SCG = System.Collections.Generic;
 namespace System.Runtime.CompilerServices
 {
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-	sealed class InterceptsLocationAttribute(int version, string data) : Attribute
+	file sealed class InterceptsLocationAttribute(int version, string data) : Attribute
 	{
 	}
 }
 
-namespace AspectGenerator
+namespace MultiProjectAspectGenerator
 {
 	using AspectGenerator = AspectGenerator;
 

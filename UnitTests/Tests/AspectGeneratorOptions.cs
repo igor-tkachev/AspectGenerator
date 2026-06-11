@@ -1,3 +1,5 @@
 using AspectGenerator;
 
-[assembly: AspectGeneratorOptions(InterceptorsNamespace = "MyAspectGenerator")]
+[assembly: AspectGeneratorOptions(
+	DebuggerStepThrough = true,
+	InterceptorsNamespace = "MyAspectGenerator")]

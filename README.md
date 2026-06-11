@@ -1,7 +1,9 @@
 # Aspect Generator
 
-[![Test workflow](https://img.shields.io/github/actions/workflow/status/igor-tkachev/AspectGenerator/dotnet.yml?branch=master&label=test&logo=github&style=flat-square)](https://github.com/igor-tkachev/AspectGenerator/actions?workflow=.NET)
-[![NuGet Version and Downloads count](https://buildstats.info/nuget/AspectGenerator?includePreReleases=true)](https://www.nuget.org/packages/AspectGenerator)
+[![Build](https://img.shields.io/github/actions/workflow/status/igor-tkachev/AspectGenerator/dotnet.yml?branch=master&label=build&logo=github&style=flat-square)](https://github.com/igor-tkachev/AspectGenerator/actions/workflows/dotnet.yml)
+[![NuGet](https://img.shields.io/nuget/v/AspectGenerator?logo=nuget&style=flat-square)](https://www.nuget.org/packages/AspectGenerator)
+[![NuGet downloads](https://img.shields.io/nuget/dt/AspectGenerator?logo=nuget&style=flat-square)](https://www.nuget.org/packages/AspectGenerator)
+[![License](https://img.shields.io/github/license/igor-tkachev/AspectGenerator?style=flat-square)](LICENSE.txt)
 
 AspectGenerator is a source generator for compile-time call-site rewriting with C# interceptors. It lets you define attribute-based aspects that run around intercepted method calls without runtime proxies or IL weaving.
 
@@ -168,12 +170,12 @@ This form is brittle because it depends on compiler display strings, aliases, ov
 
 The README is the concise entry point. The wiki should contain expanded pages with the same current terminology:
 
-- [Configuration](https://github.com/igor-tkachev/AspectGenerator/wiki/Configuration)
-- [Aspect library mode](https://github.com/igor-tkachev/AspectGenerator/wiki/Aspect-library-mode)
-- [Hook lifecycle](https://github.com/igor-tkachev/AspectGenerator/wiki/Hook-lifecycle)
-- [`InterceptMethods`](https://github.com/igor-tkachev/AspectGenerator/wiki/InterceptMethods)
-- [Diagnostics](https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics)
-- [Limitations](https://github.com/igor-tkachev/AspectGenerator/wiki/Limitations)
+- [Configuration](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/Configuration.md)
+- [Aspect library mode](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/Aspect-library-mode.md)
+- [Hook lifecycle](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/Hook-lifecycle.md)
+- [`InterceptMethods`](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/InterceptMethods.md)
+- [Diagnostics](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/Diagnostics.md)
+- [Limitations](https://raw.githubusercontent.com/wiki/igor-tkachev/AspectGenerator/Limitations.md)
 
 When updating docs, keep README and wiki synchronized:
 
