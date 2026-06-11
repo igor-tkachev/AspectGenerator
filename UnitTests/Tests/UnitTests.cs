@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -40,7 +41,11 @@ namespace AspectGenerator.Tests
 
 			static string Normalize(string text)
 			{
-				return text.Replace("\r\n", "\n").Replace('\r', '\n');
+				return Regex
+					.Replace(
+						text.Replace("\r\n", "\n").Replace('\r', '\n'),
+						@"InterceptsLocationAttribute\(1, ""[^""]+""\)",
+						@"InterceptsLocationAttribute(1, ""<location>"")");
 			}
 		}
 

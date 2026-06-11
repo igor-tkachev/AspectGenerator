@@ -8,7 +8,7 @@
 AspectGenerator is a source generator for compile-time call-site rewriting with C# interceptors. It lets you define attribute-based aspects that run around intercepted method calls without runtime proxies or IL weaving.
 
 > [!NOTE]
-> AspectGenerator targets the .NET 10 SDK and uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
+> AspectGenerator itself targets `netstandard2.0`, but consuming projects must be built with the .NET 10 SDK/compiler because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
 
 > [!IMPORTANT]
 > This is not runtime AOP. Aspects are applied by rewriting call sites visible to the current compilation. Calls made through reflection, delegates, already-compiled external assemblies, or unsupported C# constructs are outside the interception model.
@@ -179,7 +179,7 @@ The README is the concise entry point. The wiki should contain expanded pages wi
 
 When updating docs, keep README and wiki synchronized:
 
-- use `.NET 10` and `net10.0`;
+- document the .NET 10 SDK/compiler requirement and use `net10.0` in examples;
 - use `InterceptorsNamespaces`, not `InterceptorsPreviewNamespaces`;
 - use `AspectGeneratorGenerateApi`, `AspectGeneratorPublicApi`, `AspectGeneratorDebuggerStepThrough`, and `AspectGeneratorInterceptorsNamespace`;
 - describe `InterceptableLocation` as opaque compiler data;
