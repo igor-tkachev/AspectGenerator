@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+
+		<InterceptorsNamespaces>$(InterceptorsNamespaces);AspectGenerator.Diagnostics</InterceptorsNamespaces>
+		<AspectGeneratorInterceptorsNamespace>AspectGenerator.Diagnostics</AspectGeneratorInterceptorsNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Source\AspectGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
+</Project>

@@ -221,7 +221,9 @@ namespace AspectGenerator
 				}
 			}
 
-			ValidateAspectHooks(spc, aspectAttributes);
+			var reportedDiagnostics = new HashSet<string>();
+
+			ValidateAspectHooks(spc, aspectAttributes, reportedDiagnostics);
 
 			var aspectedMethods  = new List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)>();
 			var methodDic        = new Dictionary<IMethodSymbol,List<AttributeInfo>>(SymbolEqualityComparer.Default);
@@ -315,7 +317,7 @@ namespace AspectGenerator
 			if (aspectedMethods.Count == 0 || spc.CancellationToken.IsCancellationRequested)
 				return;
 
-			GenerateSource(spc, compilation, options, aspectedMethods);
+			GenerateSource(spc, compilation, options, aspectedMethods, reportedDiagnostics);
 		}
 
 		static bool? GetBoolProperty(AnalyzerConfigOptions options, string name)
@@ -373,7 +375,7 @@ namespace AspectGenerator
 				return;
 
 			var namespaces = options.AllowedInterceptorsNamespaces!
-				.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+				.Split([';'], StringSplitOptions.RemoveEmptyEntries)
 				.Select(static n => n.Trim());
 
 			if (namespaces.Contains(interceptorsNamespace, StringComparer.Ordinal))
@@ -401,7 +403,10 @@ namespace AspectGenerator
 			return [];
 		}
 
-		static void ValidateAspectHooks(SourceProductionContext spc, Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)> aspectAttributes)
+		static void ValidateAspectHooks(
+			SourceProductionContext                                                   spc,
+			Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)> aspectAttributes,
+			HashSet<string>                                                           reportedDiagnostics)
 		{
 			foreach (var item in aspectAttributes)
 			{
@@ -423,32 +428,43 @@ namespace AspectGenerator
 
 					if (methods.Length == 0)
 					{
-						spc.ReportDiagnostic(
-							Diagnostic.Create(
-								"AG0101",
-								"AspectGenerator",
-								$"Aspect hook method '{hookName}' was not found on aspect type '{aspectClass.ToDisplayString()}'.",
-								DiagnosticSeverity.Error,
-								DiagnosticSeverity.Error,
-								true,
-								0,
-								location: arg.Expression.GetLocation()));
+						ReportDiagnostic(
+							spc,
+							reportedDiagnostics,
+							"AG0101",
+							$"Aspect hook method '{hookName}' was not found on aspect type '{aspectClass.ToDisplayString()}'.",
+							arg.Expression.GetLocation());
 					}
 					else if (!methods.Any(static m => m.IsStatic))
 					{
-						spc.ReportDiagnostic(
-							Diagnostic.Create(
-								"AG0102",
-								"AspectGenerator",
-								$"Aspect hook method '{hookName}' on aspect type '{aspectClass.ToDisplayString()}' must be static.",
-								DiagnosticSeverity.Error,
-								DiagnosticSeverity.Error,
-								true,
-								0,
-								location: arg.Expression.GetLocation()));
+						ReportDiagnostic(
+							spc,
+							reportedDiagnostics,
+							"AG0102",
+							$"Aspect hook method '{hookName}' on aspect type '{aspectClass.ToDisplayString()}' must be static.",
+							arg.Expression.GetLocation());
 					}
 				}
 			}
+		}
+
+		static void ReportDiagnostic(SourceProductionContext spc, HashSet<string> reportedDiagnostics, string id, string message, Location? location)
+		{
+			var key = $"{id}:{location?.SourceTree?.FilePath}:{location?.SourceSpan.Start}:{message}";
+
+			if (!reportedDiagnostics.Add(key))
+				return;
+
+			spc.ReportDiagnostic(
+				Diagnostic.Create(
+					id,
+					"AspectGenerator",
+					message,
+					DiagnosticSeverity.Error,
+					DiagnosticSeverity.Error,
+					true,
+					0,
+					location: location));
 		}
 
 		static IEnumerable<(string Key, object? Value)> GetAspectArguments(AttributeData attribute)
@@ -504,7 +520,12 @@ namespace AspectGenerator
 				"OnFinallyAsync";
 		}
 
-		static void GenerateSource(SourceProductionContext spc, Compilation compilation, Options options, List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)> aspectedMethods)
+		static void GenerateSource(
+			SourceProductionContext                                                                    spc,
+			Compilation                                                                                compilation,
+			Options                                                                                    options,
+			List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)> aspectedMethods,
+			HashSet<string>                                                                            reportedDiagnostics)
 		{
 			// Generate source. One file for all the interceptors.
 			// Interceptors.g.cs
@@ -555,11 +576,7 @@ namespace AspectGenerator
 
 			string GetInterceptorName(string methodName)
 			{
-				if (nameSet.Contains(methodName))
-					return GetInterceptorName($"{methodName}_{++nameCounter}");
-
-				nameSet.Add(methodName);
-				return methodName;
+				return nameSet.Add(methodName) ? methodName : GetInterceptorName($"{methodName}_{++nameCounter}");
 			}
 
 			foreach (var m in aspectedMethods.GroupBy(m => m.method, SymbolEqualityComparer.Default).OrderBy(m => m.Key!.Name))
@@ -692,9 +709,7 @@ namespace AspectGenerator
 							return;
 						}
 
-#pragma warning disable RSEXPERIMENTAL002
 						sb.Append("\t\t").AppendLine(location.GetInterceptsLocationAttributeSyntax());
-#pragma warning restore RSEXPERIMENTAL002
 					}
 
 					switch (inv.Expression)
@@ -732,6 +747,8 @@ namespace AspectGenerator
 						""")
 					;
 
+				ValidateAspectHooksForMethod(spc, compilation, methods[0].inv, method, attributes, reportedDiagnostics);
+
 				GenerateMethodBody(spc, sb, methods[0].inv, method, interceptorName, attributes, methodModifierPosition);
 
 				sb
@@ -752,6 +769,369 @@ namespace AspectGenerator
 					""");
 
 			spc.AddSource("Interceptors.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
+		}
+
+		static void ValidateAspectHooksForMethod(
+			SourceProductionContext spc,
+			Compilation             compilation,
+			InvocationExpressionSyntax invocationExpression,
+			IMethodSymbol           targetMethod,
+			List<AttributeInfo>     attributes,
+			HashSet<string>         reportedDiagnostics)
+		{
+			var targetIsTask = IsTaskType(targetMethod.ReturnType, out var taskResultType);
+
+			foreach (var attribute in attributes)
+			{
+				var aspectArguments = GetAspectArguments(attribute).ToDictionary(static a => a.Key, static a => a.Value);
+				var useInterceptData = aspectArguments.TryGetValue("UseInterceptData", out var useData) && useData is true;
+
+				foreach (var hook in GetHookContracts())
+				{
+					if (!aspectArguments.TryGetValue(hook.Name, out var hookNameValue) ||
+						hookNameValue is not string hookName ||
+						string.IsNullOrWhiteSpace(hookName))
+						continue;
+
+					var location = GetHookLocation(attribute, hook.Name, invocationExpression);
+
+					if (hook.IsAsync && !targetIsTask && !HasSyncFallback(aspectArguments, hook.Name))
+					{
+						ReportDiagnostic(
+							spc,
+							reportedDiagnostics,
+							"AG0107",
+							$"Async hook '{hook.Name}' requires target method '{targetMethod.ToDisplayString()}' to return Task or Task<T>, or a synchronous fallback hook to be specified.",
+							location);
+					}
+
+					var methods       = attribute.AttributeClass.GetMembers(hookName).OfType<IMethodSymbol>().ToArray();
+					var staticMethods = methods.Where(static m => m.IsStatic).ToArray();
+
+					if (methods.Length == 0)
+					{
+						ReportDiagnostic(
+							spc,
+							reportedDiagnostics,
+							"AG0101",
+							$"Aspect hook method '{hookName}' was not found on aspect type '{attribute.AttributeClass.ToDisplayString()}'.",
+							location);
+						continue;
+					}
+
+					if (staticMethods.Length == 0)
+					{
+						ReportDiagnostic(
+							spc,
+							reportedDiagnostics,
+							"AG0102",
+							$"Aspect hook method '{hookName}' on aspect type '{attribute.AttributeClass.ToDisplayString()}' must be static.",
+							location);
+						continue;
+					}
+
+					if (hook.Name == "OnCall")
+					{
+						if (!staticMethods.Any(m => IsValidOnCallHook(compilation, m, targetMethod, targetIsTask, taskResultType)))
+						{
+							ReportDiagnostic(
+								spc,
+								reportedDiagnostics,
+								"AG0105",
+								$"OnCall hook '{hookName}' on aspect type '{attribute.AttributeClass.ToDisplayString()}' must match target method '{targetMethod.ToDisplayString()}'.",
+								location);
+						}
+
+						continue;
+					}
+
+					var methodsWithValidParameters = staticMethods
+						.Where(m => IsValidLifecycleHookParameter(m, targetMethod, targetIsTask, taskResultType, useInterceptData))
+						.ToArray();
+
+					if (methodsWithValidParameters.Length == 0)
+					{
+						var diagnosticId = useInterceptData ? "AG0106" : "AG0103";
+
+						ReportDiagnostic(
+							spc,
+							reportedDiagnostics,
+							diagnosticId,
+							diagnosticId == "AG0106"
+								? $"UseInterceptData=true requires hook method '{hookName}' to accept ref InterceptData<T> for '{hook.Name}'. Candidates: {string.Join("; ", staticMethods.Select(static m => m.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)))}."
+								: $"Hook method '{hookName}' on aspect type '{attribute.AttributeClass.ToDisplayString()}' has an invalid parameter list for '{hook.Name}'. Candidates: {string.Join("; ", staticMethods.Select(static m => m.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)))}.",
+							location);
+						continue;
+					}
+
+					if (!methodsWithValidParameters.Any(m => IsValidLifecycleHookReturnType(compilation, m, hook, targetMethod, targetIsTask, taskResultType, useInterceptData)))
+					{
+						ReportDiagnostic(
+							spc,
+							reportedDiagnostics,
+							"AG0104",
+							$"Hook method '{hookName}' on aspect type '{attribute.AttributeClass.ToDisplayString()}' has an invalid return type for '{hook.Name}'.",
+							location);
+					}
+				}
+			}
+
+			static bool HasSyncFallback(Dictionary<string,object?> aspectArguments, string asyncHookName)
+			{
+				var syncHookName = asyncHookName.EndsWith("Async", StringComparison.Ordinal)
+					? asyncHookName[..^5]
+					: asyncHookName;
+
+				return syncHookName != asyncHookName &&
+					aspectArguments.TryGetValue(syncHookName, out var value) &&
+					value is string s &&
+					!string.IsNullOrWhiteSpace(s);
+			}
+		}
+
+		readonly record struct HookContract(string Name, bool IsAsync);
+
+		static IEnumerable<HookContract> GetHookContracts()
+		{
+			yield return new("OnInit",            false);
+			yield return new("OnUsing",           false);
+			yield return new("OnUsingAsync",      true);
+			yield return new("OnBeforeCall",      false);
+			yield return new("OnBeforeCallAsync", true);
+			yield return new("OnCall",            false);
+			yield return new("OnAfterCall",       false);
+			yield return new("OnAfterCallAsync",  true);
+			yield return new("OnCatch",           false);
+			yield return new("OnCatchAsync",      true);
+			yield return new("OnFinally",         false);
+			yield return new("OnFinallyAsync",    true);
+		}
+
+		static Location GetHookLocation(AttributeInfo attribute, string hookName, InvocationExpressionSyntax invocationExpression)
+		{
+			if (attribute is { AspectAttributeSyntax: {} syntax, AspectSemanticModel: not null })
+			{
+				foreach (var arg in syntax.ArgumentList?.Arguments ?? default)
+					if (arg.NameEquals?.Name.Identifier.ValueText == hookName)
+						return arg.Expression.GetLocation();
+			}
+
+			if (attribute.AspectAttributeData?.ApplicationSyntaxReference is {} aspectSyntaxReference)
+				return Location.Create(aspectSyntaxReference.SyntaxTree, aspectSyntaxReference.Span);
+
+			if (attribute.AttributeData?.ApplicationSyntaxReference is {} attributeSyntaxReference)
+				return Location.Create(attributeSyntaxReference.SyntaxTree, attributeSyntaxReference.Span);
+
+			return invocationExpression.GetLocation();
+		}
+
+		static bool IsValidLifecycleHookParameter(
+			IMethodSymbol hookMethod,
+			IMethodSymbol targetMethod,
+			bool          targetIsTask,
+			ITypeSymbol?  taskResultType,
+			bool          useInterceptData)
+		{
+			if (hookMethod.Parameters.Length != 1)
+				return false;
+
+			var parameter = hookMethod.Parameters[0];
+
+			if (useInterceptData)
+			{
+				if (parameter.RefKind != RefKind.Ref)
+					return false;
+
+				return IsInterceptDataType(parameter.Type, hookMethod, GetHookReturnValueType(targetMethod, targetIsTask, taskResultType));
+			}
+
+			return parameter.RefKind == RefKind.None &&
+				(parameter.Type.TypeKind == TypeKind.Dynamic ||
+				IsInterceptInfoType(parameter.Type, hookMethod, GetHookReturnValueType(targetMethod, targetIsTask, taskResultType), allowNonGeneric: true));
+		}
+
+		static bool IsValidLifecycleHookReturnType(
+			Compilation   compilation,
+			IMethodSymbol hookMethod,
+			HookContract  hook,
+			IMethodSymbol targetMethod,
+			bool          targetIsTask,
+			ITypeSymbol?  taskResultType,
+			bool          useInterceptData)
+		{
+			if (hook.Name == "OnInit")
+				return useInterceptData
+					? IsInterceptDataType(hookMethod.ReturnType, hookMethod, GetHookReturnValueType(targetMethod, targetIsTask, taskResultType))
+					: IsInterceptInfoType(hookMethod.ReturnType, hookMethod, GetHookReturnValueType(targetMethod, targetIsTask, taskResultType), allowNonGeneric: false);
+
+			if (hook.Name == "OnUsing")
+				return ImplementsType(hookMethod.ReturnType, "System.IDisposable");
+
+			if (hook.Name == "OnUsingAsync")
+				return ImplementsType(hookMethod.ReturnType, "System.IAsyncDisposable");
+
+			if (hook.IsAsync)
+				return IsTaskType(hookMethod.ReturnType, out _);
+
+			return hookMethod.ReturnsVoid;
+		}
+
+		static bool IsValidOnCallHook(
+			Compilation   compilation,
+			IMethodSymbol hookMethod,
+			IMethodSymbol targetMethod,
+			bool          targetIsTask,
+			ITypeSymbol?  taskResultType)
+		{
+			var expectedParameters = GetOnCallParameters(targetMethod).ToArray();
+
+			if (hookMethod.Parameters.Length != expectedParameters.Length)
+				return false;
+
+			for (var i = 0; i < expectedParameters.Length; i++)
+			{
+				var actual   = hookMethod.Parameters[i];
+				var expected = expectedParameters[i];
+
+				if (actual.RefKind != expected.RefKind)
+					return false;
+
+				if (!SymbolEqualityComparer.Default.Equals(actual.Type, expected.Type))
+					return false;
+			}
+
+			if (targetMethod.ReturnsVoid)
+				return hookMethod.ReturnsVoid;
+
+			if (targetIsTask)
+				return IsTaskType(hookMethod.ReturnType, out var hookTaskResultType) &&
+					(taskResultType is null && hookTaskResultType is null ||
+					 taskResultType is not null &&
+					 hookTaskResultType is not null &&
+					 SymbolEqualityComparer.Default.Equals(taskResultType, hookTaskResultType));
+
+			return compilation.ClassifyConversion(hookMethod.ReturnType, targetMethod.ReturnType).IsImplicit;
+		}
+
+		static IEnumerable<(ITypeSymbol Type, RefKind RefKind)> GetOnCallParameters(IMethodSymbol targetMethod)
+		{
+			if (targetMethod.IsExtensionMethod || !targetMethod.IsStatic)
+			{
+				var receiverType = targetMethod.ReceiverType ?? targetMethod.ContainingType;
+
+				if (receiverType is not null)
+					yield return (receiverType, RefKind.None);
+			}
+
+			foreach (var parameter in targetMethod.Parameters)
+				yield return (parameter.Type, parameter.RefKind);
+		}
+
+		static (ITypeSymbol? Type, bool IsVoid) GetHookReturnValueType(IMethodSymbol targetMethod, bool targetIsTask, ITypeSymbol? taskResultType)
+		{
+			if (targetMethod.ReturnsVoid || targetIsTask && taskResultType is null)
+				return (null, true);
+
+			return targetIsTask ? (taskResultType, false) : (targetMethod.ReturnType, false);
+		}
+
+		static bool IsInterceptInfoType(
+			ITypeSymbol                    type,
+			IMethodSymbol                  hookMethod,
+			(ITypeSymbol? Type, bool IsVoid) expectedValueType,
+			bool                           allowNonGeneric)
+		{
+			if (type is not INamedTypeSymbol namedType)
+				return false;
+
+			if (!IsAspectGeneratorType(namedType, "InterceptInfo"))
+				return IsUnresolvedCarrierType(type, "InterceptInfo", allowNonGeneric);
+
+			if (namedType.Arity == 0)
+				return allowNonGeneric;
+
+			return namedType is { Arity: 1, TypeArguments: [var valueType] } &&
+				TypeArgumentMatches(valueType, hookMethod, expectedValueType);
+		}
+
+		static bool IsInterceptDataType(
+			ITypeSymbol                    type,
+			IMethodSymbol                  hookMethod,
+			(ITypeSymbol? Type, bool IsVoid) expectedValueType)
+		{
+			if (type is not INamedTypeSymbol namedType)
+				return false;
+
+			if (!IsAspectGeneratorType(namedType, "InterceptData"))
+				return IsUnresolvedCarrierType(type, "InterceptData", allowNonGeneric: false);
+
+			return namedType is { Arity: 1, TypeArguments: [var valueType] } &&
+				TypeArgumentMatches(valueType, hookMethod, expectedValueType);
+		}
+
+		static bool IsUnresolvedCarrierType(ITypeSymbol type, string name, bool allowNonGeneric)
+		{
+			var displayName = type.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
+
+			return allowNonGeneric && displayName == name ||
+				displayName.StartsWith(name + "<", StringComparison.Ordinal);
+		}
+
+		static bool TypeArgumentMatches(
+			ITypeSymbol                    type,
+			IMethodSymbol                  hookMethod,
+			(ITypeSymbol? Type, bool IsVoid) expectedValueType)
+		{
+			if (type is ITypeParameterSymbol typeParameter &&
+				SymbolEqualityComparer.Default.Equals(typeParameter.ContainingSymbol, hookMethod))
+				return true;
+
+			if (expectedValueType.IsVoid)
+				return type.SpecialType == SpecialType.System_Void ||
+					type.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat) == "System.Void" ||
+					type is INamedTypeSymbol namedType && IsAspectGeneratorType(namedType, "Void");
+
+			return expectedValueType.Type is not null &&
+				SymbolEqualityComparer.Default.Equals(type, expectedValueType.Type);
+		}
+
+		static bool IsAspectGeneratorType(INamedTypeSymbol type, string name)
+		{
+			if (type.Name != name)
+				return false;
+
+			var @namespace = type.ContainingNamespace.ToDisplayString();
+
+			return @namespace is "" or "AspectGenerator";
+		}
+
+		static bool IsTaskType(ITypeSymbol type, out ITypeSymbol? resultType)
+		{
+			resultType = null;
+
+			if (type is not INamedTypeSymbol namedType ||
+				namedType.Name != "Task" ||
+				namedType.ContainingNamespace.ToDisplayString() != "System.Threading.Tasks")
+				return false;
+
+			if (namedType is { IsGenericType: true, TypeArguments: [var taskResultType] })
+				resultType = taskResultType;
+
+			return true;
+		}
+
+		static bool ImplementsType(ITypeSymbol type, string metadataName)
+		{
+			return IsType(type, metadataName) ||
+				type.AllInterfaces.Any(i => IsType(i, metadataName));
+		}
+
+		static bool IsType(ITypeSymbol type, string metadataName)
+		{
+			if (type is not INamedTypeSymbol namedType)
+				return false;
+
+			return namedType.ContainingNamespace.ToDisplayString() + "." + namedType.Name == metadataName;
 		}
 
 		static void GenerateMethodBody(
@@ -873,7 +1253,7 @@ namespace AspectGenerator
 
 				// Generate OnUsing.
 				//
-				if (onUsing is not null)
+				if (generateAsync && onUsingAsync is not null || onUsing is not null)
 				{
 					var isAsync = generateAsync && onUsingAsync != null;
 					GenerateInterceptType("", "OnUsing")
@@ -885,7 +1265,8 @@ namespace AspectGenerator
 
 				// If OnCatch or OnFinally is defined, generate try/catch/finally block.
 				//
-				if (onCatch is not null || onFinally is not null)
+				if (generateAsync && onCatchAsync   is not null || onCatch   is not null ||
+					generateAsync && onFinallyAsync is not null || onFinally is not null)
 				{
 					sb.Append(indent).AppendLine("try");
 					sb.Append(indent).AppendLine("{");
@@ -1091,7 +1472,7 @@ namespace AspectGenerator
 
 				// Generate OnUsing.
 				//
-				if (onUsing is not null)
+				if (generateAsync && onUsingAsync is not null || onUsing is not null)
 				{
 					indent = indent[..^1];
 

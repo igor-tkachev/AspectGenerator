@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -47,6 +48,53 @@ namespace AspectGenerator.Tests
 						@"InterceptsLocationAttribute\(1, ""[^""]+""\)",
 						@"InterceptsLocationAttribute(1, ""<location>"")");
 			}
+		}
+
+		[TestMethod]
+		public void HookContractDiagnosticsTest()
+		{
+			var baseDirectory  = AppContext.BaseDirectory;
+			var repositoryRoot = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", ".."));
+			var projectPath    = Path.Combine(repositoryRoot, "UnitTests", "Diagnostics", "AspectGenerator.Diagnostics.csproj");
+			var result         = RunDotNetBuild(repositoryRoot, projectPath);
+
+			Assert.AreNotEqual(0, result.ExitCode, result.Output);
+
+			foreach (var expected in new[]
+			{
+				("AG0103", "WrongParameter",       "invalid parameter list"),
+				("AG0104", "WrongReturn",          "invalid return type"),
+				("AG0105", "OnCall hook",          "must match target method"),
+				("AG0106", "UseInterceptData=true", "ref InterceptData<T>"),
+				("AG0107", "Async hook",           "Task or Task<T>"),
+			})
+			{
+				StringAssert.Contains(result.Output, expected.Item1);
+				StringAssert.Contains(result.Output, expected.Item2);
+				StringAssert.Contains(result.Output, expected.Item3);
+			}
+
+			StringAssert.Contains(result.Output, "HookContractDiagnostics.cs");
+		}
+
+		static (int ExitCode, string Output) RunDotNetBuild(string workingDirectory, string projectPath)
+		{
+			using var process = Process.Start(
+				new ProcessStartInfo("dotnet", $"build \"{projectPath}\" --nologo")
+				{
+					WorkingDirectory       = workingDirectory,
+					RedirectStandardOutput = true,
+					RedirectStandardError  = true,
+					UseShellExecute        = false,
+				});
+
+			Assert.IsNotNull(process);
+
+			var output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
+
+			process.WaitForExit();
+
+			return (process.ExitCode, output);
 		}
 
 		[Aspects.TestAspect]

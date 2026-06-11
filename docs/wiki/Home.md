@@ -13,6 +13,7 @@ AspectGenerator is a source generator for compile-time call-site rewriting with 
 - [InterceptMethods](InterceptMethods)
 - [Diagnostics](Diagnostics)
 - [Limitations](Limitations)
+- [Roadmap](Roadmap)
 
 ## Minimum Setup
 

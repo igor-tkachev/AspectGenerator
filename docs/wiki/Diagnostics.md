@@ -9,7 +9,7 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0003`: invocation cannot be intercepted by the compiler.
 - `AG0004`: generated interceptor namespace is not listed in `InterceptorsNamespaces`.
 
-## Planned Hook Contract Diagnostics
+## Hook Contract Diagnostics
 
 - `AG0101`: hook method not found.
 - `AG0102`: hook method must be static.
@@ -20,6 +20,8 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0107`: async hook requires a supported async target.
 
 ## Planned InterceptMethods Diagnostics
+
+Deferred until after hook contract diagnostics and generator pipeline hardening. Do not include this in the current diagnostics implementation scope.
 
 - unmatched method display string;
 - ambiguous match;
