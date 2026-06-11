@@ -44,7 +44,7 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts AsyncMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKDIBAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "<location>")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		public static async System.Threading.Tasks.Task<string> AsyncMethod_Interceptor()
@@ -88,10 +88,10 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts Method1().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKOUAAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "<location>")]
 		//
 		// Intercepts Method1().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKAUBAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "<location>")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		public static void Method1_Interceptor()
@@ -133,7 +133,7 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts Method2().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKPYAAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "<location>")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		public static void Method2_Interceptor()
@@ -178,7 +178,7 @@ namespace AspectGenerator
 		/// </summary>
 		//
 		// Intercepts MethodException().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKBQBAABQcm9ncmFtLmNz")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "<location>")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		public static void MethodException_Interceptor()

@@ -44,7 +44,7 @@ namespace MultiProjectAspectGenerator
 		/// </summary>
 		//
 		// Intercepts TestMethod(str + " MainMethod").
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "jebrXVyTEu5HX6Vf5I7dVQYBAABUZXN0Q2xhc3MuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "<location>")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		public static string TestMethod_Interceptor(string str)
