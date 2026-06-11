@@ -15,8 +15,8 @@
 		<PackageProjectUrl>https://github.com/igor-tkachev/AspectGenerator</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/igor-tkachev/AspectGenerator</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageTags>Aspect;Generator;SourceGenerator;C#;.NET;InterceptsLocation</PackageTags>
-		<Description>The Aspect Generator can help you easily create your own aspects.</Description>
+		<PackageTags>Aspect;AOP;AOP-like;SourceGenerator;C#;Interceptors;InterceptableLocation;CallSiteRewriting;CompileTime</PackageTags>
+		<Description>AOP-like compile-time method aspects for C# interceptors without runtime proxies or IL weaving.</Description>
 		<PackageLicenseFile>LICENSE.TXT</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<NoWarn>$(NoWarn);NU5128</NoWarn>

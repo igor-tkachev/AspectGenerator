@@ -5,7 +5,9 @@
 [![NuGet downloads](https://img.shields.io/nuget/dt/AspectGenerator?logo=nuget&style=flat-square)](https://www.nuget.org/packages/AspectGenerator)
 [![License](https://img.shields.io/github/license/igor-tkachev/AspectGenerator?style=flat-square)](LICENSE.txt)
 
-AspectGenerator is a source generator for compile-time call-site rewriting with C# interceptors. It lets you define attribute-based aspects that run around intercepted method calls without runtime proxies or IL weaving.
+AspectGenerator provides AOP-like method aspects for C# using compile-time call-site rewriting with source generators and C# interceptors. It lets you run code around method calls without runtime proxies, dynamic dispatch wrappers, or IL weaving.
+
+AspectGenerator is not traditional runtime AOP. Aspects are applied to call sites visible to the current compilation.
 
 > [!NOTE]
 > AspectGenerator itself targets `netstandard2.0`, but consuming projects must be built with the .NET 10 SDK/compiler because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.

@@ -7,12 +7,12 @@ AspectGenerator is a source generator for compile-time call-site rewriting with 
 
 ## Pages
 
-- [Configuration](Configuration.md)
-- [Aspect library mode](Aspect-library-mode.md)
-- [Hook lifecycle](Hook-lifecycle.md)
-- [InterceptMethods](InterceptMethods.md)
-- [Diagnostics](Diagnostics.md)
-- [Limitations](Limitations.md)
+- [Configuration](Configuration)
+- [Aspect library mode](Aspect-library-mode)
+- [Hook lifecycle](Hook-lifecycle)
+- [InterceptMethods](InterceptMethods)
+- [Diagnostics](Diagnostics)
+- [Limitations](Limitations)
 
 ## Minimum Setup
 
