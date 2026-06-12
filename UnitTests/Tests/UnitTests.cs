@@ -60,11 +60,11 @@ namespace AspectGenerator.Tests
 
 			foreach (var expected in new Dictionary<string,string[]>
 			{
-				["AG0103"] = ["WrongParameter", "invalid parameter list"],
-				["AG0104"] = ["WrongReturn", "invalid return type"],
-				["AG0105"] = ["OnCall hook", "must match target method"],
-				["AG0106"] = ["UseInterceptData=true", "ref InterceptData<T>"],
-				["AG0107"] = ["Async hook", "Task or Task<T>"],
+				[AspectSourceGenerator.DiagnosticID.HookInvalidParameters]     = ["WrongParameter",        "invalid parameter list"],
+				[AspectSourceGenerator.DiagnosticID.HookInvalidReturnType]     = ["WrongReturn",           "invalid return type"],
+				[AspectSourceGenerator.DiagnosticID.OnCallHookMismatch]        = ["OnCall hook",           "must match target method"],
+				[AspectSourceGenerator.DiagnosticID.HookRequiresInterceptData] = ["UseInterceptData=true", "ref InterceptData<T>"],
+				[AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask]     = ["Async hook",            "Task or Task<T>"],
 			})
 			{
 				var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == expected.Key);
@@ -122,8 +122,9 @@ namespace AspectGenerator.Tests
 					["build_property.AspectGeneratorGenerateInterceptors"] = "false",
 				});
 
-			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), "AG0103");
-			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), "AG0107");
+			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), AspectSourceGenerator.DiagnosticID.HookInvalidParameters);
+			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask);
+
 			AssertNotGenerated(result, "Interceptors.g.cs");
 		}
 
