@@ -15,13 +15,13 @@ Completed:
 - hook contract diagnostics `AG0103` through `AG0107`;
 - shared analysis model consumed by diagnostics and interceptor emission;
 - build-time interceptor emission gate through `AspectGeneratorGenerateInterceptors` / `DesignTimeBuild`.
+- `ValueTask` and `ValueTask<T>` async target support.
 
 Not completed:
 
 - `AG0004` severity policy;
 - public API contract stabilization;
 - lazy `MemberInfo` initialization;
-- `ValueTask` decision;
 - `InterceptMethods` diagnostics.
 
 ## P1: Incremental Generator Pipeline
@@ -97,14 +97,16 @@ Checklist:
 - [ ] Generate lazy `MemberInfo` initialization only when a hook requires `MemberInfo`.
 - [ ] Measure whether the optimization is worth the added codegen complexity.
 
-## P2: `ValueTask`
+## Completed: `ValueTask`
 
-Status: not supported.
+Status: implemented.
 
 Checklist:
 
-- [ ] Either keep explicit non-support with diagnostics and documentation.
-- [ ] Or add `ValueTask` / `ValueTask<T>` support with async hook tests.
+- [x] Support `ValueTask` / `ValueTask<T>` target methods.
+- [x] Allow async hooks to return `Task`, `Task<T>`, `ValueTask`, or `ValueTask<T>`.
+- [x] Keep `async void` unsupported with diagnostics.
+- [x] Add tests for exception flow, finally flow, and return value mutation.
 
 ## Deferred: `InterceptMethods` Diagnostics
 

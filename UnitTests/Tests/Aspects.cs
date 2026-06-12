@@ -170,6 +170,95 @@ namespace Aspects
 	}
 
 	[Aspect(
+		OnUsingAsync      = nameof(OnUsingAsync),
+		OnBeforeCallAsync = nameof(OnBeforeCallAsync),
+		OnAfterCallAsync  = nameof(OnAfterCallAsync),
+		OnCatchAsync      = nameof(OnCatchAsync),
+		OnFinallyAsync    = nameof(OnFinallyAsync)
+		)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+	sealed class ValueTaskFlowAttribute : Attribute
+	{
+		public static int OnUsingCounterAsync;
+		public static int OnBeforeCallCounterAsync;
+		public static int OnAfterCallCounterAsync;
+		public static int OnCatchCounterAsync;
+		public static int OnFinallyCounterAsync;
+		public static int DisposeCounterAsync;
+
+		public static void ClearCounters()
+		{
+			OnUsingCounterAsync      = 0;
+			OnBeforeCallCounterAsync = 0;
+			OnAfterCallCounterAsync  = 0;
+			OnCatchCounterAsync      = 0;
+			OnFinallyCounterAsync    = 0;
+			DisposeCounterAsync      = 0;
+		}
+
+		public static IAsyncDisposable OnUsingAsync(InterceptInfo info)
+		{
+			OnUsingCounterAsync++;
+			return new AsyncScope();
+		}
+
+		public static ValueTask OnBeforeCallAsync(InterceptInfo info)
+		{
+			OnBeforeCallCounterAsync++;
+			return ValueTask.CompletedTask;
+		}
+
+		public static ValueTask OnAfterCallAsync(InterceptInfo info)
+		{
+			OnAfterCallCounterAsync++;
+			return ValueTask.CompletedTask;
+		}
+
+		public static ValueTask OnAfterCallAsync(InterceptInfo<int> info)
+		{
+			OnAfterCallCounterAsync++;
+			info.ReturnValue += 10;
+			return ValueTask.CompletedTask;
+		}
+
+		public static ValueTask OnCatchAsync(InterceptInfo info)
+		{
+			OnCatchCounterAsync++;
+			return ValueTask.CompletedTask;
+		}
+
+		public static ValueTask OnCatchAsync(InterceptInfo<int> info)
+		{
+			OnCatchCounterAsync++;
+			info.ReturnValue     = 20;
+			info.InterceptResult = InterceptResult.IgnoreThrow;
+			return ValueTask.CompletedTask;
+		}
+
+		public static ValueTask OnFinallyAsync(InterceptInfo info)
+		{
+			OnFinallyCounterAsync++;
+			return ValueTask.CompletedTask;
+		}
+
+		public static ValueTask OnFinallyAsync(InterceptInfo<int> info)
+		{
+			OnFinallyCounterAsync++;
+			info.ReturnValue++;
+			return ValueTask.CompletedTask;
+		}
+
+		sealed class AsyncScope : IAsyncDisposable
+		{
+			public ValueTask DisposeAsync()
+			{
+				DisposeCounterAsync++;
+				return ValueTask.CompletedTask;
+			}
+		}
+	}
+
+	[Aspect(
 		OnAfterCall = nameof(OnAfterCall)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]

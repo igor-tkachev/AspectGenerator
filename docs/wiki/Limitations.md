@@ -8,7 +8,7 @@ AspectGenerator is compile-time call-site rewriting, not runtime AOP.
 - instance method calls;
 - extension method calls;
 - generic method calls;
-- `Task` and `Task<T>` targets;
+- `Task`, `Task<T>`, `ValueTask`, and `ValueTask<T>` targets;
 - `ref`, `out`, and `in` parameters.
 
 ## Unsupported
@@ -20,6 +20,6 @@ AspectGenerator is compile-time call-site rewriting, not runtime AOP.
 - reflection calls;
 - local functions;
 - calls already compiled in external assemblies;
-- `ValueTask` and `ValueTask<T>` in the current implementation.
+- `async void` methods.
 
 Unsupported cases either cannot be represented as ordinary interceptable invocation syntax or are not implemented by AspectGenerator yet.

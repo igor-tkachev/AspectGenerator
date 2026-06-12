@@ -270,6 +270,72 @@ namespace AspectGenerator.Tests
 			Assert.AreEqual(1, Aspects.AllEventsAttribute.OnFinallyCounterAsync);
 		}
 
+		[Aspects.ValueTaskFlow]
+		internal async ValueTask ValueTaskMethodAsync()
+		{
+			await ValueTask.CompletedTask;
+		}
+
+		[TestMethod]
+		public async Task ValueTaskTestAsync()
+		{
+			Aspects.ValueTaskFlowAttribute.ClearCounters();
+
+			await ValueTaskMethodAsync();
+
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnUsingCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnBeforeCallCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnAfterCallCounterAsync);
+			Assert.AreEqual(0, Aspects.ValueTaskFlowAttribute.OnCatchCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnFinallyCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.DisposeCounterAsync);
+		}
+
+		[Aspects.ValueTaskFlow]
+		internal async ValueTask<int> ValueTaskMethodAsync2()
+		{
+			return await ValueTask.FromResult(4);
+		}
+
+		[TestMethod]
+		public async Task ValueTaskReturnValueMutationTestAsync()
+		{
+			Aspects.ValueTaskFlowAttribute.ClearCounters();
+
+			var r = await ValueTaskMethodAsync2();
+
+			Assert.AreEqual(15, r);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnUsingCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnBeforeCallCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnAfterCallCounterAsync);
+			Assert.AreEqual(0, Aspects.ValueTaskFlowAttribute.OnCatchCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnFinallyCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.DisposeCounterAsync);
+		}
+
+		[Aspects.ValueTaskFlow]
+		internal async ValueTask<int> ValueTaskThrowMethodAsync()
+		{
+			await ValueTask.CompletedTask;
+			throw new InvalidOperationException();
+		}
+
+		[TestMethod]
+		public async Task ValueTaskExceptionFlowTestAsync()
+		{
+			Aspects.ValueTaskFlowAttribute.ClearCounters();
+
+			var r = await ValueTaskThrowMethodAsync();
+
+			Assert.AreEqual(21, r);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnUsingCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnBeforeCallCounterAsync);
+			Assert.AreEqual(0, Aspects.ValueTaskFlowAttribute.OnAfterCallCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnCatchCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.OnFinallyCounterAsync);
+			Assert.AreEqual(1, Aspects.ValueTaskFlowAttribute.DisposeCounterAsync);
+		}
+
 		[Aspects.Args(Arg1 = "1", Arg2 = 2, Arg3 = [ 1, 2, 3 ])]
 		[Aspects.Args(Arg3 = [2])]
 		[Aspects.Args(Arg3 = [])]

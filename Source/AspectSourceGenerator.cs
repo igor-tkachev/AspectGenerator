@@ -872,7 +872,7 @@ namespace AspectGenerator
 			List<AttributeInfo>     attributes,
 			HashSet<string>         reportedDiagnostics)
 		{
-			var targetIsTask = IsTaskType(targetMethod.ReturnType, out var taskResultType);
+			var targetIsAsync = IsSupportedAsyncReturnType(targetMethod.ReturnType, out var asyncResultType);
 
 			for (var idx = 0; idx < attributes.Count; idx++)
 			{
@@ -914,13 +914,17 @@ namespace AspectGenerator
 
 					var location = GetHookLocation(attribute, hook.Name, invocationExpression);
 
-					if (hook.IsAsync && !targetIsTask && !HasSyncFallback(aspectArguments, hook.Name))
+					if (hook.IsAsync && !targetIsAsync && !HasSyncFallback(aspectArguments, hook.Name))
 					{
+						var asyncVoidMessage = targetMethod is { IsAsync: true, ReturnsVoid: true }
+							? " Async void target methods are not supported."
+							: "";
+
 						ReportDiagnostic(
 							diagnostics,
 							reportedDiagnostics,
 							DiagnosticID.AsyncHookRequiresTask,
-							$"Async hook '{hook.Name}' requires target method '{targetMethod.ToDisplayString()}' to return Task or Task<T>, or a synchronous fallback hook to be specified.",
+							$"Async hook '{hook.Name}' requires target method '{targetMethod.ToDisplayString()}' to return Task, Task<T>, ValueTask, or ValueTask<T>, or a synchronous fallback hook to be specified.{asyncVoidMessage}",
 							location);
 					}
 
@@ -951,7 +955,7 @@ namespace AspectGenerator
 
 					if (hook.Name == "OnCall")
 					{
-						if (!staticMethods.Any(m => IsValidOnCallHook(compilation, m, targetMethod, targetIsTask, taskResultType)))
+						if (!staticMethods.Any(m => IsValidOnCallHook(compilation, m, targetMethod, targetIsAsync, asyncResultType)))
 						{
 							ReportDiagnostic(
 								diagnostics,
@@ -965,7 +969,7 @@ namespace AspectGenerator
 					}
 
 					var methodsWithValidParameters = staticMethods
-						.Where(m => IsValidLifecycleHookParameter(m, targetMethod, targetIsTask, taskResultType, useInterceptData))
+						.Where(m => IsValidLifecycleHookParameter(m, targetMethod, targetIsAsync, asyncResultType, useInterceptData))
 						.ToArray();
 
 					if (methodsWithValidParameters.Length == 0)
@@ -983,7 +987,7 @@ namespace AspectGenerator
 						continue;
 					}
 
-					if (!methodsWithValidParameters.Any(m => IsValidLifecycleHookReturnType(compilation, m, hook, targetMethod, targetIsTask, taskResultType, useInterceptData)))
+					if (!methodsWithValidParameters.Any(m => IsValidLifecycleHookReturnType(compilation, m, hook, targetMethod, targetIsAsync, asyncResultType, useInterceptData)))
 					{
 						ReportDiagnostic(
 							diagnostics,
@@ -1047,8 +1051,8 @@ namespace AspectGenerator
 		static bool IsValidLifecycleHookParameter(
 			IMethodSymbol hookMethod,
 			IMethodSymbol targetMethod,
-			bool          targetIsTask,
-			ITypeSymbol?  taskResultType,
+			bool          targetIsAsync,
+			ITypeSymbol?  asyncResultType,
 			bool          useInterceptData)
 		{
 			if (hookMethod.Parameters.Length != 1)
@@ -1061,12 +1065,12 @@ namespace AspectGenerator
 				if (parameter.RefKind != RefKind.Ref)
 					return false;
 
-				return IsInterceptDataType(parameter.Type, hookMethod, GetHookReturnValueType(targetMethod, targetIsTask, taskResultType));
+				return IsInterceptDataType(parameter.Type, hookMethod, GetHookReturnValueType(targetMethod, targetIsAsync, asyncResultType));
 			}
 
 			return parameter.RefKind == RefKind.None &&
 				(parameter.Type.TypeKind == TypeKind.Dynamic ||
-				IsInterceptInfoType(parameter.Type, hookMethod, GetHookReturnValueType(targetMethod, targetIsTask, taskResultType), allowNonGeneric: true));
+				IsInterceptInfoType(parameter.Type, hookMethod, GetHookReturnValueType(targetMethod, targetIsAsync, asyncResultType), allowNonGeneric: true));
 		}
 
 		static bool IsValidLifecycleHookReturnType(
@@ -1074,14 +1078,14 @@ namespace AspectGenerator
 			IMethodSymbol hookMethod,
 			HookContract  hook,
 			IMethodSymbol targetMethod,
-			bool          targetIsTask,
-			ITypeSymbol?  taskResultType,
+			bool          targetIsAsync,
+			ITypeSymbol?  asyncResultType,
 			bool          useInterceptData)
 		{
 			if (hook.Name == "OnInit")
 				return useInterceptData
-					? IsInterceptDataType(hookMethod.ReturnType, hookMethod, GetHookReturnValueType(targetMethod, targetIsTask, taskResultType))
-					: IsInterceptInfoType(hookMethod.ReturnType, hookMethod, GetHookReturnValueType(targetMethod, targetIsTask, taskResultType), allowNonGeneric: false);
+					? IsInterceptDataType(hookMethod.ReturnType, hookMethod, GetHookReturnValueType(targetMethod, targetIsAsync, asyncResultType))
+					: IsInterceptInfoType(hookMethod.ReturnType, hookMethod, GetHookReturnValueType(targetMethod, targetIsAsync, asyncResultType), allowNonGeneric: false);
 
 			if (hook.Name == "OnUsing")
 				return ImplementsType(hookMethod.ReturnType, "System.IDisposable");
@@ -1090,7 +1094,7 @@ namespace AspectGenerator
 				return ImplementsType(hookMethod.ReturnType, "System.IAsyncDisposable");
 
 			if (hook.IsAsync)
-				return IsTaskType(hookMethod.ReturnType, out _);
+				return IsSupportedAsyncReturnType(hookMethod.ReturnType, out _);
 
 			return hookMethod.ReturnsVoid;
 		}
@@ -1099,8 +1103,8 @@ namespace AspectGenerator
 			Compilation   compilation,
 			IMethodSymbol hookMethod,
 			IMethodSymbol targetMethod,
-			bool          targetIsTask,
-			ITypeSymbol?  taskResultType)
+			bool          targetIsAsync,
+			ITypeSymbol?  asyncResultType)
 		{
 			var expectedParameters = GetOnCallParameters(targetMethod).ToArray();
 
@@ -1122,12 +1126,12 @@ namespace AspectGenerator
 			if (targetMethod.ReturnsVoid)
 				return hookMethod.ReturnsVoid;
 
-			if (targetIsTask)
-				return IsTaskType(hookMethod.ReturnType, out var hookTaskResultType) &&
-					(taskResultType is null && hookTaskResultType is null ||
-					 taskResultType is not null &&
-					 hookTaskResultType is not null &&
-					 SymbolEqualityComparer.Default.Equals(taskResultType, hookTaskResultType));
+			if (targetIsAsync)
+				return IsSupportedAsyncReturnType(hookMethod.ReturnType, out var hookAsyncResultType) &&
+					(asyncResultType is null && hookAsyncResultType is null ||
+					 asyncResultType is not null &&
+					 hookAsyncResultType is not null &&
+					 SymbolEqualityComparer.Default.Equals(asyncResultType, hookAsyncResultType));
 
 			return compilation.ClassifyConversion(hookMethod.ReturnType, targetMethod.ReturnType).IsImplicit;
 		}
@@ -1146,12 +1150,12 @@ namespace AspectGenerator
 				yield return (parameter.Type, parameter.RefKind);
 		}
 
-		static (ITypeSymbol? Type, bool IsVoid) GetHookReturnValueType(IMethodSymbol targetMethod, bool targetIsTask, ITypeSymbol? taskResultType)
+		static (ITypeSymbol? Type, bool IsVoid) GetHookReturnValueType(IMethodSymbol targetMethod, bool targetIsAsync, ITypeSymbol? asyncResultType)
 		{
-			if (targetMethod.ReturnsVoid || targetIsTask && taskResultType is null)
+			if (targetMethod.ReturnsVoid || targetIsAsync && asyncResultType is null)
 				return (null, true);
 
-			return targetIsTask ? (taskResultType, false) : (targetMethod.ReturnType, false);
+			return targetIsAsync ? (asyncResultType, false) : (targetMethod.ReturnType, false);
 		}
 
 		static bool IsInterceptInfoType(
@@ -1224,17 +1228,17 @@ namespace AspectGenerator
 			return @namespace is "" or "AspectGenerator";
 		}
 
-		static bool IsTaskType(ITypeSymbol type, out ITypeSymbol? resultType)
+		static bool IsSupportedAsyncReturnType(ITypeSymbol type, out ITypeSymbol? resultType)
 		{
 			resultType = null;
 
 			if (type is not INamedTypeSymbol namedType ||
-				namedType.Name != "Task" ||
+				namedType.Name is not ("Task" or "ValueTask") ||
 				namedType.ContainingNamespace.ToDisplayString() != "System.Threading.Tasks")
 				return false;
 
-			if (namedType is { IsGenericType: true, TypeArguments: [var taskResultType] })
-				resultType = taskResultType;
+			if (namedType is { IsGenericType: true, TypeArguments: [var asyncResultType] })
+				resultType = asyncResultType;
 
 			return true;
 		}
@@ -1262,10 +1266,9 @@ namespace AspectGenerator
 			List<AttributeInfo>        attributes,
 			int                        methodModifierPosition)
 		{
-			var isReturnsTask = method.ReturnType is { Name: "Task", ContainingNamespace: { Name : "Tasks", ContainingNamespace: { Name : "Threading", ContainingNamespace.Name : "System" }}};
-			var taskType      = isReturnsTask && method.ReturnType is INamedTypeSymbol { IsGenericType : true, TypeArguments : [var argType] } ? argType : null;
-			var generateAsync = isReturnsTask && attributes.Any(d => GetAspectArguments(d).Any(a => a.Key.EndsWith("Async") && a.Value is not null));
-			var generateArgs  = attributes.Any(d => GetAspectArguments(d).Any(a => a is { Key: "PassArguments", Value: true }));
+			var isReturnsAsyncType = IsSupportedAsyncReturnType(method.ReturnType, out var asyncResultType);
+			var generateAsync      = isReturnsAsyncType && attributes.Any(d => GetAspectArguments(d).Any(a => a.Key.EndsWith("Async") && a.Value is not null));
+			var generateArgs       = attributes.Any(d => GetAspectArguments(d).Any(a => a is { Key: "PassArguments", Value: true }));
 
 			// Generate arguments.
 			//
@@ -1328,7 +1331,7 @@ namespace AspectGenerator
 				if (generateAsync)
 					sb.Insert(methodModifierPosition, "async ");
 
-				var returnType = generateAsync ? taskType?.ToString() ?? "AspectGenerator.Void" : method.ReturnsVoid ? "AspectGenerator.Void" : $"{method.ReturnType}";
+				var returnType = generateAsync ? asyncResultType?.ToString() ?? "AspectGenerator.Void" : method.ReturnsVoid ? "AspectGenerator.Void" : $"{method.ReturnType}";
 
 				// Generate AspectCallInfo.
 				//
@@ -1428,7 +1431,7 @@ namespace AspectGenerator
 					sb
 						.Append(indent)
 						.Append(
-							method.ReturnsVoid || isReturnsTask && method.ReturnType is INamedTypeSymbol { IsGenericType: false }
+							method.ReturnsVoid || isReturnsAsyncType && asyncResultType is null
 								? string.Empty
 								: $"{(needInfo ? $"__info__{idx}.ReturnValue" : "var __return__")} = {(generateAsync ? "await " : "")}")
 						.Append(
@@ -1578,7 +1581,7 @@ namespace AspectGenerator
 				//
 				if (idx > 0)
 					sb.Append(indent).AppendLine($"__info__{idx - 1}.ReturnValue = __info__{idx}.ReturnValue;");
-				else if (!(method.ReturnsVoid || isReturnsTask && method.ReturnType is INamedTypeSymbol { IsGenericType: false }))
+				else if (!(method.ReturnsVoid || isReturnsAsyncType && asyncResultType is null))
 					sb.AppendLine($"\t\t\treturn {(needInfo ? $"__info__{idx}.ReturnValue" : "__return__")};");
 
 				TrimEnd(sb);

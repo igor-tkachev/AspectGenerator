@@ -1543,5 +1543,174 @@ namespace MyAspectGenerator
 
 			return __info__0.ReturnValue;
 		}
+
+		static SR. MemberInfo                 ValueTaskMethodAsync_Interceptor_MemberInfo        = MethodOf(() => default(AspectGenerator.Tests.UnitTests).ValueTaskMethodAsync());
+		static SCG.Dictionary<string,object?> ValueTaskMethodAsync_Interceptor_AspectArguments_0 = new()
+		{
+		};
+		//
+		/// <summary>
+		/// Intercepts AspectGenerator.Tests.UnitTests.ValueTaskMethodAsync().
+		/// </summary>
+		//
+		// Intercepts ValueTaskMethodAsync().
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "<location>")]
+		//
+		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
+		public static async System.Threading.Tasks.ValueTask ValueTaskMethodAsync_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		{
+			// Aspects.ValueTaskFlowAttribute
+			//
+			var __info__0 = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			{
+				MemberInfo      = ValueTaskMethodAsync_Interceptor_MemberInfo,
+				AspectType      = typeof(Aspects.ValueTaskFlowAttribute),
+				AspectArguments = ValueTaskMethodAsync_Interceptor_AspectArguments_0,
+			};
+
+			await using (Aspects.ValueTaskFlowAttribute.OnUsingAsync(__info__0))
+			{
+				try
+				{
+					await Aspects.ValueTaskFlowAttribute.OnBeforeCallAsync(__info__0);
+
+					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+					{
+						__this__.ValueTaskMethodAsync();
+
+						await Aspects.ValueTaskFlowAttribute.OnAfterCallAsync(__info__0);
+					}
+				}
+				catch (Exception __ex__)
+				{
+					__info__0.Exception = __ex__;
+					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
+
+					await Aspects.ValueTaskFlowAttribute.OnCatchAsync(__info__0);
+
+					if (__info__0.InterceptResult == AspectGenerator.InterceptResult.ReThrow)
+						throw;
+				}
+				finally
+				{
+					await Aspects.ValueTaskFlowAttribute.OnFinallyAsync(__info__0);
+				}
+			}
+		}
+
+		static SR. MemberInfo                 ValueTaskMethodAsync2_Interceptor_MemberInfo        = MethodOf(() => default(AspectGenerator.Tests.UnitTests).ValueTaskMethodAsync2());
+		static SCG.Dictionary<string,object?> ValueTaskMethodAsync2_Interceptor_AspectArguments_0 = new()
+		{
+		};
+		//
+		/// <summary>
+		/// Intercepts AspectGenerator.Tests.UnitTests.ValueTaskMethodAsync2().
+		/// </summary>
+		//
+		// Intercepts ValueTaskMethodAsync2().
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "<location>")]
+		//
+		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
+		public static async System.Threading.Tasks.ValueTask<int> ValueTaskMethodAsync2_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		{
+			// Aspects.ValueTaskFlowAttribute
+			//
+			var __info__0 = new AspectGenerator.InterceptInfo<int>
+			{
+				MemberInfo      = ValueTaskMethodAsync2_Interceptor_MemberInfo,
+				AspectType      = typeof(Aspects.ValueTaskFlowAttribute),
+				AspectArguments = ValueTaskMethodAsync2_Interceptor_AspectArguments_0,
+			};
+
+			await using (Aspects.ValueTaskFlowAttribute.OnUsingAsync(__info__0))
+			{
+				try
+				{
+					await Aspects.ValueTaskFlowAttribute.OnBeforeCallAsync(__info__0);
+
+					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+					{
+						__info__0.ReturnValue = await __this__.ValueTaskMethodAsync2();
+
+						await Aspects.ValueTaskFlowAttribute.OnAfterCallAsync(__info__0);
+					}
+				}
+				catch (Exception __ex__)
+				{
+					__info__0.Exception = __ex__;
+					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
+
+					await Aspects.ValueTaskFlowAttribute.OnCatchAsync(__info__0);
+
+					if (__info__0.InterceptResult == AspectGenerator.InterceptResult.ReThrow)
+						throw;
+				}
+				finally
+				{
+					await Aspects.ValueTaskFlowAttribute.OnFinallyAsync(__info__0);
+				}
+			}
+
+			return __info__0.ReturnValue;
+		}
+
+		static SR. MemberInfo                 ValueTaskThrowMethodAsync_Interceptor_MemberInfo        = MethodOf(() => default(AspectGenerator.Tests.UnitTests).ValueTaskThrowMethodAsync());
+		static SCG.Dictionary<string,object?> ValueTaskThrowMethodAsync_Interceptor_AspectArguments_0 = new()
+		{
+		};
+		//
+		/// <summary>
+		/// Intercepts AspectGenerator.Tests.UnitTests.ValueTaskThrowMethodAsync().
+		/// </summary>
+		//
+		// Intercepts ValueTaskThrowMethodAsync().
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "<location>")]
+		//
+		[System.Runtime.CompilerServices.CompilerGenerated]
+		[System.Diagnostics.DebuggerStepThrough]
+		public static async System.Threading.Tasks.ValueTask<int> ValueTaskThrowMethodAsync_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		{
+			// Aspects.ValueTaskFlowAttribute
+			//
+			var __info__0 = new AspectGenerator.InterceptInfo<int>
+			{
+				MemberInfo      = ValueTaskThrowMethodAsync_Interceptor_MemberInfo,
+				AspectType      = typeof(Aspects.ValueTaskFlowAttribute),
+				AspectArguments = ValueTaskThrowMethodAsync_Interceptor_AspectArguments_0,
+			};
+
+			await using (Aspects.ValueTaskFlowAttribute.OnUsingAsync(__info__0))
+			{
+				try
+				{
+					await Aspects.ValueTaskFlowAttribute.OnBeforeCallAsync(__info__0);
+
+					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+					{
+						__info__0.ReturnValue = await __this__.ValueTaskThrowMethodAsync();
+
+						await Aspects.ValueTaskFlowAttribute.OnAfterCallAsync(__info__0);
+					}
+				}
+				catch (Exception __ex__)
+				{
+					__info__0.Exception = __ex__;
+					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
+
+					await Aspects.ValueTaskFlowAttribute.OnCatchAsync(__info__0);
+
+					if (__info__0.InterceptResult == AspectGenerator.InterceptResult.ReThrow)
+						throw;
+				}
+				finally
+				{
+					await Aspects.ValueTaskFlowAttribute.OnFinallyAsync(__info__0);
+				}
+			}
+
+			return __info__0.ReturnValue;
+		}
 	}
 }

@@ -62,16 +62,17 @@ Planned work:
 - generate lazy `MemberInfo` initialization only when a hook requires `MemberInfo`;
 - measure whether the optimization is worth the added codegen complexity.
 
-## P2: `ValueTask`
+## Completed: `ValueTask`
 
-Status: not supported.
+Status: implemented.
 
-`ValueTask` and `ValueTask<T>` are documented as unsupported.
+`ValueTask` and `ValueTask<T>` targets are supported for async hooks. `async void` remains unsupported.
 
-Planned work:
+Completed work:
 
-- either keep explicit non-support with diagnostics/documentation;
-- or add `ValueTask` / `ValueTask<T>` support with async hook tests.
+- support `ValueTask` and `ValueTask<T>` target methods;
+- allow async hooks to return `Task`, `Task<T>`, `ValueTask`, or `ValueTask<T>`;
+- cover exception flow, finally flow, and return value mutation with tests.
 
 ## Deferred: `InterceptMethods` Diagnostics
 

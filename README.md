@@ -123,7 +123,7 @@ Common modes:
 | Instance methods | Supported | Call site must be visible to the current compilation. |
 | Extension methods | Supported | Covered by unit tests. |
 | Generic methods | Supported | Explicit `InterceptMethods` strings must match generated display names. |
-| `Task` and `Task<T>` async methods | Supported | Async hooks are selected for `Task` targets. |
+| `Task`, `Task<T>`, `ValueTask`, and `ValueTask<T>` async methods | Supported | Async hooks are selected for supported async targets. |
 | `ref`, `out`, `in` parameters | Supported | Covered by unit tests. |
 | Constructors | Unsupported | Platform limitation of C# interceptors. |
 | Properties and indexers | Unsupported | Not ordinary method invocation syntax. |
@@ -131,7 +131,7 @@ Common modes:
 | Delegates and reflection | Unsupported | No direct call site rewrite. |
 | Local functions | Unsupported | Platform limitation. |
 | Calls compiled in external assemblies | Unsupported | Rebuild the assembly containing the call site with AspectGenerator enabled. |
-| `ValueTask` and `ValueTask<T>` | Not currently supported | Planned or explicitly documented as a limitation. |
+| `async void` | Unsupported | Async hooks require an awaitable target return type. |
 
 ## Hooks
 

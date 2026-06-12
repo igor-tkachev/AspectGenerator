@@ -24,7 +24,7 @@ namespace AspectGenerator.Tests
 				[AspectSourceGenerator.DiagnosticID.HookInvalidReturnType]     = ["WrongReturn",           "invalid return type"],
 				[AspectSourceGenerator.DiagnosticID.OnCallHookMismatch]        = ["OnCall hook",           "must match target method"],
 				[AspectSourceGenerator.DiagnosticID.HookRequiresInterceptData] = ["UseInterceptData=true", "ref InterceptData<T>"],
-				[AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask]     = ["Async hook",            "Task or Task<T>"],
+				[AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask]     = ["Async hook",            "ValueTask<T>"],
 			})
 			{
 				var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == expected.Key);
@@ -86,6 +86,26 @@ namespace AspectGenerator.Tests
 			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask);
 
 			AssertNotGenerated(result, "Interceptors.g.cs");
+		}
+
+		[TestMethod]
+		public void ValueTaskTargetSupportsAsyncHooksTest()
+		{
+			var result = RunGenerator(ValueTaskGenerationSource);
+
+			CollectionAssert.DoesNotContain(result.Diagnostics.Select(static d => d.Id).ToArray(), AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask);
+			AssertGenerated(result, "Interceptors.g.cs");
+		}
+
+		[TestMethod]
+		public void AsyncVoidTargetReportsDiagnosticTest()
+		{
+			var result = RunGenerator(AsyncVoidDiagnosticsSource);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask);
+
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			StringAssert.Contains(diagnostic.GetMessage(), "Async void");
+			StringAssert.Contains(diagnostic.GetMessage(), "ValueTask<T>");
 		}
 
 		static GeneratorDriverRunResult RunGenerator(string source, Dictionary<string,string>? properties = null)
@@ -287,6 +307,71 @@ namespace AspectGenerator.Tests
 				public static string InvalidAsyncTarget()
 				{
 					return "";
+				}
+			}
+			""";
+
+		const string ValueTaskGenerationSource =
+			"""
+			using System;
+			using System.Threading.Tasks;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCallAsync = nameof(AfterAsync))]
+			sealed class ValueTaskAspectAttribute : Attribute
+			{
+				public static ValueTask AfterAsync(InterceptInfo<int> info)
+				{
+					info.ReturnValue++;
+					return ValueTask.CompletedTask;
+				}
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					ValueTaskTarget();
+				}
+
+				[ValueTaskAspect]
+				public static ValueTask<int> ValueTaskTarget()
+				{
+					return ValueTask.FromResult(1);
+				}
+			}
+			""";
+
+		const string AsyncVoidDiagnosticsSource =
+			"""
+			using System;
+			using System.Threading.Tasks;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCallAsync = nameof(AfterAsync))]
+			sealed class AsyncVoidAspectAttribute : Attribute
+			{
+				public static ValueTask AfterAsync(InterceptInfo info)
+				{
+					return ValueTask.CompletedTask;
+				}
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					AsyncVoidTarget();
+				}
+
+				[AsyncVoidAspect]
+				public static async void AsyncVoidTarget()
+				{
+					await Task.CompletedTask;
 				}
 			}
 			""";
