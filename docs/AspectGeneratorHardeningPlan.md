@@ -18,7 +18,6 @@ Completed:
 
 Not completed:
 
-- generated interceptor type collision hardening;
 - `AG0004` severity policy;
 - public API contract stabilization;
 - lazy `MemberInfo` initialization;
@@ -51,16 +50,16 @@ Checklist:
 
 ## P1: Generated Interceptor Type Shape
 
-Status: not implemented.
+Status: completed.
 
 Problem: generated code still emits a fixed `static partial class Interceptors` in the configured namespace, which can collide with user code or other generated code.
 
 Checklist:
 
-- [ ] Evaluate `file static class AspectGeneratorInterceptors_<stable hash>`.
-- [ ] Preserve configurable interceptor namespace.
-- [ ] Keep generated source deterministic.
-- [ ] Update generated source baselines after choosing the final shape.
+- [x] Use a file-local generated interceptor type to avoid collisions with user code.
+- [x] Preserve configurable interceptor namespace.
+- [x] Keep generated source deterministic.
+- [x] Update generated source baselines after choosing the final shape.
 
 ## P2: `AG0004` Severity Policy
 

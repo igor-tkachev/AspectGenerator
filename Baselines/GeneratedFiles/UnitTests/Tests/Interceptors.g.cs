@@ -20,7 +20,7 @@ namespace MyAspectGenerator
 {
 	using AspectGenerator = AspectGenerator;
 
-	static partial class Interceptors
+	file static class AspectGeneratorInterceptors
 	{
 		static SR.MethodInfo GetMethodInfo(SLE.Expression expr)
 		{

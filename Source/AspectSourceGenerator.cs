@@ -627,6 +627,8 @@ namespace AspectGenerator
 			GeneratorExecutionOptions                       options,
 			ImmutableArray<AnalyzedInvocation>              aspectedMethods)
 		{
+			var interceptorsNamespace = GetInterceptorsNamespace(options);
+
 			// Generate source. One file for all the interceptors.
 			// Interceptors.g.cs
 			//
@@ -650,11 +652,11 @@ namespace AspectGenerator
 					}
 				}
 
-				namespace {{(string.IsNullOrWhiteSpace(options.InterceptorsNamespace) ? "AspectGenerator" : options.InterceptorsNamespace)}}
+				namespace {{interceptorsNamespace}}
 				{
 					using AspectGenerator = AspectGenerator;
 
-					static partial class Interceptors
+					file static class AspectGeneratorInterceptors
 					{
 						static SR.MethodInfo GetMethodInfo(SLE.Expression expr)
 						{
