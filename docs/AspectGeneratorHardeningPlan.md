@@ -12,7 +12,9 @@ Completed:
 - generated source baselines under `Baselines`;
 - safer attribute literal generation;
 - initial hook diagnostics `AG0101` and `AG0102`;
-- hook contract diagnostics `AG0103` through `AG0107`.
+- hook contract diagnostics `AG0103` through `AG0107`;
+- shared analysis model consumed by diagnostics and interceptor emission;
+- build-time interceptor emission gate through `AspectGeneratorGenerateInterceptors` / `DesignTimeBuild`.
 
 Not completed:
 
@@ -27,7 +29,7 @@ Not completed:
 
 Status: partially implemented.
 
-Problem: the generator implements `IIncrementalGenerator`. The previous interception discovery path used `CompilationProvider` and scanned all syntax trees with `DescendantNodes()` to find invocations. That full syntax-tree scan has been removed; invocation candidates now come from `SyntaxProvider`.
+Problem: the generator implements `IIncrementalGenerator`. The previous interception discovery path used `CompilationProvider` and scanned all syntax trees with `DescendantNodes()` to find invocations. That full syntax-tree scan has been removed; invocation candidates now come from `SyntaxProvider`. Diagnostics and interceptor emission now consume a shared analysis result, and `Interceptors.g.cs` emission is disabled by default during design-time builds.
 
 Checklist:
 

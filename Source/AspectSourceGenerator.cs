@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -144,11 +145,21 @@ namespace AspectGenerator
 		class Options
 		{
 			public bool?   GenerateApi;
+			public bool?   GenerateInterceptors;
+			public bool?   DesignTimeBuild;
 			public bool?   PublicApi;
 			public bool?   DebuggerStepThrough;
 			public string? InterceptorsNamespace;
 			public string? AllowedInterceptorsNamespaces;
 		}
+
+		record GeneratorExecutionOptions(
+			bool    GenerateApi,
+			bool    GenerateInterceptors,
+			bool    PublicApi,
+			bool    DebuggerStepThrough,
+			string? InterceptorsNamespace,
+			string? AllowedInterceptorsNamespaces);
 
 		record AttributeInfo(
 			AttributeData?    AttributeData,
@@ -158,6 +169,23 @@ namespace AspectGenerator
 			SemanticModel?    AspectSemanticModel)
 		{
 		}
+
+		record AnalyzedInvocation(
+			InvocationExpressionSyntax Inv,
+			IMethodSymbol              Method,
+			List<AttributeInfo>        Attributes);
+
+		record DiagnosticInfo(
+			string    Id,
+			string    Message,
+			Location? Location,
+			bool      IsError = true);
+
+		record AnalysisResult(
+			Compilation                        Compilation,
+			GeneratorExecutionOptions         Options,
+			ImmutableArray<AnalyzedInvocation> AspectedMethods,
+			ImmutableArray<DiagnosticInfo>     Diagnostics);
 
 		public void Initialize(IncrementalGeneratorInitializationContext context)
 		{
@@ -193,28 +221,35 @@ namespace AspectGenerator
 				new Options
 				{
 					GenerateApi                   = GetBoolProperty(c.GlobalOptions, "build_property.AspectGeneratorGenerateApi"),
+					GenerateInterceptors          = GetBoolProperty(c.GlobalOptions, "build_property.AspectGeneratorGenerateInterceptors"),
+					DesignTimeBuild               = GetBoolProperty(c.GlobalOptions, "build_property.DesignTimeBuild"),
 					PublicApi                     = GetBoolProperty(c.GlobalOptions, "build_property.AspectGeneratorPublicApi"),
 					DebuggerStepThrough           = GetBoolProperty(c.GlobalOptions, "build_property.AspectGeneratorDebuggerStepThrough"),
 					InterceptorsNamespace         = c.GlobalOptions.TryGetValue("build_property.AspectGeneratorInterceptorsNamespace", out var ns) ? ns : null,
 					AllowedInterceptorsNamespaces = c.GlobalOptions.TryGetValue("build_property.InterceptorsNamespaces", out var namespaces) ? namespaces : null,
 				});
 
-			context.RegisterImplementationSourceOutput(context.CompilationProvider.Combine(options).Combine(attributes).Combine(invocations), Implement);
+			var analysis = context.CompilationProvider
+				.Combine(options)
+				.Combine(attributes)
+				.Combine(invocations)
+				.Select(static (data, ct) => Analyze(data, ct));
+
+			context.RegisterSourceOutput(analysis, ReportDiagnostics);
+			context.RegisterImplementationSourceOutput(analysis, EmitInterceptors);
 		}
 
-		static void Implement(
-			SourceProductionContext spc,
-			(((Compilation Left, Options Right) Left, ImmutableArray<ClassDeclarationSyntax> Right) Left, ImmutableArray<InvocationExpressionSyntax> Right) data)
+		static AnalysisResult Analyze(
+			(((Compilation Left, Options Right) Left, ImmutableArray<ClassDeclarationSyntax> Right) Left, ImmutableArray<InvocationExpressionSyntax> Right) data,
+			CancellationToken cancellationToken)
 		{
 			var compilation = data.Left.Left.Left;
 			var options     = ResolveOptions(compilation, data.Left.Left.Right);
 			var attrs       = data.Left.Right;
 			var invocations = data.Right;
 
-			if (options.GenerateApi is not false)
-				spc.AddSource("AspectAttribute.g.cs", SourceText.From(GenerateAspectApiText(options.PublicApi is true), Encoding.UTF8));
-
-			ReportMissingInterceptorsNamespace(spc, options);
+			var diagnostics = new List<DiagnosticInfo>();
+			var reportedDiagnostics = new HashSet<string>();
 
 			var aspectAttributes = new Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)>(SymbolEqualityComparer.Default);
 
@@ -222,7 +257,7 @@ namespace AspectGenerator
 			{
 				var semanticModel = compilation.GetSemanticModel(a.SyntaxTree);
 
-				if (semanticModel.GetDeclaredSymbol(a, spc.CancellationToken) is not {} symbol)
+				if (semanticModel.GetDeclaredSymbol(a, cancellationToken) is not {} symbol)
 					continue;
 
 				foreach (var attribute in a.AttributeLists.SelectMany(static l => l.Attributes))
@@ -235,11 +270,9 @@ namespace AspectGenerator
 				}
 			}
 
-			var reportedDiagnostics = new HashSet<string>();
+			ValidateAspectHooks(diagnostics, aspectAttributes, reportedDiagnostics);
 
-			ValidateAspectHooks(spc, aspectAttributes, reportedDiagnostics);
-
-			var aspectedMethods  = new List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)>();
+			var aspectedMethods  = new List<AnalyzedInvocation>();
 			var methodDic        = new Dictionary<IMethodSymbol,List<AttributeInfo>>(SymbolEqualityComparer.Default);
 			var interceptedDic   = new Dictionary<string,List<AttributeInfo>>();
 
@@ -268,7 +301,7 @@ namespace AspectGenerator
 			foreach (var invocation in invocations)
 			{
 				var semantic = compilation.GetSemanticModel(invocation.SyntaxTree);
-				var info     = semantic.GetSymbolInfo(invocation, spc.CancellationToken);
+				var info     = semantic.GetSymbolInfo(invocation, cancellationToken);
 
 				// Bind only invocation candidates provided by SyntaxProvider.
 				//
@@ -307,17 +340,50 @@ namespace AspectGenerator
 					}
 
 					if (attributes.Count > 0)
-						aspectedMethods.Add((invocation, method, attributes));
+						aspectedMethods.Add(new AnalyzedInvocation(invocation, method, attributes));
 				}
 
-				if (spc.CancellationToken.IsCancellationRequested)
+				if (cancellationToken.IsCancellationRequested)
 					break;
 			}
 
-			if (aspectedMethods.Count == 0 || spc.CancellationToken.IsCancellationRequested)
+			if (!cancellationToken.IsCancellationRequested)
+				foreach (var m in aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default))
+					ValidateAspectHooksForMethod(diagnostics, compilation, m.First().Inv, (IMethodSymbol)m.Key!, m.First().Attributes, reportedDiagnostics);
+
+			ReportMissingInterceptorsNamespace(diagnostics, options);
+
+			return new AnalysisResult(compilation, options, aspectedMethods.ToImmutableArray(), diagnostics.ToImmutableArray());
+		}
+
+		static void ReportDiagnostics(SourceProductionContext spc, AnalysisResult analysis)
+		{
+			if (analysis.Options.GenerateApi)
+				spc.AddSource("AspectAttribute.g.cs", SourceText.From(GenerateAspectApiText(analysis.Options.PublicApi), Encoding.UTF8));
+
+			foreach (var diagnostic in analysis.Diagnostics)
+			{
+				spc.ReportDiagnostic(
+					Diagnostic.Create(
+						diagnostic.Id,
+						"AspectGenerator",
+						diagnostic.Message,
+						diagnostic.IsError ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
+						diagnostic.IsError ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
+						true,
+						0,
+						location: diagnostic.Location));
+			}
+		}
+
+		static void EmitInterceptors(SourceProductionContext spc, AnalysisResult analysis)
+		{
+			if (!analysis.Options.GenerateInterceptors ||
+				analysis.AspectedMethods.Length == 0 ||
+				spc.CancellationToken.IsCancellationRequested)
 				return;
 
-			GenerateSource(spc, compilation, options, aspectedMethods, reportedDiagnostics);
+			GenerateSource(spc, analysis.Compilation, analysis.Options, analysis.AspectedMethods);
 		}
 
 		static bool? GetBoolProperty(AnalyzerConfigOptions options, string name)
@@ -328,11 +394,13 @@ namespace AspectGenerator
 			return bool.TryParse(value, out var result) ? result : null;
 		}
 
-		static Options ResolveOptions(Compilation compilation, Options msBuildOptions)
+		static GeneratorExecutionOptions ResolveOptions(Compilation compilation, Options msBuildOptions)
 		{
 			var result = new Options
 			{
 				GenerateApi                   = msBuildOptions.GenerateApi,
+				GenerateInterceptors          = msBuildOptions.GenerateInterceptors,
+				DesignTimeBuild               = msBuildOptions.DesignTimeBuild,
 				PublicApi                     = msBuildOptions.PublicApi,
 				DebuggerStepThrough           = msBuildOptions.DebuggerStepThrough,
 				InterceptorsNamespace         = msBuildOptions.InterceptorsNamespace,
@@ -343,7 +411,7 @@ namespace AspectGenerator
 				a.AttributeClass is { ContainingNamespace.Name: "AspectGenerator", Name: "AspectGeneratorOptionsAttribute" });
 
 			if (attr is null)
-				return result;
+				return CreateExecutionOptions(result);
 
 			foreach (var arg in attr.NamedArguments)
 			{
@@ -364,12 +432,30 @@ namespace AspectGenerator
 				}
 			}
 
-			return result;
+			return CreateExecutionOptions(result);
+
+			static GeneratorExecutionOptions CreateExecutionOptions(Options options)
+			{
+				var generateInterceptors = options.GenerateInterceptors ?? options.DesignTimeBuild is not true;
+
+				return new GeneratorExecutionOptions(
+					options.GenerateApi is not false,
+					generateInterceptors,
+					options.PublicApi is true,
+					options.DebuggerStepThrough is true,
+					options.InterceptorsNamespace,
+					options.AllowedInterceptorsNamespaces);
+			}
 		}
 
-		static void ReportMissingInterceptorsNamespace(SourceProductionContext spc, Options options)
+		static string GetInterceptorsNamespace(GeneratorExecutionOptions options)
 		{
-			var interceptorsNamespace = string.IsNullOrWhiteSpace(options.InterceptorsNamespace) ? "AspectGenerator" : options.InterceptorsNamespace!;
+			return string.IsNullOrWhiteSpace(options.InterceptorsNamespace) ? "AspectGenerator" : options.InterceptorsNamespace!;
+		}
+
+		static void ReportMissingInterceptorsNamespace(List<DiagnosticInfo> diagnostics, GeneratorExecutionOptions options)
+		{
+			var interceptorsNamespace = GetInterceptorsNamespace(options);
 
 			if (string.IsNullOrWhiteSpace(options.AllowedInterceptorsNamespaces))
 				return;
@@ -381,15 +467,12 @@ namespace AspectGenerator
 			if (namespaces.Contains(interceptorsNamespace, StringComparer.Ordinal))
 				return;
 
-			var descriptor = new DiagnosticDescriptor(
+			diagnostics.Add(
+				new DiagnosticInfo(
 				"AG0004",
-				"AspectGenerator",
 				$"Generated interceptors namespace '{interceptorsNamespace}' is not listed in the InterceptorsNamespaces MSBuild property.",
-				"AspectGenerator",
-				DiagnosticSeverity.Warning,
-				true);
-
-			spc.ReportDiagnostic(Diagnostic.Create(descriptor, Location.None));
+				Location.None,
+				IsError: false));
 		}
 
 		static IEnumerable<(string Key, object? Value)> GetAspectArguments(AttributeInfo attribute)
@@ -404,7 +487,7 @@ namespace AspectGenerator
 		}
 
 		static void ValidateAspectHooks(
-			SourceProductionContext                                                   spc,
+			List<DiagnosticInfo>                                                       diagnostics,
 			Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)> aspectAttributes,
 			HashSet<string>                                                           reportedDiagnostics)
 		{
@@ -429,7 +512,7 @@ namespace AspectGenerator
 					if (methods.Length == 0)
 					{
 						ReportDiagnostic(
-							spc,
+							diagnostics,
 							reportedDiagnostics,
 							"AG0101",
 							$"Aspect hook method '{hookName}' was not found on aspect type '{aspectClass.ToDisplayString()}'.",
@@ -438,7 +521,7 @@ namespace AspectGenerator
 					else if (!methods.Any(static m => m.IsStatic))
 					{
 						ReportDiagnostic(
-							spc,
+							diagnostics,
 							reportedDiagnostics,
 							"AG0102",
 							$"Aspect hook method '{hookName}' on aspect type '{aspectClass.ToDisplayString()}' must be static.",
@@ -448,23 +531,14 @@ namespace AspectGenerator
 			}
 		}
 
-		static void ReportDiagnostic(SourceProductionContext spc, HashSet<string> reportedDiagnostics, string id, string message, Location? location)
+		static void ReportDiagnostic(List<DiagnosticInfo> diagnostics, HashSet<string> reportedDiagnostics, string id, string message, Location? location)
 		{
 			var key = $"{id}:{location?.SourceTree?.FilePath}:{location?.SourceSpan.Start}:{message}";
 
 			if (!reportedDiagnostics.Add(key))
 				return;
 
-			spc.ReportDiagnostic(
-				Diagnostic.Create(
-					id,
-					"AspectGenerator",
-					message,
-					DiagnosticSeverity.Error,
-					DiagnosticSeverity.Error,
-					true,
-					0,
-					location: location));
+			diagnostics.Add(new DiagnosticInfo(id, message, location));
 		}
 
 		static IEnumerable<(string Key, object? Value)> GetAspectArguments(AttributeData attribute)
@@ -521,11 +595,10 @@ namespace AspectGenerator
 		}
 
 		static void GenerateSource(
-			SourceProductionContext                                                                    spc,
-			Compilation                                                                                compilation,
-			Options                                                                                    options,
-			List<(InvocationExpressionSyntax inv,IMethodSymbol method,List<AttributeInfo> attributes)> aspectedMethods,
-			HashSet<string>                                                                            reportedDiagnostics)
+			SourceProductionContext                         spc,
+			Compilation                                     compilation,
+			GeneratorExecutionOptions                       options,
+			ImmutableArray<AnalyzedInvocation>              aspectedMethods)
 		{
 			// Generate source. One file for all the interceptors.
 			// Interceptors.g.cs
@@ -579,12 +652,12 @@ namespace AspectGenerator
 				return nameSet.Add(methodName) ? methodName : GetInterceptorName($"{methodName}_{++nameCounter}");
 			}
 
-			foreach (var m in aspectedMethods.GroupBy(m => m.method, SymbolEqualityComparer.Default).OrderBy(m => m.Key!.Name))
+			foreach (var m in aspectedMethods.GroupBy(m => m.Method, SymbolEqualityComparer.Default).OrderBy(m => m.Key!.Name))
 			{
 				var method          = (IMethodSymbol)m.Key!;
 				var interceptorName = GetInterceptorName($"{method.Name}_Interceptor");
 				var methods         = m.ToList();
-				var attributes      = methods[0].attributes;
+				var attributes      = methods[0].Attributes;
 
 				if (attributes.Any(a => a.AttributeData?.NamedArguments.Any(na => na.Key == "Order") is true))
 				{
@@ -678,8 +751,9 @@ namespace AspectGenerator
 							//
 					""");
 
-				foreach (var (inv, _, _) in methods)
+				foreach (var analyzedInvocation in methods)
 				{
+					var inv = analyzedInvocation.Inv;
 
 					sb.AppendLine(
 						$"""
@@ -732,7 +806,7 @@ namespace AspectGenerator
 
 				sb.AppendLine("\t\t[System.Runtime.CompilerServices.CompilerGenerated]");
 
-				if (options.DebuggerStepThrough is true)
+				if (options.DebuggerStepThrough)
 					sb.AppendLine("\t\t[System.Diagnostics.DebuggerStepThrough]");
 
 				sb.Append("\t\tpublic static ");
@@ -747,9 +821,7 @@ namespace AspectGenerator
 						""")
 					;
 
-				ValidateAspectHooksForMethod(spc, compilation, methods[0].inv, method, attributes, reportedDiagnostics);
-
-				GenerateMethodBody(spc, sb, methods[0].inv, method, interceptorName, attributes, methodModifierPosition);
+				GenerateMethodBody(spc, sb, methods[0].Inv, method, interceptorName, attributes, methodModifierPosition);
 
 				sb
 					.AppendLine(
@@ -772,7 +844,7 @@ namespace AspectGenerator
 		}
 
 		static void ValidateAspectHooksForMethod(
-			SourceProductionContext spc,
+			List<DiagnosticInfo>    diagnostics,
 			Compilation             compilation,
 			InvocationExpressionSyntax invocationExpression,
 			IMethodSymbol           targetMethod,
@@ -781,10 +853,36 @@ namespace AspectGenerator
 		{
 			var targetIsTask = IsTaskType(targetMethod.ReturnType, out var taskResultType);
 
-			foreach (var attribute in attributes)
+			for (var idx = 0; idx < attributes.Count; idx++)
 			{
+				var attribute       = attributes[idx];
 				var aspectArguments = GetAspectArguments(attribute).ToDictionary(static a => a.Key, static a => a.Value);
 				var useInterceptData = aspectArguments.TryGetValue("UseInterceptData", out var useData) && useData is true;
+
+				if (idx < attributes.Count - 1 &&
+					aspectArguments.TryGetValue("OnCall", out var onCallValue) &&
+					onCallValue is string onCall &&
+					!string.IsNullOrWhiteSpace(onCall))
+				{
+					if (attribute.AttributeData?.ApplicationSyntaxReference is {} asr)
+					{
+						ReportDiagnostic(
+							diagnostics,
+							reportedDiagnostics,
+							"AG0001",
+							$"Aspect '{attribute.AttributeClass}' specifies 'OnCall' interceptor and has to be the last one in aspect list.",
+							Location.Create(asr.SyntaxTree, asr.Span));
+					}
+					else
+					{
+						ReportDiagnostic(
+							diagnostics,
+							reportedDiagnostics,
+							"AG0002",
+							$"Method '{targetMethod}' is decorated with an aspect that specifies 'OnCall' interceptor. This aspect has to be the last one in aspect list.",
+							Location.Create(invocationExpression.SyntaxTree, invocationExpression.Span));
+					}
+				}
 
 				foreach (var hook in GetHookContracts())
 				{
@@ -798,7 +896,7 @@ namespace AspectGenerator
 					if (hook.IsAsync && !targetIsTask && !HasSyncFallback(aspectArguments, hook.Name))
 					{
 						ReportDiagnostic(
-							spc,
+							diagnostics,
 							reportedDiagnostics,
 							"AG0107",
 							$"Async hook '{hook.Name}' requires target method '{targetMethod.ToDisplayString()}' to return Task or Task<T>, or a synchronous fallback hook to be specified.",
@@ -811,7 +909,7 @@ namespace AspectGenerator
 					if (methods.Length == 0)
 					{
 						ReportDiagnostic(
-							spc,
+							diagnostics,
 							reportedDiagnostics,
 							"AG0101",
 							$"Aspect hook method '{hookName}' was not found on aspect type '{attribute.AttributeClass.ToDisplayString()}'.",
@@ -822,7 +920,7 @@ namespace AspectGenerator
 					if (staticMethods.Length == 0)
 					{
 						ReportDiagnostic(
-							spc,
+							diagnostics,
 							reportedDiagnostics,
 							"AG0102",
 							$"Aspect hook method '{hookName}' on aspect type '{attribute.AttributeClass.ToDisplayString()}' must be static.",
@@ -835,7 +933,7 @@ namespace AspectGenerator
 						if (!staticMethods.Any(m => IsValidOnCallHook(compilation, m, targetMethod, targetIsTask, taskResultType)))
 						{
 							ReportDiagnostic(
-								spc,
+								diagnostics,
 								reportedDiagnostics,
 								"AG0105",
 								$"OnCall hook '{hookName}' on aspect type '{attribute.AttributeClass.ToDisplayString()}' must match target method '{targetMethod.ToDisplayString()}'.",
@@ -854,7 +952,7 @@ namespace AspectGenerator
 						var diagnosticId = useInterceptData ? "AG0106" : "AG0103";
 
 						ReportDiagnostic(
-							spc,
+							diagnostics,
 							reportedDiagnostics,
 							diagnosticId,
 							diagnosticId == "AG0106"
@@ -867,7 +965,7 @@ namespace AspectGenerator
 					if (!methodsWithValidParameters.Any(m => IsValidLifecycleHookReturnType(compilation, m, hook, targetMethod, targetIsTask, taskResultType, useInterceptData)))
 					{
 						ReportDiagnostic(
-							spc,
+							diagnostics,
 							reportedDiagnostics,
 							"AG0104",
 							$"Hook method '{hookName}' on aspect type '{attribute.AttributeClass.ToDisplayString()}' has an invalid return type for '{hook.Name}'.",
@@ -1291,36 +1389,6 @@ namespace AspectGenerator
 				//
 				if (idx < attributes.Count - 1)
 				{
-					if (onCall is not null)
-					{
-						if (attributes[idx].AttributeData?.ApplicationSyntaxReference is {} asr)
-						{
-							spc.ReportDiagnostic(
-								Diagnostic.Create(
-									"AG0001",
-									"AspectGenerator",
-									$"Aspect '{attr}' specifies 'OnCall' interceptor and has to be the last one in aspect list.",
-									DiagnosticSeverity.Error,
-									DiagnosticSeverity.Error,
-									true,
-									0,
-									location: Location.Create(asr.SyntaxTree, asr.Span)));
-						}
-						else
-						{
-							spc.ReportDiagnostic(
-								Diagnostic.Create(
-									"AG0002",
-									"AspectGenerator",
-									$"Method '{method}' is decorated with an aspect that specifies 'OnCall' interceptor. This aspect has to be the last one in aspect list.",
-									DiagnosticSeverity.Error,
-									DiagnosticSeverity.Error,
-									true,
-									0,
-									location: Location.Create(invocationExpression.SyntaxTree, invocationExpression.Span)));
-						}
-					}
-
 					sb.Append(indent).AppendLine("{");
 
 					GenerateAttribute(idx + 1, indent + '\t', useInterceptData);

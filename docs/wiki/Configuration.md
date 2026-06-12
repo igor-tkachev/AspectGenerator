@@ -7,6 +7,7 @@ AspectGenerator itself targets `netstandard2.0`, but consuming projects must be 
 ```xml
 <PropertyGroup>
   <AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
+  <AspectGeneratorGenerateInterceptors>true</AspectGeneratorGenerateInterceptors>
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
@@ -27,6 +28,8 @@ using AspectGenerator;
 ```
 
 Assembly attribute values override MSBuild properties.
+
+`AspectGeneratorGenerateInterceptors` controls `Interceptors.g.cs` emission. It defaults to `false` for design-time builds and `true` otherwise. Diagnostics still run when interceptor source emission is disabled.
 
 ## Obsolete Preview Names
 

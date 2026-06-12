@@ -75,6 +75,7 @@ AspectGenerator can be configured with MSBuild properties:
 ```xml
 <PropertyGroup>
   <AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
+  <AspectGeneratorGenerateInterceptors>true</AspectGeneratorGenerateInterceptors>
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
@@ -94,6 +95,8 @@ using AspectGenerator;
 ```
 
 `AspectGeneratorInterceptorsNamespace` must also be listed in `InterceptorsNamespaces`, otherwise the compiler will not enable generated interceptors from that namespace.
+
+`AspectGeneratorGenerateInterceptors` defaults to `false` for design-time builds and `true` otherwise. Diagnostics still run when interceptor source emission is disabled.
 
 ## Generated API Ownership
 
