@@ -12,9 +12,12 @@ namespace AspectGenerator
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
 	sealed class AspectGeneratorOptionsAttribute : Attribute
 	{
-		public bool    GenerateApi           { get; set; } = true;
-		public bool    PublicApi             { get; set; }
-		public bool    DebuggerStepThrough   { get; set; }
-		public string? InterceptorsNamespace { get; set; }
+		public bool    GenerateApi                   { get; set; } = true;
+		public bool    GenerateInterceptors          { get; set; }
+		public bool    DesignTimeBuild               { get; set; }
+		public bool    PublicApi                     { get; set; }
+		public bool    DebuggerStepThrough           { get; set; }
+		public string? InterceptorsNamespace         { get; set; }
+		public string? AllowedInterceptorsNamespaces { get; set; }
 	}
 }
