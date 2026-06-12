@@ -55,7 +55,7 @@ namespace AspectGenerator.Tests
 				GenerationOptionsSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.DesignTimeBuild}"] = "true",
+					["build_property.DesignTimeBuild"] = "true",
 				});
 
 			AssertGenerated   (designTimeResult, "AspectAttribute.g.cs");

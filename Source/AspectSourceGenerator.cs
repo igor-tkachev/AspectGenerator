@@ -37,11 +37,9 @@ namespace AspectGenerator
 		{
 			public const string GenerateApi                   = "GenerateApi";
 			public const string GenerateInterceptors          = "GenerateInterceptors";
-			public const string DesignTimeBuild               = "DesignTimeBuild";
 			public const string PublicApi                     = "PublicApi";
 			public const string DebuggerStepThrough           = "DebuggerStepThrough";
 			public const string InterceptorsNamespace         = "InterceptorsNamespace";
-			public const string AllowedInterceptorsNamespaces = "AllowedInterceptorsNamespaces";
 		}
 
 		const string AspectGeneratorOptionsAttributeText =
@@ -62,11 +60,9 @@ namespace AspectGenerator
 				{
 					public bool    {{OptionID.GenerateApi}}                   { get; set; } = true;
 					public bool    {{OptionID.GenerateInterceptors}}          { get; set; }
-					public bool    {{OptionID.DesignTimeBuild}}               { get; set; }
 					public bool    {{OptionID.PublicApi}}                     { get; set; }
 					public bool    {{OptionID.DebuggerStepThrough}}           { get; set; }
 					public string? {{OptionID.InterceptorsNamespace}}         { get; set; }
-					public string? {{OptionID.AllowedInterceptorsNamespaces}} { get; set; }
 				}
 			}
 
@@ -180,7 +176,7 @@ namespace AspectGenerator
 			public bool?   PublicApi;
 			public bool?   DebuggerStepThrough;
 			public string? InterceptorsNamespace;
-			public string? AllowedInterceptorsNamespaces;
+			public string? InterceptorsNamespaces;
 		}
 
 		record GeneratorExecutionOptions(
@@ -189,7 +185,7 @@ namespace AspectGenerator
 			bool    PublicApi,
 			bool    DebuggerStepThrough,
 			string? InterceptorsNamespace,
-			string? AllowedInterceptorsNamespaces);
+			string? InterceptorsNamespaces);
 
 		record AttributeInfo(
 			AttributeData?    AttributeData,
@@ -250,13 +246,13 @@ namespace AspectGenerator
 			var options = context.AnalyzerConfigOptionsProvider.Select((c, _) =>
 				new Options
 				{
-					GenerateApi                   = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.GenerateApi}"),
-					GenerateInterceptors          = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.GenerateInterceptors}"),
-					DesignTimeBuild               = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.DesignTimeBuild}"),
-					PublicApi                     = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.PublicApi}"),
-					DebuggerStepThrough           = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.DebuggerStepThrough}"),
-					InterceptorsNamespace         = c.GlobalOptions.TryGetValue($"build_property.AspectGenerator{OptionID.InterceptorsNamespace}", out var ns) ? ns : null,
-					AllowedInterceptorsNamespaces = c.GlobalOptions.TryGetValue($"build_property.AspectGenerator{OptionID.AllowedInterceptorsNamespaces}", out var namespaces) ? namespaces : null,
+					GenerateApi            = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.GenerateApi}"),
+					GenerateInterceptors   = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.GenerateInterceptors}"),
+					DesignTimeBuild        = GetBoolProperty(c.GlobalOptions,  "build_property.DesignTimeBuild"),
+					PublicApi              = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.PublicApi}"),
+					DebuggerStepThrough    = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.DebuggerStepThrough}"),
+					InterceptorsNamespace  = c.GlobalOptions.TryGetValue($"build_property.AspectGenerator{OptionID.InterceptorsNamespace}", out var ns) ? ns : null,
+					InterceptorsNamespaces = c.GlobalOptions.TryGetValue("build_property.InterceptorsNamespaces", out var namespaces) ? namespaces : null,
 				});
 
 			var analysis = context.CompilationProvider
@@ -434,7 +430,7 @@ namespace AspectGenerator
 				PublicApi                     = msBuildOptions.PublicApi,
 				DebuggerStepThrough           = msBuildOptions.DebuggerStepThrough,
 				InterceptorsNamespace         = msBuildOptions.InterceptorsNamespace,
-				AllowedInterceptorsNamespaces = msBuildOptions.AllowedInterceptorsNamespaces,
+				InterceptorsNamespaces = msBuildOptions.InterceptorsNamespaces,
 			};
 
 			var attr = compilation.Assembly.GetAttributes().FirstOrDefault(a =>
@@ -449,13 +445,9 @@ namespace AspectGenerator
 				{
 					case OptionID.GenerateApi           when arg.Value.Value is bool   generateApi          : result.GenerateApi           = generateApi;           break;
 					case OptionID.GenerateInterceptors  when arg.Value.Value is bool   generateInterceptors : result.GenerateInterceptors  = generateInterceptors;  break;
-					case OptionID.DesignTimeBuild       when arg.Value.Value is bool   designTimeBuild      : result.DesignTimeBuild       = designTimeBuild;       break;
 					case OptionID.PublicApi             when arg.Value.Value is bool   publicApi            : result.PublicApi             = publicApi;             break;
 					case OptionID.DebuggerStepThrough   when arg.Value.Value is bool   debuggerStepThrough  : result.DebuggerStepThrough   = debuggerStepThrough;   break;
 					case OptionID.InterceptorsNamespace when arg.Value.Value is string interceptorsNamespace: result.InterceptorsNamespace = interceptorsNamespace; break;
-					case OptionID.AllowedInterceptorsNamespaces when arg.Value.Value is string allowedInterceptorsNamespaces:
-						result.AllowedInterceptorsNamespaces = allowedInterceptorsNamespaces;
-						break;
 				}
 			}
 
@@ -471,7 +463,7 @@ namespace AspectGenerator
 					options.PublicApi is true,
 					options.DebuggerStepThrough is true,
 					options.InterceptorsNamespace,
-					options.AllowedInterceptorsNamespaces);
+					options.InterceptorsNamespaces);
 			}
 		}
 
@@ -484,10 +476,10 @@ namespace AspectGenerator
 		{
 			var interceptorsNamespace = GetInterceptorsNamespace(options);
 
-			if (string.IsNullOrWhiteSpace(options.AllowedInterceptorsNamespaces))
+			if (string.IsNullOrWhiteSpace(options.InterceptorsNamespaces))
 				return;
 
-			var namespaces = options.AllowedInterceptorsNamespaces!
+			var namespaces = options.InterceptorsNamespaces!
 				.Split([';'], StringSplitOptions.RemoveEmptyEntries)
 				.Select(static n => n.Trim());
 
