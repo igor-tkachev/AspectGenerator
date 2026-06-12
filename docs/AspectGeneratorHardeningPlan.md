@@ -16,7 +16,6 @@ Completed:
 
 Not completed:
 
-- large-project performance issue from the full syntax-tree invocation scan;
 - generated interceptor type collision hardening;
 - `AG0004` severity policy;
 - public API contract stabilization;
@@ -26,21 +25,21 @@ Not completed:
 
 ## P1: Incremental Generator Pipeline
 
-Status: not implemented.
+Status: partially implemented.
 
-Problem: the generator implements `IIncrementalGenerator`, but interception discovery still depends on `CompilationProvider` and scans all syntax trees with `DescendantNodes()` to find invocations. This can be too expensive for large projects and IDE incremental builds.
+Problem: the generator implements `IIncrementalGenerator`. The previous interception discovery path used `CompilationProvider` and scanned all syntax trees with `DescendantNodes()` to find invocations. That full syntax-tree scan has been removed; invocation candidates now come from `SyntaxProvider`.
 
 Checklist:
 
-- [ ] Split the pipeline into independent incremental sources:
+- [x] Split the pipeline into independent incremental sources:
   - aspect definitions;
   - invocation candidates;
   - MSBuild / assembly options.
-- [ ] Use `SyntaxProvider` for `InvocationExpressionSyntax` candidates.
-- [ ] Add early syntactic filtering before semantic model access.
-- [ ] Resolve semantic information only for candidate invocations.
-- [ ] Build and reuse an aspect metadata map.
-- [ ] Preserve support for:
+- [x] Use `SyntaxProvider` for `InvocationExpressionSyntax` candidates.
+- [x] Add early syntactic filtering before semantic model access.
+- [x] Resolve semantic information only for candidate invocations.
+- [x] Build and reuse an aspect metadata map.
+- [x] Preserve support for:
   - aspect attributes from the current compilation;
   - aspect attributes from referenced assemblies;
   - cross-project scenarios;

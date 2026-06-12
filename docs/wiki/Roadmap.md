@@ -6,18 +6,12 @@ This page mirrors the high-level roadmap for wiki readers.
 
 ## P1: Incremental Generator Pipeline
 
-Status: not implemented.
+Status: partially implemented.
 
-The generator still implements `IIncrementalGenerator`, but the main interception discovery path depends on `CompilationProvider` and scans all syntax trees with `DescendantNodes()` to find invocations.
+The previous full syntax-tree scan has been removed. Invocation candidates now come from `SyntaxProvider`; the remaining work is a performance regression test or benchmark.
 
 Planned work:
 
-- split the pipeline into independent incremental sources for aspect definitions, invocation candidates, and configuration;
-- use `SyntaxProvider` for `InvocationExpressionSyntax` candidates instead of scanning all syntax trees manually;
-- add early syntactic filtering before semantic model access;
-- resolve semantic information only for candidate invocations;
-- build and reuse an aspect metadata map;
-- preserve same-compilation aspects, referenced aspect libraries, cross-project scenarios, and `InterceptMethods`;
 - add a synthetic performance regression test or benchmark project with many invocations.
 
 ## P1: Generated Interceptor Type Shape

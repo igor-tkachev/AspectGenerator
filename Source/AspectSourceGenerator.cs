@@ -168,7 +168,9 @@ namespace AspectGenerator
 			}
 #endif
 
-			context.RegisterPostInitializationOutput(ctx => ctx.AddSource("AspectGeneratorOptionsAttribute.g.cs", SourceText.From(AspectGeneratorOptionsAttributeText, Encoding.UTF8)));
+			context.RegisterPostInitializationOutput(ctx => ctx.AddSource(
+				"AspectGeneratorOptionsAttribute.g.cs",
+				SourceText.From(AspectGeneratorOptionsAttributeText, Encoding.UTF8)));
 
 			var attributes = context.SyntaxProvider
 				.CreateSyntaxProvider(
@@ -176,6 +178,15 @@ namespace AspectGenerator
 						.SelectMany(static l => l.Attributes)
 						.Any(static a => IsAspectAttributeName(a.Name.ToString())),
 					transform: static (ctx, _) => (ClassDeclarationSyntax)ctx.Node)
+				.Collect();
+
+			var invocations = context.SyntaxProvider
+				.CreateSyntaxProvider(
+					predicate: static (node, _) => node is InvocationExpressionSyntax
+					{
+						Expression: MemberAccessExpressionSyntax or IdentifierNameSyntax
+					},
+					transform: static (ctx, _) => (InvocationExpressionSyntax)ctx.Node)
 				.Collect();
 
 			var options = context.AnalyzerConfigOptionsProvider.Select((c, _) =>
@@ -188,14 +199,17 @@ namespace AspectGenerator
 					AllowedInterceptorsNamespaces = c.GlobalOptions.TryGetValue("build_property.InterceptorsNamespaces", out var namespaces) ? namespaces : null,
 				});
 
-			context.RegisterImplementationSourceOutput(context.CompilationProvider.Combine(options.Combine(attributes)), Implement);
+			context.RegisterImplementationSourceOutput(context.CompilationProvider.Combine(options).Combine(attributes).Combine(invocations), Implement);
 		}
 
-		static void Implement(SourceProductionContext spc, (Compilation Left, (Options Left, ImmutableArray<ClassDeclarationSyntax> Right) Right) data)
+		static void Implement(
+			SourceProductionContext spc,
+			(((Compilation Left, Options Right) Left, ImmutableArray<ClassDeclarationSyntax> Right) Left, ImmutableArray<InvocationExpressionSyntax> Right) data)
 		{
-			var compilation = data.Left;
-			var options     = ResolveOptions(compilation, data.Right.Left);
-			var attrs       = data.Right.Right;
+			var compilation = data.Left.Left.Left;
+			var options     = ResolveOptions(compilation, data.Left.Left.Right);
+			var attrs       = data.Left.Right;
+			var invocations = data.Right;
 
 			if (options.GenerateApi is not false)
 				spc.AddSource("AspectAttribute.g.cs", SourceText.From(GenerateAspectApiText(options.PublicApi is true), Encoding.UTF8));
@@ -251,63 +265,49 @@ namespace AspectGenerator
 				}
 			}
 
-			foreach (var tree in compilation.SyntaxTrees)
+			foreach (var invocation in invocations)
 			{
-				var semantic = compilation.GetSemanticModel(tree);
+				var semantic = compilation.GetSemanticModel(invocation.SyntaxTree);
+				var info     = semantic.GetSymbolInfo(invocation, spc.CancellationToken);
 
-				// Scan the semantic tree...
+				// Bind only invocation candidates provided by SyntaxProvider.
 				//
-				foreach (var node in tree.GetRoot(spc.CancellationToken).DescendantNodes())
+				if (info.Symbol is IMethodSymbol method)
 				{
-					// .. to find an invocation...
-					//
-					if (node.IsKind(SyntaxKind.InvocationExpression))
+					if (!methodDic.TryGetValue(method, out var attributes))
 					{
-						var info = semantic.GetSymbolInfo(node, spc.CancellationToken);
+						attributes = new();
 
-						// .. of a method...
+						var methodAttributes = method.GetAttributes();
+
+						// .. decorated with any Aspect attribute...
 						//
-						if (info.Symbol is IMethodSymbol method)
+						if (methodAttributes.Length > 0)
 						{
-							if (!methodDic.TryGetValue(method, out var attributes))
+							foreach (var ma in methodAttributes)
 							{
-								attributes = new();
-
-								var methodAttributes = method.GetAttributes();
-
-								// .. decorated with any Aspect attribute...
+								// .. if attribute is defined in the compiling assembly...
 								//
-								if (methodAttributes.Length > 0)
+								if (ma.AttributeClass is not null && aspectAttributes.TryGetValue(ma.AttributeClass, out var aspectAttribute))
 								{
-									foreach (var ma in methodAttributes)
-									{
-										// .. if attribute is defined in the compiling assembly...
-										//
-										if (ma.AttributeClass is not null && aspectAttributes.TryGetValue(ma.AttributeClass, out var aspectAttribute))
-										{
-											attributes.Add(new AttributeInfo(ma, ma.AttributeClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel));
-										}
-										// .. or somewhere else.
-										else if (ma.AttributeClass?.GetAttributes().FirstOrDefault(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }}) is {} externalAspectAttributeData)
-										{
-											attributes.Add(new AttributeInfo(ma, ma.AttributeClass!, externalAspectAttributeData, null, null));
-										}
-									}
+									attributes.Add(new AttributeInfo(ma, ma.AttributeClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel));
 								}
-
-								if (interceptedDic.TryGetValue(method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat), out var mm))
-									attributes.AddRange(mm);
-
-								methodDic[method] = attributes.Distinct().ToList();
+								// .. or somewhere else.
+								else if (ma.AttributeClass?.GetAttributes().FirstOrDefault(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }}) is {} externalAspectAttributeData)
+								{
+									attributes.Add(new AttributeInfo(ma, ma.AttributeClass!, externalAspectAttributeData, null, null));
+								}
 							}
-
-							if (attributes.Count > 0)
-								aspectedMethods.Add(((InvocationExpressionSyntax)node, method, attributes));
 						}
+
+						if (interceptedDic.TryGetValue(method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat), out var mm))
+							attributes.AddRange(mm);
+
+						methodDic[method] = attributes.Distinct().ToList();
 					}
 
-					if (spc.CancellationToken.IsCancellationRequested)
-						break;
+					if (attributes.Count > 0)
+						aspectedMethods.Add((invocation, method, attributes));
 				}
 
 				if (spc.CancellationToken.IsCancellationRequested)
