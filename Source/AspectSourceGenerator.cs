@@ -103,8 +103,6 @@ namespace AspectGenerator
 					public string?   OnCatchAsync      { get; set; }
 					public string?   OnFinally         { get; set; }
 					public string?   OnFinallyAsync    { get; set; }
-					public string[]? InterceptMethods  { get; set; }
-					public string[]? Filter            { get; set; }
 					public bool      UseInterceptType  { get; set; }
 					public bool      PassArguments     { get; set; }
 					public bool      UseInterceptData  { get; set; }
@@ -126,6 +124,13 @@ namespace AspectGenerator
 					Return,
 					ReThrow     = Continue,
 					IgnoreThrow = Return
+				}
+
+				{{visibility}}enum AspectFilterKind
+				{
+					Dsl,
+					Contains,
+					Regex
 				}
 
 				{{visibility}}struct Void
@@ -200,8 +205,17 @@ namespace AspectGenerator
 		}
 
 		record CompiledAspectFilter(
-			bool  IsNegative,
-			Regex Regex);
+			bool             IsNegative,
+			TargetFilterKind Kind,
+			string           Pattern,
+			Regex?           Regex);
+
+		enum TargetFilterKind
+		{
+			Dsl,
+			Contains,
+			Regex
+		}
 
 		record AspectFilterSet(
 			AttributeInfo                         Attribute,
@@ -309,35 +323,11 @@ namespace AspectGenerator
 
 			ValidateAspectHooks(diagnostics, aspectAttributes, reportedDiagnostics);
 
-			var aspectDeclarationFilters = BuildAspectDeclarationFilters(compilation, diagnostics, aspectAttributes, reportedDiagnostics);
-			var assemblyFilters          = BuildAssemblyFilters(compilation, diagnostics, aspectAttributes, reportedDiagnostics);
+			var assemblyFilters = BuildAssemblyFilters(compilation, diagnostics, aspectAttributes, reportedDiagnostics);
 
 			var aspectedMethods  = new List<AnalyzedInvocation>();
 			var methodDic        = new Dictionary<IMethodSymbol,List<AttributeInfo>>(SymbolEqualityComparer.Default);
-			var interceptedDic   = new Dictionary<string,List<AttributeInfo>>();
 			var typeFilterDic    = new Dictionary<INamedTypeSymbol,ImmutableArray<AspectFilterSet>>(SymbolEqualityComparer.Default);
-
-			foreach (var a in aspectAttributes)
-			{
-				foreach (var arg in GetAspectArguments(a.Value.Syntax, a.Value.SemanticModel))
-				{
-					if (arg is { Key: "InterceptMethods", Value: object?[] methods })
-					{
-						foreach (var m in methods)
-						{
-							if (m is string s)
-							{
-								var ai = new AttributeInfo(null, (INamedTypeSymbol)a.Key, null, a.Value.Syntax, a.Value.SemanticModel);
-
-								if (interceptedDic.ContainsKey(s))
-									interceptedDic[s].Add(ai);
-								else
-									interceptedDic[s] = [ai];
-							}
-						}
-					}
-				}
-			}
 
 			foreach (var invocation in invocations)
 			{
@@ -374,12 +364,8 @@ namespace AspectGenerator
 							}
 						}
 
-						if (interceptedDic.TryGetValue(method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat), out var mm))
-							attributes.AddRange(mm);
-
 						var targetSignature = GetCanonicalMethodFilterSignature(method);
 
-						AddMatchedFilterAttributes(attributes, aspectDeclarationFilters, targetSignature);
 						AddMatchedFilterAttributes(attributes, assemblyFilters, targetSignature);
 						AddMatchedFilterAttributes(attributes, GetTypeFilters(compilation, diagnostics, aspectAttributes, typeFilterDic, method.ContainingType, reportedDiagnostics), targetSignature);
 
@@ -581,37 +567,6 @@ namespace AspectGenerator
 			diagnostics.Add(new DiagnosticInfo(id, message, location));
 		}
 
-		static ImmutableArray<AspectFilterSet> BuildAspectDeclarationFilters(
-			Compilation                                                             compilation,
-			List<DiagnosticInfo>                                                    diagnostics,
-			Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)> aspectAttributes,
-			HashSet<string>                                                          reportedDiagnostics)
-		{
-			var result = ImmutableArray.CreateBuilder<AspectFilterSet>();
-
-			foreach (var item in aspectAttributes)
-			{
-				if (item.Key is not INamedTypeSymbol aspectClass)
-					continue;
-
-				var filterValues = GetNamedStringArrayValue(item.Value.Syntax, item.Value.SemanticModel, "Filter");
-
-				if (filterValues.IsDefaultOrEmpty)
-					continue;
-
-				var filters = CompileAspectFilters(diagnostics, reportedDiagnostics, filterValues, item.Value.Syntax.GetLocation());
-
-				if (filters.IsDefaultOrEmpty)
-					continue;
-
-				result.Add(new AspectFilterSet(
-					new AttributeInfo(null, aspectClass, null, item.Value.Syntax, item.Value.SemanticModel),
-					filters));
-			}
-
-			return result.ToImmutable();
-		}
-
 		static ImmutableArray<AspectFilterSet> BuildAssemblyFilters(
 			Compilation                                                             compilation,
 			List<DiagnosticInfo>                                                    diagnostics,
@@ -622,7 +577,7 @@ namespace AspectGenerator
 
 			foreach (var filterAttribute in compilation.Assembly.GetAttributes())
 			{
-				if (!filterAttribute.NamedArguments.Any(static a => a.Key == "Filter"))
+				if (!filterAttribute.NamedArguments.Any(static a => a.Key == "TargetFilter"))
 					continue;
 
 				if (CreateAppliedAspectFilterSet(
@@ -661,7 +616,7 @@ namespace AspectGenerator
 
 				foreach (var filterAttribute in typeDeclaration.AttributeLists.SelectMany(static list => list.Attributes))
 				{
-					if (!HasNamedArgument(filterAttribute, "Filter"))
+					if (!HasNamedArgument(filterAttribute, "TargetFilter"))
 						continue;
 
 					if (CreateAppliedAspectFilterSet(
@@ -701,12 +656,13 @@ namespace AspectGenerator
 			else
 				return null;
 
-			var filterValues = GetNamedStringArrayValue(filterAttribute, semanticModel, "Filter");
+			var filterValues = GetNamedStringArrayValue(filterAttribute, semanticModel, "TargetFilter");
 
 			if (filterValues.IsDefaultOrEmpty)
 				return null;
 
-			var filters = CompileAspectFilters(diagnostics, reportedDiagnostics, filterValues, filterAttribute.GetLocation());
+			var filterKind = GetNamedTargetFilterKindValue(filterAttribute, semanticModel);
+			var filters    = CompileAspectFilters(diagnostics, reportedDiagnostics, filterValues, filterKind, filterAttribute.GetLocation());
 
 			return filters.IsDefaultOrEmpty ? null : new AspectFilterSet(attributeInfo, filters);
 		}
@@ -731,7 +687,7 @@ namespace AspectGenerator
 			else
 				return null;
 
-			var filterValues = GetNamedStringArrayValue(filterAttribute, "Filter");
+			var filterValues = GetNamedStringArrayValue(filterAttribute, "TargetFilter");
 
 			if (filterValues.IsDefaultOrEmpty)
 				return null;
@@ -739,7 +695,8 @@ namespace AspectGenerator
 			var location = filterAttribute.ApplicationSyntaxReference is {} syntaxReference
 				? Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span)
 				: null;
-			var filters = CompileAspectFilters(diagnostics, reportedDiagnostics, filterValues, location);
+			var filterKind = GetNamedTargetFilterKindValue(filterAttribute);
+			var filters    = CompileAspectFilters(diagnostics, reportedDiagnostics, filterValues, filterKind, location);
 
 			return filters.IsDefaultOrEmpty ? null : new AspectFilterSet(attributeInfo, filters);
 		}
@@ -761,6 +718,23 @@ namespace AspectGenerator
 			return [];
 		}
 
+		static TargetFilterKind GetNamedTargetFilterKindValue(AttributeSyntax attribute, SemanticModel semanticModel)
+		{
+			foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
+			{
+				if (arg.NameEquals?.Name.Identifier.ValueText != "TargetFilterKind")
+					continue;
+
+				var value = semanticModel.GetConstantValue(arg.Expression).Value;
+
+				return TryGetTargetFilterKind(value, out var filterKind)
+					? filterKind
+					: GetTargetFilterKindFromExpression(arg.Expression);
+			}
+
+			return TargetFilterKind.Dsl;
+		}
+
 		static ImmutableArray<string> GetNamedStringArrayValue(AttributeData attribute, string name)
 		{
 			foreach (var arg in attribute.NamedArguments)
@@ -777,10 +751,74 @@ namespace AspectGenerator
 			return [];
 		}
 
+		static TargetFilterKind GetNamedTargetFilterKindValue(AttributeData attribute)
+		{
+			foreach (var arg in attribute.NamedArguments)
+			{
+				if (arg.Key != "TargetFilterKind")
+					continue;
+
+				return TryGetTargetFilterKind(arg.Value.Value, out var filterKind)
+					? filterKind
+					: GetTargetFilterKindFromSyntax(attribute);
+			}
+
+			return TargetFilterKind.Dsl;
+		}
+
+		static TargetFilterKind GetTargetFilterKindFromSyntax(AttributeData attribute)
+		{
+			if (attribute.ApplicationSyntaxReference?.GetSyntax() is not AttributeSyntax attributeSyntax)
+				return TargetFilterKind.Dsl;
+
+			foreach (var arg in attributeSyntax.ArgumentList?.Arguments ?? default)
+				if (arg.NameEquals?.Name.Identifier.ValueText == "TargetFilterKind")
+					return GetTargetFilterKindFromExpression(arg.Expression);
+
+			return TargetFilterKind.Dsl;
+		}
+
+		static TargetFilterKind GetTargetFilterKindFromExpression(ExpressionSyntax expression)
+		{
+			var text = expression.ToString();
+
+			if (text.EndsWith(".Contains", StringComparison.Ordinal) || text == "Contains")
+				return TargetFilterKind.Contains;
+
+			if (text.EndsWith(".Regex", StringComparison.Ordinal) || text == "Regex")
+				return TargetFilterKind.Regex;
+
+			return TargetFilterKind.Dsl;
+		}
+
+		static bool TryGetTargetFilterKind(object? value, out TargetFilterKind filterKind)
+		{
+			filterKind = TargetFilterKind.Dsl;
+
+			if (value is not IConvertible convertible)
+				return false;
+
+			try
+			{
+				var intValue = convertible.ToInt32(CultureInfo.InvariantCulture);
+
+				if (!Enum.IsDefined(typeof(TargetFilterKind), intValue))
+					return false;
+
+				filterKind = (TargetFilterKind)intValue;
+				return true;
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+		}
+
 		static ImmutableArray<CompiledAspectFilter> CompileAspectFilters(
 			List<DiagnosticInfo> diagnostics,
 			HashSet<string>      reportedDiagnostics,
 			ImmutableArray<string> filters,
+			TargetFilterKind     filterKind,
 			Location?            location)
 		{
 			var result = ImmutableArray.CreateBuilder<CompiledAspectFilter>();
@@ -790,11 +828,28 @@ namespace AspectGenerator
 				var isNegative = filter.StartsWith("-", StringComparison.Ordinal);
 				var pattern    = isNegative ? filter[1..] : filter;
 
+				if (filterKind == TargetFilterKind.Dsl)
+					continue;
+
+				if (filterKind == TargetFilterKind.Contains)
+				{
+					result.Add(
+						new CompiledAspectFilter(
+							isNegative,
+							filterKind,
+							pattern,
+							null));
+
+					continue;
+				}
+
 				try
 				{
 					result.Add(
 						new CompiledAspectFilter(
 							isNegative,
+							filterKind,
+							pattern,
 							new Regex(pattern, RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(200))));
 				}
 				catch (ArgumentException ex)
@@ -831,15 +886,15 @@ namespace AspectGenerator
 
 			foreach (var filter in filters)
 			{
-				try
+				var isMatch = filter.Kind switch
 				{
-					if (!filter.Regex.IsMatch(targetSignature))
-						continue;
-				}
-				catch (RegexMatchTimeoutException)
-				{
+					TargetFilterKind.Contains => targetSignature.Contains(filter.Pattern, StringComparison.Ordinal),
+					TargetFilterKind.Regex    => IsRegexMatch(filter, targetSignature),
+					_                         => false
+				};
+
+				if (!isMatch)
 					continue;
-				}
 
 				matched = !filter.IsNegative;
 			}
@@ -847,54 +902,59 @@ namespace AspectGenerator
 			return matched;
 		}
 
+		static bool IsRegexMatch(CompiledAspectFilter filter, string targetSignature)
+		{
+			try
+			{
+				return filter.Regex?.IsMatch(targetSignature) == true;
+			}
+			catch (RegexMatchTimeoutException)
+			{
+				return false;
+			}
+		}
+
 		static string GetCanonicalMethodFilterSignature(IMethodSymbol method)
 		{
 			var sourceMethod = method.ReducedFrom ?? method;
-			var definition   = sourceMethod.OriginalDefinition;
-			var parts      = new List<string> { GetAccessibility(definition.DeclaredAccessibility) };
+			var parts        = new List<string> { GetAccessibility(sourceMethod.DeclaredAccessibility) };
 
-			if (definition.IsStatic)
-				parts.Add("static");
-			if (definition.IsAbstract)
-				parts.Add("abstract");
-			if (definition.IsVirtual && !definition.IsOverride)
-				parts.Add("virtual");
-			if (definition.IsOverride)
-				parts.Add("override");
-			if (definition.IsSealed)
-				parts.Add("sealed");
-			if (definition.IsExtern)
-				parts.Add("extern");
-			if (HasUnsafeModifier(definition))
-				parts.Add("unsafe");
+			if (sourceMethod.IsStatic)                              parts.Add("static");
+			if (sourceMethod.IsAbstract)                            parts.Add("abstract");
+			if (sourceMethod.IsVirtual && !sourceMethod.IsOverride) parts.Add("virtual");
+			if (sourceMethod.IsOverride)                            parts.Add("override");
+			if (sourceMethod.IsSealed)                              parts.Add("sealed");
+			if (sourceMethod.IsExtern)                              parts.Add("extern");
+			if (HasUnsafeModifier(sourceMethod))                    parts.Add("unsafe");
 
 			var sb = new StringBuilder();
 
-			sb.Append(string.Join(" ", parts));
-			sb.Append(' ');
-			sb.Append(FormatFilterType(definition.ReturnType));
-			sb.Append(' ');
-			sb.Append(FormatFilterType(definition.ContainingType));
-			sb.Append('.');
-			sb.Append(definition.Name);
+			sb
+				.Append(string.Join(" ", parts))
+				.Append(' ')
+				.Append(FormatFilterType(sourceMethod.ReturnType))
+				.Append(' ')
+				.Append(FormatFilterType(sourceMethod.ContainingType))
+				.Append('.')
+				.Append(sourceMethod.Name);
 
-			if (definition.TypeParameters.Length > 0)
-				sb.Append('<').Append(string.Join(",", definition.TypeParameters.Select(static p => p.Name))).Append('>');
+			if (sourceMethod.TypeArguments.Length > 0)
+				sb.Append('<').Append(string.Join(",", sourceMethod.TypeArguments.Select(FormatFilterType))).Append('>');
 
 			sb.Append('(');
 
 			var parameters = new List<string>();
 
-			var methodParameters = definition.Parameters.AsEnumerable();
+			var methodParameters = sourceMethod.Parameters.AsEnumerable();
 
-			if (method.ReducedFrom is not null || method.IsExtensionMethod || definition.IsExtensionMethod)
+			if (method.ReducedFrom is not null || method.IsExtensionMethod || sourceMethod.IsExtensionMethod)
 			{
-				var receiverType = method.ReceiverType ?? sourceMethod.Parameters.FirstOrDefault()?.Type ?? definition.Parameters.FirstOrDefault()?.Type;
+				var receiverType = method.ReceiverType ?? sourceMethod.Parameters.FirstOrDefault()?.Type;
 
 				if (receiverType is not null)
 					parameters.Add($"this {FormatFilterType(receiverType)}");
 
-				if (definition.Parameters.Length > 0)
+				if (sourceMethod.Parameters.Length > 0)
 					methodParameters = methodParameters.Skip(1);
 			}
 

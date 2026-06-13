@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace AspectGenerator.Tests
 {
@@ -48,16 +48,13 @@ namespace AspectGenerator.Tests
 		}
 	}
 
-	[Aspect(
-		OnCall = nameof(OnCall),
-		InterceptMethods =
-		[
-			"AspectGenerator.Tests.OnCallObject.OnCall(int)"
-		]
-	)]
-	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+	[Aspect(OnCall = nameof(OnCall))]
+	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class OnCallAttribute : Attribute
 	{
+		public string[]?        TargetFilter     { get; set; }
+		public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
+
 		public static int OnCall(int n)
 		{
 			return n * 2;

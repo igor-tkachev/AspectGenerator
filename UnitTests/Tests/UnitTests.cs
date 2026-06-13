@@ -11,7 +11,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace AspectGenerator.Tests
 {
 	[Aspects.Log(
-		Filter =
+		TargetFilterKind = AspectFilterKind.Regex,
+		TargetFilter =
 		[
 			@"^public static System.String AspectGenerator\.Tests\.UnitTests\.TypeFilterTarget\(\)$"
 		])]
@@ -77,19 +78,6 @@ namespace AspectGenerator.Tests
 			Assert.AreEqual("hi__I__..hi__I__++hi, John__I__", str);
 
 			Console.WriteLine(str);
-		}
-
-		public static string DeclarationFilterTarget()
-		{
-			return "target";
-		}
-
-		[TestMethod]
-		public void DeclarationFilterAspectTest()
-		{
-			var str = DeclarationFilterTarget();
-
-			Assert.AreEqual("target + log.", str);
 		}
 
 		public static string AssemblyFilterTarget()
@@ -595,7 +583,7 @@ namespace AspectGenerator.Tests
 			var s = InterceptedMethod("Intercepted");
 
 			Console.WriteLine(s);
-			Assert.AreEqual("Intercepted InterceptedMethod + InterceptMethods aspect.", s);
+			Assert.AreEqual("Intercepted InterceptedMethod + log.", s);
 		}
 
 		public static T InterceptedGenericMethod<T>(T p)
@@ -609,7 +597,7 @@ namespace AspectGenerator.Tests
 			var s = InterceptedGenericMethod("Intercepted");
 
 			Console.WriteLine(s);
-			Assert.AreEqual("Intercepted + InterceptMethods aspect.", s);
+			Assert.AreEqual("Intercepted + log.", s);
 
 			var i = InterceptedGenericMethod(10);
 
@@ -624,7 +612,7 @@ namespace AspectGenerator.Tests
 			var s = "test string".Substring(5);
 
 			Console.WriteLine(s);
-			Assert.AreEqual("string + InterceptMethods aspect.", s);
+			Assert.AreEqual("string + log.", s);
 		}
 
 		[OnCall]

@@ -109,33 +109,6 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void AspectDeclarationFilterAppliesAspectTest()
-		{
-			var result = RunGenerator(FilterDeclarationPositiveSource);
-
-			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRegex);
-			AssertGeneratedSourceContains(result, "FilteredTarget_Interceptor");
-			AssertGeneratedSourceDoesNotContain(result, "OtherTarget_Interceptor");
-		}
-
-		[TestMethod]
-		public void AspectDeclarationNegativeFilterExcludesAspectTest()
-		{
-			var result = RunGenerator(FilterDeclarationNegativeSource);
-
-			AssertGeneratedSourceContains(result, "IncludedTarget_Interceptor");
-			AssertGeneratedSourceDoesNotContain(result, "ExcludedTarget_Interceptor");
-		}
-
-		[TestMethod]
-		public void AspectDeclarationFilterLastMatchWinsTest()
-		{
-			var result = RunGenerator(FilterDeclarationLastMatchWinsSource);
-
-			AssertGeneratedSourceContains(result, "Target_Interceptor");
-		}
-
-		[TestMethod]
 		public void AssemblyAspectFilterAppliesAspectTest()
 		{
 			var result = RunGenerator(FilterAssemblySource);
@@ -151,6 +124,16 @@ namespace AspectGenerator.Tests
 
 			AssertGeneratedSourceContains(result, "SaveUser_Interceptor");
 			AssertGeneratedSourceDoesNotContain(result, "LoadUser_Interceptor");
+		}
+
+		[TestMethod]
+		public void ContainsTargetFilterAppliesAspectTest()
+		{
+			var result = RunGenerator(FilterContainsSource);
+
+			AssertGeneratedSourceContains(result, "SaveUser_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "LoadUser_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "HealthCheck_Interceptor");
 		}
 
 		[TestMethod]
@@ -175,7 +158,7 @@ namespace AspectGenerator.Tests
 		public void FiltersDoNotGenerateInterceptorsWhenInterceptorsAreDisabledTest()
 		{
 			var result = RunGenerator(
-				FilterDeclarationPositiveSource,
+				FilterAssemblySource,
 				new()
 				{
 					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "false",
@@ -188,7 +171,7 @@ namespace AspectGenerator.Tests
 		public void FiltersRespectDesignTimeBuildTest()
 		{
 			var result = RunGenerator(
-				FilterDeclarationPositiveSource,
+				FilterAssemblySource,
 				new()
 				{
 					["build_property.DesignTimeBuild"] = "true",
@@ -514,88 +497,12 @@ namespace AspectGenerator.Tests
 			}
 			""";
 
-		const string FilterDeclarationPositiveSource =
-			"""
-			using System;
-			using AspectGenerator;
-
-			namespace AspectGenerator.Tests.GeneratorDriver;
-
-			[Aspect(OnAfterCall = nameof(After), Filter = [@".*\.FilteredTarget\(\)$"])]
-			sealed class FilterAspectAttribute : Attribute
-			{
-				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
-			}
-
-			static class Target
-			{
-				public static void Invoke()
-				{
-					FilteredTarget();
-					OtherTarget();
-				}
-
-				public static string FilteredTarget() => "target";
-				public static string OtherTarget() => "other";
-			}
-			""";
-
-		const string FilterDeclarationNegativeSource =
-			"""
-			using System;
-			using AspectGenerator;
-
-			namespace AspectGenerator.Tests.GeneratorDriver;
-
-			[Aspect(OnAfterCall = nameof(After), Filter = [@".*Target\(\)$", @"-.*ExcludedTarget\(\)$"])]
-			sealed class FilterAspectAttribute : Attribute
-			{
-				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
-			}
-
-			static class Target
-			{
-				public static void Invoke()
-				{
-					IncludedTarget();
-					ExcludedTarget();
-				}
-
-				public static string IncludedTarget() => "included";
-				public static string ExcludedTarget() => "excluded";
-			}
-			""";
-
-		const string FilterDeclarationLastMatchWinsSource =
-			"""
-			using System;
-			using AspectGenerator;
-
-			namespace AspectGenerator.Tests.GeneratorDriver;
-
-			[Aspect(OnAfterCall = nameof(After), Filter = [@"-.*Target\(\)$", @".*Target\(\)$"])]
-			sealed class FilterAspectAttribute : Attribute
-			{
-				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
-			}
-
-			static class Target
-			{
-				public static void Invoke()
-				{
-					Target();
-				}
-
-				public static string Target() => "target";
-			}
-			""";
-
 		const string FilterAssemblySource =
 			"""
 			using System;
 			using AspectGenerator;
 
-			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(Filter = [@".*\.AssemblyTarget\(\)$"])]
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilterKind = AspectFilterKind.Regex, TargetFilter = [@".*\.AssemblyTarget\(\)$"])]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
@@ -603,7 +510,8 @@ namespace AspectGenerator.Tests
 			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class FilterAspectAttribute : Attribute
 			{
-				public string[]? Filter { get; set; }
+				public string[]?        TargetFilter     { get; set; }
+				public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
 
 				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
 			}
@@ -632,12 +540,13 @@ namespace AspectGenerator.Tests
 			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class FilterAspectAttribute : Attribute
 			{
-				public string[]? Filter { get; set; }
+				public string[]?        TargetFilter     { get; set; }
+				public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
 
 				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
 			}
 
-			[FilterAspect(Filter = [@".*\.SaveUser\(\)$"])]
+			[FilterAspect(TargetFilterKind = AspectFilterKind.Regex, TargetFilter = [@".*\.SaveUser\(\)$"])]
 			sealed class UserService
 			{
 				public void Invoke()
@@ -651,6 +560,45 @@ namespace AspectGenerator.Tests
 			}
 			""";
 
+		const string FilterContainsSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string[]?        TargetFilter     { get; set; }
+				public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			[FilterAspect(
+				TargetFilterKind = AspectFilterKind.Contains,
+				TargetFilter =
+				[
+					"Save",
+					"-HealthCheck"
+				])]
+			sealed class UserService
+			{
+				public void Invoke()
+				{
+					SaveUser();
+					LoadUser();
+					HealthCheck();
+				}
+
+				public string SaveUser() => "save";
+				public string LoadUser() => "load";
+				public string HealthCheck() => "health";
+			}
+			""";
+
 		const string FilterExplicitMethodSource =
 			"""
 			using System;
@@ -658,12 +606,17 @@ namespace AspectGenerator.Tests
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
-			[Aspect(OnAfterCall = nameof(After), Filter = [@".*\.DoesNotMatch\(\)$"])]
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class FilterAspectAttribute : Attribute
 			{
+				public string[]?        TargetFilter     { get; set; }
+				public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
+
 				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
 			}
 
+			[FilterAspect(TargetFilterKind = AspectFilterKind.Regex, TargetFilter = [@"-.*\.Target\(\)$"])]
 			static class Target
 			{
 				public static void Invoke()
@@ -681,11 +634,17 @@ namespace AspectGenerator.Tests
 			using System;
 			using AspectGenerator;
 
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilterKind = AspectFilterKind.Regex, TargetFilter = ["["])]
+
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
-			[Aspect(OnAfterCall = nameof(After), Filter = ["["])]
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class FilterAspectAttribute : Attribute
 			{
+				public string[]?        TargetFilter     { get; set; }
+				public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
+
 				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
 			}
 
@@ -707,17 +666,15 @@ namespace AspectGenerator.Tests
 			using System.Threading.Tasks;
 			using AspectGenerator;
 
-			namespace AspectGenerator.Tests.GeneratorDriver;
-
-			[Aspect(
-				OnAfterCall = nameof(After),
-				Filter =
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
+				TargetFilterKind = AspectFilterKind.Regex,
+				TargetFilter =
 				[
 					@"^public System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.PublicInstance\(System.Int32\)$",
 					@"^public static System.Void AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.StaticVoid\(\)$",
 					@"^public System.Threading.Tasks.Task<System.String> AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.TaskResult\(\)$",
-					@"^public T AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.GenericMethod<T>\(T\)$",
-					@"^public T AspectGenerator\.Tests\.GeneratorDriver\.GenericContainer<T>\.GenericContainerMethod\(T\)$",
+					@"^public System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.GenericMethod<System.String>\(System.String\)$",
+					@"^public System.String AspectGenerator\.Tests\.GeneratorDriver\.GenericContainer<System.String>\.GenericContainerMethod\(System.String\)$",
 					@"^public System.Boolean AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.ByRef\(ref System.Int32,out System.Int32,in System.Int32\)$",
 					@"^public static System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalExtensions\.ExtensionTarget\(this AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget,System.Int32\)$",
 					@"^public System.String\[\] AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.ArrayParameter\(System.String\[\]\)$",
@@ -725,8 +682,16 @@ namespace AspectGenerator.Tests
 					@"^public virtual System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalBase\.VirtualTarget\(\)$",
 					@"^public override System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalDerived\.OverrideTarget\(\)$"
 				])]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class FilterAspectAttribute : Attribute
 			{
+				public string[]?        TargetFilter     { get; set; }
+				public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
+
 				public static void After(InterceptInfo info)
 				{
 				}

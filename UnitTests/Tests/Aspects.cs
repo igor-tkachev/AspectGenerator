@@ -369,16 +369,12 @@ namespace Aspects
 		}
 	}
 
-	[Aspect(
-		OnAfterCall = nameof(OnAfterCall),
-		Filter =
-		[
-			@"^public static System.String AspectGenerator\.Tests\.UnitTests\.DeclarationFilterTarget\(\)$"
-		])]
+	[Aspect(OnAfterCall = nameof(OnAfterCall))]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class LogAttribute : Attribute
 	{
-		public string[]? Filter { get; set; }
+		public string[]?        TargetFilter     { get; set; }
+		public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
 
 		public static void OnAfterCall(InterceptInfo<string> info)
 		{
@@ -398,21 +394,4 @@ namespace Aspects
 		}
 	}
 
-	[Aspect(
-		OnAfterCall = nameof(OnAfterCall),
-		InterceptMethods =
-		[
-			"AspectGenerator.Tests.UnitTests.InterceptedMethod(string)",
-			"AspectGenerator.Tests.UnitTests.InterceptedGenericMethod<string>(string)",
-			"System.String.Substring(int)",
-			"string.Substring(int)"
-		]
-	)]
-	sealed class InterceptMethodsAttribute
-	{
-		public static void OnAfterCall(InterceptInfo<string> info)
-		{
-			info.ReturnValue += " + InterceptMethods aspect.";
-		}
-	}
 }

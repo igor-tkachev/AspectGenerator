@@ -16,7 +16,8 @@ Completed:
 - shared analysis model consumed by diagnostics and interceptor emission;
 - build-time interceptor emission gate through `AspectGeneratorGenerateInterceptors` / `DesignTimeBuild`;
 - `ValueTask` and `ValueTask<T>` async target support;
-- AOP-like target filters.
+- AOP-like target filters;
+- removal of the legacy explicit method selector in favor of applied target filters.
 
 Not completed:
 
@@ -28,7 +29,6 @@ Not completed:
 - typed argument passing;
 - public API contract stabilization;
 - lazy `MemberInfo` initialization;
-- `InterceptMethods` diagnostics.
 
 ## Capability Roadmap
 
@@ -45,30 +45,37 @@ Priority:
 
 Status: implemented.
 
-Problem: applying an aspect currently requires explicit method-level attributes or low-level `InterceptMethods` strings. A simple ordered regex filter model would allow applying aspects to matching target methods while keeping interception scoped to visible call sites in the current compilation.
+Problem: applying an aspect previously required explicit method-level attributes or low-level method-name strings. Ordered `TargetFilter` modes apply aspects to matching target methods while keeping interception scoped to visible call sites in the current compilation.
 
 Scope:
 
-- filters are regex strings;
+- `TargetFilter` is an ordered string list;
+- `TargetFilterKind` defaults to `AspectFilterKind.Dsl`, which is reserved while the DSL syntax is being designed;
+- `AspectFilterKind.Contains` uses ordinal substring matching;
+- `AspectFilterKind.Regex` uses regex matching with timeout protection;
 - filters apply to target method canonical signatures, not call-site text;
 - filters are evaluated in order;
-- a filter starting with `-` is an exclude filter;
-- the last matching filter wins inside one filter set;
-- no matching filter means the filter set does not apply;
+- an entry starting with `-` is an exclude filter;
+- the last matching entry wins inside one filter set;
+- no matching entry means the filter set does not apply;
 - explicit method-level aspect attributes remain explicit local intent and are not suppressed by filter excludes;
+- in AOP terminology, `TargetFilter` plays the role of a pointcut-like method selector; `pointcut` is explanatory only and is not part of the public API;
 - future suppressors such as `[NoLog]`, `[NoCounter]`, or `[AspectIgnore]` remain a separate feature.
 
 Public / generated API:
 
-- [x] Add `string[]? Filter { get; set; }` to generated `AspectAttribute`.
 - [x] Keep assembly and type filters on the applied aspect attribute itself instead of adding a separate `AspectFilterAttribute`.
-- [x] Require the applied aspect attribute to expose its own `Filter` property and appropriate `AttributeUsage` targets.
+- [x] Require the applied aspect attribute to expose its own `TargetFilter` property, `TargetFilterKind` property, and appropriate `AttributeUsage` targets.
+- [x] Keep `TargetFilter` off generated `AspectAttribute`; `[Aspect(TargetFilter = ...)]` is intentionally unsupported.
+- [x] Remove the legacy explicit method selector from generated `AspectAttribute`.
 
-Filter sources:
+TargetFilter sources:
 
-- [x] Support aspect declaration-level filters through `[Aspect(Filter = [...])]`.
-- [x] Support assembly-level filters through `[assembly: SomeAspect(Filter = [...])]`.
-- [x] Support type-level filters through `[SomeAspect(Filter = [...])]`.
+- [x] Support assembly-level filters through `[assembly: SomeAspect(TargetFilter = [...])]`.
+- [x] Support type-level filters through `[SomeAspect(TargetFilter = [...])]`.
+- [x] Support `Contains` target filters.
+- [x] Support `Regex` target filters.
+- [ ] Design and implement `Dsl` target filters.
 - [x] Evaluate each filter set independently.
 - [x] Include an aspect when any filter set evaluates to include.
 - [x] Keep negative filters local to their own filter set.
@@ -91,18 +98,18 @@ Formatting rules:
 
 Diagnostics:
 
-- [x] Add `AG0201` for invalid aspect filter regex.
+- [x] Add `AG0201` for invalid aspect target filter regex.
 - [x] Use `RegexOptions.CultureInvariant`.
 - [x] Do not use `IgnoreCase` by default.
 - [x] Use a regex timeout to protect IDE and design-time builds.
-- [ ] Postpone "filter matched no target methods" diagnostics.
+- [ ] Postpone "target filter matched no target methods" diagnostics.
 
 Implementation constraints:
 
 - [x] Do not reintroduce full `Compilation.SyntaxTrees` / `DescendantNodes()` scanning.
 - [x] Evaluate filters against invocation target methods using the existing `SyntaxProvider` candidate path.
 - [x] Start with normal methods only.
-- [x] Preserve existing behavior for explicit method-level aspects, external aspect attributes, `InterceptMethods`, diagnostics, `GenerateInterceptors`, `DesignTimeBuild`, and `InterceptorsNamespaces`.
+- [x] Preserve existing behavior for explicit method-level aspects, external aspect attributes, diagnostics, `GenerateInterceptors`, `DesignTimeBuild`, and `InterceptorsNamespaces`.
 
 Tests:
 
@@ -118,12 +125,10 @@ Tests:
   - array parameter;
   - nullable annotations ignored;
   - `virtual` / `override`.
-- [x] Add generator-driver test for aspect declaration-level positive filter.
-- [x] Add generator-driver test for aspect declaration-level negative filter.
 - [x] Add generator-driver test for last matching filter wins.
 - [x] Add generator-driver test for assembly-level applied aspect filters.
 - [x] Add generator-driver test for type-level applied aspect filters.
-- [x] Add generator-driver test proving explicit method-level aspect still applies when no filter matches.
+- [x] Add generator-driver test proving explicit method-level aspect still applies when no target filter matches.
 - [x] Add generator-driver test for invalid regex diagnostic `AG0201`.
 - [x] Add generator-driver tests for `AspectGeneratorGenerateInterceptors=false` and `DesignTimeBuild=true`.
 
@@ -280,7 +285,6 @@ Checklist:
   - aspect attributes from the current compilation;
   - aspect attributes from referenced assemblies;
   - cross-project scenarios;
-  - `InterceptMethods`.
 - [ ] Add a synthetic performance regression test or benchmark project with many invocations.
 - [ ] Re-run existing cross-project tests after each refactor step.
 
@@ -318,9 +322,6 @@ Problem: hook contract diagnostics exist, but several silent no-op or hard-to-de
 Checklist:
 
 - [x] Add hook diagnostics `AG0101` through `AG0107`.
-- [ ] Add unmatched `InterceptMethods` entry diagnostic.
-- [ ] Add ambiguous `InterceptMethods` match diagnostic.
-- [ ] Add alias-sensitive `InterceptMethods` match diagnostic.
 - [ ] Add diagnostics for aspects applied to unsupported targets, such as constructors, properties, operators, and local functions.
 - [ ] Add diagnostic for hook declared in aspect configuration but never used by generated code.
 - [ ] Revisit `OnCall` not-last diagnostics and severity.
@@ -392,16 +393,3 @@ Checklist:
 - [ ] Avoid `object?[]` allocations when `PassArguments=false`.
 - [ ] Consider typed parameter access for generated standard aspects.
 - [ ] Measure performance before adding codegen complexity.
-
-## Deferred: `InterceptMethods` Diagnostics
-
-Status: deferred until after hook contract diagnostics and generator pipeline hardening.
-
-Do not implement this in the current scope unless explicitly requested.
-
-Checklist:
-
-- [ ] Add unmatched method display string diagnostic.
-- [ ] Add ambiguous match diagnostic.
-- [ ] Add alias-sensitive match diagnostic.
-- [ ] Design a safer typed alternative separately.
