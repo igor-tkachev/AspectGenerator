@@ -11,7 +11,7 @@
 	/// <para>Create a new attribute decorated with this attribute to define an aspect.</para>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-	sealed class AspectAttribute : Attribute
+	public sealed class AspectAttribute : Attribute
 	{
 		public string?   OnInit            { get; set; }
 		public string?   OnUsing           { get; set; }
@@ -26,12 +26,13 @@
 		public string?   OnFinally         { get; set; }
 		public string?   OnFinallyAsync    { get; set; }
 		public string[]? InterceptMethods  { get; set; }
+		public string[]? Filter            { get; set; }
 		public bool      UseInterceptType  { get; set; }
 		public bool      PassArguments     { get; set; }
 		public bool      UseInterceptData  { get; set; }
 	}
 
-	enum InterceptType
+	public enum InterceptType
 	{
 		OnInit,
 		OnUsing,
@@ -41,7 +42,7 @@
 		OnFinally
 	}
 
-	enum InterceptResult
+	public enum InterceptResult
 	{
 		Continue,
 		Return,
@@ -49,11 +50,11 @@
 		IgnoreThrow = Return
 	}
 
-	struct Void
+	public struct Void
 	{
 	}
 
-	partial class InterceptInfo
+	public partial class InterceptInfo
 	{
 		public object?         Tag;
 		public InterceptType   InterceptType;
@@ -67,12 +68,12 @@
 		public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
 	}
 
-	partial class InterceptInfo<T> : InterceptInfo
+	public partial class InterceptInfo<T> : InterceptInfo
 	{
 		public T ReturnValue;
 	}
 
-	partial struct InterceptData<T>
+	public partial struct InterceptData<T>
 	{
 		public object?         Tag;
 		public InterceptType   InterceptType;

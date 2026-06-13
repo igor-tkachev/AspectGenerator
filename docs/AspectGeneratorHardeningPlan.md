@@ -15,12 +15,12 @@ Completed:
 - hook contract diagnostics `AG0103` through `AG0107`;
 - shared analysis model consumed by diagnostics and interceptor emission;
 - build-time interceptor emission gate through `AspectGeneratorGenerateInterceptors` / `DesignTimeBuild`;
-- `ValueTask` and `ValueTask<T>` async target support.
+- `ValueTask` and `ValueTask<T>` async target support;
+- AOP-like target filters.
 
 Not completed:
 
 - `AG0004` severity policy;
-- AOP-like target filters;
 - type-level aspects and suppressor model;
 - generated standard aspects;
 - aspect-specific parameter and return modifiers;
@@ -43,7 +43,7 @@ Priority:
 
 ## P0: AOP-Like Target Filters
 
-Status: not implemented.
+Status: implemented.
 
 Problem: applying an aspect currently requires explicit method-level attributes or low-level `InterceptMethods` strings. A simple ordered regex filter model would allow applying aspects to matching target methods while keeping interception scoped to visible call sites in the current compilation.
 
@@ -60,21 +60,18 @@ Scope:
 
 Public / generated API:
 
-- [ ] Add `string[]? Filter { get; set; }` to generated `AspectAttribute`.
-- [ ] Add generated `AspectFilterAttribute` usable at assembly and type level.
-- [ ] Use one combined attribute target if separate assembly/type attributes create C# usability issues:
-  - `AttributeTargets.Assembly`;
-  - `AttributeTargets.Class`;
-  - `AttributeTargets.Struct`.
+- [x] Add `string[]? Filter { get; set; }` to generated `AspectAttribute`.
+- [x] Keep assembly and type filters on the applied aspect attribute itself instead of adding a separate `AspectFilterAttribute`.
+- [x] Require the applied aspect attribute to expose its own `Filter` property and appropriate `AttributeUsage` targets.
 
 Filter sources:
 
-- [ ] Support aspect declaration-level filters through `[Aspect(Filter = [...])]`.
-- [ ] Support assembly-level filters through `[assembly: AspectFilter(typeof(SomeAspectAttribute), Filter = [...])]`.
-- [ ] Support type-level filters through `[AspectFilter(typeof(SomeAspectAttribute), Filter = [...])]`.
-- [ ] Evaluate each filter set independently.
-- [ ] Include an aspect when any filter set evaluates to include.
-- [ ] Keep negative filters local to their own filter set.
+- [x] Support aspect declaration-level filters through `[Aspect(Filter = [...])]`.
+- [x] Support assembly-level filters through `[assembly: SomeAspect(Filter = [...])]`.
+- [x] Support type-level filters through `[SomeAspect(Filter = [...])]`.
+- [x] Evaluate each filter set independently.
+- [x] Include an aspect when any filter set evaluates to include.
+- [x] Keep negative filters local to their own filter set.
 
 Canonical method filter signature:
 
@@ -84,32 +81,32 @@ Canonical method filter signature:
 
 Formatting rules:
 
-- [ ] Include accessibility: `public`, `protected`, `internal`, `private`, `protected internal`, `private protected`.
-- [ ] Include stable modifiers: `static`, `abstract`, `virtual`, `override`, `sealed`, `extern`, and `unsafe` if available from Roslyn symbol information.
-- [ ] Do not include `async`, `partial`, parameter names, nullable annotations, attributes, or generic constraints.
-- [ ] Use fully qualified type names without C# aliases, for example `System.String`, `System.Int32`, `System.Void`.
-- [ ] Format generic types as readable fully qualified generic syntax, for example `System.Threading.Tasks.Task<System.String>`.
-- [ ] Format parameters as modifier plus type only, for example `ref System.Int32`, `out System.Int32`, `in MyApp.Model`, `params System.String[]`.
-- [ ] Include `this` receiver for extension methods.
+- [x] Include accessibility: `public`, `protected`, `internal`, `private`, `protected internal`, `private protected`.
+- [x] Include stable modifiers: `static`, `abstract`, `virtual`, `override`, `sealed`, `extern`, and `unsafe` if available from Roslyn symbol information.
+- [x] Do not include `async`, `partial`, parameter names, nullable annotations, attributes, or generic constraints.
+- [x] Use fully qualified type names without C# aliases, for example `System.String`, `System.Int32`, `System.Void`.
+- [x] Format generic types as readable fully qualified generic syntax, for example `System.Threading.Tasks.Task<System.String>`.
+- [x] Format parameters as modifier plus type only, for example `ref System.Int32`, `out System.Int32`, `in MyApp.Model`, `params System.String[]`.
+- [x] Include `this` receiver for extension methods.
 
 Diagnostics:
 
-- [ ] Add `AG0201` for invalid aspect filter regex.
-- [ ] Use `RegexOptions.CultureInvariant`.
-- [ ] Do not use `IgnoreCase` by default.
-- [ ] Use a regex timeout to protect IDE and design-time builds.
+- [x] Add `AG0201` for invalid aspect filter regex.
+- [x] Use `RegexOptions.CultureInvariant`.
+- [x] Do not use `IgnoreCase` by default.
+- [x] Use a regex timeout to protect IDE and design-time builds.
 - [ ] Postpone "filter matched no target methods" diagnostics.
 
 Implementation constraints:
 
-- [ ] Do not reintroduce full `Compilation.SyntaxTrees` / `DescendantNodes()` scanning.
-- [ ] Evaluate filters against invocation target methods using the existing `SyntaxProvider` candidate path.
-- [ ] Start with normal methods only.
-- [ ] Preserve existing behavior for explicit method-level aspects, external aspect attributes, `InterceptMethods`, diagnostics, `GenerateInterceptors`, `DesignTimeBuild`, and `InterceptorsNamespaces`.
+- [x] Do not reintroduce full `Compilation.SyntaxTrees` / `DescendantNodes()` scanning.
+- [x] Evaluate filters against invocation target methods using the existing `SyntaxProvider` candidate path.
+- [x] Start with normal methods only.
+- [x] Preserve existing behavior for explicit method-level aspects, external aspect attributes, `InterceptMethods`, diagnostics, `GenerateInterceptors`, `DesignTimeBuild`, and `InterceptorsNamespaces`.
 
 Tests:
 
-- [ ] Add canonical signature formatter tests:
+- [x] Add canonical signature formatter tests:
   - public instance method;
   - static method;
   - void return;
@@ -121,22 +118,22 @@ Tests:
   - array parameter;
   - nullable annotations ignored;
   - `virtual` / `override`.
-- [ ] Add generator-driver test for aspect declaration-level positive filter.
-- [ ] Add generator-driver test for aspect declaration-level negative filter.
-- [ ] Add generator-driver test for last matching filter wins.
-- [ ] Add generator-driver test for assembly-level `AspectFilterAttribute`.
-- [ ] Add generator-driver test for type-level `AspectFilterAttribute`.
-- [ ] Add generator-driver test proving explicit method-level aspect still applies when no filter matches.
-- [ ] Add generator-driver test for invalid regex diagnostic `AG0201`.
-- [ ] Add generator-driver tests for `AspectGeneratorGenerateInterceptors=false` and `DesignTimeBuild=true`.
+- [x] Add generator-driver test for aspect declaration-level positive filter.
+- [x] Add generator-driver test for aspect declaration-level negative filter.
+- [x] Add generator-driver test for last matching filter wins.
+- [x] Add generator-driver test for assembly-level applied aspect filters.
+- [x] Add generator-driver test for type-level applied aspect filters.
+- [x] Add generator-driver test proving explicit method-level aspect still applies when no filter matches.
+- [x] Add generator-driver test for invalid regex diagnostic `AG0201`.
+- [x] Add generator-driver tests for `AspectGeneratorGenerateInterceptors=false` and `DesignTimeBuild=true`.
 
 Documentation:
 
-- [ ] Document ordered regex include / exclude filters.
-- [ ] Document canonical method signature format.
-- [ ] Document `-` prefix as exclude rule.
-- [ ] Document last matching filter wins.
-- [ ] Document that filters select target methods, while AspectGenerator still rewrites only visible call sites in the current compilation.
+- [x] Document ordered regex include / exclude filters.
+- [x] Document canonical method signature format.
+- [x] Document `-` prefix as exclude rule.
+- [x] Document last matching filter wins.
+- [x] Document that filters select target methods, while AspectGenerator still rewrites only visible call sites in the current compilation.
 
 ## P0: Type-Level Aspects And Suppressors
 

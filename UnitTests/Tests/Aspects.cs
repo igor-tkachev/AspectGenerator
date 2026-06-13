@@ -370,6 +370,23 @@ namespace Aspects
 	}
 
 	[Aspect(
+		OnAfterCall = nameof(OnAfterCall),
+		Filter =
+		[
+			@"^public static System.String AspectGenerator\.Tests\.UnitTests\.DeclarationFilterTarget\(\)$"
+		])]
+	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+	sealed class LogAttribute : Attribute
+	{
+		public string[]? Filter { get; set; }
+
+		public static void OnAfterCall(InterceptInfo<string> info)
+		{
+			info.ReturnValue += " + log.";
+		}
+	}
+
+	[Aspect(
 		OnAfterCall = nameof(OnAfterCall)
 	)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]

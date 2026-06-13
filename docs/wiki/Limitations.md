@@ -8,6 +8,7 @@ AspectGenerator is compile-time call-site rewriting, not runtime AOP.
 - instance method calls;
 - extension method calls;
 - generic method calls;
+- target filters;
 - `Task`, `Task<T>`, `ValueTask`, and `ValueTask<T>` targets;
 - `ref`, `out`, and `in` parameters.
 

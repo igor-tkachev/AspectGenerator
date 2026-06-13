@@ -26,6 +26,7 @@
 		public string?   OnFinally         { get; set; }
 		public string?   OnFinallyAsync    { get; set; }
 		public string[]? InterceptMethods  { get; set; }
+		public string[]? Filter            { get; set; }
 		public bool      UseInterceptType  { get; set; }
 		public bool      PassArguments     { get; set; }
 		public bool      UseInterceptData  { get; set; }

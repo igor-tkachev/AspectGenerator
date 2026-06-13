@@ -108,6 +108,117 @@ namespace AspectGenerator.Tests
 			StringAssert.Contains(diagnostic.GetMessage(), "ValueTask<T>");
 		}
 
+		[TestMethod]
+		public void AspectDeclarationFilterAppliesAspectTest()
+		{
+			var result = RunGenerator(FilterDeclarationPositiveSource);
+
+			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRegex);
+			AssertGeneratedSourceContains(result, "FilteredTarget_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "OtherTarget_Interceptor");
+		}
+
+		[TestMethod]
+		public void AspectDeclarationNegativeFilterExcludesAspectTest()
+		{
+			var result = RunGenerator(FilterDeclarationNegativeSource);
+
+			AssertGeneratedSourceContains(result, "IncludedTarget_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "ExcludedTarget_Interceptor");
+		}
+
+		[TestMethod]
+		public void AspectDeclarationFilterLastMatchWinsTest()
+		{
+			var result = RunGenerator(FilterDeclarationLastMatchWinsSource);
+
+			AssertGeneratedSourceContains(result, "Target_Interceptor");
+		}
+
+		[TestMethod]
+		public void AssemblyAspectFilterAppliesAspectTest()
+		{
+			var result = RunGenerator(FilterAssemblySource);
+
+			AssertGeneratedSourceContains(result, "AssemblyTarget_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "OtherTarget_Interceptor");
+		}
+
+		[TestMethod]
+		public void TypeAspectFilterAppliesAspectInsideTypeTest()
+		{
+			var result = RunGenerator(FilterTypeSource);
+
+			AssertGeneratedSourceContains(result, "SaveUser_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "LoadUser_Interceptor");
+		}
+
+		[TestMethod]
+		public void ExplicitMethodAspectAppliesWhenNoFilterMatchesTest()
+		{
+			var result = RunGenerator(FilterExplicitMethodSource);
+
+			AssertGeneratedSourceContains(result, "Target_Interceptor");
+		}
+
+		[TestMethod]
+		public void InvalidAspectFilterRegexReportsDiagnosticTest()
+		{
+			var result = RunGenerator(FilterInvalidRegexSource);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRegex);
+
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRegex}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			StringAssert.Contains(diagnostic.GetMessage(), "Invalid aspect filter regex");
+		}
+
+		[TestMethod]
+		public void FiltersDoNotGenerateInterceptorsWhenInterceptorsAreDisabledTest()
+		{
+			var result = RunGenerator(
+				FilterDeclarationPositiveSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "false",
+				});
+
+			AssertNotGenerated(result, "Interceptors.g.cs");
+		}
+
+		[TestMethod]
+		public void FiltersRespectDesignTimeBuildTest()
+		{
+			var result = RunGenerator(
+				FilterDeclarationPositiveSource,
+				new()
+				{
+					["build_property.DesignTimeBuild"] = "true",
+				});
+
+			AssertNotGenerated(result, "Interceptors.g.cs");
+		}
+
+		[TestMethod]
+		public void AspectFiltersUseCanonicalMethodSignatureTest()
+		{
+			var result = RunGenerator(FilterCanonicalSignatureSource);
+
+			foreach (var expected in new[]
+			{
+				"PublicInstance_Interceptor",
+				"StaticVoid_Interceptor",
+				"TaskResult_Interceptor",
+				"GenericMethod_Interceptor",
+				"GenericContainerMethod_Interceptor",
+				"ByRef_Interceptor",
+				"ExtensionTarget_Interceptor",
+				"ArrayParameter_Interceptor",
+				"NullableIgnored_Interceptor",
+				"VirtualTarget_Interceptor",
+				"OverrideTarget_Interceptor",
+			})
+				AssertGeneratedSourceContains(result, expected);
+		}
+
 		static GeneratorDriverRunResult RunGenerator(string source, Dictionary<string,string>? properties = null)
 		{
 			var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
@@ -151,6 +262,33 @@ namespace AspectGenerator.Tests
 			Assert.IsFalse(
 				result.Results.SelectMany(static r => r.GeneratedSources).Any(s => string.Equals(s.HintName, hintName, StringComparison.Ordinal)),
 				$"Did not expect generated source '{hintName}'.");
+		}
+
+		static void AssertNoDiagnostic(GeneratorDriverRunResult result, string diagnosticId)
+		{
+			CollectionAssert.DoesNotContain(result.Diagnostics.Select(static d => d.Id).ToArray(), diagnosticId);
+		}
+
+		static string GetGeneratedSource(GeneratorDriverRunResult result, string hintName)
+		{
+			var sources = result.Results
+				.SelectMany(static r => r.GeneratedSources)
+				.Where(s => string.Equals(s.HintName, hintName, StringComparison.Ordinal))
+				.ToArray();
+
+			Assert.AreEqual(1, sources.Length, $"Expected generated source '{hintName}'.");
+
+			return sources[0].SourceText.ToString();
+		}
+
+		static void AssertGeneratedSourceContains(GeneratorDriverRunResult result, string text)
+		{
+			StringAssert.Contains(GetGeneratedSource(result, "Interceptors.g.cs"), text);
+		}
+
+		static void AssertGeneratedSourceDoesNotContain(GeneratorDriverRunResult result, string text)
+		{
+			Assert.IsFalse(GetGeneratedSource(result, "Interceptors.g.cs").Contains(text, StringComparison.Ordinal), $"Did not expect generated source to contain '{text}'.");
 		}
 
 		sealed class TestAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsProvider
@@ -373,6 +511,279 @@ namespace AspectGenerator.Tests
 				{
 					await Task.CompletedTask;
 				}
+			}
+			""";
+
+		const string FilterDeclarationPositiveSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After), Filter = [@".*\.FilteredTarget\(\)$"])]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					FilteredTarget();
+					OtherTarget();
+				}
+
+				public static string FilteredTarget() => "target";
+				public static string OtherTarget() => "other";
+			}
+			""";
+
+		const string FilterDeclarationNegativeSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After), Filter = [@".*Target\(\)$", @"-.*ExcludedTarget\(\)$"])]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					IncludedTarget();
+					ExcludedTarget();
+				}
+
+				public static string IncludedTarget() => "included";
+				public static string ExcludedTarget() => "excluded";
+			}
+			""";
+
+		const string FilterDeclarationLastMatchWinsSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After), Filter = [@"-.*Target\(\)$", @".*Target\(\)$"])]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				public static string Target() => "target";
+			}
+			""";
+
+		const string FilterAssemblySource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(Filter = [@".*\.AssemblyTarget\(\)$"])]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string[]? Filter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					AssemblyTarget();
+					OtherTarget();
+				}
+
+				public static string AssemblyTarget() => "target";
+				public static string OtherTarget() => "other";
+			}
+			""";
+
+		const string FilterTypeSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string[]? Filter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			[FilterAspect(Filter = [@".*\.SaveUser\(\)$"])]
+			sealed class UserService
+			{
+				public void Invoke()
+				{
+					SaveUser();
+					LoadUser();
+				}
+
+				public string SaveUser() => "save";
+				public string LoadUser() => "load";
+			}
+			""";
+
+		const string FilterExplicitMethodSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After), Filter = [@".*\.DoesNotMatch\(\)$"])]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				[FilterAspect]
+				public static string Target() => "target";
+			}
+			""";
+
+		const string FilterInvalidRegexSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After), Filter = ["["])]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				public static string Target() => "target";
+			}
+			""";
+
+		const string FilterCanonicalSignatureSource =
+			"""
+			#nullable enable
+			using System;
+			using System.Threading.Tasks;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(
+				OnAfterCall = nameof(After),
+				Filter =
+				[
+					@"^public System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.PublicInstance\(System.Int32\)$",
+					@"^public static System.Void AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.StaticVoid\(\)$",
+					@"^public System.Threading.Tasks.Task<System.String> AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.TaskResult\(\)$",
+					@"^public T AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.GenericMethod<T>\(T\)$",
+					@"^public T AspectGenerator\.Tests\.GeneratorDriver\.GenericContainer<T>\.GenericContainerMethod\(T\)$",
+					@"^public System.Boolean AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.ByRef\(ref System.Int32,out System.Int32,in System.Int32\)$",
+					@"^public static System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalExtensions\.ExtensionTarget\(this AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget,System.Int32\)$",
+					@"^public System.String\[\] AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.ArrayParameter\(System.String\[\]\)$",
+					@"^public System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.NullableIgnored\(System.String\)$",
+					@"^public virtual System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalBase\.VirtualTarget\(\)$",
+					@"^public override System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalDerived\.OverrideTarget\(\)$"
+				])]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo info)
+				{
+				}
+			}
+
+			class CanonicalBase
+			{
+				public virtual string VirtualTarget() => "";
+			}
+
+			class CanonicalDerived : CanonicalBase
+			{
+				public override string OverrideTarget() => "";
+			}
+
+			class GenericContainer<T>
+			{
+				public T GenericContainerMethod(T value) => value;
+			}
+
+			class CanonicalTarget
+			{
+				public void Invoke()
+				{
+					var value = 1;
+					var input = 2;
+
+					PublicInstance(1);
+					StaticVoid();
+					TaskResult();
+					GenericMethod("value");
+					new GenericContainer<string>().GenericContainerMethod("value");
+					ByRef(ref value, out _, in input);
+					this.ExtensionTarget(1);
+					ArrayParameter(["value"]);
+					NullableIgnored(null);
+					new CanonicalBase().VirtualTarget();
+					new CanonicalDerived().OverrideTarget();
+				}
+
+				public string PublicInstance(int value) => value.ToString();
+				public static void StaticVoid() {}
+				public Task<string> TaskResult() => Task.FromResult("");
+				public T GenericMethod<T>(T value) => value;
+				public bool ByRef(ref int value, out int outValue, in int inValue)
+				{
+					value++;
+					outValue = inValue;
+					return true;
+				}
+				public string[] ArrayParameter(string[] values) => values;
+				public string? NullableIgnored(string? value) => value;
+			}
+
+			static class CanonicalExtensions
+			{
+				public static string ExtensionTarget(this CanonicalTarget target, int value) => value.ToString();
 			}
 			""";
 	}

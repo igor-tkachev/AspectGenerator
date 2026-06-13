@@ -123,6 +123,7 @@ Common modes:
 | Instance methods | Supported | Call site must be visible to the current compilation. |
 | Extension methods | Supported | Covered by unit tests. |
 | Generic methods | Supported | Explicit `InterceptMethods` strings must match generated display names. |
+| Target filters | Supported | Ordered regex filters apply aspects to matching target method signatures. |
 | `Task`, `Task<T>`, `ValueTask`, and `ValueTask<T>` async methods | Supported | Async hooks are selected for supported async targets. |
 | `ref`, `out`, `in` parameters | Supported | Covered by unit tests. |
 | Constructors | Unsupported | Platform limitation of C# interceptors. |
@@ -155,6 +156,55 @@ Common modes:
 
 Hook names are strings, so prefer `nameof(...)`. Invalid names or signatures should be reported by AspectGenerator diagnostics; if a case still fails only through generated-code compiler errors, treat that as a bug.
 
+## Target Filters
+
+`Filter` applies an aspect to target methods by canonical method signature:
+
+```csharp
+[Aspect(
+    OnAfterCall = nameof(OnAfterCall),
+    Filter =
+    [
+        @"^public .* MyApp\.Services\..*Service\.",
+        @"-\.HealthCheck\(\)$"
+    ])]
+sealed class LogAttribute : Attribute
+{
+    public static void OnAfterCall(InterceptInfo info) {}
+}
+```
+
+Filters are ordered regex patterns. A pattern starting with `-` excludes the target for that filter set, and the last matching pattern wins. Filters select target methods; AspectGenerator still rewrites only call sites visible to the current compilation.
+
+Assembly and type filters use the aspect attribute itself. The attribute type must allow the target and expose a `Filter` property:
+
+```csharp
+[assembly: Log(Filter = [@".*Service\.Save.*\("])]
+
+[Log(Filter = [@".*\.Save.*\("])]
+sealed class UserService
+{
+    public void SaveUser() {}
+}
+
+[Aspect(OnAfterCall = nameof(OnAfterCall))]
+[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
+sealed class LogAttribute : Attribute
+{
+    public string[]? Filter { get; set; }
+
+    public static void OnAfterCall(InterceptInfo info) {}
+}
+```
+
+The canonical signature format is:
+
+```text
+<accessibility>[ <modifier>...] <return-type> <containing-type>.<method-name>[<type-parameters>](<parameter-types>)
+```
+
+Types are fully qualified without C# aliases, nullable annotations and parameter names are omitted, and extension method receivers are formatted with `this`.
+
 ## Explicit Method Interception
 
 `InterceptMethods` is a low-level compatibility feature that matches methods by display string:
@@ -178,6 +228,7 @@ The README is the concise entry point. The wiki should contain expanded pages wi
 - [Configuration](https://github.com/igor-tkachev/AspectGenerator/wiki/Configuration)
 - [Aspect library mode](https://github.com/igor-tkachev/AspectGenerator/wiki/Aspect-library-mode)
 - [Hook lifecycle](https://github.com/igor-tkachev/AspectGenerator/wiki/Hook-lifecycle)
+- [Target filters](https://github.com/igor-tkachev/AspectGenerator/wiki/Target-filters)
 - [`InterceptMethods`](https://github.com/igor-tkachev/AspectGenerator/wiki/InterceptMethods)
 - [Diagnostics](https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics)
 - [Limitations](https://github.com/igor-tkachev/AspectGenerator/wiki/Limitations)

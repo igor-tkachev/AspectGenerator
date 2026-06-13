@@ -4,10 +4,17 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using AspectGenerator;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AspectGenerator.Tests
 {
+	[Aspects.Log(
+		Filter =
+		[
+			@"^public static System.String AspectGenerator\.Tests\.UnitTests\.TypeFilterTarget\(\)$"
+		])]
 	[TestClass]
 	public class UnitTests
 	{
@@ -70,6 +77,45 @@ namespace AspectGenerator.Tests
 			Assert.AreEqual("hi__I__..hi__I__++hi, John__I__", str);
 
 			Console.WriteLine(str);
+		}
+
+		public static string DeclarationFilterTarget()
+		{
+			return "target";
+		}
+
+		[TestMethod]
+		public void DeclarationFilterAspectTest()
+		{
+			var str = DeclarationFilterTarget();
+
+			Assert.AreEqual("target + log.", str);
+		}
+
+		public static string AssemblyFilterTarget()
+		{
+			return "target";
+		}
+
+		[TestMethod]
+		public void AssemblyFilterAspectTest()
+		{
+			var str = AssemblyFilterTarget();
+
+			Assert.AreEqual("target + log.", str);
+		}
+
+		public static string TypeFilterTarget()
+		{
+			return "target";
+		}
+
+		[TestMethod]
+		public void TypeFilterAspectTest()
+		{
+			var str = TypeFilterTarget();
+
+			Assert.AreEqual("target + log.", str);
 		}
 
 		[TestMethod]
