@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 using Microsoft.CodeAnalysis;
@@ -391,22 +390,9 @@ namespace AspectGenerator
 		{
 		}
 
-		record CompiledAspectFilter(
-			bool             IsNegative,
-			FilterMatcher    Matcher,
-			string           Pattern,
-			Regex?           Regex);
-
-		enum FilterMatcher
-		{
-			Pattern,
-			Contains,
-			Regex
-		}
-
 		record AspectFilterSet(
-			AttributeInfo                         Attribute,
-			ImmutableArray<CompiledAspectFilter> Filters);
+			AttributeInfo                  Attribute,
+			AspectFilters.TargetFilterSet Filters);
 
 		record AnalyzedInvocation(
 			InvocationExpressionSyntax Inv,
@@ -843,14 +829,18 @@ namespace AspectGenerator
 			else
 				return null;
 
-			var filterValues = GetNamedStringFilterValue(filterAttribute, semanticModel, "TargetFilter");
+			var filters = GetNamedCompiledFilterValue(
+				diagnostics,
+				reportedDiagnostics,
+				filterAttribute,
+				semanticModel,
+				"TargetFilter",
+				filterAttribute.GetLocation());
 
-			if (filterValues.IsDefaultOrEmpty)
+			if (filters.IsEmpty)
 				return null;
 
-			var filters = CompileAspectFilters(diagnostics, reportedDiagnostics, filterValues, filterAttribute.GetLocation());
-
-			return filters.IsDefaultOrEmpty ? null : new AspectFilterSet(attributeInfo, filters);
+			return new AspectFilterSet(attributeInfo, filters);
 		}
 
 		static AspectFilterSet? CreateAppliedAspectFilterSet(
@@ -873,20 +863,26 @@ namespace AspectGenerator
 			else
 				return null;
 
-			var filterValues = GetNamedStringFilterValue(filterAttribute, "TargetFilter");
-
-			if (filterValues.IsDefaultOrEmpty)
-				return null;
-
 			var location = filterAttribute.ApplicationSyntaxReference is {} syntaxReference
 				? Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span)
 				: null;
-			var filters = CompileAspectFilters(diagnostics, reportedDiagnostics, filterValues, location);
+			var filters = GetNamedCompiledFilterValue(
+				diagnostics,
+				reportedDiagnostics,
+				filterAttribute,
+				"TargetFilter",
+				location);
 
-			return filters.IsDefaultOrEmpty ? null : new AspectFilterSet(attributeInfo, filters);
+			return filters.IsEmpty ? null : new AspectFilterSet(attributeInfo, filters);
 		}
 
-		static ImmutableArray<string> GetNamedStringFilterValue(AttributeSyntax attribute, SemanticModel semanticModel, string name)
+		static AspectFilters.TargetFilterSet GetNamedCompiledFilterValue(
+			List<DiagnosticInfo> diagnostics,
+			HashSet<string>      reportedDiagnostics,
+			AttributeSyntax      attribute,
+			SemanticModel        semanticModel,
+			string               name,
+			Location?            location)
 		{
 			foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
 			{
@@ -895,209 +891,70 @@ namespace AspectGenerator
 
 				var value = GetAttributeArgumentValue(arg.Expression, semanticModel);
 
-				return GetStringFilterValues(value);
+				return CompileAspectFilters(diagnostics, reportedDiagnostics, value, location);
 			}
 
-			return [];
+			return default;
 		}
 
-		static ImmutableArray<string> GetNamedStringFilterValue(AttributeData attribute, string name)
+		static AspectFilters.TargetFilterSet GetNamedCompiledFilterValue(
+			List<DiagnosticInfo> diagnostics,
+			HashSet<string>      reportedDiagnostics,
+			AttributeData        attribute,
+			string               name,
+			Location?            location)
 		{
 			foreach (var arg in attribute.NamedArguments)
 			{
 				if (arg.Key != name)
 					continue;
 
-				return arg.Value.Kind == TypedConstantKind.Array
-					? GetStringFilterValues(arg.Value.Values.Select(static v => v.Value).ToArray())
-					: GetStringFilterValues(arg.Value.Value);
+				var value = arg.Value.Kind == TypedConstantKind.Array
+					? arg.Value.Values.Select(static v => v.Value).ToArray()
+					: arg.Value.Value;
+
+				return CompileAspectFilters(diagnostics, reportedDiagnostics, value, location);
 			}
 
-			return [];
+			return default;
 		}
 
-		static ImmutableArray<string> GetStringFilterValues(object? value)
-		{
-			var result = ImmutableArray.CreateBuilder<string>();
-
-			if (value is object?[] values)
-			{
-				foreach (var item in values)
-					AddStringFilterValue(result, item as string);
-			}
-			else
-				AddStringFilterValue(result, value as string);
-
-			return result.ToImmutable();
-		}
-
-		static void AddStringFilterValue(ImmutableArray<string>.Builder result, string? value)
-		{
-			if (value is null)
-				return;
-
-			foreach (var line in value.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
-			{
-				var rule = line.Trim();
-
-				if (rule.Length > 0 && !rule.StartsWith("#", StringComparison.Ordinal))
-					result.Add(rule);
-			}
-		}
-
-		static ImmutableArray<CompiledAspectFilter> CompileAspectFilters(
+		static AspectFilters.TargetFilterSet CompileAspectFilters(
 			List<DiagnosticInfo> diagnostics,
 			HashSet<string>      reportedDiagnostics,
-			ImmutableArray<string> filters,
+			object?               filterValue,
 			Location?            location)
 		{
-			var result = ImmutableArray.CreateBuilder<CompiledAspectFilter>();
+			return filterValue is object?[] values
+				? AspectFilters.GetFilters(
+					values.Select(static value => value as string),
+					ReportInvalidRegex)
+				: AspectFilters.GetFilters(
+					filterValue as string,
+					ReportInvalidRegex);
 
-			foreach (var filter in filters)
+			void ReportInvalidRegex(string pattern, string errorMessage)
 			{
-				if (!TryParseAspectFilterRule(filter, out var isNegative, out var matcher, out var pattern))
-					continue;
-
-				if (matcher == FilterMatcher.Pattern)
-					continue;
-
-				if (matcher == FilterMatcher.Contains)
-				{
-					result.Add(
-						new CompiledAspectFilter(
-							isNegative,
-							matcher,
-							pattern,
-							null));
-
-					continue;
-				}
-
-				try
-				{
-					result.Add(
-						new CompiledAspectFilter(
-							isNegative,
-							matcher,
-							pattern,
-							new Regex(pattern, RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(200))));
-				}
-				catch (ArgumentException ex)
-				{
-					ReportDiagnostic(
-						diagnostics,
+				ReportDiagnostic(
+					diagnostics,
 						reportedDiagnostics,
-						DiagnosticID.InvalidAspectFilterRegex,
-						$"Invalid aspect filter regex '{pattern}': {ex.Message}",
-						location);
-				}
+					DiagnosticID.InvalidAspectFilterRegex,
+					$"Invalid aspect filter regex '{pattern}': {errorMessage}",
+					location);
 			}
-
-			return result.ToImmutable();
-		}
-
-		static bool TryParseAspectFilterRule(string filter, out bool isNegative, out FilterMatcher matcher, out string pattern)
-		{
-			isNegative = false;
-			matcher    = FilterMatcher.Pattern;
-			pattern    = "";
-
-			var rule = filter.Trim();
-
-			if (rule.Length == 0 || rule.StartsWith("#", StringComparison.Ordinal))
-				return false;
-
-			if (rule[0] == '-')
-			{
-				isNegative = true;
-				rule       = rule[1..].TrimStart();
-			}
-
-			if (TryReadMatcherPrefix(rule, "pattern", out var patternBody))
-			{
-				matcher = FilterMatcher.Pattern;
-				pattern = patternBody;
-			}
-			else if (TryReadMatcherPrefix(rule, "regex", out var regexBody))
-			{
-				matcher = FilterMatcher.Regex;
-				pattern = regexBody;
-			}
-			else if (TryReadMatcherPrefix(rule, "contains", out var containsBody))
-			{
-				matcher = FilterMatcher.Contains;
-				pattern = containsBody;
-			}
-			else
-				pattern = rule;
-
-			return pattern.Length > 0;
-		}
-
-		static bool TryReadMatcherPrefix(string rule, string prefix, out string body)
-		{
-			body = "";
-
-			if (!rule.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-				return false;
-
-			var index = prefix.Length;
-
-			while (index < rule.Length && char.IsWhiteSpace(rule[index]))
-				index++;
-
-			if (index >= rule.Length || rule[index] != ':')
-				return false;
-
-			body = rule[(index + 1)..].Trim();
-			return true;
 		}
 
 		static void AddMatchedFilterAttributes(List<AttributeInfo> attributes, ImmutableArray<AspectFilterSet> filterSets, string targetSignature)
 		{
 			foreach (var filterSet in filterSets)
 			{
-				if (!IsMatchedByFilters(filterSet.Filters, targetSignature))
+				if (!filterSet.Filters.IsMatch(targetSignature))
 					continue;
 
 				if (attributes.Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, filterSet.Attribute.AttributeClass)))
 					continue;
 
 				attributes.Add(filterSet.Attribute);
-			}
-		}
-
-		static bool IsMatchedByFilters(ImmutableArray<CompiledAspectFilter> filters, string targetSignature)
-		{
-			var matched = false;
-
-			foreach (var filter in filters)
-			{
-				var isMatch = filter.Matcher switch
-				{
-					FilterMatcher.Contains => targetSignature.Contains(filter.Pattern, StringComparison.Ordinal),
-					FilterMatcher.Regex    => IsRegexMatch(filter, targetSignature),
-					_                      => false
-				};
-
-				if (!isMatch)
-					continue;
-
-				matched = !filter.IsNegative;
-			}
-
-			return matched;
-		}
-
-		static bool IsRegexMatch(CompiledAspectFilter filter, string targetSignature)
-		{
-			try
-			{
-				return filter.Regex?.IsMatch(targetSignature) == true;
-			}
-			catch (RegexMatchTimeoutException)
-			{
-				return false;
 			}
 		}
 
@@ -1184,13 +1041,13 @@ namespace AspectGenerator
 		{
 			return accessibility switch
 			{
-				Accessibility.Public             => "public",
-				Accessibility.Protected          => "protected",
-				Accessibility.Internal           => "internal",
-				Accessibility.Private            => "private",
-				Accessibility.ProtectedOrInternal => "protected internal",
+				Accessibility.Public               => "public",
+				Accessibility.Protected            => "protected",
+				Accessibility.Internal             => "internal",
+				Accessibility.Private              => "private",
+				Accessibility.ProtectedOrInternal  => "protected internal",
 				Accessibility.ProtectedAndInternal => "private protected",
-				_                                => "private"
+				_                                  => "private"
 			};
 		}
 
@@ -1451,9 +1308,7 @@ namespace AspectGenerator
 					{
 						var semantic = compilation.GetSemanticModel(invocation.SyntaxTree);
 
-#pragma warning disable RSEXPERIMENTAL002
 						var location = semantic.GetInterceptableLocation(invocation, spc.CancellationToken);
-#pragma warning restore RSEXPERIMENTAL002
 
 						if (location is null)
 						{
