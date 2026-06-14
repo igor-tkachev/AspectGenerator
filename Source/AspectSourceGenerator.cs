@@ -60,10 +60,37 @@ namespace AspectGenerator
 				[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
 				sealed class AspectGeneratorOptionsAttribute : Attribute
 				{
+					/// <summary>
+					/// Gets or sets whether AspectGenerator emits the shared generated API types for this assembly.
+					/// </summary>
+					/// <remarks>
+					/// Keep this enabled for single-project usage. Set it to <c>false</c> when the API is supplied by an aspect library referenced by this project.
+					/// </remarks>
 					public bool    {{OptionID.GenerateApi}}                   { get; set; } = true;
+					/// <summary>
+					/// Gets or sets whether AspectGenerator emits interceptor implementations for this assembly.
+					/// </summary>
+					/// <remarks>
+					/// This can be used to force interceptor generation in projects where generation would otherwise be skipped by build-time defaults.
+					/// </remarks>
 					public bool    {{OptionID.GenerateInterceptors}}          { get; set; }
+					/// <summary>
+					/// Gets or sets whether generated API types are emitted as public types.
+					/// </summary>
+					/// <remarks>
+					/// Use this for aspect-library projects that expose aspect definitions and generated API types to other projects.
+					/// </remarks>
 					public bool    {{OptionID.PublicApi}}                     { get; set; }
+					/// <summary>
+					/// Gets or sets whether generated interceptor methods are marked with <see cref="System.Diagnostics.DebuggerStepThroughAttribute"/>.
+					/// </summary>
 					public bool    {{OptionID.DebuggerStepThrough}}           { get; set; }
+					/// <summary>
+					/// Gets or sets the namespace used for generated interceptor types.
+					/// </summary>
+					/// <remarks>
+					/// The namespace must also be listed in the project <c>InterceptorsNamespaces</c> MSBuild property so Roslyn can use the generated interceptors.
+					/// </remarks>
 					public string? {{OptionID.InterceptorsNamespace}}         { get; set; }
 				}
 			}
@@ -91,84 +118,244 @@ namespace AspectGenerator
 				[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 				{{visibility}}sealed class AspectAttribute : Attribute
 				{
+					/// <summary>
+					/// Gets or sets the static hook method name invoked when the aspect invocation state is initialized.
+					/// </summary>
 					public string?   OnInit            { get; set; }
+					/// <summary>
+					/// Gets or sets the static hook method name invoked before the target method inside a generated <c>using</c> scope.
+					/// </summary>
+					/// <remarks>
+					/// The returned disposable value is disposed after the intercepted call completes.
+					/// </remarks>
 					public string?   OnUsing           { get; set; }
+					/// <summary>
+					/// Gets or sets the static async hook method name invoked before an async target method inside a generated async disposal scope.
+					/// </summary>
 					public string?   OnUsingAsync      { get; set; }
+					/// <summary>
+					/// Gets or sets the static hook method name invoked before the target method is called.
+					/// </summary>
 					public string?   OnBeforeCall      { get; set; }
+					/// <summary>
+					/// Gets or sets the static async hook method name invoked before a supported async target method is awaited.
+					/// </summary>
 					public string?   OnBeforeCallAsync { get; set; }
+					/// <summary>
+					/// Gets or sets the static hook method name that replaces the target method call.
+					/// </summary>
+					/// <remarks>
+					/// The hook signature must match the intercepted method signature and return type.
+					/// </remarks>
 					public string?   OnCall            { get; set; }
+					/// <summary>
+					/// Gets or sets the static hook method name invoked after the target method returns successfully.
+					/// </summary>
 					public string?   OnAfterCall       { get; set; }
+					/// <summary>
+					/// Gets or sets the static async hook method name invoked after a supported async target method completes successfully.
+					/// </summary>
 					public string?   OnAfterCallAsync  { get; set; }
+					/// <summary>
+					/// Gets or sets the static hook method name invoked when the target method throws.
+					/// </summary>
+					/// <remarks>
+					/// Set <see cref="InterceptInfo.InterceptResult"/> or <c>InterceptData&lt;T&gt;.InterceptResult</c> to control whether the exception is rethrown or ignored.
+					/// </remarks>
 					public string?   OnCatch           { get; set; }
+					/// <summary>
+					/// Gets or sets the static async hook method name invoked when a supported async target method throws.
+					/// </summary>
 					public string?   OnCatchAsync      { get; set; }
+					/// <summary>
+					/// Gets or sets the static hook method name invoked in the generated <c>finally</c> block.
+					/// </summary>
 					public string?   OnFinally         { get; set; }
+					/// <summary>
+					/// Gets or sets the static async hook method name invoked in the generated async cleanup path.
+					/// </summary>
 					public string?   OnFinallyAsync    { get; set; }
+					/// <summary>
+					/// Gets or sets whether hook data includes the current lifecycle stage.
+					/// </summary>
 					public bool      UseInterceptType  { get; set; }
+					/// <summary>
+					/// Gets or sets whether hook data includes the intercepted method arguments.
+					/// </summary>
+					/// <remarks>
+					/// When enabled, generated code populates <see cref="InterceptInfo.MethodArguments"/> or <c>InterceptData&lt;T&gt;.MethodArguments</c>.
+					/// </remarks>
 					public bool      PassArguments     { get; set; }
+					/// <summary>
+					/// Gets or sets whether hooks use the mutable <c>ref InterceptData&lt;T&gt;</c> carrier instead of <c>InterceptInfo&lt;T&gt;</c>.
+					/// </summary>
 					public bool      UseInterceptData  { get; set; }
 				}
 
+				/// <summary>
+				/// Identifies the lifecycle stage currently being processed by a hook.
+				/// </summary>
 				{{visibility}}enum InterceptType
 				{
+					/// <summary>
+					/// Aspect invocation state is being initialized.
+					/// </summary>
 					OnInit,
+					/// <summary>
+					/// The generated using-scope hook is being entered.
+					/// </summary>
 					OnUsing,
+					/// <summary>
+					/// The target method is about to be called.
+					/// </summary>
 					OnBeforeCall,
+					/// <summary>
+					/// The target method returned successfully.
+					/// </summary>
 					OnAfterCall,
+					/// <summary>
+					/// The target method threw an exception.
+					/// </summary>
 					OnCatch,
+					/// <summary>
+					/// The generated cleanup path is running.
+					/// </summary>
 					OnFinally
 				}
 
+				/// <summary>
+				/// Controls how generated interceptor code continues after a hook is executed.
+				/// </summary>
 				{{visibility}}enum InterceptResult
 				{
+					/// <summary>
+					/// Continue normal generated interceptor flow.
+					/// </summary>
 					Continue,
+					/// <summary>
+					/// Return the current value from the interceptor.
+					/// </summary>
 					Return,
+					/// <summary>
+					/// Alias for <see cref="Continue"/> used by exception hooks to rethrow the current exception.
+					/// </summary>
 					ReThrow     = Continue,
+					/// <summary>
+					/// Alias for <see cref="Return"/> used by exception hooks to ignore the current exception.
+					/// </summary>
 					IgnoreThrow = Return
 				}
 
-				{{visibility}}enum AspectFilterKind
-				{
-					Dsl,
-					Contains,
-					Regex
-				}
-
+				/// <summary>
+				/// Represents a void return value in generic hook data.
+				/// </summary>
 				{{visibility}}struct Void
 				{
 				}
 
+				/// <summary>
+				/// Provides hook data for an intercepted method.
+				/// </summary>
 				{{visibility}}partial class InterceptInfo
 				{
+					/// <summary>
+					/// Gets or sets user-defined state shared between hooks in the same interception chain.
+					/// </summary>
 					public object?         Tag;
+					/// <summary>
+					/// Gets or sets the current lifecycle stage.
+					/// </summary>
 					public InterceptType   InterceptType;
+					/// <summary>
+					/// Gets or sets the requested continuation behavior for generated interceptor code.
+					/// </summary>
 					public InterceptResult InterceptResult;
+					/// <summary>
+					/// Gets or sets the current exception for catch and finally hooks.
+					/// </summary>
 					public Exception?      Exception;
 
+					/// <summary>
+					/// Gets or sets hook data produced by the previous aspect in the same interception chain.
+					/// </summary>
 					public InterceptInfo?                                        PreviousInfo;
+					/// <summary>
+					/// Gets or sets reflection metadata for the intercepted target method.
+					/// </summary>
 					public System.Reflection.MemberInfo                          MemberInfo;
+					/// <summary>
+					/// Gets or sets intercepted method arguments when argument capture is enabled.
+					/// </summary>
 					public object?[]?                                            MethodArguments;
+					/// <summary>
+					/// Gets or sets the applied aspect attribute type.
+					/// </summary>
 					public Type                                                  AspectType;
+					/// <summary>
+					/// Gets or sets named arguments from the applied aspect attribute.
+					/// </summary>
 					public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
 				}
 
+				/// <summary>
+				/// Provides hook data for an intercepted method with a return value.
+				/// </summary>
+				/// <typeparam name="T">The intercepted method return value type.</typeparam>
 				{{visibility}}partial class InterceptInfo<T> : InterceptInfo
 				{
+					/// <summary>
+					/// Gets or sets the intercepted method return value.
+					/// </summary>
 					public T ReturnValue;
 				}
 
+				/// <summary>
+				/// Provides mutable by-reference hook data for an intercepted method.
+				/// </summary>
+				/// <typeparam name="T">The intercepted method return value type.</typeparam>
 				{{visibility}}partial struct InterceptData<T>
 				{
+					/// <summary>
+					/// Gets or sets user-defined state shared between hooks in the same interception chain.
+					/// </summary>
 					public object?         Tag;
+					/// <summary>
+					/// Gets or sets the current lifecycle stage.
+					/// </summary>
 					public InterceptType   InterceptType;
+					/// <summary>
+					/// Gets or sets the requested continuation behavior for generated interceptor code.
+					/// </summary>
 					public InterceptResult InterceptResult;
+					/// <summary>
+					/// Gets or sets the current exception for catch and finally hooks.
+					/// </summary>
 					public Exception?      Exception;
 
+					/// <summary>
+					/// Gets or sets hook data produced by the previous aspect in the same interception chain.
+					/// </summary>
 					public InterceptInfo<T>?                                     PreviousInfo;
+					/// <summary>
+					/// Gets or sets reflection metadata for the intercepted target method.
+					/// </summary>
 					public System.Reflection.MemberInfo                          MemberInfo;
+					/// <summary>
+					/// Gets or sets intercepted method arguments when argument capture is enabled.
+					/// </summary>
 					public object?[]?                                            MethodArguments;
+					/// <summary>
+					/// Gets or sets the applied aspect attribute type.
+					/// </summary>
 					public Type                                                  AspectType;
+					/// <summary>
+					/// Gets or sets named arguments from the applied aspect attribute.
+					/// </summary>
 					public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
 
+					/// <summary>
+					/// Gets or sets the intercepted method return value.
+					/// </summary>
 					public T ReturnValue;
 				}
 			}
@@ -206,13 +393,13 @@ namespace AspectGenerator
 
 		record CompiledAspectFilter(
 			bool             IsNegative,
-			TargetFilterKind Kind,
+			FilterMatcher    Matcher,
 			string           Pattern,
 			Regex?           Regex);
 
-		enum TargetFilterKind
+		enum FilterMatcher
 		{
-			Dsl,
+			Pattern,
 			Contains,
 			Regex
 		}
@@ -656,13 +843,12 @@ namespace AspectGenerator
 			else
 				return null;
 
-			var filterValues = GetNamedStringArrayValue(filterAttribute, semanticModel, "TargetFilter");
+			var filterValues = GetNamedStringFilterValue(filterAttribute, semanticModel, "TargetFilter");
 
 			if (filterValues.IsDefaultOrEmpty)
 				return null;
 
-			var filterKind = GetNamedTargetFilterKindValue(filterAttribute, semanticModel);
-			var filters    = CompileAspectFilters(diagnostics, reportedDiagnostics, filterValues, filterKind, filterAttribute.GetLocation());
+			var filters = CompileAspectFilters(diagnostics, reportedDiagnostics, filterValues, filterAttribute.GetLocation());
 
 			return filters.IsDefaultOrEmpty ? null : new AspectFilterSet(attributeInfo, filters);
 		}
@@ -687,7 +873,7 @@ namespace AspectGenerator
 			else
 				return null;
 
-			var filterValues = GetNamedStringArrayValue(filterAttribute, "TargetFilter");
+			var filterValues = GetNamedStringFilterValue(filterAttribute, "TargetFilter");
 
 			if (filterValues.IsDefaultOrEmpty)
 				return null;
@@ -695,13 +881,12 @@ namespace AspectGenerator
 			var location = filterAttribute.ApplicationSyntaxReference is {} syntaxReference
 				? Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span)
 				: null;
-			var filterKind = GetNamedTargetFilterKindValue(filterAttribute);
-			var filters    = CompileAspectFilters(diagnostics, reportedDiagnostics, filterValues, filterKind, location);
+			var filters = CompileAspectFilters(diagnostics, reportedDiagnostics, filterValues, location);
 
 			return filters.IsDefaultOrEmpty ? null : new AspectFilterSet(attributeInfo, filters);
 		}
 
-		static ImmutableArray<string> GetNamedStringArrayValue(AttributeSyntax attribute, SemanticModel semanticModel, string name)
+		static ImmutableArray<string> GetNamedStringFilterValue(AttributeSyntax attribute, SemanticModel semanticModel, string name)
 		{
 			foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
 			{
@@ -710,107 +895,53 @@ namespace AspectGenerator
 
 				var value = GetAttributeArgumentValue(arg.Expression, semanticModel);
 
-				return value is object?[] values
-					? values.OfType<string>().ToImmutableArray()
-					: [];
+				return GetStringFilterValues(value);
 			}
 
 			return [];
 		}
 
-		static TargetFilterKind GetNamedTargetFilterKindValue(AttributeSyntax attribute, SemanticModel semanticModel)
-		{
-			foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
-			{
-				if (arg.NameEquals?.Name.Identifier.ValueText != "TargetFilterKind")
-					continue;
-
-				var value = semanticModel.GetConstantValue(arg.Expression).Value;
-
-				return TryGetTargetFilterKind(value, out var filterKind)
-					? filterKind
-					: GetTargetFilterKindFromExpression(arg.Expression);
-			}
-
-			return TargetFilterKind.Dsl;
-		}
-
-		static ImmutableArray<string> GetNamedStringArrayValue(AttributeData attribute, string name)
+		static ImmutableArray<string> GetNamedStringFilterValue(AttributeData attribute, string name)
 		{
 			foreach (var arg in attribute.NamedArguments)
 			{
-				if (arg.Key != name || arg.Value.Kind != TypedConstantKind.Array)
+				if (arg.Key != name)
 					continue;
 
-				return arg.Value.Values
-					.Select(static v => v.Value)
-					.OfType<string>()
-					.ToImmutableArray();
+				return arg.Value.Kind == TypedConstantKind.Array
+					? GetStringFilterValues(arg.Value.Values.Select(static v => v.Value).ToArray())
+					: GetStringFilterValues(arg.Value.Value);
 			}
 
 			return [];
 		}
 
-		static TargetFilterKind GetNamedTargetFilterKindValue(AttributeData attribute)
+		static ImmutableArray<string> GetStringFilterValues(object? value)
 		{
-			foreach (var arg in attribute.NamedArguments)
-			{
-				if (arg.Key != "TargetFilterKind")
-					continue;
+			var result = ImmutableArray.CreateBuilder<string>();
 
-				return TryGetTargetFilterKind(arg.Value.Value, out var filterKind)
-					? filterKind
-					: GetTargetFilterKindFromSyntax(attribute);
+			if (value is object?[] values)
+			{
+				foreach (var item in values)
+					AddStringFilterValue(result, item as string);
 			}
+			else
+				AddStringFilterValue(result, value as string);
 
-			return TargetFilterKind.Dsl;
+			return result.ToImmutable();
 		}
 
-		static TargetFilterKind GetTargetFilterKindFromSyntax(AttributeData attribute)
+		static void AddStringFilterValue(ImmutableArray<string>.Builder result, string? value)
 		{
-			if (attribute.ApplicationSyntaxReference?.GetSyntax() is not AttributeSyntax attributeSyntax)
-				return TargetFilterKind.Dsl;
+			if (value is null)
+				return;
 
-			foreach (var arg in attributeSyntax.ArgumentList?.Arguments ?? default)
-				if (arg.NameEquals?.Name.Identifier.ValueText == "TargetFilterKind")
-					return GetTargetFilterKindFromExpression(arg.Expression);
-
-			return TargetFilterKind.Dsl;
-		}
-
-		static TargetFilterKind GetTargetFilterKindFromExpression(ExpressionSyntax expression)
-		{
-			var text = expression.ToString();
-
-			if (text.EndsWith(".Contains", StringComparison.Ordinal) || text == "Contains")
-				return TargetFilterKind.Contains;
-
-			if (text.EndsWith(".Regex", StringComparison.Ordinal) || text == "Regex")
-				return TargetFilterKind.Regex;
-
-			return TargetFilterKind.Dsl;
-		}
-
-		static bool TryGetTargetFilterKind(object? value, out TargetFilterKind filterKind)
-		{
-			filterKind = TargetFilterKind.Dsl;
-
-			if (value is not IConvertible convertible)
-				return false;
-
-			try
+			foreach (var line in value.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
 			{
-				var intValue = convertible.ToInt32(CultureInfo.InvariantCulture);
+				var rule = line.Trim();
 
-				if (!Enum.IsDefined(typeof(TargetFilterKind), intValue))
-					return false;
-
-				filterKind = (TargetFilterKind)intValue;
-				return true;
-			}
-			catch (Exception)
-			{
-				return false;
+				if (rule.Length > 0 && !rule.StartsWith("#", StringComparison.Ordinal))
+					result.Add(rule);
 			}
 		}
 
@@ -818,25 +949,24 @@ namespace AspectGenerator
 			List<DiagnosticInfo> diagnostics,
 			HashSet<string>      reportedDiagnostics,
 			ImmutableArray<string> filters,
-			TargetFilterKind     filterKind,
 			Location?            location)
 		{
 			var result = ImmutableArray.CreateBuilder<CompiledAspectFilter>();
 
 			foreach (var filter in filters)
 			{
-				var isNegative = filter.StartsWith("-", StringComparison.Ordinal);
-				var pattern    = isNegative ? filter[1..] : filter;
-
-				if (filterKind == TargetFilterKind.Dsl)
+				if (!TryParseAspectFilterRule(filter, out var isNegative, out var matcher, out var pattern))
 					continue;
 
-				if (filterKind == TargetFilterKind.Contains)
+				if (matcher == FilterMatcher.Pattern)
+					continue;
+
+				if (matcher == FilterMatcher.Contains)
 				{
 					result.Add(
 						new CompiledAspectFilter(
 							isNegative,
-							filterKind,
+							matcher,
 							pattern,
 							null));
 
@@ -848,7 +978,7 @@ namespace AspectGenerator
 					result.Add(
 						new CompiledAspectFilter(
 							isNegative,
-							filterKind,
+							matcher,
 							pattern,
 							new Regex(pattern, RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(200))));
 				}
@@ -864,6 +994,63 @@ namespace AspectGenerator
 			}
 
 			return result.ToImmutable();
+		}
+
+		static bool TryParseAspectFilterRule(string filter, out bool isNegative, out FilterMatcher matcher, out string pattern)
+		{
+			isNegative = false;
+			matcher    = FilterMatcher.Pattern;
+			pattern    = "";
+
+			var rule = filter.Trim();
+
+			if (rule.Length == 0 || rule.StartsWith("#", StringComparison.Ordinal))
+				return false;
+
+			if (rule[0] == '-')
+			{
+				isNegative = true;
+				rule       = rule[1..].TrimStart();
+			}
+
+			if (TryReadMatcherPrefix(rule, "pattern", out var patternBody))
+			{
+				matcher = FilterMatcher.Pattern;
+				pattern = patternBody;
+			}
+			else if (TryReadMatcherPrefix(rule, "regex", out var regexBody))
+			{
+				matcher = FilterMatcher.Regex;
+				pattern = regexBody;
+			}
+			else if (TryReadMatcherPrefix(rule, "contains", out var containsBody))
+			{
+				matcher = FilterMatcher.Contains;
+				pattern = containsBody;
+			}
+			else
+				pattern = rule;
+
+			return pattern.Length > 0;
+		}
+
+		static bool TryReadMatcherPrefix(string rule, string prefix, out string body)
+		{
+			body = "";
+
+			if (!rule.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+				return false;
+
+			var index = prefix.Length;
+
+			while (index < rule.Length && char.IsWhiteSpace(rule[index]))
+				index++;
+
+			if (index >= rule.Length || rule[index] != ':')
+				return false;
+
+			body = rule[(index + 1)..].Trim();
+			return true;
 		}
 
 		static void AddMatchedFilterAttributes(List<AttributeInfo> attributes, ImmutableArray<AspectFilterSet> filterSets, string targetSignature)
@@ -886,11 +1073,11 @@ namespace AspectGenerator
 
 			foreach (var filter in filters)
 			{
-				var isMatch = filter.Kind switch
+				var isMatch = filter.Matcher switch
 				{
-					TargetFilterKind.Contains => targetSignature.Contains(filter.Pattern, StringComparison.Ordinal),
-					TargetFilterKind.Regex    => IsRegexMatch(filter, targetSignature),
-					_                         => false
+					FilterMatcher.Contains => targetSignature.Contains(filter.Pattern, StringComparison.Ordinal),
+					FilterMatcher.Regex    => IsRegexMatch(filter, targetSignature),
+					_                      => false
 				};
 
 				if (!isMatch)

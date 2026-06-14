@@ -13,84 +13,244 @@
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 	public sealed class AspectAttribute : Attribute
 	{
+		/// <summary>
+		/// Gets or sets the static hook method name invoked when the aspect invocation state is initialized.
+		/// </summary>
 		public string?   OnInit            { get; set; }
+		/// <summary>
+		/// Gets or sets the static hook method name invoked before the target method inside a generated <c>using</c> scope.
+		/// </summary>
+		/// <remarks>
+		/// The returned disposable value is disposed after the intercepted call completes.
+		/// </remarks>
 		public string?   OnUsing           { get; set; }
+		/// <summary>
+		/// Gets or sets the static async hook method name invoked before an async target method inside a generated async disposal scope.
+		/// </summary>
 		public string?   OnUsingAsync      { get; set; }
+		/// <summary>
+		/// Gets or sets the static hook method name invoked before the target method is called.
+		/// </summary>
 		public string?   OnBeforeCall      { get; set; }
+		/// <summary>
+		/// Gets or sets the static async hook method name invoked before a supported async target method is awaited.
+		/// </summary>
 		public string?   OnBeforeCallAsync { get; set; }
+		/// <summary>
+		/// Gets or sets the static hook method name that replaces the target method call.
+		/// </summary>
+		/// <remarks>
+		/// The hook signature must match the intercepted method signature and return type.
+		/// </remarks>
 		public string?   OnCall            { get; set; }
+		/// <summary>
+		/// Gets or sets the static hook method name invoked after the target method returns successfully.
+		/// </summary>
 		public string?   OnAfterCall       { get; set; }
+		/// <summary>
+		/// Gets or sets the static async hook method name invoked after a supported async target method completes successfully.
+		/// </summary>
 		public string?   OnAfterCallAsync  { get; set; }
+		/// <summary>
+		/// Gets or sets the static hook method name invoked when the target method throws.
+		/// </summary>
+		/// <remarks>
+		/// Set <see cref="InterceptInfo.InterceptResult"/> or <c>InterceptData&lt;T&gt;.InterceptResult</c> to control whether the exception is rethrown or ignored.
+		/// </remarks>
 		public string?   OnCatch           { get; set; }
+		/// <summary>
+		/// Gets or sets the static async hook method name invoked when a supported async target method throws.
+		/// </summary>
 		public string?   OnCatchAsync      { get; set; }
+		/// <summary>
+		/// Gets or sets the static hook method name invoked in the generated <c>finally</c> block.
+		/// </summary>
 		public string?   OnFinally         { get; set; }
+		/// <summary>
+		/// Gets or sets the static async hook method name invoked in the generated async cleanup path.
+		/// </summary>
 		public string?   OnFinallyAsync    { get; set; }
+		/// <summary>
+		/// Gets or sets whether hook data includes the current lifecycle stage.
+		/// </summary>
 		public bool      UseInterceptType  { get; set; }
+		/// <summary>
+		/// Gets or sets whether hook data includes the intercepted method arguments.
+		/// </summary>
+		/// <remarks>
+		/// When enabled, generated code populates <see cref="InterceptInfo.MethodArguments"/> or <c>InterceptData&lt;T&gt;.MethodArguments</c>.
+		/// </remarks>
 		public bool      PassArguments     { get; set; }
+		/// <summary>
+		/// Gets or sets whether hooks use the mutable <c>ref InterceptData&lt;T&gt;</c> carrier instead of <c>InterceptInfo&lt;T&gt;</c>.
+		/// </summary>
 		public bool      UseInterceptData  { get; set; }
 	}
 
+	/// <summary>
+	/// Identifies the lifecycle stage currently being processed by a hook.
+	/// </summary>
 	public enum InterceptType
 	{
+		/// <summary>
+		/// Aspect invocation state is being initialized.
+		/// </summary>
 		OnInit,
+		/// <summary>
+		/// The generated using-scope hook is being entered.
+		/// </summary>
 		OnUsing,
+		/// <summary>
+		/// The target method is about to be called.
+		/// </summary>
 		OnBeforeCall,
+		/// <summary>
+		/// The target method returned successfully.
+		/// </summary>
 		OnAfterCall,
+		/// <summary>
+		/// The target method threw an exception.
+		/// </summary>
 		OnCatch,
+		/// <summary>
+		/// The generated cleanup path is running.
+		/// </summary>
 		OnFinally
 	}
 
+	/// <summary>
+	/// Controls how generated interceptor code continues after a hook is executed.
+	/// </summary>
 	public enum InterceptResult
 	{
+		/// <summary>
+		/// Continue normal generated interceptor flow.
+		/// </summary>
 		Continue,
+		/// <summary>
+		/// Return the current value from the interceptor.
+		/// </summary>
 		Return,
+		/// <summary>
+		/// Alias for <see cref="Continue"/> used by exception hooks to rethrow the current exception.
+		/// </summary>
 		ReThrow     = Continue,
+		/// <summary>
+		/// Alias for <see cref="Return"/> used by exception hooks to ignore the current exception.
+		/// </summary>
 		IgnoreThrow = Return
 	}
 
-	public enum AspectFilterKind
-	{
-		Dsl,
-		Contains,
-		Regex
-	}
-
+	/// <summary>
+	/// Represents a void return value in generic hook data.
+	/// </summary>
 	public struct Void
 	{
 	}
 
+	/// <summary>
+	/// Provides hook data for an intercepted method.
+	/// </summary>
 	public partial class InterceptInfo
 	{
+		/// <summary>
+		/// Gets or sets user-defined state shared between hooks in the same interception chain.
+		/// </summary>
 		public object?         Tag;
+		/// <summary>
+		/// Gets or sets the current lifecycle stage.
+		/// </summary>
 		public InterceptType   InterceptType;
+		/// <summary>
+		/// Gets or sets the requested continuation behavior for generated interceptor code.
+		/// </summary>
 		public InterceptResult InterceptResult;
+		/// <summary>
+		/// Gets or sets the current exception for catch and finally hooks.
+		/// </summary>
 		public Exception?      Exception;
 
+		/// <summary>
+		/// Gets or sets hook data produced by the previous aspect in the same interception chain.
+		/// </summary>
 		public InterceptInfo?                                        PreviousInfo;
+		/// <summary>
+		/// Gets or sets reflection metadata for the intercepted target method.
+		/// </summary>
 		public System.Reflection.MemberInfo                          MemberInfo;
+		/// <summary>
+		/// Gets or sets intercepted method arguments when argument capture is enabled.
+		/// </summary>
 		public object?[]?                                            MethodArguments;
+		/// <summary>
+		/// Gets or sets the applied aspect attribute type.
+		/// </summary>
 		public Type                                                  AspectType;
+		/// <summary>
+		/// Gets or sets named arguments from the applied aspect attribute.
+		/// </summary>
 		public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
 	}
 
+	/// <summary>
+	/// Provides hook data for an intercepted method with a return value.
+	/// </summary>
+	/// <typeparam name="T">The intercepted method return value type.</typeparam>
 	public partial class InterceptInfo<T> : InterceptInfo
 	{
+		/// <summary>
+		/// Gets or sets the intercepted method return value.
+		/// </summary>
 		public T ReturnValue;
 	}
 
+	/// <summary>
+	/// Provides mutable by-reference hook data for an intercepted method.
+	/// </summary>
+	/// <typeparam name="T">The intercepted method return value type.</typeparam>
 	public partial struct InterceptData<T>
 	{
+		/// <summary>
+		/// Gets or sets user-defined state shared between hooks in the same interception chain.
+		/// </summary>
 		public object?         Tag;
+		/// <summary>
+		/// Gets or sets the current lifecycle stage.
+		/// </summary>
 		public InterceptType   InterceptType;
+		/// <summary>
+		/// Gets or sets the requested continuation behavior for generated interceptor code.
+		/// </summary>
 		public InterceptResult InterceptResult;
+		/// <summary>
+		/// Gets or sets the current exception for catch and finally hooks.
+		/// </summary>
 		public Exception?      Exception;
 
+		/// <summary>
+		/// Gets or sets hook data produced by the previous aspect in the same interception chain.
+		/// </summary>
 		public InterceptInfo<T>?                                     PreviousInfo;
+		/// <summary>
+		/// Gets or sets reflection metadata for the intercepted target method.
+		/// </summary>
 		public System.Reflection.MemberInfo                          MemberInfo;
+		/// <summary>
+		/// Gets or sets intercepted method arguments when argument capture is enabled.
+		/// </summary>
 		public object?[]?                                            MethodArguments;
+		/// <summary>
+		/// Gets or sets the applied aspect attribute type.
+		/// </summary>
 		public Type                                                  AspectType;
+		/// <summary>
+		/// Gets or sets named arguments from the applied aspect attribute.
+		/// </summary>
 		public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
 
+		/// <summary>
+		/// Gets or sets the intercepted method return value.
+		/// </summary>
 		public T ReturnValue;
 	}
 }

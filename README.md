@@ -158,16 +158,18 @@ Hook names are strings, so prefer `nameof(...)`. Invalid names or signatures sho
 
 ## Target Filters
 
-`TargetFilter` applies an aspect to target methods by canonical method signature. `Contains` and `Regex` modes are implemented; `Dsl` is reserved while the DSL syntax is being designed.
+`TargetFilter` applies an aspect to target methods by canonical method signature. Each rule can use a matcher prefix. `contains:` and `regex:` are implemented now; unprefixed rules and `pattern:` are reserved for the native AspectGenerator target pattern syntax.
 
 ```csharp
 [assembly: Log(
-    TargetFilterKind = AspectFilterKind.Contains,
-    TargetFilter = ["Service.Save"])]
+    TargetFilter = """
+        # Include service saves and exclude health checks.
+        contains: Service.Save
+        -contains: HealthCheck
+        """)]
 
 [Log(
-    TargetFilterKind = AspectFilterKind.Contains,
-    TargetFilter = ["Save"])]
+    TargetFilter = "contains: Save")]
 sealed class UserService
 {
     public void SaveUser() {}
@@ -177,14 +179,13 @@ sealed class UserService
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
 sealed class LogAttribute : Attribute
 {
-    public string[]? TargetFilter { get; set; }
-    public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
+    public string? TargetFilter { get; set; }
 
     public static void OnAfterCall(InterceptInfo info) {}
 }
 ```
 
-Filters are ordered patterns. A pattern starting with `-` excludes the target for that filter set, and the last matching pattern wins. `TargetFilter` plays the role of a pointcut-like method selector in AOP terminology; AspectGenerator still rewrites only call sites visible to the current compilation.
+Filters are ordered rules. The property name is always `TargetFilter`; only the property type can differ. It can be declared as `string?` or `string[]?` on an aspect attribute. Every string is split into lines, empty lines are ignored, and lines starting with `#` are comments. `string[]` values are processed as a simple concatenation of all rules. A rule starting with `-` excludes the target for that filter set, and the last matching rule wins. `TargetFilter` plays the role of a pointcut-like method selector in AOP terminology; AspectGenerator still rewrites only call sites visible to the current compilation.
 
 Target filters are only supported on applied aspect attributes at assembly or type level. `[Aspect(TargetFilter = ...)]` is intentionally unsupported to avoid mixing aspect definition settings with aspect application.
 

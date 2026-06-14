@@ -374,8 +374,6 @@ namespace Aspects
 	sealed class LogAttribute : Attribute
 	{
 		public string[]?        TargetFilter     { get; set; }
-		public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
-
 		public static void OnAfterCall(InterceptInfo<string> info)
 		{
 			info.ReturnValue += " + log.";

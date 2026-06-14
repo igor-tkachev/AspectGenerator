@@ -6,13 +6,24 @@ Filters are not runtime AOP. They select target methods, but AspectGenerator sti
 
 ## Filter Model
 
-`TargetFilter` is an ordered string list. `Contains` and `Regex` modes are implemented. `Dsl` is reserved while the DSL syntax is being designed.
+`TargetFilter` is an ordered rule list. Each rule can use a matcher prefix. `contains:` and `regex:` are implemented now; unprefixed rules and `pattern:` are reserved for the native AspectGenerator target pattern syntax.
 
 - filters apply to canonical target method signatures;
-- an entry starting with `-` is an exclude filter;
+- a rule starting with `-` is an exclude filter;
+- a line starting with `#` is a comment;
 - the last matching entry wins inside one filter set;
 - no matching entry means the filter set does not apply;
 - exclude filters do not suppress explicit method-level aspect attributes.
+
+The property name is always `TargetFilter`; only the property type can differ. The aspect attribute can expose it as `string?` or `string[]?`. Every string is split into lines, empty lines are ignored, and each non-comment line is one rule. For `string[]`, rules from all items are concatenated in order.
+
+Rule syntax:
+
+```text
+[-] [pattern:|regex:|contains:] rule-body
+```
+
+No matcher prefix is equivalent to `pattern:`.
 
 `Contains` matching uses `StringComparison.Ordinal`.
 
@@ -24,20 +35,18 @@ Invalid regex patterns report `AG0201`.
 
 ```csharp
 [assembly: Log(
-    TargetFilterKind = AspectFilterKind.Contains,
-    TargetFilter =
-    [
-        "MyApp.Services.",
-        "-HealthCheck"
-    ])]
+    TargetFilter = """
+        # Include services and exclude health checks.
+        contains: MyApp.Services.
+        -contains: HealthCheck
+        """)]
 ```
 
 ## Type Filters
 
 ```csharp
 [Log(
-    TargetFilterKind = AspectFilterKind.Contains,
-    TargetFilter = ["Save"])]
+    TargetFilter = "contains: Save")]
 sealed class UserService
 {
     public void SaveUser() {}
@@ -52,11 +61,16 @@ For assembly or type filters, the aspect attribute itself is applied to the asse
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
 sealed class LogAttribute : Attribute
 {
-    public string[]? TargetFilter { get; set; }
-    public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
+    public string? TargetFilter { get; set; }
 
     public static void OnAfterCall(InterceptInfo info) {}
 }
+```
+
+Use `string[]?` when separate constants or generated attribute arguments are more convenient:
+
+```csharp
+public string[]? TargetFilter { get; set; }
 ```
 
 In AOP terminology, `TargetFilter` plays the role of a pointcut-like method selector. The term `pointcut` is explanatory only and is not part of the public API.

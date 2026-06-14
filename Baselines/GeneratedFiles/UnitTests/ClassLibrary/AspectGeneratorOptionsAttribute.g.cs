@@ -12,10 +12,37 @@ namespace AspectGenerator
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
 	sealed class AspectGeneratorOptionsAttribute : Attribute
 	{
+		/// <summary>
+		/// Gets or sets whether AspectGenerator emits the shared generated API types for this assembly.
+		/// </summary>
+		/// <remarks>
+		/// Keep this enabled for single-project usage. Set it to <c>false</c> when the API is supplied by an aspect library referenced by this project.
+		/// </remarks>
 		public bool    GenerateApi                   { get; set; } = true;
+		/// <summary>
+		/// Gets or sets whether AspectGenerator emits interceptor implementations for this assembly.
+		/// </summary>
+		/// <remarks>
+		/// This can be used to force interceptor generation in projects where generation would otherwise be skipped by build-time defaults.
+		/// </remarks>
 		public bool    GenerateInterceptors          { get; set; }
+		/// <summary>
+		/// Gets or sets whether generated API types are emitted as public types.
+		/// </summary>
+		/// <remarks>
+		/// Use this for aspect-library projects that expose aspect definitions and generated API types to other projects.
+		/// </remarks>
 		public bool    PublicApi                     { get; set; }
+		/// <summary>
+		/// Gets or sets whether generated interceptor methods are marked with <see cref="System.Diagnostics.DebuggerStepThroughAttribute"/>.
+		/// </summary>
 		public bool    DebuggerStepThrough           { get; set; }
+		/// <summary>
+		/// Gets or sets the namespace used for generated interceptor types.
+		/// </summary>
+		/// <remarks>
+		/// The namespace must also be listed in the project <c>InterceptorsNamespaces</c> MSBuild property so Roslyn can use the generated interceptors.
+		/// </remarks>
 		public string? InterceptorsNamespace         { get; set; }
 	}
 }

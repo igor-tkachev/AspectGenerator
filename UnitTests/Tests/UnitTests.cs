@@ -11,10 +11,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace AspectGenerator.Tests
 {
 	[Aspects.Log(
-		TargetFilterKind = AspectFilterKind.Regex,
 		TargetFilter =
 		[
-			@"^public static System.String AspectGenerator\.Tests\.UnitTests\.TypeFilterTarget\(\)$"
+			@"regex: ^public static System.String AspectGenerator\.Tests\.UnitTests\.TypeFilterTarget\(\)$"
 		])]
 	[TestClass]
 	public class UnitTests

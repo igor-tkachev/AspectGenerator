@@ -50,9 +50,11 @@ Problem: applying an aspect previously required explicit method-level attributes
 Scope:
 
 - `TargetFilter` is an ordered string list;
-- `TargetFilterKind` defaults to `AspectFilterKind.Dsl`, which is reserved while the DSL syntax is being designed;
-- `AspectFilterKind.Contains` uses ordinal substring matching;
-- `AspectFilterKind.Regex` uses regex matching with timeout protection;
+- `TargetFilter` can be declared as `string?` or `string[]?`; every string is split into non-empty line rules and `string[]` values concatenate those rules;
+- rule lines can use matcher prefixes: `pattern:`, `contains:`, `regex:`;
+- lines starting with `#` are comments;
+- `contains:` uses ordinal substring matching;
+- `regex:` uses regex matching with timeout protection;
 - filters apply to target method canonical signatures, not call-site text;
 - filters are evaluated in order;
 - an entry starting with `-` is an exclude filter;
@@ -65,7 +67,7 @@ Scope:
 Public / generated API:
 
 - [x] Keep assembly and type filters on the applied aspect attribute itself instead of adding a separate `AspectFilterAttribute`.
-- [x] Require the applied aspect attribute to expose its own `TargetFilter` property, `TargetFilterKind` property, and appropriate `AttributeUsage` targets.
+- [x] Require the applied aspect attribute to expose its own `TargetFilter` property and appropriate `AttributeUsage` targets.
 - [x] Keep `TargetFilter` off generated `AspectAttribute`; `[Aspect(TargetFilter = ...)]` is intentionally unsupported.
 - [x] Remove the legacy explicit method selector from generated `AspectAttribute`.
 
@@ -75,7 +77,7 @@ TargetFilter sources:
 - [x] Support type-level filters through `[SomeAspect(TargetFilter = [...])]`.
 - [x] Support `Contains` target filters.
 - [x] Support `Regex` target filters.
-- [ ] Design and implement `Dsl` target filters.
+- [ ] Design and implement native `Pattern` target filters.
 - [x] Evaluate each filter set independently.
 - [x] Include an aspect when any filter set evaluates to include.
 - [x] Keep negative filters local to their own filter set.

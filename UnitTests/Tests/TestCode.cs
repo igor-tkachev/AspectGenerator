@@ -53,8 +53,6 @@ namespace AspectGenerator.Tests
 	sealed class OnCallAttribute : Attribute
 	{
 		public string[]?        TargetFilter     { get; set; }
-		public AspectFilterKind TargetFilterKind { get; set; } = AspectFilterKind.Dsl;
-
 		public static int OnCall(int n)
 		{
 			return n * 2;
