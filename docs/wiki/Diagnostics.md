@@ -19,3 +19,4 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0106`: `UseInterceptData=true` requires `ref InterceptData<T>`.
 - `AG0107`: async hook requires a supported async target.
 - `AG0201`: invalid aspect filter regex.
+- `AG0202`: `pattern:` or an unprefixed target filter rule is used before the native pattern matcher is implemented.

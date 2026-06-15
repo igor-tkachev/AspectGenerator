@@ -32,6 +32,7 @@ namespace AspectGenerator
 			public const string HookRequiresInterceptData = "AG0106";
 			public const string AsyncHookRequiresTask     = "AG0107";
 			public const string InvalidAspectFilterRegex  = "AG0201";
+			public const string UnsupportedAspectFilterPattern = "AG0202";
 		}
 
 		public static class OptionID
@@ -42,6 +43,8 @@ namespace AspectGenerator
 			public const string DebuggerStepThrough           = "DebuggerStepThrough";
 			public const string InterceptorsNamespace         = "InterceptorsNamespace";
 		}
+
+		#region API
 
 		const string AspectGeneratorOptionsAttributeText =
 			$$"""
@@ -362,6 +365,8 @@ namespace AspectGenerator
 			""";
 		}
 
+		#endregion
+
 		class Options
 		{
 			public bool?   GenerateApi;
@@ -382,11 +387,13 @@ namespace AspectGenerator
 			string? InterceptorsNamespaces);
 
 		record AttributeInfo(
-			AttributeData?    AttributeData,
+			AttributeData?    AppliedAttributeData,
+			AttributeSyntax?  AppliedAttributeSyntax,
+			SemanticModel?    AppliedSemanticModel,
 			INamedTypeSymbol  AttributeClass,
-			AttributeData?    AspectAttributeData,
-			AttributeSyntax?  AspectAttributeSyntax,
-			SemanticModel?    AspectSemanticModel)
+			AttributeData?    AspectDefinitionData,
+			AttributeSyntax?  AspectDefinitionSyntax,
+			SemanticModel?    AspectDefinitionSemanticModel)
 		{
 		}
 
@@ -527,12 +534,12 @@ namespace AspectGenerator
 								//
 								if (ma.AttributeClass is not null && aspectAttributes.TryGetValue(ma.AttributeClass, out var aspectAttribute))
 								{
-									attributes.Add(new AttributeInfo(ma, ma.AttributeClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel));
+									attributes.Add(new AttributeInfo(ma, null, null, ma.AttributeClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel));
 								}
 								// .. or somewhere else.
 								else if (ma.AttributeClass?.GetAttributes().FirstOrDefault(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }}) is {} externalAspectAttributeData)
 								{
-									attributes.Add(new AttributeInfo(ma, ma.AttributeClass!, externalAspectAttributeData, null, null));
+									attributes.Add(new AttributeInfo(ma, null, null, ma.AttributeClass!, externalAspectAttributeData, null, null));
 								}
 							}
 						}
@@ -604,12 +611,12 @@ namespace AspectGenerator
 		{
 			var result = new Options
 			{
-				GenerateApi                   = msBuildOptions.GenerateApi,
-				GenerateInterceptors          = msBuildOptions.GenerateInterceptors,
-				DesignTimeBuild               = msBuildOptions.DesignTimeBuild,
-				PublicApi                     = msBuildOptions.PublicApi,
-				DebuggerStepThrough           = msBuildOptions.DebuggerStepThrough,
-				InterceptorsNamespace         = msBuildOptions.InterceptorsNamespace,
+				GenerateApi            = msBuildOptions.GenerateApi,
+				GenerateInterceptors   = msBuildOptions.GenerateInterceptors,
+				DesignTimeBuild        = msBuildOptions.DesignTimeBuild,
+				PublicApi              = msBuildOptions.PublicApi,
+				DebuggerStepThrough    = msBuildOptions.DebuggerStepThrough,
+				InterceptorsNamespace  = msBuildOptions.InterceptorsNamespace,
 				InterceptorsNamespaces = msBuildOptions.InterceptorsNamespaces,
 			};
 
@@ -676,10 +683,10 @@ namespace AspectGenerator
 
 		static IEnumerable<(string Key, object? Value)> GetAspectArguments(AttributeInfo attribute)
 		{
-			if (attribute.AspectAttributeData is {} aspectAttributeData)
+			if (attribute.AspectDefinitionData is {} aspectAttributeData)
 				return GetAspectArguments(aspectAttributeData);
 
-			if (attribute is { AspectAttributeSyntax: {} syntax, AspectSemanticModel: {} semanticModel })
+			if (attribute is { AspectDefinitionSyntax: {} syntax, AspectDefinitionSemanticModel: {} semanticModel })
 				return GetAspectArguments(syntax, semanticModel);
 
 			return [];
@@ -823,9 +830,9 @@ namespace AspectGenerator
 			AttributeInfo attributeInfo;
 
 			if (aspectAttributes.TryGetValue(aspectClass, out var aspectAttribute))
-				attributeInfo = new AttributeInfo(null, aspectClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel);
+				attributeInfo = new AttributeInfo(null, filterAttribute, semanticModel, aspectClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel);
 			else if (aspectAttributeData is not null)
-				attributeInfo = new AttributeInfo(null, aspectClass, aspectAttributeData, null, null);
+				attributeInfo = new AttributeInfo(null, filterAttribute, semanticModel, aspectClass, aspectAttributeData, null, null);
 			else
 				return null;
 
@@ -857,9 +864,9 @@ namespace AspectGenerator
 			AttributeInfo attributeInfo;
 
 			if (aspectAttributes.TryGetValue(aspectClass, out var aspectAttribute))
-				attributeInfo = new AttributeInfo(null, aspectClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel);
+				attributeInfo = new AttributeInfo(filterAttribute, null, null, aspectClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel);
 			else if (aspectAttributeData is not null)
-				attributeInfo = new AttributeInfo(null, aspectClass, aspectAttributeData, null, null);
+				attributeInfo = new AttributeInfo(filterAttribute, null, null, aspectClass, aspectAttributeData, null, null);
 			else
 				return null;
 
@@ -922,16 +929,18 @@ namespace AspectGenerator
 		static AspectFilters.TargetFilterSet CompileAspectFilters(
 			List<DiagnosticInfo> diagnostics,
 			HashSet<string>      reportedDiagnostics,
-			object?               filterValue,
+			object?              filterValue,
 			Location?            location)
 		{
 			return filterValue is object?[] values
 				? AspectFilters.GetFilters(
 					values.Select(static value => value as string),
-					ReportInvalidRegex)
+					ReportInvalidRegex,
+					ReportUnsupportedPattern)
 				: AspectFilters.GetFilters(
 					filterValue as string,
-					ReportInvalidRegex);
+					ReportInvalidRegex,
+					ReportUnsupportedPattern);
 
 			void ReportInvalidRegex(string pattern, string errorMessage)
 			{
@@ -940,6 +949,16 @@ namespace AspectGenerator
 						reportedDiagnostics,
 					DiagnosticID.InvalidAspectFilterRegex,
 					$"Invalid aspect filter regex '{pattern}': {errorMessage}",
+					location);
+			}
+
+			void ReportUnsupportedPattern(string pattern)
+			{
+				ReportDiagnostic(
+					diagnostics,
+					reportedDiagnostics,
+					DiagnosticID.UnsupportedAspectFilterPattern,
+					$"Aspect filter matcher 'pattern' is not implemented yet. Use 'contains:' or 'regex:' for '{pattern}'.",
 					location);
 			}
 		}
@@ -1092,6 +1111,63 @@ namespace AspectGenerator
 					yield return (arg.NameEquals.Name.Identifier.ValueText, GetAttributeArgumentValue(arg.Expression, semanticModel));
 		}
 
+		static IEnumerable<(string Key, string Value)> GetAppliedAspectArguments(AttributeInfo attribute)
+		{
+			if (attribute.AppliedAttributeData is not null)
+			{
+				foreach (var arg in attribute.AppliedAttributeData.NamedArguments)
+				{
+					if (arg.Key == "TargetFilter")
+						continue;
+
+					yield return (arg.Key, PrintTypedConstant(arg.Value));
+				}
+			}
+
+			if (attribute is not { AppliedAttributeSyntax: {} syntax, AppliedSemanticModel: {} semanticModel })
+				yield break;
+
+			foreach (var arg in syntax.ArgumentList?.Arguments ?? default)
+			{
+				if (arg.NameEquals is null)
+					continue;
+
+				var name = arg.NameEquals.Name.Identifier.ValueText;
+
+				if (name == "TargetFilter")
+					continue;
+
+				var value = GetAttributeArgumentValue(arg.Expression, semanticModel);
+				var type  = semanticModel.GetTypeInfo(arg.Expression).ConvertedType ?? semanticModel.GetTypeInfo(arg.Expression).Type;
+
+				yield return (name, PrintAttributeValue(value, type));
+			}
+		}
+
+		static string PrintTypedConstant(TypedConstant value)
+		{
+			if (value.Type is IArrayTypeSymbol arrayType)
+				return value.Values.Length switch
+				{
+					0 => $"new {arrayType.ElementType}[0]",
+					_ => $"new {value.Type} {{ {value.Values.Select(v => PrintValue(v.Value, arrayType.ElementType)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
+				};
+
+			return PrintValue(value.Value, value.Type);
+		}
+
+		static string PrintAttributeValue(object? value, ITypeSymbol? type)
+		{
+			if (type is IArrayTypeSymbol arrayType && value is object?[] values)
+				return values.Length switch
+				{
+					0 => $"new {arrayType.ElementType}[0]",
+					_ => $"new {type} {{ {values.Select(v => PrintValue(v, arrayType.ElementType)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
+				};
+
+			return PrintValue(value, type);
+		}
+
 		static object? GetAttributeArgumentValue(ExpressionSyntax expression, SemanticModel semanticModel)
 		{
 			if (expression is ImplicitArrayCreationExpressionSyntax { Initializer.Expressions: var implicitValues })
@@ -1203,12 +1279,12 @@ namespace AspectGenerator
 				var methods         = m.ToList();
 				var attributes      = methods[0].Attributes;
 
-				if (attributes.Any(a => a.AttributeData?.NamedArguments.Any(na => na.Key == "Order") is true))
+				if (attributes.Any(a => a.AppliedAttributeData?.NamedArguments.Any(na => na.Key == "Order") is true))
 				{
 					attributes =
 						(
 							from a in attributes
-							let o = a.AttributeData?.NamedArguments.Select(na => (KeyValuePair<string,TypedConstant>?)na).FirstOrDefault(na => na!.Value.Key == "Order")
+							let o = a.AppliedAttributeData?.NamedArguments.Select(na => (KeyValuePair<string,TypedConstant>?)na).FirstOrDefault(na => na!.Value.Key == "Order")
 							let n = o is null ? int.MaxValue : o.Value.Value.Value switch
 							{
 								string s => int.TryParse(s, out var n) ? n : null,
@@ -1253,30 +1329,15 @@ namespace AspectGenerator
 							""")
 						;
 
-					if (attr.AttributeData is not null)
-						foreach (var arg in attr.AttributeData.NamedArguments)
-						{
-							string value;
-
-							if (arg.Value.Type is IArrayTypeSymbol arrayType)
-							{
-								value = arg.Value.Values.Length switch
-								{
-									0 => $"new {arrayType.ElementType}[0]",
-									_ => $"new {arg.Value.Type} {{ {arg.Value.Values.Select(v => PrintValue(v.Value, arrayType.ElementType)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
-								};
-							}
-							else
-								value = PrintValue(arg.Value.Value, arg.Value.Type);
-
+					foreach (var arg in GetAppliedAspectArguments(attr))
+					{
 							sb
 								.AppendLine(
 									$$"""
-												["{{arg.Key}}"] = {{value}},
+												["{{arg.Key}}"] = {{arg.Value}},
 									""")
 								;
-
-						}
+					}
 
 					sb
 						.AppendLine(
@@ -1406,7 +1467,7 @@ namespace AspectGenerator
 					onCallValue is string onCall &&
 					!string.IsNullOrWhiteSpace(onCall))
 				{
-					if (attribute.AttributeData?.ApplicationSyntaxReference is {} asr)
+					if (attribute.AppliedAttributeData?.ApplicationSyntaxReference is {} asr)
 					{
 						ReportDiagnostic(
 							diagnostics,
@@ -1553,17 +1614,17 @@ namespace AspectGenerator
 
 		static Location GetHookLocation(AttributeInfo attribute, string hookName, InvocationExpressionSyntax invocationExpression)
 		{
-			if (attribute is { AspectAttributeSyntax: {} syntax, AspectSemanticModel: not null })
+			if (attribute is { AspectDefinitionSyntax: {} syntax, AspectDefinitionSemanticModel: not null })
 			{
 				foreach (var arg in syntax.ArgumentList?.Arguments ?? default)
 					if (arg.NameEquals?.Name.Identifier.ValueText == hookName)
 						return arg.Expression.GetLocation();
 			}
 
-			if (attribute.AspectAttributeData?.ApplicationSyntaxReference is {} aspectSyntaxReference)
+			if (attribute.AspectDefinitionData?.ApplicationSyntaxReference is {} aspectSyntaxReference)
 				return Location.Create(aspectSyntaxReference.SyntaxTree, aspectSyntaxReference.Span);
 
-			if (attribute.AttributeData?.ApplicationSyntaxReference is {} attributeSyntaxReference)
+			if (attribute.AppliedAttributeData?.ApplicationSyntaxReference is {} attributeSyntaxReference)
 				return Location.Create(attributeSyntaxReference.SyntaxTree, attributeSyntaxReference.Span);
 
 			return invocationExpression.GetLocation();
@@ -1859,7 +1920,7 @@ namespace AspectGenerator
 				if (needInfo)
 				{
 					sb
-						.Append(indent).AppendLine($"// {(object?)attributes[idx].AttributeData ?? attributes[idx].AttributeClass}")
+						.Append(indent).AppendLine($"// {(object?)attributes[idx].AppliedAttributeData ?? attributes[idx].AttributeClass}")
 						.Append(indent).AppendLine("//")
 						//.Append(indent).Append($"var __attr__{idx} = new {attributes[idx]}").Append(attributes[idx].NamedArguments.Length == 0 ? "()" : "").AppendLine(";")
 						.Append(indent).AppendLine($"var __info__{idx} = new AspectGenerator.Intercept{(useInterceptData ? "Data" : "Info")}<{returnType}>")

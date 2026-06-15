@@ -363,6 +363,7 @@ namespace Aspects
 		public static void OnAfterCall<T>(InterceptInfo<T> info)
 		{
 		}
+
 		public static void OnAfterCall(InterceptInfo<string> info)
 		{
 			info.ReturnValue += info.MethodArguments!.Length;
@@ -373,7 +374,8 @@ namespace Aspects
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class LogAttribute : Attribute
 	{
-		public string[]?        TargetFilter     { get; set; }
+		public string[]? TargetFilter { get; set; }
+
 		public static void OnAfterCall(InterceptInfo<string> info)
 		{
 			info.ReturnValue += " + log.";

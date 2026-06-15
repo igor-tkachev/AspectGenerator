@@ -6,51 +6,58 @@ using System.Text.RegularExpressions;
 
 namespace AspectGenerator
 {
-	internal static class AspectFilters
+	static class AspectFilters
 	{
 		const int RegexTimeoutMilliseconds = 200;
+		const int MaxCacheEntries          = 1024;
 
-		static readonly ConcurrentDictionary<string,RegexCacheEntry>       RegexCache = new();
-		static readonly ConcurrentDictionary<TargetFilterKey,TargetFilterSet> FilterCache = new();
+		static readonly ConcurrentDictionary<TargetFilterKey,TargetFilterSet> _filterCache = new();
 
-		internal static TargetFilterSet GetFilters(
+		public static TargetFilterSet GetFilters(
 			string?                filter,
-			Action<string,string>? reportInvalidRegex = null)
+			Action<string,string>? reportInvalidRegex = null,
+			Action<string>?        reportUnsupportedPattern = null)
 		{
-			return GetFilters([filter], reportInvalidRegex);
+			return GetFilters([filter], reportInvalidRegex, reportUnsupportedPattern);
 		}
 
-		internal static TargetFilterSet GetFilters(
+		public static TargetFilterSet GetFilters(
 			IEnumerable<string?>   filters,
-			Action<string,string>? reportInvalidRegex = null)
+			Action<string,string>? reportInvalidRegex = null,
+			Action<string>?        reportUnsupportedPattern = null)
 		{
 			var items = filters.ToImmutableArray();
-			var key   = new TargetFilterKey(items);
+			var rules = ParseRules(items);
+			var key   = new TargetFilterKey(rules);
 
-			return FilterCache.GetOrAdd(
-				key,
-				static k =>
-				{
-					var rules = ParseRules(k.Items);
+			if (_filterCache.Count > MaxCacheEntries)
+				_filterCache.Clear();
 
-					return TargetFilterSet.Create(rules);
-				})
-				.ReportInvalidRegex(reportInvalidRegex);
+			return _filterCache
+				.GetOrAdd(key, static k => TargetFilterSet.Create(k.Items))
+				.ReportDiagnostics(reportInvalidRegex, reportUnsupportedPattern);
 		}
 
-		static ImmutableArray<string> ParseRules(ImmutableArray<string?> items)
+		static List<string> ParseRules(ImmutableArray<string?> items)
 		{
-			var result = ImmutableArray.CreateBuilder<string>();
+			var result = new List<string>();
 
 			foreach (var item in items)
-				AddRules(result, item);
+				if (item is not null)
+					foreach (var line in item.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
+					{
+						var rule = line.Trim();
 
-			return result.ToImmutable();
+						if (rule.Length > 0 && !rule.StartsWith("#", StringComparison.Ordinal))
+							result.Add(rule);
+					}
+
+			return result;
 		}
 
-		static ImmutableArray<CompiledFilter> Compile(ImmutableArray<string> rules)
+		static List<CompiledFilter> Compile(List<string> rules)
 		{
-			var result = ImmutableArray.CreateBuilder<CompiledFilter>();
+			var result = new List<CompiledFilter>();
 
 			foreach (var rule in rules)
 			{
@@ -72,7 +79,7 @@ namespace AspectGenerator
 					result.Add(new CompiledFilter(isNegative, matcher, pattern, regex.Regex));
 			}
 
-			return result.ToImmutable();
+			return result;
 		}
 
 		static bool TryParseRule(string rule, out bool isNegative, out FilterMatcher matcher, out string pattern)
@@ -113,20 +120,6 @@ namespace AspectGenerator
 			return pattern.Length > 0;
 		}
 
-		static void AddRules(ImmutableArray<string>.Builder result, string? value)
-		{
-			if (value is null)
-				return;
-
-			foreach (var line in value.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
-			{
-				var rule = line.Trim();
-
-				if (rule.Length > 0 && !rule.StartsWith("#", StringComparison.Ordinal))
-					result.Add(rule);
-			}
-		}
-
 		static bool TryReadMatcherPrefix(string rule, string prefix, out string body)
 		{
 			body = "";
@@ -148,21 +141,16 @@ namespace AspectGenerator
 
 		static RegexCacheEntry GetRegex(string pattern)
 		{
-			return RegexCache.GetOrAdd(
-				pattern,
-				static p =>
-				{
-					try
-					{
-						return new RegexCacheEntry(
-							new Regex(p, RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(RegexTimeoutMilliseconds)),
-							null);
-					}
-					catch (ArgumentException ex)
-					{
-						return new RegexCacheEntry(null, ex.Message);
-					}
-				});
+			try
+			{
+				return new RegexCacheEntry(
+					new Regex(pattern, RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(RegexTimeoutMilliseconds)),
+					null);
+			}
+			catch (ArgumentException ex)
+			{
+				return new RegexCacheEntry(null, ex.Message);
+			}
 		}
 
 		static bool IsRegexMatch(CompiledFilter filter, string targetSignature)
@@ -177,25 +165,25 @@ namespace AspectGenerator
 			}
 		}
 
-		internal readonly struct TargetFilterSet
+		public readonly struct TargetFilterSet
 		{
-			readonly ImmutableArray<string>         _rules;
-			readonly ImmutableArray<CompiledFilter> _filters;
+			readonly List<string>         _rules;
+			readonly List<CompiledFilter> _filters;
 
-			TargetFilterSet(ImmutableArray<string> rules, ImmutableArray<CompiledFilter> filters)
+			TargetFilterSet(List<string> rules, List<CompiledFilter> filters)
 			{
 				_rules   = rules;
 				_filters = filters;
 			}
 
-			internal bool IsEmpty => _filters.IsDefaultOrEmpty;
+			public bool IsEmpty => _filters.Count == 0;
 
-			internal static TargetFilterSet Create(ImmutableArray<string> rules)
+			public static TargetFilterSet Create(List<string> rules)
 			{
 				return new TargetFilterSet(rules, Compile(rules));
 			}
 
-			internal bool IsMatch(string targetSignature)
+			public bool IsMatch(string targetSignature)
 			{
 				var matched = false;
 
@@ -217,20 +205,31 @@ namespace AspectGenerator
 				return matched;
 			}
 
-			internal TargetFilterSet ReportInvalidRegex(Action<string,string>? reportInvalidRegex)
+			public TargetFilterSet ReportDiagnostics(
+				Action<string,string>? reportInvalidRegex,
+				Action<string>?        reportUnsupportedPattern)
 			{
-				if (reportInvalidRegex is null)
+				if (reportInvalidRegex is null && reportUnsupportedPattern is null)
 					return this;
 
 				foreach (var rule in _rules)
 				{
-					if (!TryParseRule(rule, out _, out var matcher, out var pattern) || matcher != FilterMatcher.Regex)
+					if (!TryParseRule(rule, out _, out var matcher, out var pattern))
 						continue;
 
-					var regex = GetRegex(pattern);
+					if (matcher == FilterMatcher.Pattern)
+					{
+						reportUnsupportedPattern?.Invoke(pattern);
+						continue;
+					}
 
-					if (regex.Regex is null)
-						reportInvalidRegex(pattern, regex.ErrorMessage ?? "Invalid regex pattern.");
+					if (matcher == FilterMatcher.Regex)
+					{
+						var regex = GetRegex(pattern);
+
+						if (regex.Regex is null)
+							reportInvalidRegex?.Invoke(pattern, regex.ErrorMessage ?? "Invalid regex pattern.");
+					}
 				}
 
 				return this;
@@ -239,33 +238,34 @@ namespace AspectGenerator
 
 		readonly struct TargetFilterKey : IEquatable<TargetFilterKey>
 		{
-			readonly ImmutableArray<string?> _items;
-			readonly int                     _hashCode;
+			readonly List<string> _items;
+			readonly int          _hashCode;
 
-			internal TargetFilterKey(ImmutableArray<string?> items)
+			public TargetFilterKey(List<string> items)
 			{
-				_items = items.IsDefault ? ImmutableArray<string?>.Empty : items;
+				_items = items;
 
 				unchecked
 				{
 					var hashCode = 17;
-					hashCode = hashCode * 31 + _items.Length;
+
+					hashCode = hashCode * 31 + _items.Count;
 
 					foreach (var item in _items)
-						hashCode = hashCode * 31 + (item is null ? 0 : StringComparer.Ordinal.GetHashCode(item));
+						hashCode = hashCode * 31 + StringComparer.Ordinal.GetHashCode(item);
 
 					_hashCode = hashCode;
 				}
 			}
 
-			internal ImmutableArray<string?> Items => _items;
+			public List<string> Items => _items;
 
 			public bool Equals(TargetFilterKey other)
 			{
-				if (_items.Length != other._items.Length)
+				if (_items.Count != other._items.Count)
 					return false;
 
-				for (var i = 0; i < _items.Length; i++)
+				for (var i = 0; i < _items.Count; i++)
 					if (!StringComparer.Ordinal.Equals(_items[i], other._items[i]))
 						return false;
 

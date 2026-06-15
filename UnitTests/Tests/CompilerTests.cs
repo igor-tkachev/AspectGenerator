@@ -156,6 +156,16 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void FilterAppliedAspectPreservesAppliedArgumentsTest()
+		{
+			var result = RunGenerator(FilterAppliedArgumentsSource);
+			var source = GetGeneratedSource(result, "Interceptors.g.cs");
+
+			StringAssert.Contains(source, "[\"Category\"] = \"audit\"");
+			Assert.IsFalse(source.Contains("[\"TargetFilter\"]", StringComparison.Ordinal), "TargetFilter is a selector and should not be emitted into runtime AspectArguments.");
+		}
+
+		[TestMethod]
 		public void ExplicitMethodAspectAppliesWhenNoFilterMatchesTest()
 		{
 			var result = RunGenerator(FilterExplicitMethodSource);
@@ -171,6 +181,16 @@ namespace AspectGenerator.Tests
 
 			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRegex}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
 			StringAssert.Contains(diagnostic.GetMessage(), "Invalid aspect filter regex");
+		}
+
+		[TestMethod]
+		public void PatternAspectFilterReportsDiagnosticUntilImplementedTest()
+		{
+			var result = RunGenerator(FilterPatternSource);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.UnsupportedAspectFilterPattern);
+
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.UnsupportedAspectFilterPattern}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			StringAssert.Contains(diagnostic.GetMessage(), "not implemented");
 		}
 
 		[TestMethod]
@@ -675,6 +695,38 @@ namespace AspectGenerator.Tests
 			}
 			""";
 
+		const string FilterAppliedArgumentsSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
+				TargetFilter = "contains: SaveUser",
+				Category = "audit")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+				public string? Category     { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += info.AspectArguments["Category"];
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					SaveUser();
+				}
+
+				public static string SaveUser() => "save";
+			}
+			""";
+
 		const string FilterExplicitMethodSource =
 			"""
 			using System;
@@ -728,6 +780,35 @@ namespace AspectGenerator.Tests
 				}
 
 				public static string Target() => "target";
+			}
+			""";
+
+		const string FilterPatternSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "public MyApp.Services.*")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					SaveUser();
+				}
+
+				public static string SaveUser() => "save";
 			}
 			""";
 

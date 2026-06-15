@@ -102,9 +102,12 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void PatternRulesAreAcceptedButNotCompiledYetTest()
 		{
-			var filters = AspectFilters.GetFilters("pattern: public MyApp.Services.*");
+			var reported = ImmutableArray.CreateBuilder<string>();
+			var filters  = AspectFilters.GetFilters("pattern: public MyApp.Services.*", reportUnsupportedPattern: pattern => reported.Add(pattern));
 
 			Assert.IsTrue(filters.IsEmpty);
+			Assert.AreEqual(1, reported.Count);
+			Assert.AreEqual("public MyApp.Services.*", reported[0]);
 		}
 	}
 }
