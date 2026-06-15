@@ -55,7 +55,9 @@ Scope:
 - lines starting with `#` are comments;
 - `contains:` uses ordinal substring matching;
 - `regex:` uses regex matching with timeout protection;
-- filters apply to target method canonical signatures, not call-site text;
+- `pattern:` and unprefixed rules use the native AspectGenerator target pattern syntax;
+- `contains:` and `regex:` apply to target method canonical signatures, not call-site text;
+- `pattern:` applies to structured target method metadata, not call-site text;
 - filters are evaluated in order;
 - an entry starting with `-` is an exclude filter;
 - the last matching entry wins inside one filter set;
@@ -77,7 +79,8 @@ TargetFilter sources:
 - [x] Support type-level filters through `[SomeAspect(TargetFilter = [...])]`.
 - [x] Support `Contains` target filters.
 - [x] Support `Regex` target filters.
-- [ ] Design and implement native `Pattern` target filters.
+- [x] Design and implement native `Pattern` target filters.
+- [x] Support native `Pattern` method rules, condition rules, dotted wildcards, return filters, and parameter filters.
 - [x] Evaluate each filter set independently.
 - [x] Include an aspect when any filter set evaluates to include.
 - [x] Keep negative filters local to their own filter set.

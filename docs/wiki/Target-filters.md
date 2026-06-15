@@ -6,7 +6,7 @@ Filters are not runtime AOP. They select target methods, but AspectGenerator sti
 
 ## Filter Model
 
-`TargetFilter` is an ordered rule list. Each rule can use a matcher prefix. `contains:` and `regex:` are implemented now; unprefixed rules and `pattern:` are reserved for the native AspectGenerator target pattern syntax.
+`TargetFilter` is an ordered rule list. Each rule can use a matcher prefix. Unprefixed rules and `pattern:` use the native AspectGenerator target pattern syntax. `contains:` and `regex:` match the canonical target method signature.
 
 - filters apply to canonical target method signatures;
 - a rule starting with `-` is an exclude filter;
@@ -25,11 +25,79 @@ Rule syntax:
 
 No matcher prefix is equivalent to `pattern:`.
 
-`Contains` matching uses `StringComparison.Ordinal`.
+`Pattern` matching is case-sensitive and matches structured method metadata: accessibility, modifiers, containing namespace/type, method name, return type, and parameter list.
+
+`Contains` matching uses `StringComparison.Ordinal` over the canonical signature.
 
 `Regex` matching uses `RegexOptions.CultureInvariant`, is case-sensitive by default, and uses a timeout to protect IDE and design-time builds.
 
-Invalid regex patterns report `AG0201`.
+Invalid regex patterns report `AG0201`. Invalid native pattern rules report `AG0202`, `AG0204`, `AG0205`, or `AG0206` depending on the error.
+
+## Native Pattern Syntax
+
+The default matcher is `pattern:`, so these two rules are equivalent:
+
+```text
+public **.*Service.Save*(..., *CancellationToken) : System.Threading.Tasks.Task*
+pattern: public **.*Service.Save*(..., *CancellationToken) : System.Threading.Tasks.Task*
+```
+
+Method-pattern form:
+
+```text
+[accessibility/modifiers...] [namespace/type path.]method[(parameters)] [: return-type]
+```
+
+Examples:
+
+```text
+Save
+Save()
+Save(...)
+public Save*
+public static MyApp.Services.*Service.Save*
+protected internal MyApp.**.*Service.Save*(..., *CancellationToken) : System.Threading.Tasks.Task*
+MyApp.Data.Repository<*>.Get<*>(_)
+*.TryGet(System.String, out System.Int32) : System.Boolean
+```
+
+Parameter rules:
+
+- no parameter list ignores parameters;
+- `()` requires zero parameters;
+- `(...)` matches any parameter list;
+- `_` matches exactly one arbitrary parameter;
+- `...` inside a parameter list matches zero or more parameters and can appear once;
+- typed parameters can use `ref`, `out`, `in`, or `params`.
+
+Condition-rule form combines conditions with `;`:
+
+```text
+namespace:MyApp.Services.**; type:*Service; method:Save*
+method:*Async; returns:System.Threading.Tasks.Task*
+params:..., *CancellationToken
+param:out System.Int32
+signature:public * MyApp.Services.*
+```
+
+Condition keys:
+
+- `namespace`: containing namespace only;
+- `type`: simple containing type name;
+- `fulltype`: namespace plus containing type;
+- `method`: method name only;
+- `fullmethod`: namespace plus containing type plus method name;
+- `returns`: return type;
+- `param`: any parameter;
+- `params`: full parameter list;
+- `signature`: canonical signature string.
+
+Pattern wildcards:
+
+- `*` matches zero or more characters inside one segment;
+- `?` matches exactly one character inside one segment;
+- `**` matches zero or more complete dotted segments and must be a complete segment;
+- dots inside generic angle brackets do not split segments.
 
 ## Assembly Filters
 

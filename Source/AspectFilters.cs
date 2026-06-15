@@ -6,25 +6,24 @@ using System.Text.RegularExpressions;
 
 namespace AspectGenerator
 {
-	static class AspectFilters
+	static partial class AspectFilters
 	{
 		const int RegexTimeoutMilliseconds = 200;
 		const int MaxCacheEntries          = 1024;
 
+		static readonly ConcurrentDictionary<string,RegexCacheEntry>          _regexCache  = new();
 		static readonly ConcurrentDictionary<TargetFilterKey,TargetFilterSet> _filterCache = new();
 
 		public static TargetFilterSet GetFilters(
-			string?                filter,
-			Action<string,string>? reportInvalidRegex = null,
-			Action<string>?        reportUnsupportedPattern = null)
+			string?                         filter,
+			Action<TargetFilterDiagnostic>? reportDiagnostic = null)
 		{
-			return GetFilters([filter], reportInvalidRegex, reportUnsupportedPattern);
+			return GetFilters([filter], reportDiagnostic);
 		}
 
 		public static TargetFilterSet GetFilters(
-			IEnumerable<string?>   filters,
-			Action<string,string>? reportInvalidRegex = null,
-			Action<string>?        reportUnsupportedPattern = null)
+			IEnumerable<string?>            filters,
+			Action<TargetFilterDiagnostic>? reportDiagnostic = null)
 		{
 			var items = filters.ToImmutableArray();
 			var rules = ParseRules(items);
@@ -35,7 +34,7 @@ namespace AspectGenerator
 
 			return _filterCache
 				.GetOrAdd(key, static k => TargetFilterSet.Create(k.Items))
-				.ReportDiagnostics(reportInvalidRegex, reportUnsupportedPattern);
+				.ReportDiagnostics(reportDiagnostic);
 		}
 
 		static List<string> ParseRules(ImmutableArray<string?> items)
@@ -55,148 +54,94 @@ namespace AspectGenerator
 			return result;
 		}
 
-		static List<CompiledFilter> Compile(List<string> rules)
+		static List<CompiledFilter> Compile(List<string> rules, List<TargetFilterDiagnostic> diagnostics)
 		{
 			var result = new List<CompiledFilter>();
 
 			foreach (var rule in rules)
 			{
-				if (!TryParseRule(rule, out var isNegative, out var matcher, out var pattern))
+				if (!TargetFilterRule.TryParse(rule, diagnostics, out var parsedRule))
 					continue;
 
-				if (matcher == FilterMatcher.Pattern)
-					continue;
-
-				if (matcher == FilterMatcher.Contains)
+				if (parsedRule.Matcher == FilterMatcher.Contains)
 				{
-					result.Add(new CompiledFilter(isNegative, matcher, pattern, null));
+					result.Add(new ContainsFilter(parsedRule.IsNegative, parsedRule.Body));
 					continue;
 				}
 
-				var regex = GetRegex(pattern);
+				if (parsedRule.Matcher == FilterMatcher.Pattern)
+				{
+					if (PatternParser.Compile(parsedRule.Body, diagnostics, out var pattern))
+						result.Add(new PatternFilter(parsedRule.IsNegative, pattern));
 
-				if (regex.Regex is not null)
-					result.Add(new CompiledFilter(isNegative, matcher, pattern, regex.Regex));
+					continue;
+				}
+
+				var regex = GetRegex(parsedRule.Body);
+
+				if (regex.Regex is null)
+					diagnostics.Add(TargetFilterDiagnostic.InvalidRegex(parsedRule.Body, regex.ErrorMessage ?? "Invalid regex pattern."));
+				else
+					result.Add(new RegexFilter(parsedRule.IsNegative, parsedRule.Body, regex.Regex));
 			}
 
 			return result;
 		}
 
-		static bool TryParseRule(string rule, out bool isNegative, out FilterMatcher matcher, out string pattern)
-		{
-			isNegative = false;
-			matcher    = FilterMatcher.Pattern;
-			pattern    = "";
-
-			rule = rule.Trim();
-
-			if (rule.Length == 0 || rule.StartsWith("#", StringComparison.Ordinal))
-				return false;
-
-			if (rule[0] == '-')
-			{
-				isNegative = true;
-				rule       = rule[1..].TrimStart();
-			}
-
-			if (TryReadMatcherPrefix(rule, "pattern", out var patternBody))
-			{
-				matcher = FilterMatcher.Pattern;
-				pattern = patternBody;
-			}
-			else if (TryReadMatcherPrefix(rule, "regex", out var regexBody))
-			{
-				matcher = FilterMatcher.Regex;
-				pattern = regexBody;
-			}
-			else if (TryReadMatcherPrefix(rule, "contains", out var containsBody))
-			{
-				matcher = FilterMatcher.Contains;
-				pattern = containsBody;
-			}
-			else
-				pattern = rule;
-
-			return pattern.Length > 0;
-		}
-
-		static bool TryReadMatcherPrefix(string rule, string prefix, out string body)
-		{
-			body = "";
-
-			if (!rule.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-				return false;
-
-			var index = prefix.Length;
-
-			while (index < rule.Length && char.IsWhiteSpace(rule[index]))
-				index++;
-
-			if (index >= rule.Length || rule[index] != ':')
-				return false;
-
-			body = rule[(index + 1)..].Trim();
-			return true;
-		}
-
 		static RegexCacheEntry GetRegex(string pattern)
 		{
-			try
-			{
-				return new RegexCacheEntry(
-					new Regex(pattern, RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(RegexTimeoutMilliseconds)),
-					null);
-			}
-			catch (ArgumentException ex)
-			{
-				return new RegexCacheEntry(null, ex.Message);
-			}
-		}
+			if (_regexCache.Count > MaxCacheEntries)
+				_regexCache.Clear();
 
-		static bool IsRegexMatch(CompiledFilter filter, string targetSignature)
-		{
-			try
-			{
-				return filter.Regex?.IsMatch(targetSignature) == true;
-			}
-			catch (RegexMatchTimeoutException)
-			{
-				return false;
-			}
+			return _regexCache.GetOrAdd(
+				pattern,
+				static p =>
+				{
+					try
+					{
+						return new RegexCacheEntry(
+							new Regex(p, RegexOptions.CultureInvariant | RegexOptions.Compiled, TimeSpan.FromMilliseconds(RegexTimeoutMilliseconds)),
+							null);
+					}
+					catch (ArgumentException ex)
+					{
+						return new RegexCacheEntry(null, ex.Message);
+					}
+				});
 		}
 
 		public readonly struct TargetFilterSet
 		{
-			readonly List<string>         _rules;
-			readonly List<CompiledFilter> _filters;
+			readonly ImmutableArray<TargetFilterDiagnostic> _diagnostics;
+			readonly List<CompiledFilter>                  _filters;
 
-			TargetFilterSet(List<string> rules, List<CompiledFilter> filters)
+			TargetFilterSet(List<CompiledFilter> filters, ImmutableArray<TargetFilterDiagnostic> diagnostics)
 			{
-				_rules   = rules;
-				_filters = filters;
+				_filters     = filters;
+				_diagnostics = diagnostics;
 			}
 
 			public bool IsEmpty => _filters.Count == 0;
 
 			public static TargetFilterSet Create(List<string> rules)
 			{
-				return new TargetFilterSet(rules, Compile(rules));
+				var diagnostics = new List<TargetFilterDiagnostic>();
+
+				return new TargetFilterSet(Compile(rules, diagnostics), diagnostics.ToImmutableArray());
 			}
 
 			public bool IsMatch(string targetSignature)
+			{
+				return IsMatch(MethodTarget.FromSignature(targetSignature));
+			}
+
+			public bool IsMatch(in MethodTarget target)
 			{
 				var matched = false;
 
 				foreach (var filter in _filters)
 				{
-					var isMatch = filter.Matcher switch
-					{
-						FilterMatcher.Contains => targetSignature.Contains(filter.Pattern, StringComparison.Ordinal),
-						FilterMatcher.Regex    => IsRegexMatch(filter, targetSignature),
-						_                      => false
-					};
-
-					if (!isMatch)
+					if (!filter.IsMatch(target))
 						continue;
 
 					matched = !filter.IsNegative;
@@ -205,34 +150,93 @@ namespace AspectGenerator
 				return matched;
 			}
 
-			public TargetFilterSet ReportDiagnostics(
-				Action<string,string>? reportInvalidRegex,
-				Action<string>?        reportUnsupportedPattern)
+			public TargetFilterSet ReportDiagnostics(Action<TargetFilterDiagnostic>? reportDiagnostic)
 			{
-				if (reportInvalidRegex is null && reportUnsupportedPattern is null)
+				if (reportDiagnostic is null)
 					return this;
 
-				foreach (var rule in _rules)
-				{
-					if (!TryParseRule(rule, out _, out var matcher, out var pattern))
-						continue;
-
-					if (matcher == FilterMatcher.Pattern)
-					{
-						reportUnsupportedPattern?.Invoke(pattern);
-						continue;
-					}
-
-					if (matcher == FilterMatcher.Regex)
-					{
-						var regex = GetRegex(pattern);
-
-						if (regex.Regex is null)
-							reportInvalidRegex?.Invoke(pattern, regex.ErrorMessage ?? "Invalid regex pattern.");
-					}
-				}
+				foreach (var diagnostic in _diagnostics)
+					reportDiagnostic(diagnostic);
 
 				return this;
+			}
+		}
+
+		public readonly struct MethodTarget
+		{
+			public AccessibilityMask            Accessibility      { get; init; }
+			public ModifierMask                 Modifiers          { get; init; }
+			public string                       Namespace          { get; init; }
+			public string                       TypeName           { get; init; }
+			public string                       FullTypeName       { get; init; }
+			public string                       MethodName         { get; init; }
+			public string                       FullMethodName     { get; init; }
+			public string                       ReturnType         { get; init; }
+			public string                       Signature          { get; init; }
+			public ImmutableArray<string>       NamespaceSegments  { get; init; }
+			public ImmutableArray<string>       FullTypeSegments   { get; init; }
+			public ImmutableArray<string>       FullMethodSegments { get; init; }
+			public ImmutableArray<ParameterTarget> Parameters      { get; init; }
+
+			public static MethodTarget FromSignature(string signature)
+			{
+				return new MethodTarget
+				{
+					Signature          = signature,
+					Namespace          = "",
+					TypeName           = "",
+					FullTypeName       = "",
+					MethodName         = "",
+					FullMethodName     = "",
+					ReturnType         = "",
+					NamespaceSegments  = [],
+					FullTypeSegments   = [],
+					FullMethodSegments = [],
+					Parameters         = []
+				};
+			}
+		}
+
+		public readonly struct ParameterTarget
+		{
+			public ParameterModifier Modifier { get; init; }
+			public string            Type     { get; init; }
+		}
+
+		public readonly struct TargetFilterDiagnostic
+		{
+			public TargetFilterDiagnostic(string id, string message)
+			{
+				Id      = id;
+				Message = message;
+			}
+
+			public string Id      { get; }
+			public string Message { get; }
+
+			public static TargetFilterDiagnostic InvalidRegex(string pattern, string error)
+			{
+				return new TargetFilterDiagnostic("AG0201", $"Invalid aspect filter regex '{pattern}': {error}");
+			}
+
+			public static TargetFilterDiagnostic InvalidRule(string rule, string message)
+			{
+				return new TargetFilterDiagnostic("AG0202", $"Invalid aspect filter rule '{rule}': {message}");
+			}
+
+			public static TargetFilterDiagnostic UnknownConditionKey(string key)
+			{
+				return new TargetFilterDiagnostic("AG0204", $"Unknown target filter condition key '{key}'.");
+			}
+
+			public static TargetFilterDiagnostic InvalidParameterPattern(string pattern, string message)
+			{
+				return new TargetFilterDiagnostic("AG0205", $"Invalid target filter parameter pattern '{pattern}': {message}");
+			}
+
+			public static TargetFilterDiagnostic InvalidDottedPattern(string pattern, string message)
+			{
+				return new TargetFilterDiagnostic("AG0206", $"Invalid target filter dotted pattern '{pattern}': {message}");
 			}
 		}
 
@@ -290,11 +294,105 @@ namespace AspectGenerator
 			Regex
 		}
 
-		sealed record CompiledFilter(
-			bool          IsNegative,
-			FilterMatcher Matcher,
-			string        Pattern,
-			Regex?        Regex);
+		[Flags]
+		public enum AccessibilityMask
+		{
+			None      = 0,
+			Public    = 1,
+			Private   = 2,
+			Protected = 4,
+			Internal  = 8
+		}
+
+		[Flags]
+		public enum ModifierMask
+		{
+			None     = 0,
+			Static   = 1,
+			Instance = 2,
+			Abstract = 4,
+			Virtual  = 8,
+			Override = 16,
+			Sealed   = 32,
+			Extern   = 64,
+			Unsafe   = 128
+		}
+
+		public enum ParameterModifier
+		{
+			None,
+			Ref,
+			Out,
+			In,
+			Params
+		}
+
+		abstract class CompiledFilter
+		{
+			protected CompiledFilter(bool isNegative)
+			{
+				IsNegative = isNegative;
+			}
+
+			public bool IsNegative { get; }
+
+			public abstract bool IsMatch(in MethodTarget target);
+		}
+
+		sealed class PatternFilter : CompiledFilter
+		{
+			readonly PatternParser _pattern;
+
+			public PatternFilter(bool isNegative, PatternParser pattern)
+				: base(isNegative)
+			{
+				_pattern = pattern;
+			}
+
+			public override bool IsMatch(in MethodTarget target)
+			{
+				return _pattern.IsMatch(target);
+			}
+		}
+
+		sealed class ContainsFilter : CompiledFilter
+		{
+			readonly string _pattern;
+
+			public ContainsFilter(bool isNegative, string pattern)
+				: base(isNegative)
+			{
+				_pattern = pattern;
+			}
+
+			public override bool IsMatch(in MethodTarget target)
+			{
+				return target.Signature.Contains(_pattern, StringComparison.Ordinal);
+			}
+		}
+
+		sealed class RegexFilter : CompiledFilter
+		{
+			readonly Regex _regex;
+
+			public RegexFilter(bool isNegative, string pattern, Regex regex)
+				: base(isNegative)
+			{
+				_regex = regex;
+			}
+
+			public override bool IsMatch(in MethodTarget target)
+			{
+				try
+				{
+					return _regex.IsMatch(target.Signature);
+				}
+				catch (RegexMatchTimeoutException)
+				{
+					return false;
+				}
+			}
+		}
 
 		sealed record RegexCacheEntry(Regex? Regex, string? ErrorMessage);
 	}

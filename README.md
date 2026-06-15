@@ -158,13 +158,13 @@ Hook names are strings, so prefer `nameof(...)`. Invalid names or signatures sho
 
 ## Target Filters
 
-`TargetFilter` applies an aspect to target methods by canonical method signature. Each rule can use a matcher prefix. `contains:` and `regex:` are implemented now; unprefixed rules and `pattern:` are reserved for the native AspectGenerator target pattern syntax.
+`TargetFilter` applies an aspect to matching target methods. Unprefixed rules and `pattern:` use the native AspectGenerator target pattern syntax; `contains:` and `regex:` match the canonical method signature.
 
 ```csharp
 [assembly: Log(
     TargetFilter = """
         # Include service saves and exclude health checks.
-        contains: Service.Save
+        public **.*Service.Save*(..., *CancellationToken)
         -contains: HealthCheck
         """)]
 

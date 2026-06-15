@@ -32,7 +32,10 @@ namespace AspectGenerator
 			public const string HookRequiresInterceptData = "AG0106";
 			public const string AsyncHookRequiresTask     = "AG0107";
 			public const string InvalidAspectFilterRegex  = "AG0201";
-			public const string UnsupportedAspectFilterPattern = "AG0202";
+			public const string InvalidAspectFilterRule   = "AG0202";
+			public const string UnknownAspectFilterConditionKey = "AG0204";
+			public const string InvalidAspectFilterParameterPattern = "AG0205";
+			public const string InvalidAspectFilterDottedPattern = "AG0206";
 		}
 
 		public static class OptionID
@@ -544,10 +547,10 @@ namespace AspectGenerator
 							}
 						}
 
-						var targetSignature = GetCanonicalMethodFilterSignature(method);
+						var target = GetMethodTarget(method);
 
-						AddMatchedFilterAttributes(attributes, assemblyFilters, targetSignature);
-						AddMatchedFilterAttributes(attributes, GetTypeFilters(compilation, diagnostics, aspectAttributes, typeFilterDic, method.ContainingType, reportedDiagnostics), targetSignature);
+						AddMatchedFilterAttributes(attributes, assemblyFilters, target);
+						AddMatchedFilterAttributes(attributes, GetTypeFilters(compilation, diagnostics, aspectAttributes, typeFilterDic, method.ContainingType, reportedDiagnostics), target);
 
 						methodDic[method] = attributes.Distinct().ToList();
 					}
@@ -933,41 +936,25 @@ namespace AspectGenerator
 			Location?            location)
 		{
 			return filterValue is object?[] values
-				? AspectFilters.GetFilters(
-					values.Select(static value => value as string),
-					ReportInvalidRegex,
-					ReportUnsupportedPattern)
-				: AspectFilters.GetFilters(
-					filterValue as string,
-					ReportInvalidRegex,
-					ReportUnsupportedPattern);
+				? AspectFilters.GetFilters(values.Select(static value => value as string), ReportFilterDiagnostic)
+				: AspectFilters.GetFilters(filterValue as string, ReportFilterDiagnostic);
 
-			void ReportInvalidRegex(string pattern, string errorMessage)
-			{
-				ReportDiagnostic(
-					diagnostics,
-						reportedDiagnostics,
-					DiagnosticID.InvalidAspectFilterRegex,
-					$"Invalid aspect filter regex '{pattern}': {errorMessage}",
-					location);
-			}
-
-			void ReportUnsupportedPattern(string pattern)
+			void ReportFilterDiagnostic(AspectFilters.TargetFilterDiagnostic diagnostic)
 			{
 				ReportDiagnostic(
 					diagnostics,
 					reportedDiagnostics,
-					DiagnosticID.UnsupportedAspectFilterPattern,
-					$"Aspect filter matcher 'pattern' is not implemented yet. Use 'contains:' or 'regex:' for '{pattern}'.",
+					diagnostic.Id,
+					diagnostic.Message,
 					location);
 			}
 		}
 
-		static void AddMatchedFilterAttributes(List<AttributeInfo> attributes, ImmutableArray<AspectFilterSet> filterSets, string targetSignature)
+		static void AddMatchedFilterAttributes(List<AttributeInfo> attributes, ImmutableArray<AspectFilterSet> filterSets, in AspectFilters.MethodTarget target)
 		{
 			foreach (var filterSet in filterSets)
 			{
-				if (!filterSet.Filters.IsMatch(targetSignature))
+				if (!filterSet.Filters.IsMatch(target))
 					continue;
 
 				if (attributes.Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, filterSet.Attribute.AttributeClass)))
@@ -1046,6 +1033,117 @@ namespace AspectGenerator
 			return sb.ToString();
 		}
 
+		static AspectFilters.MethodTarget GetMethodTarget(IMethodSymbol method)
+		{
+			var sourceMethod   = method.ReducedFrom ?? method;
+			var fullTypeName   = FormatFilterType(sourceMethod.ContainingType);
+			var namespaceName  = sourceMethod.ContainingType.ContainingNamespace.IsGlobalNamespace
+				? ""
+				: sourceMethod.ContainingType.ContainingNamespace.ToDisplayString();
+			var methodName     = FormatFilterMethodName(sourceMethod);
+			var fullMethodName = $"{fullTypeName}.{methodName}";
+			var parameters     = ImmutableArray.CreateBuilder<AspectFilters.ParameterTarget>();
+
+			foreach (var parameter in sourceMethod.Parameters)
+			{
+				parameters.Add(
+					new AspectFilters.ParameterTarget
+					{
+						Modifier = GetParameterModifier(parameter),
+						Type     = FormatFilterType(parameter.Type)
+					});
+			}
+
+			return new AspectFilters.MethodTarget
+			{
+				Accessibility      = GetAccessibilityMask(sourceMethod.DeclaredAccessibility),
+				Modifiers          = GetModifierMask(sourceMethod),
+				Namespace          = namespaceName,
+				TypeName           = FormatFilterSimpleTypeName(sourceMethod.ContainingType),
+				FullTypeName       = fullTypeName,
+				MethodName         = methodName,
+				FullMethodName     = fullMethodName,
+				ReturnType         = FormatFilterType(sourceMethod.ReturnType),
+				Signature          = GetCanonicalMethodFilterSignature(method),
+				NamespaceSegments  = SplitFilterDottedName(namespaceName),
+				FullTypeSegments   = SplitFilterDottedName(fullTypeName),
+				FullMethodSegments = SplitFilterDottedName(fullMethodName),
+				Parameters         = parameters.ToImmutable()
+			};
+		}
+
+		static AspectFilters.AccessibilityMask GetAccessibilityMask(Accessibility accessibility)
+		{
+			return accessibility switch
+			{
+				Accessibility.Public               => AspectFilters.AccessibilityMask.Public,
+				Accessibility.Protected            => AspectFilters.AccessibilityMask.Protected,
+				Accessibility.Internal             => AspectFilters.AccessibilityMask.Internal,
+				Accessibility.Private              => AspectFilters.AccessibilityMask.Private,
+				Accessibility.ProtectedOrInternal  => AspectFilters.AccessibilityMask.Protected | AspectFilters.AccessibilityMask.Internal,
+				Accessibility.ProtectedAndInternal => AspectFilters.AccessibilityMask.Private   | AspectFilters.AccessibilityMask.Protected,
+				_                                  => AspectFilters.AccessibilityMask.Private
+			};
+		}
+
+		static AspectFilters.ModifierMask GetModifierMask(IMethodSymbol method)
+		{
+			var result = method.IsStatic
+				? AspectFilters.ModifierMask.Static
+				: AspectFilters.ModifierMask.Instance;
+
+			if (method.IsAbstract)                            result |= AspectFilters.ModifierMask.Abstract;
+			if (method.IsVirtual && !method.IsOverride)       result |= AspectFilters.ModifierMask.Virtual;
+			if (method.IsOverride)                            result |= AspectFilters.ModifierMask.Override;
+			if (method.IsSealed)                              result |= AspectFilters.ModifierMask.Sealed;
+			if (method.IsExtern)                              result |= AspectFilters.ModifierMask.Extern;
+			if (HasUnsafeModifier(method))                    result |= AspectFilters.ModifierMask.Unsafe;
+
+			return result;
+		}
+
+		static AspectFilters.ParameterModifier GetParameterModifier(IParameterSymbol parameter)
+		{
+			if (parameter.IsParams)
+				return AspectFilters.ParameterModifier.Params;
+
+			return parameter.RefKind switch
+			{
+				RefKind.Ref => AspectFilters.ParameterModifier.Ref,
+				RefKind.Out => AspectFilters.ParameterModifier.Out,
+				RefKind.In  => AspectFilters.ParameterModifier.In,
+				_           => AspectFilters.ParameterModifier.None
+			};
+		}
+
+		static ImmutableArray<string> SplitFilterDottedName(string name)
+		{
+			if (string.IsNullOrEmpty(name))
+				return [];
+
+			var result  = ImmutableArray.CreateBuilder<string>();
+			var start   = 0;
+			var depth   = 0;
+
+			for (var i = 0; i < name.Length; i++)
+			{
+				var ch = name[i];
+
+				if (ch == '<')
+					depth++;
+				else if (ch == '>' && depth > 0)
+					depth--;
+				else if (depth == 0 && ch == '.')
+				{
+					result.Add(name[start..i]);
+					start = i + 1;
+				}
+			}
+
+			result.Add(name[start..]);
+			return result.ToImmutable();
+		}
+
 		static bool HasUnsafeModifier(IMethodSymbol method)
 		{
 			foreach (var syntaxReference in method.DeclaringSyntaxReferences)
@@ -1095,6 +1193,28 @@ namespace AspectGenerator
 					typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
 					genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
 					miscellaneousOptions: SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers));
+		}
+
+		static string FormatFilterSimpleTypeName(INamedTypeSymbol type)
+		{
+			var name = type.Name;
+			var tick = name.IndexOf('`');
+
+			if (tick >= 0)
+				name = name[..tick];
+
+			if (!type.IsGenericType)
+				return name;
+
+			return $"{name}<{string.Join(",", type.TypeArguments.Select(FormatFilterType))}>";
+		}
+
+		static string FormatFilterMethodName(IMethodSymbol method)
+		{
+			if (method.TypeArguments.Length == 0)
+				return method.Name;
+
+			return $"{method.Name}<{string.Join(",", method.TypeArguments.Select(FormatFilterType))}>";
 		}
 
 		static IEnumerable<(string Key, object? Value)> GetAspectArguments(AttributeData attribute)
