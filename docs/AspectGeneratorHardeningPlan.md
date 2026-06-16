@@ -81,6 +81,8 @@ TargetFilter sources:
 - [x] Support `Regex` target filters.
 - [x] Design and implement native `Pattern` target filters.
 - [x] Support native `Pattern` method rules, condition rules, dotted wildcards, return filters, and parameter filters.
+- [x] Support native condition groups: different keys are `AND`, repeated keys are `OR` by default, leading `&` forces `AND`, and leading `|` starts an alternative group.
+- [x] Support inline condition value expressions with `&` precedence over `|`, escaped operators, and no boolean parentheses in V1.
 - [x] Evaluate each filter set independently.
 - [x] Include an aspect when any filter set evaluates to include.
 - [x] Keep negative filters local to their own filter set.

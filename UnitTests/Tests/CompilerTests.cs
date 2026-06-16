@@ -216,6 +216,68 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void PatternConditionLinesUseAndAcrossDifferentKeysTest()
+		{
+			var result = RunGenerator(FilterPatternConditionLineAndSource);
+
+			AssertGeneratedSourceContains(result, "SaveWithCancellation_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "SaveWithoutCancellation_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "LoadWithCancellation_Interceptor");
+		}
+
+		[TestMethod]
+		public void PatternConditionRepeatedKeysUseOrAcrossLinesTest()
+		{
+			var result = RunGenerator(FilterPatternRepeatedKeyOrSource);
+
+			AssertGeneratedSourceContains(result, "SaveUser_Interceptor");
+			AssertGeneratedSourceContains(result, "UpdateUser_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "LoadUser_Interceptor");
+		}
+
+		[TestMethod]
+		public void PatternConditionInlineAndAppliesToSameFieldAndParametersTest()
+		{
+			var result = RunGenerator(FilterPatternInlineAndSource);
+
+			AssertGeneratedSourceContains(result, "SaveAsync_Interceptor");
+			AssertGeneratedSourceContains(result, "SaveWithDependenciesAsync_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "Save_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "LoadWithCancellationAsync_Interceptor");
+		}
+
+		[TestMethod]
+		public void PatternConditionLinePrefixesCreateAlternativeAndExcludeGroupsTest()
+		{
+			var result = RunGenerator(FilterPatternLinePrefixSource);
+
+			AssertGeneratedSourceContains(result, "SaveUser_Interceptor");
+			AssertGeneratedSourceContains(result, "RunJob_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "HealthCheck_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "Ping_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "LoadUser_Interceptor");
+		}
+
+		[TestMethod]
+		public void InvalidPatternConditionPrefixReportsDiagnosticTest()
+		{
+			var result = RunGenerator(FilterInvalidConditionPrefixSource);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule);
+
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			StringAssert.Contains(diagnostic.GetMessage(), "Leading '&'");
+		}
+
+		[TestMethod]
+		public void ContainsAndRegexFiltersDoNotParseInlineOperatorsTest()
+		{
+			var result = RunGenerator(FilterContainsRegexRawOperatorsSource);
+
+			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule);
+			AssertGeneratedSourceContains(result, "Save_Interceptor");
+		}
+
+		[TestMethod]
 		public void PatternPathAliasAppliesAspectTest()
 		{
 			var result = RunGenerator(FilterPatternPathAliasSource);
@@ -962,7 +1024,7 @@ namespace AspectGenerator.Tests
 				TargetFilter =
 				[
 					"namespace:AspectGenerator.Tests.GeneratorDriver | AspectGenerator.Tests.GeneratorDriver.Jobs; type:*Service | *Repository; method:Save* | Update*; returns:System.Threading.Tasks.Task* | System.Threading.Tasks.ValueTask*; param:*CancellationToken | out System.Int32",
-					"params:(string, out int) | (_, *CancellationToken)",
+					"| namespace:AspectGenerator.Tests.GeneratorDriver; type:*Service; method:TryGet; params:(string, out int)",
 					"-method:Ping | HealthCheck"
 				])]
 
@@ -999,6 +1061,241 @@ namespace AspectGenerator.Tests
 				}
 				public Task<string> Ping(CancellationToken cancellationToken) => Task.FromResult("");
 				public string Load() => "";
+			}
+			""";
+
+		const string FilterPatternConditionLineAndSource =
+			"""
+			using System;
+			using System.Threading;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
+				TargetFilter = @"
+				namespace: AspectGenerator.Tests.GeneratorDriver
+				type: *Service
+				method: Save*
+				params: ..., *CancellationToken
+				")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			sealed class UserService
+			{
+				public void Invoke(CancellationToken cancellationToken)
+				{
+					SaveWithCancellation(cancellationToken);
+					SaveWithoutCancellation();
+					LoadWithCancellation(cancellationToken);
+				}
+
+				public string SaveWithCancellation(CancellationToken cancellationToken) => "";
+				public string SaveWithoutCancellation() => "";
+				public string LoadWithCancellation(CancellationToken cancellationToken) => "";
+			}
+			""";
+
+		const string FilterPatternInlineAndSource =
+			"""
+			using System;
+			using System.Threading;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
+				TargetFilter =
+				[
+					"method: Save* & *Async",
+					"| param: *CancellationToken & *IDisposable"
+				])]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string[]? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			sealed class UserService
+			{
+				public void Invoke(CancellationToken cancellationToken, IDisposable disposable)
+				{
+					SaveAsync();
+					Save();
+					SaveWithDependenciesAsync(cancellationToken, disposable);
+					LoadWithCancellationAsync(cancellationToken);
+				}
+
+				public string SaveAsync() => "";
+				public string Save() => "";
+				public string SaveWithDependenciesAsync(CancellationToken cancellationToken, IDisposable disposable) => "";
+				public string LoadWithCancellationAsync(CancellationToken cancellationToken) => "";
+			}
+			""";
+
+		const string FilterPatternRepeatedKeyOrSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
+				TargetFilter = @"
+				type: *Service
+				method: Save*
+				method: Update*
+				")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			sealed class UserService
+			{
+				public void Invoke()
+				{
+					SaveUser();
+					UpdateUser();
+					LoadUser();
+				}
+
+				public string SaveUser() => "";
+				public string UpdateUser() => "";
+				public string LoadUser() => "";
+			}
+			""";
+
+		const string FilterPatternLinePrefixSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
+				TargetFilter = @"
+				namespace: AspectGenerator.Tests.GeneratorDriver
+				& type: *Service
+				& method: Save*
+
+				| namespace: AspectGenerator.Tests.GeneratorDriver
+				& type: *Job
+				& method: Run*
+
+				- method: HealthCheck
+				| method: Ping
+				")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			sealed class UserService
+			{
+				public void Invoke()
+				{
+					SaveUser();
+					LoadUser();
+					HealthCheck();
+					Ping();
+					new ImportJob().RunJob();
+				}
+
+				public string SaveUser() => "";
+				public string LoadUser() => "";
+				public string HealthCheck() => "";
+				public string Ping() => "";
+			}
+
+			sealed class ImportJob
+			{
+				public string RunJob() => "";
+			}
+			""";
+
+		const string FilterInvalidConditionPrefixSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "& method: Save")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					Save();
+				}
+
+				public static string Save() => "";
+			}
+			""";
+
+		const string FilterContainsRegexRawOperatorsSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
+				TargetFilter =
+				[
+					"contains: Save|",
+					"regex: ^public .*\\.Save\\(\\)$"
+				])]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string[]? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					Save();
+				}
+
+				public static string Save() => "";
 			}
 			""";
 

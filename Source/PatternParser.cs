@@ -200,70 +200,152 @@ namespace AspectGenerator
 				return TryParseMethodPattern(text, diagnostics, out compiledPattern);
 			}
 
-			static bool IsConditionRule(string text)
+			public static bool IsConditionRule(string text)
 			{
 				if (IndexOfTopLevel(text, ';') >= 0)
 					return true;
 
 				if (!TryReadMatcherPrefix(text, out var key, out _))
-					return false;
+					return IsModifierOrAccessibilityRule(text);
 
 				return IsKnownConditionKey(key);
 			}
 
+			public static bool TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher compiledPattern)
+			{
+				return TryParseConditionRule(lines, diagnostics, out compiledPattern);
+			}
+
 			static bool TryParseConditionRule(string text, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher compiledPattern)
+			{
+				return TryParseConditionRule([new ConditionGroupLine(text, forceAnd: false)], diagnostics, out compiledPattern);
+			}
+
+			static bool TryParseConditionRule(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher compiledPattern)
 			{
 				var accessibility = AccessibilityMask.None;
 				var modifiers     = ModifierMask.None;
-				var conditions    = ImmutableArray.CreateBuilder<Condition>();
+				var items         = new List<ConditionItem>();
 				var valid         = true;
 
-				foreach (var item in SplitTopLevel(text, ';'))
+				foreach (var line in lines)
 				{
-					if (item.Length == 0)
-						continue;
-
-					if (!TryReadMatcherPrefix(item, out var key, out var value))
+					foreach (var item in SplitTopLevel(line.Text, ';'))
 					{
-						foreach (var token in SplitWhitespace(item))
+						if (item.Length == 0)
+							continue;
+
+						if (!TryReadMatcherPrefix(item, out var key, out var value))
 						{
-							if (TryReadAccessibility(token, out var accessibilityMask))
+							foreach (var token in SplitWhitespace(item))
 							{
-								accessibility |= accessibilityMask;
-								continue;
+								if (TryReadAccessibility(token, out var accessibilityMask))
+								{
+									accessibility |= accessibilityMask;
+									continue;
+								}
+
+								if (TryReadModifier(token, out var modifierMask))
+								{
+									modifiers |= modifierMask;
+									continue;
+								}
+
+								diagnostics.Add(TargetFilterDiagnostic.InvalidRule(item, "Condition item must contain only modifier/accessibility tokens or 'key: value'."));
+								valid = false;
 							}
 
-							if (TryReadModifier(token, out var modifierMask))
-							{
-								modifiers |= modifierMask;
-								continue;
-							}
-
-							diagnostics.Add(TargetFilterDiagnostic.InvalidRule(item, "Condition item must contain only modifier/accessibility tokens or 'key: value'."));
-							valid = false;
+							continue;
 						}
 
-						continue;
-					}
+						if (!IsKnownConditionKey(key))
+						{
+							diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(key));
+							valid = false;
+							continue;
+						}
 
-					if (!IsKnownConditionKey(key))
+						items.Add(new ConditionItem(key, value, line.ForceAnd));
+					}
+				}
+
+				var buckets = new List<ConditionBucket>();
+
+				foreach (var item in items)
+				{
+					var bucketIndex = -1;
+
+					if (!item.ForceAnd)
+						for (var i = buckets.Count - 1; i >= 0; i--)
+							if (string.Equals(buckets[i].Key, item.Key, StringComparison.OrdinalIgnoreCase))
+							{
+								bucketIndex = i;
+								break;
+							}
+
+					if (bucketIndex < 0)
 					{
-						diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(key));
-						valid = false;
-						continue;
+						var bucket = new ConditionBucket(item.Key);
+						bucket.Values.Add(item.Value);
+						buckets.Add(bucket);
 					}
+					else
+						buckets[bucketIndex].Values.Add(item.Value);
+				}
 
-					if (!Condition.TryParse(key, value, diagnostics, out var condition))
-					{
+				var conditions = ImmutableArray.CreateBuilder<Condition>();
+
+				foreach (var bucket in buckets)
+				{
+					var value = string.Join(" | ", bucket.Values);
+
+					if (Condition.TryParse(bucket.Key, value, diagnostics, out var condition))
+						conditions.Add(condition);
+					else
 						valid = false;
-						continue;
-					}
-
-					conditions.Add(condition);
 				}
 
 				compiledPattern = new CompiledPatternMatcher(accessibility, modifiers, conditions.ToImmutable(), null, null, null);
 				return valid;
+			}
+
+			static bool IsModifierOrAccessibilityRule(string text)
+			{
+				var tokens = SplitWhitespace(text);
+
+				if (tokens.Count == 0)
+					return false;
+
+				foreach (var token in tokens)
+					if (!TryReadAccessibility(token, out _) && !TryReadModifier(token, out _))
+						return false;
+
+				return true;
+			}
+
+			readonly struct ConditionItem
+			{
+				public ConditionItem(string key, string value, bool forceAnd)
+				{
+					Key      = key;
+					Value    = value;
+					ForceAnd = forceAnd;
+				}
+
+				public string Key      { get; }
+				public string Value    { get; }
+				public bool   ForceAnd { get; }
+			}
+
+			sealed class ConditionBucket
+			{
+				public ConditionBucket(string key)
+				{
+					Key = key;
+				}
+
+				public string       Key    { get; }
+				public List<string> Values { get; } = new();
 			}
 
 			static bool TryParseMethodPattern(string text, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher matcher)
@@ -404,7 +486,8 @@ namespace AspectGenerator
 
 		sealed class Condition
 		{
-			readonly Condition[]?           _alternatives;
+			readonly Condition[]?           _children;
+			readonly ConditionOperator      _operator;
 			readonly string                _key;
 			readonly DottedPattern?        _dottedPattern;
 			readonly SegmentMatcher?       _segmentPattern;
@@ -422,7 +505,8 @@ namespace AspectGenerator
 				ParameterListPattern? parameterListPattern,
 				SegmentMatcher?       signaturePattern)
 			{
-				_alternatives          = null;
+				_children              = null;
+				_operator              = ConditionOperator.None;
 				_key                  = key;
 				_dottedPattern        = dottedPattern;
 				_segmentPattern       = segmentPattern;
@@ -432,9 +516,10 @@ namespace AspectGenerator
 				_signaturePattern     = signaturePattern;
 			}
 
-			Condition(Condition[] alternatives)
+			Condition(ConditionOperator @operator, Condition[] children)
 			{
-				_alternatives          = alternatives;
+				_children              = children;
+				_operator              = @operator;
 				_key                   = "";
 				_dottedPattern         = null;
 				_segmentPattern        = null;
@@ -452,26 +537,60 @@ namespace AspectGenerator
 				if (key == "path")
 					key = "fulltype";
 
-				var alternatives = SplitConditionValues(value);
+				if (!TryParseOrExpression(key, value, diagnostics, out condition))
+					return false;
 
-				if (alternatives.Count > 1)
+				return true;
+			}
+
+			static bool TryParseOrExpression(string key, string value, List<TargetFilterDiagnostic> diagnostics, out Condition condition)
+			{
+				condition = null!;
+
+				if (!TrySplitConditionValues(value, '|', diagnostics, out var alternatives))
+					return false;
+
+				if (alternatives.Count == 1)
+					return TryParseAndExpression(key, alternatives[0], diagnostics, out condition);
+
+				var conditions = new List<Condition>(alternatives.Count);
+				var valid      = true;
+
+				foreach (var alternative in alternatives)
 				{
-					var conditions = new List<Condition>(alternatives.Count);
-					var valid      = true;
-
-					foreach (var alternative in alternatives)
-					{
-						if (TryParseSingle(key, alternative, diagnostics, out var alternativeCondition))
-							conditions.Add(alternativeCondition);
-						else
-							valid = false;
-					}
-
-					condition = new Condition(conditions.ToArray());
-					return valid;
+					if (TryParseAndExpression(key, alternative, diagnostics, out var alternativeCondition))
+						conditions.Add(alternativeCondition);
+					else
+						valid = false;
 				}
 
-				return TryParseSingle(key, alternatives.Count == 0 ? value : alternatives[0], diagnostics, out condition);
+				condition = new Condition(ConditionOperator.Any, conditions.ToArray());
+				return valid;
+			}
+
+			static bool TryParseAndExpression(string key, string value, List<TargetFilterDiagnostic> diagnostics, out Condition condition)
+			{
+				condition = null!;
+
+				if (!TrySplitConditionValues(value, '&', diagnostics, out var items))
+					return false;
+
+				if (items.Count == 1)
+					return TryParseSingle(key, items[0], diagnostics, out condition);
+
+				var conditions = new List<Condition>(items.Count);
+				var valid      = true;
+
+				foreach (var item in items)
+				{
+					if (TryParseSingle(key, item, diagnostics, out var itemCondition))
+						conditions.Add(itemCondition);
+					else
+						valid = false;
+				}
+
+				condition = new Condition(ConditionOperator.All, conditions.ToArray());
+				return valid;
 			}
 
 			static bool TryParseSingle(string key, string value, List<TargetFilterDiagnostic> diagnostics, out Condition condition)
@@ -533,13 +652,22 @@ namespace AspectGenerator
 
 			public bool IsMatch(in MethodTarget target)
 			{
-				if (_alternatives is not null)
+				if (_children is not null)
 				{
-					foreach (var alternative in _alternatives)
-						if (alternative.IsMatch(target))
-							return true;
+					if (_operator == ConditionOperator.Any)
+					{
+						foreach (var child in _children)
+							if (child.IsMatch(target))
+								return true;
 
-					return false;
+						return false;
+					}
+
+					foreach (var child in _children)
+						if (!child.IsMatch(target))
+							return false;
+
+					return true;
 				}
 
 				return _key switch
@@ -557,9 +685,9 @@ namespace AspectGenerator
 				};
 			}
 
-			static List<string> SplitConditionValues(string text)
+			static bool TrySplitConditionValues(string text, char separator, List<TargetFilterDiagnostic> diagnostics, out List<string> result)
 			{
-				var result          = new List<string>();
+				result              = new List<string>();
 				var start           = 0;
 				var genericDepth    = 0;
 				var parenthesisDepth = 0;
@@ -589,16 +717,39 @@ namespace AspectGenerator
 						parenthesisDepth++;
 					else if (ch == ')' && parenthesisDepth > 0)
 						parenthesisDepth--;
-					else if (ch == '|' && genericDepth == 0 && parenthesisDepth == 0)
+					else if (ch == separator && genericDepth == 0 && parenthesisDepth == 0)
 					{
-						result.Add(text[start..i].Trim());
+						var value = text[start..i].Trim();
+
+						if (value.Length == 0)
+						{
+							diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, $"Condition value has an empty operand around '{separator}'."));
+							return false;
+						}
+
+						result.Add(value);
 						start = i + 1;
 					}
 				}
 
-				result.Add(text[start..].Trim());
-				return result;
+				var last = text[start..].Trim();
+
+				if (last.Length == 0)
+				{
+					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, $"Condition value has an empty operand around '{separator}'."));
+					return false;
+				}
+
+				result.Add(last);
+				return true;
 			}
+		}
+
+		enum ConditionOperator
+		{
+			None,
+			Any,
+			All
 		}
 
 		sealed class ParameterListPattern

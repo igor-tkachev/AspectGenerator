@@ -6,25 +6,30 @@ Filters are not runtime AOP. They select target methods, but AspectGenerator sti
 
 ## Filter Model
 
-`TargetFilter` is an ordered rule list. Each rule can use a matcher prefix. Unprefixed rules and `pattern:` use the native AspectGenerator target pattern syntax. `contains:` and `regex:` match the canonical target method signature.
+`TargetFilter` is evaluated per target method. Each rule or native condition group returns include, exclude, or no decision. Rules/groups are evaluated in order, and the last effective decision wins.
 
-- one physical line is one ordered rule;
-- a rule starting with `-` is an exclude filter for that whole line;
+Each rule can use a matcher prefix. Unprefixed rules and `pattern:` use the native AspectGenerator target pattern syntax. `contains:` and `regex:` match the canonical target method signature.
+
+- `contains:` and `regex:` lines are standalone ordered rules;
+- `pattern:` lines are standalone native pattern rules;
+- unprefixed native condition lines are grouped into condition groups;
+- a line starting with `-` starts an exclude rule/group;
+- a line starting with `&` continues the current native condition group with explicit `AND`;
+- a line starting with `|` starts an alternative native condition group with the same include/exclude action as the previous group;
 - a line starting with `#` is a comment;
-- multiple lines are ordered include/exclude rules, not `AND` conditions;
 - the last effective matching entry wins inside one filter set;
 - no matching entry means the filter set does not apply;
 - exclude filters do not suppress explicit method-level aspect attributes.
 
 The property name is always `TargetFilter`; only the property type can differ. The aspect attribute can expose it as `string?` or `string[]?`. Every string is split into lines, empty lines are ignored, and each non-comment line is one rule. For `string[]`, rules from all items are concatenated in order.
 
-Rule syntax:
+Standalone rule syntax:
 
 ```text
 [-] [pattern:|regex:|contains:] rule-body
 ```
 
-No matcher prefix is equivalent to `pattern:`.
+No matcher prefix is equivalent to `pattern:` for compact method patterns. For condition lines, no prefix participates in native condition grouping.
 
 `Pattern` matching is case-sensitive and matches structured method metadata: accessibility, modifiers, containing namespace/type, method name, return type, and parameter list.
 
@@ -71,7 +76,7 @@ Parameter rules:
 - `...` inside a parameter list matches zero or more parameters and can appear once;
 - typed parameters can use `ref`, `out`, `in`, or `params`.
 
-Condition-rule form combines conditions with `;`:
+Condition-rule form combines conditions with `;` or grouped lines:
 
 ```text
 namespace:MyApp.Services.**; type:*Service; method:Save*
@@ -81,14 +86,64 @@ param:out System.Int32
 signature:public * MyApp.Services.*
 ```
 
-Within one condition value, `|` means `OR`:
+Different condition keys in one group are `AND`. Repeated same keys are `OR` by default:
 
 ```text
-namespace:MyApp.Services | MyApp.Jobs; type:*Service | *Repository; method:Save* | Update*
--method:HealthCheck | Ping
+namespace: MyApp.Services
+namespace: MyApp.Jobs
+method: Save*
+method: Update*
+params: ..., *CancellationToken
 ```
 
-Use `\|` when a literal pipe character is needed in a native pattern value. `|` is not parsed specially for `contains:` and `regex:` rules.
+This means:
+
+```text
+(namespace is MyApp.Services OR MyApp.Jobs)
+AND (method is Save* OR Update*)
+AND params match ..., *CancellationToken
+```
+
+Use leading `&` to force `AND` for repeated keys:
+
+```text
+method: Save*
+& method: *Async
+```
+
+Within one condition value, `|` means `OR`, and `&` means `AND`. `&` has higher precedence than `|`:
+
+```text
+method: Save* & *Async | Update* & *Async
+param: *CancellationToken & *DbConnection
+```
+
+Use `\|` or `\&` when a literal operator character is needed in a native pattern value. Operators are not parsed specially for `contains:` and `regex:` rules.
+
+Leading `|` starts an alternative group:
+
+```text
+namespace: MyApp.Services
+& type: *Service
+& method: Save*
+
+| namespace: MyApp.Jobs
+& type: *Job
+& method: Run*
+```
+
+Leading `-` starts an exclude group. A following leading `|` keeps the exclude action:
+
+```text
+- method: HealthCheck
+| method: Ping
+```
+
+`pattern:` is always standalone, even when its body looks like a condition rule:
+
+```text
+pattern: namespace: MyApp.Services; method: Save*
+```
 
 Condition keys:
 
@@ -114,9 +169,19 @@ Pattern wildcards:
 ```csharp
 [assembly: Log(
     TargetFilter = """
-        # Include services and exclude health checks.
-        contains: MyApp.Services.
-        -contains: HealthCheck
+        # Include service/job methods with CancellationToken.
+        namespace: MyApp.Services
+        namespace: MyApp.Jobs
+        & type: *Service | *Job
+        & method: Save* | Update* | Run*
+        & params: ..., *CancellationToken
+
+        # Exclude health checks.
+        - method: HealthCheck
+        | method: Ping
+
+        # Expert/agent escape hatch.
+        regex:^public .* MyApp\.Generated\..*\.Map.*\(.*\)$
         """)]
 ```
 
