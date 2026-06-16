@@ -204,12 +204,40 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void PatternConditionModifierTokensApplyAspectTest()
+		{
+			var result = RunGenerator(FilterPatternConditionModifiersSource);
+
+			AssertGeneratedSourceContains(result, "ProtectedInternalTarget_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "ProtectedTarget_Interceptor");
+		}
+
+		[TestMethod]
 		public void PatternParameterFilterAppliesAspectTest()
 		{
 			var result = RunGenerator(FilterPatternParametersSource);
 
 			AssertGeneratedSourceContains(result, "SaveWithCancellation_Interceptor");
 			AssertGeneratedSourceDoesNotContain(result, "SaveWithoutCancellation_Interceptor");
+		}
+
+		[TestMethod]
+		public void PatternPrimitiveTypeAliasesApplyAspectTest()
+		{
+			var result = RunGenerator(FilterPatternPrimitiveAliasesSource);
+
+			AssertGeneratedSourceContains(result, "TryGet_Interceptor");
+			AssertGeneratedSourceContains(result, "LoadAsync_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "Skip_Interceptor");
+		}
+
+		[TestMethod]
+		public void PatternNestedGenericTypeAppliesAspectTest()
+		{
+			var result = RunGenerator(FilterPatternNestedGenericTypeSource);
+
+			AssertGeneratedSourceContains(result, "Save_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "Skip_Interceptor");
 		}
 
 		[TestMethod]
@@ -220,6 +248,16 @@ namespace AspectGenerator.Tests
 
 			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InvalidAspectFilterDottedPattern}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
 			StringAssert.Contains(diagnostic.GetMessage(), "'**' cannot be used as the final method segment");
+		}
+
+		[TestMethod]
+		public void MethodLevelTargetFilterReportsDiagnosticTest()
+		{
+			var result = RunGenerator(FilterMethodLevelTargetFilterSource);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.MethodLevelTargetFilter);
+
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.MethodLevelTargetFilter}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			StringAssert.Contains(diagnostic.GetMessage(), "assembly-level or type-level");
 		}
 
 		[TestMethod]
@@ -881,6 +919,37 @@ namespace AspectGenerator.Tests
 			}
 			""";
 
+		const string FilterPatternConditionModifiersSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "fulltype:AspectGenerator.Tests.GeneratorDriver.UserService; protected internal")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			sealed class UserService
+			{
+				public void Invoke()
+				{
+					ProtectedInternalTarget();
+					ProtectedTarget();
+				}
+
+				protected internal string ProtectedInternalTarget() => "target";
+				protected string ProtectedTarget() => "target";
+			}
+			""";
+
 		const string FilterPatternParametersSource =
 			"""
 			using System;
@@ -913,6 +982,94 @@ namespace AspectGenerator.Tests
 			}
 			""";
 
+		const string FilterPatternPrimitiveAliasesSource =
+			"""
+			using System;
+			using System.Threading.Tasks;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
+				TargetFilter =
+				[
+					"TryGet(string, out int) : bool",
+					"LoadAsync() : System.Threading.Tasks.Task<string>"
+				])]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string[]? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo info)
+				{
+				}
+			}
+
+			sealed class UserService
+			{
+				public void Invoke()
+				{
+					TryGet("id", out _);
+					LoadAsync();
+					Skip(1);
+				}
+
+				public bool TryGet(string id, out int value)
+				{
+					value = 1;
+					return true;
+				}
+
+				public Task<string> LoadAsync() => Task.FromResult("");
+				public string Skip(int value) => value.ToString();
+			}
+			""";
+
+		const string FilterPatternNestedGenericTypeSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
+				TargetFilter = "fulltype:**.Outer<*>.Inner<*>; method:Save; returns:*Inner<*>")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo info)
+				{
+				}
+			}
+
+			sealed class Outer<T>
+			{
+				public sealed class Inner<U>
+				{
+					public Inner<U> Save() => this;
+					public string Skip() => "";
+				}
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					var target = new Outer<string>.Inner<int>();
+
+					target.Save();
+					target.Skip();
+				}
+			}
+			""";
+
 		const string FilterInvalidPatternSource =
 			"""
 			using System;
@@ -939,6 +1096,34 @@ namespace AspectGenerator.Tests
 				}
 
 				public static string SaveUser() => "save";
+			}
+			""";
+
+		const string FilterMethodLevelTargetFilterSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					Load();
+				}
+
+				[FilterAspect(TargetFilter = "Save")]
+				public static string Load() => "load";
 			}
 			""";
 

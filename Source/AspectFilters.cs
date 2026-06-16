@@ -26,7 +26,18 @@ namespace AspectGenerator
 			Action<TargetFilterDiagnostic>? reportDiagnostic = null)
 		{
 			var items = filters.ToImmutableArray();
-			var rules = ParseRules(items);
+			var rules = new List<string>();
+
+			foreach (var item in items)
+				if (item is not null)
+					foreach (var line in item.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
+					{
+						var rule = line.Trim();
+
+						if (rule.Length > 0 && !rule.StartsWith("#", StringComparison.Ordinal))
+							rules.Add(rule);
+					}
+
 			var key   = new TargetFilterKey(rules);
 
 			if (_filterCache.Count > MaxCacheEntries)
@@ -37,55 +48,87 @@ namespace AspectGenerator
 				.ReportDiagnostics(reportDiagnostic);
 		}
 
-		static List<string> ParseRules(ImmutableArray<string?> items)
-		{
-			var result = new List<string>();
-
-			foreach (var item in items)
-				if (item is not null)
-					foreach (var line in item.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
-					{
-						var rule = line.Trim();
-
-						if (rule.Length > 0 && !rule.StartsWith("#", StringComparison.Ordinal))
-							result.Add(rule);
-					}
-
-			return result;
-		}
-
 		static List<CompiledFilter> Compile(List<string> rules, List<TargetFilterDiagnostic> diagnostics)
 		{
 			var result = new List<CompiledFilter>();
 
 			foreach (var rule in rules)
 			{
-				if (!TargetFilterRule.TryParse(rule, diagnostics, out var parsedRule))
+				if (!TryParseRule(rule, out var isNegative, out var matcher, out var body))
 					continue;
 
-				if (parsedRule.Matcher == FilterMatcher.Contains)
+				if (matcher == FilterMatcher.Contains)
 				{
-					result.Add(new ContainsFilter(parsedRule.IsNegative, parsedRule.Body));
+					result.Add(new ContainsFilter(isNegative, body));
 					continue;
 				}
 
-				if (parsedRule.Matcher == FilterMatcher.Pattern)
+				if (matcher == FilterMatcher.Pattern)
 				{
-					if (PatternParser.Compile(parsedRule.Body, diagnostics, out var pattern))
-						result.Add(new PatternFilter(parsedRule.IsNegative, pattern));
+					if (PatternParser.Compile(body, diagnostics, out var pattern))
+						result.Add(new PatternFilter(isNegative, pattern));
 
 					continue;
 				}
 
-				var regex = GetRegex(parsedRule.Body);
+				var regex = GetRegex(body);
 
 				if (regex.Regex is null)
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRegex(parsedRule.Body, regex.ErrorMessage ?? "Invalid regex pattern."));
+					diagnostics.Add(TargetFilterDiagnostic.InvalidRegex(body, regex.ErrorMessage ?? "Invalid regex pattern."));
 				else
-					result.Add(new RegexFilter(parsedRule.IsNegative, parsedRule.Body, regex.Regex));
+					result.Add(new RegexFilter(isNegative, body, regex.Regex));
 			}
 
 			return result;
+
+			bool TryParseRule(string rule, out bool isNegative, out FilterMatcher matcher, out string body)
+			{
+				isNegative = false;
+				matcher    = FilterMatcher.Pattern;
+				body       = "";
+
+				rule = rule.Trim();
+
+				if (rule.Length == 0 || rule.StartsWith("#", StringComparison.Ordinal))
+					return false;
+
+				if (rule[0] == '-')
+				{
+					isNegative = true;
+					rule       = rule[1..].TrimStart();
+				}
+
+				if (TryReadMatcherPrefix(rule, out var matcherName, out var matcherBody))
+				{
+					if (string.Equals(matcherName, "pattern", StringComparison.OrdinalIgnoreCase))
+					{
+						matcher = FilterMatcher.Pattern;
+						body    = matcherBody;
+					}
+					else if (string.Equals(matcherName, "regex", StringComparison.OrdinalIgnoreCase))
+					{
+						matcher = FilterMatcher.Regex;
+						body    = matcherBody;
+					}
+					else if (string.Equals(matcherName, "contains", StringComparison.OrdinalIgnoreCase))
+					{
+						matcher = FilterMatcher.Contains;
+						body    = matcherBody;
+					}
+					else
+					{
+						body = rule;
+					}
+				}
+				else
+					body = rule;
+
+				if (body.Length > 0)
+					return true;
+
+				diagnostics.Add(TargetFilterDiagnostic.InvalidRule(rule, "Target filter rule body cannot be empty."));
+				return false;
+			}
 		}
 
 		static RegexCacheEntry GetRegex(string pattern)
@@ -130,11 +173,6 @@ namespace AspectGenerator
 				return new TargetFilterSet(Compile(rules, diagnostics), diagnostics.ToImmutableArray());
 			}
 
-			public bool IsMatch(string targetSignature)
-			{
-				return IsMatch(MethodTarget.FromSignature(targetSignature));
-			}
-
 			public bool IsMatch(in MethodTarget target)
 			{
 				var matched = false;
@@ -164,37 +202,20 @@ namespace AspectGenerator
 
 		public readonly struct MethodTarget
 		{
-			public AccessibilityMask            Accessibility      { get; init; }
-			public ModifierMask                 Modifiers          { get; init; }
-			public string                       Namespace          { get; init; }
-			public string                       TypeName           { get; init; }
-			public string                       FullTypeName       { get; init; }
-			public string                       MethodName         { get; init; }
-			public string                       FullMethodName     { get; init; }
-			public string                       ReturnType         { get; init; }
-			public string                       Signature          { get; init; }
-			public ImmutableArray<string>       NamespaceSegments  { get; init; }
-			public ImmutableArray<string>       FullTypeSegments   { get; init; }
-			public ImmutableArray<string>       FullMethodSegments { get; init; }
-			public ImmutableArray<ParameterTarget> Parameters      { get; init; }
+			public AccessibilityMask     Accessibility      { get; init; }
+			public ModifierMask          Modifiers          { get; init; }
+			public string                Namespace          { get; init; }
+			public string                TypeName           { get; init; }
+			public string                FullTypeName       { get; init; }
+			public string                MethodName         { get; init; }
+			public string                FullMethodName     { get; init; }
+			public string                ReturnType         { get; init; }
+			public string                Signature          { get; init; }
+			public List<string>          NamespaceSegments  { get; init; }
+			public List<string>          FullTypeSegments   { get; init; }
+			public List<string>          FullMethodSegments { get; init; }
+			public List<ParameterTarget> Parameters         { get; init; }
 
-			public static MethodTarget FromSignature(string signature)
-			{
-				return new MethodTarget
-				{
-					Signature          = signature,
-					Namespace          = "",
-					TypeName           = "",
-					FullTypeName       = "",
-					MethodName         = "",
-					FullMethodName     = "",
-					ReturnType         = "",
-					NamespaceSegments  = [],
-					FullTypeSegments   = [],
-					FullMethodSegments = [],
-					Parameters         = []
-				};
-			}
 		}
 
 		public readonly struct ParameterTarget

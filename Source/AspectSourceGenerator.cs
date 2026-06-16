@@ -20,31 +20,32 @@ namespace AspectGenerator
 		// Diagnostic IDs
 		public static class DiagnosticID
 		{
-			public const string OnCallNotLastAspect       = "AG0001";
-			public const string OnCallNotLastMethod       = "AG0002";
-			public const string CannotIntercept           = "AG0003";
-			public const string NamespaceNotAllowed       = "AG0004";
-			public const string HookMethodNotFound        = "AG0101";
-			public const string HookMethodNotStatic       = "AG0102";
-			public const string HookInvalidParameters     = "AG0103";
-			public const string HookInvalidReturnType     = "AG0104";
-			public const string OnCallHookMismatch        = "AG0105";
-			public const string HookRequiresInterceptData = "AG0106";
-			public const string AsyncHookRequiresTask     = "AG0107";
-			public const string InvalidAspectFilterRegex  = "AG0201";
-			public const string InvalidAspectFilterRule   = "AG0202";
-			public const string UnknownAspectFilterConditionKey = "AG0204";
+			public const string OnCallNotLastAspect                 = "AG0001";
+			public const string OnCallNotLastMethod                 = "AG0002";
+			public const string CannotIntercept                     = "AG0003";
+			public const string NamespaceNotAllowed                 = "AG0004";
+			public const string HookMethodNotFound                  = "AG0101";
+			public const string HookMethodNotStatic                 = "AG0102";
+			public const string HookInvalidParameters               = "AG0103";
+			public const string HookInvalidReturnType               = "AG0104";
+			public const string OnCallHookMismatch                  = "AG0105";
+			public const string HookRequiresInterceptData           = "AG0106";
+			public const string AsyncHookRequiresTask               = "AG0107";
+			public const string InvalidAspectFilterRegex            = "AG0201";
+			public const string InvalidAspectFilterRule             = "AG0202";
+			public const string UnknownAspectFilterConditionKey     = "AG0204";
 			public const string InvalidAspectFilterParameterPattern = "AG0205";
-			public const string InvalidAspectFilterDottedPattern = "AG0206";
+			public const string InvalidAspectFilterDottedPattern    = "AG0206";
+			public const string MethodLevelTargetFilter             = "AG0208";
 		}
 
 		public static class OptionID
 		{
-			public const string GenerateApi                   = "GenerateApi";
-			public const string GenerateInterceptors          = "GenerateInterceptors";
-			public const string PublicApi                     = "PublicApi";
-			public const string DebuggerStepThrough           = "DebuggerStepThrough";
-			public const string InterceptorsNamespace         = "InterceptorsNamespace";
+			public const string GenerateApi           = "GenerateApi";
+			public const string GenerateInterceptors  = "GenerateInterceptors";
+			public const string PublicApi             = "PublicApi";
+			public const string DebuggerStepThrough   = "DebuggerStepThrough";
+			public const string InterceptorsNamespace = "InterceptorsNamespace";
 		}
 
 		#region API
@@ -537,11 +538,13 @@ namespace AspectGenerator
 								//
 								if (ma.AttributeClass is not null && aspectAttributes.TryGetValue(ma.AttributeClass, out var aspectAttribute))
 								{
+									ReportMethodLevelTargetFilter(diagnostics, reportedDiagnostics, ma);
 									attributes.Add(new AttributeInfo(ma, null, null, ma.AttributeClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel));
 								}
 								// .. or somewhere else.
 								else if (ma.AttributeClass?.GetAttributes().FirstOrDefault(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }}) is {} externalAspectAttributeData)
 								{
+									ReportMethodLevelTargetFilter(diagnostics, reportedDiagnostics, ma);
 									attributes.Add(new AttributeInfo(ma, null, null, ma.AttributeClass!, externalAspectAttributeData, null, null));
 								}
 							}
@@ -748,6 +751,23 @@ namespace AspectGenerator
 				return;
 
 			diagnostics.Add(new DiagnosticInfo(id, message, location));
+		}
+
+		static void ReportMethodLevelTargetFilter(List<DiagnosticInfo> diagnostics, HashSet<string> reportedDiagnostics, AttributeData attribute)
+		{
+			if (!attribute.NamedArguments.Any(static a => a.Key == "TargetFilter"))
+				return;
+
+			var location = attribute.ApplicationSyntaxReference is {} syntaxReference
+				? Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span)
+				: null;
+
+			ReportDiagnostic(
+				diagnostics,
+				reportedDiagnostics,
+				DiagnosticID.MethodLevelTargetFilter,
+				"TargetFilter is only supported on assembly-level or type-level aspect attributes. Remove TargetFilter from this method-level aspect attribute.",
+				location);
 		}
 
 		static ImmutableArray<AspectFilterSet> BuildAssemblyFilters(
@@ -1042,7 +1062,7 @@ namespace AspectGenerator
 				: sourceMethod.ContainingType.ContainingNamespace.ToDisplayString();
 			var methodName     = FormatFilterMethodName(sourceMethod);
 			var fullMethodName = $"{fullTypeName}.{methodName}";
-			var parameters     = ImmutableArray.CreateBuilder<AspectFilters.ParameterTarget>();
+			var parameters     = new List<AspectFilters.ParameterTarget>();
 
 			foreach (var parameter in sourceMethod.Parameters)
 			{
@@ -1068,7 +1088,7 @@ namespace AspectGenerator
 				NamespaceSegments  = SplitFilterDottedName(namespaceName),
 				FullTypeSegments   = SplitFilterDottedName(fullTypeName),
 				FullMethodSegments = SplitFilterDottedName(fullMethodName),
-				Parameters         = parameters.ToImmutable()
+				Parameters         = parameters
 			};
 		}
 
@@ -1092,12 +1112,12 @@ namespace AspectGenerator
 				? AspectFilters.ModifierMask.Static
 				: AspectFilters.ModifierMask.Instance;
 
-			if (method.IsAbstract)                            result |= AspectFilters.ModifierMask.Abstract;
-			if (method.IsVirtual && !method.IsOverride)       result |= AspectFilters.ModifierMask.Virtual;
-			if (method.IsOverride)                            result |= AspectFilters.ModifierMask.Override;
-			if (method.IsSealed)                              result |= AspectFilters.ModifierMask.Sealed;
-			if (method.IsExtern)                              result |= AspectFilters.ModifierMask.Extern;
-			if (HasUnsafeModifier(method))                    result |= AspectFilters.ModifierMask.Unsafe;
+			if (method.IsAbstract)                      result |= AspectFilters.ModifierMask.Abstract;
+			if (method.IsVirtual && !method.IsOverride) result |= AspectFilters.ModifierMask.Virtual;
+			if (method.IsOverride)                      result |= AspectFilters.ModifierMask.Override;
+			if (method.IsSealed)                        result |= AspectFilters.ModifierMask.Sealed;
+			if (method.IsExtern)                        result |= AspectFilters.ModifierMask.Extern;
+			if (HasUnsafeModifier(method))              result |= AspectFilters.ModifierMask.Unsafe;
 
 			return result;
 		}
@@ -1116,12 +1136,12 @@ namespace AspectGenerator
 			};
 		}
 
-		static ImmutableArray<string> SplitFilterDottedName(string name)
+		static List<string> SplitFilterDottedName(string name)
 		{
 			if (string.IsNullOrEmpty(name))
 				return [];
 
-			var result  = ImmutableArray.CreateBuilder<string>();
+			var result  = new List<string>();
 			var start   = 0;
 			var depth   = 0;
 
@@ -1141,7 +1161,7 @@ namespace AspectGenerator
 			}
 
 			result.Add(name[start..]);
-			return result.ToImmutable();
+			return result;
 		}
 
 		static bool HasUnsafeModifier(IMethodSymbol method)
@@ -1176,17 +1196,8 @@ namespace AspectGenerator
 			if (type is ITypeParameterSymbol typeParameter)
 				return typeParameter.Name;
 
-			if (type is INamedTypeSymbol { IsGenericType: true } namedType)
-			{
-				var unbound = namedType.OriginalDefinition;
-				var name    = unbound.Name;
-				var tick    = name.IndexOf('`');
-
-				if (tick >= 0)
-					name = name[..tick];
-
-				return $"{unbound.ContainingNamespace.ToDisplayString()}.{name}<{string.Join(",", namedType.TypeArguments.Select(FormatFilterType))}>";
-			}
+			if (type is INamedTypeSymbol namedType)
+				return FormatFilterNamedType(namedType, includeNamespace: true);
 
 			return type.ToDisplayString(
 				new SymbolDisplayFormat(
@@ -1195,18 +1206,49 @@ namespace AspectGenerator
 					miscellaneousOptions: SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers));
 		}
 
+		static string FormatFilterNamedType(INamedTypeSymbol type, bool includeNamespace)
+		{
+			var name = GetMetadataNameWithoutArity(type.Name);
+			var typeParameterCount = type.TypeParameters.Length;
+
+			if (typeParameterCount > 0)
+			{
+				var typeArguments = type.TypeArguments.Length > typeParameterCount
+					? type.TypeArguments.Skip(type.TypeArguments.Length - typeParameterCount)
+					: type.TypeArguments;
+
+				name += $"<{string.Join(",", typeArguments.Select(FormatFilterType))}>";
+			}
+
+			if (type.ContainingType is not null)
+				return $"{FormatFilterNamedType(type.ContainingType, includeNamespace)}.{name}";
+
+			if (!includeNamespace || type.ContainingNamespace.IsGlobalNamespace)
+				return name;
+
+			return $"{type.ContainingNamespace.ToDisplayString()}.{name}";
+		}
+
 		static string FormatFilterSimpleTypeName(INamedTypeSymbol type)
 		{
-			var name = type.Name;
-			var tick = name.IndexOf('`');
-
-			if (tick >= 0)
-				name = name[..tick];
+			var name = GetMetadataNameWithoutArity(type.Name);
 
 			if (!type.IsGenericType)
 				return name;
 
-			return $"{name}<{string.Join(",", type.TypeArguments.Select(FormatFilterType))}>";
+			var typeParameterCount = type.TypeParameters.Length;
+			var typeArguments = type.TypeArguments.Length > typeParameterCount
+				? type.TypeArguments.Skip(type.TypeArguments.Length - typeParameterCount)
+				: type.TypeArguments;
+
+			return $"{name}<{string.Join(",", typeArguments.Select(FormatFilterType))}>";
+		}
+
+		static string GetMetadataNameWithoutArity(string name)
+		{
+			var tick = name.IndexOf('`');
+
+			return tick >= 0 ? name[..tick] : name;
 		}
 
 		static string FormatFilterMethodName(IMethodSymbol method)

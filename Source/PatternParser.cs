@@ -9,91 +9,6 @@ namespace AspectGenerator
 {
 	static partial class AspectFilters
 	{
-		readonly struct TargetFilterRule
-		{
-			static readonly HashSet<string> _patternConditionKeys = new(StringComparer.OrdinalIgnoreCase)
-			{
-				"namespace",
-				"type",
-				"fulltype",
-				"method",
-				"fullmethod",
-				"returns",
-				"param",
-				"params",
-				"signature"
-			};
-
-			TargetFilterRule(bool isNegative, FilterMatcher matcher, string body)
-			{
-				IsNegative = isNegative;
-				Matcher    = matcher;
-				Body       = body;
-			}
-
-			public bool          IsNegative { get; }
-			public FilterMatcher Matcher    { get; }
-			public string        Body       { get; }
-
-			public static bool TryParse(string rule, List<TargetFilterDiagnostic> diagnostics, out TargetFilterRule result)
-			{
-				var isNegative = false;
-				var matcher    = FilterMatcher.Pattern;
-				var body       = "";
-
-				result = default;
-				rule   = rule.Trim();
-
-				if (rule.Length == 0 || rule.StartsWith("#", StringComparison.Ordinal))
-					return false;
-
-				if (rule[0] == '-')
-				{
-					isNegative = true;
-					rule       = rule[1..].TrimStart();
-				}
-
-				if (TryReadMatcherPrefix(rule, out var matcherName, out var matcherBody))
-				{
-					if (string.Equals(matcherName, "pattern", StringComparison.OrdinalIgnoreCase))
-					{
-						matcher = FilterMatcher.Pattern;
-						body    = matcherBody;
-					}
-					else if (string.Equals(matcherName, "regex", StringComparison.OrdinalIgnoreCase))
-					{
-						matcher = FilterMatcher.Regex;
-						body    = matcherBody;
-					}
-					else if (string.Equals(matcherName, "contains", StringComparison.OrdinalIgnoreCase))
-					{
-						matcher = FilterMatcher.Contains;
-						body    = matcherBody;
-					}
-					else if (_patternConditionKeys.Contains(matcherName))
-					{
-						body = rule;
-					}
-					else
-					{
-						diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(matcherName));
-						return false;
-					}
-				}
-				else
-					body = rule;
-
-				if (body.Length == 0)
-				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(rule, "Target filter rule body cannot be empty."));
-					return false;
-				}
-
-				result = new TargetFilterRule(isNegative, matcher, body);
-				return true;
-			}
-		}
-
 		static int IndexOfTopLevel(string text, char value)
 		{
 			var depth   = 0;
@@ -126,9 +41,9 @@ namespace AspectGenerator
 			return -1;
 		}
 
-		static ImmutableArray<string> SplitTopLevel(string text, char separator)
+		static List<string> SplitTopLevel(string text, char separator)
 		{
-			var result  = ImmutableArray.CreateBuilder<string>();
+			var result  = new List<string>();
 			var start   = 0;
 			var depth   = 0;
 			var escaped = false;
@@ -161,12 +76,12 @@ namespace AspectGenerator
 			}
 
 			result.Add(text[start..].Trim());
-			return result.ToImmutable();
+			return result;
 		}
 
-		static ImmutableArray<string> SplitWhitespace(string text)
+		static List<string> SplitWhitespace(string text)
 		{
-			var result  = ImmutableArray.CreateBuilder<string>();
+			var result  = new List<string>();
 			var start   = -1;
 			var depth   = 0;
 			var escaped = false;
@@ -210,7 +125,7 @@ namespace AspectGenerator
 			if (start >= 0)
 				result.Add(text[start..]);
 
-			return result.ToImmutable();
+			return result;
 		}
 
 		static bool TryReadMatcherPrefix(string rule, out string name, out string body)
@@ -307,22 +222,26 @@ namespace AspectGenerator
 					if (item.Length == 0)
 						continue;
 
-					if (TryReadAccessibility(item, out var accessibilityMask))
-					{
-						accessibility |= accessibilityMask;
-						continue;
-					}
-
-					if (TryReadModifier(item, out var modifierMask))
-					{
-						modifiers |= modifierMask;
-						continue;
-					}
-
 					if (!TryReadMatcherPrefix(item, out var key, out var value))
 					{
-						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(item, "Condition item must be a modifier token or 'key: value'."));
-						valid = false;
+						foreach (var token in SplitWhitespace(item))
+						{
+							if (TryReadAccessibility(token, out var accessibilityMask))
+							{
+								accessibility |= accessibilityMask;
+								continue;
+							}
+
+							if (TryReadModifier(token, out var modifierMask))
+							{
+								modifiers |= modifierMask;
+								continue;
+							}
+
+							diagnostics.Add(TargetFilterDiagnostic.InvalidRule(item, "Condition item must contain only modifier/accessibility tokens or 'key: value'."));
+							valid = false;
+						}
+
 						continue;
 					}
 
@@ -385,7 +304,7 @@ namespace AspectGenerator
 				var tokens = SplitWhitespace(text);
 				var index  = 0;
 
-				while (index < tokens.Length)
+				while (index < tokens.Count)
 				{
 					var token = tokens[index];
 
@@ -490,7 +409,7 @@ namespace AspectGenerator
 			readonly TypePattern?          _typePattern;
 			readonly ParameterPattern?     _parameterPattern;
 			readonly ParameterListPattern? _parameterListPattern;
-			readonly string?               _plainText;
+			readonly SegmentMatcher?       _signaturePattern;
 
 			Condition(
 				string                key,
@@ -499,7 +418,7 @@ namespace AspectGenerator
 				TypePattern?          typePattern,
 				ParameterPattern?     parameterPattern,
 				ParameterListPattern? parameterListPattern,
-				string?               plainText)
+				SegmentMatcher?       signaturePattern)
 			{
 				_key                  = key;
 				_dottedPattern        = dottedPattern;
@@ -507,7 +426,7 @@ namespace AspectGenerator
 				_typePattern          = typePattern;
 				_parameterPattern     = parameterPattern;
 				_parameterListPattern = parameterListPattern;
-				_plainText            = plainText;
+				_signaturePattern     = signaturePattern;
 			}
 
 			public static bool TryParse(string key, string value, List<TargetFilterDiagnostic> diagnostics, out Condition condition)
@@ -556,7 +475,10 @@ namespace AspectGenerator
 						return true;
 
 					case "signature":
-						condition = new Condition(key, null, null, null, null, null, value);
+						if (!SegmentMatcher.TryParse(value, diagnostics, out var signaturePattern))
+							return false;
+
+						condition = new Condition(key, null, null, null, null, null, signaturePattern);
 						return true;
 
 					default:
@@ -577,7 +499,7 @@ namespace AspectGenerator
 					"returns"    => _typePattern!.IsMatch(target.ReturnType),
 					"param"      => target.Parameters.Any(p => _parameterPattern!.IsMatch(p)),
 					"params"     => _parameterListPattern!.IsMatch(target.Parameters),
-					"signature"  => SegmentMatcher.Like(_plainText!, target.Signature),
+					"signature"  => _signaturePattern!.IsMatch(target.Signature),
 					_            => false
 				};
 			}
@@ -646,14 +568,14 @@ namespace AspectGenerator
 				return valid;
 			}
 
-			public bool IsMatch(ImmutableArray<ParameterTarget> parameters)
+			public bool IsMatch(List<ParameterTarget> parameters)
 			{
 				if (_ignore)
 					return true;
 
 				if (_ellipsisIndex < 0)
 				{
-					if (_parameters.Length != parameters.Length)
+					if (_parameters.Length != parameters.Count)
 						return false;
 
 					for (var i = 0; i < _parameters.Length; i++)
@@ -666,7 +588,7 @@ namespace AspectGenerator
 				var beforeCount = _ellipsisIndex;
 				var afterCount  = _parameters.Length - _ellipsisIndex - 1;
 
-				if (parameters.Length < beforeCount + afterCount)
+				if (parameters.Count < beforeCount + afterCount)
 					return false;
 
 				for (var i = 0; i < beforeCount; i++)
@@ -676,7 +598,7 @@ namespace AspectGenerator
 				for (var i = 0; i < afterCount; i++)
 				{
 					var patternIndex   = _ellipsisIndex + 1 + i;
-					var parameterIndex = parameters.Length - afterCount + i;
+					var parameterIndex = parameters.Count - afterCount + i;
 
 					if (!_parameters[patternIndex]!.IsMatch(parameters[parameterIndex]))
 						return false;
@@ -756,6 +678,28 @@ namespace AspectGenerator
 
 		sealed class TypePattern
 		{
+			static readonly Dictionary<string,string> _typeAliases = new(StringComparer.Ordinal)
+			{
+				["bool"]    = "System.Boolean",
+				["byte"]    = "System.Byte",
+				["sbyte"]   = "System.SByte",
+				["char"]    = "System.Char",
+				["decimal"] = "System.Decimal",
+				["double"]  = "System.Double",
+				["float"]   = "System.Single",
+				["int"]     = "System.Int32",
+				["uint"]    = "System.UInt32",
+				["nint"]    = "System.IntPtr",
+				["nuint"]   = "System.UIntPtr",
+				["long"]    = "System.Int64",
+				["ulong"]   = "System.UInt64",
+				["object"]  = "System.Object",
+				["short"]   = "System.Int16",
+				["ushort"]  = "System.UInt16",
+				["string"]  = "System.String",
+				["void"]    = "System.Void"
+			};
+
 			readonly DottedPattern?  _dottedPattern;
 			readonly SegmentMatcher? _segmentPattern;
 
@@ -775,6 +719,8 @@ namespace AspectGenerator
 					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, "Type pattern cannot be empty."));
 					return false;
 				}
+
+				text = ExpandTypeAliases(text);
 
 				if (IndexOfTopLevel(text, '.') >= 0)
 				{
@@ -803,7 +749,79 @@ namespace AspectGenerator
 			{
 				var segments = SplitTopLevel(typeName, '.');
 
-				return segments.Length == 0 ? typeName : segments[^1];
+				return segments.Count == 0 ? typeName : segments[^1];
+			}
+
+			static string ExpandTypeAliases(string text)
+			{
+				var sb = new StringBuilder(text.Length);
+
+				for (var i = 0; i < text.Length;)
+				{
+					var ch = text[i];
+
+					if (IsIdentifierStart(ch))
+					{
+						var start = i++;
+
+						while (i < text.Length && IsIdentifierPart(text[i]))
+							i++;
+
+						var token = text[start..i];
+
+						if (_typeAliases.TryGetValue(token, out var alias))
+							sb.Append(alias);
+						else
+							sb.Append(token);
+
+						if (i < text.Length && text[i] == '?' && !HasUnescapedWildcard(token))
+						{
+							i++;
+						}
+
+						continue;
+					}
+
+					sb.Append(ch);
+					i++;
+				}
+
+				return sb.ToString();
+			}
+
+			static bool IsIdentifierStart(char ch)
+			{
+				return char.IsLetter(ch) || ch == '_';
+			}
+
+			static bool IsIdentifierPart(char ch)
+			{
+				return char.IsLetterOrDigit(ch) || ch == '_';
+			}
+
+			static bool HasUnescapedWildcard(string text)
+			{
+				var escaped = false;
+
+				foreach (var ch in text)
+				{
+					if (escaped)
+					{
+						escaped = false;
+						continue;
+					}
+
+					if (ch == '\\')
+					{
+						escaped = true;
+						continue;
+					}
+
+					if (ch is '*' or '?')
+						return true;
+				}
+
+				return false;
 			}
 		}
 
@@ -829,7 +847,7 @@ namespace AspectGenerator
 
 				var parts = SplitTopLevel(text.Trim(), '.');
 
-				if (parts.Length == 0 || parts.Any(static p => p.Length == 0))
+				if (parts.Count == 0 || parts.Any(static p => p.Length == 0))
 				{
 					diagnostics.Add(TargetFilterDiagnostic.InvalidDottedPattern(text, "Dotted pattern contains an empty segment."));
 					return false;
@@ -838,7 +856,7 @@ namespace AspectGenerator
 				var segments = ImmutableArray.CreateBuilder<SegmentMatcher>();
 				var valid    = true;
 
-				for (var i = 0; i < parts.Length; i++)
+				for (var i = 0; i < parts.Count; i++)
 				{
 					var part = parts[i];
 
@@ -849,7 +867,7 @@ namespace AspectGenerator
 						continue;
 					}
 
-					if (part == "**" && i == parts.Length - 1 && !allowRecursiveFinalSegment)
+					if (part == "**" && i == parts.Count - 1 && !allowRecursiveFinalSegment)
 					{
 						diagnostics.Add(TargetFilterDiagnostic.InvalidDottedPattern(text, "Method pattern must end with a method name segment. '**' cannot be used as the final method segment."));
 						valid = false;
@@ -869,7 +887,7 @@ namespace AspectGenerator
 				return valid;
 			}
 
-			public bool IsMatch(ImmutableArray<string> values)
+			public bool IsMatch(List<string> values)
 			{
 				return IsMatch(0, 0);
 
@@ -884,21 +902,21 @@ namespace AspectGenerator
 							if (patternIndex == _segments.Length - 1)
 								return true;
 
-							for (var i = valueIndex; i <= values.Length; i++)
+							for (var i = valueIndex; i <= values.Count; i++)
 								if (IsMatch(patternIndex + 1, i))
 									return true;
 
 							return false;
 						}
 
-						if (valueIndex >= values.Length || !segment.IsMatch(values[valueIndex]))
+						if (valueIndex >= values.Count || !segment.IsMatch(values[valueIndex]))
 							return false;
 
 						patternIndex++;
 						valueIndex++;
 					}
 
-					return valueIndex == values.Length;
+					return valueIndex == values.Count;
 				}
 			}
 		}
@@ -986,16 +1004,6 @@ namespace AspectGenerator
 					SegmentMatcherKind.Recursive => true,
 					_                            => false
 				};
-			}
-
-			public static bool Like(string pattern, string value)
-			{
-				if (!HasWildcard(pattern))
-					return string.Equals(pattern, value, StringComparison.Ordinal);
-
-				var diagnostics = new List<TargetFilterDiagnostic>();
-
-				return TryParse(pattern, diagnostics, out var matcher) && matcher.IsMatch(value);
 			}
 
 			bool IsRegexMatch(string value)

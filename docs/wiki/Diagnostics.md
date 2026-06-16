@@ -23,3 +23,4 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0204`: unknown target filter condition key.
 - `AG0205`: invalid target filter parameter pattern.
 - `AG0206`: invalid target filter dotted pattern.
+- `AG0208`: `TargetFilter` is used on a method-level aspect attribute.
