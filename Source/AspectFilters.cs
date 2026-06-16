@@ -65,7 +65,7 @@ namespace AspectGenerator
 
 				if (matcher == FilterMatcher.Pattern)
 				{
-					if (PatternParser.Compile(body, diagnostics, out var pattern))
+					if (CompiledPatternMatcher.TryCompile(body, diagnostics, out var pattern))
 						result.Add(new PatternFilter(isNegative, pattern));
 
 					continue;
@@ -175,17 +175,20 @@ namespace AspectGenerator
 
 			public bool IsMatch(in MethodTarget target)
 			{
-				var matched = false;
+				var included = false;
 
 				foreach (var filter in _filters)
 				{
+					if (included == !filter.IsNegative)
+						continue;
+
 					if (!filter.IsMatch(target))
 						continue;
 
-					matched = !filter.IsNegative;
+					included = !filter.IsNegative;
 				}
 
-				return matched;
+				return included;
 			}
 
 			public TargetFilterSet ReportDiagnostics(Action<TargetFilterDiagnostic>? reportDiagnostic)
@@ -247,17 +250,17 @@ namespace AspectGenerator
 
 			public static TargetFilterDiagnostic UnknownConditionKey(string key)
 			{
-				return new TargetFilterDiagnostic("AG0204", $"Unknown target filter condition key '{key}'.");
+				return new TargetFilterDiagnostic(AspectSourceGenerator.DiagnosticID.UnknownAspectFilterConditionKey, $"Unknown target filter condition key '{key}'.");
 			}
 
 			public static TargetFilterDiagnostic InvalidParameterPattern(string pattern, string message)
 			{
-				return new TargetFilterDiagnostic("AG0205", $"Invalid target filter parameter pattern '{pattern}': {message}");
+				return new TargetFilterDiagnostic(AspectSourceGenerator.DiagnosticID.InvalidAspectFilterParameterPattern, $"Invalid target filter parameter pattern '{pattern}': {message}");
 			}
 
 			public static TargetFilterDiagnostic InvalidDottedPattern(string pattern, string message)
 			{
-				return new TargetFilterDiagnostic("AG0206", $"Invalid target filter dotted pattern '{pattern}': {message}");
+				return new TargetFilterDiagnostic(AspectSourceGenerator.DiagnosticID.InvalidAspectFilterDottedPattern, $"Invalid target filter dotted pattern '{pattern}': {message}");
 			}
 		}
 
@@ -348,47 +351,26 @@ namespace AspectGenerator
 			Params
 		}
 
-		abstract class CompiledFilter
+		abstract class CompiledFilter(bool isNegative)
 		{
-			protected CompiledFilter(bool isNegative)
-			{
-				IsNegative = isNegative;
-			}
-
-			public bool IsNegative { get; }
+			public bool IsNegative { get; } = isNegative;
 
 			public abstract bool IsMatch(in MethodTarget target);
 		}
 
-		sealed class PatternFilter : CompiledFilter
+		sealed class PatternFilter(bool isNegative, CompiledPatternMatcher matcher) : CompiledFilter(isNegative)
 		{
-			readonly PatternParser _pattern;
-
-			public PatternFilter(bool isNegative, PatternParser pattern)
-				: base(isNegative)
-			{
-				_pattern = pattern;
-			}
-
 			public override bool IsMatch(in MethodTarget target)
 			{
-				return _pattern.IsMatch(target);
+				return matcher.IsMatch(target);
 			}
 		}
 
-		sealed class ContainsFilter : CompiledFilter
+		sealed class ContainsFilter(bool isNegative, string pattern) : CompiledFilter(isNegative)
 		{
-			readonly string _pattern;
-
-			public ContainsFilter(bool isNegative, string pattern)
-				: base(isNegative)
-			{
-				_pattern = pattern;
-			}
-
 			public override bool IsMatch(in MethodTarget target)
 			{
-				return target.Signature.Contains(_pattern, StringComparison.Ordinal);
+				return target.Signature.Contains(pattern, StringComparison.Ordinal);
 			}
 		}
 

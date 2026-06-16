@@ -204,6 +204,38 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void PatternConditionOrValuesApplyAspectTest()
+		{
+			var result = RunGenerator(FilterPatternConditionOrSource);
+
+			AssertGeneratedSourceContains(result, "SaveAsync_Interceptor");
+			AssertGeneratedSourceContains(result, "UpdateWithCancellation_Interceptor");
+			AssertGeneratedSourceContains(result, "TryGet_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "Ping_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "Load_Interceptor");
+		}
+
+		[TestMethod]
+		public void PatternPathAliasAppliesAspectTest()
+		{
+			var result = RunGenerator(FilterPatternPathAliasSource);
+
+			AssertGeneratedSourceContains(result, "Save_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "Skip_Interceptor");
+		}
+
+		[TestMethod]
+		public void PatternRuleSkipSemanticsPreserveLastEffectiveDecisionTest()
+		{
+			var result = RunGenerator(FilterPatternRuleSkipSource);
+
+			AssertGeneratedSourceContains(result, "IncludedThenExcludedThenIncluded_Interceptor");
+			AssertGeneratedSourceContains(result, "NegativeBeforeInclude_Interceptor");
+			AssertGeneratedSourceContains(result, "IncludeThenInclude_Interceptor");
+			AssertGeneratedSourceDoesNotContain(result, "IncludedThenExcluded_Interceptor");
+		}
+
+		[TestMethod]
 		public void PatternConditionModifierTokensApplyAspectTest()
 		{
 			var result = RunGenerator(FilterPatternConditionModifiersSource);
@@ -916,6 +948,135 @@ namespace AspectGenerator.Tests
 				public Task<string> SaveAsync() => Task.FromResult("save");
 				public string Save() => "save";
 				public Task<string> HealthCheckAsync() => Task.FromResult("health");
+			}
+			""";
+
+		const string FilterPatternConditionOrSource =
+			"""
+			using System;
+			using System.Threading;
+			using System.Threading.Tasks;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
+				TargetFilter =
+				[
+					"namespace:AspectGenerator.Tests.GeneratorDriver | AspectGenerator.Tests.GeneratorDriver.Jobs; type:*Service | *Repository; method:Save* | Update*; returns:System.Threading.Tasks.Task* | System.Threading.Tasks.ValueTask*; param:*CancellationToken | out System.Int32",
+					"params:(string, out int) | (_, *CancellationToken)",
+					"-method:Ping | HealthCheck"
+				])]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string[]? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo info)
+				{
+				}
+			}
+
+			sealed class UserService
+			{
+				public void Invoke(CancellationToken cancellationToken)
+				{
+					SaveAsync(cancellationToken);
+					UpdateWithCancellation(1, cancellationToken);
+					TryGet("id", out _);
+					Ping(cancellationToken);
+					Load();
+				}
+
+				public Task<string> SaveAsync(CancellationToken cancellationToken) => Task.FromResult("");
+				public ValueTask<string> UpdateWithCancellation(int value, CancellationToken cancellationToken) => ValueTask.FromResult("");
+				public bool TryGet(string id, out int value)
+				{
+					value = 1;
+					return true;
+				}
+				public Task<string> Ping(CancellationToken cancellationToken) => Task.FromResult("");
+				public string Load() => "";
+			}
+			""";
+
+		const string FilterPatternPathAliasSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "path:AspectGenerator.Tests.GeneratorDriver.*Service; method:Save")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			sealed class UserService
+			{
+				public void Invoke()
+				{
+					Save();
+					Skip();
+				}
+
+				public string Save() => "save";
+				public string Skip() => "skip";
+			}
+			""";
+
+		const string FilterPatternRuleSkipSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
+				TargetFilter =
+				[
+					"method:IncludedThenExcludedThenIncluded",
+					"-method:IncludedThenExcludedThenIncluded",
+					"method:IncludedThenExcludedThenIncluded",
+					"method:IncludedThenExcluded",
+					"-method:IncludedThenExcluded",
+					"-method:NegativeBeforeInclude",
+					"method:NegativeBeforeInclude",
+					"method:IncludeThenInclude",
+					"method:IncludeThenInclude"
+				])]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string[]? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					IncludedThenExcludedThenIncluded();
+					IncludedThenExcluded();
+					NegativeBeforeInclude();
+					IncludeThenInclude();
+				}
+
+				public static string IncludedThenExcludedThenIncluded() => "";
+				public static string IncludedThenExcluded() => "";
+				public static string NegativeBeforeInclude() => "";
+				public static string IncludeThenInclude() => "";
 			}
 			""";
 

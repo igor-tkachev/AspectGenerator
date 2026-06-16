@@ -8,10 +8,11 @@ Filters are not runtime AOP. They select target methods, but AspectGenerator sti
 
 `TargetFilter` is an ordered rule list. Each rule can use a matcher prefix. Unprefixed rules and `pattern:` use the native AspectGenerator target pattern syntax. `contains:` and `regex:` match the canonical target method signature.
 
-- filters apply to canonical target method signatures;
-- a rule starting with `-` is an exclude filter;
+- one physical line is one ordered rule;
+- a rule starting with `-` is an exclude filter for that whole line;
 - a line starting with `#` is a comment;
-- the last matching entry wins inside one filter set;
+- multiple lines are ordered include/exclude rules, not `AND` conditions;
+- the last effective matching entry wins inside one filter set;
 - no matching entry means the filter set does not apply;
 - exclude filters do not suppress explicit method-level aspect attributes.
 
@@ -80,11 +81,20 @@ param:out System.Int32
 signature:public * MyApp.Services.*
 ```
 
+Within one condition value, `|` means `OR`:
+
+```text
+namespace:MyApp.Services | MyApp.Jobs; type:*Service | *Repository; method:Save* | Update*
+-method:HealthCheck | Ping
+```
+
+Use `\|` when a literal pipe character is needed in a native pattern value. `|` is not parsed specially for `contains:` and `regex:` rules.
+
 Condition keys:
 
 - `namespace`: containing namespace only;
 - `type`: simple containing type name;
-- `fulltype`: namespace plus containing type;
+- `path` / `fulltype`: namespace plus containing type;
 - `method`: method name only;
 - `fullmethod`: namespace plus containing type plus method name;
 - `returns`: return type;

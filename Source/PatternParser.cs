@@ -148,11 +148,12 @@ namespace AspectGenerator
 			return true;
 		}
 
-		sealed class PatternParser
+		sealed class CompiledPatternMatcher
 		{
 			static readonly HashSet<string> _conditionKeys = new(StringComparer.OrdinalIgnoreCase)
 			{
 				"namespace",
+				"path",
 				"type",
 				"fulltype",
 				"method",
@@ -170,7 +171,7 @@ namespace AspectGenerator
 			readonly ParameterListPattern?     _parameters;
 			readonly TypePattern?              _returnType;
 
-			PatternParser(
+			CompiledPatternMatcher(
 				AccessibilityMask         accessibility,
 				ModifierMask              modifiers,
 				ImmutableArray<Condition> conditions,
@@ -191,12 +192,12 @@ namespace AspectGenerator
 				return _conditionKeys.Contains(key);
 			}
 
-			public static bool Compile(string text, List<TargetFilterDiagnostic> diagnostics, out PatternParser pattern)
+			public static bool TryCompile(string text, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher compiledPattern)
 			{
 				if (IsConditionRule(text))
-					return TryParseConditionRule(text, diagnostics, out pattern);
+					return TryParseConditionRule(text, diagnostics, out compiledPattern);
 
-				return TryParseMethodPattern(text, diagnostics, out pattern);
+				return TryParseMethodPattern(text, diagnostics, out compiledPattern);
 			}
 
 			static bool IsConditionRule(string text)
@@ -210,7 +211,7 @@ namespace AspectGenerator
 				return IsKnownConditionKey(key);
 			}
 
-			static bool TryParseConditionRule(string text, List<TargetFilterDiagnostic> diagnostics, out PatternParser pattern)
+			static bool TryParseConditionRule(string text, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher compiledPattern)
 			{
 				var accessibility = AccessibilityMask.None;
 				var modifiers     = ModifierMask.None;
@@ -261,11 +262,11 @@ namespace AspectGenerator
 					conditions.Add(condition);
 				}
 
-				pattern = new PatternParser(accessibility, modifiers, conditions.ToImmutable(), null, null, null);
+				compiledPattern = new CompiledPatternMatcher(accessibility, modifiers, conditions.ToImmutable(), null, null, null);
 				return valid;
 			}
 
-			static bool TryParseMethodPattern(string text, List<TargetFilterDiagnostic> diagnostics, out PatternParser pattern)
+			static bool TryParseMethodPattern(string text, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher matcher)
 			{
 				var accessibility = AccessibilityMask.None;
 				var modifiers     = ModifierMask.None;
@@ -330,7 +331,7 @@ namespace AspectGenerator
 				if (patternText.Length == 0)
 				{
 					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, "Method pattern is missing."));
-					pattern = new PatternParser(accessibility, modifiers, [], null, parameters, returnType);
+					matcher = new CompiledPatternMatcher(accessibility, modifiers, [], null, parameters, returnType);
 					return false;
 				}
 
@@ -340,7 +341,7 @@ namespace AspectGenerator
 				if (methodPattern.Segments.Length == 1)
 					methodPattern = DottedPattern.FromSegments([SegmentMatcher.Recursive, methodPattern.Segments[0]]);
 
-				pattern = new PatternParser(accessibility, modifiers, [], methodPattern, parameters, returnType);
+				matcher = new CompiledPatternMatcher(accessibility, modifiers, [], methodPattern, parameters, returnType);
 				return valid;
 			}
 
@@ -403,6 +404,7 @@ namespace AspectGenerator
 
 		sealed class Condition
 		{
+			readonly Condition[]?           _alternatives;
 			readonly string                _key;
 			readonly DottedPattern?        _dottedPattern;
 			readonly SegmentMatcher?       _segmentPattern;
@@ -420,6 +422,7 @@ namespace AspectGenerator
 				ParameterListPattern? parameterListPattern,
 				SegmentMatcher?       signaturePattern)
 			{
+				_alternatives          = null;
 				_key                  = key;
 				_dottedPattern        = dottedPattern;
 				_segmentPattern       = segmentPattern;
@@ -429,10 +432,51 @@ namespace AspectGenerator
 				_signaturePattern     = signaturePattern;
 			}
 
+			Condition(Condition[] alternatives)
+			{
+				_alternatives          = alternatives;
+				_key                   = "";
+				_dottedPattern         = null;
+				_segmentPattern        = null;
+				_typePattern           = null;
+				_parameterPattern      = null;
+				_parameterListPattern  = null;
+				_signaturePattern      = null;
+			}
+
 			public static bool TryParse(string key, string value, List<TargetFilterDiagnostic> diagnostics, out Condition condition)
 			{
 				condition = null!;
 				key       = key.ToLowerInvariant();
+
+				if (key == "path")
+					key = "fulltype";
+
+				var alternatives = SplitConditionValues(value);
+
+				if (alternatives.Count > 1)
+				{
+					var conditions = new List<Condition>(alternatives.Count);
+					var valid      = true;
+
+					foreach (var alternative in alternatives)
+					{
+						if (TryParseSingle(key, alternative, diagnostics, out var alternativeCondition))
+							conditions.Add(alternativeCondition);
+						else
+							valid = false;
+					}
+
+					condition = new Condition(conditions.ToArray());
+					return valid;
+				}
+
+				return TryParseSingle(key, alternatives.Count == 0 ? value : alternatives[0], diagnostics, out condition);
+			}
+
+			static bool TryParseSingle(string key, string value, List<TargetFilterDiagnostic> diagnostics, out Condition condition)
+			{
+				condition = null!;
 
 				switch (key)
 				{
@@ -489,6 +533,15 @@ namespace AspectGenerator
 
 			public bool IsMatch(in MethodTarget target)
 			{
+				if (_alternatives is not null)
+				{
+					foreach (var alternative in _alternatives)
+						if (alternative.IsMatch(target))
+							return true;
+
+					return false;
+				}
+
 				return _key switch
 				{
 					"namespace"  => _dottedPattern!.IsMatch(target.NamespaceSegments),
@@ -502,6 +555,49 @@ namespace AspectGenerator
 					"signature"  => _signaturePattern!.IsMatch(target.Signature),
 					_            => false
 				};
+			}
+
+			static List<string> SplitConditionValues(string text)
+			{
+				var result          = new List<string>();
+				var start           = 0;
+				var genericDepth    = 0;
+				var parenthesisDepth = 0;
+				var escaped         = false;
+
+				for (var i = 0; i < text.Length; i++)
+				{
+					var ch = text[i];
+
+					if (escaped)
+					{
+						escaped = false;
+						continue;
+					}
+
+					if (ch == '\\')
+					{
+						escaped = true;
+						continue;
+					}
+
+					if (ch == '<')
+						genericDepth++;
+					else if (ch == '>' && genericDepth > 0)
+						genericDepth--;
+					else if (ch == '(')
+						parenthesisDepth++;
+					else if (ch == ')' && parenthesisDepth > 0)
+						parenthesisDepth--;
+					else if (ch == '|' && genericDepth == 0 && parenthesisDepth == 0)
+					{
+						result.Add(text[start..i].Trim());
+						start = i + 1;
+					}
+				}
+
+				result.Add(text[start..].Trim());
+				return result;
 			}
 		}
 
@@ -522,6 +618,9 @@ namespace AspectGenerator
 			{
 				pattern = null!;
 				text    = text.Trim();
+
+				if (TryStripParentheses(text, out var parenthesizedText))
+					text = parenthesizedText;
 
 				if (text.Length == 0)
 				{
@@ -566,6 +665,55 @@ namespace AspectGenerator
 
 				pattern = new ParameterListPattern(false, items.ToImmutable(), ellipsisIndex);
 				return valid;
+			}
+
+			static bool TryStripParentheses(string text, out string result)
+			{
+				result = "";
+
+				if (text.Length < 2 || text[0] != '(' || text[^1] != ')')
+					return false;
+
+				var depth        = 0;
+				var genericDepth = 0;
+				var escaped      = false;
+
+				for (var i = 0; i < text.Length; i++)
+				{
+					var ch = text[i];
+
+					if (escaped)
+					{
+						escaped = false;
+						continue;
+					}
+
+					if (ch == '\\')
+					{
+						escaped = true;
+						continue;
+					}
+
+					if (ch == '<')
+						genericDepth++;
+					else if (ch == '>' && genericDepth > 0)
+						genericDepth--;
+					else if (genericDepth == 0 && ch == '(')
+						depth++;
+					else if (genericDepth == 0 && ch == ')')
+					{
+						depth--;
+
+						if (depth == 0 && i != text.Length - 1)
+							return false;
+					}
+				}
+
+				if (depth != 0)
+					return false;
+
+				result = text[1..^1].Trim();
+				return true;
 			}
 
 			public bool IsMatch(List<ParameterTarget> parameters)
