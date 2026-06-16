@@ -24,3 +24,21 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0205`: invalid target filter parameter pattern.
 - `AG0206`: invalid target filter dotted pattern.
 - `AG0208`: `TargetFilter` is used on a method-level aspect attribute.
+
+## Compile-Time Reporting Diagnostics
+
+Compile-time reporting diagnostics are source-generator diagnostics. They explain matching and generation decisions and do not add runtime tracing or logging code.
+
+Reporting is configured per category with `AspectGeneratorSummarySeverity`, `AspectGeneratorInterceptorsSeverity`, `AspectGeneratorTargetsSeverity`, and `AspectGeneratorFiltersSeverity`, or with the matching `[assembly: AspectGeneratorOptions(...)]` properties. Supported severities are `Off`, `Hidden`, `Info`, and `Warning`.
+
+- `AG0700`: summary report.
+- `AG0710`: interceptor was generated for a selected call.
+- `AG0711`: interceptor generation skipped an unsupported target.
+- `AG0712`: interceptor generation skipped a non-selected target.
+- `AG0720`: aspect selected a target method.
+- `AG0721`: aspect was excluded from a target method.
+- `AG0722`: aspect was skipped for a target method.
+- `AG0723`: aspect was skipped because its `ConditionalAttribute` symbol is not defined.
+- `AG0730`: `TargetFilter` rule or group matched a target.
+- `AG0731`: `TargetFilter` rule or group did not match a target.
+- `AG0732`: final `TargetFilter` decision for a target.

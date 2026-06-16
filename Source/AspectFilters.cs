@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AspectGenerator
@@ -67,7 +68,7 @@ namespace AspectGenerator
 				if (matcher == FilterMatcher.Contains)
 				{
 					FlushConditionGroup();
-					result.Add(new ContainsFilter(prefix == RulePrefix.Exclude, body));
+					result.Add(new ContainsFilter(prefix == RulePrefix.Exclude, FormatRule(prefix, body), body));
 					continue;
 				}
 
@@ -80,7 +81,7 @@ namespace AspectGenerator
 					if (regex.Regex is null)
 						diagnostics.Add(TargetFilterDiagnostic.InvalidRegex(body, regex.ErrorMessage ?? "Invalid regex pattern."));
 					else
-						result.Add(new RegexFilter(prefix == RulePrefix.Exclude, body, regex.Regex));
+						result.Add(new RegexFilter(prefix == RulePrefix.Exclude, FormatRule(prefix, body), regex.Regex));
 
 					continue;
 				}
@@ -157,7 +158,7 @@ namespace AspectGenerator
 			void AddPattern(bool isNegative, string text)
 			{
 				if (CompiledPatternMatcher.TryCompile(text, diagnostics, out var pattern))
-					result.Add(new PatternFilter(isNegative, pattern));
+					result.Add(new PatternFilter(isNegative, FormatRule(isNegative ? RulePrefix.Exclude : RulePrefix.None, text), pattern));
 			}
 
 			void FlushConditionGroup()
@@ -166,7 +167,7 @@ namespace AspectGenerator
 					return;
 
 				if (CompiledPatternMatcher.TryCompileConditionGroup(conditionGroup, diagnostics, out var pattern))
-					result.Add(new PatternFilter(conditionGroupAction, pattern));
+					result.Add(new PatternFilter(conditionGroupAction, FormatConditionGroup(conditionGroupAction, conditionGroup), pattern));
 
 				conditionGroup = null;
 			}
@@ -229,6 +230,38 @@ namespace AspectGenerator
 				diagnostics.Add(TargetFilterDiagnostic.InvalidRule(rule, "Target filter rule body cannot be empty."));
 				return false;
 			}
+
+			static string FormatRule(RulePrefix prefix, string body)
+			{
+				return prefix switch
+				{
+					RulePrefix.Exclude => "- " + body,
+					RulePrefix.And     => "& " + body,
+					RulePrefix.Or      => "| " + body,
+					_                  => body
+				};
+			}
+
+			static string FormatConditionGroup(bool isNegative, List<ConditionGroupLine> lines)
+			{
+				var sb = new StringBuilder();
+
+				if (isNegative)
+					sb.Append("- ");
+
+				for (var i = 0; i < lines.Count; i++)
+				{
+					if (i > 0)
+						sb.Append("; ");
+
+					if (i > 0 && lines[i].ForceAnd)
+						sb.Append("& ");
+
+					sb.Append(lines[i].Text);
+				}
+
+				return sb.ToString();
+			}
 		}
 
 		static RegexCacheEntry GetRegex(string pattern)
@@ -275,20 +308,30 @@ namespace AspectGenerator
 
 			public bool IsMatch(in MethodTarget target)
 			{
+				return Evaluate(target).IsMatch;
+			}
+
+			public TargetFilterEvaluation Evaluate(in MethodTarget target, Action<TargetFilterTrace>? trace = null)
+			{
 				var included = false;
+				var matchedRule = default(string);
 
 				foreach (var filter in _filters)
 				{
 					if (included == !filter.IsNegative)
 						continue;
 
-					if (!filter.IsMatch(target))
+					var isMatch = filter.IsMatch(target);
+					trace?.Invoke(new TargetFilterTrace(isMatch ? AspectSourceGenerator.DiagnosticID.ReportFilterMatched : AspectSourceGenerator.DiagnosticID.ReportFilterNotMatched, filter.RuleText));
+
+					if (!isMatch)
 						continue;
 
 					included = !filter.IsNegative;
+					matchedRule = filter.RuleText;
 				}
 
-				return included;
+				return new TargetFilterEvaluation(included, matchedRule is not null && !included, matchedRule);
 			}
 
 			public TargetFilterSet ReportDiagnostics(Action<TargetFilterDiagnostic>? reportDiagnostic)
@@ -319,6 +362,32 @@ namespace AspectGenerator
 			public List<string>          FullMethodSegments { get; init; }
 			public List<ParameterTarget> Parameters         { get; init; }
 
+		}
+
+		public readonly struct TargetFilterEvaluation
+		{
+			public TargetFilterEvaluation(bool isMatch, bool isExcluded, string? matchedRule)
+			{
+				IsMatch     = isMatch;
+				IsExcluded  = isExcluded;
+				MatchedRule = matchedRule;
+			}
+
+			public bool    IsMatch     { get; }
+			public bool    IsExcluded  { get; }
+			public string? MatchedRule { get; }
+		}
+
+		public readonly struct TargetFilterTrace
+		{
+			public TargetFilterTrace(string diagnosticId, string rule)
+			{
+				DiagnosticId = diagnosticId;
+				Rule         = rule;
+			}
+
+			public string DiagnosticId { get; }
+			public string Rule         { get; }
 		}
 
 		public readonly struct ParameterTarget
@@ -472,14 +541,15 @@ namespace AspectGenerator
 			Params
 		}
 
-		abstract class CompiledFilter(bool isNegative)
+		abstract class CompiledFilter(bool isNegative, string ruleText)
 		{
 			public bool IsNegative { get; } = isNegative;
+			public string RuleText { get; } = ruleText;
 
 			public abstract bool IsMatch(in MethodTarget target);
 		}
 
-		sealed class PatternFilter(bool isNegative, CompiledPatternMatcher matcher) : CompiledFilter(isNegative)
+		sealed class PatternFilter(bool isNegative, string ruleText, CompiledPatternMatcher matcher) : CompiledFilter(isNegative, ruleText)
 		{
 			public override bool IsMatch(in MethodTarget target)
 			{
@@ -487,7 +557,7 @@ namespace AspectGenerator
 			}
 		}
 
-		sealed class ContainsFilter(bool isNegative, string pattern) : CompiledFilter(isNegative)
+		sealed class ContainsFilter(bool isNegative, string ruleText, string pattern) : CompiledFilter(isNegative, ruleText)
 		{
 			public override bool IsMatch(in MethodTarget target)
 			{
@@ -499,8 +569,8 @@ namespace AspectGenerator
 		{
 			readonly Regex _regex;
 
-			public RegexFilter(bool isNegative, string pattern, Regex regex)
-				: base(isNegative)
+			public RegexFilter(bool isNegative, string ruleText, Regex regex)
+				: base(isNegative, ruleText)
 			{
 				_regex = regex;
 			}

@@ -10,6 +10,10 @@ AspectGenerator itself targets `netstandard2.0`, but consuming projects must be 
   <AspectGeneratorGenerateInterceptors>true</AspectGeneratorGenerateInterceptors>
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
+  <AspectGeneratorSummarySeverity>Info</AspectGeneratorSummarySeverity>
+  <AspectGeneratorInterceptorsSeverity>Hidden</AspectGeneratorInterceptorsSeverity>
+  <AspectGeneratorTargetsSeverity>Hidden</AspectGeneratorTargetsSeverity>
+  <AspectGeneratorFiltersSeverity>Off</AspectGeneratorFiltersSeverity>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
   <InterceptorsNamespaces>$(InterceptorsNamespaces);AspectGenerator</InterceptorsNamespaces>
 </PropertyGroup>
@@ -24,12 +28,18 @@ using AspectGenerator;
     GenerateApi = true,
     PublicApi = false,
     DebuggerStepThrough = false,
+    SummarySeverity = AspectReportSeverity.Info,
+    InterceptorsSeverity = AspectReportSeverity.Hidden,
+    TargetsSeverity = AspectReportSeverity.Hidden,
+    FiltersSeverity = AspectReportSeverity.Off,
     InterceptorsNamespace = "AspectGenerator")]
 ```
 
 Assembly attribute values override MSBuild properties.
 
 `AspectGeneratorGenerateInterceptors` controls `Interceptors.g.cs` emission. It defaults to `false` for design-time builds and `true` otherwise. Diagnostics still run when interceptor source emission is disabled.
+
+Compile-time reporting diagnostics are controlled per category. Supported severities are `Off`, `Hidden`, `Info`, and `Warning`. The defaults are `SummarySeverity=Info`, `InterceptorsSeverity=Hidden`, `TargetsSeverity=Hidden`, and `FiltersSeverity=Off`.
 
 ## Obsolete Preview Names
 

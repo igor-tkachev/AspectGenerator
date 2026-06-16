@@ -220,6 +220,30 @@ In AOP terminology, `TargetFilter` plays the role of a pointcut-like method sele
 
 Target filters are only supported on applied aspect attributes at assembly or type level. `[Aspect(TargetFilter = ...)]` is intentionally unsupported to keep aspect definition settings separate from aspect application.
 
+## Conditional Aspect Attributes
+
+Aspect attribute classes can be decorated with `System.Diagnostics.ConditionalAttribute`. When an aspect attribute class has `[Conditional("SYMBOL")]`, applying that aspect is ignored unless `SYMBOL` is defined for the consuming syntax tree/project.
+
+Multiple `[Conditional]` attributes are treated as `OR`:
+
+```csharp
+using System.Diagnostics;
+using AspectGenerator;
+
+[Conditional("DEBUG")]
+[Conditional("TRACE")]
+[Aspect(OnAfterCall = nameof(OnAfterCall))]
+[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
+sealed class LogAttribute : Attribute
+{
+    public string? TargetFilter { get; set; }
+
+    public static void OnAfterCall(InterceptInfo info) {}
+}
+```
+
+The conditional check applies consistently to direct method aspect usage, type-level `TargetFilter`, and assembly-level `TargetFilter`.
+
 ## Canonical Signature Format
 
 ```text

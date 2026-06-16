@@ -7,6 +7,21 @@ using System;
 namespace AspectGenerator
 {
 	/// <summary>
+	/// Controls AspectGenerator compile-time reporting diagnostic severity.
+	/// </summary>
+	public enum AspectReportSeverity
+	{
+		/// <summary>No reporting diagnostics are emitted for the configured category.</summary>
+		Off = 0,
+		/// <summary>Reporting diagnostics are emitted with hidden severity.</summary>
+		Hidden = 1,
+		/// <summary>Reporting diagnostics are emitted with informational severity.</summary>
+		Info = 2,
+		/// <summary>Reporting diagnostics are emitted with warning severity.</summary>
+		Warning = 3
+	}
+
+	/// <summary>
 	/// Configures AspectGenerator for the current assembly.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
@@ -37,6 +52,22 @@ namespace AspectGenerator
 		/// Gets or sets whether generated interceptor methods are marked with <see cref="System.Diagnostics.DebuggerStepThroughAttribute"/>.
 		/// </summary>
 		public bool    DebuggerStepThrough           { get; set; }
+		/// <summary>
+		/// Gets or sets summary reporting diagnostic severity.
+		/// </summary>
+		public AspectReportSeverity SummarySeverity      { get; set; } = AspectReportSeverity.Info;
+		/// <summary>
+		/// Gets or sets interceptor call-site reporting diagnostic severity.
+		/// </summary>
+		public AspectReportSeverity InterceptorsSeverity { get; set; } = AspectReportSeverity.Hidden;
+		/// <summary>
+		/// Gets or sets target method reporting diagnostic severity.
+		/// </summary>
+		public AspectReportSeverity TargetsSeverity      { get; set; } = AspectReportSeverity.Hidden;
+		/// <summary>
+		/// Gets or sets detailed target-filter reporting diagnostic severity.
+		/// </summary>
+		public AspectReportSeverity FiltersSeverity      { get; set; } = AspectReportSeverity.Off;
 		/// <summary>
 		/// Gets or sets the namespace used for generated interceptor types.
 		/// </summary>

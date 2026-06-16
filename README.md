@@ -78,6 +78,10 @@ AspectGenerator can be configured with MSBuild properties:
   <AspectGeneratorGenerateInterceptors>true</AspectGeneratorGenerateInterceptors>
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
+  <AspectGeneratorSummarySeverity>Info</AspectGeneratorSummarySeverity>
+  <AspectGeneratorInterceptorsSeverity>Hidden</AspectGeneratorInterceptorsSeverity>
+  <AspectGeneratorTargetsSeverity>Hidden</AspectGeneratorTargetsSeverity>
+  <AspectGeneratorFiltersSeverity>Off</AspectGeneratorFiltersSeverity>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
 </PropertyGroup>
 ```
@@ -91,12 +95,18 @@ using AspectGenerator;
     GenerateApi = true,
     PublicApi = false,
     DebuggerStepThrough = false,
+    SummarySeverity = AspectReportSeverity.Info,
+    InterceptorsSeverity = AspectReportSeverity.Hidden,
+    TargetsSeverity = AspectReportSeverity.Hidden,
+    FiltersSeverity = AspectReportSeverity.Off,
     InterceptorsNamespace = "AspectGenerator")]
 ```
 
 `AspectGeneratorInterceptorsNamespace` must also be listed in `InterceptorsNamespaces`, otherwise the compiler will not enable generated interceptors from that namespace.
 
 `AspectGeneratorGenerateInterceptors` defaults to `false` for design-time builds and `true` otherwise. Diagnostics still run when interceptor source emission is disabled.
+
+Compile-time reporting diagnostics are controlled per category. Supported severities are `Off`, `Hidden`, `Info`, and `Warning`. The defaults are `SummarySeverity=Info`, `InterceptorsSeverity=Hidden`, `TargetsSeverity=Hidden`, and `FiltersSeverity=Off`.
 
 ## Generated API Ownership
 
@@ -196,6 +206,44 @@ The canonical signature format is:
 ```
 
 Types are fully qualified without C# aliases, nullable annotations and parameter names are omitted, extension method receivers are formatted with `this`, and generic calls use constructed type arguments.
+
+## Conditional Aspects
+
+Aspect attribute classes can be decorated with `System.Diagnostics.ConditionalAttribute`. When an aspect attribute class has `[Conditional("SYMBOL")]`, applying that aspect is ignored unless `SYMBOL` is defined for the consuming syntax tree/project.
+
+Multiple `[Conditional]` attributes are treated as `OR`:
+
+```csharp
+using System.Diagnostics;
+using AspectGenerator;
+
+[Conditional("DEBUG")]
+[Conditional("TRACE")]
+[Aspect(OnAfterCall = nameof(OnAfterCall))]
+sealed class LogAttribute : Attribute
+{
+    public static void OnAfterCall(InterceptInfo info) {}
+}
+```
+
+This applies consistently to direct method aspect usage, type-level `TargetFilter`, and assembly-level `TargetFilter`.
+
+## Compile-Time Reporting
+
+AspectGenerator can emit compile-time reporting diagnostics that explain matching and generation decisions. This is diagnostic output from the source generator, not runtime tracing or logging code.
+
+Reporting diagnostic categories:
+
+| Category | Range | Default | Meaning |
+| --- | --- | --- | --- |
+| Summary | `AG0700` | `Info` | Compact generator summary. |
+| Interceptors | `AG0710`-`AG0719` | `Hidden` | Generated or skipped interceptor call sites. |
+| Targets | `AG0720`-`AG0729` | `Hidden` | Selected, excluded, or skipped target methods. |
+| Filters | `AG0730`-`AG0739` | `Off` | Detailed TargetFilter rule/group/final decisions. |
+
+Each category accepts `AspectReportSeverity.Off`, `Hidden`, `Info`, or `Warning`. Reporting diagnostics never use `Error` by design and do not affect generated code.
+
+These diagnostics use normal compiler diagnostic configuration, so they can also be suppressed or filtered through standard build tooling.
 
 ## Documentation And Wiki
 
