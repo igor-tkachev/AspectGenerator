@@ -53,6 +53,7 @@ namespace AspectGenerator
 			var conditionGroup       = default(List<ConditionGroupLine>);
 			var conditionGroupAction = false;
 			var previousGroupAction  = default(bool?);
+			var previousWasConditionGroup = false;
 
 			foreach (var rule in rules)
 			{
@@ -69,6 +70,7 @@ namespace AspectGenerator
 				{
 					FlushConditionGroup();
 					result.Add(new ContainsFilter(prefix == RulePrefix.Exclude, FormatRule(prefix, body), body));
+					previousWasConditionGroup = false;
 					continue;
 				}
 
@@ -83,6 +85,7 @@ namespace AspectGenerator
 					else
 						result.Add(new RegexFilter(prefix == RulePrefix.Exclude, FormatRule(prefix, body), regex.Regex));
 
+					previousWasConditionGroup = false;
 					continue;
 				}
 
@@ -90,6 +93,15 @@ namespace AspectGenerator
 				{
 					FlushConditionGroup();
 					AddPattern(prefix == RulePrefix.Exclude, body);
+					previousWasConditionGroup = false;
+					continue;
+				}
+
+				if (CompiledPatternMatcher.TryGetUnknownSimpleConditionKey(body, out var unknownKey))
+				{
+					FlushConditionGroup();
+					diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(unknownKey));
+					previousWasConditionGroup = false;
 					continue;
 				}
 
@@ -105,6 +117,7 @@ namespace AspectGenerator
 				{
 					FlushConditionGroup();
 					AddPattern(prefix == RulePrefix.Exclude, body);
+					previousWasConditionGroup = false;
 					continue;
 				}
 
@@ -122,9 +135,9 @@ namespace AspectGenerator
 
 				if (prefix == RulePrefix.Or)
 				{
-					if (previousGroupAction is null && conditionGroup is null)
+					if (conditionGroup is null && !previousWasConditionGroup)
 					{
-						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(rule, "Leading '|' requires a previous condition group."));
+						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(rule, "Leading '|' requires a previous native condition group."));
 						continue;
 					}
 
@@ -150,6 +163,7 @@ namespace AspectGenerator
 				}
 
 				conditionGroup.Add(new ConditionGroupLine(body, forceAnd: false));
+				previousWasConditionGroup = false;
 			}
 
 			FlushConditionGroup();
@@ -169,6 +183,8 @@ namespace AspectGenerator
 				if (CompiledPatternMatcher.TryCompileConditionGroup(conditionGroup, diagnostics, out var pattern))
 					result.Add(new PatternFilter(conditionGroupAction, FormatConditionGroup(conditionGroupAction, conditionGroup), pattern));
 
+				previousWasConditionGroup = true;
+				previousGroupAction       = conditionGroupAction;
 				conditionGroup = null;
 			}
 
@@ -318,9 +334,6 @@ namespace AspectGenerator
 
 				foreach (var filter in _filters)
 				{
-					if (included == !filter.IsNegative)
-						continue;
-
 					var isMatch = filter.IsMatch(target);
 					trace?.Invoke(new TargetFilterTrace(isMatch ? AspectSourceGenerator.DiagnosticID.ReportFilterMatched : AspectSourceGenerator.DiagnosticID.ReportFilterNotMatched, filter.RuleText));
 

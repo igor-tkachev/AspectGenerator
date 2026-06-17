@@ -29,7 +29,7 @@ Not completed:
 - typed argument passing;
 - public API contract stabilization;
 - lazy `MemberInfo` initialization;
-- optional per-aspect compile-time reporting severity overrides;
+- optional per-aspect compile-time report verbosity overrides;
 
 ## Capability Roadmap
 

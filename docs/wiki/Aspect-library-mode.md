@@ -26,4 +26,4 @@ In consuming projects:
 <AspectGeneratorGenerateApi>false</AspectGeneratorGenerateApi>
 ```
 
-All projects that need generated interceptors must set a generated interceptor namespace and include it in `InterceptorsNamespaces`.
+Every project whose call sites should be intercepted must reference AspectGenerator directly. The package appends the generated interceptor namespace to `InterceptorsNamespaces` automatically for direct package consumers.

@@ -192,6 +192,23 @@ namespace AspectGenerator
 				return _conditionKeys.Contains(key);
 			}
 
+			public static bool TryGetUnknownSimpleConditionKey(string text, out string key)
+			{
+				key = "";
+
+				if (!TryReadMatcherPrefix(text, out var candidate, out _))
+					return false;
+
+				if (string.Equals(candidate, "pattern", StringComparison.OrdinalIgnoreCase) ||
+					string.Equals(candidate, "contains", StringComparison.OrdinalIgnoreCase) ||
+					string.Equals(candidate, "regex", StringComparison.OrdinalIgnoreCase) ||
+					IsKnownConditionKey(candidate))
+					return false;
+
+				key = candidate;
+				return true;
+			}
+
 			public static bool TryCompile(string text, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher compiledPattern)
 			{
 				if (IsConditionRule(text))

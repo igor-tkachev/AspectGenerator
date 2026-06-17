@@ -29,7 +29,7 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 
 Compile-time reporting diagnostics are source-generator diagnostics. They explain matching and generation decisions and do not add runtime tracing or logging code.
 
-Reporting is configured per category with `AspectGeneratorSummarySeverity`, `AspectGeneratorInterceptorsSeverity`, `AspectGeneratorTargetsSeverity`, and `AspectGeneratorFiltersSeverity`, or with the matching `[assembly: AspectGeneratorOptions(...)]` properties. Supported severities are `Off`, `Hidden`, `Info`, and `Warning`.
+Reporting is configured with MSBuild-only `AspectGeneratorVerbosity` for the current reporting level and matching `[assembly: AspectGeneratorOptions(...)]` properties for per-category thresholds. Supported values are `Off`, `Quiet`, `Minimal`, `Normal`, `Detailed`, and `Diagnostic`. Defaults are `AspectGeneratorVerbosity=Quiet`, `SummaryVerbosity=Quiet`, `InterceptorsVerbosity=Minimal`, `TargetsVerbosity=Normal`, and `FiltersVerbosity=Diagnostic`. All `AG0700`-`AG0799` report diagnostics are emitted as `Info`.
 
 - `AG0700`: summary report.
 - `AG0710`: interceptor was generated for a selected call.

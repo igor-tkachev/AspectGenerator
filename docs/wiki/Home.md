@@ -20,8 +20,7 @@ AspectGenerator is a source generator for compile-time call-site rewriting with 
 ```xml
 <PropertyGroup>
   <TargetFramework>net10.0</TargetFramework>
-  <InterceptorsNamespaces>$(InterceptorsNamespaces);AspectGenerator</InterceptorsNamespaces>
 </PropertyGroup>
 ```
 
-The generated interceptor namespace must be listed in `InterceptorsNamespaces`.
+The AspectGenerator NuGet package imports the required MSBuild wiring automatically for projects that reference the package directly. Every project whose call sites should be intercepted must reference AspectGenerator directly.

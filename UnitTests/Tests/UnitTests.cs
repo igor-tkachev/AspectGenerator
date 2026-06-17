@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -53,6 +54,48 @@ namespace AspectGenerator.Tests
 						text.Replace("\r\n", "\n").Replace('\r', '\n'),
 						@"InterceptsLocationAttribute\(1, ""[^""]+""\)",
 						@"InterceptsLocationAttribute(1, ""<location>"")");
+			}
+		}
+
+		[TestMethod]
+		public void NuGetPackageContainsMsBuildAssetsTest()
+		{
+			var baseDirectory  = AppContext.BaseDirectory;
+			var repositoryRoot = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", ".."));
+			var packageDir     = Path.Combine(repositoryRoot, "Source", "bin", "Debug");
+			var packageFiles   = Directory.GetFiles(packageDir, "AspectGenerator.*.nupkg");
+
+			Assert.AreEqual(1, packageFiles.Length, $"Expected exactly one AspectGenerator package in {packageDir}. Build Source/AspectGenerator.csproj before running package validation tests.");
+
+			using var archive = ZipFile.OpenRead(packageFiles[0]);
+			var entries = new List<string>();
+
+			foreach (var entry in archive.Entries)
+				entries.Add(entry.FullName);
+
+			CollectionAssert.Contains(entries, "build/AspectGenerator.props");
+			CollectionAssert.Contains(entries, "build/AspectGenerator.targets");
+			CollectionAssert.Contains(entries, "analyzers/dotnet/cs/AspectGenerator.dll");
+			CollectionAssert.DoesNotContain(entries, "buildTransitive/AspectGenerator.props");
+			CollectionAssert.DoesNotContain(entries, "buildTransitive/AspectGenerator.targets");
+
+			var props   = ReadEntryText(archive, "build/AspectGenerator.props");
+			var targets = ReadEntryText(archive, "build/AspectGenerator.targets");
+
+			StringAssert.Contains(props, "<AspectGeneratorInterceptorsNamespace Condition=\"'$(AspectGeneratorInterceptorsNamespace)' == ''\">AspectGenerator</AspectGeneratorInterceptorsNamespace>");
+			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorVerbosity\" />");
+			StringAssert.Contains(targets, "<InterceptorsNamespaces>$(InterceptorsNamespaces);$(AspectGeneratorInterceptorsNamespace)</InterceptorsNamespaces>");
+
+			static string ReadEntryText(ZipArchive archive, string name)
+			{
+				var entry = archive.GetEntry(name);
+
+				Assert.IsNotNull(entry, $"Package entry does not exist: {name}");
+
+				using var stream = entry.Open();
+				using var reader = new StreamReader(stream);
+
+				return reader.ReadToEnd();
 			}
 		}
 

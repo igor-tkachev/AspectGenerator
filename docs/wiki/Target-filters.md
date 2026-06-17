@@ -15,7 +15,7 @@ Each rule can use a matcher prefix. Unprefixed rules and `pattern:` use the nati
 - unprefixed native condition lines are grouped into condition groups;
 - a line starting with `-` starts an exclude rule/group;
 - a line starting with `&` continues the current native condition group with explicit `AND`;
-- a line starting with `|` starts an alternative native condition group with the same include/exclude action as the previous group;
+- a line starting with `|` starts an alternative native condition group with the same include/exclude action as the immediately previous native condition group;
 - a line starting with `#` is a comment;
 - the last effective matching entry wins inside one filter set;
 - no matching entry means the filter set does not apply;
@@ -38,6 +38,19 @@ No matcher prefix is equivalent to `pattern:` for compact method patterns. For c
 `Regex` matching uses `RegexOptions.CultureInvariant`, is case-sensitive by default, and uses a timeout to protect IDE and design-time builds.
 
 Invalid regex patterns report `AG0201`. Invalid native pattern rules report `AG0202`, `AG0204`, `AG0205`, or `AG0206` depending on the error.
+
+A simple unknown condition key reports `AG0204` and is not interpreted as a compact method pattern:
+
+```text
+foo: bar
+```
+
+Compact method patterns with return type remain valid when the text before `:` is not a simple condition key:
+
+```text
+public Save* : System.Void
+MyApp.Service.Save* : System.String
+```
 
 ## Native Pattern Syntax
 
@@ -111,6 +124,27 @@ method: Save*
 & method: *Async
 ```
 
+When same-key `AND` and implicit same-key `OR` are mixed, the implicit `OR` joins the latest same-key bucket:
+
+```text
+method: Save*
+& method: *Async
+method: Update*
+```
+
+This means:
+
+```text
+method matches Save*
+AND method matches (*Async OR Update*)
+```
+
+For complex same-key logic, prefer inline expressions:
+
+```text
+method: Save* & *Async | Update* & *Async
+```
+
 Within one condition value, `|` means `OR`, and `&` means `AND`. `&` has higher precedence than `|`:
 
 ```text
@@ -130,6 +164,26 @@ namespace: MyApp.Services
 | namespace: MyApp.Jobs
 & type: *Job
 & method: Run*
+```
+
+Leading `|` is valid only immediately after a native condition group. It is not a continuation mechanism for standalone `regex:`, `contains:`, `pattern:`, or compact method-pattern rules. These examples are invalid and report `AG0202`:
+
+```text
+namespace: MyApp.Services
+regex:^public .*$
+| method: Save*
+```
+
+```text
+namespace: MyApp.Services
+contains: Save
+| method: Update*
+```
+
+```text
+namespace: MyApp.Services
+pattern: MyApp.**.Save*
+| method: Update*
 ```
 
 Leading `-` starts an exclude group. A following leading `|` keeps the exclude action:
@@ -220,6 +274,29 @@ In AOP terminology, `TargetFilter` plays the role of a pointcut-like method sele
 
 Target filters are only supported on applied aspect attributes at assembly or type level. `[Aspect(TargetFilter = ...)]` is intentionally unsupported to keep aspect definition settings separate from aspect application.
 
+## Precedence
+
+For the same aspect attribute type:
+
+- an explicit method-level aspect application wins and is not suppressed by assembly or type filters;
+- type-level `TargetFilter` decisions override assembly-level `TargetFilter` decisions;
+- later effective decisions win inside one filter set.
+
+This allows a broad assembly-level include with local type-level excludes:
+
+```csharp
+[assembly: Log(TargetFilter = "namespace: MyApp.Services")]
+
+[Log(TargetFilter = "- method: HealthCheck")]
+class Service
+{
+    void Save() {}
+    void HealthCheck() {}
+}
+```
+
+`Save` is intercepted, while `HealthCheck` is not intercepted unless it has an explicit method-level `[Log]`.
+
 ## Conditional Aspect Attributes
 
 Aspect attribute classes can be decorated with `System.Diagnostics.ConditionalAttribute`. When an aspect attribute class has `[Conditional("SYMBOL")]`, applying that aspect is ignored unless `SYMBOL` is defined for the consuming syntax tree/project.
@@ -243,6 +320,8 @@ sealed class LogAttribute : Attribute
 ```
 
 The conditional check applies consistently to direct method aspect usage, type-level `TargetFilter`, and assembly-level `TargetFilter`.
+
+Conditional aspect attributes are evaluated against project/tree preprocessor symbols. Project-level `DEBUG`, `TRACE`, and MSBuild-defined symbols are supported. Local source-file `#define` / `#undef` directive state is not guaranteed to be evaluated with full location sensitivity.
 
 ## Canonical Signature Format
 

@@ -447,116 +447,135 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void ReportSeverityDefaultEmitsSummaryInfoTest()
+		public void BuildVerbosityDefaultEmitsOnlySummaryInfoTest()
 		{
 			var result = RunGenerator(TraceFilterSource);
 			var reports = GetReportDiagnostics(result);
 
+			Assert.AreEqual(1, reports.Length);
 			Assert.AreEqual(DiagnosticSeverity.Info, reports.Single(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary).Severity);
 		}
 
 		[TestMethod]
-		public void ReportSeverityDefaultEmitsInterceptorsAndTargetsAsHiddenTest()
-		{
-			var result = RunGenerator(TraceFilterSource);
-			var reports = GetReportDiagnostics(result);
-
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportInterceptorGenerated && d.Severity == DiagnosticSeverity.Hidden));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetSelected && d.Severity == DiagnosticSeverity.Hidden));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetExcluded && d.Severity == DiagnosticSeverity.Hidden));
-		}
-
-		[TestMethod]
-		public void ReportSeverityDefaultEmitsNoFilterDiagnosticsTest()
-		{
-			var result = RunGenerator(TraceFilterSource);
-
-			Assert.IsFalse(GetReportDiagnostics(result).Any(static d => d.Id.StartsWith("AG073", StringComparison.Ordinal)));
-		}
-
-		[TestMethod]
-		public void ReportSeverityOffEmitsNoReportDiagnosticsTest()
+		public void BuildVerbosityOffEmitsNoReportDiagnosticsTest()
 		{
 			var result = RunGenerator(
 				TraceFilterSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.SummarySeverity}"]      = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.InterceptorsSeverity}"] = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.TargetsSeverity}"]      = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.FiltersSeverity}"]      = "Off",
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Off",
 				});
 
 			Assert.AreEqual(0, result.Diagnostics.Count(IsReportDiagnostic));
 		}
 
 		[TestMethod]
-		public void InterceptorsSeverityInfoEmitsInterceptorReportsAsInfoTest()
+		public void BuildVerbosityMinimalEmitsSummaryAndInterceptorReportsTest()
 		{
 			var result = RunGenerator(
 				TraceFilterSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.SummarySeverity}"]      = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.InterceptorsSeverity}"] = "Info",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.TargetsSeverity}"]      = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.FiltersSeverity}"]      = "Off",
-				});
-
-			Assert.IsTrue(GetReportDiagnostics(result).Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportInterceptorGenerated && d.Severity == DiagnosticSeverity.Info));
-		}
-
-		[TestMethod]
-		public void TargetsSeverityInfoEmitsTargetReportsAsInfoTest()
-		{
-			var result = RunGenerator(
-				TraceFilterSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.SummarySeverity}"]      = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.InterceptorsSeverity}"] = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.TargetsSeverity}"]      = "Info",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.FiltersSeverity}"]      = "Off",
-				});
-
-			Assert.IsTrue(GetReportDiagnostics(result).Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetSelected && d.Severity == DiagnosticSeverity.Info));
-			Assert.IsTrue(GetReportDiagnostics(result).Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetExcluded && d.Severity == DiagnosticSeverity.Info));
-		}
-
-		[TestMethod]
-		public void FiltersSeverityInfoEmitsFilterReportsAsInfoTest()
-		{
-			var result = RunGenerator(
-				TraceFilterSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.SummarySeverity}"]      = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.InterceptorsSeverity}"] = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.TargetsSeverity}"]      = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.FiltersSeverity}"]      = "Info",
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Minimal",
 				});
 			var reports = GetReportDiagnostics(result);
 
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterMatched && d.Severity == DiagnosticSeverity.Info));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterNotMatched && d.Severity == DiagnosticSeverity.Info));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterFinalDecision && d.Severity == DiagnosticSeverity.Info));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterFinalDecision && d.GetMessage().Contains("matched rule", StringComparison.Ordinal)));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportInterceptorGenerated));
+			Assert.IsFalse(reports.Any(static d => d.Id.StartsWith("AG072", StringComparison.Ordinal)));
+			Assert.IsFalse(reports.Any(static d => d.Id.StartsWith("AG073", StringComparison.Ordinal)));
 		}
 
 		[TestMethod]
-		public void ReportSeverityWarningEmitsConfiguredCategoryAsWarningTest()
+		public void BuildVerbosityNormalEmitsTargetReportsTest()
 		{
 			var result = RunGenerator(
 				TraceFilterSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.SummarySeverity}"]      = "Warning",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.InterceptorsSeverity}"] = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.TargetsSeverity}"]      = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.FiltersSeverity}"]      = "Off",
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Normal",
 				});
+			var reports = GetReportDiagnostics(result);
 
-			Assert.AreEqual(DiagnosticSeverity.Warning, GetReportDiagnostics(result).Single(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary).Severity);
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportInterceptorGenerated));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetSelected));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetExcluded));
+			Assert.IsFalse(reports.Any(static d => d.Id.StartsWith("AG073", StringComparison.Ordinal)));
+		}
+
+		[TestMethod]
+		public void BuildVerbosityDetailedDoesNotEmitFiltersWithDefaultThresholdTest()
+		{
+			var result = RunGenerator(
+				TraceFilterSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Detailed",
+				});
+			var reports = GetReportDiagnostics(result);
+
+			Assert.IsFalse(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterMatched));
+			Assert.IsFalse(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterNotMatched));
+			Assert.IsFalse(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterFinalDecision));
+		}
+
+		[TestMethod]
+		public void BuildVerbosityDiagnosticEmitsAllDefaultCategoriesTest()
+		{
+			var result = RunGenerator(
+				TraceFilterSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Diagnostic",
+				});
+			var reports = GetReportDiagnostics(result);
+
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportInterceptorGenerated));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetSelected));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterMatched));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterNotMatched));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterFinalDecision));
+			Assert.IsTrue(reports.All(static d => d.Severity == DiagnosticSeverity.Info));
+		}
+
+		[TestMethod]
+		public void ReportCategoryThresholdCanMoveCategoryEarlierTest()
+		{
+			var source = TraceFilterSource.Replace(
+				"using AspectGenerator;",
+				"using AspectGenerator;\n\n[assembly: AspectGeneratorOptions(TargetsVerbosity = AspectReportVerbosity.Minimal)]");
+
+			var result = RunGenerator(
+				source,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"]  = "Minimal",
+				});
+			var reports = GetReportDiagnostics(result);
+
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetSelected));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetExcluded));
+		}
+
+		[TestMethod]
+		public void ReportCategoryThresholdOffDisablesCategoryTest()
+		{
+			var source = TraceFilterSource.Replace(
+				"using AspectGenerator;",
+				"using AspectGenerator;\n\n[assembly: AspectGeneratorOptions(InterceptorsVerbosity = AspectReportVerbosity.Off)]");
+
+			var result = RunGenerator(
+				source,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Diagnostic",
+				});
+			var reports = GetReportDiagnostics(result);
+
+			Assert.IsFalse(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportInterceptorGenerated));
+			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetSelected));
 		}
 
 		[TestMethod]
@@ -566,10 +585,7 @@ namespace AspectGenerator.Tests
 				TraceDirectSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.SummarySeverity}"]      = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.InterceptorsSeverity}"] = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.TargetsSeverity}"]      = "Off",
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.FiltersSeverity}"]      = "Off",
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Off",
 				});
 			var verboseResult = RunGenerator(TraceDirectSource);
 			var source = GetGeneratedSource(verboseResult, "Interceptors.g.cs");
@@ -577,6 +593,109 @@ namespace AspectGenerator.Tests
 			Assert.AreEqual(GetGeneratedSource(offResult, "Interceptors.g.cs"), source);
 			Assert.IsFalse(source.Contains("Trace.WriteLine", StringComparison.Ordinal));
 			Assert.IsFalse(source.Contains("System.Diagnostics.Trace", StringComparison.Ordinal));
+		}
+
+		[TestMethod]
+		public void ReportSummaryMentionsDisabledInterceptorGenerationTest()
+		{
+			var result = RunGenerator(
+				TraceDirectSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "false",
+				});
+
+			StringAssert.Contains(GetReportDiagnostics(result).Single(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary).GetMessage(), "interceptor generation is disabled");
+		}
+
+		[TestMethod]
+		public void ReportSummaryMentionsDesignTimeDisabledInterceptorGenerationTest()
+		{
+			var result = RunGenerator(
+				TraceDirectSource,
+				new()
+				{
+					["build_property.DesignTimeBuild"] = "true",
+				});
+
+			StringAssert.Contains(GetReportDiagnostics(result).Single(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary).GetMessage(), "interceptor generation is disabled");
+		}
+
+		[TestMethod]
+		public void UnknownSimpleTargetFilterConditionKeyReportsDiagnosticTest()
+		{
+			var result = RunGenerator(InvalidUnknownConditionKeyFilterSource);
+
+			AssertDiagnostic(result, AspectSourceGenerator.DiagnosticID.UnknownAspectFilterConditionKey);
+		}
+
+		[TestMethod]
+		public void LeadingOrAfterStandaloneFilterRuleReportsDiagnosticTest()
+		{
+			foreach (var rule in new[]
+			{
+				"regex:^public .*$",
+				"contains: Save",
+				"pattern: MyApp.**.Save*",
+				"Save*: System.String",
+			})
+			{
+				var result = RunGenerator(InvalidLeadingOrFilterSource.Replace("FILTER_RULE", rule));
+
+				AssertDiagnostic(result, AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule);
+				Assert.IsTrue(result.Diagnostics.Any(d =>
+					d.Id == AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule &&
+					d.GetMessage().Contains("Leading '|' requires a previous native condition group.", StringComparison.Ordinal)));
+			}
+		}
+
+		[TestMethod]
+		public void TypeLevelExcludeSuppressesAssemblyLevelIncludeForSameAspectTypeTest()
+		{
+			var result = RunGenerator(AssemblyIncludeTypeExcludeFilterSource);
+			var source = GetGeneratedSource(result, "Interceptors.g.cs");
+
+			StringAssert.Contains(source, "Save_Interceptor");
+			Assert.IsFalse(source.Contains("HealthCheck_Interceptor", StringComparison.Ordinal));
+		}
+
+		[TestMethod]
+		public void AssemblyIncludeAndTypeIncludeApplySameAspectTypeTest()
+		{
+			var result = RunGenerator(AssemblyIncludeTypeIncludeFilterSource);
+			var source = GetGeneratedSource(result, "Interceptors.g.cs");
+
+			StringAssert.Contains(source, "Save_Interceptor");
+			StringAssert.Contains(source, "Load_Interceptor");
+		}
+
+		[TestMethod]
+		public void DirectMethodAspectIsNotSuppressedByTypeLevelExcludeTest()
+		{
+			var result = RunGenerator(DirectMethodAspectWithTypeExcludeFilterSource);
+
+			StringAssert.Contains(GetGeneratedSource(result, "Interceptors.g.cs"), "HealthCheck_Interceptor");
+		}
+
+		[TestMethod]
+		public void TypeLevelExcludeDoesNotSuppressDifferentAspectTypeTest()
+		{
+			var result = RunGenerator(MultipleAspectTypesFilterPrecedenceSource);
+			var source = GetGeneratedSource(result, "Interceptors.g.cs");
+
+			StringAssert.Contains(source, "Save_Interceptor");
+			StringAssert.Contains(source, "HealthCheck_Interceptor");
+		}
+
+		[TestMethod]
+		public void SameKeyAndOrConditionGroupSemanticsTest()
+		{
+			var result = RunGenerator(SameKeyAndOrFilterSource);
+			var source = GetGeneratedSource(result, "Interceptors.g.cs");
+
+			StringAssert.Contains(source, "SaveAsync_Interceptor");
+			Assert.IsFalse(source.Contains("Save_Interceptor", StringComparison.Ordinal));
+			Assert.IsFalse(source.Contains("UpdateAsync_Interceptor", StringComparison.Ordinal));
 		}
 
 		static GeneratorDriverRunResult RunGenerator(string source, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null)
@@ -631,6 +750,11 @@ namespace AspectGenerator.Tests
 		static void AssertNoDiagnostic(GeneratorDriverRunResult result, string diagnosticId)
 		{
 			CollectionAssert.DoesNotContain(result.Diagnostics.Select(static d => d.Id).ToArray(), diagnosticId);
+		}
+
+		static void AssertDiagnostic(GeneratorDriverRunResult result, string diagnosticId)
+		{
+			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), diagnosticId);
 		}
 
 		static string GetGeneratedSource(GeneratorDriverRunResult result, string hintName)
@@ -2044,6 +2168,214 @@ namespace AspectGenerator.Tests
 				public static string Save() => "";
 				public static string HealthCheck() => "";
 				public static string Load() => "";
+			}
+			""";
+
+		const string InvalidUnknownConditionKeyFilterSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "foo: bar")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+			""";
+
+		const string InvalidLeadingOrFilterSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(
+				TargetFilter = @"
+				namespace: MyApp.Services
+				FILTER_RULE
+				| method: Save*
+				")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+			""";
+
+		const string AssemblyIncludeTypeExcludeFilterSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "namespace: AspectGenerator.Tests.GeneratorDriver")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			[Log(TargetFilter = "- method: HealthCheck")]
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Save();
+					HealthCheck();
+				}
+
+				public static string Save() => "";
+				public static string HealthCheck() => "";
+			}
+			""";
+
+		const string AssemblyIncludeTypeIncludeFilterSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "method: Save")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			[Log(TargetFilter = "method: Load")]
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Save();
+					Load();
+				}
+
+				public static string Save() => "";
+				public static string Load() => "";
+			}
+			""";
+
+		const string DirectMethodAspectWithTypeExcludeFilterSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			[Log(TargetFilter = "- method: HealthCheck")]
+			static class Service
+			{
+				public static void Invoke()
+				{
+					HealthCheck();
+				}
+
+				[Log]
+				public static string HealthCheck() => "";
+			}
+			""";
+
+		const string MultipleAspectTypesFilterPrecedenceSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "method: *")]
+			[assembly: AspectGenerator.Tests.GeneratorDriver.Audit(TargetFilter = "method: HealthCheck")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = true)]
+			sealed class AuditAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " audited";
+			}
+
+			[Log(TargetFilter = "- method: HealthCheck")]
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Save();
+					HealthCheck();
+				}
+
+				public static string Save() => "";
+				public static string HealthCheck() => "";
+			}
+			""";
+
+		const string SameKeyAndOrFilterSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(
+				TargetFilter = @"
+				method: Save*
+				& method: *Async
+				method: Update*
+				")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Save();
+					SaveAsync();
+					UpdateAsync();
+				}
+
+				public static string Save() => "";
+				public static string SaveAsync() => "";
+				public static string UpdateAsync() => "";
 			}
 			""";
 

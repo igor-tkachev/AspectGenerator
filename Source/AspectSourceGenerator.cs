@@ -56,19 +56,22 @@ namespace AspectGenerator
 			public const string GenerateInterceptors  = "GenerateInterceptors";
 			public const string PublicApi             = "PublicApi";
 			public const string DebuggerStepThrough   = "DebuggerStepThrough";
-			public const string SummarySeverity       = "SummarySeverity";
-			public const string InterceptorsSeverity  = "InterceptorsSeverity";
-			public const string TargetsSeverity       = "TargetsSeverity";
-			public const string FiltersSeverity       = "FiltersSeverity";
+			public const string Verbosity             = "Verbosity";
+			public const string SummaryVerbosity      = "SummaryVerbosity";
+			public const string InterceptorsVerbosity = "InterceptorsVerbosity";
+			public const string TargetsVerbosity      = "TargetsVerbosity";
+			public const string FiltersVerbosity      = "FiltersVerbosity";
 			public const string InterceptorsNamespace = "InterceptorsNamespace";
 		}
 
-		enum AspectReportSeverity
+		enum AspectReportVerbosity
 		{
 			Off = 0,
-			Hidden = 1,
-			Info = 2,
-			Warning = 3
+			Quiet = 1,
+			Minimal = 2,
+			Normal = 3,
+			Detailed = 4,
+			Diagnostic = 5
 		}
 
 		#region API
@@ -86,18 +89,22 @@ namespace AspectGenerator
 			namespace AspectGenerator
 			{
 				/// <summary>
-				/// Controls AspectGenerator compile-time reporting diagnostic severity.
+				/// Controls AspectGenerator compile-time report verbosity.
 				/// </summary>
-				public enum AspectReportSeverity
+				public enum AspectReportVerbosity
 				{
-					/// <summary>No reporting diagnostics are emitted for the configured category.</summary>
+					/// <summary>No compile-time report diagnostics are emitted.</summary>
 					Off = 0,
-					/// <summary>Reporting diagnostics are emitted with hidden severity.</summary>
-					Hidden = 1,
-					/// <summary>Reporting diagnostics are emitted with informational severity.</summary>
-					Info = 2,
-					/// <summary>Reporting diagnostics are emitted with warning severity.</summary>
-					Warning = 3
+					/// <summary>Only the compact summary report is emitted.</summary>
+					Quiet = 1,
+					/// <summary>Summary and interceptor call-site reports are emitted.</summary>
+					Minimal = 2,
+					/// <summary>Minimal reports plus target method selection reports are emitted.</summary>
+					Normal = 3,
+					/// <summary>Normal reports plus TargetFilter final decision reports are emitted.</summary>
+					Detailed = 4,
+					/// <summary>Detailed reports plus TargetFilter rule/group match reports are emitted.</summary>
+					Diagnostic = 5
 				}
 
 				/// <summary>
@@ -132,21 +139,21 @@ namespace AspectGenerator
 					/// </summary>
 					public bool    {{OptionID.DebuggerStepThrough}}           { get; set; }
 					/// <summary>
-					/// Gets or sets summary reporting diagnostic severity.
+					/// Gets or sets the minimal report verbosity required to emit summary report diagnostics.
 					/// </summary>
-					public AspectReportSeverity {{OptionID.SummarySeverity}}      { get; set; } = AspectReportSeverity.Info;
+					public AspectReportVerbosity {{OptionID.SummaryVerbosity}}      { get; set; } = AspectReportVerbosity.Quiet;
 					/// <summary>
-					/// Gets or sets interceptor call-site reporting diagnostic severity.
+					/// Gets or sets the minimal report verbosity required to emit interceptor call-site report diagnostics.
 					/// </summary>
-					public AspectReportSeverity {{OptionID.InterceptorsSeverity}} { get; set; } = AspectReportSeverity.Hidden;
+					public AspectReportVerbosity {{OptionID.InterceptorsVerbosity}} { get; set; } = AspectReportVerbosity.Minimal;
 					/// <summary>
-					/// Gets or sets target method reporting diagnostic severity.
+					/// Gets or sets the minimal report verbosity required to emit target method report diagnostics.
 					/// </summary>
-					public AspectReportSeverity {{OptionID.TargetsSeverity}}      { get; set; } = AspectReportSeverity.Hidden;
+					public AspectReportVerbosity {{OptionID.TargetsVerbosity}}      { get; set; } = AspectReportVerbosity.Normal;
 					/// <summary>
-					/// Gets or sets detailed target-filter reporting diagnostic severity.
+					/// Gets or sets the minimal report verbosity required to emit target-filter report diagnostics.
 					/// </summary>
-					public AspectReportSeverity {{OptionID.FiltersSeverity}}      { get; set; } = AspectReportSeverity.Off;
+					public AspectReportVerbosity {{OptionID.FiltersVerbosity}}      { get; set; } = AspectReportVerbosity.Diagnostic;
 					/// <summary>
 					/// Gets or sets the namespace used for generated interceptor types.
 					/// </summary>
@@ -435,10 +442,11 @@ namespace AspectGenerator
 			public bool?   DesignTimeBuild;
 			public bool?   PublicApi;
 			public bool?   DebuggerStepThrough;
-			public AspectReportSeverity? SummarySeverity;
-			public AspectReportSeverity? InterceptorsSeverity;
-			public AspectReportSeverity? TargetsSeverity;
-			public AspectReportSeverity? FiltersSeverity;
+			public AspectReportVerbosity? Verbosity;
+			public AspectReportVerbosity? SummaryVerbosity;
+			public AspectReportVerbosity? InterceptorsVerbosity;
+			public AspectReportVerbosity? TargetsVerbosity;
+			public AspectReportVerbosity? FiltersVerbosity;
 			public string? InterceptorsNamespace;
 			public string? InterceptorsNamespaces;
 		}
@@ -448,10 +456,11 @@ namespace AspectGenerator
 			bool    GenerateInterceptors,
 			bool    PublicApi,
 			bool    DebuggerStepThrough,
-			AspectReportSeverity SummarySeverity,
-			AspectReportSeverity InterceptorsSeverity,
-			AspectReportSeverity TargetsSeverity,
-			AspectReportSeverity FiltersSeverity,
+			AspectReportVerbosity Verbosity,
+			AspectReportVerbosity SummaryVerbosity,
+			AspectReportVerbosity InterceptorsVerbosity,
+			AspectReportVerbosity TargetsVerbosity,
+			AspectReportVerbosity FiltersVerbosity,
 			string? InterceptorsNamespace,
 			string? InterceptorsNamespaces);
 
@@ -525,10 +534,7 @@ namespace AspectGenerator
 					DesignTimeBuild        = GetBoolProperty(c.GlobalOptions,  "build_property.DesignTimeBuild"),
 					PublicApi              = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.PublicApi}"),
 					DebuggerStepThrough    = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.DebuggerStepThrough}"),
-					SummarySeverity        = GetReportSeverityProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.SummarySeverity}"),
-					InterceptorsSeverity   = GetReportSeverityProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.InterceptorsSeverity}"),
-					TargetsSeverity        = GetReportSeverityProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.TargetsSeverity}"),
-					FiltersSeverity        = GetReportSeverityProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.FiltersSeverity}"),
+					Verbosity              = GetVerbosityProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.Verbosity}"),
 					InterceptorsNamespace  = c.GlobalOptions.TryGetValue($"build_property.AspectGenerator{OptionID.InterceptorsNamespace}", out var ns) ? ns : null,
 					InterceptorsNamespaces = c.GlobalOptions.TryGetValue("build_property.InterceptorsNamespaces", out var namespaces) ? namespaces : null,
 				});
@@ -594,6 +600,7 @@ namespace AspectGenerator
 					if (!methodDic.TryGetValue(method, out var attributes))
 					{
 						attributes = new();
+						var explicitAttributeClasses = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
 						var methodAttributes = method.GetAttributes();
 
@@ -608,9 +615,10 @@ namespace AspectGenerator
 
 								if (!IsConditionalAspectEnabled(ma.AttributeClass, compilation, ma.ApplicationSyntaxReference?.SyntaxTree))
 								{
-									ReportDiagnostic(
+									ReportReportDiagnostic(
 										diagnostics,
-										options.TargetsSeverity,
+										options.Verbosity,
+										options.TargetsVerbosity,
 										DiagnosticID.ReportTargetSkippedByConditional,
 										() => $"Aspect '{ma.AttributeClass.ToDisplayString()}' skipped by ConditionalAttribute.",
 										ma.ApplicationSyntaxReference is {} syntaxReference ? Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span) : null);
@@ -623,34 +631,38 @@ namespace AspectGenerator
 								{
 									ReportMethodLevelTargetFilter(diagnostics, reportedDiagnostics, ma);
 									var attributeInfo = new AttributeInfo(ma, null, null, ma.AttributeClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel);
-									ReportDiagnostic(
+									ReportReportDiagnostic(
 										diagnostics,
-										options.TargetsSeverity,
+										options.Verbosity,
+										options.TargetsVerbosity,
 										DiagnosticID.ReportTargetSelected,
 										() => $"Aspect '{ma.AttributeClass.ToDisplayString()}' selected target method '{method.ToDisplayString()}'.",
 										method.Locations.FirstOrDefault());
 									attributes.Add(attributeInfo);
+									explicitAttributeClasses.Add(ma.AttributeClass);
 								}
 								// .. or somewhere else.
 								else if (ma.AttributeClass?.GetAttributes().FirstOrDefault(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }}) is {} externalAspectAttributeData)
 								{
 									ReportMethodLevelTargetFilter(diagnostics, reportedDiagnostics, ma);
 									var attributeInfo = new AttributeInfo(ma, null, null, ma.AttributeClass!, externalAspectAttributeData, null, null);
-									ReportDiagnostic(
+									ReportReportDiagnostic(
 										diagnostics,
-										options.TargetsSeverity,
+										options.Verbosity,
+										options.TargetsVerbosity,
 										DiagnosticID.ReportTargetSelected,
 										() => $"Aspect '{ma.AttributeClass.ToDisplayString()}' selected target method '{method.ToDisplayString()}'.",
 										method.Locations.FirstOrDefault());
 									attributes.Add(attributeInfo);
+									explicitAttributeClasses.Add(ma.AttributeClass!);
 								}
 							}
 						}
 
 						var target = GetMethodTarget(method);
 
-						AddMatchedFilterAttributes(diagnostics, options, attributes, assemblyFilters, target, method);
-						AddMatchedFilterAttributes(diagnostics, options, attributes, GetTypeFilters(compilation, diagnostics, options, aspectAttributes, typeFilterDic, method.ContainingType, reportedDiagnostics), target, method);
+						AddMatchedFilterAttributes(diagnostics, options, attributes, explicitAttributeClasses, assemblyFilters, target, method);
+						AddMatchedFilterAttributes(diagnostics, options, attributes, explicitAttributeClasses, GetTypeFilters(compilation, diagnostics, options, aspectAttributes, typeFilterDic, method.ContainingType, reportedDiagnostics), target, method);
 
 						methodDic[method] = attributes.Distinct().ToList();
 					}
@@ -670,18 +682,20 @@ namespace AspectGenerator
 			if (options.GenerateInterceptors)
 				foreach (var analyzedInvocation in aspectedMethods)
 					foreach (var attribute in analyzedInvocation.Attributes)
-						ReportDiagnostic(
+						ReportReportDiagnostic(
 							diagnostics,
-							options.InterceptorsSeverity,
+							options.Verbosity,
+							options.InterceptorsVerbosity,
 							DiagnosticID.ReportInterceptorGenerated,
 							() => $"Intercepted call '{analyzedInvocation.Inv}' using aspect '{attribute.AttributeClass.ToDisplayString()}'.",
 							analyzedInvocation.Inv.GetLocation());
 
-			ReportDiagnostic(
+			ReportReportDiagnostic(
 				diagnostics,
-				options.SummarySeverity,
+				options.Verbosity,
+				options.SummaryVerbosity,
 				DiagnosticID.ReportSummary,
-				() => $"AspectGenerator generated interceptors for {aspectedMethods.Count} call site(s) in {aspectedMethods.Select(static m => m.Method).Distinct(SymbolEqualityComparer.Default).Count()} target method(s).",
+				() => GetSummaryReportMessage(options, aspectedMethods),
 				Location.None);
 
 			ReportMissingInterceptorsNamespace(diagnostics, options);
@@ -719,6 +733,16 @@ namespace AspectGenerator
 			GenerateSource(spc, analysis.Compilation, analysis.Options, analysis.AspectedMethods);
 		}
 
+		static string GetSummaryReportMessage(GeneratorExecutionOptions options, List<AnalyzedInvocation> aspectedMethods)
+		{
+			var callSiteCount = aspectedMethods.Count;
+			var methodCount   = aspectedMethods.Select(static m => m.Method).Distinct(SymbolEqualityComparer.Default).Count();
+
+			return options.GenerateInterceptors
+				? $"AspectGenerator generated interceptors for {callSiteCount} call site(s) in {methodCount} target method(s)."
+				: $"AspectGenerator selected {callSiteCount} interceptable call site(s) in {methodCount} target method(s), but interceptor generation is disabled.";
+		}
+
 		static bool? GetBoolProperty(AnalyzerConfigOptions options, string name)
 		{
 			if (!options.TryGetValue(name, out var value))
@@ -727,12 +751,12 @@ namespace AspectGenerator
 			return bool.TryParse(value, out var result) ? result : null;
 		}
 
-		static AspectReportSeverity? GetReportSeverityProperty(AnalyzerConfigOptions options, string name)
+		static AspectReportVerbosity? GetVerbosityProperty(AnalyzerConfigOptions options, string name)
 		{
 			if (!options.TryGetValue(name, out var value))
 				return null;
 
-			return Enum.TryParse<AspectReportSeverity>(value, ignoreCase: true, out var result) ? result : null;
+			return Enum.TryParse<AspectReportVerbosity>(value, ignoreCase: true, out var result) ? result : null;
 		}
 
 		static GeneratorExecutionOptions ResolveOptions(Compilation compilation, Options msBuildOptions)
@@ -744,10 +768,7 @@ namespace AspectGenerator
 				DesignTimeBuild        = msBuildOptions.DesignTimeBuild,
 				PublicApi              = msBuildOptions.PublicApi,
 				DebuggerStepThrough    = msBuildOptions.DebuggerStepThrough,
-				SummarySeverity        = msBuildOptions.SummarySeverity,
-				InterceptorsSeverity   = msBuildOptions.InterceptorsSeverity,
-				TargetsSeverity        = msBuildOptions.TargetsSeverity,
-				FiltersSeverity        = msBuildOptions.FiltersSeverity,
+				Verbosity              = msBuildOptions.Verbosity,
 				InterceptorsNamespace  = msBuildOptions.InterceptorsNamespace,
 				InterceptorsNamespaces = msBuildOptions.InterceptorsNamespaces,
 			};
@@ -766,10 +787,10 @@ namespace AspectGenerator
 					case OptionID.GenerateInterceptors  when arg.Value.Value is bool   generateInterceptors : result.GenerateInterceptors  = generateInterceptors;  break;
 					case OptionID.PublicApi             when arg.Value.Value is bool   publicApi            : result.PublicApi             = publicApi;             break;
 					case OptionID.DebuggerStepThrough   when arg.Value.Value is bool   debuggerStepThrough  : result.DebuggerStepThrough   = debuggerStepThrough;   break;
-					case OptionID.SummarySeverity       when TryReadReportSeverity(arg.Value, out var severity) : result.SummarySeverity      = severity; break;
-					case OptionID.InterceptorsSeverity  when TryReadReportSeverity(arg.Value, out var severity) : result.InterceptorsSeverity = severity; break;
-					case OptionID.TargetsSeverity       when TryReadReportSeverity(arg.Value, out var severity) : result.TargetsSeverity      = severity; break;
-					case OptionID.FiltersSeverity       when TryReadReportSeverity(arg.Value, out var severity) : result.FiltersSeverity      = severity; break;
+					case OptionID.SummaryVerbosity      when TryReadVerbosity(arg.Value, out var summaryVerbosity) : result.SummaryVerbosity = summaryVerbosity; break;
+					case OptionID.InterceptorsVerbosity when TryReadVerbosity(arg.Value, out var interceptorsVerbosity) : result.InterceptorsVerbosity = interceptorsVerbosity; break;
+					case OptionID.TargetsVerbosity      when TryReadVerbosity(arg.Value, out var targetsVerbosity) : result.TargetsVerbosity = targetsVerbosity; break;
+					case OptionID.FiltersVerbosity      when TryReadVerbosity(arg.Value, out var filtersVerbosity) : result.FiltersVerbosity = filtersVerbosity; break;
 					case OptionID.InterceptorsNamespace when arg.Value.Value is string interceptorsNamespace: result.InterceptorsNamespace = interceptorsNamespace; break;
 				}
 			}
@@ -785,27 +806,28 @@ namespace AspectGenerator
 					generateInterceptors,
 					options.PublicApi is true,
 					options.DebuggerStepThrough is true,
-					options.SummarySeverity      ?? AspectReportSeverity.Info,
-					options.InterceptorsSeverity ?? AspectReportSeverity.Hidden,
-					options.TargetsSeverity      ?? AspectReportSeverity.Hidden,
-					options.FiltersSeverity      ?? AspectReportSeverity.Off,
+					options.Verbosity            ?? AspectReportVerbosity.Quiet,
+					options.SummaryVerbosity     ?? AspectReportVerbosity.Quiet,
+					options.InterceptorsVerbosity ?? AspectReportVerbosity.Minimal,
+					options.TargetsVerbosity     ?? AspectReportVerbosity.Normal,
+					options.FiltersVerbosity     ?? AspectReportVerbosity.Diagnostic,
 					options.InterceptorsNamespace,
 					options.InterceptorsNamespaces);
 			}
 		}
 
-		static bool TryReadReportSeverity(TypedConstant value, out AspectReportSeverity severity)
+		static bool TryReadVerbosity(TypedConstant value, out AspectReportVerbosity verbosity)
 		{
-			if (value.Value is int raw && Enum.IsDefined(typeof(AspectReportSeverity), raw))
+			if (value.Value is int raw && Enum.IsDefined(typeof(AspectReportVerbosity), raw))
 			{
-				severity = (AspectReportSeverity)raw;
+				verbosity = (AspectReportVerbosity)raw;
 				return true;
 			}
 
-			if (value.Value is string text && Enum.TryParse(text, ignoreCase: true, out severity))
+			if (value.Value is string text && Enum.TryParse(text, ignoreCase: true, out verbosity))
 				return true;
 
-			severity = AspectReportSeverity.Off;
+			verbosity = AspectReportVerbosity.Off;
 			return false;
 		}
 
@@ -902,23 +924,27 @@ namespace AspectGenerator
 			diagnostics.Add(new DiagnosticInfo(id, message, location));
 		}
 
-		static void ReportDiagnostic(List<DiagnosticInfo> diagnostics, AspectReportSeverity reportSeverity, string id, Func<string> messageFactory, Location? location)
+		static void ReportReportDiagnostic(
+			List<DiagnosticInfo>    diagnostics,
+			AspectReportVerbosity   currentVerbosity,
+			AspectReportVerbosity   requiredVerbosity,
+			string                  id,
+			Func<string>            messageFactory,
+			Location?               location)
 		{
-			if (reportSeverity == AspectReportSeverity.Off)
+			if (currentVerbosity == AspectReportVerbosity.Off ||
+				requiredVerbosity == AspectReportVerbosity.Off ||
+				currentVerbosity < requiredVerbosity)
 				return;
 
-			diagnostics.Add(new DiagnosticInfo(id, messageFactory(), location, ToDiagnosticSeverity(reportSeverity)));
+			diagnostics.Add(new DiagnosticInfo(id, messageFactory(), location, DiagnosticSeverity.Info));
 		}
 
-		static DiagnosticSeverity ToDiagnosticSeverity(AspectReportSeverity reportSeverity)
+		static bool ShouldReport(AspectReportVerbosity currentVerbosity, AspectReportVerbosity requiredVerbosity)
 		{
-			return reportSeverity switch
-			{
-				AspectReportSeverity.Hidden  => DiagnosticSeverity.Hidden,
-				AspectReportSeverity.Info    => DiagnosticSeverity.Info,
-				AspectReportSeverity.Warning => DiagnosticSeverity.Warning,
-				_                            => DiagnosticSeverity.Hidden
-			};
+			return currentVerbosity != AspectReportVerbosity.Off &&
+				requiredVerbosity != AspectReportVerbosity.Off &&
+				currentVerbosity >= requiredVerbosity;
 		}
 
 		static void ReportMethodLevelTargetFilter(List<DiagnosticInfo> diagnostics, HashSet<string> reportedDiagnostics, AttributeData attribute)
@@ -1065,9 +1091,10 @@ namespace AspectGenerator
 
 			if (!IsConditionalAspectEnabled(aspectClass, semanticModel.Compilation, filterAttribute.SyntaxTree))
 			{
-				ReportDiagnostic(
+				ReportReportDiagnostic(
 					diagnostics,
-					options.TargetsSeverity,
+					options.Verbosity,
+					AspectReportVerbosity.Normal,
 					DiagnosticID.ReportTargetSkippedByConditional,
 					() => $"Aspect '{aspectClass.ToDisplayString()}' skipped by ConditionalAttribute.",
 					filterAttribute.GetLocation());
@@ -1112,9 +1139,10 @@ namespace AspectGenerator
 
 			if (!IsConditionalAspectEnabled(aspectClass, compilation, filterAttribute.ApplicationSyntaxReference?.SyntaxTree))
 			{
-				ReportDiagnostic(
+				ReportReportDiagnostic(
 					diagnostics,
-					options.TargetsSeverity,
+					options.Verbosity,
+					AspectReportVerbosity.Normal,
 					DiagnosticID.ReportTargetSkippedByConditional,
 					() => $"Aspect '{aspectClass.ToDisplayString()}' skipped by ConditionalAttribute.",
 					filterAttribute.ApplicationSyntaxReference is {} conditionalSyntaxReference ? Location.Create(conditionalSyntaxReference.SyntaxTree, conditionalSyntaxReference.Span) : null);
@@ -1213,33 +1241,42 @@ namespace AspectGenerator
 			List<DiagnosticInfo> diagnostics,
 			GeneratorExecutionOptions options,
 			List<AttributeInfo> attributes,
+			HashSet<INamedTypeSymbol> explicitAttributeClasses,
 			ImmutableArray<AspectFilterSet> filterSets,
 			in AspectFilters.MethodTarget target,
 			IMethodSymbol method)
 		{
 			foreach (var filterSet in filterSets)
 			{
-				var evaluation = options.FiltersSeverity != AspectReportSeverity.Off
-					? filterSet.Filters.Evaluate(target, trace => ReportDiagnostic(
+				var evaluation = ShouldReport(options.Verbosity, options.FiltersVerbosity)
+					? filterSet.Filters.Evaluate(target, trace => ReportReportDiagnostic(
 						diagnostics,
-						options.FiltersSeverity,
+						options.Verbosity,
+						options.FiltersVerbosity,
 						trace.DiagnosticId,
 						() => $"TargetFilter rule/group {(trace.DiagnosticId == DiagnosticID.ReportFilterMatched ? "matched" : "did not match")} target '{method.ToDisplayString()}': {trace.Rule}",
 						method.Locations.FirstOrDefault()))
 					: filterSet.Filters.Evaluate(target);
 
-				ReportDiagnostic(
-						diagnostics,
-						options.FiltersSeverity,
-						DiagnosticID.ReportFilterFinalDecision,
-						() => $"TargetFilter final decision for '{method.ToDisplayString()}': {(evaluation.IsMatch ? "Include" : evaluation.IsExcluded ? "Exclude" : "None")}{(evaluation.MatchedRule is {} rule ? $"; matched rule '{rule}'." : ".")}",
-						method.Locations.FirstOrDefault());
+				ReportReportDiagnostic(
+					diagnostics,
+					options.Verbosity,
+					options.FiltersVerbosity,
+					DiagnosticID.ReportFilterFinalDecision,
+					() => $"TargetFilter final decision for '{method.ToDisplayString()}': {(evaluation.IsMatch ? "Include" : evaluation.IsExcluded ? "Exclude" : "None")}{(evaluation.MatchedRule is {} rule ? $"; matched rule '{rule}'." : ".")}",
+					method.Locations.FirstOrDefault());
 
 				if (!evaluation.IsMatch)
 				{
-					ReportDiagnostic(
+					if (evaluation.IsExcluded)
+						attributes.RemoveAll(attribute =>
+							SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, filterSet.Attribute.AttributeClass) &&
+							!explicitAttributeClasses.Contains(attribute.AttributeClass));
+
+					ReportReportDiagnostic(
 						diagnostics,
-						options.TargetsSeverity,
+						options.Verbosity,
+						options.TargetsVerbosity,
 						evaluation.IsExcluded ? DiagnosticID.ReportTargetExcluded : DiagnosticID.ReportTargetSkipped,
 						() => evaluation.IsExcluded
 							? $"Aspect '{filterSet.Attribute.AttributeClass.ToDisplayString()}' excluded target '{method.ToDisplayString()}' by TargetFilter."
@@ -1251,9 +1288,10 @@ namespace AspectGenerator
 				if (attributes.Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, filterSet.Attribute.AttributeClass)))
 					continue;
 
-				ReportDiagnostic(
+				ReportReportDiagnostic(
 					diagnostics,
-					options.TargetsSeverity,
+					options.Verbosity,
+					options.TargetsVerbosity,
 					DiagnosticID.ReportTargetSelected,
 					() => $"Aspect '{filterSet.Attribute.AttributeClass.ToDisplayString()}' selected target method '{method.ToDisplayString()}'.",
 					method.Locations.FirstOrDefault());

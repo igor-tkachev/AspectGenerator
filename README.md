@@ -28,9 +28,10 @@ Configure the consuming project:
 ```xml
 <PropertyGroup>
   <TargetFramework>net10.0</TargetFramework>
-  <InterceptorsNamespaces>$(InterceptorsNamespaces);AspectGenerator</InterceptorsNamespaces>
 </PropertyGroup>
 ```
+
+The AspectGenerator NuGet package imports the required MSBuild wiring automatically for projects that reference the package directly.
 
 Define an aspect:
 
@@ -78,10 +79,7 @@ AspectGenerator can be configured with MSBuild properties:
   <AspectGeneratorGenerateInterceptors>true</AspectGeneratorGenerateInterceptors>
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
-  <AspectGeneratorSummarySeverity>Info</AspectGeneratorSummarySeverity>
-  <AspectGeneratorInterceptorsSeverity>Hidden</AspectGeneratorInterceptorsSeverity>
-  <AspectGeneratorTargetsSeverity>Hidden</AspectGeneratorTargetsSeverity>
-  <AspectGeneratorFiltersSeverity>Off</AspectGeneratorFiltersSeverity>
+  <AspectGeneratorVerbosity>Quiet</AspectGeneratorVerbosity>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
 </PropertyGroup>
 ```
@@ -95,18 +93,18 @@ using AspectGenerator;
     GenerateApi = true,
     PublicApi = false,
     DebuggerStepThrough = false,
-    SummarySeverity = AspectReportSeverity.Info,
-    InterceptorsSeverity = AspectReportSeverity.Hidden,
-    TargetsSeverity = AspectReportSeverity.Hidden,
-    FiltersSeverity = AspectReportSeverity.Off,
+    SummaryVerbosity = AspectReportVerbosity.Quiet,
+    InterceptorsVerbosity = AspectReportVerbosity.Minimal,
+    TargetsVerbosity = AspectReportVerbosity.Normal,
+    FiltersVerbosity = AspectReportVerbosity.Diagnostic,
     InterceptorsNamespace = "AspectGenerator")]
 ```
 
-`AspectGeneratorInterceptorsNamespace` must also be listed in `InterceptorsNamespaces`, otherwise the compiler will not enable generated interceptors from that namespace.
+`AspectGeneratorInterceptorsNamespace` controls the namespace used for generated interceptors. The package appends this namespace to `InterceptorsNamespaces` automatically for direct package consumers. Manual `InterceptorsNamespaces` configuration should only be needed for unusual or custom build setups.
 
 `AspectGeneratorGenerateInterceptors` defaults to `false` for design-time builds and `true` otherwise. Diagnostics still run when interceptor source emission is disabled.
 
-Compile-time reporting diagnostics are controlled per category. Supported severities are `Off`, `Hidden`, `Info`, and `Warning`. The defaults are `SummarySeverity=Info`, `InterceptorsSeverity=Hidden`, `TargetsSeverity=Hidden`, and `FiltersSeverity=Off`.
+Compile-time reporting diagnostics are controlled by the MSBuild-only `AspectGeneratorVerbosity` current reporting level and assembly-level per-category verbosity thresholds. Supported values are `Off`, `Quiet`, `Minimal`, `Normal`, `Detailed`, and `Diagnostic`. Defaults are `AspectGeneratorVerbosity=Quiet`, `SummaryVerbosity=Quiet`, `InterceptorsVerbosity=Minimal`, `TargetsVerbosity=Normal`, and `FiltersVerbosity=Diagnostic`.
 
 ## Generated API Ownership
 
@@ -123,7 +121,9 @@ Common modes:
 | --- | --- | --- |
 | Single project | `GenerateApi=true`, `PublicApi=false` | App defines and uses its own aspects. |
 | Aspect library | Library: `GenerateApi=true`, `PublicApi=true`; consumer: `GenerateApi=false` | Shared aspect attributes live in a reusable assembly. |
-| Cross-project app | Same interceptor namespace in each project via `AspectGeneratorInterceptorsNamespace` and `InterceptorsNamespaces` | Intercept calls compiled in multiple projects. |
+| Cross-project app | Same interceptor namespace in each project via `AspectGeneratorInterceptorsNamespace` | Intercept calls compiled in multiple projects. |
+
+Every project whose call sites should be intercepted must reference AspectGenerator directly. A shared aspect library may reference AspectGenerator to define and build aspect attributes, but applications that use those aspect attributes must also reference AspectGenerator directly if their call sites should be intercepted. The source generator runs in the compilation of the project that references the generator package.
 
 ## Supported Scenarios
 
@@ -133,7 +133,7 @@ Common modes:
 | Instance methods | Supported | Call site must be visible to the current compilation. |
 | Extension methods | Supported | Covered by unit tests. |
 | Generic methods | Supported | Covered by unit tests. |
-| Target filters | Supported | Ordered regex filters apply aspects to matching target method signatures. |
+| Target filters | Supported | Native condition patterns, compact method patterns, contains, and regex filters apply aspects to matching target methods. |
 | `Task`, `Task<T>`, `ValueTask`, and `ValueTask<T>` async methods | Supported | Async hooks are selected for supported async targets. |
 | `ref`, `out`, `in` parameters | Supported | Covered by unit tests. |
 | Constructors | Unsupported | Platform limitation of C# interceptors. |
@@ -228,20 +228,24 @@ sealed class LogAttribute : Attribute
 
 This applies consistently to direct method aspect usage, type-level `TargetFilter`, and assembly-level `TargetFilter`.
 
+Conditional aspect attributes are evaluated against project/tree preprocessor symbols. Project-level `DEBUG`, `TRACE`, and MSBuild-defined symbols are supported. Local source-file `#define` / `#undef` directive state is not guaranteed to be evaluated with full location sensitivity.
+
 ## Compile-Time Reporting
 
 AspectGenerator can emit compile-time reporting diagnostics that explain matching and generation decisions. This is diagnostic output from the source generator, not runtime tracing or logging code.
 
-Reporting diagnostic categories:
+Reporting verbosity and default category thresholds:
 
-| Category | Range | Default | Meaning |
-| --- | --- | --- | --- |
-| Summary | `AG0700` | `Info` | Compact generator summary. |
-| Interceptors | `AG0710`-`AG0719` | `Hidden` | Generated or skipped interceptor call sites. |
-| Targets | `AG0720`-`AG0729` | `Hidden` | Selected, excluded, or skipped target methods. |
-| Filters | `AG0730`-`AG0739` | `Off` | Detailed TargetFilter rule/group/final decisions. |
+| Category | Range | Default threshold |
+| --- | --- | --- |
+| Summary | `AG0700` | `Quiet` |
+| Interceptors | `AG0710`-`AG0719` | `Minimal` |
+| Targets | `AG0720`-`AG0729` | `Normal` |
+| Filters | `AG0730`-`AG0739` | `Diagnostic` |
 
-Each category accepts `AspectReportSeverity.Off`, `Hidden`, `Info`, or `Warning`. Reporting diagnostics never use `Error` by design and do not affect generated code.
+`AspectGeneratorVerbosity` is the current reporting level and is configured through MSBuild/analyzer-config only. A category is emitted when `AspectGeneratorVerbosity` is greater than or equal to that category threshold. If either `AspectGeneratorVerbosity` or the category threshold is `Off`, that category is not emitted.
+
+All `AG0700`-`AG0799` report diagnostics are emitted as `Info`. AspectGenerator options control how much report output is generated; they do not expose compiler diagnostic severity.
 
 These diagnostics use normal compiler diagnostic configuration, so they can also be suppressed or filtered through standard build tooling.
 

@@ -1,0 +1,5 @@
+<Project>
+	<PropertyGroup Condition="'$(AspectGeneratorInterceptorsNamespace)' != ''">
+		<InterceptorsNamespaces>$(InterceptorsNamespaces);$(AspectGeneratorInterceptorsNamespace)</InterceptorsNamespaces>
+	</PropertyGroup>
+</Project>
