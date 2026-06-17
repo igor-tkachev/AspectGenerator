@@ -79,6 +79,7 @@ AspectGenerator can be configured with MSBuild properties:
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
   <AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
+  <AspectGeneratorMarkInterceptedCalls>false</AspectGeneratorMarkInterceptedCalls>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
 </PropertyGroup>
 ```
@@ -101,6 +102,7 @@ using AspectGenerator;
     GenerateApi = true,
     PublicApi = false,
     DebuggerStepThrough = false,
+    MarkInterceptedCalls = false,
     InterceptorsNamespace = "AspectGenerator")]
 ```
 
@@ -257,6 +259,20 @@ To change the report path or file name, set `AspectGeneratorReportFile`:
 ```
 
 Diagnostics are reserved for errors and warnings. The build report is informational, stored as a build artifact, and is not emitted as compiler diagnostics.
+
+## Intercepted Call Markers
+
+AspectGenerator can optionally mark intercepted call sites with `AG0300` warning diagnostics. This is disabled by default and is intended for temporary IDE inspection:
+
+```xml
+<PropertyGroup>
+  <AspectGeneratorMarkInterceptedCalls>true</AspectGeneratorMarkInterceptedCalls>
+</PropertyGroup>
+```
+
+When enabled, each actually intercepted call site receives one `AG0300` marker warning. The marker lists the applied aspect attribute names, but it does not include target signatures, generated interceptor names, or filter details. Use the build report for complete and baseline-friendly information.
+
+`AG0300` is informational and does not indicate a problem. The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail because of marker warnings.
 
 ## Documentation And Wiki
 

@@ -5,8 +5,6 @@ using System.IO.Compression;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-using AspectGenerator;
-
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AspectGenerator.Tests
@@ -84,10 +82,13 @@ namespace AspectGenerator.Tests
 
 			StringAssert.Contains(props, "<AspectGeneratorInterceptorsNamespace Condition=\"'$(AspectGeneratorInterceptorsNamespace)' == ''\">AspectGenerator</AspectGeneratorInterceptorsNamespace>");
 			StringAssert.Contains(props, "<AspectGeneratorReportFile Condition=\"'$(AspectGeneratorReportFile)' == ''\">$(BaseIntermediateOutputPath)\\GeneratedFiles\\AspectGenerator\\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>");
+			StringAssert.Contains(props, "<AspectGeneratorMarkInterceptedCalls Condition=\"'$(AspectGeneratorMarkInterceptedCalls)' == ''\">false</AspectGeneratorMarkInterceptedCalls>");
 			Assert.IsFalse(props.Contains("AspectGeneratorPrintReport", StringComparison.Ordinal));
 			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorReportFile\" />");
+			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorMarkInterceptedCalls\" />");
 			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"CompilerGeneratedFilesOutputPath\" />");
 			StringAssert.Contains(targets, "<InterceptorsNamespaces>$(InterceptorsNamespaces);$(AspectGeneratorInterceptorsNamespace)</InterceptorsNamespaces>");
+			StringAssert.Contains(targets, "<WarningsNotAsErrors>$(WarningsNotAsErrors);AG0300</WarningsNotAsErrors>");
 			StringAssert.Contains(targets, "Name=\"AspectGeneratorCleanReport\"");
 			Assert.IsFalse(targets.Contains("AspectGeneratorPrintReport", StringComparison.Ordinal));
 			Assert.IsFalse(targets.Contains("<ReadLinesFromFile", StringComparison.Ordinal));

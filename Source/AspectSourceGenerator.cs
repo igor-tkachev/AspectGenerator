@@ -38,6 +38,7 @@ namespace AspectGenerator
 			public const string InvalidAspectFilterParameterPattern = "AG0205";
 			public const string InvalidAspectFilterDottedPattern    = "AG0206";
 			public const string MethodLevelTargetFilter             = "AG0208";
+			public const string InterceptedCallMarker               = "AG0300";
 		}
 
 		public static class OptionID
@@ -47,8 +48,23 @@ namespace AspectGenerator
 			public const string PublicApi             = "PublicApi";
 			public const string DebuggerStepThrough   = "DebuggerStepThrough";
 			public const string ReportFile            = "ReportFile";
+			public const string MarkInterceptedCalls  = "MarkInterceptedCalls";
 			public const string InterceptorsNamespace = "InterceptorsNamespace";
 		}
+
+		public const DiagnosticSeverity InterceptedCallMarkerSeverity = DiagnosticSeverity.Warning;
+
+		#pragma warning disable RS2008 // AspectGenerator does not use analyzer release tracking files yet.
+		static readonly DiagnosticDescriptor InterceptedCallMarkerDescriptor = new(
+			DiagnosticID.InterceptedCallMarker,
+			"Call is intercepted by AspectGenerator",
+			"Call is intercepted by {0}",
+			"AspectGenerator",
+			InterceptedCallMarkerSeverity,
+			true,
+			"Marks a call site that is intercepted by AspectGenerator in this build.",
+			"https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics");
+		#pragma warning restore RS2008
 
 		#region API
 
@@ -95,6 +111,13 @@ namespace AspectGenerator
 					/// Gets or sets whether generated interceptor methods are marked with <see cref="System.Diagnostics.DebuggerStepThroughAttribute"/>.
 					/// </summary>
 					public bool    {{OptionID.DebuggerStepThrough}}           { get; set; }
+					/// <summary>
+					/// Gets or sets whether AspectGenerator emits optional call-site marker diagnostics for intercepted calls.
+					/// </summary>
+					/// <remarks>
+					/// This is intended for temporary IDE inspection. Use the build report for complete baseline-friendly interception details.
+					/// </remarks>
+					public bool    {{OptionID.MarkInterceptedCalls}}          { get; set; }
 					/// <summary>
 					/// Gets or sets the namespace used for generated interceptor types.
 					/// </summary>
@@ -385,6 +408,7 @@ namespace AspectGenerator
 			public bool?   PublicApi;
 			public bool?   DebuggerStepThrough;
 			public string? ReportFile;
+			public bool?   MarkInterceptedCalls;
 			public string? ProjectDirectory;
 			public string? CompilerGeneratedFilesOutputPath;
 			public string? InterceptorsNamespace;
@@ -398,6 +422,7 @@ namespace AspectGenerator
 			bool    PublicApi,
 			bool    DebuggerStepThrough,
 			string? ReportFile,
+			bool    MarkInterceptedCalls,
 			string? ProjectDirectory,
 			string? CompilerGeneratedFilesOutputPath,
 			string? InterceptorsNamespace,
@@ -480,6 +505,7 @@ namespace AspectGenerator
 					PublicApi              = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.PublicApi}"),
 					DebuggerStepThrough    = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.DebuggerStepThrough}"),
 					ReportFile             = c.GlobalOptions.TryGetValue($"build_property.AspectGenerator{OptionID.ReportFile}", out var reportFile) ? reportFile : null,
+					MarkInterceptedCalls   = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.MarkInterceptedCalls}"),
 					ProjectDirectory       = c.GlobalOptions.TryGetValue("build_property.ProjectDir", out var projectDir) ? projectDir : null,
 					CompilerGeneratedFilesOutputPath = c.GlobalOptions.TryGetValue("build_property.CompilerGeneratedFilesOutputPath", out var generatedFilesPath) ? generatedFilesPath : null,
 					InterceptorsNamespace  = c.GlobalOptions.TryGetValue($"build_property.AspectGenerator{OptionID.InterceptorsNamespace}", out var ns) ? ns : null,
@@ -629,7 +655,35 @@ namespace AspectGenerator
 						location: diagnostic.Location));
 			}
 
+			ReportInterceptedCallMarkers(spc, analysis);
 			WriteBuildReport(analysis);
+		}
+
+		static void ReportInterceptedCallMarkers(SourceProductionContext spc, AnalysisResult analysis)
+		{
+			if (!analysis.Options.MarkInterceptedCalls ||
+				!analysis.Options.GenerateInterceptors ||
+				analysis.AspectedMethods.Length == 0)
+				return;
+
+			foreach (var analyzedInvocation in analysis.AspectedMethods.OrderBy(static m => GetLocationSortKey(m.Inv.GetLocation()), StringComparer.Ordinal))
+			{
+				if (analyzedInvocation.Attributes.Count == 0)
+					continue;
+
+				var semantic = analysis.Compilation.GetSemanticModel(analyzedInvocation.Inv.SyntaxTree);
+
+				if (semantic.GetInterceptableLocation(analyzedInvocation.Inv, spc.CancellationToken) is null)
+					continue;
+
+				var aspects = string.Join(", ", analyzedInvocation.Attributes.Select(static attribute => attribute.AttributeClass.Name));
+
+				spc.ReportDiagnostic(
+					Diagnostic.Create(
+						InterceptedCallMarkerDescriptor,
+						analyzedInvocation.Inv.GetLocation(),
+						aspects));
+			}
 		}
 
 		#pragma warning disable RS1035 // Build reports are an explicit source-generator output channel for this package.
@@ -885,6 +939,7 @@ namespace AspectGenerator
 				PublicApi              = msBuildOptions.PublicApi,
 				DebuggerStepThrough    = msBuildOptions.DebuggerStepThrough,
 				ReportFile             = msBuildOptions.ReportFile,
+				MarkInterceptedCalls   = msBuildOptions.MarkInterceptedCalls,
 				ProjectDirectory       = msBuildOptions.ProjectDirectory,
 				CompilerGeneratedFilesOutputPath = msBuildOptions.CompilerGeneratedFilesOutputPath,
 				InterceptorsNamespace  = msBuildOptions.InterceptorsNamespace,
@@ -905,6 +960,7 @@ namespace AspectGenerator
 					case OptionID.GenerateInterceptors  when arg.Value.Value is bool   generateInterceptors : result.GenerateInterceptors  = generateInterceptors;  break;
 					case OptionID.PublicApi             when arg.Value.Value is bool   publicApi            : result.PublicApi             = publicApi;             break;
 					case OptionID.DebuggerStepThrough   when arg.Value.Value is bool   debuggerStepThrough  : result.DebuggerStepThrough   = debuggerStepThrough;   break;
+					case OptionID.MarkInterceptedCalls  when arg.Value.Value is bool   markInterceptedCalls : result.MarkInterceptedCalls  = markInterceptedCalls;  break;
 					case OptionID.InterceptorsNamespace when arg.Value.Value is string interceptorsNamespace: result.InterceptorsNamespace = interceptorsNamespace; break;
 				}
 			}
@@ -922,6 +978,7 @@ namespace AspectGenerator
 					options.PublicApi is true,
 					options.DebuggerStepThrough is true,
 					options.ReportFile,
+					options.MarkInterceptedCalls is true,
 					options.ProjectDirectory,
 					options.CompilerGeneratedFilesOutputPath,
 					options.InterceptorsNamespace,

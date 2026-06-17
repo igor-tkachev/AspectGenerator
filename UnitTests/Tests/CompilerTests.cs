@@ -447,6 +447,161 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void InterceptedCallMarkersAreDisabledByDefaultTest()
+		{
+			var result = RunGenerator(TraceDirectSource);
+
+			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkerReportsWarningWhenEnabledTest()
+		{
+			var result = RunGenerator(
+				TraceDirectSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+				});
+
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			Assert.AreEqual(AspectSourceGenerator.InterceptedCallMarkerSeverity, diagnostic.Severity);
+			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
+			StringAssert.Contains(diagnostic.GetMessage(), "TraceAspectAttribute");
+			Assert.AreEqual("Target()", diagnostic.Location.SourceTree?.GetRoot().FindNode(diagnostic.Location.SourceSpan).ToString());
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkerCanBeEnabledByAssemblyOptionsTest()
+		{
+			var result = RunGenerator(TraceAssemblyOptionsMarkerSource);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			StringAssert.Contains(diagnostic.GetMessage(), "TraceAspectAttribute");
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkerReportsOneDiagnosticForMultipleAspectsTest()
+		{
+			var result = RunGenerator(
+				MarkerMultipleAspectsSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+				});
+			var diagnostics = result.Diagnostics.Where(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker).ToArray();
+
+			Assert.AreEqual(1, diagnostics.Length);
+			StringAssert.Contains(diagnostics[0].GetMessage(), "LogAttribute");
+			StringAssert.Contains(diagnostics[0].GetMessage(), "AuditAttribute");
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkersReportEachCallSiteTest()
+		{
+			var result = RunGenerator(
+				MarkerMultipleCallSitesSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+				});
+
+			Assert.AreEqual(2, result.Diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkersAreSuppressedWhenInterceptorsAreDisabledTest()
+		{
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
+
+			try
+			{
+				var result = RunGenerator(
+					TraceDirectSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "false",
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+					});
+
+				AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+				AssertNotGenerated(result, "Interceptors.g.cs");
+				StringAssert.Contains(File.ReadAllText(reportFile), "| Interceptor generation | disabled |");
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkersAreSuppressedForDesignTimeBuildTest()
+		{
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
+
+			try
+			{
+				var result = RunGenerator(
+					TraceDirectSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+						["build_property.DesignTimeBuild"] = "true",
+					});
+
+				AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+				AssertNotGenerated(result, "Interceptors.g.cs");
+				Assert.IsFalse(File.Exists(reportFile), $"Report file should not be generated for design-time build: {reportFile}");
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkersAreSuppressedForExcludedTargetsTest()
+		{
+			var result = RunGenerator(
+				AssemblyIncludeTypeExcludeFilterSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+				});
+
+			Assert.AreEqual(1, result.Diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
+			Assert.IsTrue(result.Diagnostics
+				.Where(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker)
+				.All(d => d.Location.SourceTree?.GetRoot().FindNode(d.Location.SourceSpan).ToString() != "HealthCheck()"));
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkersAreSuppressedForDisabledConditionalAspectTest()
+		{
+			var disabledResult = RunGenerator(
+				ConditionalDirectAspectSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+				});
+			var enabledResult = RunGenerator(
+				ConditionalDirectAspectSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+				},
+				preprocessorSymbols: ["DEBUG"]);
+
+			AssertNoDiagnostic(disabledResult, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			Assert.AreEqual(1, enabledResult.Diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
+		}
+
+		[TestMethod]
 		public void BuildReportFileGeneratedForNormalBuildTest()
 		{
 			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
@@ -2106,6 +2261,91 @@ namespace AspectGenerator.Tests
 				}
 
 				[TraceAspect]
+				public static string Target() => "";
+			}
+			""";
+
+		const string MarkerMultipleAspectsSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			sealed class LogAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			[Aspect(OnAfterCall = nameof(After))]
+			sealed class AuditAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " audited";
+			}
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				[Log]
+				[Audit]
+				public static string Target() => "";
+			}
+			""";
+
+		const string TraceAssemblyOptionsMarkerSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGeneratorOptions(MarkInterceptedCalls = true)]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			sealed class TraceAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " traced";
+			}
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				[TraceAspect]
+				public static string Target() => "";
+			}
+			""";
+
+		const string MarkerMultipleCallSitesSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			sealed class LogAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Target();
+					Target();
+				}
+
+				[Log]
 				public static string Target() => "";
 			}
 			""";

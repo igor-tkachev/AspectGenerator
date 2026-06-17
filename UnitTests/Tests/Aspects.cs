@@ -3,15 +3,13 @@ using System.Threading.Tasks;
 
 namespace Aspects
 {
-	using AspectGenerator;
-
-	[Aspect]
+	[AspectGenerator.Aspect]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class EmptyAspectAttribute : Attribute
 	{
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnAfterCall      = nameof(OnAfterCall),
 		UseInterceptType = true,
 		UseInterceptData = true
@@ -19,20 +17,20 @@ namespace Aspects
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class TestAspectAttribute : Attribute
 	{
-		public static void OnAfterCall<T>(ref InterceptData<T> info)
+		public static void OnAfterCall<T>(ref AspectGenerator.InterceptData<T> info)
 		{
 		}
 
-		public static void OnAfterCall(ref InterceptData<string> info)
+		public static void OnAfterCall(ref AspectGenerator.InterceptData<string> info)
 		{
-			if (info.InterceptType == InterceptType.OnAfterCall)
+			if (info.InterceptType == AspectGenerator.InterceptType.OnAfterCall)
 			{
 				info.ReturnValue += "__I__";
 			}
 		}
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnBeforeCall     = nameof(OnBeforeCall),
 		OnAfterCall      = nameof(OnCall),
 		UseInterceptType = true
@@ -40,25 +38,25 @@ namespace Aspects
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class TestAspect2Attribute : Attribute
 	{
-		public static void OnBeforeCall(InterceptInfo info)
+		public static void OnBeforeCall(AspectGenerator.InterceptInfo info)
 		{
 			info.Tag = "__X__";
 		}
 
-		public static void OnCall(InterceptInfo<Void> info)
+		public static void OnCall(AspectGenerator.InterceptInfo<AspectGenerator.Void> info)
 		{
 		}
 
-		public static void OnCall(InterceptInfo<string> info)
+		public static void OnCall(AspectGenerator.InterceptInfo<string> info)
 		{
-			if (info.InterceptType == InterceptType.OnAfterCall)
+			if (info.InterceptType == AspectGenerator.InterceptType.OnAfterCall)
 			{
 				info.ReturnValue += (string)info.Tag!;
 			}
 		}
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnInit = nameof(OnInit)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
@@ -66,38 +64,38 @@ namespace Aspects
 	{
 		public static int CallCount;
 
-		public static InterceptInfo<T> OnInit<T>(InterceptInfo<T> info)
+		public static AspectGenerator.InterceptInfo<T> OnInit<T>(AspectGenerator.InterceptInfo<T> info)
 		{
 			CallCount++;
 			return info;
 		}
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnCatch = nameof(OnCatch)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class IgnoreCatchAttribute : Attribute
 	{
-		public static void OnCatch(InterceptInfo info)
+		public static void OnCatch(AspectGenerator.InterceptInfo info)
 		{
-			info.InterceptResult = InterceptResult.IgnoreThrow;
+			info.InterceptResult = AspectGenerator.InterceptResult.IgnoreThrow;
 		}
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnFinally = nameof(OnFinally)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class FinallyAttribute : Attribute
 	{
-		public static void OnFinally(InterceptInfo<int> info)
+		public static void OnFinally(AspectGenerator.InterceptInfo<int> info)
 		{
 			info.ReturnValue = (int)info.ReturnValue! + 1;
 		}
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnInit            = nameof(OnInit),
 		OnUsing           = nameof(OnUsing),
 		OnUsingAsync      = nameof(OnUsingAsync),
@@ -140,36 +138,36 @@ namespace Aspects
 			OnFinallyCounterAsync    = 0;
 		}
 
-		public static InterceptInfo<T> OnInit<T>(InterceptInfo<T> info)
+		public static AspectGenerator.InterceptInfo<T> OnInit<T>(AspectGenerator.InterceptInfo<T> info)
 		{
 			OnInitCounter++;
 			return info;
 		}
 
-		public static IDisposable? OnUsing(InterceptInfo info)
+		public static IDisposable? OnUsing(AspectGenerator.InterceptInfo info)
 		{
 			OnUsingCounter++;
 			return null;
 		}
 
-		public static IAsyncDisposable? OnUsingAsync(InterceptInfo info)
+		public static IAsyncDisposable? OnUsingAsync(AspectGenerator.InterceptInfo info)
 		{
 			OnUsingCounterAsync++;
 			return null;
 		}
 
-		public static void OnBeforeCall     (InterceptInfo info) => OnBeforeCallCounter++;
-		public static void OnAfterCall      (InterceptInfo info) => OnAfterCallCounter++;
-		public static void OnCatch          (InterceptInfo info) => OnCatchCounter++;
-		public static void OnFinally        (InterceptInfo info) => OnFinallyCounter++;
+		public static void OnBeforeCall     (AspectGenerator.InterceptInfo info) => OnBeforeCallCounter++;
+		public static void OnAfterCall      (AspectGenerator.InterceptInfo                 info) => OnAfterCallCounter++;
+		public static void OnCatch          (AspectGenerator.InterceptInfo                 info) => OnCatchCounter++;
+		public static void OnFinally        (AspectGenerator.InterceptInfo                 info) => OnFinallyCounter++;
 
-		public static Task OnBeforeCallAsync(InterceptInfo info) => Task.FromResult(OnBeforeCallCounterAsync++);
-		public static Task OnAfterCallAsync (InterceptInfo info) => Task.FromResult(OnAfterCallCounterAsync++);
-		public static Task OnCatchAsync     (InterceptInfo info) => Task.FromResult(OnCatchCounterAsync++);
-		public static Task OnFinallyAsync   (InterceptInfo info) => Task.FromResult(OnFinallyCounterAsync++);
+		public static Task OnBeforeCallAsync(AspectGenerator.InterceptInfo info) => Task.FromResult(OnBeforeCallCounterAsync++);
+		public static Task OnAfterCallAsync (AspectGenerator.InterceptInfo info) => Task.FromResult(OnAfterCallCounterAsync++);
+		public static Task OnCatchAsync     (AspectGenerator.InterceptInfo info) => Task.FromResult(OnCatchCounterAsync++);
+		public static Task OnFinallyAsync   (AspectGenerator.InterceptInfo info) => Task.FromResult(OnFinallyCounterAsync++);
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnUsingAsync      = nameof(OnUsingAsync),
 		OnBeforeCallAsync = nameof(OnBeforeCallAsync),
 		OnAfterCallAsync  = nameof(OnAfterCallAsync),
@@ -196,52 +194,52 @@ namespace Aspects
 			DisposeCounterAsync      = 0;
 		}
 
-		public static IAsyncDisposable OnUsingAsync(InterceptInfo info)
+		public static IAsyncDisposable OnUsingAsync(AspectGenerator.InterceptInfo info)
 		{
 			OnUsingCounterAsync++;
 			return new AsyncScope();
 		}
 
-		public static ValueTask OnBeforeCallAsync(InterceptInfo info)
+		public static ValueTask OnBeforeCallAsync(AspectGenerator.InterceptInfo info)
 		{
 			OnBeforeCallCounterAsync++;
 			return ValueTask.CompletedTask;
 		}
 
-		public static ValueTask OnAfterCallAsync(InterceptInfo info)
+		public static ValueTask OnAfterCallAsync(AspectGenerator.InterceptInfo info)
 		{
 			OnAfterCallCounterAsync++;
 			return ValueTask.CompletedTask;
 		}
 
-		public static ValueTask OnAfterCallAsync(InterceptInfo<int> info)
+		public static ValueTask OnAfterCallAsync(AspectGenerator.InterceptInfo<int> info)
 		{
 			OnAfterCallCounterAsync++;
 			info.ReturnValue += 10;
 			return ValueTask.CompletedTask;
 		}
 
-		public static ValueTask OnCatchAsync(InterceptInfo info)
+		public static ValueTask OnCatchAsync(AspectGenerator.InterceptInfo info)
 		{
 			OnCatchCounterAsync++;
 			return ValueTask.CompletedTask;
 		}
 
-		public static ValueTask OnCatchAsync(InterceptInfo<int> info)
+		public static ValueTask OnCatchAsync(AspectGenerator.InterceptInfo<int> info)
 		{
 			OnCatchCounterAsync++;
 			info.ReturnValue     = 20;
-			info.InterceptResult = InterceptResult.IgnoreThrow;
+			info.InterceptResult = AspectGenerator.InterceptResult.IgnoreThrow;
 			return ValueTask.CompletedTask;
 		}
 
-		public static ValueTask OnFinallyAsync(InterceptInfo info)
+		public static ValueTask OnFinallyAsync(AspectGenerator.InterceptInfo info)
 		{
 			OnFinallyCounterAsync++;
 			return ValueTask.CompletedTask;
 		}
 
-		public static ValueTask OnFinallyAsync(InterceptInfo<int> info)
+		public static ValueTask OnFinallyAsync(AspectGenerator.InterceptInfo<int> info)
 		{
 			OnFinallyCounterAsync++;
 			info.ReturnValue++;
@@ -258,7 +256,7 @@ namespace Aspects
 		}
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnAfterCall = nameof(OnAfterCall)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
@@ -270,7 +268,7 @@ namespace Aspects
 		public char    Arg4 { get; set; }
 		public object? Arg5 { get; set; }
 
-		public static void OnAfterCall(InterceptInfo<string> info)
+		public static void OnAfterCall(AspectGenerator.InterceptInfo<string> info)
 		{
 			if (info.AspectArguments.TryGetValue(nameof(Arg2), out var value))
 			{
@@ -285,7 +283,7 @@ namespace Aspects
 		Second
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnAfterCall = nameof(OnAfterCall)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
@@ -298,7 +296,7 @@ namespace Aspects
 		public LiteralKind  Kind      { get; set; }
 		public string[]?    Values    { get; set; }
 
-		public static void OnAfterCall(InterceptInfo<string> info)
+		public static void OnAfterCall(AspectGenerator.InterceptInfo<string> info)
 		{
 			var values = (string[])info.AspectArguments[nameof(Values)]!;
 
@@ -314,7 +312,7 @@ namespace Aspects
 		}
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnUsing          = nameof(OnUsing),
 		OnUsingAsync     = nameof(OnUsingAsync),
 		UseInterceptData = true
@@ -322,18 +320,18 @@ namespace Aspects
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class UsingAttribute : Attribute
 	{
-		public static IDisposable? OnUsing<T>(ref InterceptData<T> info)
+		public static IDisposable? OnUsing<T>(ref AspectGenerator.InterceptData<T> info)
 		{
 			return null;
 		}
 
-		public static IAsyncDisposable? OnUsingAsync<T>(ref InterceptData<T> info)
+		public static IAsyncDisposable? OnUsingAsync<T>(ref AspectGenerator.InterceptData<T> info)
 		{
 			return null;
 		}
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnAfterCall = nameof(OnAfterCall)
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
@@ -342,53 +340,53 @@ namespace Aspects
 		public int     Order { get; set; } = int.MaxValue;
 		public string? Value { get; set; }
 
-		public static void OnAfterCall(InterceptInfo<string> info)
+		public static void OnAfterCall(AspectGenerator.InterceptInfo<string> info)
 		{
 			info.ReturnValue += info.AspectArguments["Value"];
 		}
 
-		public static void OnAfterCall(InterceptInfo<int> info)
+		public static void OnAfterCall(AspectGenerator.InterceptInfo<int> info)
 		{
 			info.ReturnValue = info.ReturnValue * 10 + int.Parse((string)info.AspectArguments["Value"]!);
 		}
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnAfterCall   = nameof(OnAfterCall),
 		PassArguments = true
 		)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class ArgumentsAttribute : Attribute
 	{
-		public static void OnAfterCall<T>(InterceptInfo<T> info)
+		public static void OnAfterCall<T>(AspectGenerator.InterceptInfo<T> info)
 		{
 		}
 
-		public static void OnAfterCall(InterceptInfo<string> info)
+		public static void OnAfterCall(AspectGenerator.InterceptInfo<string> info)
 		{
 			info.ReturnValue += info.MethodArguments!.Length;
 		}
 	}
 
-	[Aspect(OnAfterCall = nameof(OnAfterCall))]
+	[AspectGenerator.Aspect(OnAfterCall = nameof(OnAfterCall))]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 	sealed class LogAttribute : Attribute
 	{
 		public string[]? TargetFilter { get; set; }
 
-		public static void OnAfterCall(InterceptInfo<string> info)
+		public static void OnAfterCall(AspectGenerator.InterceptInfo<string> info)
 		{
 			info.ReturnValue += " + log.";
 		}
 	}
 
-	[Aspect(
+	[AspectGenerator.Aspect(
 		OnAfterCall = nameof(OnAfterCall)
 	)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
 	sealed class CrossProjectAttribute : Attribute
 	{
-		public static void OnAfterCall(InterceptInfo<string> info)
+		public static void OnAfterCall(AspectGenerator.InterceptInfo<string> info)
 		{
 			info.ReturnValue += " + CrossProject aspect.";
 		}

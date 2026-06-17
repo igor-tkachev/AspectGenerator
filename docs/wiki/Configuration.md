@@ -10,6 +10,7 @@ AspectGenerator itself targets `netstandard2.0`, but consuming projects must be 
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
   <AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
+  <AspectGeneratorMarkInterceptedCalls>false</AspectGeneratorMarkInterceptedCalls>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
 </PropertyGroup>
 ```
@@ -32,6 +33,7 @@ using AspectGenerator;
     GenerateApi = true,
     PublicApi = false,
     DebuggerStepThrough = false,
+    MarkInterceptedCalls = false,
     InterceptorsNamespace = "AspectGenerator")]
 ```
 

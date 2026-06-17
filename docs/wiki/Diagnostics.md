@@ -24,6 +24,7 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0205`: invalid target filter parameter pattern.
 - `AG0206`: invalid target filter dotted pattern.
 - `AG0208`: `TargetFilter` is used on a method-level aspect attribute.
+- `AG0300`: intercepted call-site marker. Disabled by default; enable with `AspectGeneratorMarkInterceptedCalls=true` for temporary IDE inspection.
 
 ## Build Report
 
@@ -36,3 +37,21 @@ obj/GeneratedFiles/AspectGenerator/AspectGeneratorBuildReport.md
 ```
 
 The report is not printed to the console. Users who need it can inspect the report file directly. Design-time builds do not write the report.
+
+## Intercepted Call Markers
+
+AspectGenerator can optionally mark intercepted call sites with `AG0300` warning diagnostics.
+
+This mode is disabled by default:
+
+```xml
+<PropertyGroup>
+  <AspectGeneratorMarkInterceptedCalls>true</AspectGeneratorMarkInterceptedCalls>
+</PropertyGroup>
+```
+
+When enabled, each actually intercepted call site receives one `AG0300` warning. Multiple aspects on the same call site produce one marker listing all applied aspect attribute names.
+
+`AG0300` is informational and does not indicate a problem. The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail because of marker warnings.
+
+Use the build report for complete and baseline-friendly information. Use `AG0300` marker mode only as a temporary IDE/source-code inspection aid.

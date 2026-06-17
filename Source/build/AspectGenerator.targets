@@ -3,6 +3,10 @@
 		<AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<WarningsNotAsErrors>$(WarningsNotAsErrors);AG0300</WarningsNotAsErrors>
+	</PropertyGroup>
+
 	<!-- Imported after project properties, so custom AspectGeneratorInterceptorsNamespace values are appended here. -->
 	<Choose>
 		<When Condition="'$(AspectGeneratorInterceptorsNamespace)' != '' and '$(InterceptorsNamespaces)' == ''">

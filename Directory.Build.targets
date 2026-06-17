@@ -3,6 +3,10 @@
 		<AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<WarningsNotAsErrors>$(WarningsNotAsErrors);AG0300</WarningsNotAsErrors>
+	</PropertyGroup>
+
 	<Target Name="AspectGeneratorCleanReport"
 	        BeforeTargets="CoreCompile"
 	        Condition="'$(DesignTimeBuild)' != 'true'

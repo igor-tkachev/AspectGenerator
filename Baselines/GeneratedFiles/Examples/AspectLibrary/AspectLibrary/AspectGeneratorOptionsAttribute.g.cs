@@ -38,6 +38,13 @@ namespace AspectGenerator
 		/// </summary>
 		public bool    DebuggerStepThrough           { get; set; }
 		/// <summary>
+		/// Gets or sets whether AspectGenerator emits optional call-site marker diagnostics for intercepted calls.
+		/// </summary>
+		/// <remarks>
+		/// This is intended for temporary IDE inspection. Use the build report for complete baseline-friendly interception details.
+		/// </remarks>
+		public bool    MarkInterceptedCalls          { get; set; }
+		/// <summary>
 		/// Gets or sets the namespace used for generated interceptor types.
 		/// </summary>
 		/// <remarks>
