@@ -4,6 +4,7 @@ using AspectGenerator;
 	DebuggerStepThrough = true,
 	PublicApi = true,
 	MarkInterceptedCalls = true,
+	GenerateInterceptors = true,
 	InterceptorsNamespace = "MyAspectGenerator")]
 
 [assembly: Aspects.Log(

@@ -60,7 +60,8 @@ namespace AspectGenerator.Tests
 		{
 			var baseDirectory  = AppContext.BaseDirectory;
 			var repositoryRoot = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", ".."));
-			var packageDir     = Path.Combine(repositoryRoot, "Source", "bin", "Debug");
+			var configuration  = Directory.GetParent(baseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))?.Name;
+			var packageDir     = Path.Combine(repositoryRoot, "Source", "bin", configuration ?? "Debug");
 			var packageFiles   = Directory.GetFiles(packageDir, "AspectGenerator.*.nupkg");
 
 			Assert.AreEqual(1, packageFiles.Length, $"Expected exactly one AspectGenerator package in {packageDir}. Build Source/AspectGenerator.csproj before running package validation tests.");
