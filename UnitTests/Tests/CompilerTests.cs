@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -39,18 +40,9 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void GenerateInterceptorsOptionTest()
+		public void InterceptorEmissionFollowsBuildModeTest()
 		{
-			var disabledResult = RunGenerator(
-				GenerationOptionsSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "false",
-				});
-
-			AssertGenerated   (disabledResult, "AspectAttribute.g.cs");
-			AssertNotGenerated(disabledResult, "Interceptors.g.cs");
-
+			var normalResult = RunGenerator(GenerationOptionsSource);
 			var designTimeResult = RunGenerator(
 				GenerationOptionsSource,
 				new()
@@ -58,28 +50,44 @@ namespace AspectGenerator.Tests
 					["build_property.DesignTimeBuild"] = "true",
 				});
 
+			AssertGenerated   (normalResult, "AspectAttribute.g.cs");
+			AssertGenerated   (normalResult, "Interceptors.g.cs");
 			AssertGenerated   (designTimeResult, "AspectAttribute.g.cs");
 			AssertNotGenerated(designTimeResult, "Interceptors.g.cs");
-
-			var enabledResult = RunGenerator(
-				GenerationOptionsSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "true",
-				});
-
-			AssertGenerated(enabledResult, "AspectAttribute.g.cs");
-			AssertGenerated(enabledResult, "Interceptors.g.cs");
 		}
 
 		[TestMethod]
-		public void HookContractDiagnosticsRunWhenInterceptorsAreDisabledTest()
+		public void AspectGeneratorGenerateInterceptorsPropertyIsIgnoredTest()
+		{
+			var result = RunGenerator(
+				GenerationOptionsSource,
+				new()
+				{
+					["build_property.AspectGeneratorGenerateInterceptors"] = "false",
+				});
+
+			AssertGenerated(result, "Interceptors.g.cs");
+		}
+
+		[TestMethod]
+		public void AspectGeneratorOptionsGenerateInterceptorsNamedArgumentDoesNotExistTest()
+		{
+			var result = RunGeneratorAndGetCompilation(GenerateInterceptorsAssemblyOptionSource, out var compilation);
+
+			AssertGenerated(result, "AspectGeneratorOptionsAttribute.g.cs");
+			Assert.IsTrue(compilation.GetDiagnostics().Any(static d =>
+				d.Severity == DiagnosticSeverity.Error &&
+				d.GetMessage().Contains("GenerateInterceptors", StringComparison.Ordinal)));
+		}
+
+		[TestMethod]
+		public void HookContractDiagnosticsRunDuringDesignTimeBuildTest()
 		{
 			var result = RunGenerator(
 				HookContractDiagnosticsSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "false",
+					["build_property.DesignTimeBuild"] = "true",
 				});
 
 			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), AspectSourceGenerator.DiagnosticID.HookInvalidParameters);
@@ -355,19 +363,6 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void FiltersDoNotGenerateInterceptorsWhenInterceptorsAreDisabledTest()
-		{
-			var result = RunGenerator(
-				FilterAssemblySource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "false",
-				});
-
-			AssertNotGenerated(result, "Interceptors.g.cs");
-		}
-
-		[TestMethod]
 		public void FiltersRespectDesignTimeBuildTest()
 		{
 			var result = RunGenerator(
@@ -449,24 +444,24 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void InterceptedCallMarkersAreDisabledByDefaultTest()
 		{
-			var result = RunGenerator(TraceDirectSource);
+			var diagnostics = RunAnalyzer(TraceDirectSource);
 
-			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			AssertNoDiagnostic(diagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
 		}
 
 		[TestMethod]
 		public void InterceptedCallMarkerReportsWarningWhenEnabledTest()
 		{
-			var result = RunGenerator(
+			var diagnostics = RunAnalyzer(
 				TraceDirectSource,
 				new()
 				{
 					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
 				});
 
-			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
 			Assert.AreEqual(AspectSourceGenerator.InterceptedCallMarkerSeverity, diagnostic.Severity);
 			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
 			StringAssert.Contains(diagnostic.GetMessage(), "TraceAspectAttribute");
@@ -476,70 +471,44 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void InterceptedCallMarkerCanBeEnabledByAssemblyOptionsTest()
 		{
-			var result = RunGenerator(TraceAssemblyOptionsMarkerSource);
-			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			var diagnostics = RunAnalyzer(TraceAssemblyOptionsMarkerSource);
+			var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
 			StringAssert.Contains(diagnostic.GetMessage(), "TraceAspectAttribute");
 		}
 
 		[TestMethod]
 		public void InterceptedCallMarkerReportsOneDiagnosticForMultipleAspectsTest()
 		{
-			var result = RunGenerator(
+			var diagnostics = RunAnalyzer(
 				MarkerMultipleAspectsSource,
 				new()
 				{
 					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
 				});
-			var diagnostics = result.Diagnostics.Where(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker).ToArray();
+			var markerDiagnostics = diagnostics.Where(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker).ToArray();
 
-			Assert.AreEqual(1, diagnostics.Length);
-			StringAssert.Contains(diagnostics[0].GetMessage(), "LogAttribute");
-			StringAssert.Contains(diagnostics[0].GetMessage(), "AuditAttribute");
+			Assert.AreEqual(1, markerDiagnostics.Length);
+			StringAssert.Contains(markerDiagnostics[0].GetMessage(), "LogAttribute");
+			StringAssert.Contains(markerDiagnostics[0].GetMessage(), "AuditAttribute");
 		}
 
 		[TestMethod]
 		public void InterceptedCallMarkersReportEachCallSiteTest()
 		{
-			var result = RunGenerator(
+			var diagnostics = RunAnalyzer(
 				MarkerMultipleCallSitesSource,
 				new()
 				{
 					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
 				});
 
-			Assert.AreEqual(2, result.Diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
+			Assert.AreEqual(2, diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
 		}
 
 		[TestMethod]
-		public void InterceptedCallMarkersAreSuppressedWhenInterceptorsAreDisabledTest()
-		{
-			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
-
-			try
-			{
-				var result = RunGenerator(
-					TraceDirectSource,
-					new()
-					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "false",
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
-					});
-
-				AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
-				AssertNotGenerated(result, "Interceptors.g.cs");
-				StringAssert.Contains(File.ReadAllText(reportFile), "| Interceptor generation | disabled |");
-			}
-			finally
-			{
-				DeleteReportDirectory(reportFile);
-			}
-		}
-
-		[TestMethod]
-		public void InterceptedCallMarkersAreSuppressedForDesignTimeBuildTest()
+		public void InterceptedCallMarkersReportDuringDesignTimeBuildTest()
 		{
 			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
 
@@ -553,8 +522,16 @@ namespace AspectGenerator.Tests
 						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
 						["build_property.DesignTimeBuild"] = "true",
 					});
+				var diagnostics = RunAnalyzer(
+					TraceDirectSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+						["build_property.DesignTimeBuild"] = "true",
+					});
 
-				AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+				AssertDiagnostic(diagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
 				AssertNotGenerated(result, "Interceptors.g.cs");
 				Assert.IsFalse(File.Exists(reportFile), $"Report file should not be generated for design-time build: {reportFile}");
 			}
@@ -565,17 +542,39 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void InterceptedCallMarkersAreSuppressedForExcludedTargetsTest()
+		public void ConditionalDisabledAspectDoesNotEmitInterceptedCallMarkerTest()
 		{
 			var result = RunGenerator(
+				ConditionalDirectAspectSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+					["build_property.DesignTimeBuild"] = "true",
+				});
+			var diagnostics = RunAnalyzer(
+				ConditionalDirectAspectSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+					["build_property.DesignTimeBuild"] = "true",
+				});
+
+			AssertNoDiagnostic(diagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			AssertNotGenerated(result, "Interceptors.g.cs");
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkersAreSuppressedForExcludedTargetsTest()
+		{
+			var diagnostics = RunAnalyzer(
 				AssemblyIncludeTypeExcludeFilterSource,
 				new()
 				{
 					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
 				});
 
-			Assert.AreEqual(1, result.Diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
-			Assert.IsTrue(result.Diagnostics
+			Assert.AreEqual(1, diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
+			Assert.IsTrue(diagnostics
 				.Where(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker)
 				.All(d => d.Location.SourceTree?.GetRoot().FindNode(d.Location.SourceSpan).ToString() != "HealthCheck()"));
 		}
@@ -583,13 +582,13 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void InterceptedCallMarkersAreSuppressedForDisabledConditionalAspectTest()
 		{
-			var disabledResult = RunGenerator(
+			var disabledDiagnostics = RunAnalyzer(
 				ConditionalDirectAspectSource,
 				new()
 				{
 					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
 				});
-			var enabledResult = RunGenerator(
+			var enabledDiagnostics = RunAnalyzer(
 				ConditionalDirectAspectSource,
 				new()
 				{
@@ -597,8 +596,8 @@ namespace AspectGenerator.Tests
 				},
 				preprocessorSymbols: ["DEBUG"]);
 
-			AssertNoDiagnostic(disabledResult, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
-			Assert.AreEqual(1, enabledResult.Diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
+			AssertNoDiagnostic(disabledDiagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			Assert.AreEqual(1, enabledDiagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
 		}
 
 		[TestMethod]
@@ -666,7 +665,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void BuildReportMentionsDisabledInterceptorGenerationTest()
+		public void BuildReportIgnoresRemovedGenerateInterceptorsPropertyTest()
 		{
 			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
 
@@ -677,15 +676,15 @@ namespace AspectGenerator.Tests
 					new()
 					{
 						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "false",
+						["build_property.AspectGeneratorGenerateInterceptors"] = "false",
 					});
 
 				var report = File.ReadAllText(reportFile);
 
-				StringAssert.Contains(report, "| Selected call sites | 1 |");
+				StringAssert.Contains(report, "| Generated call sites | 1 |");
 				StringAssert.Contains(report, "| Target methods | 1 |");
-				StringAssert.Contains(report, "| Interceptor generation | disabled |");
-				StringAssert.Contains(report, "No interceptor source was emitted.");
+				StringAssert.Contains(report, "| Interceptor generation | enabled |");
+				Assert.IsFalse(report.Contains("No interceptor source was emitted.", StringComparison.Ordinal));
 			}
 			finally
 			{
@@ -824,6 +823,11 @@ namespace AspectGenerator.Tests
 
 		static GeneratorDriverRunResult RunGenerator(string source, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null)
 		{
+			return RunGeneratorAndGetCompilation(source, out _, properties, preprocessorSymbols);
+		}
+
+		static GeneratorDriverRunResult RunGeneratorAndGetCompilation(string source, out Compilation outputCompilation, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null)
+		{
 			var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
 
 			if (preprocessorSymbols is not null)
@@ -849,9 +853,30 @@ namespace AspectGenerator.Tests
 				parseOptions: parseOptions,
 				optionsProvider: optionsProvider);
 
-			driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out _);
+			driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out outputCompilation, out _);
 
 			return driver.GetRunResult();
+		}
+
+		static ImmutableArray<Diagnostic> RunAnalyzer(string source, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null)
+		{
+			RunGeneratorAndGetCompilation(source, out var compilation, properties, preprocessorSymbols);
+
+			var effectiveProperties = properties is null
+				? new Dictionary<string,string>()
+				: new Dictionary<string,string>(properties);
+
+			effectiveProperties.TryAdd("build_property.InterceptorsNamespaces", "AspectGenerator");
+
+			var optionsProvider = new TestAnalyzerConfigOptionsProvider(effectiveProperties);
+			var analyzerOptions = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
+			var analyzers       = ImmutableArray.Create<DiagnosticAnalyzer>(new AspectGeneratorDiagnosticAnalyzer());
+
+			return compilation
+				.WithAnalyzers(analyzers, analyzerOptions)
+				.GetAnalyzerDiagnosticsAsync()
+				.GetAwaiter()
+				.GetResult();
 		}
 
 		static IEnumerable<MetadataReference> GetMetadataReferences()
@@ -882,9 +907,19 @@ namespace AspectGenerator.Tests
 			CollectionAssert.DoesNotContain(result.Diagnostics.Select(static d => d.Id).ToArray(), diagnosticId);
 		}
 
+		static void AssertNoDiagnostic(ImmutableArray<Diagnostic> diagnostics, string diagnosticId)
+		{
+			CollectionAssert.DoesNotContain(diagnostics.Select(static d => d.Id).ToArray(), diagnosticId);
+		}
+
 		static void AssertDiagnostic(GeneratorDriverRunResult result, string diagnosticId)
 		{
 			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), diagnosticId);
+		}
+
+		static void AssertDiagnostic(ImmutableArray<Diagnostic> diagnostics, string diagnosticId)
+		{
+			CollectionAssert.Contains(diagnostics.Select(static d => d.Id).ToArray(), diagnosticId);
 		}
 
 		static string GetGeneratedSource(GeneratorDriverRunResult result, string hintName)
@@ -983,6 +1018,13 @@ namespace AspectGenerator.Tests
 					return "target";
 				}
 			}
+			""";
+
+		const string GenerateInterceptorsAssemblyOptionSource =
+			"""
+			using AspectGenerator;
+
+			[assembly: AspectGeneratorOptions(GenerateInterceptors = false)]
 			""";
 
 		const string HookContractDiagnosticsSource =

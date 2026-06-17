@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -44,7 +44,6 @@ namespace AspectGenerator
 		public static class OptionID
 		{
 			public const string GenerateApi           = "GenerateApi";
-			public const string GenerateInterceptors  = "GenerateInterceptors";
 			public const string PublicApi             = "PublicApi";
 			public const string DebuggerStepThrough   = "DebuggerStepThrough";
 			public const string ReportFile            = "ReportFile";
@@ -62,9 +61,11 @@ namespace AspectGenerator
 			"AspectGenerator",
 			InterceptedCallMarkerSeverity,
 			true,
-			"Marks a call site that is intercepted by AspectGenerator in this build.",
+			"Marks a call site that is selected by AspectGenerator and is expected to be intercepted in a normal build.",
 			"https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics");
 		#pragma warning restore RS2008
+
+		public static ImmutableArray<DiagnosticDescriptor> MarkerSupportedDiagnostics => [InterceptedCallMarkerDescriptor];
 
 		#region API
 
@@ -93,13 +94,6 @@ namespace AspectGenerator
 					/// Keep this enabled for single-project usage. Set it to <c>false</c> when the API is supplied by an aspect library referenced by this project.
 					/// </remarks>
 					public bool    {{OptionID.GenerateApi}}                   { get; set; } = true;
-					/// <summary>
-					/// Gets or sets whether AspectGenerator emits interceptor implementations for this assembly.
-					/// </summary>
-					/// <remarks>
-					/// This can be used to force interceptor generation in projects where generation would otherwise be skipped by build-time defaults.
-					/// </remarks>
-					public bool    {{OptionID.GenerateInterceptors}}          { get; set; }
 					/// <summary>
 					/// Gets or sets whether generated API types are emitted as public types.
 					/// </summary>
@@ -403,7 +397,6 @@ namespace AspectGenerator
 		class Options
 		{
 			public bool?   GenerateApi;
-			public bool?   GenerateInterceptors;
 			public bool?   DesignTimeBuild;
 			public bool?   PublicApi;
 			public bool?   DebuggerStepThrough;
@@ -417,7 +410,7 @@ namespace AspectGenerator
 
 		record GeneratorExecutionOptions(
 			bool    GenerateApi,
-			bool    GenerateInterceptors,
+			bool    EmitInterceptors,
 			bool    DesignTimeBuild,
 			bool    PublicApi,
 			bool    DebuggerStepThrough,
@@ -497,20 +490,7 @@ namespace AspectGenerator
 				.Collect();
 
 			var options = context.AnalyzerConfigOptionsProvider.Select((c, _) =>
-				new Options
-				{
-					GenerateApi            = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.GenerateApi}"),
-					GenerateInterceptors   = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.GenerateInterceptors}"),
-					DesignTimeBuild        = GetBoolProperty(c.GlobalOptions,  "build_property.DesignTimeBuild"),
-					PublicApi              = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.PublicApi}"),
-					DebuggerStepThrough    = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.DebuggerStepThrough}"),
-					ReportFile             = c.GlobalOptions.TryGetValue($"build_property.AspectGenerator{OptionID.ReportFile}", out var reportFile) ? reportFile : null,
-					MarkInterceptedCalls   = GetBoolProperty(c.GlobalOptions, $"build_property.AspectGenerator{OptionID.MarkInterceptedCalls}"),
-					ProjectDirectory       = c.GlobalOptions.TryGetValue("build_property.ProjectDir", out var projectDir) ? projectDir : null,
-					CompilerGeneratedFilesOutputPath = c.GlobalOptions.TryGetValue("build_property.CompilerGeneratedFilesOutputPath", out var generatedFilesPath) ? generatedFilesPath : null,
-					InterceptorsNamespace  = c.GlobalOptions.TryGetValue($"build_property.AspectGenerator{OptionID.InterceptorsNamespace}", out var ns) ? ns : null,
-					InterceptorsNamespaces = c.GlobalOptions.TryGetValue("build_property.InterceptorsNamespaces", out var namespaces) ? namespaces : null,
-				});
+				GetOptions(c));
 
 			var analysis = context.CompilationProvider
 				.Combine(options)
@@ -655,16 +635,16 @@ namespace AspectGenerator
 						location: diagnostic.Location));
 			}
 
-			ReportInterceptedCallMarkers(spc, analysis);
 			WriteBuildReport(analysis);
 		}
 
-		static void ReportInterceptedCallMarkers(SourceProductionContext spc, AnalysisResult analysis)
+		static ImmutableArray<Diagnostic> GetInterceptedCallMarkerDiagnostics(AnalysisResult analysis, CancellationToken cancellationToken)
 		{
 			if (!analysis.Options.MarkInterceptedCalls ||
-				!analysis.Options.GenerateInterceptors ||
 				analysis.AspectedMethods.Length == 0)
-				return;
+				return [];
+
+			var result = ImmutableArray.CreateBuilder<Diagnostic>();
 
 			foreach (var analyzedInvocation in analysis.AspectedMethods.OrderBy(static m => GetLocationSortKey(m.Inv.GetLocation()), StringComparer.Ordinal))
 			{
@@ -673,17 +653,19 @@ namespace AspectGenerator
 
 				var semantic = analysis.Compilation.GetSemanticModel(analyzedInvocation.Inv.SyntaxTree);
 
-				if (semantic.GetInterceptableLocation(analyzedInvocation.Inv, spc.CancellationToken) is null)
+				if (semantic.GetInterceptableLocation(analyzedInvocation.Inv, cancellationToken) is null)
 					continue;
 
 				var aspects = string.Join(", ", analyzedInvocation.Attributes.Select(static attribute => attribute.AttributeClass.Name));
 
-				spc.ReportDiagnostic(
+				result.Add(
 					Diagnostic.Create(
 						InterceptedCallMarkerDescriptor,
 						analyzedInvocation.Inv.GetLocation(),
 						aspects));
 			}
+
+			return result.ToImmutable();
 		}
 
 		#pragma warning disable RS1035 // Build reports are an explicit source-generator output channel for this package.
@@ -725,7 +707,7 @@ namespace AspectGenerator
 		{
 			var selectedCallSiteCount = analysis.AspectedMethods.Length;
 			var targetMethodCount     = analysis.AspectedMethods.Select(static m => m.Method).Distinct(SymbolEqualityComparer.Default).Count();
-			var interceptorState      = analysis.Options.GenerateInterceptors ? "enabled" : "disabled";
+			var interceptorState      = analysis.Options.EmitInterceptors ? "enabled" : "disabled";
 			var generatedApiState     = analysis.Options.GenerateApi ? "enabled" : "disabled";
 			var interceptorsNamespace = GetInterceptorsNamespace(analysis.Options);
 			var interceptors          = GetInterceptorInfos(analysis.AspectedMethods);
@@ -738,13 +720,13 @@ namespace AspectGenerator
 			sb.AppendLine("| Item | Value |");
 			sb.AppendLine("| --- | --- |");
 			AppendTableRow(sb, "Project", analysis.Compilation.AssemblyName ?? analysis.Compilation.Assembly.Identity.Name);
-			AppendTableRow(sb, analysis.Options.GenerateInterceptors ? "Generated call sites" : "Selected call sites", selectedCallSiteCount.ToString(CultureInfo.InvariantCulture));
+			AppendTableRow(sb, analysis.Options.EmitInterceptors ? "Generated call sites" : "Selected call sites", selectedCallSiteCount.ToString(CultureInfo.InvariantCulture));
 			AppendTableRow(sb, "Target methods", targetMethodCount.ToString(CultureInfo.InvariantCulture));
 			AppendTableRow(sb, "Interceptor generation", interceptorState);
 			AppendTableRow(sb, "Generated API", generatedApiState);
 			AppendTableRow(sb, "Interceptors namespace", $"`{interceptorsNamespace}`");
 
-			if (!analysis.Options.GenerateInterceptors)
+			if (!analysis.Options.EmitInterceptors)
 			{
 				sb.AppendLine();
 				sb.AppendLine("> No interceptor source was emitted.");
@@ -760,7 +742,7 @@ namespace AspectGenerator
 			if (analysis.Options.GenerateApi)
 				AppendGeneratedSourceRow(sb, analysis.Options, "AspectAttribute.g.cs", "Generated aspect authoring and runtime API.");
 
-			if (analysis.Options.GenerateInterceptors && analysis.AspectedMethods.Length > 0)
+			if (analysis.Options.EmitInterceptors && analysis.AspectedMethods.Length > 0)
 				AppendGeneratedSourceRow(sb, analysis.Options, "Interceptors.g.cs", "Generated interceptor methods for selected call sites.");
 
 			sb.AppendLine();
@@ -913,7 +895,7 @@ namespace AspectGenerator
 
 		static void EmitInterceptors(SourceProductionContext spc, AnalysisResult analysis)
 		{
-			if (!analysis.Options.GenerateInterceptors ||
+			if (!analysis.Options.EmitInterceptors ||
 				analysis.AspectedMethods.Length == 0 ||
 				spc.CancellationToken.IsCancellationRequested)
 				return;
@@ -929,12 +911,47 @@ namespace AspectGenerator
 			return bool.TryParse(value, out var result) ? result : null;
 		}
 
+		static Options GetOptions(AnalyzerConfigOptionsProvider optionsProvider)
+		{
+			var options = optionsProvider.GlobalOptions;
+
+			return new Options
+			{
+				GenerateApi            = GetBoolProperty(options, $"build_property.AspectGenerator{OptionID.GenerateApi}"),
+				DesignTimeBuild        = GetBoolProperty(options,  "build_property.DesignTimeBuild"),
+				PublicApi              = GetBoolProperty(options, $"build_property.AspectGenerator{OptionID.PublicApi}"),
+				DebuggerStepThrough    = GetBoolProperty(options, $"build_property.AspectGenerator{OptionID.DebuggerStepThrough}"),
+				ReportFile             = options.TryGetValue($"build_property.AspectGenerator{OptionID.ReportFile}", out var reportFile) ? reportFile : null,
+				MarkInterceptedCalls   = GetBoolProperty(options, $"build_property.AspectGenerator{OptionID.MarkInterceptedCalls}"),
+				ProjectDirectory       = options.TryGetValue("build_property.ProjectDir", out var projectDir) ? projectDir : null,
+				CompilerGeneratedFilesOutputPath = options.TryGetValue("build_property.CompilerGeneratedFilesOutputPath", out var generatedFilesPath) ? generatedFilesPath : null,
+				InterceptorsNamespace  = options.TryGetValue($"build_property.AspectGenerator{OptionID.InterceptorsNamespace}", out var ns) ? ns : null,
+				InterceptorsNamespaces = options.TryGetValue("build_property.InterceptorsNamespaces", out var namespaces) ? namespaces : null,
+			};
+		}
+
+		public static ImmutableArray<Diagnostic> GetInterceptedCallMarkerDiagnostics(
+			Compilation                                      compilation,
+			AnalyzerConfigOptionsProvider                    optionsProvider,
+			ImmutableArray<ClassDeclarationSyntax>           aspectDeclarations,
+			ImmutableArray<InvocationExpressionSyntax>       invocations,
+			CancellationToken                                cancellationToken)
+		{
+			var analysis = Analyze((((compilation, GetOptions(optionsProvider)), aspectDeclarations), invocations), cancellationToken);
+
+			return GetInterceptedCallMarkerDiagnostics(analysis, cancellationToken);
+		}
+
+		public static bool IsInterceptedCallMarkerEnabled(Compilation compilation, AnalyzerConfigOptionsProvider optionsProvider)
+		{
+			return ResolveOptions(compilation, GetOptions(optionsProvider)).MarkInterceptedCalls;
+		}
+
 		static GeneratorExecutionOptions ResolveOptions(Compilation compilation, Options msBuildOptions)
 		{
 			var result = new Options
 			{
 				GenerateApi            = msBuildOptions.GenerateApi,
-				GenerateInterceptors   = msBuildOptions.GenerateInterceptors,
 				DesignTimeBuild        = msBuildOptions.DesignTimeBuild,
 				PublicApi              = msBuildOptions.PublicApi,
 				DebuggerStepThrough    = msBuildOptions.DebuggerStepThrough,
@@ -949,31 +966,32 @@ namespace AspectGenerator
 			var attr = compilation.Assembly.GetAttributes().FirstOrDefault(a =>
 				a.AttributeClass is { ContainingNamespace.Name: "AspectGenerator", Name: "AspectGeneratorOptionsAttribute" });
 
-			if (attr is null)
-				return CreateExecutionOptions(result);
-
-			foreach (var arg in attr.NamedArguments)
+			if (attr is not null)
 			{
-				switch (arg.Key)
+				foreach (var arg in attr.NamedArguments)
 				{
-					case OptionID.GenerateApi           when arg.Value.Value is bool   generateApi          : result.GenerateApi           = generateApi;           break;
-					case OptionID.GenerateInterceptors  when arg.Value.Value is bool   generateInterceptors : result.GenerateInterceptors  = generateInterceptors;  break;
-					case OptionID.PublicApi             when arg.Value.Value is bool   publicApi            : result.PublicApi             = publicApi;             break;
-					case OptionID.DebuggerStepThrough   when arg.Value.Value is bool   debuggerStepThrough  : result.DebuggerStepThrough   = debuggerStepThrough;   break;
-					case OptionID.MarkInterceptedCalls  when arg.Value.Value is bool   markInterceptedCalls : result.MarkInterceptedCalls  = markInterceptedCalls;  break;
-					case OptionID.InterceptorsNamespace when arg.Value.Value is string interceptorsNamespace: result.InterceptorsNamespace = interceptorsNamespace; break;
+					switch (arg.Key)
+					{
+						case OptionID.GenerateApi           when arg.Value.Value is bool   generateApi          : result.GenerateApi           = generateApi;           break;
+						case OptionID.PublicApi             when arg.Value.Value is bool   publicApi            : result.PublicApi             = publicApi;             break;
+						case OptionID.DebuggerStepThrough   when arg.Value.Value is bool   debuggerStepThrough  : result.DebuggerStepThrough   = debuggerStepThrough;   break;
+						case OptionID.MarkInterceptedCalls  when arg.Value.Value is bool   markInterceptedCalls : result.MarkInterceptedCalls  = markInterceptedCalls;  break;
+						case OptionID.InterceptorsNamespace when arg.Value.Value is string interceptorsNamespace: result.InterceptorsNamespace = interceptorsNamespace; break;
+					}
 				}
 			}
+
+			ApplyAssemblyOptionsFromSyntax(compilation, result);
 
 			return CreateExecutionOptions(result);
 
 			static GeneratorExecutionOptions CreateExecutionOptions(Options options)
 			{
-				var generateInterceptors = options.GenerateInterceptors ?? options.DesignTimeBuild is not true;
+				var emitInterceptors = options.DesignTimeBuild is not true;
 
 				return new GeneratorExecutionOptions(
 					options.GenerateApi is not false,
-					generateInterceptors,
+					emitInterceptors,
 					options.DesignTimeBuild is true,
 					options.PublicApi is true,
 					options.DebuggerStepThrough is true,
@@ -984,6 +1002,81 @@ namespace AspectGenerator
 					options.InterceptorsNamespace,
 					options.InterceptorsNamespaces);
 			}
+		}
+
+		static void ApplyAssemblyOptionsFromSyntax(Compilation compilation, Options options)
+		{
+			foreach (var tree in compilation.SyntaxTrees)
+			{
+				if (tree.GetRoot() is not CompilationUnitSyntax root)
+					continue;
+
+				foreach (var attribute in root.AttributeLists
+					.Where(static list => list.Target?.Identifier.IsKind(SyntaxKind.AssemblyKeyword) == true)
+					.SelectMany(static list => list.Attributes))
+				{
+					if (!IsAspectGeneratorOptionsAttributeName(attribute.Name.ToString()))
+						continue;
+
+					foreach (var argument in attribute.ArgumentList?.Arguments ?? default(SeparatedSyntaxList<AttributeArgumentSyntax>))
+					{
+						var name = argument.NameEquals?.Name.Identifier.ValueText;
+
+						if (name is null)
+							continue;
+
+						switch (name)
+						{
+							case OptionID.GenerateApi           when TryGetBoolLiteral(argument.Expression, out var generateApi)          : options.GenerateApi           = generateApi;           break;
+							case OptionID.PublicApi             when TryGetBoolLiteral(argument.Expression, out var publicApi)            : options.PublicApi             = publicApi;             break;
+							case OptionID.DebuggerStepThrough   when TryGetBoolLiteral(argument.Expression, out var debuggerStepThrough)  : options.DebuggerStepThrough   = debuggerStepThrough;   break;
+							case OptionID.MarkInterceptedCalls  when TryGetBoolLiteral(argument.Expression, out var markInterceptedCalls) : options.MarkInterceptedCalls  = markInterceptedCalls;  break;
+							case OptionID.InterceptorsNamespace when TryGetStringLiteral(argument.Expression, out var interceptorsNamespace): options.InterceptorsNamespace = interceptorsNamespace; break;
+						}
+					}
+				}
+			}
+
+			static bool TryGetBoolLiteral(ExpressionSyntax expression, out bool value)
+			{
+				if (expression.IsKind(SyntaxKind.TrueLiteralExpression))
+				{
+					value = true;
+					return true;
+				}
+
+				if (expression.IsKind(SyntaxKind.FalseLiteralExpression))
+				{
+					value = false;
+					return true;
+				}
+
+				value = false;
+				return false;
+			}
+
+			static bool TryGetStringLiteral(ExpressionSyntax expression, out string? value)
+			{
+				if (expression is LiteralExpressionSyntax literal && literal.IsKind(SyntaxKind.StringLiteralExpression))
+				{
+					value = literal.Token.ValueText;
+					return true;
+				}
+
+				value = null;
+				return false;
+			}
+		}
+
+		static bool IsAspectGeneratorOptionsAttributeName(string name)
+		{
+			return
+				name == "AspectGeneratorOptions" ||
+				name == "AspectGeneratorOptionsAttribute" ||
+				name == "AspectGenerator.AspectGeneratorOptions" ||
+				name == "AspectGenerator.AspectGeneratorOptionsAttribute" ||
+				name.EndsWith(".AspectGeneratorOptions", StringComparison.Ordinal) ||
+				name.EndsWith(".AspectGeneratorOptionsAttribute", StringComparison.Ordinal);
 		}
 
 		static string GetInterceptorsNamespace(GeneratorExecutionOptions options)

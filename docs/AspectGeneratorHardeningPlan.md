@@ -14,7 +14,7 @@ Completed:
 - initial hook diagnostics `AG0101` and `AG0102`;
 - hook contract diagnostics `AG0103` through `AG0107`;
 - shared analysis model consumed by diagnostics and interceptor emission;
-- build-time interceptor emission gate through `AspectGeneratorGenerateInterceptors` / `DesignTimeBuild`;
+- automatic build-mode interceptor emission gate based on `DesignTimeBuild`;
 - `ValueTask` and `ValueTask<T>` async target support;
 - AOP-like target filters;
 - removal of the legacy explicit method selector in favor of applied target filters;
@@ -117,7 +117,7 @@ Implementation constraints:
 - [x] Do not reintroduce full `Compilation.SyntaxTrees` / `DescendantNodes()` scanning.
 - [x] Evaluate filters against invocation target methods using the existing `SyntaxProvider` candidate path.
 - [x] Start with normal methods only.
-- [x] Preserve existing behavior for explicit method-level aspects, external aspect attributes, diagnostics, `GenerateInterceptors`, `DesignTimeBuild`, and `InterceptorsNamespaces`.
+- [x] Preserve existing behavior for explicit method-level aspects, external aspect attributes, diagnostics, `DesignTimeBuild`, and `InterceptorsNamespaces`.
 
 Tests:
 
@@ -138,7 +138,7 @@ Tests:
 - [x] Add generator-driver test for type-level applied aspect filters.
 - [x] Add generator-driver test proving explicit method-level aspect still applies when no target filter matches.
 - [x] Add generator-driver test for invalid regex diagnostic `AG0201`.
-- [x] Add generator-driver tests for `AspectGeneratorGenerateInterceptors=false` and `DesignTimeBuild=true`.
+- [x] Add generator-driver tests for normal build emission and `DesignTimeBuild=true` suppression.
 
 Documentation:
 

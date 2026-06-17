@@ -84,15 +84,6 @@ AspectGenerator can be configured with MSBuild properties:
 </PropertyGroup>
 ```
 
-Advanced override:
-
-```xml
-<PropertyGroup>
-  <!-- Force interceptor source emission even when the default build-mode logic would skip it. -->
-  <AspectGeneratorGenerateInterceptors>true</AspectGeneratorGenerateInterceptors>
-</PropertyGroup>
-```
-
 The same settings can be overridden with an assembly-level attribute:
 
 ```csharp
@@ -110,7 +101,7 @@ using AspectGenerator;
 
 The package `.props` asset defines defaults early. The package `.targets` asset appends `InterceptorsNamespaces` late, after project-level overrides such as `AspectGeneratorInterceptorsNamespace` are evaluated.
 
-`AspectGeneratorGenerateInterceptors` defaults to `false` for design-time builds and `true` otherwise. Diagnostics still run when interceptor source emission is disabled.
+AspectGenerator analyzes code during design-time builds so IDE diagnostics and optional call-site markers can work. Interceptor source is emitted only during normal builds. This behavior is automatic and not user-configurable.
 
 AspectGenerator writes an informational build report file during normal builds. The report is not printed to the console by default. Diagnostics are reserved for errors, warnings, and actionable misconfiguration.
 

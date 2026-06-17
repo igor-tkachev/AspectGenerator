@@ -15,15 +15,6 @@ AspectGenerator itself targets `netstandard2.0`, but consuming projects must be 
 </PropertyGroup>
 ```
 
-Advanced override:
-
-```xml
-<PropertyGroup>
-  <!-- Force interceptor source emission even when the default build-mode logic would skip it. -->
-  <AspectGeneratorGenerateInterceptors>true</AspectGeneratorGenerateInterceptors>
-</PropertyGroup>
-```
-
 ## Assembly Attribute Override
 
 ```csharp
@@ -39,7 +30,7 @@ using AspectGenerator;
 
 Assembly attribute values override MSBuild properties.
 
-`AspectGeneratorGenerateInterceptors` controls `Interceptors.g.cs` emission. It defaults to `false` for design-time builds and `true` otherwise. Diagnostics still run when interceptor source emission is disabled.
+AspectGenerator analyzes code during design-time builds so IDE diagnostics and optional call-site markers can work. Interceptor source is emitted only during normal builds. This behavior is automatic and not user-configurable.
 
 AspectGenerator writes an informational build report file during normal builds. `AspectGeneratorReportFile` controls the output path. The report is not printed to the console by default. Diagnostics are reserved for errors, warnings, and actionable misconfiguration.
 

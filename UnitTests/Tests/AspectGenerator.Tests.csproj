@@ -10,7 +10,9 @@
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
+
 		<AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
+		<AspectGeneratorMarkInterceptedCalls>true</AspectGeneratorMarkInterceptedCalls>
 	</PropertyGroup>
 
 	<ItemGroup>

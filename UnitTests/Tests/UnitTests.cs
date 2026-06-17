@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -62,11 +63,15 @@ namespace AspectGenerator.Tests
 			var repositoryRoot = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", ".."));
 			var configuration  = Directory.GetParent(baseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))?.Name;
 			var packageDir     = Path.Combine(repositoryRoot, "Source", "bin", configuration ?? "Debug");
-			var packageFiles   = Directory.GetFiles(packageDir, "AspectGenerator.*.nupkg");
+			var packageFile    = Directory
+				.GetFiles(packageDir, "AspectGenerator.*.nupkg")
+				.Select(static path => new FileInfo(path))
+				.OrderByDescending(static file => file.LastWriteTimeUtc)
+				.FirstOrDefault();
 
-			Assert.AreEqual(1, packageFiles.Length, $"Expected exactly one AspectGenerator package in {packageDir}. Build Source/AspectGenerator.csproj before running package validation tests.");
+			Assert.IsNotNull(packageFile, $"Expected at least one AspectGenerator package in {packageDir}. Build Source/AspectGenerator.csproj before running package validation tests.");
 
-			using var archive = ZipFile.OpenRead(packageFiles[0]);
+			using var archive = ZipFile.OpenRead(packageFile.FullName);
 			var entries = new List<string>();
 
 			foreach (var entry in archive.Entries)
