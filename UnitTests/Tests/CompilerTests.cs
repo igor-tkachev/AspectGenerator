@@ -447,178 +447,131 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void BuildVerbosityDefaultEmitsOnlySummaryInfoTest()
+		public void BuildReportFileGeneratedForNormalBuildTest()
 		{
-			var result = RunGenerator(TraceFilterSource);
-			var reports = GetReportDiagnostics(result);
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
 
-			Assert.AreEqual(1, reports.Length);
-			Assert.AreEqual(DiagnosticSeverity.Info, reports.Single(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary).Severity);
+			try
+			{
+				var result = RunGenerator(
+					TraceFilterSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+					});
+
+				Assert.AreEqual(0, result.Diagnostics.Count(IsReportDiagnostic));
+				Assert.IsTrue(File.Exists(reportFile), $"Report file was not generated: {reportFile}");
+
+				var report = File.ReadAllText(reportFile);
+
+				StringAssert.Contains(report, "# AspectGenerator Build Report");
+				StringAssert.Contains(report, "| Generated call sites | 2 |");
+				StringAssert.Contains(report, "| Target methods | 2 |");
+				StringAssert.Contains(report, "| Interceptor generation | enabled |");
+				StringAssert.Contains(report, "| Generated API | enabled |");
+				StringAssert.Contains(report, "| Interceptors namespace | `AspectGenerator` |");
+				StringAssert.Contains(report, "## Generated Sources");
+				StringAssert.Contains(report, "Interceptors.g.cs");
+				StringAssert.Contains(report, "## Target Methods");
+				StringAssert.Contains(report, "`AspectGenerator.Tests.GeneratorDriver.Service.Save()`");
+				StringAssert.Contains(report, "`Save_Interceptor`");
+				StringAssert.Contains(report, "`AspectGenerator.Tests.GeneratorDriver.TraceAspectAttribute`");
+				StringAssert.Contains(report, "## Intercepted Call Sites");
+				StringAssert.Contains(report, "`Save()`");
+				StringAssert.Contains(report, "`Load()`");
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
 		}
 
 		[TestMethod]
-		public void BuildVerbosityOffEmitsNoReportDiagnosticsTest()
+		public void BuildReportFileNotGeneratedForDesignTimeBuildTest()
 		{
-			var result = RunGenerator(
-				TraceFilterSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Off",
-				});
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
 
-			Assert.AreEqual(0, result.Diagnostics.Count(IsReportDiagnostic));
+			try
+			{
+				RunGenerator(
+					TraceFilterSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+						["build_property.DesignTimeBuild"] = "true",
+					});
+
+				Assert.IsFalse(File.Exists(reportFile), $"Report file should not be generated for design-time build: {reportFile}");
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
 		}
 
 		[TestMethod]
-		public void BuildVerbosityMinimalEmitsSummaryAndInterceptorReportsTest()
+		public void BuildReportMentionsDisabledInterceptorGenerationTest()
 		{
-			var result = RunGenerator(
-				TraceFilterSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Minimal",
-				});
-			var reports = GetReportDiagnostics(result);
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
 
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportInterceptorGenerated));
-			Assert.IsFalse(reports.Any(static d => d.Id.StartsWith("AG072", StringComparison.Ordinal)));
-			Assert.IsFalse(reports.Any(static d => d.Id.StartsWith("AG073", StringComparison.Ordinal)));
+			try
+			{
+				RunGenerator(
+					TraceDirectSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "false",
+					});
+
+				var report = File.ReadAllText(reportFile);
+
+				StringAssert.Contains(report, "| Selected call sites | 1 |");
+				StringAssert.Contains(report, "| Target methods | 1 |");
+				StringAssert.Contains(report, "| Interceptor generation | disabled |");
+				StringAssert.Contains(report, "No interceptor source was emitted.");
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
 		}
 
 		[TestMethod]
-		public void BuildVerbosityNormalEmitsTargetReportsTest()
+		public void RealDiagnosticsStillEmitWithoutReportDiagnosticsTest()
 		{
-			var result = RunGenerator(
-				TraceFilterSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Normal",
-				});
-			var reports = GetReportDiagnostics(result);
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
 
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportInterceptorGenerated));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetSelected));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetExcluded));
-			Assert.IsFalse(reports.Any(static d => d.Id.StartsWith("AG073", StringComparison.Ordinal)));
-		}
+			try
+			{
+				var result = RunGenerator(
+					InvalidUnknownConditionKeyFilterSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+					});
 
-		[TestMethod]
-		public void BuildVerbosityDetailedDoesNotEmitFiltersWithDefaultThresholdTest()
-		{
-			var result = RunGenerator(
-				TraceFilterSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Detailed",
-				});
-			var reports = GetReportDiagnostics(result);
-
-			Assert.IsFalse(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterMatched));
-			Assert.IsFalse(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterNotMatched));
-			Assert.IsFalse(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterFinalDecision));
-		}
-
-		[TestMethod]
-		public void BuildVerbosityDiagnosticEmitsAllDefaultCategoriesTest()
-		{
-			var result = RunGenerator(
-				TraceFilterSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Diagnostic",
-				});
-			var reports = GetReportDiagnostics(result);
-
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportInterceptorGenerated));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetSelected));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterMatched));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterNotMatched));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportFilterFinalDecision));
-			Assert.IsTrue(reports.All(static d => d.Severity == DiagnosticSeverity.Info));
-		}
-
-		[TestMethod]
-		public void ReportCategoryThresholdCanMoveCategoryEarlierTest()
-		{
-			var source = TraceFilterSource.Replace(
-				"using AspectGenerator;",
-				"using AspectGenerator;\n\n[assembly: AspectGeneratorOptions(TargetsVerbosity = AspectReportVerbosity.Minimal)]");
-
-			var result = RunGenerator(
-				source,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"]  = "Minimal",
-				});
-			var reports = GetReportDiagnostics(result);
-
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetSelected));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetExcluded));
-		}
-
-		[TestMethod]
-		public void ReportCategoryThresholdOffDisablesCategoryTest()
-		{
-			var source = TraceFilterSource.Replace(
-				"using AspectGenerator;",
-				"using AspectGenerator;\n\n[assembly: AspectGeneratorOptions(InterceptorsVerbosity = AspectReportVerbosity.Off)]");
-
-			var result = RunGenerator(
-				source,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Diagnostic",
-				});
-			var reports = GetReportDiagnostics(result);
-
-			Assert.IsFalse(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportInterceptorGenerated));
-			Assert.IsTrue(reports.Any(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportTargetSelected));
+				AssertDiagnostic(result, AspectSourceGenerator.DiagnosticID.UnknownAspectFilterConditionKey);
+				Assert.AreEqual(0, result.Diagnostics.Count(IsReportDiagnostic));
+				Assert.IsTrue(File.Exists(reportFile), $"Report file was not generated: {reportFile}");
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
 		}
 
 		[TestMethod]
 		public void CompileTimeReportingDoesNotAffectGeneratedCodeTest()
 		{
-			var offResult = RunGenerator(
-				TraceDirectSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.Verbosity}"] = "Off",
-				});
+			var offResult = RunGenerator(TraceDirectSource);
 			var verboseResult = RunGenerator(TraceDirectSource);
 			var source = GetGeneratedSource(verboseResult, "Interceptors.g.cs");
 
 			Assert.AreEqual(GetGeneratedSource(offResult, "Interceptors.g.cs"), source);
 			Assert.IsFalse(source.Contains("Trace.WriteLine", StringComparison.Ordinal));
 			Assert.IsFalse(source.Contains("System.Diagnostics.Trace", StringComparison.Ordinal));
-		}
-
-		[TestMethod]
-		public void ReportSummaryMentionsDisabledInterceptorGenerationTest()
-		{
-			var result = RunGenerator(
-				TraceDirectSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.GenerateInterceptors}"] = "false",
-				});
-
-			StringAssert.Contains(GetReportDiagnostics(result).Single(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary).GetMessage(), "interceptor generation is disabled");
-		}
-
-		[TestMethod]
-		public void ReportSummaryMentionsDesignTimeDisabledInterceptorGenerationTest()
-		{
-			var result = RunGenerator(
-				TraceDirectSource,
-				new()
-				{
-					["build_property.DesignTimeBuild"] = "true",
-				});
-
-			StringAssert.Contains(GetReportDiagnostics(result).Single(d => d.Id == AspectSourceGenerator.DiagnosticID.ReportSummary).GetMessage(), "interceptor generation is disabled");
 		}
 
 		[TestMethod]
@@ -698,6 +651,22 @@ namespace AspectGenerator.Tests
 			Assert.IsFalse(source.Contains("UpdateAsync_Interceptor", StringComparison.Ordinal));
 		}
 
+		[TestMethod]
+		public void EmptyInterceptorsNamespacesReportsDiagnosticTest()
+		{
+			var result = RunGenerator(
+				TraceDirectSource,
+				new()
+				{
+					["build_property.InterceptorsNamespaces"] = "",
+				});
+
+			AssertDiagnostic(result, AspectSourceGenerator.DiagnosticID.NamespaceNotAllowed);
+			Assert.IsTrue(result.Diagnostics.Any(d =>
+				d.Id == AspectSourceGenerator.DiagnosticID.NamespaceNotAllowed &&
+				d.GetMessage().Contains("InterceptorsNamespaces MSBuild property is empty.", StringComparison.Ordinal)));
+		}
+
 		static GeneratorDriverRunResult RunGenerator(string source, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null)
 		{
 			var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
@@ -711,7 +680,13 @@ namespace AspectGenerator.Tests
 				GetMetadataReferences(),
 				new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-			var optionsProvider = new TestAnalyzerConfigOptionsProvider(properties ?? new());
+			var effectiveProperties = properties is null
+				? new Dictionary<string,string>()
+				: new Dictionary<string,string>(properties);
+
+			effectiveProperties.TryAdd("build_property.InterceptorsNamespaces", "AspectGenerator");
+
+			var optionsProvider = new TestAnalyzerConfigOptionsProvider(effectiveProperties);
 			var generator       = new AspectSourceGenerator();
 
 			GeneratorDriver driver = CSharpGeneratorDriver.Create(
@@ -779,17 +754,18 @@ namespace AspectGenerator.Tests
 			Assert.IsFalse(GetGeneratedSource(result, "Interceptors.g.cs").Contains(text, StringComparison.Ordinal), $"Did not expect generated source to contain '{text}'.");
 		}
 
-		static Diagnostic[] GetReportDiagnostics(GeneratorDriverRunResult result)
-		{
-			return result.Diagnostics
-				.Where(IsReportDiagnostic)
-				.ToArray();
-		}
-
 		static bool IsReportDiagnostic(Diagnostic diagnostic)
 		{
 			return diagnostic.Id.Length == 6 &&
 				diagnostic.Id.StartsWith("AG07", StringComparison.Ordinal);
+		}
+
+		static void DeleteReportDirectory(string reportFile)
+		{
+			var directory = Path.GetDirectoryName(reportFile);
+
+			if (!string.IsNullOrWhiteSpace(directory) && Directory.Exists(directory))
+				Directory.Delete(directory, recursive: true);
 		}
 
 		sealed class TestAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsProvider

@@ -76,11 +76,19 @@ AspectGenerator can be configured with MSBuild properties:
 ```xml
 <PropertyGroup>
   <AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
-  <AspectGeneratorGenerateInterceptors>true</AspectGeneratorGenerateInterceptors>
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
-  <AspectGeneratorVerbosity>Quiet</AspectGeneratorVerbosity>
+  <AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
+</PropertyGroup>
+```
+
+Advanced override:
+
+```xml
+<PropertyGroup>
+  <!-- Force interceptor source emission even when the default build-mode logic would skip it. -->
+  <AspectGeneratorGenerateInterceptors>true</AspectGeneratorGenerateInterceptors>
 </PropertyGroup>
 ```
 
@@ -93,18 +101,16 @@ using AspectGenerator;
     GenerateApi = true,
     PublicApi = false,
     DebuggerStepThrough = false,
-    SummaryVerbosity = AspectReportVerbosity.Quiet,
-    InterceptorsVerbosity = AspectReportVerbosity.Minimal,
-    TargetsVerbosity = AspectReportVerbosity.Normal,
-    FiltersVerbosity = AspectReportVerbosity.Diagnostic,
     InterceptorsNamespace = "AspectGenerator")]
 ```
 
 `AspectGeneratorInterceptorsNamespace` controls the namespace used for generated interceptors. The package appends this namespace to `InterceptorsNamespaces` automatically for direct package consumers. Manual `InterceptorsNamespaces` configuration should only be needed for unusual or custom build setups.
 
+The package `.props` asset defines defaults early. The package `.targets` asset appends `InterceptorsNamespaces` late, after project-level overrides such as `AspectGeneratorInterceptorsNamespace` are evaluated.
+
 `AspectGeneratorGenerateInterceptors` defaults to `false` for design-time builds and `true` otherwise. Diagnostics still run when interceptor source emission is disabled.
 
-Compile-time reporting diagnostics are controlled by the MSBuild-only `AspectGeneratorVerbosity` current reporting level and assembly-level per-category verbosity thresholds. Supported values are `Off`, `Quiet`, `Minimal`, `Normal`, `Detailed`, and `Diagnostic`. Defaults are `AspectGeneratorVerbosity=Quiet`, `SummaryVerbosity=Quiet`, `InterceptorsVerbosity=Minimal`, `TargetsVerbosity=Normal`, and `FiltersVerbosity=Diagnostic`.
+AspectGenerator writes an informational build report file during normal builds. The report is not printed to the console by default. Diagnostics are reserved for errors, warnings, and actionable misconfiguration.
 
 ## Generated API Ownership
 
@@ -230,24 +236,27 @@ This applies consistently to direct method aspect usage, type-level `TargetFilte
 
 Conditional aspect attributes are evaluated against project/tree preprocessor symbols. Project-level `DEBUG`, `TRACE`, and MSBuild-defined symbols are supported. Local source-file `#define` / `#undef` directive state is not guaranteed to be evaluated with full location sensitivity.
 
-## Compile-Time Reporting
+## Build Report
 
-AspectGenerator can emit compile-time reporting diagnostics that explain matching and generation decisions. This is diagnostic output from the source generator, not runtime tracing or logging code.
+AspectGenerator writes a compile-time build report file during normal builds. This is informational build output, not runtime tracing or logging code. The report uses Markdown-friendly text with summary, generated source files, target methods, intercepted call sites, source locations, applied aspects, and generated interceptor names.
 
-Reporting verbosity and default category thresholds:
+Default path:
 
-| Category | Range | Default threshold |
-| --- | --- | --- |
-| Summary | `AG0700` | `Quiet` |
-| Interceptors | `AG0710`-`AG0719` | `Minimal` |
-| Targets | `AG0720`-`AG0729` | `Normal` |
-| Filters | `AG0730`-`AG0739` | `Diagnostic` |
+```text
+obj/GeneratedFiles/AspectGenerator/AspectGeneratorBuildReport.md
+```
 
-`AspectGeneratorVerbosity` is the current reporting level and is configured through MSBuild/analyzer-config only. A category is emitted when `AspectGeneratorVerbosity` is greater than or equal to that category threshold. If either `AspectGeneratorVerbosity` or the category threshold is `Off`, that category is not emitted.
+The report is not printed to the console. Users who need it can inspect the report file directly.
 
-All `AG0700`-`AG0799` report diagnostics are emitted as `Info`. AspectGenerator options control how much report output is generated; they do not expose compiler diagnostic severity.
+To change the report path or file name, set `AspectGeneratorReportFile`:
 
-These diagnostics use normal compiler diagnostic configuration, so they can also be suppressed or filtered through standard build tooling.
+```xml
+<PropertyGroup>
+  <AspectGeneratorReportFile>$(MSBuildProjectDirectory)\artifacts\aspect-report.txt</AspectGeneratorReportFile>
+</PropertyGroup>
+```
+
+Diagnostics are reserved for errors and warnings. The build report is informational, stored as a build artifact, and is not emitted as compiler diagnostics.
 
 ## Documentation And Wiki
 

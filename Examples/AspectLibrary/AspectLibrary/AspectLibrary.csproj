@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
 		<AspectGeneratorPublicApi>true</AspectGeneratorPublicApi>
@@ -6,6 +6,6 @@
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
 
-		<InterceptorsNamespaces>$(InterceptorsNamespaces);AspectGenerator</InterceptorsNamespaces>
+		<InterceptorsNamespaces>AspectGenerator</InterceptorsNamespaces>
 	</PropertyGroup>
 </Project>

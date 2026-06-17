@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<InterceptorsNamespaces>$(InterceptorsNamespaces);MultiProjectAspectGenerator</InterceptorsNamespaces>
+		<InterceptorsNamespaces>MultiProjectAspectGenerator</InterceptorsNamespaces>
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>

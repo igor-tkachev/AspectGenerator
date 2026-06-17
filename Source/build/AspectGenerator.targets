@@ -1,5 +1,27 @@
 <Project>
-	<PropertyGroup Condition="'$(AspectGeneratorInterceptorsNamespace)' != ''">
-		<InterceptorsNamespaces>$(InterceptorsNamespaces);$(AspectGeneratorInterceptorsNamespace)</InterceptorsNamespaces>
+	<PropertyGroup Condition="'$(AspectGeneratorReportFile)' == '' or '$(AspectGeneratorReportFile)' == 'AspectGenerator\report.txt'">
+		<AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
 	</PropertyGroup>
+
+	<!-- Imported after project properties, so custom AspectGeneratorInterceptorsNamespace values are appended here. -->
+	<Choose>
+		<When Condition="'$(AspectGeneratorInterceptorsNamespace)' != '' and '$(InterceptorsNamespaces)' == ''">
+			<PropertyGroup>
+				<InterceptorsNamespaces>$(AspectGeneratorInterceptorsNamespace)</InterceptorsNamespaces>
+			</PropertyGroup>
+		</When>
+		<When Condition="'$(AspectGeneratorInterceptorsNamespace)' != ''">
+			<PropertyGroup>
+				<InterceptorsNamespaces>$(InterceptorsNamespaces);$(AspectGeneratorInterceptorsNamespace)</InterceptorsNamespaces>
+			</PropertyGroup>
+		</When>
+	</Choose>
+
+	<Target Name="AspectGeneratorCleanReport"
+	        BeforeTargets="CoreCompile"
+	        Condition="'$(DesignTimeBuild)' != 'true'
+	                and '$(AspectGeneratorReportFile)' != ''">
+		<Delete Files="$(AspectGeneratorReportFile)"
+		        TreatErrorsAsWarnings="true" />
+	</Target>
 </Project>

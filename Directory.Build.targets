@@ -1,0 +1,13 @@
+<Project>
+	<PropertyGroup Condition="'$(AspectGeneratorReportFile)' == '' or '$(AspectGeneratorReportFile)' == 'AspectGenerator\report.txt'">
+		<AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
+	</PropertyGroup>
+
+	<Target Name="AspectGeneratorCleanReport"
+	        BeforeTargets="CoreCompile"
+	        Condition="'$(DesignTimeBuild)' != 'true'
+	                and '$(AspectGeneratorReportFile)' != ''">
+		<Delete Files="$(AspectGeneratorReportFile)"
+		        TreatErrorsAsWarnings="true" />
+	</Target>
+</Project>

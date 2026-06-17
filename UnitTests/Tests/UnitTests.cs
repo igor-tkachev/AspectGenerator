@@ -83,8 +83,15 @@ namespace AspectGenerator.Tests
 			var targets = ReadEntryText(archive, "build/AspectGenerator.targets");
 
 			StringAssert.Contains(props, "<AspectGeneratorInterceptorsNamespace Condition=\"'$(AspectGeneratorInterceptorsNamespace)' == ''\">AspectGenerator</AspectGeneratorInterceptorsNamespace>");
-			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorVerbosity\" />");
+			StringAssert.Contains(props, "<AspectGeneratorReportFile Condition=\"'$(AspectGeneratorReportFile)' == ''\">$(BaseIntermediateOutputPath)\\GeneratedFiles\\AspectGenerator\\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>");
+			Assert.IsFalse(props.Contains("AspectGeneratorPrintReport", StringComparison.Ordinal));
+			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorReportFile\" />");
+			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"CompilerGeneratedFilesOutputPath\" />");
 			StringAssert.Contains(targets, "<InterceptorsNamespaces>$(InterceptorsNamespaces);$(AspectGeneratorInterceptorsNamespace)</InterceptorsNamespaces>");
+			StringAssert.Contains(targets, "Name=\"AspectGeneratorCleanReport\"");
+			Assert.IsFalse(targets.Contains("AspectGeneratorPrintReport", StringComparison.Ordinal));
+			Assert.IsFalse(targets.Contains("<ReadLinesFromFile", StringComparison.Ordinal));
+			Assert.IsFalse(targets.Contains("<Message", StringComparison.Ordinal));
 
 			static string ReadEntryText(ZipArchive archive, string name)
 			{

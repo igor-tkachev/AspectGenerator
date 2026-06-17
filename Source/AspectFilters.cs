@@ -327,7 +327,7 @@ namespace AspectGenerator
 				return Evaluate(target).IsMatch;
 			}
 
-			public TargetFilterEvaluation Evaluate(in MethodTarget target, Action<TargetFilterTrace>? trace = null)
+			public TargetFilterEvaluation Evaluate(in MethodTarget target)
 			{
 				var included = false;
 				var matchedRule = default(string);
@@ -335,7 +335,6 @@ namespace AspectGenerator
 				foreach (var filter in _filters)
 				{
 					var isMatch = filter.IsMatch(target);
-					trace?.Invoke(new TargetFilterTrace(isMatch ? AspectSourceGenerator.DiagnosticID.ReportFilterMatched : AspectSourceGenerator.DiagnosticID.ReportFilterNotMatched, filter.RuleText));
 
 					if (!isMatch)
 						continue;
@@ -389,18 +388,6 @@ namespace AspectGenerator
 			public bool    IsMatch     { get; }
 			public bool    IsExcluded  { get; }
 			public string? MatchedRule { get; }
-		}
-
-		public readonly struct TargetFilterTrace
-		{
-			public TargetFilterTrace(string diagnosticId, string rule)
-			{
-				DiagnosticId = diagnosticId;
-				Rule         = rule;
-			}
-
-			public string DiagnosticId { get; }
-			public string Rule         { get; }
 		}
 
 		public readonly struct ParameterTarget

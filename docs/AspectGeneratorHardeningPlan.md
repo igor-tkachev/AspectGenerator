@@ -17,7 +17,8 @@ Completed:
 - build-time interceptor emission gate through `AspectGeneratorGenerateInterceptors` / `DesignTimeBuild`;
 - `ValueTask` and `ValueTask<T>` async target support;
 - AOP-like target filters;
-- removal of the legacy explicit method selector in favor of applied target filters.
+- removal of the legacy explicit method selector in favor of applied target filters;
+- MSBuild-visible build report output through `AspectGeneratorReportFile`.
 
 Not completed:
 
@@ -29,7 +30,6 @@ Not completed:
 - typed argument passing;
 - public API contract stabilization;
 - lazy `MemberInfo` initialization;
-- optional per-aspect compile-time report verbosity overrides;
 
 ## Capability Roadmap
 

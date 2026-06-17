@@ -7,25 +7,6 @@ using System;
 namespace AspectGenerator
 {
 	/// <summary>
-	/// Controls AspectGenerator compile-time report verbosity.
-	/// </summary>
-	public enum AspectReportVerbosity
-	{
-		/// <summary>No compile-time report diagnostics are emitted.</summary>
-		Off = 0,
-		/// <summary>Only the compact summary report is emitted.</summary>
-		Quiet = 1,
-		/// <summary>Summary and interceptor call-site reports are emitted.</summary>
-		Minimal = 2,
-		/// <summary>Minimal reports plus target method selection reports are emitted.</summary>
-		Normal = 3,
-		/// <summary>Normal reports plus TargetFilter final decision reports are emitted.</summary>
-		Detailed = 4,
-		/// <summary>Detailed reports plus TargetFilter rule/group match reports are emitted.</summary>
-		Diagnostic = 5
-	}
-
-	/// <summary>
 	/// Configures AspectGenerator for the current assembly.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
@@ -57,26 +38,11 @@ namespace AspectGenerator
 		/// </summary>
 		public bool    DebuggerStepThrough           { get; set; }
 		/// <summary>
-		/// Gets or sets the minimal report verbosity required to emit summary report diagnostics.
-		/// </summary>
-		public AspectReportVerbosity SummaryVerbosity      { get; set; } = AspectReportVerbosity.Quiet;
-		/// <summary>
-		/// Gets or sets the minimal report verbosity required to emit interceptor call-site report diagnostics.
-		/// </summary>
-		public AspectReportVerbosity InterceptorsVerbosity { get; set; } = AspectReportVerbosity.Minimal;
-		/// <summary>
-		/// Gets or sets the minimal report verbosity required to emit target method report diagnostics.
-		/// </summary>
-		public AspectReportVerbosity TargetsVerbosity      { get; set; } = AspectReportVerbosity.Normal;
-		/// <summary>
-		/// Gets or sets the minimal report verbosity required to emit target-filter report diagnostics.
-		/// </summary>
-		public AspectReportVerbosity FiltersVerbosity      { get; set; } = AspectReportVerbosity.Diagnostic;
-		/// <summary>
 		/// Gets or sets the namespace used for generated interceptor types.
 		/// </summary>
 		/// <remarks>
-		/// The namespace must also be listed in the project <c>InterceptorsNamespaces</c> MSBuild property so Roslyn can use the generated interceptors.
+		/// The package normally appends this namespace to the project <c>InterceptorsNamespaces</c> MSBuild property for direct package consumers.
+		/// Custom build setups must ensure this namespace is listed so Roslyn can use the generated interceptors.
 		/// </remarks>
 		public string? InterceptorsNamespace         { get; set; }
 	}

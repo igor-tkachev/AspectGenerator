@@ -8,10 +8,6 @@ using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-[assembly: AspectGeneratorOptions(
-	SummaryVerbosity = AspectReportVerbosity.Quiet
-	)]
-
 namespace Aspects
 {
 	/// <summary>

@@ -7,11 +7,19 @@ AspectGenerator itself targets `netstandard2.0`, but consuming projects must be 
 ```xml
 <PropertyGroup>
   <AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
-  <AspectGeneratorGenerateInterceptors>true</AspectGeneratorGenerateInterceptors>
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
-  <AspectGeneratorVerbosity>Quiet</AspectGeneratorVerbosity>
+  <AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
+</PropertyGroup>
+```
+
+Advanced override:
+
+```xml
+<PropertyGroup>
+  <!-- Force interceptor source emission even when the default build-mode logic would skip it. -->
+  <AspectGeneratorGenerateInterceptors>true</AspectGeneratorGenerateInterceptors>
 </PropertyGroup>
 ```
 
@@ -24,10 +32,6 @@ using AspectGenerator;
     GenerateApi = true,
     PublicApi = false,
     DebuggerStepThrough = false,
-    SummaryVerbosity = AspectReportVerbosity.Quiet,
-    InterceptorsVerbosity = AspectReportVerbosity.Minimal,
-    TargetsVerbosity = AspectReportVerbosity.Normal,
-    FiltersVerbosity = AspectReportVerbosity.Diagnostic,
     InterceptorsNamespace = "AspectGenerator")]
 ```
 
@@ -35,9 +39,11 @@ Assembly attribute values override MSBuild properties.
 
 `AspectGeneratorGenerateInterceptors` controls `Interceptors.g.cs` emission. It defaults to `false` for design-time builds and `true` otherwise. Diagnostics still run when interceptor source emission is disabled.
 
-Compile-time reporting diagnostics are controlled by the MSBuild-only `AspectGeneratorVerbosity` current reporting level and assembly-level per-category verbosity thresholds. Supported values are `Off`, `Quiet`, `Minimal`, `Normal`, `Detailed`, and `Diagnostic`. Defaults are `AspectGeneratorVerbosity=Quiet`, `SummaryVerbosity=Quiet`, `InterceptorsVerbosity=Minimal`, `TargetsVerbosity=Normal`, and `FiltersVerbosity=Diagnostic`.
+AspectGenerator writes an informational build report file during normal builds. `AspectGeneratorReportFile` controls the output path. The report is not printed to the console by default. Diagnostics are reserved for errors, warnings, and actionable misconfiguration.
 
 `AspectGeneratorInterceptorsNamespace` controls the namespace used for generated interceptors. The AspectGenerator NuGet package appends this namespace to `InterceptorsNamespaces` automatically for projects that reference the package directly. Manual `InterceptorsNamespaces` configuration should only be needed for unusual or custom build setups.
+
+The package `.props` asset defines defaults early. The package `.targets` asset appends `InterceptorsNamespaces` late, after project-level overrides such as `AspectGeneratorInterceptorsNamespace` are evaluated.
 
 Every project whose call sites should be intercepted must reference AspectGenerator directly. A shared aspect library may reference AspectGenerator to define and build aspect attributes, but applications that use those aspect attributes must also reference AspectGenerator directly if their call sites should be intercepted.
 

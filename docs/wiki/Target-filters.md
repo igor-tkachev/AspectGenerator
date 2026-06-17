@@ -39,6 +39,27 @@ No matcher prefix is equivalent to `pattern:` for compact method patterns. For c
 
 Invalid regex patterns report `AG0201`. Invalid native pattern rules report `AG0202`, `AG0204`, `AG0205`, or `AG0206` depending on the error.
 
+Approximate grammar:
+
+```text
+filter          ::= line*
+line            ::= blank | comment | rule
+comment         ::= "#" text
+rule            ::= prefix? matcher-rule
+prefix          ::= "-" | "&" | "|"
+matcher-rule    ::= prefixed-rule | native-rule
+prefixed-rule   ::= ("pattern" | "contains" | "regex") ":" text
+native-rule     ::= condition-rule | method-pattern
+condition-rule  ::= condition-item (";" condition-item)*
+condition-item  ::= condition-key ":" condition-expr | modifier-token+
+condition-expr  ::= condition-term ("|" condition-term)*
+condition-term  ::= condition-atom ("&" condition-atom)*
+method-pattern  ::= modifier-token* method-name-pattern parameter-list? return-pattern?
+return-pattern  ::= ":" type-pattern
+```
+
+This grammar is intentionally approximate. Pattern values also have escaping, wildcard, generic nesting, dotted-segment, and parameter-list parsing rules.
+
 A simple unknown condition key reports `AG0204` and is not interpreted as a compact method pattern:
 
 ```text

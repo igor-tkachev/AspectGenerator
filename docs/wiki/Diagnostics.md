@@ -25,20 +25,14 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0206`: invalid target filter dotted pattern.
 - `AG0208`: `TargetFilter` is used on a method-level aspect attribute.
 
-## Compile-Time Reporting Diagnostics
+## Build Report
 
-Compile-time reporting diagnostics are source-generator diagnostics. They explain matching and generation decisions and do not add runtime tracing or logging code.
+Informational compile-time output is written to the AspectGenerator build report, not to compiler diagnostics. The report uses Markdown-friendly text with summary, generated source files, target methods, intercepted call sites, source locations, applied aspects, and generated interceptor names.
 
-Reporting is configured with MSBuild-only `AspectGeneratorVerbosity` for the current reporting level and matching `[assembly: AspectGeneratorOptions(...)]` properties for per-category thresholds. Supported values are `Off`, `Quiet`, `Minimal`, `Normal`, `Detailed`, and `Diagnostic`. Defaults are `AspectGeneratorVerbosity=Quiet`, `SummaryVerbosity=Quiet`, `InterceptorsVerbosity=Minimal`, `TargetsVerbosity=Normal`, and `FiltersVerbosity=Diagnostic`. All `AG0700`-`AG0799` report diagnostics are emitted as `Info`.
+Default report path:
 
-- `AG0700`: summary report.
-- `AG0710`: interceptor was generated for a selected call.
-- `AG0711`: interceptor generation skipped an unsupported target.
-- `AG0712`: interceptor generation skipped a non-selected target.
-- `AG0720`: aspect selected a target method.
-- `AG0721`: aspect was excluded from a target method.
-- `AG0722`: aspect was skipped for a target method.
-- `AG0723`: aspect was skipped because its `ConditionalAttribute` symbol is not defined.
-- `AG0730`: `TargetFilter` rule or group matched a target.
-- `AG0731`: `TargetFilter` rule or group did not match a target.
-- `AG0732`: final `TargetFilter` decision for a target.
+```text
+obj/GeneratedFiles/AspectGenerator/AspectGeneratorBuildReport.md
+```
+
+The report is not printed to the console. Users who need it can inspect the report file directly. Design-time builds do not write the report.
