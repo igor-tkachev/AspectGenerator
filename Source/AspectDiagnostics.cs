@@ -23,6 +23,7 @@ namespace AspectGenerator
 			public const string InvalidAspectFilterParameterPattern = "AG0205";
 			public const string InvalidAspectFilterDottedPattern    = "AG0206";
 			public const string MethodLevelTargetFilter             = "AG0208";
+			public const string InvalidAspectDiagnosticSeverity     = "AG0209";
 			public const string InterceptedCallMarker               = "AG0300";
 		}
 
@@ -49,12 +50,12 @@ namespace AspectGenerator
 		{
 			return new DiagnosticDescriptor(
 			Id.InterceptedCallMarker,
-			"Call is intercepted by AspectGenerator",
-			"Call is intercepted by {0}",
+			"Call is marked for interception",
+			"Call is marked for interception by {0}",
 			"AspectGenerator",
 			severity,
 			true,
-			"Marks a call site that is selected by AspectGenerator and is expected to be intercepted in a normal build.",
+			"Shows where AspectGenerator applies aspects.",
 			"https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics");
 		}
 	}

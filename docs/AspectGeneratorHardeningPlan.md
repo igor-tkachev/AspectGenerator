@@ -20,6 +20,7 @@ Completed:
 - removal of the legacy explicit method selector in favor of applied target filters;
 - MSBuild-visible build report output through `AspectGeneratorReportFile`;
 - `AG0300` call-site markers through a dedicated `DiagnosticAnalyzer` using shared selection logic.
+- invalid optional diagnostic severity reporting through `AG0209`.
 
 Not completed:
 

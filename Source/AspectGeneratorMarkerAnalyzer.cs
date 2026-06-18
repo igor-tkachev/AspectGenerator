@@ -28,7 +28,8 @@ namespace AspectGenerator
 			{
 				var options = AspectOptionsResolver.Resolve(
 					startContext.Compilation,
-					startContext.Options.AnalyzerConfigOptionsProvider);
+					startContext.Options.AnalyzerConfigOptionsProvider,
+					NullDiagnosticSink.Instance);
 
 				if (options.AspectDiagnosticSeverity == AspectDiagnosticSeverity.Off)
 					return;

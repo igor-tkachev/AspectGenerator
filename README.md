@@ -253,7 +253,7 @@ Diagnostics are reserved for errors and warnings. The build report is informatio
 
 ## Intercepted Call Markers
 
-AspectGenerator marks intercepted call sites with optional `AG0300` diagnostics through a dedicated analyzer. The default severity is `Info`:
+AspectGenerator can mark calls where aspects are applied by reporting optional `AG0300` diagnostics. The default severity is `Info`:
 
 ```xml
 <PropertyGroup>
@@ -263,9 +263,9 @@ AspectGenerator marks intercepted call sites with optional `AG0300` diagnostics 
 
 Supported values are `Off`, `Hidden`, `Info`, `Warning`, and `Error`. Set `Off` to disable optional markers, use `Warning` for audit-style builds, or `Error` when intercepted calls must be explicitly inspected before a commit.
 
-Each actually intercepted call site receives one `AG0300` marker. The marker lists the applied aspect attribute names, but it does not include target signatures, generated interceptor names, or filter details. Use the build report for complete and baseline-friendly information.
+`AG0300` shows where AspectGenerator applies aspects. Each marked call receives one diagnostic listing the applied aspect attributes. The diagnostic is informational by default and does not indicate a problem. Use the build report for complete and baseline-friendly information.
 
-`AG0300` is optional and does not indicate a problem by itself. The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail when the marker severity is configured as `Warning`.
+The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail when the marker severity is configured as `Warning`.
 
 ## Documentation And Wiki
 

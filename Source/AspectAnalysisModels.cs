@@ -14,6 +14,7 @@ namespace AspectGenerator
 		public bool?   DebuggerStepThrough;
 		public string? ReportFile;
 		public AspectDiagnosticSeverity? AspectDiagnosticSeverity;
+		public string? InvalidAspectDiagnosticSeverityValue;
 		public string? ProjectDirectory;
 		public string? CompilerGeneratedFilesOutputPath;
 		public string? InterceptorsNamespace;

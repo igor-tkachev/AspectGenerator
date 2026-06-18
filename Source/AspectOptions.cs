@@ -22,6 +22,7 @@ namespace AspectGenerator
 		public static Options GetMSBuildOptions(AnalyzerConfigOptionsProvider optionsProvider)
 		{
 			var options = optionsProvider.GlobalOptions;
+			var aspectDiagnosticSeverity = GetAspectDiagnosticSeverityProperty(options, $"build_property.AspectGenerator{AspectOptionNames.AspectDiagnosticSeverity}");
 
 			return new Options
 			{
@@ -30,7 +31,8 @@ namespace AspectGenerator
 				PublicApi              = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionNames.PublicApi}"),
 				DebuggerStepThrough    = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionNames.DebuggerStepThrough}"),
 				ReportFile             = options.TryGetValue($"build_property.AspectGenerator{AspectOptionNames.ReportFile}", out var reportFile) ? reportFile : null,
-				AspectDiagnosticSeverity = GetAspectDiagnosticSeverityProperty(options, $"build_property.AspectGenerator{AspectOptionNames.AspectDiagnosticSeverity}"),
+				AspectDiagnosticSeverity = aspectDiagnosticSeverity.Value,
+				InvalidAspectDiagnosticSeverityValue = aspectDiagnosticSeverity.InvalidValue,
 				ProjectDirectory       = options.TryGetValue("build_property.ProjectDir", out var projectDir) ? projectDir : null,
 				CompilerGeneratedFilesOutputPath = options.TryGetValue("build_property.CompilerGeneratedFilesOutputPath", out var generatedFilesPath) ? generatedFilesPath : null,
 				InterceptorsNamespace  = options.TryGetValue($"build_property.AspectGenerator{AspectOptionNames.InterceptorsNamespace}", out var ns) ? ns : null,
@@ -40,10 +42,20 @@ namespace AspectGenerator
 
 		public static GeneratorExecutionOptions Resolve(Compilation compilation, AnalyzerConfigOptionsProvider optionsProvider)
 		{
-			return Resolve(compilation, GetMSBuildOptions(optionsProvider));
+			return Resolve(compilation, GetMSBuildOptions(optionsProvider), NullDiagnosticSink.Instance);
 		}
 
 		public static GeneratorExecutionOptions Resolve(Compilation compilation, Options msBuildOptions)
+		{
+			return Resolve(compilation, msBuildOptions, NullDiagnosticSink.Instance);
+		}
+
+		public static GeneratorExecutionOptions Resolve(Compilation compilation, AnalyzerConfigOptionsProvider optionsProvider, IAspectDiagnosticSink diagnostics)
+		{
+			return Resolve(compilation, GetMSBuildOptions(optionsProvider), diagnostics);
+		}
+
+		public static GeneratorExecutionOptions Resolve(Compilation compilation, Options msBuildOptions, IAspectDiagnosticSink diagnostics)
 		{
 			var result = new Options
 			{
@@ -53,6 +65,7 @@ namespace AspectGenerator
 				DebuggerStepThrough    = msBuildOptions.DebuggerStepThrough,
 				ReportFile             = msBuildOptions.ReportFile,
 				AspectDiagnosticSeverity = msBuildOptions.AspectDiagnosticSeverity,
+				InvalidAspectDiagnosticSeverityValue = msBuildOptions.InvalidAspectDiagnosticSeverityValue,
 				ProjectDirectory       = msBuildOptions.ProjectDirectory,
 				CompilerGeneratedFilesOutputPath = msBuildOptions.CompilerGeneratedFilesOutputPath,
 				InterceptorsNamespace  = msBuildOptions.InterceptorsNamespace,
@@ -71,13 +84,22 @@ namespace AspectGenerator
 						case AspectOptionNames.GenerateApi           when arg.Value.Value is bool   generateApi          : result.GenerateApi           = generateApi;           break;
 						case AspectOptionNames.PublicApi             when arg.Value.Value is bool   publicApi            : result.PublicApi             = publicApi;             break;
 						case AspectOptionNames.DebuggerStepThrough   when arg.Value.Value is bool   debuggerStepThrough  : result.DebuggerStepThrough   = debuggerStepThrough;   break;
-						case AspectOptionNames.AspectDiagnosticSeverity when TryConvertAspectDiagnosticSeverity(arg.Value.Value, out var aspectDiagnosticSeverity): result.AspectDiagnosticSeverity = aspectDiagnosticSeverity; break;
+						case AspectOptionNames.AspectDiagnosticSeverity:
+							if (TryConvertAspectDiagnosticSeverity(arg.Value.Value, out var aspectDiagnosticSeverity))
+							{
+								result.AspectDiagnosticSeverity = aspectDiagnosticSeverity;
+								result.InvalidAspectDiagnosticSeverityValue = null;
+							}
+							break;
 						case AspectOptionNames.InterceptorsNamespace when arg.Value.Value is string interceptorsNamespace: result.InterceptorsNamespace = interceptorsNamespace; break;
 					}
 				}
 			}
 
-			ApplyAssemblyOptionsFromSyntax(compilation, result);
+			if (result.InvalidAspectDiagnosticSeverityValue is not null)
+				ReportInvalidAspectDiagnosticSeverity(diagnostics, result.InvalidAspectDiagnosticSeverityValue, Location.None);
+
+			ApplyAssemblyOptionsFromSyntax(compilation, result, diagnostics);
 
 			return CreateExecutionOptions(result);
 		}
@@ -90,12 +112,17 @@ namespace AspectGenerator
 			return bool.TryParse(value, out var result) ? result : null;
 		}
 
-		static AspectDiagnosticSeverity? GetAspectDiagnosticSeverityProperty(AnalyzerConfigOptions options, string name)
+		static AspectDiagnosticSeverityOption GetAspectDiagnosticSeverityProperty(AnalyzerConfigOptions options, string name)
 		{
 			if (!options.TryGetValue(name, out var value))
-				return null;
+				return default;
 
-			return TryParseAspectDiagnosticSeverity(value, out var result) ? result : null;
+			if (string.IsNullOrWhiteSpace(value))
+				return default;
+
+			return TryParseAspectDiagnosticSeverity(value, out var result)
+				? new AspectDiagnosticSeverityOption(result, null)
+				: new AspectDiagnosticSeverityOption(null, value);
 		}
 
 		static GeneratorExecutionOptions CreateExecutionOptions(Options options)
@@ -116,7 +143,7 @@ namespace AspectGenerator
 				options.InterceptorsNamespaces);
 		}
 
-		static void ApplyAssemblyOptionsFromSyntax(Compilation compilation, Options options)
+		static void ApplyAssemblyOptionsFromSyntax(Compilation compilation, Options options, IAspectDiagnosticSink diagnostics)
 		{
 			foreach (var tree in compilation.SyntaxTrees)
 			{
@@ -142,12 +169,29 @@ namespace AspectGenerator
 							case AspectOptionNames.GenerateApi           when TryGetBoolLiteral(argument.Expression, out var generateApi)          : options.GenerateApi           = generateApi;           break;
 							case AspectOptionNames.PublicApi             when TryGetBoolLiteral(argument.Expression, out var publicApi)            : options.PublicApi             = publicApi;             break;
 							case AspectOptionNames.DebuggerStepThrough   when TryGetBoolLiteral(argument.Expression, out var debuggerStepThrough)  : options.DebuggerStepThrough   = debuggerStepThrough;   break;
-							case AspectOptionNames.AspectDiagnosticSeverity when TryGetAspectDiagnosticSeverity(argument.Expression, out var aspectDiagnosticSeverity): options.AspectDiagnosticSeverity = aspectDiagnosticSeverity; break;
+							case AspectOptionNames.AspectDiagnosticSeverity:
+								if (TryGetAspectDiagnosticSeverity(argument.Expression, out var aspectDiagnosticSeverity))
+									options.AspectDiagnosticSeverity = aspectDiagnosticSeverity;
+								else
+								{
+									ReportInvalidAspectDiagnosticSeverity(diagnostics, argument.Expression.ToString(), argument.Expression.GetLocation());
+									options.AspectDiagnosticSeverity = AspectDiagnosticSeverity.Info;
+								}
+								break;
 							case AspectOptionNames.InterceptorsNamespace when TryGetStringLiteral(argument.Expression, out var interceptorsNamespace): options.InterceptorsNamespace = interceptorsNamespace; break;
 						}
 					}
 				}
 			}
+		}
+
+		static void ReportInvalidAspectDiagnosticSeverity(IAspectDiagnosticSink diagnostics, string value, Location? location)
+		{
+			diagnostics.Report(
+				AspectDiagnostics.Id.InvalidAspectDiagnosticSeverity,
+				$"Invalid AspectGenerator diagnostic severity value '{value}'. Supported values are Off, Hidden, Info, Warning, and Error. Check AspectGeneratorAspectDiagnosticSeverity in the project file, Directory.Build.props, imported .props files, or the AspectGeneratorOptions assembly attribute.",
+				location,
+				DiagnosticSeverity.Warning);
 		}
 
 		static bool TryGetBoolLiteral(ExpressionSyntax expression, out bool value)
@@ -231,6 +275,9 @@ namespace AspectGenerator
 			if (expression is MemberAccessExpressionSyntax memberAccess)
 				return TryParseAspectDiagnosticSeverity(memberAccess.Name.Identifier.ValueText, out severity);
 
+			if (expression is QualifiedNameSyntax qualifiedName)
+				return TryParseAspectDiagnosticSeverity(qualifiedName.Right.Identifier.ValueText, out severity);
+
 			if (expression is IdentifierNameSyntax identifier)
 				return TryParseAspectDiagnosticSeverity(identifier.Identifier.ValueText, out severity);
 
@@ -250,6 +297,18 @@ namespace AspectGenerator
 
 			severity = default;
 			return false;
+		}
+
+		readonly struct AspectDiagnosticSeverityOption
+		{
+			public AspectDiagnosticSeverityOption(AspectDiagnosticSeverity? value, string? invalidValue)
+			{
+				Value        = value;
+				InvalidValue = invalidValue;
+			}
+
+			public AspectDiagnosticSeverity? Value        { get; }
+			public string?                   InvalidValue { get; }
 		}
 	}
 }

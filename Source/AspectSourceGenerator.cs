@@ -38,6 +38,7 @@ namespace AspectGenerator
 			public const string InvalidAspectFilterParameterPattern = AspectDiagnostics.Id.InvalidAspectFilterParameterPattern;
 			public const string InvalidAspectFilterDottedPattern    = AspectDiagnostics.Id.InvalidAspectFilterDottedPattern;
 			public const string MethodLevelTargetFilter             = AspectDiagnostics.Id.MethodLevelTargetFilter;
+			public const string InvalidAspectDiagnosticSeverity     = AspectDiagnostics.Id.InvalidAspectDiagnosticSeverity;
 			public const string InterceptedCallMarker               = AspectDiagnostics.Id.InterceptedCallMarker;
 		}
 
@@ -466,13 +467,12 @@ namespace AspectGenerator
 			CancellationToken cancellationToken)
 		{
 			var compilation = data.Left.Left.Left;
-			var options     = AspectOptionsResolver.Resolve(compilation, data.Left.Left.Right);
-			var attrs       = data.Left.Right;
-			var invocations = data.Right;
-
 			var diagnosticSink = new GeneratorDiagnosticSink();
 			var diagnostics = diagnosticSink.Diagnostics;
 			var reportedDiagnostics = new HashSet<string>();
+			var options     = AspectOptionsResolver.Resolve(compilation, data.Left.Left.Right, diagnosticSink);
+			var attrs       = data.Left.Right;
+			var invocations = data.Right;
 
 			var registry = AspectDefinitionRegistry.Create(
 				compilation,
