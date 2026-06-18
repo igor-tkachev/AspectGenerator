@@ -22,7 +22,8 @@ Completed:
 - `AG0300` call-site markers through a dedicated `DiagnosticAnalyzer` using shared selection logic.
 - invalid optional diagnostic severity reporting through `AG0209`.
 - typed applied aspect instances exposed through `InterceptInfo.Aspect` / `InterceptData<T>.Aspect`;
-- lazy `MemberInfo`, applied aspect instance, and applied aspect argument initialization in generated interceptors.
+- per-interceptor static state holders for lazy `MemberInfo` and applied aspect instance initialization.
+- `AspectInstanceLifetime.Instance` local applied aspect construction for static typed hooks.
 
 Not completed:
 
@@ -33,7 +34,7 @@ Not completed:
 - `ref` / `out` / `in` hardening;
 - typed argument passing beyond the applied aspect instance;
 - public API contract stabilization;
-- explicit instance-lifetime hook mode and related diagnostics;
+- instance hook method mode and related diagnostics;
 
 ## Capability Roadmap
 
@@ -44,7 +45,7 @@ Priority:
 - P0: AOP-like target filters, type-level aspects, suppressors, and a generated `Counter` aspect.
 - P1: generated `Log` aspect with dependency-free backends, aspect-specific modifiers, and external logging backends.
 - P2: cache aspect, validation attributes, `ref` / `out` / `in` hardening, and better diagnostics.
-- P3: typed argument passing, lazy `MemberInfo`, and public API stabilization.
+- P3: typed argument passing and public API stabilization.
 
 ## P0: AOP-Like Target Filters
 
@@ -366,20 +367,20 @@ Checklist:
 - [ ] Decide whether public API should use properties, a separate runtime package, or an explicit versioned contract.
 - [ ] Document migration guidance before any breaking change.
 
-## P2: `MemberInfo` Initialization
+## Completed: `MemberInfo` Initialization
 
-Status: deferred.
+Status: implemented.
 
-Problem: generated interceptors initialize `MemberInfo` through expression-tree helper methods in static fields. This is not a per-call allocation, but it can add first-use cost because the generated interceptor type initializes static `MemberInfo` fields before the value may actually be needed by a hook.
+Problem: generated interceptors initialized `MemberInfo` through expression-tree helper methods in static fields on the outer generated interceptor type. This was not a per-call allocation, but it could add first-use cost because the generated interceptor type could initialize static `MemberInfo` fields before a specific interceptor was used.
 
 Checklist:
 
-- [ ] Keep the current expression-tree approach as the baseline.
+- [x] Keep the expression-tree approach as the baseline for resolving target metadata.
+- [x] Move target metadata into a per-interceptor nested static state holder.
+- [x] Add an explicit empty static constructor to each holder to avoid `beforefieldinit`.
+- [x] Read holder fields into locals inside the generated interceptor method.
+- [ ] Design an explicit configuration option if later work needs to disable `MemberInfo` generation when hooks do not read `InterceptInfo.MemberInfo`.
 - [ ] Measure first-use cost on a project with many intercepted methods.
-- [ ] Design an explicit configuration option for `MemberInfo` generation, for example always generate, lazy generate, or disable when the user knows hooks do not read `InterceptInfo.MemberInfo`.
-- [ ] Prefer an explicit option over trying to infer hook usage from parameter types.
-- [ ] If implemented, generate lazy static `MemberInfo` initialization only for modes that require `MemberInfo`.
-- [ ] Document the performance tradeoff and compatibility behavior.
 
 ## Completed: `ValueTask`
 

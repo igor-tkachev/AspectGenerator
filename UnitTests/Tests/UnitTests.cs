@@ -485,6 +485,29 @@ namespace AspectGenerator.Tests
 			Assert.AreEqual("typed-ok", result);
 		}
 
+		[Aspects.StaticLifetimeCounter]
+		internal string StaticLifetimeCounterMethod1()
+		{
+			return "counter";
+		}
+
+		[Aspects.StaticLifetimeCounter]
+		internal string StaticLifetimeCounterMethod2()
+		{
+			return "counter";
+		}
+
+		[TestMethod]
+		public void StaticLifetimeInitializesOnlyUsedInterceptorAspectTest()
+		{
+			Aspects.StaticLifetimeCounterAttribute.ConstructorCount = 0;
+
+			var result = StaticLifetimeCounterMethod1();
+
+			Assert.AreEqual("counter1", result);
+			Assert.AreEqual(1, Aspects.StaticLifetimeCounterAttribute.ConstructorCount);
+		}
+
 		[Aspects.Using]
 		internal string UsingMethod()
 		{

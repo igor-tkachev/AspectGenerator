@@ -339,6 +339,25 @@ namespace Aspects
 	}
 
 	[AspectGenerator.Aspect(
+		OnAfterCall = nameof(OnAfterCall)
+		)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	sealed class StaticLifetimeCounterAttribute : Attribute
+	{
+		public static int ConstructorCount;
+
+		public StaticLifetimeCounterAttribute()
+		{
+			ConstructorCount++;
+		}
+
+		public static void OnAfterCall(StaticLifetimeCounterAttribute aspect, AspectGenerator.InterceptInfo<string> info)
+		{
+			info.ReturnValue += ConstructorCount.ToString();
+		}
+	}
+
+	[AspectGenerator.Aspect(
 		OnUsing          = nameof(OnUsing),
 		OnUsingAsync     = nameof(OnUsingAsync),
 		UseInterceptData = true

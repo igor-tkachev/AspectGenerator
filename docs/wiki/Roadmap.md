@@ -50,17 +50,16 @@ Planned work:
 - decide whether public API should use properties, a separate runtime package, or an explicit versioned contract;
 - document migration guidance before any breaking change.
 
-## P2: `MemberInfo` Initialization
+## Completed: `MemberInfo` Initialization
 
-Status: deferred.
+Status: implemented.
 
-Generated interceptors still initialize `MemberInfo` through expression-tree helper methods.
+Generated interceptors keep the expression-tree helper approach for target metadata, but the metadata is stored in per-interceptor static state holders. Each holder has its own explicit static constructor, so target metadata and static aspect instances are initialized lazily when that interceptor is first used.
 
-Planned work:
+Follow-up work:
 
-- keep the current expression-tree approach as the baseline;
-- generate lazy `MemberInfo` initialization only when a hook requires `MemberInfo`;
-- measure whether the optimization is worth the added codegen complexity.
+- measure first-use cost on a project with many intercepted methods;
+- consider an explicit option if users need to disable `InterceptInfo.MemberInfo` generation.
 
 ## Completed: `ValueTask`
 

@@ -33,8 +33,15 @@ namespace ExampleAspectGenerator
 		static SR.MethodInfo MethodOf<T>(SLE.Expression<Func<T>> func) => GetMethodInfo(func.Body);
 		static SR.MethodInfo MethodOf   (SLE.Expression<Action>  func) => GetMethodInfo(func.Body);
 
-		static readonly Lazy<SR.MemberInfo> GetCustomers_Interceptor_MemberInfo = new(() => MethodOf(() => TransactionAspect.Program.GetCustomers(default(LinqToDB.Data.DataConnection))));
-		static readonly Lazy<global::Aspects.TransactionAttribute> GetCustomers_Interceptor_Aspect_0 = new(() => new global::Aspects.TransactionAttribute() { IsolationLevel = (System.Data.IsolationLevel)256 });
+		private static class GetCustomers_Interceptor_State
+		{
+			internal static readonly SR.MemberInfo TargetMethod = MethodOf(() => TransactionAspect.Program.GetCustomers(default(LinqToDB.Data.DataConnection)));
+			internal static readonly global::Aspects.TransactionAttribute Aspect0 = new global::Aspects.TransactionAttribute() { IsolationLevel = (System.Data.IsolationLevel)256 };
+
+			static GetCustomers_Interceptor_State()
+			{
+			}
+		}
 		//
 		/// <summary>
 		/// Intercepts TransactionAspect.Program.GetCustomers(LinqToDB.Data.DataConnection).
@@ -50,10 +57,11 @@ namespace ExampleAspectGenerator
 
 			// Aspects.TransactionAttribute(IsolationLevel = System.Data.IsolationLevel.ReadUncommitted)
 			//
-			var __aspect__0 = GetCustomers_Interceptor_Aspect_0.Value;
+			var __targetMethod__ = GetCustomers_Interceptor_State.TargetMethod;
+			var __aspect__0 = GetCustomers_Interceptor_State.Aspect0;
 			var __info__0 = new AspectGenerator.InterceptInfo<System.Collections.Generic.List<TransactionAspect.Program.Customer>>
 			{
-				MemberInfo      = GetCustomers_Interceptor_MemberInfo.Value,
+				MemberInfo      = __targetMethod__,
 				AspectType      = typeof(Aspects.TransactionAttribute),
 				Aspect          = __aspect__0,
 				MethodArguments = __args__,
@@ -81,8 +89,15 @@ namespace ExampleAspectGenerator
 			return __info__0.ReturnValue;
 		}
 
-		static readonly Lazy<SR.MemberInfo> GetCustomersAsync_Interceptor_MemberInfo = new(() => MethodOf(() => TransactionAspect.Program.GetCustomersAsync(default(LinqToDB.Data.DataConnection))));
-		static readonly Lazy<global::Aspects.TransactionAttribute> GetCustomersAsync_Interceptor_Aspect_0 = new(() => new global::Aspects.TransactionAttribute());
+		private static class GetCustomersAsync_Interceptor_State
+		{
+			internal static readonly SR.MemberInfo TargetMethod = MethodOf(() => TransactionAspect.Program.GetCustomersAsync(default(LinqToDB.Data.DataConnection)));
+			internal static readonly global::Aspects.TransactionAttribute Aspect0 = new global::Aspects.TransactionAttribute();
+
+			static GetCustomersAsync_Interceptor_State()
+			{
+			}
+		}
 		//
 		/// <summary>
 		/// Intercepts TransactionAspect.Program.GetCustomersAsync(LinqToDB.Data.DataConnection).
@@ -98,10 +113,11 @@ namespace ExampleAspectGenerator
 
 			// Aspects.TransactionAttribute
 			//
-			var __aspect__0 = GetCustomersAsync_Interceptor_Aspect_0.Value;
+			var __targetMethod__ = GetCustomersAsync_Interceptor_State.TargetMethod;
+			var __aspect__0 = GetCustomersAsync_Interceptor_State.Aspect0;
 			var __info__0 = new AspectGenerator.InterceptInfo<System.Collections.Generic.List<TransactionAspect.Program.Customer>>
 			{
-				MemberInfo      = GetCustomersAsync_Interceptor_MemberInfo.Value,
+				MemberInfo      = __targetMethod__,
 				AspectType      = typeof(Aspects.TransactionAttribute),
 				Aspect          = __aspect__0,
 				MethodArguments = __args__,

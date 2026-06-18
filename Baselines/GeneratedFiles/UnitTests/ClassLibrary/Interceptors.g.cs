@@ -33,8 +33,15 @@ namespace AspectGenerator
 		static SR.MethodInfo MethodOf<T>(SLE.Expression<Func<T>> func) => GetMethodInfo(func.Body);
 		static SR.MethodInfo MethodOf   (SLE.Expression<Action>  func) => GetMethodInfo(func.Body);
 
-		static readonly Lazy<SR.MemberInfo> TestMethod_Interceptor_MemberInfo = new(() => MethodOf(() => AspectGenerator.ClassLibrary.TestClass.TestMethod(default(string))));
-		static readonly Lazy<global::Aspects.CrossProjectAttribute> TestMethod_Interceptor_Aspect_0 = new(() => new global::Aspects.CrossProjectAttribute());
+		private static class TestMethod_Interceptor_State
+		{
+			internal static readonly SR.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.ClassLibrary.TestClass.TestMethod(default(string)));
+			internal static readonly global::Aspects.CrossProjectAttribute Aspect0 = new global::Aspects.CrossProjectAttribute();
+
+			static TestMethod_Interceptor_State()
+			{
+			}
+		}
 		//
 		/// <summary>
 		/// Intercepts AspectGenerator.ClassLibrary.TestClass.TestMethod(string).
@@ -48,10 +55,11 @@ namespace AspectGenerator
 		{
 			// Aspects.CrossProjectAttribute
 			//
-			var __aspect__0 = TestMethod_Interceptor_Aspect_0.Value;
+			var __targetMethod__ = TestMethod_Interceptor_State.TargetMethod;
+			var __aspect__0 = TestMethod_Interceptor_State.Aspect0;
 			var __info__0 = new AspectGenerator.InterceptInfo<string>
 			{
-				MemberInfo      = TestMethod_Interceptor_MemberInfo.Value,
+				MemberInfo      = __targetMethod__,
 				AspectType      = typeof(Aspects.CrossProjectAttribute),
 				Aspect          = __aspect__0,
 			};

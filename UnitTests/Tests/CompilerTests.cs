@@ -122,14 +122,30 @@ namespace AspectGenerator.Tests
 			var source = GetGeneratedSource(result, "Interceptors.g.cs");
 
 			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.HookInvalidParameters);
-			StringAssert.Contains(source, "static readonly Lazy<SR.MemberInfo> Target_Interceptor_MemberInfo");
-			StringAssert.Contains(source, "Target_Interceptor_MemberInfo.Value");
-			StringAssert.Contains(source, "static readonly Lazy<global::AspectGenerator.Tests.GeneratorDriver.TypedAspectAttribute> Target_Interceptor_Aspect_0");
-			StringAssert.Contains(source, "var __aspect__0 = Target_Interceptor_Aspect_0.Value;");
+			StringAssert.Contains(source, "private static class Target_Interceptor_State");
+			StringAssert.Contains(source, "internal static readonly SR.MemberInfo TargetMethod");
+			StringAssert.Contains(source, "internal static readonly global::AspectGenerator.Tests.GeneratorDriver.TypedAspectAttribute Aspect0");
+			StringAssert.Contains(source, "static Target_Interceptor_State()");
+			StringAssert.Contains(source, "var __targetMethod__ = Target_Interceptor_State.TargetMethod;");
+			StringAssert.Contains(source, "var __aspect__0 = Target_Interceptor_State.Aspect0;");
 			StringAssert.Contains(source, "Aspect          = __aspect__0,");
+			Assert.IsFalse(source.Contains("Lazy<", StringComparison.Ordinal), "Generated interceptors should use per-interceptor state holders instead of Lazy<T>.");
 			var removedApiName = "Aspect" + "Arguments";
 			Assert.IsFalse(source.Contains(removedApiName, StringComparison.Ordinal), $"{removedApiName} should not be emitted.");
 			StringAssert.Contains(source, "TypedAspectAttribute.After(__aspect__0, __info__0);");
+		}
+
+		[TestMethod]
+		public void InstanceLifetimeUsesLocalAspectConstructionTest()
+		{
+			var result = RunGenerator(InstanceLifetimeGenerationSource);
+			var source = GetGeneratedSource(result, "Interceptors.g.cs");
+
+			StringAssert.Contains(source, "private static class Target_Interceptor_State");
+			StringAssert.Contains(source, "internal static readonly SR.MemberInfo TargetMethod");
+			Assert.IsFalse(source.Contains("internal static readonly global::AspectGenerator.Tests.GeneratorDriver.InstanceAspectAttribute Aspect0", StringComparison.Ordinal));
+			StringAssert.Contains(source, "var __aspect__0 = new global::AspectGenerator.Tests.GeneratorDriver.InstanceAspectAttribute(\"audit\") { Level = 2 };");
+			StringAssert.Contains(source, "InstanceAspectAttribute.After(__aspect__0, __info__0);");
 		}
 
 		[TestMethod]
@@ -822,6 +838,8 @@ namespace AspectGenerator.Tests
 				StringAssert.Contains(report, "`AspectGenerator.Tests.GeneratorDriver.Service.Save()`");
 				StringAssert.Contains(report, "`Save_Interceptor`");
 				StringAssert.Contains(report, "`AspectGenerator.Tests.GeneratorDriver.TraceAspectAttribute`");
+				StringAssert.Contains(report, "DeclaredLifetime: Auto");
+				StringAssert.Contains(report, "EffectiveLifetime: Static");
 				StringAssert.Contains(report, "## Intercepted Call Sites");
 				StringAssert.Contains(report, "`Save()`");
 				StringAssert.Contains(report, "`Load()`");
@@ -1417,6 +1435,47 @@ namespace AspectGenerator.Tests
 				}
 
 				[TypedAspect("audit", Level = 2)]
+				public static string Target()
+				{
+					return "";
+				}
+			}
+			""";
+
+		const string InstanceLifetimeGenerationSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(
+				OnAfterCall = nameof(After),
+				Lifetime = AspectInstanceLifetime.Instance)]
+			sealed class InstanceAspectAttribute : Attribute
+			{
+				public InstanceAspectAttribute(string category)
+				{
+					Category = category;
+				}
+
+				public string Category { get; }
+				public int    Level    { get; set; }
+
+				public static void After(InstanceAspectAttribute aspect, InterceptInfo<string> info)
+				{
+					info.ReturnValue += aspect.Category + aspect.Level.ToString();
+				}
+			}
+
+			static class TargetType
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				[InstanceAspect("audit", Level = 2)]
 				public static string Target()
 				{
 					return "";

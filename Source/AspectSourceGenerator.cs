@@ -720,8 +720,14 @@ namespace AspectGenerator
 
 		static string FormatAspectList(IEnumerable<AttributeInfo> attributes)
 		{
-			return string.Join("<br />", attributes.Select(static attribute =>
-				$"`{FormatMarkdownCode(attribute.AttributeClass.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat))}`"));
+			return string.Join("<br />", attributes.Select(attribute =>
+			{
+				var declaredLifetime = GetDeclaredAspectLifetime(attribute);
+
+				return $"`{FormatMarkdownCode(attribute.AttributeClass.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat))}`" +
+					$"<br />DeclaredLifetime: {declaredLifetime}" +
+					$"<br />EffectiveLifetime: {declaredLifetime switch { "Instance" => "Instance", _ => "Static" }}";
+			}));
 		}
 
 		static string FormatMarkdownCode(string value)
@@ -892,7 +898,50 @@ namespace AspectGenerator
 		{
 			foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
 				if (arg.NameEquals is not null)
-					yield return (arg.NameEquals.Name.Identifier.ValueText, AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel));
+				{
+					var name = arg.NameEquals.Name.Identifier.ValueText;
+
+					yield return (
+						name,
+						name == "Lifetime"
+							? GetAspectLifetimeValue(arg.Expression, semanticModel)
+							: AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel));
+				}
+		}
+
+		static object? GetAspectLifetimeValue(ExpressionSyntax expression, SemanticModel semanticModel)
+		{
+			return AspectSymbols.GetAttributeArgumentValue(expression, semanticModel) ??
+				expression.ToString().Split('.').LastOrDefault();
+		}
+
+		static string GetDeclaredAspectLifetime(AttributeInfo attribute)
+		{
+			foreach (var option in GetAspectOptions(attribute))
+			{
+				if (option.Key != "Lifetime")
+					continue;
+
+				return option.Value switch
+				{
+					1                => "Static",
+					2                => "Instance",
+					"Static"         => "Static",
+					"Instance"       => "Instance",
+					"Auto"           => "Auto",
+					string value when value.EndsWith(".Static",   StringComparison.Ordinal) => "Static",
+					string value when value.EndsWith(".Instance", StringComparison.Ordinal) => "Instance",
+					string value when value.EndsWith(".Auto",     StringComparison.Ordinal) => "Auto",
+					_                => "Auto"
+				};
+			}
+
+			return "Auto";
+		}
+
+		static bool UsesInstanceLifetime(AttributeInfo attribute)
+		{
+			return GetDeclaredAspectLifetime(attribute) == "Instance";
 		}
 
 		static string GetAppliedAspectConstruction(AttributeInfo attribute)
@@ -1049,6 +1098,12 @@ namespace AspectGenerator
 				var methods         = interceptor.Invocations;
 				var attributes      = interceptor.Attributes;
 
+				sb.AppendLine(
+					$$"""
+							private static class {{interceptorName}}_State
+							{
+					""");
+
 				foreach (var p in method.Parameters)
 				{
 					switch (p.RefKind)
@@ -1066,21 +1121,29 @@ namespace AspectGenerator
 
 				sb.AppendLine(
 					$$"""
-							static readonly Lazy<SR.MemberInfo> {{interceptorName}}_MemberInfo = new(() => MethodOf{{GetMethodOf(method, interceptorName)}});
+								internal static readonly SR.MemberInfo TargetMethod = MethodOf{{GetMethodOf(method, interceptorName)}};
 					""");
 
 				for (var i = 0; i < attributes.Count; i++)
 				{
 					var attr = attributes[i];
+
+					if (UsesInstanceLifetime(attr))
+						continue;
+
 					var attrType = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-					sb
-						.AppendLine(
-							$$"""
-									static readonly Lazy<{{attrType}}> {{interceptorName}}_Aspect_{{i}} = new(() => {{GetAppliedAspectConstruction(attr)}});
-							""")
-						;
+					sb.AppendLine($"\t\t\tinternal static readonly {attrType} Aspect{i} = {GetAppliedAspectConstruction(attr)};");
 				}
+
+				sb.AppendLine(
+					$$"""
+
+								static {{interceptorName}}_State()
+								{
+								}
+							}
+					""");
 
 				sb.AppendLine(
 					$$"""
@@ -1646,6 +1709,7 @@ namespace AspectGenerator
 			var isReturnsAsyncType = IsSupportedAsyncReturnType(method.ReturnType, out var asyncResultType);
 			var generateAsync      = isReturnsAsyncType && attributes.Any(d => GetAspectOptions(d).Any(a => a.Key.EndsWith("Async") && a.Value is not null));
 			var generateArgs       = attributes.Any(d => GetAspectOptions(d).Any(a => a is { Key: "PassArguments", Value: true }));
+			var targetMethodLocalGenerated = false;
 
 			// Generate arguments.
 			//
@@ -1717,11 +1781,20 @@ namespace AspectGenerator
 					sb
 						.Append(indent).AppendLine($"// {(object?)attributes[idx].AppliedAttributeData ?? attributes[idx].AttributeClass}")
 						.Append(indent).AppendLine("//")
-						.Append(indent).AppendLine($"var __aspect__{idx} = {interceptorName}_Aspect_{idx}.Value;")
+						;
+
+					if (!targetMethodLocalGenerated)
+					{
+						sb.Append(indent).AppendLine($"var __targetMethod__ = {interceptorName}_State.TargetMethod;");
+						targetMethodLocalGenerated = true;
+					}
+
+					sb
+						.Append(indent).AppendLine($"var __aspect__{idx} = {(UsesInstanceLifetime(attributes[idx]) ? GetAppliedAspectConstruction(attributes[idx]) : $"{interceptorName}_State.Aspect{idx}")};")
 						.Append(indent).AppendLine($"var __info__{idx} = new AspectGenerator.Intercept{(useInterceptData ? "Data" : "Info")}<{returnType}>")
 						.Append(indent).AppendLine("{")
 						//.Append(indent).AppendLine($"\tReturnValue     = {(idx > 0 ? $"__info__{idx - 1}.ReturnValue" : $"default({(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")})")},")
-						.Append(indent).AppendLine($"\tMemberInfo      = {interceptorName}_MemberInfo.Value,")
+						.Append(indent).AppendLine($"\tMemberInfo      = __targetMethod__,")
 						.Append(indent).AppendLine($"\tAspectType      = typeof({attr}),")
 						.Append(indent).AppendLine($"\tAspect          = __aspect__{idx},")
 						;

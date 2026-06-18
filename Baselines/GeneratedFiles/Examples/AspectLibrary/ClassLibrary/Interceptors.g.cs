@@ -33,8 +33,15 @@ namespace AspectGenerator
 		static SR.MethodInfo MethodOf<T>(SLE.Expression<Func<T>> func) => GetMethodInfo(func.Body);
 		static SR.MethodInfo MethodOf   (SLE.Expression<Action>  func) => GetMethodInfo(func.Body);
 
-		static readonly Lazy<SR.MemberInfo> StaticMethod_Interceptor_MemberInfo = new(() => MethodOf(() => ClassLibrary.Class1.StaticMethod()));
-		static readonly Lazy<global::AspectLibrary.ConsoleLogAttribute> StaticMethod_Interceptor_Aspect_0 = new(() => new global::AspectLibrary.ConsoleLogAttribute());
+		private static class StaticMethod_Interceptor_State
+		{
+			internal static readonly SR.MemberInfo TargetMethod = MethodOf(() => ClassLibrary.Class1.StaticMethod());
+			internal static readonly global::AspectLibrary.ConsoleLogAttribute Aspect0 = new global::AspectLibrary.ConsoleLogAttribute();
+
+			static StaticMethod_Interceptor_State()
+			{
+			}
+		}
 		//
 		/// <summary>
 		/// Intercepts ClassLibrary.Class1.StaticMethod().
@@ -48,10 +55,11 @@ namespace AspectGenerator
 		{
 			// AspectLibrary.ConsoleLogAttribute
 			//
-			var __aspect__0 = StaticMethod_Interceptor_Aspect_0.Value;
+			var __targetMethod__ = StaticMethod_Interceptor_State.TargetMethod;
+			var __aspect__0 = StaticMethod_Interceptor_State.Aspect0;
 			var __info__0 = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 			{
-				MemberInfo      = StaticMethod_Interceptor_MemberInfo.Value,
+				MemberInfo      = __targetMethod__,
 				AspectType      = typeof(AspectLibrary.ConsoleLogAttribute),
 				Aspect          = __aspect__0,
 			};
