@@ -6,7 +6,7 @@
 		<IsTestProject>true</IsTestProject>
 
 		<InterceptorsNamespaces>MyAspectGenerator</InterceptorsNamespaces>
-		<AspectGeneratorPublicApi>true</AspectGeneratorPublicApi>
+		<AspectGeneratorGenerateApi>false</AspectGeneratorGenerateApi>
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>

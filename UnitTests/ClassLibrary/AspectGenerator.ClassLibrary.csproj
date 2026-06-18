@@ -5,6 +5,8 @@
 		<IsPackable>false</IsPackable>
 
 		<InterceptorsNamespaces>AspectGenerator</InterceptorsNamespaces>
+		<AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
+		<AspectGeneratorPublicApi>true</AspectGeneratorPublicApi>
 
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>

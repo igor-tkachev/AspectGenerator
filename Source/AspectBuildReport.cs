@@ -100,7 +100,7 @@ namespace AspectGenerator
 				AppendGeneratedSourceRow(sb, analysis.Options, "AspectAttribute.g.cs", "Generated aspect authoring and runtime API.");
 
 			if (analysis.Options.EmitInterceptors && analysis.AspectedMethods.Length > 0)
-				AppendGeneratedSourceRow(sb, analysis.Options, "Interceptors.g.cs", "Generated interceptor methods for selected call sites.");
+				AppendGeneratedSourceRow(sb, analysis.Options, "Interceptors.g.cs", "Generated interceptor methods for marked calls.");
 
 			sb
 				.AppendLine()

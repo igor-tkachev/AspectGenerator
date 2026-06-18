@@ -1,10 +1,9 @@
 using AspectGenerator;
 
 [assembly: AspectGeneratorOptions(
-	DebuggerStepThrough = true,
-	PublicApi = true,
+	DebuggerStepThrough      = true,
 	AspectDiagnosticSeverity = AspectDiagnosticSeverity.Off,
-	InterceptorsNamespace = "MyAspectGenerator")]
+	InterceptorsNamespace    = "MyAspectGenerator")]
 
 [assembly: Aspects.Log(
 	TargetFilter =

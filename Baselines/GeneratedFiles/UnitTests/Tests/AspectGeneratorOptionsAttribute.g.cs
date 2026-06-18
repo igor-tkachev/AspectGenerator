@@ -12,7 +12,7 @@ namespace AspectGenerator
 	/// <remarks>
 	/// Values except <see cref="Off"/> map directly to Microsoft.CodeAnalysis.DiagnosticSeverity.
 	/// </remarks>
-	public enum AspectDiagnosticSeverity
+	enum AspectDiagnosticSeverity
 	{
 		/// <summary>
 		/// Do not report optional diagnostics.
@@ -40,7 +40,7 @@ namespace AspectGenerator
 	/// Configures AspectGenerator for the current assembly.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
-	public sealed class AspectGeneratorOptionsAttribute : Attribute
+	sealed class AspectGeneratorOptionsAttribute : Attribute
 	{
 		/// <summary>
 		/// Gets or sets whether AspectGenerator emits the shared generated API types for this assembly.

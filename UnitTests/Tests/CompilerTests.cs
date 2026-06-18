@@ -59,11 +59,42 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void AssemblyOptionsSyntaxFallbackControlsGeneratedApiTest()
 		{
-			var result = RunGenerator(AssemblyOptionsSyntaxFallbackSource);
+			var result = RunGeneratorAndGetCompilation(AssemblyOptionsSyntaxFallbackSource, out var compilation);
 
 			AssertGenerated(result, "AspectGeneratorOptionsAttribute.g.cs");
 			AssertNotGenerated(result, "AspectAttribute.g.cs");
 			AssertNoDiagnostic(result, AspectDiagnosticID.NamespaceNotAllowed);
+			Assert.IsFalse(compilation.GetDiagnostics().Any(static d => d.Severity == DiagnosticSeverity.Error), string.Join(Environment.NewLine, compilation.GetDiagnostics()));
+
+			var optionsSource = GetGeneratedSource(result, "AspectGeneratorOptionsAttribute.g.cs");
+
+			StringAssert.Contains(optionsSource, "enum AspectDiagnosticSeverity");
+			StringAssert.Contains(optionsSource, "sealed class AspectGeneratorOptionsAttribute");
+			Assert.IsFalse(optionsSource.Contains("public enum AspectDiagnosticSeverity", StringComparison.Ordinal));
+			Assert.IsFalse(optionsSource.Contains("public sealed class AspectGeneratorOptionsAttribute", StringComparison.Ordinal));
+		}
+
+		[TestMethod]
+		public void RuntimeApiVisibilityFollowsPublicApiTest()
+		{
+			var internalResult = RunGenerator(GenerationOptionsSource);
+			var publicResult   = RunGenerator(
+				GenerationOptionsSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectOptionName.PublicApi}"] = "true",
+				});
+
+			var internalApi = GetGeneratedSource(internalResult, "AspectAttribute.g.cs");
+			var publicApi   = GetGeneratedSource(publicResult,   "AspectAttribute.g.cs");
+
+			StringAssert.Contains(internalApi, "sealed class AspectAttribute");
+			Assert.IsFalse(internalApi.Contains("public sealed class AspectAttribute", StringComparison.Ordinal));
+			StringAssert.Contains(publicApi, "public sealed class AspectAttribute");
+
+			var publicOptionsApi = GetGeneratedSource(publicResult, "AspectGeneratorOptionsAttribute.g.cs");
+
+			Assert.IsFalse(publicOptionsApi.Contains("public sealed class AspectGeneratorOptionsAttribute", StringComparison.Ordinal));
 		}
 
 		[TestMethod]

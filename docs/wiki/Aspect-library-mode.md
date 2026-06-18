@@ -13,6 +13,8 @@ Use this when one project defines and consumes its own aspects.
 
 ## Shared Aspect Library
 
+Any project that exposes aspect attributes to other projects must set `AspectGeneratorPublicApi=true`.
+
 In the library that defines shared aspects:
 
 ```xml

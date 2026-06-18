@@ -97,6 +97,8 @@ using AspectGenerator;
     InterceptorsNamespace = "AspectGenerator")]
 ```
 
+`AspectGeneratorOptionsAttribute` and `AspectDiagnosticSeverity` are generated automatically for the current project and are used only to configure AspectGenerator. They are always internal and do not participate in aspect-library runtime API ownership.
+
 `AspectGeneratorInterceptorsNamespace` controls the namespace used for generated interceptors. The package appends this namespace to `InterceptorsNamespaces` automatically for direct package consumers. Manual `InterceptorsNamespaces` configuration should only be needed for unusual or custom build setups.
 
 The package `.props` asset defines defaults early. The package `.targets` asset appends `InterceptorsNamespaces` late, after project-level overrides such as `AspectGeneratorInterceptorsNamespace` are evaluated.
@@ -107,12 +109,14 @@ AspectGenerator writes an informational build report file during normal builds. 
 
 ## Generated API Ownership
 
-AspectGenerator normally generates the authoring/runtime API into each consuming compilation:
+AspectGenerator normally generates the authoring/runtime API into each consuming compilation. This runtime API includes `AspectAttribute`, `InterceptInfo`, `InterceptInfo<T>`, `InterceptData<T>`, `InterceptResult`, and related types.
 
 - `GenerateApi=true`: generate `AspectAttribute`, `InterceptInfo`, `InterceptData<T>`, `InterceptResult`, and related types.
 - `GenerateApi=false`: do not generate the API. Use this when the API is supplied by an aspect library.
 - `PublicApi=false`: generated API is internal to the consuming assembly.
 - `PublicApi=true`: generated API is public. Treat this mode as experimental until the public contract is stabilized.
+
+Any project that exposes aspect attributes to other projects must set `AspectGeneratorPublicApi=true`. Consumer projects can either generate their own internal runtime API for local aspects or set `AspectGeneratorGenerateApi=false` and use the public runtime API supplied by an aspect library.
 
 Common modes:
 

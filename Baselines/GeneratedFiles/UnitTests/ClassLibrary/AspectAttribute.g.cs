@@ -11,7 +11,7 @@
 	/// <para>Create a new attribute decorated with this attribute to define an aspect.</para>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-	sealed class AspectAttribute : Attribute
+	public sealed class AspectAttribute : Attribute
 	{
 		/// <summary>
 		/// Gets or sets the static hook method name invoked when the aspect invocation state is initialized.
@@ -94,7 +94,7 @@
 	/// <summary>
 	/// Controls generated aspect attribute instance lifetime.
 	/// </summary>
-	enum AspectInstanceLifetime
+	public enum AspectInstanceLifetime
 	{
 		/// <summary>
 		/// Let AspectGenerator choose the lifetime from the hook contract.
@@ -113,7 +113,7 @@
 	/// <summary>
 	/// Identifies the lifecycle stage currently being processed by a hook.
 	/// </summary>
-	enum InterceptType
+	public enum InterceptType
 	{
 		/// <summary>
 		/// Aspect invocation state is being initialized.
@@ -144,7 +144,7 @@
 	/// <summary>
 	/// Controls how generated interceptor code continues after a hook is executed.
 	/// </summary>
-	enum InterceptResult
+	public enum InterceptResult
 	{
 		/// <summary>
 		/// Continue normal generated interceptor flow.
@@ -167,14 +167,14 @@
 	/// <summary>
 	/// Represents a void return value in generic hook data.
 	/// </summary>
-	struct Void
+	public struct Void
 	{
 	}
 
 	/// <summary>
 	/// Provides hook data for an intercepted method.
 	/// </summary>
-	partial class InterceptInfo
+	public partial class InterceptInfo
 	{
 		/// <summary>
 		/// Gets or sets user-defined state shared between hooks in the same interception chain.
@@ -219,7 +219,7 @@
 	/// Provides hook data for an intercepted method with a return value.
 	/// </summary>
 	/// <typeparam name="T">The intercepted method return value type.</typeparam>
-	partial class InterceptInfo<T> : InterceptInfo
+	public partial class InterceptInfo<T> : InterceptInfo
 	{
 		/// <summary>
 		/// Gets or sets the intercepted method return value.
@@ -231,7 +231,7 @@
 	/// Provides mutable by-reference hook data for an intercepted method.
 	/// </summary>
 	/// <typeparam name="T">The intercepted method return value type.</typeparam>
-	partial struct InterceptData<T>
+	public partial struct InterceptData<T>
 	{
 		/// <summary>
 		/// Gets or sets user-defined state shared between hooks in the same interception chain.
