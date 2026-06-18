@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,54 +8,54 @@ namespace AspectGenerator
 {
 	sealed class Options
 	{
-		public bool?   GenerateApi;
-		public bool?   DesignTimeBuild;
-		public bool?   PublicApi;
-		public bool?   DebuggerStepThrough;
-		public string? ReportFile;
+		public bool?                     GenerateApi;
+		public bool?                     DesignTimeBuild;
+		public bool?                     PublicApi;
+		public bool?                     DebuggerStepThrough;
+		public string?                   ReportFile;
 		public AspectDiagnosticSeverity? AspectDiagnosticSeverity;
-		public string? InvalidAspectDiagnosticSeverityValue;
-		public string? ProjectDirectory;
-		public string? CompilerGeneratedFilesOutputPath;
-		public string? InterceptorsNamespace;
-		public string? InterceptorsNamespaces;
+		public string?                   InvalidAspectDiagnosticSeverityValue;
+		public string?                   ProjectDirectory;
+		public string?                   CompilerGeneratedFilesOutputPath;
+		public string?                   InterceptorsNamespace;
+		public string?                   InterceptorsNamespaces;
 	}
 
-	record GeneratorExecutionOptions(
-		bool    GenerateApi,
-		bool    EmitInterceptors,
-		bool    DesignTimeBuild,
-		bool    PublicApi,
-		bool    DebuggerStepThrough,
-		string? ReportFile,
+	internal record GeneratorExecutionOptions(
+		bool                     GenerateApi,
+		bool                     EmitInterceptors,
+		bool                     DesignTimeBuild,
+		bool                     PublicApi,
+		bool                     DebuggerStepThrough,
+		string?                  ReportFile,
 		AspectDiagnosticSeverity AspectDiagnosticSeverity,
-		string? ProjectDirectory,
-		string? CompilerGeneratedFilesOutputPath,
-		string? InterceptorsNamespace,
-		string? InterceptorsNamespaces);
+		string?                  ProjectDirectory,
+		string?                  CompilerGeneratedFilesOutputPath,
+		string?                  InterceptorsNamespace,
+		string?                  InterceptorsNamespaces);
 
-	record AttributeInfo(
-		AttributeData?    AppliedAttributeData,
-		AttributeSyntax?  AppliedAttributeSyntax,
-		SemanticModel?    AppliedSemanticModel,
-		INamedTypeSymbol  AttributeClass,
-		AttributeData?    AspectDefinitionData,
-		AttributeSyntax?  AspectDefinitionSyntax,
-		SemanticModel?    AspectDefinitionSemanticModel);
+	internal record AttributeInfo(
+		AttributeData?   AppliedAttributeData,
+		AttributeSyntax? AppliedAttributeSyntax,
+		SemanticModel?   AppliedSemanticModel,
+		INamedTypeSymbol AttributeClass,
+		AttributeData?   AspectDefinitionData,
+		AttributeSyntax? AspectDefinitionSyntax,
+		SemanticModel?   AspectDefinitionSemanticModel);
 
 	record AspectFilterSet(
 		AttributeInfo                 Attribute,
 		AspectFilters.TargetFilterSet Filters);
 
-	record AnalyzedInvocation(
+	internal record AnalyzedInvocation(
 		InvocationExpressionSyntax Inv,
 		IMethodSymbol              Method,
 		List<AttributeInfo>        Attributes);
 
-	record DiagnosticInfo(
-		string    Id,
-		string    Message,
-		Location? Location,
+	internal record DiagnosticInfo(
+		string             Id,
+		string             Message,
+		Location?          Location,
 		DiagnosticSeverity Severity = DiagnosticSeverity.Error);
 
 	interface IAspectDiagnosticSink

@@ -21,11 +21,11 @@ namespace AspectGenerator.Tests
 
 			foreach (var expected in new Dictionary<string,string[]>
 			{
-				[AspectSourceGenerator.DiagnosticID.HookInvalidParameters]     = ["WrongParameter",        "invalid parameter list"],
-				[AspectSourceGenerator.DiagnosticID.HookInvalidReturnType]     = ["WrongReturn",           "invalid return type"],
-				[AspectSourceGenerator.DiagnosticID.OnCallHookMismatch]        = ["OnCall hook",           "must match target method"],
-				[AspectSourceGenerator.DiagnosticID.HookRequiresInterceptData] = ["UseInterceptData=true", "ref InterceptData<T>"],
-				[AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask]     = ["Async hook",            "ValueTask<T>"],
+				[AspectDiagnosticID.HookInvalidParameters]     = ["WrongParameter",        "invalid parameter list"],
+				[AspectDiagnosticID.HookInvalidReturnType]     = ["WrongReturn",           "invalid return type"],
+				[AspectDiagnosticID.OnCallHookMismatch]        = ["OnCall hook",           "must match target method"],
+				[AspectDiagnosticID.HookRequiresInterceptData] = ["UseInterceptData=true", "ref InterceptData<T>"],
+				[AspectDiagnosticID.AsyncHookRequiresTask]     = ["Async hook",            "ValueTask<T>"],
 			})
 			{
 				var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == expected.Key);
@@ -63,7 +63,7 @@ namespace AspectGenerator.Tests
 
 			AssertGenerated(result, "AspectGeneratorOptionsAttribute.g.cs");
 			AssertNotGenerated(result, "AspectAttribute.g.cs");
-			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.NamespaceNotAllowed);
+			AssertNoDiagnostic(result, AspectDiagnosticID.NamespaceNotAllowed);
 		}
 
 		[TestMethod]
@@ -100,8 +100,8 @@ namespace AspectGenerator.Tests
 					["build_property.DesignTimeBuild"] = "true",
 				});
 
-			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), AspectSourceGenerator.DiagnosticID.HookInvalidParameters);
-			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask);
+			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), AspectDiagnosticID.HookInvalidParameters);
+			CollectionAssert.Contains(result.Diagnostics.Select(static d => d.Id).ToArray(), AspectDiagnosticID.AsyncHookRequiresTask);
 
 			AssertNotGenerated(result, "Interceptors.g.cs");
 		}
@@ -111,7 +111,7 @@ namespace AspectGenerator.Tests
 		{
 			var result = RunGenerator(ValueTaskGenerationSource);
 
-			CollectionAssert.DoesNotContain(result.Diagnostics.Select(static d => d.Id).ToArray(), AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask);
+			CollectionAssert.DoesNotContain(result.Diagnostics.Select(static d => d.Id).ToArray(), AspectDiagnosticID.AsyncHookRequiresTask);
 			AssertGenerated(result, "Interceptors.g.cs");
 		}
 
@@ -121,7 +121,7 @@ namespace AspectGenerator.Tests
 			var result = RunGenerator(TypedAspectGenerationSource);
 			var source = GetGeneratedSource(result, "Interceptors.g.cs");
 
-			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.HookInvalidParameters);
+			AssertNoDiagnostic(result, AspectDiagnosticID.HookInvalidParameters);
 			StringAssert.Contains(source, "private static class Target_Interceptor_State");
 			StringAssert.Contains(source, "internal static readonly SR.MemberInfo TargetMethod");
 			StringAssert.Contains(source, "internal static readonly global::AspectGenerator.Tests.GeneratorDriver.TypedAspectAttribute Aspect0");
@@ -152,9 +152,9 @@ namespace AspectGenerator.Tests
 		public void AsyncVoidTargetReportsDiagnosticTest()
 		{
 			var result = RunGenerator(AsyncVoidDiagnosticsSource);
-			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.AsyncHookRequiresTask);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.AsyncHookRequiresTask}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.AsyncHookRequiresTask}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
 			StringAssert.Contains(diagnostic.GetMessage(), "Async void");
 			StringAssert.Contains(diagnostic.GetMessage(), "ValueTask<T>");
 		}
@@ -229,9 +229,9 @@ namespace AspectGenerator.Tests
 		public void InvalidAspectFilterRegexReportsDiagnosticTest()
 		{
 			var result = RunGenerator(FilterInvalidRegexSource);
-			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRegex);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InvalidAspectFilterRegex);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRegex}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InvalidAspectFilterRegex}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
 			StringAssert.Contains(diagnostic.GetMessage(), "Invalid aspect filter regex");
 		}
 
@@ -240,7 +240,7 @@ namespace AspectGenerator.Tests
 		{
 			var result = RunGenerator(FilterPatternSource);
 
-			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule);
+			AssertNoDiagnostic(result, AspectDiagnosticID.InvalidAspectFilterRule);
 			AssertGeneratedSourceContains(result, "SaveUser_Interceptor");
 			AssertGeneratedSourceDoesNotContain(result, "LoadUser_Interceptor");
 		}
@@ -314,9 +314,9 @@ namespace AspectGenerator.Tests
 		public void InvalidPatternConditionPrefixReportsDiagnosticTest()
 		{
 			var result = RunGenerator(FilterInvalidConditionPrefixSource);
-			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InvalidAspectFilterRule);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InvalidAspectFilterRule}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
 			StringAssert.Contains(diagnostic.GetMessage(), "Leading '&'");
 		}
 
@@ -325,7 +325,7 @@ namespace AspectGenerator.Tests
 		{
 			var result = RunGenerator(FilterContainsRegexRawOperatorsSource);
 
-			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule);
+			AssertNoDiagnostic(result, AspectDiagnosticID.InvalidAspectFilterRule);
 			AssertGeneratedSourceContains(result, "Save_Interceptor");
 		}
 
@@ -390,9 +390,9 @@ namespace AspectGenerator.Tests
 		public void InvalidPatternReportsDiagnosticTest()
 		{
 			var result = RunGenerator(FilterInvalidPatternSource);
-			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InvalidAspectFilterDottedPattern);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InvalidAspectFilterDottedPattern);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InvalidAspectFilterDottedPattern}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InvalidAspectFilterDottedPattern}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
 			StringAssert.Contains(diagnostic.GetMessage(), "'**' cannot be used as the final method segment");
 		}
 
@@ -405,7 +405,7 @@ namespace AspectGenerator.Tests
 
 				AssertFilterDiagnostic(
 					result,
-					AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule,
+					AspectDiagnosticID.InvalidAspectFilterRule,
 					"Target filter rule body cannot be empty.");
 			}
 		}
@@ -419,7 +419,7 @@ namespace AspectGenerator.Tests
 
 				AssertFilterDiagnostic(
 					result,
-					AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule,
+					AspectDiagnosticID.InvalidAspectFilterRule,
 					"can only be used with native condition rules");
 			}
 		}
@@ -433,7 +433,7 @@ namespace AspectGenerator.Tests
 
 				AssertFilterDiagnostic(
 					result,
-					AspectSourceGenerator.DiagnosticID.InvalidAspectFilterParameterPattern,
+					AspectDiagnosticID.InvalidAspectFilterParameterPattern,
 					rule.Contains("this", StringComparison.Ordinal) ? "'this' is not supported" : "can appear at most once");
 			}
 		}
@@ -447,7 +447,7 @@ namespace AspectGenerator.Tests
 
 				AssertFilterDiagnostic(
 					result,
-					AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule,
+					AspectDiagnosticID.InvalidAspectFilterRule,
 					"Condition value has an empty operand");
 			}
 		}
@@ -456,9 +456,9 @@ namespace AspectGenerator.Tests
 		public void MethodLevelTargetFilterReportsDiagnosticTest()
 		{
 			var result = RunGenerator(FilterMethodLevelTargetFilterSource);
-			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.MethodLevelTargetFilter);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.MethodLevelTargetFilter);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.MethodLevelTargetFilter}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.MethodLevelTargetFilter}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
 			StringAssert.Contains(diagnostic.GetMessage(), "assembly-level or type-level");
 		}
 
@@ -545,9 +545,9 @@ namespace AspectGenerator.Tests
 		public void InterceptedCallMarkerReportsInfoByDefaultTest()
 		{
 			var diagnostics = RunAnalyzer(TraceDirectSource);
-			var diagnostic  = diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			var diagnostic  = diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InterceptedCallMarker);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
 			Assert.AreEqual(DiagnosticSeverity.Info, diagnostic.Severity);
 			Assert.AreEqual("Call is marked for interception by TraceAspectAttribute", diagnostic.GetMessage());
 		}
@@ -559,10 +559,10 @@ namespace AspectGenerator.Tests
 				TraceDirectSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Off",
+					[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Off",
 				});
 
-			AssertNoDiagnostic(diagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			AssertNoDiagnostic(diagnostics, AspectDiagnosticID.InterceptedCallMarker);
 		}
 
 		[TestMethod]
@@ -584,12 +584,12 @@ namespace AspectGenerator.Tests
 					TraceDirectSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = configuredSeverity,
+						[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = configuredSeverity,
 					});
 
-				var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+				var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InterceptedCallMarker);
 
-				Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
+				Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
 				Assert.AreEqual(expectedSeverity, diagnostic.Severity);
 				StringAssert.Contains(diagnostic.GetMessage(), "TraceAspectAttribute");
 				Assert.AreEqual("Target()", diagnostic.Location.SourceTree?.GetRoot().FindNode(diagnostic.Location.SourceSpan).ToString());
@@ -601,29 +601,29 @@ namespace AspectGenerator.Tests
 		{
 			var properties = new Dictionary<string,string>
 			{
-				[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Offf",
+				[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Offf",
 			};
 			var result = RunGenerator(TraceDirectSource, properties);
-			var invalidDiagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InvalidAspectDiagnosticSeverity);
+			var invalidDiagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InvalidAspectDiagnosticSeverity);
 
 			AssertInvalidAspectDiagnosticSeverity(invalidDiagnostic, "Offf");
 			Assert.AreEqual(Location.None, invalidDiagnostic!.Location);
 
 			var analyzerDiagnostics = RunAnalyzer(TraceDirectSource, properties);
-			var marker = analyzerDiagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			var marker = analyzerDiagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InterceptedCallMarker);
 
-			Assert.IsNotNull(marker, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", analyzerDiagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(marker, $"Expected diagnostic {AspectDiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", analyzerDiagnostics.Select(d => d.Id))}");
 			Assert.AreEqual(DiagnosticSeverity.Info, marker.Severity);
-			AssertNoDiagnostic(analyzerDiagnostics, AspectSourceGenerator.DiagnosticID.InvalidAspectDiagnosticSeverity);
+			AssertNoDiagnostic(analyzerDiagnostics, AspectDiagnosticID.InvalidAspectDiagnosticSeverity);
 		}
 
 		[TestMethod]
 		public void InterceptedCallMarkerCanBeConfiguredByAssemblyOptionsTest()
 		{
 			var diagnostics = RunAnalyzer(TraceAssemblyOptionsMarkerSource);
-			var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InterceptedCallMarker);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
 			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
 			StringAssert.Contains(diagnostic.GetMessage(), "TraceAspectAttribute");
 		}
@@ -635,11 +635,11 @@ namespace AspectGenerator.Tests
 				TraceAssemblyOptionsMarkerSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Error",
+					[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Error",
 				});
-			var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InterceptedCallMarker);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
 			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
 		}
 
@@ -647,17 +647,17 @@ namespace AspectGenerator.Tests
 		public void InvalidAssemblyAspectDiagnosticSeverityReportsWarningAtExpressionAndFallsBackToInfoTest()
 		{
 			var result = RunGenerator(TraceAssemblyOptionsInvalidMarkerSource);
-			var invalidDiagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InvalidAspectDiagnosticSeverity);
+			var invalidDiagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InvalidAspectDiagnosticSeverity);
 
 			AssertInvalidAspectDiagnosticSeverity(invalidDiagnostic, "99");
 			Assert.AreEqual("99", invalidDiagnostic!.Location.SourceTree?.GetRoot().FindNode(invalidDiagnostic.Location.SourceSpan).ToString());
 
 			var analyzerDiagnostics = RunAnalyzer(TraceAssemblyOptionsInvalidMarkerSource);
-			var marker = analyzerDiagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			var marker = analyzerDiagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InterceptedCallMarker);
 
-			Assert.IsNotNull(marker, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", analyzerDiagnostics.Select(d => d.Id))}");
+			Assert.IsNotNull(marker, $"Expected diagnostic {AspectDiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", analyzerDiagnostics.Select(d => d.Id))}");
 			Assert.AreEqual(DiagnosticSeverity.Info, marker.Severity);
-			AssertNoDiagnostic(analyzerDiagnostics, AspectSourceGenerator.DiagnosticID.InvalidAspectDiagnosticSeverity);
+			AssertNoDiagnostic(analyzerDiagnostics, AspectDiagnosticID.InvalidAspectDiagnosticSeverity);
 		}
 
 		[TestMethod]
@@ -671,7 +671,7 @@ namespace AspectGenerator.Tests
 			{
 				var diagnostics = RunAnalyzer(source);
 				var markerDiagnostics = diagnostics
-					.Where(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker)
+					.Where(d => d.Id == AspectDiagnosticID.InterceptedCallMarker)
 					.ToArray();
 
 				if (expectedSeverity is null)
@@ -692,9 +692,9 @@ namespace AspectGenerator.Tests
 				MarkerMultipleAspectsSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
+					[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Warning",
 				});
-			var markerDiagnostics = diagnostics.Where(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker).ToArray();
+			var markerDiagnostics = diagnostics.Where(d => d.Id == AspectDiagnosticID.InterceptedCallMarker).ToArray();
 
 			Assert.AreEqual(1, markerDiagnostics.Length);
 			StringAssert.Contains(markerDiagnostics[0].GetMessage(), "LogAttribute");
@@ -708,10 +708,10 @@ namespace AspectGenerator.Tests
 				MarkerMultipleCallSitesSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
+					[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Warning",
 				});
 
-			Assert.AreEqual(2, diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
+			Assert.AreEqual(2, diagnostics.Count(d => d.Id == AspectDiagnosticID.InterceptedCallMarker));
 		}
 
 		[TestMethod]
@@ -725,20 +725,20 @@ namespace AspectGenerator.Tests
 					TraceDirectSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Warning",
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
 						["build_property.DesignTimeBuild"] = "true",
 					});
 				var diagnostics = RunAnalyzer(
 					TraceDirectSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Warning",
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
 						["build_property.DesignTimeBuild"] = "true",
 					});
 
-				AssertDiagnostic(diagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+				AssertDiagnostic(diagnostics, AspectDiagnosticID.InterceptedCallMarker);
 				AssertNotGenerated(result, "Interceptors.g.cs");
 				Assert.IsFalse(File.Exists(reportFile), $"Report file should not be generated for design-time build: {reportFile}");
 			}
@@ -755,18 +755,18 @@ namespace AspectGenerator.Tests
 					ConditionalDirectAspectSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
+						[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Warning",
 						["build_property.DesignTimeBuild"] = "true",
 				});
 			var diagnostics = RunAnalyzer(
 					ConditionalDirectAspectSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
+						[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Warning",
 						["build_property.DesignTimeBuild"] = "true",
 				});
 
-			AssertNoDiagnostic(diagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			AssertNoDiagnostic(diagnostics, AspectDiagnosticID.InterceptedCallMarker);
 			AssertNotGenerated(result, "Interceptors.g.cs");
 		}
 
@@ -777,12 +777,12 @@ namespace AspectGenerator.Tests
 				AssemblyIncludeTypeExcludeFilterSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
+					[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Warning",
 				});
 
-			Assert.AreEqual(1, diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
+			Assert.AreEqual(1, diagnostics.Count(d => d.Id == AspectDiagnosticID.InterceptedCallMarker));
 			Assert.IsTrue(diagnostics
-				.Where(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker)
+				.Where(d => d.Id == AspectDiagnosticID.InterceptedCallMarker)
 				.All(d => d.Location.SourceTree?.GetRoot().FindNode(d.Location.SourceSpan).ToString() != "HealthCheck()"));
 		}
 
@@ -793,18 +793,18 @@ namespace AspectGenerator.Tests
 					ConditionalDirectAspectSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
+						[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Warning",
 					});
 			var enabledDiagnostics = RunAnalyzer(
 					ConditionalDirectAspectSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
+						[$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Warning",
 					},
 				preprocessorSymbols: ["DEBUG"]);
 
-			AssertNoDiagnostic(disabledDiagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
-			Assert.AreEqual(1, enabledDiagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
+			AssertNoDiagnostic(disabledDiagnostics, AspectDiagnosticID.InterceptedCallMarker);
+			Assert.AreEqual(1, enabledDiagnostics.Count(d => d.Id == AspectDiagnosticID.InterceptedCallMarker));
 		}
 
 		[TestMethod]
@@ -818,7 +818,7 @@ namespace AspectGenerator.Tests
 					TraceFilterSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
 					});
 
 				Assert.AreEqual(0, result.Diagnostics.Count(IsReportDiagnostic));
@@ -861,7 +861,7 @@ namespace AspectGenerator.Tests
 					TraceFilterSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
 						["build_property.DesignTimeBuild"] = "true",
 					});
 
@@ -884,7 +884,7 @@ namespace AspectGenerator.Tests
 					TraceDirectSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
 						["build_property.AspectGeneratorGenerateInterceptors"] = "false",
 					});
 
@@ -912,10 +912,10 @@ namespace AspectGenerator.Tests
 					InvalidUnknownConditionKeyFilterSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
 					});
 
-				AssertDiagnostic(result, AspectSourceGenerator.DiagnosticID.UnknownAspectFilterConditionKey);
+				AssertDiagnostic(result, AspectDiagnosticID.UnknownAspectFilterConditionKey);
 				Assert.AreEqual(0, result.Diagnostics.Count(IsReportDiagnostic));
 				Assert.IsTrue(File.Exists(reportFile), $"Report file was not generated: {reportFile}");
 			}
@@ -942,7 +942,7 @@ namespace AspectGenerator.Tests
 		{
 			var result = RunGenerator(InvalidUnknownConditionKeyFilterSource);
 
-			AssertDiagnostic(result, AspectSourceGenerator.DiagnosticID.UnknownAspectFilterConditionKey);
+			AssertDiagnostic(result, AspectDiagnosticID.UnknownAspectFilterConditionKey);
 		}
 
 		[TestMethod]
@@ -958,9 +958,9 @@ namespace AspectGenerator.Tests
 			{
 				var result = RunGenerator(InvalidLeadingOrFilterSource.Replace("FILTER_RULE", rule));
 
-				AssertDiagnostic(result, AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule);
+				AssertDiagnostic(result, AspectDiagnosticID.InvalidAspectFilterRule);
 				Assert.IsTrue(result.Diagnostics.Any(d =>
-					d.Id == AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule &&
+					d.Id == AspectDiagnosticID.InvalidAspectFilterRule &&
 					d.GetMessage().Contains("Leading '|' requires a previous native condition group.", StringComparison.Ordinal)));
 			}
 		}
@@ -1024,9 +1024,9 @@ namespace AspectGenerator.Tests
 					["build_property.InterceptorsNamespaces"] = "",
 				});
 
-			AssertDiagnostic(result, AspectSourceGenerator.DiagnosticID.NamespaceNotAllowed);
+			AssertDiagnostic(result, AspectDiagnosticID.NamespaceNotAllowed);
 			Assert.IsTrue(result.Diagnostics.Any(d =>
-				d.Id == AspectSourceGenerator.DiagnosticID.NamespaceNotAllowed &&
+				d.Id == AspectDiagnosticID.NamespaceNotAllowed &&
 				d.GetMessage().Contains("InterceptorsNamespaces MSBuild property is empty.", StringComparison.Ordinal)));
 		}
 
@@ -1142,7 +1142,7 @@ namespace AspectGenerator.Tests
 
 		static void AssertInvalidAspectDiagnosticSeverity(Diagnostic? diagnostic, string value)
 		{
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InvalidAspectDiagnosticSeverity}.");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InvalidAspectDiagnosticSeverity}.");
 			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
 
 			var message = diagnostic.GetMessage();

@@ -7,36 +7,26 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace AspectGenerator
 {
-	static class AspectOptionNames
-	{
-		public const string GenerateApi           = "GenerateApi";
-		public const string PublicApi             = "PublicApi";
-		public const string DebuggerStepThrough   = "DebuggerStepThrough";
-		public const string ReportFile            = "ReportFile";
-		public const string AspectDiagnosticSeverity = "AspectDiagnosticSeverity";
-		public const string InterceptorsNamespace = "InterceptorsNamespace";
-	}
-
 	static class AspectOptionsResolver
 	{
 		public static Options GetMSBuildOptions(AnalyzerConfigOptionsProvider optionsProvider)
 		{
 			var options = optionsProvider.GlobalOptions;
-			var aspectDiagnosticSeverity = GetAspectDiagnosticSeverityProperty(options, $"build_property.AspectGenerator{AspectOptionNames.AspectDiagnosticSeverity}");
+			var aspectDiagnosticSeverity = GetAspectDiagnosticSeverityProperty(options, $"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}");
 
 			return new Options
 			{
-				GenerateApi            = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionNames.GenerateApi}"),
-				DesignTimeBuild        = GetBoolProperty(options,  "build_property.DesignTimeBuild"),
-				PublicApi              = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionNames.PublicApi}"),
-				DebuggerStepThrough    = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionNames.DebuggerStepThrough}"),
-				ReportFile             = options.TryGetValue($"build_property.AspectGenerator{AspectOptionNames.ReportFile}", out var reportFile) ? reportFile : null,
-				AspectDiagnosticSeverity = aspectDiagnosticSeverity.Value,
+				GenerateApi                          = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.GenerateApi}"),
+				DesignTimeBuild                      = GetBoolProperty(options,  "build_property.DesignTimeBuild"),
+				PublicApi                            = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.PublicApi}"),
+				DebuggerStepThrough                  = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.DebuggerStepThrough}"),
+				ReportFile                           = options.TryGetValue($"build_property.AspectGenerator{AspectOptionName.ReportFile}",            out var reportFile) ? reportFile : null,
+				AspectDiagnosticSeverity             = aspectDiagnosticSeverity.Value,
 				InvalidAspectDiagnosticSeverityValue = aspectDiagnosticSeverity.InvalidValue,
-				ProjectDirectory       = options.TryGetValue("build_property.ProjectDir", out var projectDir) ? projectDir : null,
-				CompilerGeneratedFilesOutputPath = options.TryGetValue("build_property.CompilerGeneratedFilesOutputPath", out var generatedFilesPath) ? generatedFilesPath : null,
-				InterceptorsNamespace  = options.TryGetValue($"build_property.AspectGenerator{AspectOptionNames.InterceptorsNamespace}", out var ns) ? ns : null,
-				InterceptorsNamespaces = options.TryGetValue("build_property.InterceptorsNamespaces", out var namespaces) ? namespaces : null,
+				ProjectDirectory                     = options.TryGetValue("build_property.ProjectDir",                                               out var projectDir) ? projectDir : null,
+				CompilerGeneratedFilesOutputPath     = options.TryGetValue("build_property.CompilerGeneratedFilesOutputPath",                         out var generatedFilesPath) ? generatedFilesPath : null,
+				InterceptorsNamespace                = options.TryGetValue($"build_property.AspectGenerator{AspectOptionName.InterceptorsNamespace}", out var ns) ? ns : null,
+				InterceptorsNamespaces               = options.TryGetValue("build_property.InterceptorsNamespaces",                                   out var namespaces) ? namespaces : null,
 			};
 		}
 
@@ -81,17 +71,17 @@ namespace AspectGenerator
 				{
 					switch (arg.Key)
 					{
-						case AspectOptionNames.GenerateApi           when arg.Value.Value is bool   generateApi          : result.GenerateApi           = generateApi;           break;
-						case AspectOptionNames.PublicApi             when arg.Value.Value is bool   publicApi            : result.PublicApi             = publicApi;             break;
-						case AspectOptionNames.DebuggerStepThrough   when arg.Value.Value is bool   debuggerStepThrough  : result.DebuggerStepThrough   = debuggerStepThrough;   break;
-						case AspectOptionNames.AspectDiagnosticSeverity:
+						case AspectOptionName.GenerateApi           when arg.Value.Value is bool   generateApi          : result.GenerateApi           = generateApi;           break;
+						case AspectOptionName.PublicApi             when arg.Value.Value is bool   publicApi            : result.PublicApi             = publicApi;             break;
+						case AspectOptionName.DebuggerStepThrough   when arg.Value.Value is bool   debuggerStepThrough  : result.DebuggerStepThrough   = debuggerStepThrough;   break;
+						case AspectOptionName.AspectDiagnosticSeverity:
 							if (TryConvertAspectDiagnosticSeverity(arg.Value.Value, out var aspectDiagnosticSeverity))
 							{
 								result.AspectDiagnosticSeverity = aspectDiagnosticSeverity;
 								result.InvalidAspectDiagnosticSeverityValue = null;
 							}
 							break;
-						case AspectOptionNames.InterceptorsNamespace when arg.Value.Value is string interceptorsNamespace: result.InterceptorsNamespace = interceptorsNamespace; break;
+						case AspectOptionName.InterceptorsNamespace when arg.Value.Value is string interceptorsNamespace: result.InterceptorsNamespace = interceptorsNamespace; break;
 					}
 				}
 			}
@@ -166,10 +156,10 @@ namespace AspectGenerator
 
 						switch (name)
 						{
-							case AspectOptionNames.GenerateApi           when TryGetBoolLiteral(argument.Expression, out var generateApi)          : options.GenerateApi           = generateApi;           break;
-							case AspectOptionNames.PublicApi             when TryGetBoolLiteral(argument.Expression, out var publicApi)            : options.PublicApi             = publicApi;             break;
-							case AspectOptionNames.DebuggerStepThrough   when TryGetBoolLiteral(argument.Expression, out var debuggerStepThrough)  : options.DebuggerStepThrough   = debuggerStepThrough;   break;
-							case AspectOptionNames.AspectDiagnosticSeverity:
+							case AspectOptionName.GenerateApi           when TryGetBoolLiteral(argument.Expression, out var generateApi)          : options.GenerateApi           = generateApi;           break;
+							case AspectOptionName.PublicApi             when TryGetBoolLiteral(argument.Expression, out var publicApi)            : options.PublicApi             = publicApi;             break;
+							case AspectOptionName.DebuggerStepThrough   when TryGetBoolLiteral(argument.Expression, out var debuggerStepThrough)  : options.DebuggerStepThrough   = debuggerStepThrough;   break;
+							case AspectOptionName.AspectDiagnosticSeverity:
 								if (TryGetAspectDiagnosticSeverity(argument.Expression, out var aspectDiagnosticSeverity))
 									options.AspectDiagnosticSeverity = aspectDiagnosticSeverity;
 								else
@@ -178,7 +168,7 @@ namespace AspectGenerator
 									options.AspectDiagnosticSeverity = AspectDiagnosticSeverity.Info;
 								}
 								break;
-							case AspectOptionNames.InterceptorsNamespace when TryGetStringLiteral(argument.Expression, out var interceptorsNamespace): options.InterceptorsNamespace = interceptorsNamespace; break;
+							case AspectOptionName.InterceptorsNamespace when TryGetStringLiteral(argument.Expression, out var interceptorsNamespace): options.InterceptorsNamespace = interceptorsNamespace; break;
 						}
 					}
 				}
@@ -188,7 +178,7 @@ namespace AspectGenerator
 		static void ReportInvalidAspectDiagnosticSeverity(IAspectDiagnosticSink diagnostics, string value, Location? location)
 		{
 			diagnostics.Report(
-				AspectDiagnostics.Id.InvalidAspectDiagnosticSeverity,
+				AspectDiagnosticID.InvalidAspectDiagnosticSeverity,
 				$"Invalid AspectGenerator diagnostic severity value '{value}'. Supported values are Off, Hidden, Info, Warning, and Error. Check AspectGeneratorAspectDiagnosticSeverity in the project file, Directory.Build.props, imported .props files, or the AspectGeneratorOptions assembly attribute.",
 				location,
 				DiagnosticSeverity.Warning);

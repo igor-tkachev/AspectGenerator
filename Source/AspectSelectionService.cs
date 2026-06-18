@@ -309,7 +309,7 @@ namespace AspectGenerator
 				: null;
 
 			_diagnostics.Report(
-				AspectDiagnostics.Id.MethodLevelTargetFilter,
+				AspectDiagnosticID.MethodLevelTargetFilter,
 				"TargetFilter is only supported on assembly-level or type-level aspect attributes. Remove TargetFilter from this method-level aspect attribute.",
 				location);
 		}

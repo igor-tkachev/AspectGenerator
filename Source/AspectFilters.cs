@@ -419,17 +419,17 @@ namespace AspectGenerator
 
 			public static TargetFilterDiagnostic UnknownConditionKey(string key)
 			{
-				return new TargetFilterDiagnostic(AspectSourceGenerator.DiagnosticID.UnknownAspectFilterConditionKey, $"Unknown target filter condition key '{key}'.");
+				return new TargetFilterDiagnostic(AspectDiagnosticID.UnknownAspectFilterConditionKey, $"Unknown target filter condition key '{key}'.");
 			}
 
 			public static TargetFilterDiagnostic InvalidParameterPattern(string pattern, string message)
 			{
-				return new TargetFilterDiagnostic(AspectSourceGenerator.DiagnosticID.InvalidAspectFilterParameterPattern, $"Invalid target filter parameter pattern '{pattern}': {message}");
+				return new TargetFilterDiagnostic(AspectDiagnosticID.InvalidAspectFilterParameterPattern, $"Invalid target filter parameter pattern '{pattern}': {message}");
 			}
 
 			public static TargetFilterDiagnostic InvalidDottedPattern(string pattern, string message)
 			{
-				return new TargetFilterDiagnostic(AspectSourceGenerator.DiagnosticID.InvalidAspectFilterDottedPattern, $"Invalid target filter dotted pattern '{pattern}': {message}");
+				return new TargetFilterDiagnostic(AspectDiagnosticID.InvalidAspectFilterDottedPattern, $"Invalid target filter dotted pattern '{pattern}': {message}");
 			}
 		}
 
