@@ -3,7 +3,7 @@ using AspectGenerator;
 [assembly: AspectGeneratorOptions(
 	DebuggerStepThrough = true,
 	PublicApi = true,
-	AspectDiagnosticSeverity = AspectDiagnosticSeverity.Info,
+//	AspectDiagnosticSeverity = AspectDiagnosticSeverity.Info,
 	InterceptorsNamespace = "MyAspectGenerator")]
 
 [assembly: Aspects.Log(

@@ -57,6 +57,16 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void AssemblyOptionsSyntaxFallbackControlsGeneratedApiTest()
+		{
+			var result = RunGenerator(AssemblyOptionsSyntaxFallbackSource);
+
+			AssertGenerated(result, "AspectGeneratorOptionsAttribute.g.cs");
+			AssertNotGenerated(result, "AspectAttribute.g.cs");
+			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.NamespaceNotAllowed);
+		}
+
+		[TestMethod]
 		public void AspectGeneratorGenerateInterceptorsPropertyIsIgnoredTest()
 		{
 			var result = RunGenerator(
@@ -353,6 +363,62 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void EmptyTargetFilterRuleBodyReportsDiagnosticTest()
+		{
+			foreach (var rule in new[] { "contains:", "regex:", "pattern:" })
+			{
+				var result = RunGenerator(FilterRuleDiagnosticSource.Replace("FILTER_RULE", rule));
+
+				AssertFilterDiagnostic(
+					result,
+					AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule,
+					"Target filter rule body cannot be empty.");
+			}
+		}
+
+		[TestMethod]
+		public void LinePrefixOnNonPatternMatcherReportsDiagnosticTest()
+		{
+			foreach (var rule in new[] { "& regex: .*Save.*", "| contains: Save" })
+			{
+				var result = RunGenerator(FilterRuleDiagnosticSource.Replace("FILTER_RULE", rule));
+
+				AssertFilterDiagnostic(
+					result,
+					AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule,
+					"can only be used with native condition rules");
+			}
+		}
+
+		[TestMethod]
+		public void InvalidParameterPatternsReportDiagnosticTest()
+		{
+			foreach (var rule in new[] { "params: this string", "Save(..., ...)" })
+			{
+				var result = RunGenerator(FilterRuleDiagnosticSource.Replace("FILTER_RULE", rule));
+
+				AssertFilterDiagnostic(
+					result,
+					AspectSourceGenerator.DiagnosticID.InvalidAspectFilterParameterPattern,
+					rule.Contains("this", StringComparison.Ordinal) ? "'this' is not supported" : "can appear at most once");
+			}
+		}
+
+		[TestMethod]
+		public void EmptyConditionOperandsReportDiagnosticTest()
+		{
+			foreach (var rule in new[] { "method: Save | ", "method: Save & " })
+			{
+				var result = RunGenerator(FilterRuleDiagnosticSource.Replace("FILTER_RULE", rule));
+
+				AssertFilterDiagnostic(
+					result,
+					AspectSourceGenerator.DiagnosticID.InvalidAspectFilterRule,
+					"Condition value has an empty operand");
+			}
+		}
+
+		[TestMethod]
 		public void MethodLevelTargetFilterReportsDiagnosticTest()
 		{
 			var result = RunGenerator(FilterMethodLevelTargetFilterSource);
@@ -471,6 +537,12 @@ namespace AspectGenerator.Tests
 			AssertMarkerSeverity("Info",    DiagnosticSeverity.Info);
 			AssertMarkerSeverity("Warning", DiagnosticSeverity.Warning);
 			AssertMarkerSeverity("Error",   DiagnosticSeverity.Error);
+			AssertMarkerSeverity("hidden",  DiagnosticSeverity.Hidden);
+			AssertMarkerSeverity("0",       DiagnosticSeverity.Hidden);
+			AssertMarkerSeverity("1",       DiagnosticSeverity.Info);
+			AssertMarkerSeverity("2",       DiagnosticSeverity.Warning);
+			AssertMarkerSeverity("3",       DiagnosticSeverity.Error);
+			AssertMarkerSeverity("invalid", DiagnosticSeverity.Info);
 
 			static void AssertMarkerSeverity(string configuredSeverity, DiagnosticSeverity expectedSeverity)
 			{
@@ -514,6 +586,31 @@ namespace AspectGenerator.Tests
 
 			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
 			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkerAssemblyOptionsSupportIdentifierAndNumericSeverityTest()
+		{
+			AssertAssemblySeverity(TraceAssemblyOptionsIdentifierMarkerSource, DiagnosticSeverity.Hidden);
+			AssertAssemblySeverity(TraceAssemblyOptionsNumericMarkerSource, DiagnosticSeverity.Error);
+			AssertAssemblySeverity(TraceAssemblyOptionsOffMarkerSource, null);
+
+			static void AssertAssemblySeverity(string source, DiagnosticSeverity? expectedSeverity)
+			{
+				var diagnostics = RunAnalyzer(source);
+				var markerDiagnostics = diagnostics
+					.Where(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker)
+					.ToArray();
+
+				if (expectedSeverity is null)
+				{
+					Assert.AreEqual(0, markerDiagnostics.Length);
+					return;
+				}
+
+				Assert.AreEqual(1, markerDiagnostics.Length);
+				Assert.AreEqual(expectedSeverity.Value, markerDiagnostics[0].Severity);
+			}
 		}
 
 		[TestMethod]
@@ -960,6 +1057,15 @@ namespace AspectGenerator.Tests
 			CollectionAssert.Contains(diagnostics.Select(static d => d.Id).ToArray(), diagnosticId);
 		}
 
+		static void AssertFilterDiagnostic(GeneratorDriverRunResult result, string diagnosticId, string messageFragment)
+		{
+			var diagnostic = result.Diagnostics.FirstOrDefault(d =>
+				d.Id == diagnosticId &&
+				d.GetMessage().Contains(messageFragment, StringComparison.Ordinal));
+
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {diagnosticId} containing '{messageFragment}'. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(static d => $"{d.Id}: {d.GetMessage()}"))}");
+		}
+
 		static string GetGeneratedSource(GeneratorDriverRunResult result, string hintName)
 		{
 			var sources = result.Results
@@ -1056,6 +1162,20 @@ namespace AspectGenerator.Tests
 					return "target";
 				}
 			}
+			""";
+
+		const string AssemblyOptionsSyntaxFallbackSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGeneratorOptions(
+				GenerateApi = false,
+				PublicApi = true,
+				DebuggerStepThrough = true,
+				InterceptorsNamespace = "AspectGenerator")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
 			""";
 
 		const string GenerateInterceptorsAssemblyOptionSource =
@@ -2086,6 +2206,35 @@ namespace AspectGenerator.Tests
 			}
 			""";
 
+		const string FilterRuleDiagnosticSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "FILTER_RULE")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static void Invoke()
+				{
+					Save();
+				}
+
+				public static string Save() => "save";
+			}
+			""";
+
 		const string FilterMethodLevelTargetFilterSource =
 			"""
 			using System;
@@ -2383,6 +2532,88 @@ namespace AspectGenerator.Tests
 			using AspectGenerator;
 
 			[assembly: AspectGeneratorOptions(AspectDiagnosticSeverity = AspectDiagnosticSeverity.Warning)]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			sealed class TraceAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " traced";
+			}
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				[TraceAspect]
+				public static string Target() => "";
+			}
+			""";
+
+		const string TraceAssemblyOptionsIdentifierMarkerSource =
+			"""
+			using System;
+			using AspectGenerator;
+			using static AspectGenerator.AspectDiagnosticSeverity;
+
+			[assembly: AspectGeneratorOptions(AspectDiagnosticSeverity = Hidden)]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			sealed class TraceAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " traced";
+			}
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				[TraceAspect]
+				public static string Target() => "";
+			}
+			""";
+
+		const string TraceAssemblyOptionsNumericMarkerSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGeneratorOptions(AspectDiagnosticSeverity = 3)]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			sealed class TraceAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " traced";
+			}
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				[TraceAspect]
+				public static string Target() => "";
+			}
+			""";
+
+		const string TraceAssemblyOptionsOffMarkerSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGeneratorOptions(AspectDiagnosticSeverity = -1)]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
