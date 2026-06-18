@@ -35,7 +35,8 @@ namespace AspectGenerator
 
 		private static class StaticMethod_Interceptor_State
 		{
-			internal static readonly SR.MemberInfo TargetMethod = MethodOf(() => ClassLibrary.Class1.StaticMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => ClassLibrary.Class1.StaticMethod());
+
 			internal static readonly global::AspectLibrary.ConsoleLogAttribute Aspect0 = new global::AspectLibrary.ConsoleLogAttribute();
 
 			static StaticMethod_Interceptor_State()
@@ -56,12 +57,13 @@ namespace AspectGenerator
 			// AspectLibrary.ConsoleLogAttribute
 			//
 			var __targetMethod__ = StaticMethod_Interceptor_State.TargetMethod;
+
 			var __aspect__0 = StaticMethod_Interceptor_State.Aspect0;
-			var __info__0 = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 			{
-				MemberInfo      = __targetMethod__,
-				AspectType      = typeof(AspectLibrary.ConsoleLogAttribute),
-				Aspect          = __aspect__0,
+				MemberInfo = __targetMethod__,
+				AspectType = typeof(AspectLibrary.ConsoleLogAttribute),
+				Aspect     = __aspect__0,
 			};
 
 			AspectLibrary.ConsoleLogAttribute.OnBeforeCall(__info__0);

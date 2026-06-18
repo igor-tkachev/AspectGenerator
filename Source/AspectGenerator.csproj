@@ -30,8 +30,8 @@
 		<PackageReference Include="PolySharp"                        PrivateAssets="all" />
 
 		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-		<None Include="build\AspectGenerator.props"       Pack="true" PackagePath="build\AspectGenerator.props" Visible="false" />
-		<None Include="build\AspectGenerator.targets"     Pack="true" PackagePath="build\AspectGenerator.targets" Visible="false" />
+		<None Include="build\AspectGenerator.props"       Pack="true" PackagePath="build\AspectGenerator.props" />
+		<None Include="build\AspectGenerator.targets"     Pack="true" PackagePath="build\AspectGenerator.targets" />
 		<None Include="..\LICENSE.TXT"                    Pack="true" PackagePath="\" />
 		<None Include="..\README.md"                      Pack="true" PackagePath="\" />
 	</ItemGroup>

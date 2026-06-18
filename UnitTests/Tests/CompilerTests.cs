@@ -154,12 +154,12 @@ namespace AspectGenerator.Tests
 
 			AssertNoDiagnostic(result, AspectDiagnosticID.HookInvalidParameters);
 			StringAssert.Contains(source, "private static class Target_Interceptor_State");
-			StringAssert.Contains(source, "internal static readonly SR.MemberInfo TargetMethod");
+			StringAssert.Contains(source, "internal static readonly global::System.Reflection.MemberInfo TargetMethod");
 			StringAssert.Contains(source, "internal static readonly global::AspectGenerator.Tests.GeneratorDriver.TypedAspectAttribute Aspect0");
 			StringAssert.Contains(source, "static Target_Interceptor_State()");
 			StringAssert.Contains(source, "var __targetMethod__ = Target_Interceptor_State.TargetMethod;");
 			StringAssert.Contains(source, "var __aspect__0 = Target_Interceptor_State.Aspect0;");
-			StringAssert.Contains(source, "Aspect          = __aspect__0,");
+			StringAssert.Contains(source, "Aspect     = __aspect__0,");
 			Assert.IsFalse(source.Contains("Lazy<", StringComparison.Ordinal), "Generated interceptors should use per-interceptor state holders instead of Lazy<T>.");
 			var removedApiName = "Aspect" + "Arguments";
 			Assert.IsFalse(source.Contains(removedApiName, StringComparison.Ordinal), $"{removedApiName} should not be emitted.");
@@ -173,7 +173,7 @@ namespace AspectGenerator.Tests
 			var source = GetGeneratedSource(result, "Interceptors.g.cs");
 
 			StringAssert.Contains(source, "private static class Target_Interceptor_State");
-			StringAssert.Contains(source, "internal static readonly SR.MemberInfo TargetMethod");
+			StringAssert.Contains(source, "internal static readonly global::System.Reflection.MemberInfo TargetMethod");
 			Assert.IsFalse(source.Contains("internal static readonly global::AspectGenerator.Tests.GeneratorDriver.InstanceAspectAttribute Aspect0", StringComparison.Ordinal));
 			StringAssert.Contains(source, "var __aspect__0 = new global::AspectGenerator.Tests.GeneratorDriver.InstanceAspectAttribute(\"audit\") { Level = 2 };");
 			StringAssert.Contains(source, "InstanceAspectAttribute.After(__aspect__0, __info__0);");

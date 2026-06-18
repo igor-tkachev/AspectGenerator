@@ -99,6 +99,8 @@ using AspectGenerator;
 
 `AspectGeneratorOptionsAttribute` and `AspectDiagnosticSeverity` are generated automatically for the current project and are used only to configure AspectGenerator. They are always internal and do not participate in aspect-library runtime API ownership.
 
+Configuration is evaluated per project because the generator and analyzer run in a single compilation. Use `Directory.Build.props` or a linked source file with `[assembly: AspectGeneratorOptions(...)]` to share configuration across projects; each project still applies that configuration to its own compilation. Runtime API ownership is separate and remains controlled by `AspectGeneratorGenerateApi` and `AspectGeneratorPublicApi`.
+
 `AspectGeneratorInterceptorsNamespace` controls the namespace used for generated interceptors. The package appends this namespace to `InterceptorsNamespaces` automatically for direct package consumers. Manual `InterceptorsNamespaces` configuration should only be needed for unusual or custom build setups.
 
 The package `.props` asset defines defaults early. The package `.targets` asset appends `InterceptorsNamespaces` late, after project-level overrides such as `AspectGeneratorInterceptorsNamespace` are evaluated.

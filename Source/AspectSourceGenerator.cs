@@ -838,6 +838,8 @@ namespace AspectGenerator
 							{
 					""");
 
+				bool parametersAdded = false;
+
 				foreach (var p in method.Parameters)
 				{
 					switch (p.RefKind)
@@ -847,15 +849,20 @@ namespace AspectGenerator
 						case RefKind.In  :
 							sb.AppendLine(
 								$$"""
-										static {{p.Type, -30}} {{interceptorName}}_Arg_{{p.Name, -13}} = default({{p.Type}});
+											static {{p.Type}} {{interceptorName}}_Arg_{{p.Name}} = default({{p.Type}});
 								""");
+							parametersAdded = true;
 							break;
 					}
 				}
 
+				if (parametersAdded)
+					sb.AppendLine();
+
 				sb.AppendLine(
 					$$"""
-								internal static readonly SR.MemberInfo TargetMethod = MethodOf{{GetMethodOf(method, interceptorName)}};
+								internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf{{GetMethodOf(method, interceptorName)}};
+
 					""");
 
 				for (var i = 0; i < attributes.Count; i++)
@@ -1147,7 +1154,7 @@ namespace AspectGenerator
 						continue;
 					}
 
-					if (!methodsWithValidParameters.Any(m => IsValidLifecycleHookReturnType(compilation, m, hook, targetMethod, targetIsAsync, asyncResultType, useInterceptData)))
+					if (!methodsWithValidParameters.Any(m => IsValidLifecycleHookReturnType(m, hook, targetMethod, targetIsAsync, asyncResultType, useInterceptData)))
 					{
 						ReportDiagnostic(
 							diagnostics,
@@ -1248,7 +1255,6 @@ namespace AspectGenerator
 		}
 
 		static bool IsValidLifecycleHookReturnType(
-			Compilation   compilation,
 			IMethodSymbol hookMethod,
 			HookContract  hook,
 			IMethodSymbol targetMethod,
@@ -1421,14 +1427,14 @@ namespace AspectGenerator
 		{
 			return IsType(type, metadataName) ||
 				type.AllInterfaces.Any(i => IsType(i, metadataName));
-		}
 
-		static bool IsType(ITypeSymbol type, string metadataName)
-		{
-			if (type is not INamedTypeSymbol namedType)
-				return false;
+			static bool IsType(ITypeSymbol type, string metadataName)
+			{
+				if (type is not INamedTypeSymbol namedType)
+					return false;
 
-			return namedType.ContainingNamespace.ToDisplayString() + "." + namedType.Name == metadataName;
+				return namedType.ContainingNamespace.ToDisplayString() + "." + namedType.Name == metadataName;
+			}
 		}
 
 		static void GenerateMethodBody(
@@ -1467,7 +1473,7 @@ namespace AspectGenerator
 
 			void GenerateAttribute(int idx, string indent, bool isPrevData)
 			{
-				var attr   = attributes[idx].AttributeClass!;
+				var attr = attributes[idx].AttributeClass!;
 
 				// Get aspect attribute parameters.
 				//
@@ -1519,18 +1525,22 @@ namespace AspectGenerator
 
 					if (!targetMethodLocalGenerated)
 					{
-						sb.Append(indent).AppendLine($"var __targetMethod__ = {interceptorName}_State.TargetMethod;");
+						sb
+							.Append(indent)
+							.AppendLine($"var __targetMethod__ = {interceptorName}_State.TargetMethod;")
+							.AppendLine()
+							;
 						targetMethodLocalGenerated = true;
 					}
 
 					sb
 						.Append(indent).AppendLine($"var __aspect__{idx} = {(UsesInstanceLifetime(attributes[idx]) ? GetAppliedAspectConstruction(attributes[idx]) : $"{interceptorName}_State.Aspect{idx}")};")
-						.Append(indent).AppendLine($"var __info__{idx} = new AspectGenerator.Intercept{(useInterceptData ? "Data" : "Info")}<{returnType}>")
+						.Append(indent).AppendLine($"var __info__{idx}   = new AspectGenerator.Intercept{(useInterceptData ? "Data" : "Info")}<{returnType}>")
 						.Append(indent).AppendLine("{")
 						//.Append(indent).AppendLine($"\tReturnValue     = {(idx > 0 ? $"__info__{idx - 1}.ReturnValue" : $"default({(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")})")},")
-						.Append(indent).AppendLine($"\tMemberInfo      = __targetMethod__,")
-						.Append(indent).AppendLine($"\tAspectType      = typeof({attr}),")
-						.Append(indent).AppendLine($"\tAspect          = __aspect__{idx},")
+						.Append(indent).AppendLine($"\tMemberInfo = __targetMethod__,")
+						.Append(indent).AppendLine($"\tAspectType = typeof({attr}),")
+						.Append(indent).AppendLine($"\tAspect     = __aspect__{idx},")
 						;
 
 					if (passArguments)
@@ -1539,7 +1549,7 @@ namespace AspectGenerator
 							;
 
 					if (idx > 0 && !isPrevData)
-						sb.Append(indent).AppendLine($"\tPreviousInfo    = __info__{idx - 1}");
+						sb.Append(indent).AppendLine($"\tPreviousInfo = __info__{idx - 1}");
 
 					sb
 						.Append(indent).AppendLine("};")

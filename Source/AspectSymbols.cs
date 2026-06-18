@@ -31,23 +31,6 @@ namespace AspectGenerator
 			return IsAspectAttributeName(attribute.Name.ToString());
 		}
 
-		public static bool IsAspectDefinition(INamedTypeSymbol type)
-		{
-			return type.GetAttributes().Any(static attribute => attribute is
-			{
-				AttributeClass:
-				{
-					Name: "AspectAttribute",
-					ContainingNamespace.Name: "AspectGenerator"
-				}
-			});
-		}
-
-		public static bool IsAspectApplication(AttributeData attribute)
-		{
-			return attribute.AttributeClass is {} attributeClass && IsAspectDefinition(attributeClass);
-		}
-
 		public static bool IsConditionalAspectEnabled(INamedTypeSymbol aspectClass, Compilation compilation, SyntaxTree? applicationSyntaxTree)
 		{
 			var conditionalSymbols = aspectClass.GetAttributes()

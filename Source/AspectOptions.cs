@@ -30,16 +30,6 @@ namespace AspectGenerator
 			};
 		}
 
-		public static GeneratorExecutionOptions Resolve(Compilation compilation, AnalyzerConfigOptionsProvider optionsProvider)
-		{
-			return Resolve(compilation, GetMSBuildOptions(optionsProvider), NullDiagnosticSink.Instance);
-		}
-
-		public static GeneratorExecutionOptions Resolve(Compilation compilation, Options msBuildOptions)
-		{
-			return Resolve(compilation, msBuildOptions, NullDiagnosticSink.Instance);
-		}
-
 		public static GeneratorExecutionOptions Resolve(Compilation compilation, AnalyzerConfigOptionsProvider optionsProvider, IAspectDiagnosticSink diagnostics)
 		{
 			return Resolve(compilation, GetMSBuildOptions(optionsProvider), diagnostics);

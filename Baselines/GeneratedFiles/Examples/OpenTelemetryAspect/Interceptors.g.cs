@@ -35,7 +35,8 @@ namespace AspectGenerator
 
 		private static class AsyncMethod_Interceptor_State
 		{
-			internal static readonly SR.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.AsyncMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.AsyncMethod());
+
 			internal static readonly global::Aspects.MetricsAttribute Aspect0 = new global::Aspects.MetricsAttribute();
 
 			static AsyncMethod_Interceptor_State()
@@ -56,12 +57,13 @@ namespace AspectGenerator
 			// Aspects.MetricsAttribute
 			//
 			var __targetMethod__ = AsyncMethod_Interceptor_State.TargetMethod;
+
 			var __aspect__0 = AsyncMethod_Interceptor_State.Aspect0;
-			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new AspectGenerator.InterceptInfo<string>
 			{
-				MemberInfo      = __targetMethod__,
-				AspectType      = typeof(Aspects.MetricsAttribute),
-				Aspect          = __aspect__0,
+				MemberInfo = __targetMethod__,
+				AspectType = typeof(Aspects.MetricsAttribute),
+				Aspect     = __aspect__0,
 			};
 
 			await using (Aspects.MetricsAttribute.OnUsingAsync(__info__0))
@@ -86,7 +88,8 @@ namespace AspectGenerator
 
 		private static class Method1_Interceptor_State
 		{
-			internal static readonly SR.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.Method1());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.Method1());
+
 			internal static readonly global::Aspects.MetricsAttribute Aspect0 = new global::Aspects.MetricsAttribute();
 
 			static Method1_Interceptor_State()
@@ -110,12 +113,13 @@ namespace AspectGenerator
 			// Aspects.MetricsAttribute
 			//
 			var __targetMethod__ = Method1_Interceptor_State.TargetMethod;
+
 			var __aspect__0 = Method1_Interceptor_State.Aspect0;
-			var __info__0 = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 			{
-				MemberInfo      = __targetMethod__,
-				AspectType      = typeof(Aspects.MetricsAttribute),
-				Aspect          = __aspect__0,
+				MemberInfo = __targetMethod__,
+				AspectType = typeof(Aspects.MetricsAttribute),
+				Aspect     = __aspect__0,
 			};
 
 			using (Aspects.MetricsAttribute.OnUsing(__info__0))
@@ -138,7 +142,8 @@ namespace AspectGenerator
 
 		private static class Method2_Interceptor_State
 		{
-			internal static readonly SR.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.Method2());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.Method2());
+
 			internal static readonly global::Aspects.MetricsAttribute Aspect0 = new global::Aspects.MetricsAttribute();
 
 			static Method2_Interceptor_State()
@@ -159,12 +164,13 @@ namespace AspectGenerator
 			// Aspects.MetricsAttribute
 			//
 			var __targetMethod__ = Method2_Interceptor_State.TargetMethod;
+
 			var __aspect__0 = Method2_Interceptor_State.Aspect0;
-			var __info__0 = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 			{
-				MemberInfo      = __targetMethod__,
-				AspectType      = typeof(Aspects.MetricsAttribute),
-				Aspect          = __aspect__0,
+				MemberInfo = __targetMethod__,
+				AspectType = typeof(Aspects.MetricsAttribute),
+				Aspect     = __aspect__0,
 			};
 
 			using (Aspects.MetricsAttribute.OnUsing(__info__0))
@@ -187,7 +193,8 @@ namespace AspectGenerator
 
 		private static class MethodException_Interceptor_State
 		{
-			internal static readonly SR.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.MethodException());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.MethodException());
+
 			internal static readonly global::Aspects.IgnoreCatchAttribute Aspect0 = new global::Aspects.IgnoreCatchAttribute();
 			internal static readonly global::Aspects.MetricsAttribute Aspect1 = new global::Aspects.MetricsAttribute();
 
@@ -209,12 +216,13 @@ namespace AspectGenerator
 			// Aspects.IgnoreCatchAttribute
 			//
 			var __targetMethod__ = MethodException_Interceptor_State.TargetMethod;
+
 			var __aspect__0 = MethodException_Interceptor_State.Aspect0;
-			var __info__0 = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 			{
-				MemberInfo      = __targetMethod__,
-				AspectType      = typeof(Aspects.IgnoreCatchAttribute),
-				Aspect          = __aspect__0,
+				MemberInfo = __targetMethod__,
+				AspectType = typeof(Aspects.IgnoreCatchAttribute),
+				Aspect     = __aspect__0,
 			};
 
 			try
@@ -223,12 +231,12 @@ namespace AspectGenerator
 					// Aspects.MetricsAttribute
 					//
 					var __aspect__1 = MethodException_Interceptor_State.Aspect1;
-					var __info__1 = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+					var __info__1   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 					{
-						MemberInfo      = __targetMethod__,
-						AspectType      = typeof(Aspects.MetricsAttribute),
-						Aspect          = __aspect__1,
-						PreviousInfo    = __info__0
+						MemberInfo = __targetMethod__,
+						AspectType = typeof(Aspects.MetricsAttribute),
+						Aspect     = __aspect__1,
+						PreviousInfo = __info__0
 					};
 
 					using (Aspects.MetricsAttribute.OnUsing(__info__1))

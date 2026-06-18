@@ -322,11 +322,6 @@ namespace AspectGenerator
 				return new TargetFilterSet(Compile(rules, diagnostics), diagnostics.ToArray());
 			}
 
-			public bool IsMatch(in MethodTarget target)
-			{
-				return Evaluate(target).IsMatch;
-			}
-
 			public TargetFilterEvaluation Evaluate(in MethodTarget target)
 			{
 				var included = false;

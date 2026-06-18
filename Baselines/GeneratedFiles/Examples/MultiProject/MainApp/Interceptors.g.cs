@@ -35,7 +35,8 @@ namespace MultiProjectAspectGenerator
 
 		private static class TestMethod_Interceptor_State
 		{
-			internal static readonly SR.MemberInfo TargetMethod = MethodOf(() => ClassLibrary.TestClass.TestMethod(default(string)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => ClassLibrary.TestClass.TestMethod(default(string)));
+
 			internal static readonly global::Aspects.CrossProjectAttribute Aspect0 = new global::Aspects.CrossProjectAttribute();
 
 			static TestMethod_Interceptor_State()
@@ -56,12 +57,13 @@ namespace MultiProjectAspectGenerator
 			// Aspects.CrossProjectAttribute
 			//
 			var __targetMethod__ = TestMethod_Interceptor_State.TargetMethod;
+
 			var __aspect__0 = TestMethod_Interceptor_State.Aspect0;
-			var __info__0 = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new AspectGenerator.InterceptInfo<string>
 			{
-				MemberInfo      = __targetMethod__,
-				AspectType      = typeof(Aspects.CrossProjectAttribute),
-				Aspect          = __aspect__0,
+				MemberInfo = __targetMethod__,
+				AspectType = typeof(Aspects.CrossProjectAttribute),
+				Aspect     = __aspect__0,
 			};
 
 			__info__0.ReturnValue = ClassLibrary.TestClass.TestMethod(str);
