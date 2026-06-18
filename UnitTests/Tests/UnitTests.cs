@@ -88,10 +88,10 @@ namespace AspectGenerator.Tests
 
 			StringAssert.Contains(props, "<AspectGeneratorInterceptorsNamespace Condition=\"'$(AspectGeneratorInterceptorsNamespace)' == ''\">AspectGenerator</AspectGeneratorInterceptorsNamespace>");
 			StringAssert.Contains(props, "<AspectGeneratorReportFile Condition=\"'$(AspectGeneratorReportFile)' == ''\">$(BaseIntermediateOutputPath)\\GeneratedFiles\\AspectGenerator\\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>");
-			StringAssert.Contains(props, "<AspectGeneratorMarkInterceptedCalls Condition=\"'$(AspectGeneratorMarkInterceptedCalls)' == ''\">false</AspectGeneratorMarkInterceptedCalls>");
+			StringAssert.Contains(props, "<AspectGeneratorAspectDiagnosticSeverity Condition=\"'$(AspectGeneratorAspectDiagnosticSeverity)' == ''\">Info</AspectGeneratorAspectDiagnosticSeverity>");
 			Assert.IsFalse(props.Contains("AspectGeneratorPrintReport", StringComparison.Ordinal));
 			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorReportFile\" />");
-			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorMarkInterceptedCalls\" />");
+			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorAspectDiagnosticSeverity\" />");
 			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"CompilerGeneratedFilesOutputPath\" />");
 			StringAssert.Contains(targets, "<InterceptorsNamespaces>$(InterceptorsNamespaces);$(AspectGeneratorInterceptorsNamespace)</InterceptorsNamespaces>");
 			StringAssert.Contains(targets, "<WarningsNotAsErrors>$(WarningsNotAsErrors);AG0300</WarningsNotAsErrors>");

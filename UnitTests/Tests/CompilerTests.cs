@@ -442,40 +442,78 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void InterceptedCallMarkersAreDisabledByDefaultTest()
+		public void InterceptedCallMarkerReportsInfoByDefaultTest()
 		{
 			var diagnostics = RunAnalyzer(TraceDirectSource);
+			var diagnostic  = diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
 
-			AssertNoDiagnostic(diagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
+			Assert.AreEqual(DiagnosticSeverity.Info, diagnostic.Severity);
 		}
 
 		[TestMethod]
-		public void InterceptedCallMarkerReportsWarningWhenEnabledTest()
+		public void InterceptedCallMarkerCanBeDisabledTest()
 		{
 			var diagnostics = RunAnalyzer(
 				TraceDirectSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Off",
 				});
 
-			var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
-
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
-			Assert.AreEqual(AspectSourceGenerator.InterceptedCallMarkerSeverity, diagnostic.Severity);
-			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
-			StringAssert.Contains(diagnostic.GetMessage(), "TraceAspectAttribute");
-			Assert.AreEqual("Target()", diagnostic.Location.SourceTree?.GetRoot().FindNode(diagnostic.Location.SourceSpan).ToString());
+			AssertNoDiagnostic(diagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
 		}
 
 		[TestMethod]
-		public void InterceptedCallMarkerCanBeEnabledByAssemblyOptionsTest()
+		public void InterceptedCallMarkerReportsConfiguredSeverityTest()
+		{
+			AssertMarkerSeverity("Hidden",  DiagnosticSeverity.Hidden);
+			AssertMarkerSeverity("Info",    DiagnosticSeverity.Info);
+			AssertMarkerSeverity("Warning", DiagnosticSeverity.Warning);
+			AssertMarkerSeverity("Error",   DiagnosticSeverity.Error);
+
+			static void AssertMarkerSeverity(string configuredSeverity, DiagnosticSeverity expectedSeverity)
+			{
+				var diagnostics = RunAnalyzer(
+					TraceDirectSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = configuredSeverity,
+					});
+
+				var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+
+				Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
+				Assert.AreEqual(expectedSeverity, diagnostic.Severity);
+				StringAssert.Contains(diagnostic.GetMessage(), "TraceAspectAttribute");
+				Assert.AreEqual("Target()", diagnostic.Location.SourceTree?.GetRoot().FindNode(diagnostic.Location.SourceSpan).ToString());
+			}
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkerCanBeConfiguredByAssemblyOptionsTest()
 		{
 			var diagnostics = RunAnalyzer(TraceAssemblyOptionsMarkerSource);
 			var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
 
 			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
+			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
 			StringAssert.Contains(diagnostic.GetMessage(), "TraceAspectAttribute");
+		}
+
+		[TestMethod]
+		public void InterceptedCallMarkerAssemblyOptionsOverrideMsBuildOptionsTest()
+		{
+			var diagnostics = RunAnalyzer(
+				TraceAssemblyOptionsMarkerSource,
+				new()
+				{
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Error",
+				});
+			var diagnostic = diagnostics.SingleOrDefault(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
+
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectSourceGenerator.DiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
+			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
 		}
 
 		[TestMethod]
@@ -485,7 +523,7 @@ namespace AspectGenerator.Tests
 				MarkerMultipleAspectsSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
 				});
 			var markerDiagnostics = diagnostics.Where(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker).ToArray();
 
@@ -501,7 +539,7 @@ namespace AspectGenerator.Tests
 				MarkerMultipleCallSitesSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
 				});
 
 			Assert.AreEqual(2, diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
@@ -518,7 +556,7 @@ namespace AspectGenerator.Tests
 					TraceDirectSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
 						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
 						["build_property.DesignTimeBuild"] = "true",
 					});
@@ -526,7 +564,7 @@ namespace AspectGenerator.Tests
 					TraceDirectSource,
 					new()
 					{
-						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
 						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.ReportFile}"] = reportFile,
 						["build_property.DesignTimeBuild"] = "true",
 					});
@@ -545,18 +583,18 @@ namespace AspectGenerator.Tests
 		public void ConditionalDisabledAspectDoesNotEmitInterceptedCallMarkerTest()
 		{
 			var result = RunGenerator(
-				ConditionalDirectAspectSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
-					["build_property.DesignTimeBuild"] = "true",
+					ConditionalDirectAspectSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
+						["build_property.DesignTimeBuild"] = "true",
 				});
 			var diagnostics = RunAnalyzer(
-				ConditionalDirectAspectSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
-					["build_property.DesignTimeBuild"] = "true",
+					ConditionalDirectAspectSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
+						["build_property.DesignTimeBuild"] = "true",
 				});
 
 			AssertNoDiagnostic(diagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
@@ -570,7 +608,7 @@ namespace AspectGenerator.Tests
 				AssemblyIncludeTypeExcludeFilterSource,
 				new()
 				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
+					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
 				});
 
 			Assert.AreEqual(1, diagnostics.Count(d => d.Id == AspectSourceGenerator.DiagnosticID.InterceptedCallMarker));
@@ -583,17 +621,17 @@ namespace AspectGenerator.Tests
 		public void InterceptedCallMarkersAreSuppressedForDisabledConditionalAspectTest()
 		{
 			var disabledDiagnostics = RunAnalyzer(
-				ConditionalDirectAspectSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
-				});
+					ConditionalDirectAspectSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
+					});
 			var enabledDiagnostics = RunAnalyzer(
-				ConditionalDirectAspectSource,
-				new()
-				{
-					[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.MarkInterceptedCalls}"] = "true",
-				},
+					ConditionalDirectAspectSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectSourceGenerator.OptionID.AspectDiagnosticSeverity}"] = "Warning",
+					},
 				preprocessorSymbols: ["DEBUG"]);
 
 			AssertNoDiagnostic(disabledDiagnostics, AspectSourceGenerator.DiagnosticID.InterceptedCallMarker);
@@ -870,7 +908,7 @@ namespace AspectGenerator.Tests
 
 			var optionsProvider = new TestAnalyzerConfigOptionsProvider(effectiveProperties);
 			var analyzerOptions = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
-			var analyzers       = ImmutableArray.Create<DiagnosticAnalyzer>(new AspectGeneratorDiagnosticAnalyzer());
+			var analyzers       = ImmutableArray.Create<DiagnosticAnalyzer>(new AspectGeneratorMarkerAnalyzer());
 
 			return compilation
 				.WithAnalyzers(analyzers, analyzerOptions)
@@ -2344,7 +2382,7 @@ namespace AspectGenerator.Tests
 			using System;
 			using AspectGenerator;
 
-			[assembly: AspectGeneratorOptions(MarkInterceptedCalls = true)]
+			[assembly: AspectGeneratorOptions(AspectDiagnosticSeverity = AspectDiagnosticSeverity.Warning)]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 

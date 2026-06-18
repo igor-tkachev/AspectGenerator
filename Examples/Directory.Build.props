@@ -12,7 +12,7 @@
 		<CompilerVisibleProperty Include="AspectGeneratorPublicApi" />
 		<CompilerVisibleProperty Include="AspectGeneratorDebuggerStepThrough" />
 		<CompilerVisibleProperty Include="AspectGeneratorReportFile" />
-		<CompilerVisibleProperty Include="AspectGeneratorMarkInterceptedCalls" />
+		<CompilerVisibleProperty Include="AspectGeneratorAspectDiagnosticSeverity" />
 		<CompilerVisibleProperty Include="AspectGeneratorInterceptorsNamespace" />
 		<CompilerVisibleProperty Include="CompilerGeneratedFilesOutputPath" />
 		<CompilerVisibleProperty Include="DesignTimeBuild" />

@@ -10,7 +10,7 @@ AspectGenerator itself targets `netstandard2.0`, but consuming projects must be 
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
   <AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
-  <AspectGeneratorMarkInterceptedCalls>false</AspectGeneratorMarkInterceptedCalls>
+  <AspectGeneratorAspectDiagnosticSeverity>Info</AspectGeneratorAspectDiagnosticSeverity>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
 </PropertyGroup>
 ```
@@ -24,11 +24,13 @@ using AspectGenerator;
     GenerateApi = true,
     PublicApi = false,
     DebuggerStepThrough = false,
-    MarkInterceptedCalls = false,
+    AspectDiagnosticSeverity = AspectDiagnosticSeverity.Info,
     InterceptorsNamespace = "AspectGenerator")]
 ```
 
 Assembly attribute values override MSBuild properties.
+
+`AspectGeneratorAspectDiagnosticSeverity` controls optional diagnostics such as `AG0300` intercepted-call markers. Supported values are `Off`, `Hidden`, `Info`, `Warning`, and `Error`; the default is `Info`.
 
 AspectGenerator analyzes code during design-time builds so IDE diagnostics and optional call-site markers can work. Interceptor source is emitted only during normal builds. This behavior is automatic and not user-configurable.
 

@@ -18,7 +18,8 @@ Completed:
 - `ValueTask` and `ValueTask<T>` async target support;
 - AOP-like target filters;
 - removal of the legacy explicit method selector in favor of applied target filters;
-- MSBuild-visible build report output through `AspectGeneratorReportFile`.
+- MSBuild-visible build report output through `AspectGeneratorReportFile`;
+- `AG0300` call-site markers through a dedicated `DiagnosticAnalyzer` using shared selection logic.
 
 Not completed:
 

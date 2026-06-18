@@ -7,10 +7,40 @@ using System;
 namespace AspectGenerator
 {
 	/// <summary>
+	/// Specifies how AspectGenerator reports optional diagnostics.
+	/// </summary>
+	/// <remarks>
+	/// Values except <see cref="Off"/> map directly to Microsoft.CodeAnalysis.DiagnosticSeverity.
+	/// </remarks>
+	public enum AspectDiagnosticSeverity
+	{
+		/// <summary>
+		/// Do not report optional diagnostics.
+		/// </summary>
+		Off = -1,
+		/// <summary>
+		/// Something that is an issue, as determined by some authority, but is not surfaced through normal means.
+		/// </summary>
+		Hidden = 0,
+		/// <summary>
+		/// Information that does not indicate a problem.
+		/// </summary>
+		Info = 1,
+		/// <summary>
+		/// Something suspicious but allowed.
+		/// </summary>
+		Warning = 2,
+		/// <summary>
+		/// Something not allowed by the rules of the language or other authority.
+		/// </summary>
+		Error = 3,
+	}
+
+	/// <summary>
 	/// Configures AspectGenerator for the current assembly.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
-	sealed class AspectGeneratorOptionsAttribute : Attribute
+	public sealed class AspectGeneratorOptionsAttribute : Attribute
 	{
 		/// <summary>
 		/// Gets or sets whether AspectGenerator emits the shared generated API types for this assembly.
@@ -31,12 +61,12 @@ namespace AspectGenerator
 		/// </summary>
 		public bool    DebuggerStepThrough           { get; set; }
 		/// <summary>
-		/// Gets or sets whether AspectGenerator emits optional call-site marker diagnostics for intercepted calls.
+		/// Gets or sets how AspectGenerator reports optional diagnostics such as intercepted-call markers.
 		/// </summary>
 		/// <remarks>
-		/// This is intended for temporary IDE inspection. Use the build report for complete baseline-friendly interception details.
+		/// Set to <see cref="AspectGenerator.AspectDiagnosticSeverity.Off"/> to disable optional diagnostics.
 		/// </remarks>
-		public bool    MarkInterceptedCalls          { get; set; }
+		public AspectDiagnosticSeverity AspectDiagnosticSeverity { get; set; } = AspectDiagnosticSeverity.Info;
 		/// <summary>
 		/// Gets or sets the namespace used for generated interceptor types.
 		/// </summary>

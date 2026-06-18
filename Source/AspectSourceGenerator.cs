@@ -21,56 +21,42 @@ namespace AspectGenerator
 		// Diagnostic IDs
 		public static class DiagnosticID
 		{
-			public const string OnCallNotLastAspect                 = "AG0001";
-			public const string OnCallNotLastMethod                 = "AG0002";
-			public const string CannotIntercept                     = "AG0003";
-			public const string NamespaceNotAllowed                 = "AG0004";
-			public const string HookMethodNotFound                  = "AG0101";
-			public const string HookMethodNotStatic                 = "AG0102";
-			public const string HookInvalidParameters               = "AG0103";
-			public const string HookInvalidReturnType               = "AG0104";
-			public const string OnCallHookMismatch                  = "AG0105";
-			public const string HookRequiresInterceptData           = "AG0106";
-			public const string AsyncHookRequiresTask               = "AG0107";
-			public const string InvalidAspectFilterRegex            = "AG0201";
-			public const string InvalidAspectFilterRule             = "AG0202";
-			public const string UnknownAspectFilterConditionKey     = "AG0204";
-			public const string InvalidAspectFilterParameterPattern = "AG0205";
-			public const string InvalidAspectFilterDottedPattern    = "AG0206";
-			public const string MethodLevelTargetFilter             = "AG0208";
-			public const string InterceptedCallMarker               = "AG0300";
+			public const string OnCallNotLastAspect                 = AspectDiagnostics.Id.OnCallNotLastAspect;
+			public const string OnCallNotLastMethod                 = AspectDiagnostics.Id.OnCallNotLastMethod;
+			public const string CannotIntercept                     = AspectDiagnostics.Id.CannotIntercept;
+			public const string NamespaceNotAllowed                 = AspectDiagnostics.Id.NamespaceNotAllowed;
+			public const string HookMethodNotFound                  = AspectDiagnostics.Id.HookMethodNotFound;
+			public const string HookMethodNotStatic                 = AspectDiagnostics.Id.HookMethodNotStatic;
+			public const string HookInvalidParameters               = AspectDiagnostics.Id.HookInvalidParameters;
+			public const string HookInvalidReturnType               = AspectDiagnostics.Id.HookInvalidReturnType;
+			public const string OnCallHookMismatch                  = AspectDiagnostics.Id.OnCallHookMismatch;
+			public const string HookRequiresInterceptData           = AspectDiagnostics.Id.HookRequiresInterceptData;
+			public const string AsyncHookRequiresTask               = AspectDiagnostics.Id.AsyncHookRequiresTask;
+			public const string InvalidAspectFilterRegex            = AspectDiagnostics.Id.InvalidAspectFilterRegex;
+			public const string InvalidAspectFilterRule             = AspectDiagnostics.Id.InvalidAspectFilterRule;
+			public const string UnknownAspectFilterConditionKey     = AspectDiagnostics.Id.UnknownAspectFilterConditionKey;
+			public const string InvalidAspectFilterParameterPattern = AspectDiagnostics.Id.InvalidAspectFilterParameterPattern;
+			public const string InvalidAspectFilterDottedPattern    = AspectDiagnostics.Id.InvalidAspectFilterDottedPattern;
+			public const string MethodLevelTargetFilter             = AspectDiagnostics.Id.MethodLevelTargetFilter;
+			public const string InterceptedCallMarker               = AspectDiagnostics.Id.InterceptedCallMarker;
 		}
 
 		public static class OptionID
 		{
-			public const string GenerateApi           = "GenerateApi";
-			public const string PublicApi             = "PublicApi";
-			public const string DebuggerStepThrough   = "DebuggerStepThrough";
-			public const string ReportFile            = "ReportFile";
-			public const string MarkInterceptedCalls  = "MarkInterceptedCalls";
-			public const string InterceptorsNamespace = "InterceptorsNamespace";
+			public const string GenerateApi           = AspectOptionNames.GenerateApi;
+			public const string PublicApi             = AspectOptionNames.PublicApi;
+			public const string DebuggerStepThrough   = AspectOptionNames.DebuggerStepThrough;
+			public const string ReportFile            = AspectOptionNames.ReportFile;
+			public const string AspectDiagnosticSeverity = AspectOptionNames.AspectDiagnosticSeverity;
+			public const string InterceptorsNamespace = AspectOptionNames.InterceptorsNamespace;
 		}
-
-		public const DiagnosticSeverity InterceptedCallMarkerSeverity = DiagnosticSeverity.Warning;
-
-		#pragma warning disable RS2008 // AspectGenerator does not use analyzer release tracking files yet.
-		static readonly DiagnosticDescriptor InterceptedCallMarkerDescriptor = new(
-			DiagnosticID.InterceptedCallMarker,
-			"Call is intercepted by AspectGenerator",
-			"Call is intercepted by {0}",
-			"AspectGenerator",
-			InterceptedCallMarkerSeverity,
-			true,
-			"Marks a call site that is selected by AspectGenerator and is expected to be intercepted in a normal build.",
-			"https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics");
-		#pragma warning restore RS2008
-
-		public static ImmutableArray<DiagnosticDescriptor> MarkerSupportedDiagnostics => [InterceptedCallMarkerDescriptor];
 
 		#region API
 
-		static string GenerateAspectGeneratorOptionsApiText()
+		static string GenerateAspectGeneratorOptionsApiText(bool publicApi)
 		{
+			var visibility = publicApi ? "public " : "";
+
 			return
 				$$"""
 			// <auto-generated/>
@@ -82,10 +68,40 @@ namespace AspectGenerator
 			namespace AspectGenerator
 			{
 				/// <summary>
+				/// Specifies how AspectGenerator reports optional diagnostics.
+				/// </summary>
+				/// <remarks>
+				/// Values except <see cref="Off"/> map directly to Microsoft.CodeAnalysis.DiagnosticSeverity.
+				/// </remarks>
+				{{visibility}}enum AspectDiagnosticSeverity
+				{
+					/// <summary>
+					/// Do not report optional diagnostics.
+					/// </summary>
+					Off = -1,
+					/// <summary>
+					/// Something that is an issue, as determined by some authority, but is not surfaced through normal means.
+					/// </summary>
+					Hidden = 0,
+					/// <summary>
+					/// Information that does not indicate a problem.
+					/// </summary>
+					Info = 1,
+					/// <summary>
+					/// Something suspicious but allowed.
+					/// </summary>
+					Warning = 2,
+					/// <summary>
+					/// Something not allowed by the rules of the language or other authority.
+					/// </summary>
+					Error = 3,
+				}
+
+				/// <summary>
 				/// Configures AspectGenerator for the current assembly.
 				/// </summary>
 				[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
-				sealed class AspectGeneratorOptionsAttribute : Attribute
+				{{visibility}}sealed class AspectGeneratorOptionsAttribute : Attribute
 				{
 					/// <summary>
 					/// Gets or sets whether AspectGenerator emits the shared generated API types for this assembly.
@@ -106,12 +122,12 @@ namespace AspectGenerator
 					/// </summary>
 					public bool    {{OptionID.DebuggerStepThrough}}           { get; set; }
 					/// <summary>
-					/// Gets or sets whether AspectGenerator emits optional call-site marker diagnostics for intercepted calls.
+					/// Gets or sets how AspectGenerator reports optional diagnostics such as intercepted-call markers.
 					/// </summary>
 					/// <remarks>
-					/// This is intended for temporary IDE inspection. Use the build report for complete baseline-friendly interception details.
+					/// Set to <see cref="AspectGenerator.AspectDiagnosticSeverity.Off"/> to disable optional diagnostics.
 					/// </remarks>
-					public bool    {{OptionID.MarkInterceptedCalls}}          { get; set; }
+					public AspectDiagnosticSeverity {{OptionID.AspectDiagnosticSeverity}} { get; set; } = AspectDiagnosticSeverity.Info;
 					/// <summary>
 					/// Gets or sets the namespace used for generated interceptor types.
 					/// </summary>
@@ -394,59 +410,6 @@ namespace AspectGenerator
 
 		#endregion
 
-		class Options
-		{
-			public bool?   GenerateApi;
-			public bool?   DesignTimeBuild;
-			public bool?   PublicApi;
-			public bool?   DebuggerStepThrough;
-			public string? ReportFile;
-			public bool?   MarkInterceptedCalls;
-			public string? ProjectDirectory;
-			public string? CompilerGeneratedFilesOutputPath;
-			public string? InterceptorsNamespace;
-			public string? InterceptorsNamespaces;
-		}
-
-		record GeneratorExecutionOptions(
-			bool    GenerateApi,
-			bool    EmitInterceptors,
-			bool    DesignTimeBuild,
-			bool    PublicApi,
-			bool    DebuggerStepThrough,
-			string? ReportFile,
-			bool    MarkInterceptedCalls,
-			string? ProjectDirectory,
-			string? CompilerGeneratedFilesOutputPath,
-			string? InterceptorsNamespace,
-			string? InterceptorsNamespaces);
-
-		record AttributeInfo(
-			AttributeData?    AppliedAttributeData,
-			AttributeSyntax?  AppliedAttributeSyntax,
-			SemanticModel?    AppliedSemanticModel,
-			INamedTypeSymbol  AttributeClass,
-			AttributeData?    AspectDefinitionData,
-			AttributeSyntax?  AspectDefinitionSyntax,
-			SemanticModel?    AspectDefinitionSemanticModel)
-		{
-		}
-
-		record AspectFilterSet(
-			AttributeInfo                  Attribute,
-			AspectFilters.TargetFilterSet Filters);
-
-		record AnalyzedInvocation(
-			InvocationExpressionSyntax Inv,
-			IMethodSymbol              Method,
-			List<AttributeInfo>        Attributes);
-
-		record DiagnosticInfo(
-			string    Id,
-			string    Message,
-			Location? Location,
-			DiagnosticSeverity Severity = DiagnosticSeverity.Error);
-
 		record InterceptorInfo(
 			IMethodSymbol             Method,
 			List<AnalyzedInvocation>  Invocations,
@@ -468,15 +431,11 @@ namespace AspectGenerator
 			}
 #endif
 
-			context.RegisterPostInitializationOutput(ctx => ctx.AddSource(
-				"AspectGeneratorOptionsAttribute.g.cs",
-				SourceText.From(GenerateAspectGeneratorOptionsApiText(), Encoding.UTF8)));
-
 			var attributes = context.SyntaxProvider
 				.CreateSyntaxProvider(
 					predicate: static (node, _) => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 } c && c.AttributeLists
 						.SelectMany(static l => l.Attributes)
-						.Any(static a => IsAspectAttributeName(a.Name.ToString())),
+						.Any(static a => AspectSymbols.IsAspectAttributeName(a.Name.ToString())),
 					transform: static (ctx, _) => (ClassDeclarationSyntax)ctx.Node)
 				.Collect();
 
@@ -489,8 +448,8 @@ namespace AspectGenerator
 					transform: static (ctx, _) => (InvocationExpressionSyntax)ctx.Node)
 				.Collect();
 
-			var options = context.AnalyzerConfigOptionsProvider.Select((c, _) =>
-				GetOptions(c));
+			var options = context.AnalyzerConfigOptionsProvider.Select(static (c, _) =>
+				AspectOptionsResolver.GetMSBuildOptions(c));
 
 			var analysis = context.CompilationProvider
 				.Combine(options)
@@ -507,105 +466,28 @@ namespace AspectGenerator
 			CancellationToken cancellationToken)
 		{
 			var compilation = data.Left.Left.Left;
-			var options     = ResolveOptions(compilation, data.Left.Left.Right);
+			var options     = AspectOptionsResolver.Resolve(compilation, data.Left.Left.Right);
 			var attrs       = data.Left.Right;
 			var invocations = data.Right;
 
-			var diagnostics = new List<DiagnosticInfo>();
+			var diagnosticSink = new GeneratorDiagnosticSink();
+			var diagnostics = diagnosticSink.Diagnostics;
 			var reportedDiagnostics = new HashSet<string>();
 
-			var aspectAttributes = new Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)>(SymbolEqualityComparer.Default);
+			var registry = AspectDefinitionRegistry.Create(
+				compilation,
+				attrs,
+				diagnosticSink,
+				cancellationToken);
 
-			foreach (var a in attrs)
-			{
-				var semanticModel = compilation.GetSemanticModel(a.SyntaxTree);
+			ValidateAspectHooks(diagnostics, registry.AspectAttributes, reportedDiagnostics);
 
-				if (semanticModel.GetDeclaredSymbol(a, cancellationToken) is not {} symbol)
-					continue;
-
-				foreach (var attribute in a.AttributeLists.SelectMany(static l => l.Attributes))
-				{
-					if (!IsAspectAttributeName(attribute.Name.ToString()))
-						continue;
-
-					aspectAttributes[symbol] = (attribute, semanticModel);
-					break;
-				}
-			}
-
-			ValidateAspectHooks(diagnostics, aspectAttributes, reportedDiagnostics);
-
-			var assemblyFilters = BuildAssemblyFilters(compilation, diagnostics, options, aspectAttributes, reportedDiagnostics);
-
-			var aspectedMethods  = new List<AnalyzedInvocation>();
-			var methodDic        = new Dictionary<IMethodSymbol,List<AttributeInfo>>(SymbolEqualityComparer.Default);
-			var typeFilterDic    = new Dictionary<INamedTypeSymbol,ImmutableArray<AspectFilterSet>>(SymbolEqualityComparer.Default);
-
-			foreach (var invocation in invocations)
-			{
-				var semantic = compilation.GetSemanticModel(invocation.SyntaxTree);
-				var info     = semantic.GetSymbolInfo(invocation, cancellationToken);
-
-				// Bind only invocation candidates provided by SyntaxProvider.
-				//
-				if (info.Symbol is IMethodSymbol method)
-				{
-					if (!methodDic.TryGetValue(method, out var attributes))
-					{
-						attributes = new();
-						var explicitAttributeClasses = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-
-						var methodAttributes = method.GetAttributes();
-
-						// .. decorated with any Aspect attribute...
-						//
-						if (methodAttributes.Length > 0)
-						{
-							foreach (var ma in methodAttributes)
-							{
-								if (ma.AttributeClass is null)
-									continue;
-
-								if (!IsConditionalAspectEnabled(ma.AttributeClass, compilation, ma.ApplicationSyntaxReference?.SyntaxTree))
-								{
-									continue;
-								}
-
-								// .. if attribute is defined in the compiling assembly...
-								//
-								if (aspectAttributes.TryGetValue(ma.AttributeClass, out var aspectAttribute))
-								{
-									ReportMethodLevelTargetFilter(diagnostics, reportedDiagnostics, ma);
-									var attributeInfo = new AttributeInfo(ma, null, null, ma.AttributeClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel);
-									attributes.Add(attributeInfo);
-									explicitAttributeClasses.Add(ma.AttributeClass);
-								}
-								// .. or somewhere else.
-								else if (ma.AttributeClass?.GetAttributes().FirstOrDefault(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }}) is {} externalAspectAttributeData)
-								{
-									ReportMethodLevelTargetFilter(diagnostics, reportedDiagnostics, ma);
-									var attributeInfo = new AttributeInfo(ma, null, null, ma.AttributeClass!, externalAspectAttributeData, null, null);
-									attributes.Add(attributeInfo);
-									explicitAttributeClasses.Add(ma.AttributeClass!);
-								}
-							}
-						}
-
-						var target = GetMethodTarget(method);
-
-						AddMatchedFilterAttributes(diagnostics, options, attributes, explicitAttributeClasses, assemblyFilters, target, method);
-						AddMatchedFilterAttributes(diagnostics, options, attributes, explicitAttributeClasses, GetTypeFilters(compilation, diagnostics, options, aspectAttributes, typeFilterDic, method.ContainingType, reportedDiagnostics), target, method);
-
-						methodDic[method] = attributes.Distinct().ToList();
-					}
-
-					if (attributes.Count > 0)
-						aspectedMethods.Add(new AnalyzedInvocation(invocation, method, attributes));
-				}
-
-				if (cancellationToken.IsCancellationRequested)
-					break;
-			}
+			var selection = new AspectSelectionService(
+				compilation,
+				options,
+				registry,
+				diagnosticSink);
+			var aspectedMethods = selection.AnalyzeInvocations(invocations, cancellationToken);
 
 			if (!cancellationToken.IsCancellationRequested)
 				foreach (var m in aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default))
@@ -613,11 +495,13 @@ namespace AspectGenerator
 
 			ReportMissingInterceptorsNamespace(diagnostics, options);
 
-			return new AnalysisResult(compilation, options, aspectedMethods.ToImmutableArray(), diagnostics.ToImmutableArray());
+			return new AnalysisResult(compilation, options, aspectedMethods, diagnostics.ToImmutableArray());
 		}
 
 		static void ReportDiagnostics(SourceProductionContext spc, AnalysisResult analysis)
 		{
+			spc.AddSource("AspectGeneratorOptionsAttribute.g.cs", SourceText.From(GenerateAspectGeneratorOptionsApiText(analysis.Options.PublicApi), Encoding.UTF8));
+
 			if (analysis.Options.GenerateApi)
 				spc.AddSource("AspectAttribute.g.cs", SourceText.From(GenerateAspectApiText(analysis.Options.PublicApi), Encoding.UTF8));
 
@@ -636,36 +520,6 @@ namespace AspectGenerator
 			}
 
 			WriteBuildReport(analysis);
-		}
-
-		static ImmutableArray<Diagnostic> GetInterceptedCallMarkerDiagnostics(AnalysisResult analysis, CancellationToken cancellationToken)
-		{
-			if (!analysis.Options.MarkInterceptedCalls ||
-				analysis.AspectedMethods.Length == 0)
-				return [];
-
-			var result = ImmutableArray.CreateBuilder<Diagnostic>();
-
-			foreach (var analyzedInvocation in analysis.AspectedMethods.OrderBy(static m => GetLocationSortKey(m.Inv.GetLocation()), StringComparer.Ordinal))
-			{
-				if (analyzedInvocation.Attributes.Count == 0)
-					continue;
-
-				var semantic = analysis.Compilation.GetSemanticModel(analyzedInvocation.Inv.SyntaxTree);
-
-				if (semantic.GetInterceptableLocation(analyzedInvocation.Inv, cancellationToken) is null)
-					continue;
-
-				var aspects = string.Join(", ", analyzedInvocation.Attributes.Select(static attribute => attribute.AttributeClass.Name));
-
-				result.Add(
-					Diagnostic.Create(
-						InterceptedCallMarkerDescriptor,
-						analyzedInvocation.Inv.GetLocation(),
-						aspects));
-			}
-
-			return result.ToImmutable();
 		}
 
 		#pragma warning disable RS1035 // Build reports are an explicit source-generator output channel for this package.
@@ -903,182 +757,6 @@ namespace AspectGenerator
 			GenerateSource(spc, analysis.Compilation, analysis.Options, analysis.AspectedMethods);
 		}
 
-		static bool? GetBoolProperty(AnalyzerConfigOptions options, string name)
-		{
-			if (!options.TryGetValue(name, out var value))
-				return null;
-
-			return bool.TryParse(value, out var result) ? result : null;
-		}
-
-		static Options GetOptions(AnalyzerConfigOptionsProvider optionsProvider)
-		{
-			var options = optionsProvider.GlobalOptions;
-
-			return new Options
-			{
-				GenerateApi            = GetBoolProperty(options, $"build_property.AspectGenerator{OptionID.GenerateApi}"),
-				DesignTimeBuild        = GetBoolProperty(options,  "build_property.DesignTimeBuild"),
-				PublicApi              = GetBoolProperty(options, $"build_property.AspectGenerator{OptionID.PublicApi}"),
-				DebuggerStepThrough    = GetBoolProperty(options, $"build_property.AspectGenerator{OptionID.DebuggerStepThrough}"),
-				ReportFile             = options.TryGetValue($"build_property.AspectGenerator{OptionID.ReportFile}", out var reportFile) ? reportFile : null,
-				MarkInterceptedCalls   = GetBoolProperty(options, $"build_property.AspectGenerator{OptionID.MarkInterceptedCalls}"),
-				ProjectDirectory       = options.TryGetValue("build_property.ProjectDir", out var projectDir) ? projectDir : null,
-				CompilerGeneratedFilesOutputPath = options.TryGetValue("build_property.CompilerGeneratedFilesOutputPath", out var generatedFilesPath) ? generatedFilesPath : null,
-				InterceptorsNamespace  = options.TryGetValue($"build_property.AspectGenerator{OptionID.InterceptorsNamespace}", out var ns) ? ns : null,
-				InterceptorsNamespaces = options.TryGetValue("build_property.InterceptorsNamespaces", out var namespaces) ? namespaces : null,
-			};
-		}
-
-		public static ImmutableArray<Diagnostic> GetInterceptedCallMarkerDiagnostics(
-			Compilation                                      compilation,
-			AnalyzerConfigOptionsProvider                    optionsProvider,
-			ImmutableArray<ClassDeclarationSyntax>           aspectDeclarations,
-			ImmutableArray<InvocationExpressionSyntax>       invocations,
-			CancellationToken                                cancellationToken)
-		{
-			var analysis = Analyze((((compilation, GetOptions(optionsProvider)), aspectDeclarations), invocations), cancellationToken);
-
-			return GetInterceptedCallMarkerDiagnostics(analysis, cancellationToken);
-		}
-
-		public static bool IsInterceptedCallMarkerEnabled(Compilation compilation, AnalyzerConfigOptionsProvider optionsProvider)
-		{
-			return ResolveOptions(compilation, GetOptions(optionsProvider)).MarkInterceptedCalls;
-		}
-
-		static GeneratorExecutionOptions ResolveOptions(Compilation compilation, Options msBuildOptions)
-		{
-			var result = new Options
-			{
-				GenerateApi            = msBuildOptions.GenerateApi,
-				DesignTimeBuild        = msBuildOptions.DesignTimeBuild,
-				PublicApi              = msBuildOptions.PublicApi,
-				DebuggerStepThrough    = msBuildOptions.DebuggerStepThrough,
-				ReportFile             = msBuildOptions.ReportFile,
-				MarkInterceptedCalls   = msBuildOptions.MarkInterceptedCalls,
-				ProjectDirectory       = msBuildOptions.ProjectDirectory,
-				CompilerGeneratedFilesOutputPath = msBuildOptions.CompilerGeneratedFilesOutputPath,
-				InterceptorsNamespace  = msBuildOptions.InterceptorsNamespace,
-				InterceptorsNamespaces = msBuildOptions.InterceptorsNamespaces,
-			};
-
-			var attr = compilation.Assembly.GetAttributes().FirstOrDefault(a =>
-				a.AttributeClass is { ContainingNamespace.Name: "AspectGenerator", Name: "AspectGeneratorOptionsAttribute" });
-
-			if (attr is not null)
-			{
-				foreach (var arg in attr.NamedArguments)
-				{
-					switch (arg.Key)
-					{
-						case OptionID.GenerateApi           when arg.Value.Value is bool   generateApi          : result.GenerateApi           = generateApi;           break;
-						case OptionID.PublicApi             when arg.Value.Value is bool   publicApi            : result.PublicApi             = publicApi;             break;
-						case OptionID.DebuggerStepThrough   when arg.Value.Value is bool   debuggerStepThrough  : result.DebuggerStepThrough   = debuggerStepThrough;   break;
-						case OptionID.MarkInterceptedCalls  when arg.Value.Value is bool   markInterceptedCalls : result.MarkInterceptedCalls  = markInterceptedCalls;  break;
-						case OptionID.InterceptorsNamespace when arg.Value.Value is string interceptorsNamespace: result.InterceptorsNamespace = interceptorsNamespace; break;
-					}
-				}
-			}
-
-			ApplyAssemblyOptionsFromSyntax(compilation, result);
-
-			return CreateExecutionOptions(result);
-
-			static GeneratorExecutionOptions CreateExecutionOptions(Options options)
-			{
-				var emitInterceptors = options.DesignTimeBuild is not true;
-
-				return new GeneratorExecutionOptions(
-					options.GenerateApi is not false,
-					emitInterceptors,
-					options.DesignTimeBuild is true,
-					options.PublicApi is true,
-					options.DebuggerStepThrough is true,
-					options.ReportFile,
-					options.MarkInterceptedCalls is true,
-					options.ProjectDirectory,
-					options.CompilerGeneratedFilesOutputPath,
-					options.InterceptorsNamespace,
-					options.InterceptorsNamespaces);
-			}
-		}
-
-		static void ApplyAssemblyOptionsFromSyntax(Compilation compilation, Options options)
-		{
-			foreach (var tree in compilation.SyntaxTrees)
-			{
-				if (tree.GetRoot() is not CompilationUnitSyntax root)
-					continue;
-
-				foreach (var attribute in root.AttributeLists
-					.Where(static list => list.Target?.Identifier.IsKind(SyntaxKind.AssemblyKeyword) == true)
-					.SelectMany(static list => list.Attributes))
-				{
-					if (!IsAspectGeneratorOptionsAttributeName(attribute.Name.ToString()))
-						continue;
-
-					foreach (var argument in attribute.ArgumentList?.Arguments ?? default(SeparatedSyntaxList<AttributeArgumentSyntax>))
-					{
-						var name = argument.NameEquals?.Name.Identifier.ValueText;
-
-						if (name is null)
-							continue;
-
-						switch (name)
-						{
-							case OptionID.GenerateApi           when TryGetBoolLiteral(argument.Expression, out var generateApi)          : options.GenerateApi           = generateApi;           break;
-							case OptionID.PublicApi             when TryGetBoolLiteral(argument.Expression, out var publicApi)            : options.PublicApi             = publicApi;             break;
-							case OptionID.DebuggerStepThrough   when TryGetBoolLiteral(argument.Expression, out var debuggerStepThrough)  : options.DebuggerStepThrough   = debuggerStepThrough;   break;
-							case OptionID.MarkInterceptedCalls  when TryGetBoolLiteral(argument.Expression, out var markInterceptedCalls) : options.MarkInterceptedCalls  = markInterceptedCalls;  break;
-							case OptionID.InterceptorsNamespace when TryGetStringLiteral(argument.Expression, out var interceptorsNamespace): options.InterceptorsNamespace = interceptorsNamespace; break;
-						}
-					}
-				}
-			}
-
-			static bool TryGetBoolLiteral(ExpressionSyntax expression, out bool value)
-			{
-				if (expression.IsKind(SyntaxKind.TrueLiteralExpression))
-				{
-					value = true;
-					return true;
-				}
-
-				if (expression.IsKind(SyntaxKind.FalseLiteralExpression))
-				{
-					value = false;
-					return true;
-				}
-
-				value = false;
-				return false;
-			}
-
-			static bool TryGetStringLiteral(ExpressionSyntax expression, out string? value)
-			{
-				if (expression is LiteralExpressionSyntax literal && literal.IsKind(SyntaxKind.StringLiteralExpression))
-				{
-					value = literal.Token.ValueText;
-					return true;
-				}
-
-				value = null;
-				return false;
-			}
-		}
-
-		static bool IsAspectGeneratorOptionsAttributeName(string name)
-		{
-			return
-				name == "AspectGeneratorOptions" ||
-				name == "AspectGeneratorOptionsAttribute" ||
-				name == "AspectGenerator.AspectGeneratorOptions" ||
-				name == "AspectGenerator.AspectGeneratorOptionsAttribute" ||
-				name.EndsWith(".AspectGeneratorOptions", StringComparison.Ordinal) ||
-				name.EndsWith(".AspectGeneratorOptionsAttribute", StringComparison.Ordinal);
-		}
-
 		static string GetInterceptorsNamespace(GeneratorExecutionOptions options)
 		{
 			return string.IsNullOrWhiteSpace(options.InterceptorsNamespace) ? "AspectGenerator" : options.InterceptorsNamespace!;
@@ -1144,7 +822,7 @@ namespace AspectGenerator
 					if (arg.NameEquals is null || !IsHookName(arg.NameEquals.Name.Identifier.ValueText))
 						continue;
 
-					if (GetAttributeArgumentValue(arg.Expression, aspectAttribute.SemanticModel) is not string hookName || string.IsNullOrWhiteSpace(hookName))
+					if (AspectSymbols.GetAttributeArgumentValue(arg.Expression, aspectAttribute.SemanticModel) is not string hookName || string.IsNullOrWhiteSpace(hookName))
 						continue;
 
 					var methods = aspectClass.GetMembers(hookName).OfType<IMethodSymbol>().ToArray();
@@ -1181,587 +859,6 @@ namespace AspectGenerator
 			diagnostics.Add(new DiagnosticInfo(id, message, location));
 		}
 
-		static void ReportMethodLevelTargetFilter(List<DiagnosticInfo> diagnostics, HashSet<string> reportedDiagnostics, AttributeData attribute)
-		{
-			if (!attribute.NamedArguments.Any(static a => a.Key == "TargetFilter"))
-				return;
-
-			var location = attribute.ApplicationSyntaxReference is {} syntaxReference
-				? Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span)
-				: null;
-
-			ReportDiagnostic(
-				diagnostics,
-				reportedDiagnostics,
-				DiagnosticID.MethodLevelTargetFilter,
-				"TargetFilter is only supported on assembly-level or type-level aspect attributes. Remove TargetFilter from this method-level aspect attribute.",
-				location);
-		}
-
-		static bool IsConditionalAspectEnabled(INamedTypeSymbol aspectClass, Compilation compilation, SyntaxTree? applicationSyntaxTree)
-		{
-			var conditionalSymbols = aspectClass.GetAttributes()
-				.Where(static attribute => attribute.AttributeClass is
-				{
-					Name: "ConditionalAttribute",
-					ContainingNamespace:
-					{
-						Name: "Diagnostics",
-						ContainingNamespace:
-						{
-							Name: "System",
-							ContainingNamespace.IsGlobalNamespace: true
-						}
-					}
-				})
-				.Select(static attribute => attribute.ConstructorArguments.Length == 1 ? attribute.ConstructorArguments[0].Value as string : null)
-				.Where(static symbol => !string.IsNullOrWhiteSpace(symbol))
-				.ToArray();
-
-			if (conditionalSymbols.Length == 0)
-				return true;
-
-			var definedSymbols = new HashSet<string>(StringComparer.Ordinal);
-
-			if (applicationSyntaxTree?.Options is CSharpParseOptions applicationOptions)
-				foreach (var symbol in applicationOptions.PreprocessorSymbolNames)
-					definedSymbols.Add(symbol);
-			else
-				foreach (var tree in compilation.SyntaxTrees)
-					if (tree.Options is CSharpParseOptions options)
-						foreach (var symbol in options.PreprocessorSymbolNames)
-							definedSymbols.Add(symbol);
-
-			foreach (var conditionalSymbol in conditionalSymbols)
-				if (definedSymbols.Contains(conditionalSymbol!))
-					return true;
-
-			return false;
-		}
-
-		static ImmutableArray<AspectFilterSet> BuildAssemblyFilters(
-			Compilation                                                             compilation,
-			List<DiagnosticInfo>                                                    diagnostics,
-			GeneratorExecutionOptions                                               options,
-			Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)> aspectAttributes,
-			HashSet<string>                                                          reportedDiagnostics)
-		{
-			var result = ImmutableArray.CreateBuilder<AspectFilterSet>();
-
-			foreach (var filterAttribute in compilation.Assembly.GetAttributes())
-			{
-				if (!filterAttribute.NamedArguments.Any(static a => a.Key == "TargetFilter"))
-					continue;
-
-				if (CreateAppliedAspectFilterSet(
-					diagnostics,
-					compilation,
-					options,
-					aspectAttributes,
-					reportedDiagnostics,
-					filterAttribute) is {} filterSet)
-					result.Add(filterSet);
-			}
-
-			return result.ToImmutable();
-		}
-
-		static ImmutableArray<AspectFilterSet> GetTypeFilters(
-			Compilation                                                             compilation,
-			List<DiagnosticInfo>                                                    diagnostics,
-			GeneratorExecutionOptions                                               options,
-			Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)> aspectAttributes,
-			Dictionary<INamedTypeSymbol,ImmutableArray<AspectFilterSet>>             typeFilterDic,
-			INamedTypeSymbol?                                                       type,
-			HashSet<string>                                                          reportedDiagnostics)
-		{
-			if (type is null)
-				return [];
-
-			if (typeFilterDic.TryGetValue(type, out var cached))
-				return cached;
-
-			var result = ImmutableArray.CreateBuilder<AspectFilterSet>();
-
-			foreach (var syntaxReference in type.DeclaringSyntaxReferences)
-			{
-				if (syntaxReference.GetSyntax() is not TypeDeclarationSyntax typeDeclaration)
-					continue;
-
-				var semanticModel = compilation.GetSemanticModel(typeDeclaration.SyntaxTree);
-
-				foreach (var filterAttribute in typeDeclaration.AttributeLists.SelectMany(static list => list.Attributes))
-				{
-					if (!HasNamedArgument(filterAttribute, "TargetFilter"))
-						continue;
-
-					if (CreateAppliedAspectFilterSet(
-						diagnostics,
-						options,
-						aspectAttributes,
-						reportedDiagnostics,
-						filterAttribute,
-						semanticModel) is {} filterSet)
-						result.Add(filterSet);
-				}
-			}
-
-			var filters = result.ToImmutable();
-			typeFilterDic[type] = filters;
-
-			return filters;
-		}
-
-		static AspectFilterSet? CreateAppliedAspectFilterSet(
-			List<DiagnosticInfo>                                                    diagnostics,
-			GeneratorExecutionOptions                                               options,
-			Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)> aspectAttributes,
-			HashSet<string>                                                          reportedDiagnostics,
-			AttributeSyntax                                                         filterAttribute,
-			SemanticModel                                                            semanticModel)
-		{
-			if (semanticModel.GetSymbolInfo(filterAttribute).Symbol is not IMethodSymbol { ContainingType: var aspectClass })
-				return null;
-
-			if (!IsConditionalAspectEnabled(aspectClass, semanticModel.Compilation, filterAttribute.SyntaxTree))
-			{
-				return null;
-			}
-
-			var aspectAttributeData = aspectClass.GetAttributes().FirstOrDefault(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }});
-
-			AttributeInfo attributeInfo;
-
-			if (aspectAttributes.TryGetValue(aspectClass, out var aspectAttribute))
-				attributeInfo = new AttributeInfo(null, filterAttribute, semanticModel, aspectClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel);
-			else if (aspectAttributeData is not null)
-				attributeInfo = new AttributeInfo(null, filterAttribute, semanticModel, aspectClass, aspectAttributeData, null, null);
-			else
-				return null;
-
-			var filters = GetNamedCompiledFilterValue(
-				diagnostics,
-				reportedDiagnostics,
-				filterAttribute,
-				semanticModel,
-				"TargetFilter",
-				filterAttribute.GetLocation());
-
-			if (filters.IsEmpty)
-				return null;
-
-			return new AspectFilterSet(attributeInfo, filters);
-		}
-
-		static AspectFilterSet? CreateAppliedAspectFilterSet(
-			List<DiagnosticInfo>                                                    diagnostics,
-			Compilation                                                             compilation,
-			GeneratorExecutionOptions                                               options,
-			Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)> aspectAttributes,
-			HashSet<string>                                                          reportedDiagnostics,
-			AttributeData                                                           filterAttribute)
-		{
-			if (filterAttribute.AttributeClass is not {} aspectClass)
-				return null;
-
-			if (!IsConditionalAspectEnabled(aspectClass, compilation, filterAttribute.ApplicationSyntaxReference?.SyntaxTree))
-			{
-				return null;
-			}
-
-			var aspectAttributeData = aspectClass.GetAttributes().FirstOrDefault(aa => aa is { AttributeClass : { ContainingNamespace.Name : "AspectGenerator", Name : "AspectAttribute" }});
-
-			AttributeInfo attributeInfo;
-
-			if (aspectAttributes.TryGetValue(aspectClass, out var aspectAttribute))
-				attributeInfo = new AttributeInfo(filterAttribute, null, null, aspectClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel);
-			else if (aspectAttributeData is not null)
-				attributeInfo = new AttributeInfo(filterAttribute, null, null, aspectClass, aspectAttributeData, null, null);
-			else
-				return null;
-
-			var location = filterAttribute.ApplicationSyntaxReference is {} syntaxReference
-				? Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span)
-				: null;
-			var filters = GetNamedCompiledFilterValue(
-				diagnostics,
-				reportedDiagnostics,
-				filterAttribute,
-				"TargetFilter",
-				location);
-
-			return filters.IsEmpty ? null : new AspectFilterSet(attributeInfo, filters);
-		}
-
-		static AspectFilters.TargetFilterSet GetNamedCompiledFilterValue(
-			List<DiagnosticInfo> diagnostics,
-			HashSet<string>      reportedDiagnostics,
-			AttributeSyntax      attribute,
-			SemanticModel        semanticModel,
-			string               name,
-			Location?            location)
-		{
-			foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
-			{
-				if (arg.NameEquals?.Name.Identifier.ValueText != name)
-					continue;
-
-				var value = GetAttributeArgumentValue(arg.Expression, semanticModel);
-
-				return CompileAspectFilters(diagnostics, reportedDiagnostics, value, location);
-			}
-
-			return default;
-		}
-
-		static AspectFilters.TargetFilterSet GetNamedCompiledFilterValue(
-			List<DiagnosticInfo> diagnostics,
-			HashSet<string>      reportedDiagnostics,
-			AttributeData        attribute,
-			string               name,
-			Location?            location)
-		{
-			foreach (var arg in attribute.NamedArguments)
-			{
-				if (arg.Key != name)
-					continue;
-
-				var value = arg.Value.Kind == TypedConstantKind.Array
-					? arg.Value.Values.Select(static v => v.Value).ToArray()
-					: arg.Value.Value;
-
-				return CompileAspectFilters(diagnostics, reportedDiagnostics, value, location);
-			}
-
-			return default;
-		}
-
-		static AspectFilters.TargetFilterSet CompileAspectFilters(
-			List<DiagnosticInfo> diagnostics,
-			HashSet<string>      reportedDiagnostics,
-			object?              filterValue,
-			Location?            location)
-		{
-			return filterValue is object?[] values
-				? AspectFilters.GetFilters(values.Select(static value => value as string), ReportFilterDiagnostic)
-				: AspectFilters.GetFilters(filterValue as string, ReportFilterDiagnostic);
-
-			void ReportFilterDiagnostic(AspectFilters.TargetFilterDiagnostic diagnostic)
-			{
-				ReportDiagnostic(
-					diagnostics,
-					reportedDiagnostics,
-					diagnostic.Id,
-					diagnostic.Message,
-					location);
-			}
-		}
-
-		static void AddMatchedFilterAttributes(
-			List<DiagnosticInfo> diagnostics,
-			GeneratorExecutionOptions options,
-			List<AttributeInfo> attributes,
-			HashSet<INamedTypeSymbol> explicitAttributeClasses,
-			ImmutableArray<AspectFilterSet> filterSets,
-			in AspectFilters.MethodTarget target,
-			IMethodSymbol method)
-		{
-			foreach (var filterSet in filterSets)
-			{
-				var evaluation = filterSet.Filters.Evaluate(target);
-
-				if (!evaluation.IsMatch)
-				{
-					if (evaluation.IsExcluded)
-						attributes.RemoveAll(attribute =>
-							SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, filterSet.Attribute.AttributeClass) &&
-							!explicitAttributeClasses.Contains(attribute.AttributeClass));
-
-					continue;
-				}
-
-				if (attributes.Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, filterSet.Attribute.AttributeClass)))
-					continue;
-
-				attributes.Add(filterSet.Attribute);
-			}
-		}
-
-		static string GetCanonicalMethodFilterSignature(IMethodSymbol method)
-		{
-			var sourceMethod = method.ReducedFrom ?? method;
-			var parts        = new List<string> { GetAccessibility(sourceMethod.DeclaredAccessibility) };
-
-			if (sourceMethod.IsStatic)                              parts.Add("static");
-			if (sourceMethod.IsAbstract)                            parts.Add("abstract");
-			if (sourceMethod.IsVirtual && !sourceMethod.IsOverride) parts.Add("virtual");
-			if (sourceMethod.IsOverride)                            parts.Add("override");
-			if (sourceMethod.IsSealed)                              parts.Add("sealed");
-			if (sourceMethod.IsExtern)                              parts.Add("extern");
-			if (HasUnsafeModifier(sourceMethod))                    parts.Add("unsafe");
-
-			var sb = new StringBuilder();
-
-			sb
-				.Append(string.Join(" ", parts))
-				.Append(' ')
-				.Append(FormatFilterType(sourceMethod.ReturnType))
-				.Append(' ')
-				.Append(FormatFilterType(sourceMethod.ContainingType))
-				.Append('.')
-				.Append(sourceMethod.Name);
-
-			if (sourceMethod.TypeArguments.Length > 0)
-				sb.Append('<').Append(string.Join(",", sourceMethod.TypeArguments.Select(FormatFilterType))).Append('>');
-
-			sb.Append('(');
-
-			var parameters = new List<string>();
-
-			var methodParameters = sourceMethod.Parameters.AsEnumerable();
-
-			if (method.ReducedFrom is not null || method.IsExtensionMethod || sourceMethod.IsExtensionMethod)
-			{
-				var receiverType = method.ReceiverType ?? sourceMethod.Parameters.FirstOrDefault()?.Type;
-
-				if (receiverType is not null)
-					parameters.Add($"this {FormatFilterType(receiverType)}");
-
-				if (sourceMethod.Parameters.Length > 0)
-					methodParameters = methodParameters.Skip(1);
-			}
-
-			foreach (var parameter in methodParameters)
-			{
-				var parameterText = new StringBuilder();
-
-				if (parameter.IsParams)
-					parameterText.Append("params ");
-
-				parameterText.Append(parameter.RefKind switch
-				{
-					RefKind.Ref => "ref ",
-					RefKind.Out => "out ",
-					RefKind.In  => "in ",
-					_           => ""
-				});
-
-				parameterText.Append(FormatFilterType(parameter.Type));
-				parameters.Add(parameterText.ToString());
-			}
-
-			sb.Append(string.Join(",", parameters));
-			sb.Append(')');
-
-			return sb.ToString();
-		}
-
-		static AspectFilters.MethodTarget GetMethodTarget(IMethodSymbol method)
-		{
-			var sourceMethod   = method.ReducedFrom ?? method;
-			var fullTypeName   = FormatFilterType(sourceMethod.ContainingType);
-			var namespaceName  = sourceMethod.ContainingType.ContainingNamespace.IsGlobalNamespace
-				? ""
-				: sourceMethod.ContainingType.ContainingNamespace.ToDisplayString();
-			var methodName     = FormatFilterMethodName(sourceMethod);
-			var fullMethodName = $"{fullTypeName}.{methodName}";
-			var parameters     = new List<AspectFilters.ParameterTarget>();
-
-			foreach (var parameter in sourceMethod.Parameters)
-			{
-				parameters.Add(
-					new AspectFilters.ParameterTarget
-					{
-						Modifier = GetParameterModifier(parameter),
-						Type     = FormatFilterType(parameter.Type)
-					});
-			}
-
-			return new AspectFilters.MethodTarget
-			{
-				Accessibility      = GetAccessibilityMask(sourceMethod.DeclaredAccessibility),
-				Modifiers          = GetModifierMask(sourceMethod),
-				Namespace          = namespaceName,
-				TypeName           = FormatFilterSimpleTypeName(sourceMethod.ContainingType),
-				FullTypeName       = fullTypeName,
-				MethodName         = methodName,
-				FullMethodName     = fullMethodName,
-				ReturnType         = FormatFilterType(sourceMethod.ReturnType),
-				Signature          = GetCanonicalMethodFilterSignature(method),
-				NamespaceSegments  = SplitFilterDottedName(namespaceName),
-				FullTypeSegments   = SplitFilterDottedName(fullTypeName),
-				FullMethodSegments = SplitFilterDottedName(fullMethodName),
-				Parameters         = parameters
-			};
-		}
-
-		static AspectFilters.AccessibilityMask GetAccessibilityMask(Accessibility accessibility)
-		{
-			return accessibility switch
-			{
-				Accessibility.Public               => AspectFilters.AccessibilityMask.Public,
-				Accessibility.Protected            => AspectFilters.AccessibilityMask.Protected,
-				Accessibility.Internal             => AspectFilters.AccessibilityMask.Internal,
-				Accessibility.Private              => AspectFilters.AccessibilityMask.Private,
-				Accessibility.ProtectedOrInternal  => AspectFilters.AccessibilityMask.Protected | AspectFilters.AccessibilityMask.Internal,
-				Accessibility.ProtectedAndInternal => AspectFilters.AccessibilityMask.Private   | AspectFilters.AccessibilityMask.Protected,
-				_                                  => AspectFilters.AccessibilityMask.Private
-			};
-		}
-
-		static AspectFilters.ModifierMask GetModifierMask(IMethodSymbol method)
-		{
-			var result = method.IsStatic
-				? AspectFilters.ModifierMask.Static
-				: AspectFilters.ModifierMask.Instance;
-
-			if (method.IsAbstract)                      result |= AspectFilters.ModifierMask.Abstract;
-			if (method.IsVirtual && !method.IsOverride) result |= AspectFilters.ModifierMask.Virtual;
-			if (method.IsOverride)                      result |= AspectFilters.ModifierMask.Override;
-			if (method.IsSealed)                        result |= AspectFilters.ModifierMask.Sealed;
-			if (method.IsExtern)                        result |= AspectFilters.ModifierMask.Extern;
-			if (HasUnsafeModifier(method))              result |= AspectFilters.ModifierMask.Unsafe;
-
-			return result;
-		}
-
-		static AspectFilters.ParameterModifier GetParameterModifier(IParameterSymbol parameter)
-		{
-			if (parameter.IsParams)
-				return AspectFilters.ParameterModifier.Params;
-
-			return parameter.RefKind switch
-			{
-				RefKind.Ref => AspectFilters.ParameterModifier.Ref,
-				RefKind.Out => AspectFilters.ParameterModifier.Out,
-				RefKind.In  => AspectFilters.ParameterModifier.In,
-				_           => AspectFilters.ParameterModifier.None
-			};
-		}
-
-		static List<string> SplitFilterDottedName(string name)
-		{
-			if (string.IsNullOrEmpty(name))
-				return [];
-
-			var result  = new List<string>();
-			var start   = 0;
-			var depth   = 0;
-
-			for (var i = 0; i < name.Length; i++)
-			{
-				var ch = name[i];
-
-				if (ch == '<')
-					depth++;
-				else if (ch == '>' && depth > 0)
-					depth--;
-				else if (depth == 0 && ch == '.')
-				{
-					result.Add(name[start..i]);
-					start = i + 1;
-				}
-			}
-
-			result.Add(name[start..]);
-			return result;
-		}
-
-		static bool HasUnsafeModifier(IMethodSymbol method)
-		{
-			foreach (var syntaxReference in method.DeclaringSyntaxReferences)
-				if (syntaxReference.GetSyntax() is MethodDeclarationSyntax methodDeclaration &&
-					methodDeclaration.Modifiers.Any(SyntaxKind.UnsafeKeyword))
-					return true;
-
-			return false;
-		}
-
-		static string GetAccessibility(Accessibility accessibility)
-		{
-			return accessibility switch
-			{
-				Accessibility.Public               => "public",
-				Accessibility.Protected            => "protected",
-				Accessibility.Internal             => "internal",
-				Accessibility.Private              => "private",
-				Accessibility.ProtectedOrInternal  => "protected internal",
-				Accessibility.ProtectedAndInternal => "private protected",
-				_                                  => "private"
-			};
-		}
-
-		static string FormatFilterType(ITypeSymbol type)
-		{
-			if (type is IArrayTypeSymbol arrayType)
-				return $"{FormatFilterType(arrayType.ElementType)}[]";
-
-			if (type is ITypeParameterSymbol typeParameter)
-				return typeParameter.Name;
-
-			if (type is INamedTypeSymbol namedType)
-				return FormatFilterNamedType(namedType, includeNamespace: true);
-
-			return type.ToDisplayString(
-				new SymbolDisplayFormat(
-					typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-					genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-					miscellaneousOptions: SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers));
-		}
-
-		static string FormatFilterNamedType(INamedTypeSymbol type, bool includeNamespace)
-		{
-			var name = GetMetadataNameWithoutArity(type.Name);
-			var typeParameterCount = type.TypeParameters.Length;
-
-			if (typeParameterCount > 0)
-			{
-				var typeArguments = type.TypeArguments.Length > typeParameterCount
-					? type.TypeArguments.Skip(type.TypeArguments.Length - typeParameterCount)
-					: type.TypeArguments;
-
-				name += $"<{string.Join(",", typeArguments.Select(FormatFilterType))}>";
-			}
-
-			if (type.ContainingType is not null)
-				return $"{FormatFilterNamedType(type.ContainingType, includeNamespace)}.{name}";
-
-			if (!includeNamespace || type.ContainingNamespace.IsGlobalNamespace)
-				return name;
-
-			return $"{type.ContainingNamespace.ToDisplayString()}.{name}";
-		}
-
-		static string FormatFilterSimpleTypeName(INamedTypeSymbol type)
-		{
-			var name = GetMetadataNameWithoutArity(type.Name);
-
-			if (!type.IsGenericType)
-				return name;
-
-			var typeParameterCount = type.TypeParameters.Length;
-			var typeArguments = type.TypeArguments.Length > typeParameterCount
-				? type.TypeArguments.Skip(type.TypeArguments.Length - typeParameterCount)
-				: type.TypeArguments;
-
-			return $"{name}<{string.Join(",", typeArguments.Select(FormatFilterType))}>";
-		}
-
-		static string GetMetadataNameWithoutArity(string name)
-		{
-			var tick = name.IndexOf('`');
-
-			return tick >= 0 ? name[..tick] : name;
-		}
-
-		static string FormatFilterMethodName(IMethodSymbol method)
-		{
-			if (method.TypeArguments.Length == 0)
-				return method.Name;
-
-			return $"{method.Name}<{string.Join(",", method.TypeArguments.Select(FormatFilterType))}>";
-		}
-
 		static IEnumerable<(string Key, object? Value)> GetAspectArguments(AttributeData attribute)
 		{
 			return attribute.NamedArguments.Select(static arg => (
@@ -1773,7 +870,7 @@ namespace AspectGenerator
 		{
 			foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
 				if (arg.NameEquals is not null)
-					yield return (arg.NameEquals.Name.Identifier.ValueText, GetAttributeArgumentValue(arg.Expression, semanticModel));
+					yield return (arg.NameEquals.Name.Identifier.ValueText, AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel));
 		}
 
 		static IEnumerable<(string Key, string Value)> GetAppliedAspectArguments(AttributeInfo attribute)
@@ -1802,7 +899,7 @@ namespace AspectGenerator
 				if (name == "TargetFilter")
 					continue;
 
-				var value = GetAttributeArgumentValue(arg.Expression, semanticModel);
+				var value = AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel);
 				var type  = semanticModel.GetTypeInfo(arg.Expression).ConvertedType ?? semanticModel.GetTypeInfo(arg.Expression).Type;
 
 				yield return (name, PrintAttributeValue(value, type));
@@ -1833,28 +930,6 @@ namespace AspectGenerator
 			return PrintValue(value, type);
 		}
 
-		static object? GetAttributeArgumentValue(ExpressionSyntax expression, SemanticModel semanticModel)
-		{
-			if (expression is ImplicitArrayCreationExpressionSyntax { Initializer.Expressions: var implicitValues })
-				return implicitValues.Select(e => semanticModel.GetConstantValue(e).Value).ToArray();
-
-			if (expression is ArrayCreationExpressionSyntax { Initializer.Expressions: var arrayValues })
-				return arrayValues.Select(e => semanticModel.GetConstantValue(e).Value).ToArray();
-
-			if (expression is CollectionExpressionSyntax { Elements: var elements })
-				return elements
-					.OfType<ExpressionElementSyntax>()
-					.Select(e => semanticModel.GetConstantValue(e.Expression).Value)
-					.ToArray();
-
-			return semanticModel.GetConstantValue(expression).Value;
-		}
-
-		static bool IsAspectAttributeName(string name)
-		{
-			return name is "Aspect" or "AspectAttribute" or "AspectGenerator.Aspect" or "AspectGenerator.AspectAttribute";
-		}
-
 		static bool IsHookName(string name)
 		{
 			return name is
@@ -1870,11 +945,6 @@ namespace AspectGenerator
 				"OnCatchAsync"      or
 				"OnFinally"         or
 				"OnFinallyAsync";
-		}
-
-		static bool HasNamedArgument(AttributeSyntax attribute, string name)
-		{
-			return attribute.ArgumentList?.Arguments.Any(a => a.NameEquals?.Name.Identifier.ValueText == name) == true;
 		}
 
 		static void GenerateSource(

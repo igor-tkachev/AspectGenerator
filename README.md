@@ -79,7 +79,7 @@ AspectGenerator can be configured with MSBuild properties:
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
   <AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
-  <AspectGeneratorMarkInterceptedCalls>false</AspectGeneratorMarkInterceptedCalls>
+  <AspectGeneratorAspectDiagnosticSeverity>Info</AspectGeneratorAspectDiagnosticSeverity>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
 </PropertyGroup>
 ```
@@ -93,7 +93,7 @@ using AspectGenerator;
     GenerateApi = true,
     PublicApi = false,
     DebuggerStepThrough = false,
-    MarkInterceptedCalls = false,
+    AspectDiagnosticSeverity = AspectDiagnosticSeverity.Info,
     InterceptorsNamespace = "AspectGenerator")]
 ```
 
@@ -253,17 +253,19 @@ Diagnostics are reserved for errors and warnings. The build report is informatio
 
 ## Intercepted Call Markers
 
-AspectGenerator can optionally mark intercepted call sites with `AG0300` warning diagnostics. This is disabled by default and is intended for temporary IDE inspection:
+AspectGenerator marks intercepted call sites with optional `AG0300` diagnostics through a dedicated analyzer. The default severity is `Info`:
 
 ```xml
 <PropertyGroup>
-  <AspectGeneratorMarkInterceptedCalls>true</AspectGeneratorMarkInterceptedCalls>
+  <AspectGeneratorAspectDiagnosticSeverity>Info</AspectGeneratorAspectDiagnosticSeverity>
 </PropertyGroup>
 ```
 
-When enabled, each actually intercepted call site receives one `AG0300` marker warning. The marker lists the applied aspect attribute names, but it does not include target signatures, generated interceptor names, or filter details. Use the build report for complete and baseline-friendly information.
+Supported values are `Off`, `Hidden`, `Info`, `Warning`, and `Error`. Set `Off` to disable optional markers, use `Warning` for audit-style builds, or `Error` when intercepted calls must be explicitly inspected before a commit.
 
-`AG0300` is informational and does not indicate a problem. The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail because of marker warnings.
+Each actually intercepted call site receives one `AG0300` marker. The marker lists the applied aspect attribute names, but it does not include target signatures, generated interceptor names, or filter details. Use the build report for complete and baseline-friendly information.
+
+`AG0300` is optional and does not indicate a problem by itself. The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail when the marker severity is configured as `Warning`.
 
 ## Documentation And Wiki
 

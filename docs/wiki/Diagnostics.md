@@ -24,7 +24,7 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0205`: invalid target filter parameter pattern.
 - `AG0206`: invalid target filter dotted pattern.
 - `AG0208`: `TargetFilter` is used on a method-level aspect attribute.
-- `AG0300`: intercepted call-site marker. Disabled by default; enable with `AspectGeneratorMarkInterceptedCalls=true` for temporary IDE inspection.
+- `AG0300`: intercepted call-site marker. Controlled by `AspectGeneratorAspectDiagnosticSeverity`; default severity is `Info`.
 
 ## Build Report
 
@@ -40,18 +40,18 @@ The report is not printed to the console. Users who need it can inspect the repo
 
 ## Intercepted Call Markers
 
-AspectGenerator can optionally mark intercepted call sites with `AG0300` warning diagnostics.
-
-This mode is disabled by default:
+AspectGenerator can optionally mark intercepted call sites with `AG0300` diagnostics. The default severity is `Info`:
 
 ```xml
 <PropertyGroup>
-  <AspectGeneratorMarkInterceptedCalls>true</AspectGeneratorMarkInterceptedCalls>
+  <AspectGeneratorAspectDiagnosticSeverity>Info</AspectGeneratorAspectDiagnosticSeverity>
 </PropertyGroup>
 ```
 
-When enabled, each actually intercepted call site receives one `AG0300` warning. Multiple aspects on the same call site produce one marker listing all applied aspect attribute names.
+Supported values are `Off`, `Hidden`, `Info`, `Warning`, and `Error`. Set `Off` to disable optional markers. Use `Warning` for audit-style builds, or `Error` when intercepted calls must be explicitly inspected before a commit.
 
-`AG0300` is informational and does not indicate a problem. The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail because of marker warnings.
+When enabled, each actually intercepted call site receives one `AG0300` marker. Multiple aspects on the same call site produce one marker listing all applied aspect attribute names.
+
+`AG0300` is optional and does not indicate a problem by itself. The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail when the marker severity is configured as `Warning`.
 
 Use the build report for complete and baseline-friendly information. Use `AG0300` marker mode only as a temporary IDE/source-code inspection aid.

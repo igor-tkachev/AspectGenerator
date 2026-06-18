@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
@@ -11,8 +11,7 @@
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
 
-		<AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
-		<AspectGeneratorMarkInterceptedCalls>true</AspectGeneratorMarkInterceptedCalls>
+		<AspectGeneratorReportFile>$(CompilerGeneratedFilesOutputPath)\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
 	</PropertyGroup>
 
 	<ItemGroup>
