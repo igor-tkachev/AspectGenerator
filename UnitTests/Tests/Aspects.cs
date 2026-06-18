@@ -270,9 +270,9 @@ namespace Aspects
 
 		public static void OnAfterCall(AspectGenerator.InterceptInfo<string> info)
 		{
-			if (info.AspectArguments.TryGetValue(nameof(Arg2), out var value))
+			if (info.Aspect is ArgsAttribute { Arg2: not 0 } aspect)
 			{
-				info.ReturnValue += value?.ToString();
+				info.ReturnValue += aspect.Arg2.ToString();
 			}
 		}
 	}
@@ -298,17 +298,43 @@ namespace Aspects
 
 		public static void OnAfterCall(AspectGenerator.InterceptInfo<string> info)
 		{
-			var values = (string[])info.AspectArguments[nameof(Values)]!;
+			var aspect = (LiteralArgsAttribute)info.Aspect!;
+			var values = aspect.Values!;
 
 			info.ReturnValue =
-				(string)info.AspectArguments[nameof(Text)]! == "quote\" slash\\ newline\n" &&
-				(char)info.AspectArguments[nameof(Character)]! == '\'' &&
-				(double)info.AspectArguments[nameof(Number)]! == 1.25d &&
-				(float)info.AspectArguments[nameof(Single)]! == 3.5f &&
-				(LiteralKind)info.AspectArguments[nameof(Kind)]! == LiteralKind.Second &&
+				aspect.Text == "quote\" slash\\ newline\n" &&
+				aspect.Character == '\'' &&
+				aspect.Number == 1.25d &&
+				aspect.Single == 3.5f &&
+				aspect.Kind == LiteralKind.Second &&
 				values is ["a\"b", "c\\d", "e\nf"]
 					? "literal-ok"
 					: "literal-failed";
+		}
+	}
+
+	[AspectGenerator.Aspect(
+		OnAfterCall = nameof(OnAfterCall)
+		)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	sealed class TypedAspectAttribute : Attribute
+	{
+		public TypedAspectAttribute(string category)
+		{
+			Category = category;
+		}
+
+		public string      Category { get; }
+		public LiteralKind Kind     { get; set; }
+
+		public static void OnAfterCall(TypedAspectAttribute aspect, AspectGenerator.InterceptInfo<string> info)
+		{
+			info.ReturnValue =
+				ReferenceEquals(info.Aspect, aspect) &&
+				aspect.Category == "typed" &&
+				aspect.Kind == LiteralKind.Second
+					? "typed-ok"
+					: "typed-failed";
 		}
 	}
 
@@ -342,12 +368,12 @@ namespace Aspects
 
 		public static void OnAfterCall(AspectGenerator.InterceptInfo<string> info)
 		{
-			info.ReturnValue += info.AspectArguments["Value"];
+			info.ReturnValue += ((OrderedAttribute)info.Aspect!).Value;
 		}
 
 		public static void OnAfterCall(AspectGenerator.InterceptInfo<int> info)
 		{
-			info.ReturnValue = info.ReturnValue * 10 + int.Parse((string)info.AspectArguments["Value"]!);
+			info.ReturnValue = info.ReturnValue * 10 + int.Parse(((OrderedAttribute)info.Aspect!).Value!);
 		}
 	}
 

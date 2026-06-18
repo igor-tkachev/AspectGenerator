@@ -471,6 +471,20 @@ namespace AspectGenerator.Tests
 			Assert.AreEqual("literal-ok", args);
 		}
 
+		[Aspects.TypedAspect("typed", Kind = Aspects.LiteralKind.Second)]
+		internal string TypedAspectMethod()
+		{
+			return "typed-failed";
+		}
+
+		[TestMethod]
+		public void TypedAspectTest()
+		{
+			var result = TypedAspectMethod();
+
+			Assert.AreEqual("typed-ok", result);
+		}
+
 		[Aspects.Using]
 		internal string UsingMethod()
 		{

@@ -30,9 +30,10 @@ namespace Aspects
 				if (arg is DataConnection { Transaction : null } con)
 				{
 					info.Tag = con;
+					var aspect = (TransactionAttribute)info.Aspect!;
 
-					if (info.AspectArguments.TryGetValue(nameof(IsolationLevel), out var il))
-						con.BeginTransaction((IsolationLevel)il!);
+					if (aspect.IsolationLevel != default)
+						con.BeginTransaction(aspect.IsolationLevel);
 					else
 						con.BeginTransaction();
 
@@ -48,9 +49,10 @@ namespace Aspects
 				if (arg is DataConnection { Transaction : null } con)
 				{
 					info.Tag = con;
+					var aspect = (TransactionAttribute)info.Aspect!;
 
-					return info.AspectArguments.TryGetValue(nameof(IsolationLevel), out var il)
-						? con.BeginTransactionAsync((IsolationLevel)il!)
+					return aspect.IsolationLevel != default
+						? con.BeginTransactionAsync(aspect.IsolationLevel)
 						: con.BeginTransactionAsync();
 				}
 			}

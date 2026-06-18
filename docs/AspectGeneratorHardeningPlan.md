@@ -21,6 +21,8 @@ Completed:
 - MSBuild-visible build report output through `AspectGeneratorReportFile`;
 - `AG0300` call-site markers through a dedicated `DiagnosticAnalyzer` using shared selection logic.
 - invalid optional diagnostic severity reporting through `AG0209`.
+- typed applied aspect instances exposed through `InterceptInfo.Aspect` / `InterceptData<T>.Aspect`;
+- lazy `MemberInfo`, applied aspect instance, and applied aspect argument initialization in generated interceptors.
 
 Not completed:
 
@@ -29,9 +31,9 @@ Not completed:
 - generated standard aspects;
 - aspect-specific parameter and return modifiers;
 - `ref` / `out` / `in` hardening;
-- typed argument passing;
+- typed argument passing beyond the applied aspect instance;
 - public API contract stabilization;
-- lazy `MemberInfo` initialization;
+- explicit instance-lifetime hook mode and related diagnostics;
 
 ## Capability Roadmap
 
@@ -394,7 +396,7 @@ Checklist:
 
 Status: deferred.
 
-Problem: `MethodArguments` and `AspectArguments` use `object?[]` and dictionaries. This is flexible but allocates and loses type information.
+Problem: `MethodArguments` uses `object?[]`. This is flexible but allocates and loses type information.
 
 Checklist:
 

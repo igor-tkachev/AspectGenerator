@@ -116,6 +116,23 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void TypedAspectHookUsesLazyAspectAndMemberInfoTest()
+		{
+			var result = RunGenerator(TypedAspectGenerationSource);
+			var source = GetGeneratedSource(result, "Interceptors.g.cs");
+
+			AssertNoDiagnostic(result, AspectSourceGenerator.DiagnosticID.HookInvalidParameters);
+			StringAssert.Contains(source, "static readonly Lazy<SR.MemberInfo> Target_Interceptor_MemberInfo");
+			StringAssert.Contains(source, "Target_Interceptor_MemberInfo.Value");
+			StringAssert.Contains(source, "static readonly Lazy<global::AspectGenerator.Tests.GeneratorDriver.TypedAspectAttribute> Target_Interceptor_Aspect_0");
+			StringAssert.Contains(source, "var __aspect__0 = Target_Interceptor_Aspect_0.Value;");
+			StringAssert.Contains(source, "Aspect          = __aspect__0,");
+			var removedApiName = "Aspect" + "Arguments";
+			Assert.IsFalse(source.Contains(removedApiName, StringComparison.Ordinal), $"{removedApiName} should not be emitted.");
+			StringAssert.Contains(source, "TypedAspectAttribute.After(__aspect__0, __info__0);");
+		}
+
+		[TestMethod]
 		public void AsyncVoidTargetReportsDiagnosticTest()
 		{
 			var result = RunGenerator(AsyncVoidDiagnosticsSource);
@@ -179,8 +196,9 @@ namespace AspectGenerator.Tests
 			var result = RunGenerator(FilterAppliedArgumentsSource);
 			var source = GetGeneratedSource(result, "Interceptors.g.cs");
 
-			StringAssert.Contains(source, "[\"Category\"] = \"audit\"");
-			Assert.IsFalse(source.Contains("[\"TargetFilter\"]", StringComparison.Ordinal), "TargetFilter is a selector and should not be emitted into runtime AspectArguments.");
+			StringAssert.Contains(source, "new global::AspectGenerator.Tests.GeneratorDriver.FilterAspectAttribute() { Category = \"audit\" }");
+			var removedApiName = "Aspect" + "Arguments";
+			Assert.IsFalse(source.Contains(removedApiName, StringComparison.Ordinal), $"{removedApiName} should not be emitted.");
 		}
 
 		[TestMethod]
@@ -1367,6 +1385,45 @@ namespace AspectGenerator.Tests
 			}
 			""";
 
+		const string TypedAspectGenerationSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			sealed class TypedAspectAttribute : Attribute
+			{
+				public TypedAspectAttribute(string category)
+				{
+					Category = category;
+				}
+
+				public string Category { get; }
+				public int    Level    { get; set; }
+
+				public static void After(TypedAspectAttribute aspect, InterceptInfo<string> info)
+				{
+					info.ReturnValue += aspect.Category + aspect.Level.ToString();
+				}
+			}
+
+			static class TargetType
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				[TypedAspect("audit", Level = 2)]
+				public static string Target()
+				{
+					return "";
+				}
+			}
+			""";
+
 		const string AsyncVoidDiagnosticsSource =
 			"""
 			using System;
@@ -1576,7 +1633,7 @@ namespace AspectGenerator.Tests
 				public string? TargetFilter { get; set; }
 				public string? Category     { get; set; }
 
-				public static void After(InterceptInfo<string> info) => info.ReturnValue += info.AspectArguments["Category"];
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += ((FilterAspectAttribute)info.Aspect!).Category;
 			}
 
 			static class Target

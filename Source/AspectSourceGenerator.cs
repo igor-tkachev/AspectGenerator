@@ -236,6 +236,29 @@ namespace AspectGenerator
 					/// Gets or sets whether hooks use the mutable <c>ref InterceptData&lt;T&gt;</c> carrier instead of <c>InterceptInfo&lt;T&gt;</c>.
 					/// </summary>
 					public bool      UseInterceptData  { get; set; }
+					/// <summary>
+					/// Gets or sets how generated interceptors create and reuse applied aspect attribute instances.
+					/// </summary>
+					public AspectInstanceLifetime Lifetime { get; set; } = AspectInstanceLifetime.Auto;
+				}
+
+				/// <summary>
+				/// Controls generated aspect attribute instance lifetime.
+				/// </summary>
+				{{visibility}}enum AspectInstanceLifetime
+				{
+					/// <summary>
+					/// Let AspectGenerator choose the lifetime from the hook contract.
+					/// </summary>
+					Auto,
+					/// <summary>
+					/// Reuse one lazily-created aspect attribute instance per generated interceptor.
+					/// </summary>
+					Static,
+					/// <summary>
+					/// Create a new aspect attribute instance for each intercepted call.
+					/// </summary>
+					Instance
 				}
 
 				/// <summary>
@@ -338,9 +361,9 @@ namespace AspectGenerator
 					/// </summary>
 					public Type                                                  AspectType;
 					/// <summary>
-					/// Gets or sets named arguments from the applied aspect attribute.
+					/// Gets or sets the applied aspect attribute instance.
 					/// </summary>
-					public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
+					public Attribute?                                            Aspect;
 				}
 
 				/// <summary>
@@ -395,10 +418,9 @@ namespace AspectGenerator
 					/// </summary>
 					public Type                                                  AspectType;
 					/// <summary>
-					/// Gets or sets named arguments from the applied aspect attribute.
+					/// Gets or sets the applied aspect attribute instance.
 					/// </summary>
-					public System.Collections.Generic.Dictionary<string,object?> AspectArguments;
-
+					public Attribute?                                            Aspect;
 					/// <summary>
 					/// Gets or sets the intercepted method return value.
 					/// </summary>
@@ -793,13 +815,13 @@ namespace AspectGenerator
 				DiagnosticSeverity.Warning));
 		}
 
-		static IEnumerable<(string Key, object? Value)> GetAspectArguments(AttributeInfo attribute)
+		static IEnumerable<(string Key, object? Value)> GetAspectOptions(AttributeInfo attribute)
 		{
 			if (attribute.AspectDefinitionData is {} aspectAttributeData)
-				return GetAspectArguments(aspectAttributeData);
+				return GetAspectOptions(aspectAttributeData);
 
 			if (attribute is { AspectDefinitionSyntax: {} syntax, AspectDefinitionSemanticModel: {} semanticModel })
-				return GetAspectArguments(syntax, semanticModel);
+				return GetAspectOptions(syntax, semanticModel);
 
 			return [];
 		}
@@ -859,50 +881,72 @@ namespace AspectGenerator
 			diagnostics.Add(new DiagnosticInfo(id, message, location));
 		}
 
-		static IEnumerable<(string Key, object? Value)> GetAspectArguments(AttributeData attribute)
+		static IEnumerable<(string Key, object? Value)> GetAspectOptions(AttributeData attribute)
 		{
 			return attribute.NamedArguments.Select(static arg => (
 				arg.Key,
 				arg.Value.Kind == TypedConstantKind.Array ? arg.Value.Values.Select(static v => v.Value).ToArray() : arg.Value.Value));
 		}
 
-		static IEnumerable<(string Key, object? Value)> GetAspectArguments(AttributeSyntax attribute, SemanticModel semanticModel)
+		static IEnumerable<(string Key, object? Value)> GetAspectOptions(AttributeSyntax attribute, SemanticModel semanticModel)
 		{
 			foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
 				if (arg.NameEquals is not null)
 					yield return (arg.NameEquals.Name.Identifier.ValueText, AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel));
 		}
 
-		static IEnumerable<(string Key, string Value)> GetAppliedAspectArguments(AttributeInfo attribute)
+		static string GetAppliedAspectConstruction(AttributeInfo attribute)
 		{
-			if (attribute.AppliedAttributeData is not null)
-			{
-				foreach (var arg in attribute.AppliedAttributeData.NamedArguments)
-				{
-					if (arg.Key == "TargetFilter")
-						continue;
+			var attributeType = attribute.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-					yield return (arg.Key, PrintTypedConstant(arg.Value));
-				}
+			if (attribute.AppliedAttributeData is {} data)
+			{
+				var constructorArguments = data.ConstructorArguments
+					.Select(PrintTypedConstant)
+					.ToArray();
+				var namedArguments = data.NamedArguments
+					.Where(static arg => arg.Key != "TargetFilter")
+					.Select(static arg => $"{arg.Key} = {PrintTypedConstant(arg.Value)}")
+					.ToArray();
+
+				return CreateAttributeConstruction(attributeType, constructorArguments, namedArguments);
 			}
 
-			if (attribute is not { AppliedAttributeSyntax: {} syntax, AppliedSemanticModel: {} semanticModel })
-				yield break;
-
-			foreach (var arg in syntax.ArgumentList?.Arguments ?? default)
+			if (attribute is { AppliedAttributeSyntax: {} syntax, AppliedSemanticModel: {} semanticModel })
 			{
-				if (arg.NameEquals is null)
-					continue;
+				var constructorArguments = new List<string>();
+				var namedArguments       = new List<string>();
 
-				var name = arg.NameEquals.Name.Identifier.ValueText;
+				foreach (var arg in syntax.ArgumentList?.Arguments ?? default)
+				{
+					var value = AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel);
+					var type  = semanticModel.GetTypeInfo(arg.Expression).ConvertedType ?? semanticModel.GetTypeInfo(arg.Expression).Type;
 
-				if (name == "TargetFilter")
-					continue;
+					if (arg.NameEquals is null)
+					{
+						constructorArguments.Add(PrintAttributeValue(value, type));
+						continue;
+					}
 
-				var value = AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel);
-				var type  = semanticModel.GetTypeInfo(arg.Expression).ConvertedType ?? semanticModel.GetTypeInfo(arg.Expression).Type;
+					var name = arg.NameEquals.Name.Identifier.ValueText;
 
-				yield return (name, PrintAttributeValue(value, type));
+					if (name != "TargetFilter")
+						namedArguments.Add($"{name} = {PrintAttributeValue(value, type)}");
+				}
+
+				return CreateAttributeConstruction(attributeType, constructorArguments, namedArguments);
+			}
+
+			return $"new {attributeType}()";
+
+			static string CreateAttributeConstruction(string attributeType, IReadOnlyCollection<string> constructorArguments, IReadOnlyCollection<string> namedArguments)
+			{
+				var result = $"new {attributeType}({string.Join(", ", constructorArguments)})";
+
+				if (namedArguments.Count > 0)
+					result += $" {{ {string.Join(", ", namedArguments)} }}";
+
+				return result;
 			}
 		}
 
@@ -968,7 +1012,6 @@ namespace AspectGenerator
 
 				using SR  = System.Reflection;
 				using SLE = System.Linq.Expressions;
-				using SCG = System.Collections.Generic;
 
 				namespace System.Runtime.CompilerServices
 				{
@@ -1023,35 +1066,18 @@ namespace AspectGenerator
 
 				sb.AppendLine(
 					$$"""
-							static SR. MemberInfo                 {{interceptorName}}_MemberInfo        = MethodOf{{GetMethodOf(method, interceptorName)}};
+							static readonly Lazy<SR.MemberInfo> {{interceptorName}}_MemberInfo = new(() => MethodOf{{GetMethodOf(method, interceptorName)}});
 					""");
 
 				for (var i = 0; i < attributes.Count; i++)
 				{
 					var attr = attributes[i];
+					var attrType = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
 					sb
 						.AppendLine(
 							$$"""
-									static SCG.Dictionary<string,object?> {{interceptorName}}_AspectArguments_{{i}} = new()
-									{
-							""")
-						;
-
-					foreach (var arg in GetAppliedAspectArguments(attr))
-					{
-							sb
-								.AppendLine(
-									$$"""
-												["{{arg.Key}}"] = {{arg.Value}},
-									""")
-								;
-					}
-
-					sb
-						.AppendLine(
-							"""
-									};
+									static readonly Lazy<{{attrType}}> {{interceptorName}}_Aspect_{{i}} = new(() => {{GetAppliedAspectConstruction(attr)}});
 							""")
 						;
 				}
@@ -1214,7 +1240,7 @@ namespace AspectGenerator
 			for (var idx = 0; idx < attributes.Count; idx++)
 			{
 				var attribute       = attributes[idx];
-				var aspectArguments = GetAspectArguments(attribute).ToDictionary(static a => a.Key, static a => a.Value);
+				var aspectArguments = GetAspectOptions(attribute).ToDictionary(static a => a.Key, static a => a.Value);
 				var useInterceptData = aspectArguments.TryGetValue("UseInterceptData", out var useData) && useData is true;
 
 				if (idx < attributes.Count - 1 &&
@@ -1306,7 +1332,7 @@ namespace AspectGenerator
 					}
 
 					var methodsWithValidParameters = staticMethods
-						.Where(m => IsValidLifecycleHookParameter(m, targetMethod, targetIsAsync, asyncResultType, useInterceptData))
+						.Where(m => IsValidLifecycleHookParameter(m, targetMethod, targetIsAsync, asyncResultType, useInterceptData, attribute.AttributeClass))
 						.ToArray();
 
 					if (methodsWithValidParameters.Length == 0)
@@ -1390,12 +1416,26 @@ namespace AspectGenerator
 			IMethodSymbol targetMethod,
 			bool          targetIsAsync,
 			ITypeSymbol?  asyncResultType,
-			bool          useInterceptData)
+			bool          useInterceptData,
+			INamedTypeSymbol aspectClass)
 		{
-			if (hookMethod.Parameters.Length != 1)
+			if (hookMethod.Parameters.Length is not (1 or 2))
 				return false;
 
-			var parameter = hookMethod.Parameters[0];
+			var parameterIndex = 0;
+
+			if (hookMethod.Parameters.Length == 2)
+			{
+				var aspectParameter = hookMethod.Parameters[0];
+
+				if (aspectParameter.RefKind != RefKind.None ||
+					!SymbolEqualityComparer.Default.Equals(aspectParameter.Type, aspectClass))
+					return false;
+
+				parameterIndex = 1;
+			}
+
+			var parameter = hookMethod.Parameters[parameterIndex];
 
 			if (useInterceptData)
 			{
@@ -1604,8 +1644,8 @@ namespace AspectGenerator
 			int                        methodModifierPosition)
 		{
 			var isReturnsAsyncType = IsSupportedAsyncReturnType(method.ReturnType, out var asyncResultType);
-			var generateAsync      = isReturnsAsyncType && attributes.Any(d => GetAspectArguments(d).Any(a => a.Key.EndsWith("Async") && a.Value is not null));
-			var generateArgs       = attributes.Any(d => GetAspectArguments(d).Any(a => a is { Key: "PassArguments", Value: true }));
+			var generateAsync      = isReturnsAsyncType && attributes.Any(d => GetAspectOptions(d).Any(a => a.Key.EndsWith("Async") && a.Value is not null));
+			var generateArgs       = attributes.Any(d => GetAspectOptions(d).Any(a => a is { Key: "PassArguments", Value: true }));
 
 			// Generate arguments.
 			//
@@ -1645,7 +1685,7 @@ namespace AspectGenerator
 				var     useInterceptData = false;
 				var     needInfo         = attributes.Count > 1 || generateAsync;
 
-				foreach (var arg in GetAspectArguments(attributes[idx]))
+				foreach (var arg in GetAspectOptions(attributes[idx]))
 					switch (arg.Key)
 					{
 						case "OnInit"            : onInit            = arg.Value; needInfo = true; break;
@@ -1677,13 +1717,13 @@ namespace AspectGenerator
 					sb
 						.Append(indent).AppendLine($"// {(object?)attributes[idx].AppliedAttributeData ?? attributes[idx].AttributeClass}")
 						.Append(indent).AppendLine("//")
-						//.Append(indent).Append($"var __attr__{idx} = new {attributes[idx]}").Append(attributes[idx].NamedArguments.Length == 0 ? "()" : "").AppendLine(";")
+						.Append(indent).AppendLine($"var __aspect__{idx} = {interceptorName}_Aspect_{idx}.Value;")
 						.Append(indent).AppendLine($"var __info__{idx} = new AspectGenerator.Intercept{(useInterceptData ? "Data" : "Info")}<{returnType}>")
 						.Append(indent).AppendLine("{")
 						//.Append(indent).AppendLine($"\tReturnValue     = {(idx > 0 ? $"__info__{idx - 1}.ReturnValue" : $"default({(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")})")},")
-						.Append(indent).AppendLine($"\tMemberInfo      = {interceptorName}_MemberInfo,")
+						.Append(indent).AppendLine($"\tMemberInfo      = {interceptorName}_MemberInfo.Value,")
 						.Append(indent).AppendLine($"\tAspectType      = typeof({attr}),")
-						.Append(indent).AppendLine($"\tAspectArguments = {interceptorName}_AspectArguments_{idx},")
+						.Append(indent).AppendLine($"\tAspect          = __aspect__{idx},")
 						;
 
 					if (passArguments)
@@ -1931,8 +1971,27 @@ namespace AspectGenerator
 				StringBuilder GenerateMethodCall(object? onAsync, object? call)
 				{
 					if (generateAsync && onAsync is not null)
-						return sb.Append(indent).AppendLine($"await {attr.ContainingNamespace}.{attr.Name}.{onAsync}({PassInfo(idx)});");
-					return sb.Append(indent).AppendLine($"{attr.ContainingNamespace}.{attr.Name}.{call}({PassInfo(idx)});");
+						return sb.Append(indent).AppendLine($"await {attr.ContainingNamespace}.{attr.Name}.{onAsync}({PassHookArguments(onAsync)});");
+					return sb.Append(indent).AppendLine($"{attr.ContainingNamespace}.{attr.Name}.{call}({PassHookArguments(call)});");
+				}
+
+				string PassHookArguments(object? hookName)
+				{
+					return UsesAspectParameter(hookName)
+						? $"__aspect__{idx}, {PassInfo(idx)}"
+						: PassInfo(idx);
+				}
+
+				bool UsesAspectParameter(object? hookName)
+				{
+					if (hookName is not string name)
+						return false;
+
+					return attr
+						.GetMembers(name)
+						.OfType<IMethodSymbol>()
+						.Where(static m => m.IsStatic)
+						.Any(m => IsValidLifecycleHookParameter(m, method, targetIsAsync: isReturnsAsyncType, asyncResultType, useInterceptData, attr) && m.Parameters.Length == 2);
 				}
 
 				StringBuilder GenerateInterceptType(string additionalIndent, string interceptType)
