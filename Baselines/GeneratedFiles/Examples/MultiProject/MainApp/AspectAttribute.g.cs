@@ -192,23 +192,22 @@
 		/// Gets or sets the current exception for catch and finally hooks.
 		/// </summary>
 		public Exception?      Exception;
-
 		/// <summary>
 		/// Gets or sets hook data produced by the previous aspect in the same interception chain.
 		/// </summary>
-		public InterceptInfo?                                        PreviousInfo;
-		/// <summary>
-		/// Gets or sets reflection metadata for the intercepted target method.
-		/// </summary>
-		public System.Reflection.MemberInfo                          MemberInfo;
+		public InterceptInfo?  PreviousInfo;
 		/// <summary>
 		/// Gets or sets intercepted method arguments when argument capture is enabled.
 		/// </summary>
-		public object?[]?                                            MethodArguments;
+		public object?[]?      MethodArguments;
 		/// <summary>
 		/// Gets or sets the applied aspect attribute instance.
 		/// </summary>
-		public Attribute?                                            Aspect;
+		public Attribute?      Aspect;
+		/// <summary>
+		/// Gets or sets reflection metadata for the intercepted target method.
+		/// </summary>
+		public System.Reflection.MemberInfo MemberInfo;
 	}
 
 	/// <summary>
@@ -245,26 +244,25 @@
 		/// Gets or sets the current exception for catch and finally hooks.
 		/// </summary>
 		public Exception?      Exception;
-
-		/// <summary>
-		/// Gets or sets hook data produced by the previous aspect in the same interception chain.
-		/// </summary>
-		public InterceptInfo<T>?                                     PreviousInfo;
-		/// <summary>
-		/// Gets or sets reflection metadata for the intercepted target method.
-		/// </summary>
-		public System.Reflection.MemberInfo                          MemberInfo;
 		/// <summary>
 		/// Gets or sets intercepted method arguments when argument capture is enabled.
 		/// </summary>
-		public object?[]?                                            MethodArguments;
+		public object?[]?      MethodArguments;
 		/// <summary>
 		/// Gets or sets the applied aspect attribute instance.
 		/// </summary>
-		public Attribute?                                            Aspect;
+		public Attribute?      Aspect;
 		/// <summary>
 		/// Gets or sets the intercepted method return value.
 		/// </summary>
-		public T ReturnValue;
+		public T               ReturnValue;
+		/// <summary>
+		/// Gets or sets hook data produced by the previous aspect in the same interception chain.
+		/// </summary>
+		public InterceptInfo<T>? PreviousInfo;
+		/// <summary>
+		/// Gets or sets reflection metadata for the intercepted target method.
+		/// </summary>
+		public System.Reflection.MemberInfo MemberInfo;
 	}
 }

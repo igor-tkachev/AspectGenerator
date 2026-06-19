@@ -72,25 +72,18 @@ namespace AspectGenerator
 					/// <remarks>
 					/// Keep this enabled for single-project usage. Set it to <c>false</c> when the API is supplied by an aspect library referenced by this project.
 					/// </remarks>
-					public bool    {{AspectOptionName.GenerateApi}}                   { get; set; } = true;
+					public bool    {{AspectOptionName.GenerateApi}}           { get; set; } = true;
 					/// <summary>
 					/// Gets or sets whether generated API types are emitted as public types.
 					/// </summary>
 					/// <remarks>
 					/// Use this for aspect-library projects that expose aspect definitions and generated API types to other projects.
 					/// </remarks>
-					public bool    {{AspectOptionName.PublicApi}}                     { get; set; }
+					public bool    {{AspectOptionName.PublicApi}}             { get; set; }
 					/// <summary>
 					/// Gets or sets whether generated interceptor methods are marked with <see cref="System.Diagnostics.DebuggerStepThroughAttribute"/>.
 					/// </summary>
-					public bool    {{AspectOptionName.DebuggerStepThrough}}           { get; set; }
-					/// <summary>
-					/// Gets or sets how AspectGenerator reports optional diagnostics such as intercepted-call markers.
-					/// </summary>
-					/// <remarks>
-					/// Set to <see cref="AspectGenerator.AspectDiagnosticSeverity.Off"/> to disable optional diagnostics.
-					/// </remarks>
-					public AspectDiagnosticSeverity {{AspectOptionName.AspectDiagnosticSeverity}} { get; set; } = AspectDiagnosticSeverity.Info;
+					public bool    {{AspectOptionName.DebuggerStepThrough}}   { get; set; }
 					/// <summary>
 					/// Gets or sets the namespace used for generated interceptor types.
 					/// </summary>
@@ -98,7 +91,14 @@ namespace AspectGenerator
 					/// The package normally appends this namespace to the project <c>InterceptorsNamespaces</c> MSBuild property for direct package consumers.
 					/// Custom build setups must ensure this namespace is listed so Roslyn can use the generated interceptors.
 					/// </remarks>
-					public string? {{AspectOptionName.InterceptorsNamespace}}         { get; set; }
+					public string? {{AspectOptionName.InterceptorsNamespace}} { get; set; }
+					/// <summary>
+					/// Gets or sets how AspectGenerator reports optional diagnostics such as intercepted-call markers.
+					/// </summary>
+					/// <remarks>
+					/// Set to <see cref="AspectGenerator.AspectDiagnosticSeverity.Off"/> to disable optional diagnostics.
+					/// </remarks>
+					public AspectDiagnosticSeverity {{AspectOptionName.AspectDiagnosticSeverity}} { get; set; } = AspectDiagnosticSeverity.Info;
 				}
 			}
 
@@ -305,23 +305,22 @@ namespace AspectGenerator
 					/// Gets or sets the current exception for catch and finally hooks.
 					/// </summary>
 					public Exception?      Exception;
-
 					/// <summary>
 					/// Gets or sets hook data produced by the previous aspect in the same interception chain.
 					/// </summary>
-					public InterceptInfo?                                        PreviousInfo;
-					/// <summary>
-					/// Gets or sets reflection metadata for the intercepted target method.
-					/// </summary>
-					public System.Reflection.MemberInfo                          MemberInfo;
+					public InterceptInfo?  PreviousInfo;
 					/// <summary>
 					/// Gets or sets intercepted method arguments when argument capture is enabled.
 					/// </summary>
-					public object?[]?                                            MethodArguments;
+					public object?[]?      MethodArguments;
 					/// <summary>
 					/// Gets or sets the applied aspect attribute instance.
 					/// </summary>
-					public Attribute?                                            Aspect;
+					public Attribute?      Aspect;
+					/// <summary>
+					/// Gets or sets reflection metadata for the intercepted target method.
+					/// </summary>
+					public System.Reflection.MemberInfo MemberInfo;
 				}
 
 				/// <summary>
@@ -358,27 +357,26 @@ namespace AspectGenerator
 					/// Gets or sets the current exception for catch and finally hooks.
 					/// </summary>
 					public Exception?      Exception;
-
-					/// <summary>
-					/// Gets or sets hook data produced by the previous aspect in the same interception chain.
-					/// </summary>
-					public InterceptInfo<T>?                                     PreviousInfo;
-					/// <summary>
-					/// Gets or sets reflection metadata for the intercepted target method.
-					/// </summary>
-					public System.Reflection.MemberInfo                          MemberInfo;
 					/// <summary>
 					/// Gets or sets intercepted method arguments when argument capture is enabled.
 					/// </summary>
-					public object?[]?                                            MethodArguments;
+					public object?[]?      MethodArguments;
 					/// <summary>
 					/// Gets or sets the applied aspect attribute instance.
 					/// </summary>
-					public Attribute?                                            Aspect;
+					public Attribute?      Aspect;
 					/// <summary>
 					/// Gets or sets the intercepted method return value.
 					/// </summary>
-					public T ReturnValue;
+					public T               ReturnValue;
+					/// <summary>
+					/// Gets or sets hook data produced by the previous aspect in the same interception chain.
+					/// </summary>
+					public InterceptInfo<T>? PreviousInfo;
+					/// <summary>
+					/// Gets or sets reflection metadata for the intercepted target method.
+					/// </summary>
+					public System.Reflection.MemberInfo MemberInfo;
 				}
 			}
 
@@ -479,6 +477,58 @@ namespace AspectGenerator
 			return new AnalysisResult(compilation, options, aspectedMethods, [..diagnostics]);
 		}
 
+		static void ValidateAspectHooks(
+			List<DiagnosticInfo>                                                     diagnostics,
+			Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)> aspectAttributes,
+			HashSet<string>                                                          reportedDiagnostics)
+		{
+			foreach (var item in aspectAttributes)
+			{
+				var symbol          = item.Key;
+				var aspectAttribute = item.Value;
+
+				if (symbol is not INamedTypeSymbol aspectClass)
+					continue;
+
+				foreach (var arg in aspectAttribute.Syntax.ArgumentList?.Arguments ?? default)
+				{
+					if (arg.NameEquals?.Name.Identifier.ValueText is not (
+					    "OnInit"            or
+					    "OnUsing"           or "OnUsingAsync"      or
+					    "OnBeforeCall"      or "OnBeforeCallAsync" or
+					    "OnCall"            or
+					    "OnAfterCall"       or "OnAfterCallAsync"  or
+					    "OnCatch"           or "OnCatchAsync"      or
+					    "OnFinally"         or "OnFinallyAsync"))
+						continue;
+
+					if (AspectSymbols.GetAttributeArgumentValue(arg.Expression, aspectAttribute.SemanticModel) is not string hookName || string.IsNullOrWhiteSpace(hookName))
+						continue;
+
+					var methods = aspectClass.GetMembers(hookName).OfType<IMethodSymbol>().ToArray();
+
+					if (methods.Length == 0)
+					{
+						ReportDiagnostic(
+							diagnostics,
+							reportedDiagnostics,
+							AspectDiagnosticID.HookMethodNotFound,
+							$"Aspect hook method '{hookName}' was not found on aspect type '{aspectClass.ToDisplayString()}'.",
+							arg.Expression.GetLocation());
+					}
+					else if (!methods.Any(static m => m.IsStatic))
+					{
+						ReportDiagnostic(
+							diagnostics,
+							reportedDiagnostics,
+							AspectDiagnosticID.HookMethodNotStatic,
+							$"Aspect hook method '{hookName}' on aspect type '{aspectClass.ToDisplayString()}' must be static.",
+							arg.Expression.GetLocation());
+					}
+				}
+			}
+		}
+
 		static void ReportDiagnostics(SourceProductionContext spc, AnalysisResult analysis)
 		{
 			if (analysis.Options.GenerateApi)
@@ -550,56 +600,29 @@ namespace AspectGenerator
 		static IEnumerable<(string Key, object? Value)> GetAspectOptions(AttributeInfo attribute)
 		{
 			if (attribute.AspectDefinitionData is {} aspectAttributeData)
-				return GetAspectOptions(aspectAttributeData);
+				return aspectAttributeData.NamedArguments.Select(static arg => (
+					arg.Key,
+					arg.Value.Kind == TypedConstantKind.Array ? arg.Value.Values.Select(static v => v.Value).ToArray() : arg.Value.Value));
 
 			if (attribute is { AspectDefinitionSyntax: {} syntax, AspectDefinitionSemanticModel: {} semanticModel })
-				return GetAspectOptions(syntax, semanticModel);
+				return GetOptions(syntax, semanticModel);
 
 			return [];
-		}
 
-		static void ValidateAspectHooks(
-			List<DiagnosticInfo>                                                       diagnostics,
-			Dictionary<ISymbol,(AttributeSyntax Syntax,SemanticModel SemanticModel)> aspectAttributes,
-			HashSet<string>                                                           reportedDiagnostics)
-		{
-			foreach (var item in aspectAttributes)
+			static IEnumerable<(string Key, object? Value)> GetOptions(AttributeSyntax attribute, SemanticModel semanticModel)
 			{
-				var symbol          = item.Key;
-				var aspectAttribute = item.Value;
-
-				if (symbol is not INamedTypeSymbol aspectClass)
-					continue;
-
-				foreach (var arg in aspectAttribute.Syntax.ArgumentList?.Arguments ?? default)
-				{
-					if (arg.NameEquals is null || !IsHookName(arg.NameEquals.Name.Identifier.ValueText))
-						continue;
-
-					if (AspectSymbols.GetAttributeArgumentValue(arg.Expression, aspectAttribute.SemanticModel) is not string hookName || string.IsNullOrWhiteSpace(hookName))
-						continue;
-
-					var methods = aspectClass.GetMembers(hookName).OfType<IMethodSymbol>().ToArray();
-
-					if (methods.Length == 0)
+				foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
+					if (arg.NameEquals is not null)
 					{
-						ReportDiagnostic(
-							diagnostics,
-							reportedDiagnostics,
-							AspectDiagnosticID.HookMethodNotFound,
-							$"Aspect hook method '{hookName}' was not found on aspect type '{aspectClass.ToDisplayString()}'.",
-							arg.Expression.GetLocation());
+						var name = arg.NameEquals.Name.Identifier.ValueText;
+
+						var attributeArgumentValue = AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel);
+						yield return (
+							name,
+							name == "Lifetime"
+								? attributeArgumentValue ?? arg.Expression.ToString().Split('.').LastOrDefault()
+								: attributeArgumentValue);
 					}
-					else if (!methods.Any(static m => m.IsStatic))
-					{
-						ReportDiagnostic(
-							diagnostics,
-							reportedDiagnostics,
-							AspectDiagnosticID.HookMethodNotStatic,
-							$"Aspect hook method '{hookName}' on aspect type '{aspectClass.ToDisplayString()}' must be static.",
-							arg.Expression.GetLocation());
-					}
-				}
 			}
 		}
 
@@ -613,61 +636,33 @@ namespace AspectGenerator
 			diagnostics.Add(new DiagnosticInfo(id, message, location));
 		}
 
-		static IEnumerable<(string Key, object? Value)> GetAspectOptions(AttributeData attribute)
-		{
-			return attribute.NamedArguments.Select(static arg => (
-				arg.Key,
-				arg.Value.Kind == TypedConstantKind.Array ? arg.Value.Values.Select(static v => v.Value).ToArray() : arg.Value.Value));
-		}
-
-		static IEnumerable<(string Key, object? Value)> GetAspectOptions(AttributeSyntax attribute, SemanticModel semanticModel)
-		{
-			foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
-				if (arg.NameEquals is not null)
-				{
-					var name = arg.NameEquals.Name.Identifier.ValueText;
-
-					yield return (
-						name,
-						name == "Lifetime"
-							? GetAspectLifetimeValue(arg.Expression, semanticModel)
-							: AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel));
-				}
-		}
-
-		static object? GetAspectLifetimeValue(ExpressionSyntax expression, SemanticModel semanticModel)
-		{
-			return AspectSymbols.GetAttributeArgumentValue(expression, semanticModel) ??
-				expression.ToString().Split('.').LastOrDefault();
-		}
-
-		static string GetDeclaredAspectLifetime(AttributeInfo attribute)
-		{
-			foreach (var option in GetAspectOptions(attribute))
-			{
-				if (option.Key != "Lifetime")
-					continue;
-
-				return option.Value switch
-				{
-					1                => "Static",
-					2                => "Instance",
-					"Static"         => "Static",
-					"Instance"       => "Instance",
-					"Auto"           => "Auto",
-					string value when value.EndsWith(".Static",   StringComparison.Ordinal) => "Static",
-					string value when value.EndsWith(".Instance", StringComparison.Ordinal) => "Instance",
-					string value when value.EndsWith(".Auto",     StringComparison.Ordinal) => "Auto",
-					_                => "Auto"
-				};
-			}
-
-			return "Auto";
-		}
-
 		static bool UsesInstanceLifetime(AttributeInfo attribute)
 		{
 			return GetDeclaredAspectLifetime(attribute) == "Instance";
+
+			static string GetDeclaredAspectLifetime(AttributeInfo attribute)
+			{
+				foreach (var option in GetAspectOptions(attribute))
+				{
+					if (option.Key != "Lifetime")
+						continue;
+
+					return option.Value switch
+					{
+						1                => "Static",
+						2                => "Instance",
+						"Static"         => "Static",
+						"Instance"       => "Instance",
+						"Auto"           => "Auto",
+						string value when value.EndsWith(".Static",   StringComparison.Ordinal) => "Static",
+						string value when value.EndsWith(".Instance", StringComparison.Ordinal) => "Instance",
+						string value when value.EndsWith(".Auto",     StringComparison.Ordinal) => "Auto",
+						_                => "Auto"
+					};
+				}
+
+				return "Auto";
+			}
 		}
 
 		static string GetAppliedAspectConstruction(AttributeInfo attribute)
@@ -749,28 +744,11 @@ namespace AspectGenerator
 			return PrintValue(value, type);
 		}
 
-		static bool IsHookName(string name)
-		{
-			return name is
-				"OnInit"            or
-				"OnUsing"           or
-				"OnUsingAsync"      or
-				"OnBeforeCall"      or
-				"OnBeforeCallAsync" or
-				"OnCall"            or
-				"OnAfterCall"       or
-				"OnAfterCallAsync"  or
-				"OnCatch"           or
-				"OnCatchAsync"      or
-				"OnFinally"         or
-				"OnFinallyAsync";
-		}
-
 		static void GenerateSource(
-			SourceProductionContext                         spc,
-			Compilation                                     compilation,
-			GeneratorExecutionOptions                       options,
-			ImmutableArray<AnalyzedInvocation>              aspectedMethods)
+			SourceProductionContext            spc,
+			Compilation                        compilation,
+			GeneratorExecutionOptions          options,
+			ImmutableArray<AnalyzedInvocation> aspectedMethods)
 		{
 			var interceptorsNamespace = GetInterceptorsNamespace(options);
 
@@ -975,52 +953,52 @@ namespace AspectGenerator
 					""");
 
 			spc.AddSource("Interceptors.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
-		}
 
-		static List<InterceptorInfo> GetInterceptorInfos(ImmutableArray<AnalyzedInvocation> aspectedMethods)
-		{
-			var nameCounter = 0;
-			var nameSet     = new HashSet<string>();
-			var result      = new List<InterceptorInfo>();
-
-			string GetInterceptorName(string methodName)
+			static List<InterceptorInfo> GetInterceptorInfos(ImmutableArray<AnalyzedInvocation> aspectedMethods)
 			{
-				return nameSet.Add(methodName) ? methodName : GetInterceptorName($"{methodName}_{++nameCounter}");
-			}
+				var nameCounter = 0;
+				var nameSet     = new HashSet<string>();
+				var result      = new List<InterceptorInfo>();
 
-			foreach (var group in aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default).OrderBy(static m => m.Key!.Name))
-			{
-				var method     = (IMethodSymbol)group.Key!;
-				var invocations = group.ToList();
-
-				result.Add(new InterceptorInfo(
-					method,
-					invocations,
-					GetInterceptorName($"{method.Name}_Interceptor"),
-					GetOrderedAttributes(invocations[0].Attributes)));
-			}
-
-			return result;
-		}
-
-		static List<AttributeInfo> GetOrderedAttributes(List<AttributeInfo> attributes)
-		{
-			if (!attributes.Any(static a => a.AppliedAttributeData?.NamedArguments.Any(static na => na.Key == "Order") is true))
-				return attributes;
-
-			return
-			(
-				from a in attributes
-				let o = a.AppliedAttributeData?.NamedArguments.Select(static na => (KeyValuePair<string,TypedConstant>?)na).FirstOrDefault(static na => na!.Value.Key == "Order")
-				let n = o is null ? int.MaxValue : o.Value.Value.Value switch
+				string GetInterceptorName(string methodName)
 				{
-					string s => int.TryParse(s, out var n) ? n : null,
-					int    n => (int?)n,
-					_        => null
+					return nameSet.Add(methodName) ? methodName : GetInterceptorName($"{methodName}_{++nameCounter}");
 				}
-				orderby n
-				select a
-			).ToList();
+
+				foreach (var group in aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default).OrderBy(static m => m.Key!.Name))
+				{
+					var method     = (IMethodSymbol)group.Key!;
+					var invocations = group.ToList();
+
+					result.Add(new InterceptorInfo(
+						method,
+						invocations,
+						GetInterceptorName($"{method.Name}_Interceptor"),
+						GetOrderedAttributes(invocations[0].Attributes)));
+				}
+
+				return result;
+			}
+
+			static List<AttributeInfo> GetOrderedAttributes(List<AttributeInfo> attributes)
+			{
+				if (!attributes.Any(static a => a.AppliedAttributeData?.NamedArguments.Any(static na => na.Key == "Order") is true))
+					return attributes;
+
+				return
+				(
+					from a in attributes
+					let o = a.AppliedAttributeData?.NamedArguments.Select(static na => (KeyValuePair<string,TypedConstant>?)na).FirstOrDefault(static na => na!.Value.Key == "Order")
+					let n = o is null ? int.MaxValue : o.Value.Value.Value switch
+					{
+						string s => int.TryParse(s, out var n) ? n : null,
+						int    n => (int?)n,
+						_        => null
+					}
+					orderby n
+					select a
+				).ToList();
+			}
 		}
 
 		static void ValidateAspectHooksForMethod(

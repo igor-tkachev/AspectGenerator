@@ -48,25 +48,18 @@ namespace AspectGenerator
 		/// <remarks>
 		/// Keep this enabled for single-project usage. Set it to <c>false</c> when the API is supplied by an aspect library referenced by this project.
 		/// </remarks>
-		public bool    GenerateApi                   { get; set; } = true;
+		public bool    GenerateApi           { get; set; } = true;
 		/// <summary>
 		/// Gets or sets whether generated API types are emitted as public types.
 		/// </summary>
 		/// <remarks>
 		/// Use this for aspect-library projects that expose aspect definitions and generated API types to other projects.
 		/// </remarks>
-		public bool    PublicApi                     { get; set; }
+		public bool    PublicApi             { get; set; }
 		/// <summary>
 		/// Gets or sets whether generated interceptor methods are marked with <see cref="System.Diagnostics.DebuggerStepThroughAttribute"/>.
 		/// </summary>
-		public bool    DebuggerStepThrough           { get; set; }
-		/// <summary>
-		/// Gets or sets how AspectGenerator reports optional diagnostics such as intercepted-call markers.
-		/// </summary>
-		/// <remarks>
-		/// Set to <see cref="AspectGenerator.AspectDiagnosticSeverity.Off"/> to disable optional diagnostics.
-		/// </remarks>
-		public AspectDiagnosticSeverity AspectDiagnosticSeverity { get; set; } = AspectDiagnosticSeverity.Info;
+		public bool    DebuggerStepThrough   { get; set; }
 		/// <summary>
 		/// Gets or sets the namespace used for generated interceptor types.
 		/// </summary>
@@ -74,6 +67,13 @@ namespace AspectGenerator
 		/// The package normally appends this namespace to the project <c>InterceptorsNamespaces</c> MSBuild property for direct package consumers.
 		/// Custom build setups must ensure this namespace is listed so Roslyn can use the generated interceptors.
 		/// </remarks>
-		public string? InterceptorsNamespace         { get; set; }
+		public string? InterceptorsNamespace { get; set; }
+		/// <summary>
+		/// Gets or sets how AspectGenerator reports optional diagnostics such as intercepted-call markers.
+		/// </summary>
+		/// <remarks>
+		/// Set to <see cref="AspectGenerator.AspectDiagnosticSeverity.Off"/> to disable optional diagnostics.
+		/// </remarks>
+		public AspectDiagnosticSeverity AspectDiagnosticSeverity { get; set; } = AspectDiagnosticSeverity.Info;
 	}
 }
