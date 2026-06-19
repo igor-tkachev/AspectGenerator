@@ -62,7 +62,6 @@ namespace AspectGenerator
 			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
-				AspectType = typeof(AspectLibrary.ConsoleLogAttribute),
 				Aspect     = __aspect__0,
 			};
 

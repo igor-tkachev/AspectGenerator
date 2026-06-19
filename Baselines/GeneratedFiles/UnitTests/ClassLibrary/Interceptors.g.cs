@@ -62,7 +62,6 @@ namespace AspectGenerator
 			var __info__0   = new AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
-				AspectType = typeof(Aspects.CrossProjectAttribute),
 				Aspect     = __aspect__0,
 			};
 

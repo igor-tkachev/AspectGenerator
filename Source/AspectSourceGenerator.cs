@@ -319,10 +319,6 @@ namespace AspectGenerator
 					/// </summary>
 					public object?[]?                                            MethodArguments;
 					/// <summary>
-					/// Gets or sets the applied aspect attribute type.
-					/// </summary>
-					public Type                                                  AspectType;
-					/// <summary>
 					/// Gets or sets the applied aspect attribute instance.
 					/// </summary>
 					public Attribute?                                            Aspect;
@@ -375,10 +371,6 @@ namespace AspectGenerator
 					/// Gets or sets intercepted method arguments when argument capture is enabled.
 					/// </summary>
 					public object?[]?                                            MethodArguments;
-					/// <summary>
-					/// Gets or sets the applied aspect attribute type.
-					/// </summary>
-					public Type                                                  AspectType;
 					/// <summary>
 					/// Gets or sets the applied aspect attribute instance.
 					/// </summary>
@@ -1539,7 +1531,6 @@ namespace AspectGenerator
 						.Append(indent).AppendLine("{")
 						//.Append(indent).AppendLine($"\tReturnValue     = {(idx > 0 ? $"__info__{idx - 1}.ReturnValue" : $"default({(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")})")},")
 						.Append(indent).AppendLine($"\tMemberInfo = __targetMethod__,")
-						.Append(indent).AppendLine($"\tAspectType = typeof({attr}),")
 						.Append(indent).AppendLine($"\tAspect     = __aspect__{idx},")
 						;
 

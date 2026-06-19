@@ -62,7 +62,6 @@ namespace AspectGenerator
 			var __info__0   = new AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
-				AspectType = typeof(Aspects.MetricsAttribute),
 				Aspect     = __aspect__0,
 			};
 
@@ -118,7 +117,6 @@ namespace AspectGenerator
 			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
-				AspectType = typeof(Aspects.MetricsAttribute),
 				Aspect     = __aspect__0,
 			};
 
@@ -169,7 +167,6 @@ namespace AspectGenerator
 			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
-				AspectType = typeof(Aspects.MetricsAttribute),
 				Aspect     = __aspect__0,
 			};
 
@@ -221,7 +218,6 @@ namespace AspectGenerator
 			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
-				AspectType = typeof(Aspects.IgnoreCatchAttribute),
 				Aspect     = __aspect__0,
 			};
 
@@ -234,7 +230,6 @@ namespace AspectGenerator
 					var __info__1   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
 					{
 						MemberInfo = __targetMethod__,
-						AspectType = typeof(Aspects.MetricsAttribute),
 						Aspect     = __aspect__1,
 						PreviousInfo = __info__0
 					};

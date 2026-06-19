@@ -30,11 +30,11 @@ namespace AspectGenerator
 			return new DiagnosticDescriptor(
 			AspectDiagnosticID.InterceptedCallMarker,
 			"Call is marked for interception",
-			"Call is marked for interception by {0}",
+			"Call is marked for interception by {0}; generated method: {1}",
 			"AspectGenerator",
 			severity,
 			true,
-			"Shows where AspectGenerator applies aspects.",
+			"Shows where AspectGenerator applies aspects and names the generated interceptor method.",
 			"https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics");
 		}
 	}

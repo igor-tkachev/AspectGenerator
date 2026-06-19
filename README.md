@@ -269,7 +269,7 @@ AspectGenerator can mark calls where aspects are applied by reporting optional `
 
 Supported values are `Off`, `Hidden`, `Info`, `Warning`, and `Error`. Set `Off` to disable optional markers, use `Warning` for audit-style builds, or `Error` when intercepted calls must be explicitly inspected before a commit.
 
-`AG0300` shows where AspectGenerator applies aspects. Each marked call receives one diagnostic listing the applied aspect attributes. The diagnostic is informational by default and does not indicate a problem. Use the build report for complete and baseline-friendly information.
+`AG0300` shows where AspectGenerator applies aspects. Each marked call receives one diagnostic listing the applied aspect attributes and the generated interceptor method name. The diagnostic is informational by default and does not indicate a problem. Use the build report for complete and baseline-friendly information.
 
 The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail when the marker severity is configured as `Warning`.
 

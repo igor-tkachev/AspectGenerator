@@ -64,7 +64,6 @@ namespace ExampleAspectGenerator
 			var __info__0   = new AspectGenerator.InterceptInfo<System.Collections.Generic.List<TransactionAspect.Program.Customer>>
 			{
 				MemberInfo = __targetMethod__,
-				AspectType = typeof(Aspects.TransactionAttribute),
 				Aspect     = __aspect__0,
 				MethodArguments = __args__,
 			};
@@ -122,7 +121,6 @@ namespace ExampleAspectGenerator
 			var __info__0   = new AspectGenerator.InterceptInfo<System.Collections.Generic.List<TransactionAspect.Program.Customer>>
 			{
 				MemberInfo = __targetMethod__,
-				AspectType = typeof(Aspects.TransactionAttribute),
 				Aspect     = __aspect__0,
 				MethodArguments = __args__,
 			};

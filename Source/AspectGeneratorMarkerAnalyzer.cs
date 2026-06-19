@@ -64,15 +64,32 @@ namespace AspectGenerator
 						var aspects = string.Join(", ", analyzedInvocation.Attributes
 							.Select(static attribute => attribute.AttributeClass.Name)
 							.Distinct(System.StringComparer.Ordinal));
+						var interceptorName = GetGeneratedInterceptorMethodName(analyzedInvocation.Method);
+						var interceptor     = $"{GetGeneratedInterceptorType(options)}.{interceptorName}";
 
 						context.ReportDiagnostic(
 							Diagnostic.Create(
 								descriptor,
 								invocation.GetLocation(),
-								aspects));
+								aspects,
+								interceptor));
 					},
 					SyntaxKind.InvocationExpression);
 			});
+		}
+
+		static string GetGeneratedInterceptorType(GeneratorExecutionOptions options)
+		{
+			var interceptorsNamespace = string.IsNullOrWhiteSpace(options.InterceptorsNamespace)
+				? "AspectGenerator"
+				: options.InterceptorsNamespace!;
+
+			return $"{interceptorsNamespace}.AspectGeneratorInterceptors";
+		}
+
+		static string GetGeneratedInterceptorMethodName(IMethodSymbol method)
+		{
+			return $"{method.Name}_Interceptor";
 		}
 	}
 }

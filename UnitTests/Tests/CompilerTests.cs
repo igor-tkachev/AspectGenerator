@@ -580,7 +580,7 @@ namespace AspectGenerator.Tests
 
 			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
 			Assert.AreEqual(DiagnosticSeverity.Info, diagnostic.Severity);
-			Assert.AreEqual("Call is marked for interception by TraceAspectAttribute", diagnostic.GetMessage());
+			Assert.AreEqual("Call is marked for interception by TraceAspectAttribute; generated method: AspectGenerator.AspectGeneratorInterceptors.Target_Interceptor", diagnostic.GetMessage());
 		}
 
 		[TestMethod]
@@ -623,6 +623,7 @@ namespace AspectGenerator.Tests
 				Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InterceptedCallMarker}. Actual diagnostics: {string.Join(", ", diagnostics.Select(d => d.Id))}");
 				Assert.AreEqual(expectedSeverity, diagnostic.Severity);
 				StringAssert.Contains(diagnostic.GetMessage(), "TraceAspectAttribute");
+				StringAssert.Contains(diagnostic.GetMessage(), "AspectGenerator.AspectGeneratorInterceptors.Target_Interceptor");
 				Assert.AreEqual("Target()", diagnostic.Location.SourceTree?.GetRoot().FindNode(diagnostic.Location.SourceSpan).ToString());
 			}
 		}

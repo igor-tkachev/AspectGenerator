@@ -206,10 +206,6 @@
 		/// </summary>
 		public object?[]?                                            MethodArguments;
 		/// <summary>
-		/// Gets or sets the applied aspect attribute type.
-		/// </summary>
-		public Type                                                  AspectType;
-		/// <summary>
 		/// Gets or sets the applied aspect attribute instance.
 		/// </summary>
 		public Attribute?                                            Aspect;
@@ -262,10 +258,6 @@
 		/// Gets or sets intercepted method arguments when argument capture is enabled.
 		/// </summary>
 		public object?[]?                                            MethodArguments;
-		/// <summary>
-		/// Gets or sets the applied aspect attribute type.
-		/// </summary>
-		public Type                                                  AspectType;
 		/// <summary>
 		/// Gets or sets the applied aspect attribute instance.
 		/// </summary>
