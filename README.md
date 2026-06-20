@@ -9,8 +9,10 @@ AspectGenerator provides AOP-like method aspects for C# using compile-time call-
 
 AspectGenerator is not traditional runtime AOP. Aspects are applied to call sites visible to the current compilation.
 
-> [!NOTE]
-> AspectGenerator itself targets `netstandard2.0`, but consuming projects must be built with the .NET 10 SDK/compiler because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
+> [!IMPORTANT]
+> **Projects that use AspectGenerator must be built with the .NET 10 SDK/compiler.**
+>
+> This is a build-toolchain requirement, not a target-framework requirement. AspectGenerator itself targets `netstandard2.0`, and your project target framework is a separate decision. The project must be compiled with the .NET 10 SDK/compiler because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
 
 > [!IMPORTANT]
 > This is not runtime AOP. Aspects are applied by rewriting call sites visible to the current compilation. Calls made through reflection, delegates, already-compiled external assemblies, or unsupported C# constructs are outside the interception model.
@@ -23,12 +25,16 @@ Install the package:
 dotnet add package AspectGenerator
 ```
 
-Configure the consuming project:
+Build the consuming project with the .NET 10 SDK/compiler. This requirement is about the build tools used by `dotnet build`, MSBuild, or Visual Studio, not about forcing a specific `TargetFramework`.
 
-```xml
-<PropertyGroup>
-  <TargetFramework>net10.0</TargetFramework>
-</PropertyGroup>
+For example, use a `global.json` to pin the repository to a .NET 10 SDK:
+
+```json
+{
+  "sdk": {
+    "version": "10.0.100"
+  }
+}
 ```
 
 The AspectGenerator NuGet package imports the required MSBuild wiring automatically for projects that reference the package directly.
@@ -288,7 +294,7 @@ The README is the concise entry point. The wiki should contain expanded pages wi
 
 When updating docs, keep README and wiki synchronized:
 
-- document the .NET 10 SDK/compiler requirement and use `net10.0` in examples;
+- document the .NET 10 SDK/compiler requirement and avoid implying that `net10.0` is required as the target framework;
 - use `InterceptorsNamespaces`, not `InterceptorsPreviewNamespaces`;
 - use `AspectGeneratorGenerateApi`, `AspectGeneratorPublicApi`, `AspectGeneratorDebuggerStepThrough`, and `AspectGeneratorInterceptorsNamespace`;
 - describe `InterceptableLocation` as opaque compiler data;
