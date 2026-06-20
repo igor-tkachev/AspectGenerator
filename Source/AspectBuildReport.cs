@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,12 +9,6 @@ using Microsoft.CodeAnalysis;
 
 namespace AspectGenerator
 {
-	readonly record struct ReportInterceptorInfo(
-		IMethodSymbol                      Method,
-		ImmutableArray<AnalyzedInvocation> Invocations,
-		string                             Name,
-		ImmutableArray<AttributeInfo>      Attributes);
-
 	static class AspectBuildReport
 	{
 		#pragma warning disable RS1035 // Build reports are an explicit source-generator output channel for this package.
@@ -62,7 +55,7 @@ namespace AspectGenerator
 			var interceptorState      = analysis.Options.EmitInterceptors ? "enabled" : "disabled";
 			var generatedApiState     = analysis.Options.GenerateApi ? "enabled" : "disabled";
 			var interceptorsNamespace = GetInterceptorsNamespace(analysis.Options);
-			var interceptors          = GetInterceptorInfos(analysis.AspectedMethods);
+			var interceptors          = InterceptorNamingService.Create(analysis.AspectedMethods);
 			var sb                    = new StringBuilder();
 
 			sb
@@ -107,7 +100,7 @@ namespace AspectGenerator
 				.AppendLine("## Target Methods")
 				.AppendLine();
 
-			if (interceptors.Length == 0)
+			if (interceptors.Count == 0)
 			{
 				sb.AppendLine("No target methods were selected.");
 			}
@@ -124,7 +117,7 @@ namespace AspectGenerator
 						$"`{FormatMarkdownCode(interceptor.Method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat))}`",
 						$"`{interceptor.Name}`",
 						FormatAspectList(interceptor.Attributes),
-						interceptor.Invocations.Length.ToString(CultureInfo.InvariantCulture));
+						interceptor.Invocations.Count.ToString(CultureInfo.InvariantCulture));
 				}
 			}
 
@@ -133,7 +126,7 @@ namespace AspectGenerator
 				.AppendLine("## Intercepted Call Sites")
 				.AppendLine();
 
-			if (interceptors.Length == 0)
+			if (interceptors.Count == 0)
 			{
 				sb.AppendLine("No call sites were selected.");
 			}
@@ -204,11 +197,11 @@ namespace AspectGenerator
 		{
 			return string.Join("<br />", attributes.Select(attribute =>
 			{
-				var declaredLifetime = GetDeclaredAspectLifetime(attribute);
+				var lifetime = AspectLifetimeResolver.Resolve(attribute);
 
 				return $"`{FormatMarkdownCode(attribute.AttributeClass.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat))}`" +
-					$"<br />DeclaredLifetime: {declaredLifetime}" +
-					$"<br />EffectiveLifetime: {declaredLifetime switch { "Instance" => "Instance", _ => "Static" }}";
+					$"<br />DeclaredLifetime: {lifetime.DeclaredLifetime}" +
+					$"<br />EffectiveLifetime: {lifetime.EffectiveLifetime}";
 			}));
 		}
 
@@ -262,74 +255,5 @@ namespace AspectGenerator
 			return string.IsNullOrWhiteSpace(options.InterceptorsNamespace) ? "AspectGenerator" : options.InterceptorsNamespace!;
 		}
 
-		static string GetDeclaredAspectLifetime(AttributeInfo attribute)
-		{
-			if (attribute.AspectDefinitionData is {} aspectDefinition)
-			{
-				foreach (var option in aspectDefinition.NamedArguments)
-				{
-					if (option.Key == "Lifetime")
-						return GetDeclaredAspectLifetime(option.Value.Value);
-				}
-			}
-
-			if (attribute is { AspectDefinitionSyntax: {} syntax, AspectDefinitionSemanticModel: {} semanticModel })
-			{
-				foreach (var arg in syntax.ArgumentList?.Arguments ?? default)
-				{
-					if (arg.NameEquals?.Name.Identifier.ValueText != "Lifetime")
-						continue;
-
-					return GetDeclaredAspectLifetime(
-						AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel) ??
-						arg.Expression.ToString().Split('.').LastOrDefault());
-				}
-			}
-
-			return "Auto";
-		}
-
-		static string GetDeclaredAspectLifetime(object? value)
-		{
-			return value switch
-			{
-				1                => "Static",
-				2                => "Instance",
-				"Static"         => "Static",
-				"Instance"       => "Instance",
-				"Auto"           => "Auto",
-				string text when text.EndsWith(".Static",   StringComparison.Ordinal) => "Static",
-				string text when text.EndsWith(".Instance", StringComparison.Ordinal) => "Instance",
-				string text when text.EndsWith(".Auto",     StringComparison.Ordinal) => "Auto",
-				_                => "Auto"
-			};
-		}
-
-		static ImmutableArray<ReportInterceptorInfo> GetInterceptorInfos(ImmutableArray<AnalyzedInvocation> aspectedMethods)
-		{
-			var builder = ImmutableArray.CreateBuilder<ReportInterceptorInfo>();
-			var names   = new HashSet<string>();
-
-			foreach (var group in aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default).OrderBy(static m => m.Key!.Name))
-			{
-				var method = (IMethodSymbol)group.Key!;
-				var name   = method.Name + "_Interceptor";
-
-				if (!names.Add(name))
-				{
-					for (var index = 1;; index++)
-					{
-						name = method.Name + "_Interceptor_" + index;
-
-						if (names.Add(name))
-							break;
-					}
-				}
-
-				builder.Add(new ReportInterceptorInfo(method, [..group], name, [..group.First().Attributes]));
-			}
-
-			return builder.ToImmutable();
-		}
 	}
 }

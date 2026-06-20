@@ -237,7 +237,9 @@ Conditional aspect attributes are evaluated against project/tree preprocessor sy
 
 ## Build Report
 
-AspectGenerator writes a compile-time build report file during normal builds. This is informational build output, not runtime tracing or logging code. The report uses Markdown-friendly text with summary, generated source files, target methods, intercepted call sites, source locations, applied aspects, and generated interceptor names.
+AspectGenerator writes a human-readable build report during normal builds. This report can be inspected by developers, reviewers, maintainers, or AI coding agents to understand which target methods and call sites were selected, which aspects were applied, and which interceptor methods were generated. This is informational build output, not runtime tracing or logging code.
+
+The report uses Markdown-friendly text with summary, generated source files, target methods, intercepted call sites, source locations, applied aspects, generated interceptor names, and aspect lifetime information. It is optimized for inspection and may include local paths, source links, line and column locations, and generated source references. It is not intended to be a deterministic golden-file baseline format in V1.
 
 Default path:
 
@@ -255,7 +257,7 @@ To change the report path or file name, set `AspectGeneratorReportFile`:
 </PropertyGroup>
 ```
 
-Diagnostics are reserved for errors and warnings. The build report is informational, stored as a build artifact, and is not emitted as compiler diagnostics.
+Diagnostics are reserved for errors, warnings, and actionable misconfiguration. The build report is informational, stored as a build artifact, and is not emitted as compiler diagnostics.
 
 ## Intercepted Call Markers
 

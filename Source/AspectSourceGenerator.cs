@@ -385,12 +385,6 @@ namespace AspectGenerator
 
 		#endregion
 
-		record InterceptorInfo(
-			IMethodSymbol             Method,
-			List<AnalyzedInvocation>  Invocations,
-			string                    Name,
-			List<AttributeInfo>       Attributes);
-
 		internal record AnalysisResult(
 			Compilation                        Compilation,
 			GeneratorExecutionOptions          Options,
@@ -597,7 +591,7 @@ namespace AspectGenerator
 				DiagnosticSeverity.Warning));
 		}
 
-		static IEnumerable<(string Key, object? Value)> GetAspectOptions(AttributeInfo attribute)
+		internal static IEnumerable<(string Key, object? Value)> GetAspectOptions(AttributeInfo attribute)
 		{
 			if (attribute.AspectDefinitionData is {} aspectAttributeData)
 				return aspectAttributeData.NamedArguments.Select(static arg => (
@@ -634,35 +628,6 @@ namespace AspectGenerator
 				return;
 
 			diagnostics.Add(new DiagnosticInfo(id, message, location));
-		}
-
-		static bool UsesInstanceLifetime(AttributeInfo attribute)
-		{
-			return GetDeclaredAspectLifetime(attribute) == "Instance";
-
-			static string GetDeclaredAspectLifetime(AttributeInfo attribute)
-			{
-				foreach (var option in GetAspectOptions(attribute))
-				{
-					if (option.Key != "Lifetime")
-						continue;
-
-					return option.Value switch
-					{
-						1                => "Static",
-						2                => "Instance",
-						"Static"         => "Static",
-						"Instance"       => "Instance",
-						"Auto"           => "Auto",
-						string value when value.EndsWith(".Static",   StringComparison.Ordinal) => "Static",
-						string value when value.EndsWith(".Instance", StringComparison.Ordinal) => "Instance",
-						string value when value.EndsWith(".Auto",     StringComparison.Ordinal) => "Auto",
-						_                => "Auto"
-					};
-				}
-
-				return "Auto";
-			}
 		}
 
 		static string GetAppliedAspectConstruction(AttributeInfo attribute)
@@ -795,7 +760,7 @@ namespace AspectGenerator
 
 				""");
 
-			foreach (var interceptor in GetInterceptorInfos(aspectedMethods))
+			foreach (var interceptor in InterceptorNamingService.Create(aspectedMethods))
 			{
 				var method          = interceptor.Method;
 				var interceptorName = interceptor.Name;
@@ -839,7 +804,7 @@ namespace AspectGenerator
 				{
 					var attr = attributes[i];
 
-					if (UsesInstanceLifetime(attr))
+					if (AspectLifetimeResolver.UsesInstanceLifetime(attr))
 						continue;
 
 					var attrType = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -954,51 +919,6 @@ namespace AspectGenerator
 
 			spc.AddSource("Interceptors.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
 
-			static List<InterceptorInfo> GetInterceptorInfos(ImmutableArray<AnalyzedInvocation> aspectedMethods)
-			{
-				var nameCounter = 0;
-				var nameSet     = new HashSet<string>();
-				var result      = new List<InterceptorInfo>();
-
-				string GetInterceptorName(string methodName)
-				{
-					return nameSet.Add(methodName) ? methodName : GetInterceptorName($"{methodName}_{++nameCounter}");
-				}
-
-				foreach (var group in aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default).OrderBy(static m => m.Key!.Name))
-				{
-					var method     = (IMethodSymbol)group.Key!;
-					var invocations = group.ToList();
-
-					result.Add(new InterceptorInfo(
-						method,
-						invocations,
-						GetInterceptorName($"{method.Name}_Interceptor"),
-						GetOrderedAttributes(invocations[0].Attributes)));
-				}
-
-				return result;
-			}
-
-			static List<AttributeInfo> GetOrderedAttributes(List<AttributeInfo> attributes)
-			{
-				if (!attributes.Any(static a => a.AppliedAttributeData?.NamedArguments.Any(static na => na.Key == "Order") is true))
-					return attributes;
-
-				return
-				(
-					from a in attributes
-					let o = a.AppliedAttributeData?.NamedArguments.Select(static na => (KeyValuePair<string,TypedConstant>?)na).FirstOrDefault(static na => na!.Value.Key == "Order")
-					let n = o is null ? int.MaxValue : o.Value.Value.Value switch
-					{
-						string s => int.TryParse(s, out var n) ? n : null,
-						int    n => (int?)n,
-						_        => null
-					}
-					orderby n
-					select a
-				).ToList();
-			}
 		}
 
 		static void ValidateAspectHooksForMethod(
@@ -1504,7 +1424,7 @@ namespace AspectGenerator
 					}
 
 					sb
-						.Append(indent).AppendLine($"var __aspect__{idx} = {(UsesInstanceLifetime(attributes[idx]) ? GetAppliedAspectConstruction(attributes[idx]) : $"{interceptorName}_State.Aspect{idx}")};")
+						.Append(indent).AppendLine($"var __aspect__{idx} = {(AspectLifetimeResolver.UsesInstanceLifetime(attributes[idx]) ? GetAppliedAspectConstruction(attributes[idx]) : $"{interceptorName}_State.Aspect{idx}")};")
 						.Append(indent).AppendLine($"var __info__{idx}   = new AspectGenerator.Intercept{(useInterceptData ? "Data" : "Info")}<{returnType}>")
 						.Append(indent).AppendLine("{")
 						//.Append(indent).AppendLine($"\tReturnValue     = {(idx > 0 ? $"__info__{idx - 1}.ReturnValue" : $"default({(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")})")},")

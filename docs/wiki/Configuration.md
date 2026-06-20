@@ -146,7 +146,9 @@ Any project that exposes aspect attributes to other projects must set:
 
 AspectGenerator analyzes code during design-time builds so IDE diagnostics and optional call-site markers can work. Interceptor source is emitted only during normal builds. This behavior is automatic and not user-configurable.
 
-AspectGenerator writes an informational build report file during normal builds. `AspectGeneratorReportFile` controls the output path. The report is not printed to the console by default. Diagnostics are reserved for errors, warnings, and actionable misconfiguration.
+`AspectGeneratorReportFile` controls the path of the human-readable build report. The report is written during normal builds and skipped during design-time builds.
+
+The report can be used by developers and AI coding agents to inspect selected target methods, intercepted call sites, applied aspects, generated interceptor methods, generated source references, source locations, and aspect lifetime information. It is not printed to the console by default. Diagnostics are reserved for errors, warnings, optional call-site markers, and actionable misconfiguration.
 
 `AspectGeneratorInterceptorsNamespace` controls the namespace used for generated interceptors. The AspectGenerator NuGet package appends this namespace to `InterceptorsNamespaces` automatically for projects that reference the package directly. Manual `InterceptorsNamespaces` configuration should only be needed for unusual or custom build setups.
 

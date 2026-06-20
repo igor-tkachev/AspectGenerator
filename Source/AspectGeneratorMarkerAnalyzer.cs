@@ -89,7 +89,7 @@ namespace AspectGenerator
 
 		static string GetGeneratedInterceptorMethodName(IMethodSymbol method)
 		{
-			return $"{method.Name}_Interceptor";
+			return InterceptorNamingService.GetBaseName(method);
 		}
 	}
 }

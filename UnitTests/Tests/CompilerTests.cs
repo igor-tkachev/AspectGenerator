@@ -851,6 +851,7 @@ namespace AspectGenerator.Tests
 					new()
 					{
 						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
+						["build_property.CompilerGeneratedFilesOutputPath"] = Path.Combine(Path.GetTempPath(), "aspect-generator-generated"),
 					});
 
 				Assert.AreEqual(0, result.Diagnostics.Count(IsReportDiagnostic));
@@ -866,15 +867,45 @@ namespace AspectGenerator.Tests
 				StringAssert.Contains(report, "| Interceptors namespace | `AspectGenerator` |");
 				StringAssert.Contains(report, "## Generated Sources");
 				StringAssert.Contains(report, "Interceptors.g.cs");
+				StringAssert.Contains(report, "file:///");
 				StringAssert.Contains(report, "## Target Methods");
+				StringAssert.Contains(report, "| Target method | Generated interceptor | Aspect(s) | Call sites |");
 				StringAssert.Contains(report, "`AspectGenerator.Tests.GeneratorDriver.Service.Save()`");
 				StringAssert.Contains(report, "`Save_Interceptor`");
 				StringAssert.Contains(report, "`AspectGenerator.Tests.GeneratorDriver.TraceAspectAttribute`");
 				StringAssert.Contains(report, "DeclaredLifetime: Auto");
 				StringAssert.Contains(report, "EffectiveLifetime: Static");
 				StringAssert.Contains(report, "## Intercepted Call Sites");
+				StringAssert.Contains(report, "| # | Source | Replaced call | Target method | Aspect(s) | Generated interceptor |");
 				StringAssert.Contains(report, "`Save()`");
 				StringAssert.Contains(report, "`Load()`");
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
+		}
+
+		[TestMethod]
+		public void BuildReportUsesGeneratedInterceptorNamesForOverloadedTargetsTest()
+		{
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
+
+			try
+			{
+				var result = RunGenerator(
+					TraceOverloadedTargetsSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
+					});
+				var source = GetGeneratedSource(result, "Interceptors.g.cs");
+				var report = File.ReadAllText(reportFile);
+
+				StringAssert.Contains(source, "Save_Interceptor(");
+				StringAssert.Contains(source, "Save_Interceptor_1(");
+				StringAssert.Contains(report, "`Save_Interceptor`");
+				StringAssert.Contains(report, "`Save_Interceptor_1`");
 			}
 			finally
 			{
@@ -2923,6 +2954,35 @@ namespace AspectGenerator.Tests
 				public static string Save() => "";
 				public static string HealthCheck() => "";
 				public static string Load() => "";
+			}
+			""";
+
+		const string TraceOverloadedTargetsSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			sealed class TraceAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " traced";
+			}
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Save();
+					Save(1);
+				}
+
+				[TraceAspect]
+				public static string Save() => "";
+
+				[TraceAspect]
+				public static string Save(int value) => "";
 			}
 			""";
 
