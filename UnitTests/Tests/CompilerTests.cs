@@ -494,6 +494,62 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void DefaultTargetFilterExcludesTypeAttributeTargetsTest()
+		{
+			var result = RunGenerator(DefaultTargetFilterTypeNoLogSource);
+
+			AssertNotGenerated(result, "Interceptors.g.cs");
+		}
+
+		[TestMethod]
+		public void DefaultTargetFilterExcludesOnlyMethodAttributeTargetTest()
+		{
+			var result = RunGenerator(DefaultTargetFilterMethodNoLogSource);
+
+			AssertGeneratedSourceDoesNotContain(result, "HealthCheck_Interceptor");
+			AssertGeneratedSourceContains(result, "Save_Interceptor");
+		}
+
+		[TestMethod]
+		public void AppliedTargetFilterIsAppendedAfterDefaultTargetFilterTest()
+		{
+			var result = RunGenerator(DefaultTargetFilterOverrideSource);
+
+			AssertGeneratedSourceContains(result, "Save_Interceptor");
+		}
+
+		[TestMethod]
+		public void AppliedTargetFilterCanRepeatDefaultExclusionTest()
+		{
+			var result = RunGenerator(DefaultTargetFilterPreserveExclusionSource);
+
+			AssertNotGenerated(result, "Interceptors.g.cs");
+		}
+
+		[TestMethod]
+		public void AttributeConditionKeyIsNotSingularTest()
+		{
+			var result = RunGenerator(DefaultTargetFilterSingularAttributeSource);
+
+			AssertFilterDiagnostic(
+				result,
+				AspectDiagnosticID.UnknownAspectFilterConditionKey,
+				"Unknown target filter condition key 'attribute'");
+		}
+
+		[TestMethod]
+		public void AttributesConditionMatchesShortAndFullyQualifiedNamesTest()
+		{
+			var shortNameResult = RunGenerator(DefaultTargetFilterMethodNoLogSource);
+			var fullNameResult  = RunGenerator(DefaultTargetFilterFullyQualifiedNoLogSource);
+
+			AssertGeneratedSourceDoesNotContain(shortNameResult, "HealthCheck_Interceptor");
+			AssertGeneratedSourceContains(shortNameResult, "Save_Interceptor");
+			AssertGeneratedSourceDoesNotContain(fullNameResult, "HealthCheck_Interceptor");
+			AssertGeneratedSourceContains(fullNameResult, "Save_Interceptor");
+		}
+
+		[TestMethod]
 		public void FiltersRespectDesignTimeBuildTest()
 		{
 			var result = RunGenerator(
@@ -2492,6 +2548,225 @@ namespace AspectGenerator.Tests
 
 				[FilterAspect(TargetFilter = "Save")]
 				public static string Load() => "load";
+			}
+			""";
+
+		const string DefaultTargetFilterTypeNoLogSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(
+				OnAfterCall = nameof(After),
+				DefaultTargetFilter = "-attributes: NoLogAttribute")]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
+			sealed class NoLogAttribute : Attribute
+			{
+			}
+
+			[Log]
+			[NoLog]
+			sealed class Service
+			{
+				public void Invoke()
+				{
+					Save();
+				}
+
+				public string Save() => "";
+			}
+			""";
+
+		const string DefaultTargetFilterMethodNoLogSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(
+				OnAfterCall = nameof(After),
+				DefaultTargetFilter = "-attributes: NoLogAttribute")]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
+			sealed class NoLogAttribute : Attribute
+			{
+			}
+
+			[Log]
+			sealed class Service
+			{
+				public void Invoke()
+				{
+					HealthCheck();
+					Save();
+				}
+
+				[NoLog]
+				public string HealthCheck() => "";
+
+				public string Save() => "";
+			}
+			""";
+
+		const string DefaultTargetFilterFullyQualifiedNoLogSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(
+				OnAfterCall = nameof(After),
+				DefaultTargetFilter = "-attributes: AspectGenerator.Tests.GeneratorDriver.NoLogAttribute")]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
+			sealed class NoLogAttribute : Attribute
+			{
+			}
+
+			[Log]
+			sealed class Service
+			{
+				public void Invoke()
+				{
+					HealthCheck();
+					Save();
+				}
+
+				[NoLog]
+				public string HealthCheck() => "";
+
+				public string Save() => "";
+			}
+			""";
+
+		const string DefaultTargetFilterOverrideSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(
+				OnAfterCall = nameof(After),
+				DefaultTargetFilter = "-attributes: NoLogAttribute")]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
+			sealed class NoLogAttribute : Attribute
+			{
+			}
+
+			[Log(TargetFilter = "public **.*(...)")]
+			[NoLog]
+			sealed class Service
+			{
+				public void Invoke()
+				{
+					Save();
+				}
+
+				public string Save() => "";
+			}
+			""";
+
+		const string DefaultTargetFilterPreserveExclusionSource =
+			""""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(
+				OnAfterCall = nameof(After),
+				DefaultTargetFilter = "-attributes: NoLogAttribute")]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
+			sealed class NoLogAttribute : Attribute
+			{
+			}
+
+			[Log(TargetFilter = """
+				public **.*(...)
+				-attributes: NoLogAttribute
+				""")]
+			[NoLog]
+			sealed class Service
+			{
+				public void Invoke()
+				{
+					Save();
+				}
+
+				public string Save() => "";
+			}
+			"""";
+
+		const string DefaultTargetFilterSingularAttributeSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(
+				OnAfterCall = nameof(After),
+				DefaultTargetFilter = "attribute: NoLogAttribute")]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+
+			[Log]
+			sealed class Service
+			{
+				public void Invoke()
+				{
+					Save();
+				}
+
+				public string Save() => "";
 			}
 			""";
 

@@ -144,12 +144,12 @@ Design-time builds do not write the report.
 ```text
 Off      disables optional markers
 Hidden   reports hidden markers
-Info     reports informational markers
+Info     default; reports informational markers
 Warning  reports warning markers
 Error    reports error markers
 ```
 
-Use `AG0300` for temporary IDE/source inspection. Use the build report for complete aspect application analysis.
+`AG0300` is enabled by default with `Info` severity. It does not indicate a problem. Set `AspectGeneratorAspectDiagnosticSeverity` to `Off` to disable these markers. Use `AG0300` for temporary IDE/source inspection and the build report for complete aspect application analysis.
 
 ## Defining aspects
 
@@ -236,6 +236,14 @@ Aspect constructors and property initializers should be cheap and side-effect fr
 
 `TargetFilter` applies an aspect to matching target methods at assembly or type level. It belongs to the applied aspect attribute, not to `[Aspect]`.
 
+`DefaultTargetFilter` belongs to `[Aspect]` on the aspect definition. It lets aspect authors prepend default rules to assembly-level or type-level applications of that aspect. V1 uses simple concatenation:
+
+```text
+EffectiveTargetFilter = DefaultTargetFilter + TargetFilter
+```
+
+Later matching rules win. A consumer `TargetFilter` can override a default exclusion unless it repeats that exclusion later.
+
 Aspect attributes that support filters should expose:
 
 ```csharp
@@ -257,6 +265,7 @@ unprefixed  native AspectGenerator target pattern syntax
 pattern:     native AspectGenerator target pattern syntax
 contains:    ordinal substring match against canonical method signature
 regex:       regex match against canonical method signature
+-attributes: exclude targets with a matching method or containing type attribute
 -rule        exclude rule; last matching rule wins inside one filter set
 ```
 
@@ -280,6 +289,8 @@ Canonical method signature format:
 ```
 
 Types are fully qualified without C# aliases. Nullable annotations and parameter names are omitted. Extension method receivers are formatted with `this`.
+
+The `attributes:` condition checks method attributes and containing type attributes, including nested containing types. It supports short attribute names, short names without the `Attribute` suffix, and fully qualified names. `attribute:` is intentionally not supported.
 
 Target filters select target methods. AspectGenerator still rewrites only call sites visible to the current compilation.
 
@@ -400,4 +411,23 @@ build-toolchain requirement, not just target-framework requirement
 
 Do not reintroduce public `GenerateInterceptors` documentation.
 
-Do not remove build report details just because they are not baseline-friendly. The report is intentionally human- and agent-readable.
+Do not remove build report details just because they are not suitable for deterministic golden-file comparison. The report is intentionally human- and agent-readable.
+
+## Dependency guidance for agents
+
+Do not add new NuGet packages, template engines, formatters, source-generation helper libraries, or build tools unless the maintainer explicitly asks for that dependency.
+
+In particular, do not replace internal code generation with Scriban, Handlebars.Net, CSharpier, or other external templating/formatting tools as an automatic refactoring step.
+
+When improving generated-code quality, prefer internal refactoring first:
+
+```text
+CodeWriter
+GeneratedCodeSymbolPrinter
+InterceptorNamingService
+AspectLifetimeResolver
+smaller emitter classes
+targeted regression tests
+```
+
+If a new dependency seems useful, propose it as a separate design discussion with trade-offs, package impact, versioning risk, analyzer/generator loading risk, and build performance implications. Do not include it in unrelated cleanup or refactoring changes.

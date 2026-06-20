@@ -72,13 +72,29 @@ namespace AspectGenerator
 		{
 			if (_aspectAttributes.TryGetValue(attributeClass, out var aspectAttribute))
 			{
-				definition = new AttributeInfo(null, null, null, attributeClass, null, aspectAttribute.Syntax, aspectAttribute.SemanticModel);
+				definition = new AttributeInfo(
+					null,
+					null,
+					null,
+					attributeClass,
+					null,
+					aspectAttribute.Syntax,
+					aspectAttribute.SemanticModel,
+					GetDefaultTargetFilter(aspectAttribute.Syntax, aspectAttribute.SemanticModel));
 				return true;
 			}
 
 			if (TryGetExternalAspectDefinition(attributeClass, out var externalAspectDefinitionData))
 			{
-				definition = new AttributeInfo(null, null, null, attributeClass, externalAspectDefinitionData, null, null);
+				definition = new AttributeInfo(
+					null,
+					null,
+					null,
+					attributeClass,
+					externalAspectDefinitionData,
+					null,
+					null,
+					GetDefaultTargetFilter(externalAspectDefinitionData));
 				return true;
 			}
 
@@ -98,6 +114,31 @@ namespace AspectGenerator
 			});
 
 			return aspectDefinitionData is not null;
+		}
+
+		static string? GetDefaultTargetFilter(AttributeSyntax attribute, SemanticModel semanticModel)
+		{
+			foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
+			{
+				if (arg.NameEquals?.Name.Identifier.ValueText != "DefaultTargetFilter")
+					continue;
+
+				return AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel) as string;
+			}
+
+			return null;
+		}
+
+		static string? GetDefaultTargetFilter(AttributeData? attribute)
+		{
+			if (attribute is null)
+				return null;
+
+			foreach (var arg in attribute.NamedArguments)
+				if (arg.Key == "DefaultTargetFilter")
+					return arg.Value.Value as string;
+
+			return null;
 		}
 	}
 }

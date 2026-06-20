@@ -230,7 +230,26 @@ Condition keys:
 - `returns`: return type;
 - `param`: any parameter;
 - `params`: full parameter list;
+- `attributes`: method and containing type attributes;
 - `signature`: canonical signature string.
+
+`attributes:` matches target candidates that have a matching attribute on the method, containing type, or containing nested type chain. Assembly attributes, module attributes, base method attributes, interface method attributes, and `AttributeUsage.Inherited` traversal are not included in V1.
+
+Attribute names match by short attribute name, short name without the `Attribute` suffix, or fully qualified name:
+
+```text
+attributes: NoLog
+attributes: NoLogAttribute
+attributes: MyCompany.Diagnostics.NoLogAttribute
+```
+
+For shared aspect libraries, prefer fully qualified names to avoid ambiguity:
+
+```text
+-attributes: MyCompany.Diagnostics.NoLogAttribute
+```
+
+`attribute:` is not a supported alias and reports `AG0204`.
 
 Pattern wildcards:
 
@@ -294,6 +313,56 @@ public string[]? TargetFilter { get; set; }
 In AOP terminology, `TargetFilter` plays the role of a pointcut-like method selector. The term `pointcut` is explanatory only and is not part of the public API.
 
 Target filters are only supported on applied aspect attributes at assembly or type level. `[Aspect(TargetFilter = ...)]` is intentionally unsupported to keep aspect definition settings separate from aspect application.
+
+## Default Target Filters
+
+`DefaultTargetFilter` belongs to the aspect definition and is set on `[Aspect]`. It lets an aspect author provide default target-selection rules once:
+
+```csharp
+[Aspect(
+    OnBeforeCall = nameof(OnBeforeCall),
+    DefaultTargetFilter = """
+        -attributes: MyCompany.Diagnostics.NoLogAttribute
+        """)]
+[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
+sealed class LogAttribute : Attribute
+{
+    public string? TargetFilter { get; set; }
+
+    public static void OnBeforeCall(InterceptInfo info) {}
+}
+```
+
+When the aspect is applied at assembly or type level, AspectGenerator builds the effective filter by prepending the aspect author's default rules to the consumer-provided rules:
+
+```text
+EffectiveTargetFilter = DefaultTargetFilter + TargetFilter
+```
+
+The resulting rules use the normal ordered-rule semantics. Later matching rules win. `DefaultTargetFilter` is a default policy, not a hard constraint.
+
+For example, the consumer can override a default exclusion with a later broad include:
+
+```text
+DefaultTargetFilter:
+  -attributes: NoLogAttribute
+
+TargetFilter:
+  public **.*(...)
+
+EffectiveTargetFilter:
+  -attributes: NoLogAttribute
+  public **.*(...)
+```
+
+If both rules match, `public **.*(...)` wins because it appears later. To preserve the default exclusion after adding a broad include, repeat it later:
+
+```text
+public **.*(...)
+-attributes: NoLogAttribute
+```
+
+V1 does not support placeholder expansion such as `$(attributes)`, `$(-attributes)`, `$(namespace)`, or `$(method)`.
 
 ## Precedence
 

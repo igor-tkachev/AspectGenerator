@@ -49,7 +49,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts AllEventsMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqdshAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7MiAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -114,7 +114,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts AllEventsMethodAsync().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqfUlAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG80mAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -179,7 +179,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts AllEventsMethodAsync2().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqSUqAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG/0qAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -255,7 +255,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgsMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqd84AABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7c5AABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -442,7 +442,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsInMethod("_", 1, in b, ref n).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqZlFAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3FGAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -487,7 +487,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsInMethod("_", 1, b, ref n).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqd5GAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7ZHAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -530,7 +530,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqVdCAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGy9DAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -573,7 +573,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsMethod("_", 1).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqUBDAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGxhEAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -618,7 +618,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsOutMethod(out _).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqfJHAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG8pIAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -663,7 +663,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ArgumentsRefMethod("_", 1, ref b).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqVdEAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGy9FAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -706,7 +706,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts AssemblyFilterTarget().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqcAXAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG5gYAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -746,7 +746,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts EmptyMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqZEbAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG2kcAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -773,7 +773,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts this.ExtensionMethod(1).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqVEfAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGykgAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -814,7 +814,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts new TestClassExtension().ExtensionMethod(1).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqRAgAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG+ggAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -855,7 +855,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts new TestStructExtension().ExtensionMethod(2).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqdEgAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG6khAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -896,7 +896,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts FinallyMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqQweAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG+QeAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -947,7 +947,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts TestCode.GenericMethod(1).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqVQZAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGywaAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1011,10 +1011,10 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts TestCode.GenericMethod(DateTime.Today).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqXAZAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG0gaAABVbml0VGVzdHMuY3M=")]
 		//
 		// Intercepts TestCode.GenericMethod(now).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqZkZAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3EaAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1077,7 +1077,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts IgnoreCatchMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqVsdAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGzMeAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1128,7 +1128,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts InitMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqWkcAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG0EdAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1168,7 +1168,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts InterceptedGenericMethod("Intercepted").
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqcJLAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG5pMAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1208,7 +1208,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts InterceptedMethod("Intercepted").
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqaBKAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3hLAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1248,7 +1248,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts LiteralArgsMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqZo6AABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3I7AABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1288,7 +1288,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts MemberMethod(1).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqdUeAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG60fAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1338,7 +1338,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts obj.OnCall(2).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqaFOAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3lPAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1365,7 +1365,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts OnCallTestMethod(2).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqeNNAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7tOAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1393,7 +1393,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts OrderedMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqTtBAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGxNCAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1450,7 +1450,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts OrderedMethod2().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqX1BAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG1VCAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1507,7 +1507,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ReturnVoidMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqeAaAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7gbAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1568,7 +1568,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts StaticLifetimeCounterMethod1().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqaE9AABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3k+AABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1608,10 +1608,10 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts StaticMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqWsWAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG0MXAABVbml0VGVzdHMuY3M=")]
 		//
 		// Intercepts StaticMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqYMWAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG1sXAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1652,7 +1652,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts StaticMethod("John").
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqZwWAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3QXAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1693,7 +1693,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts "test string".Substring(5).
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqflMAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG9FNAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1733,7 +1733,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ClassLibrary.TestClass.TestMethod("Test").
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqXZJAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG05KAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1773,7 +1773,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts TypedAspectMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqbs7AABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG5M8AABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1813,7 +1813,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts TypeFilterTarget().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqaEYAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3kZAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1853,7 +1853,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts UsingMethod().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqdM+AABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG6s/AABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1894,7 +1894,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts UsingMethodAsync().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqaU/AABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG31AAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1935,7 +1935,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ValueTaskMethodAsync().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqW0uAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG0UvAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -1998,7 +1998,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ValueTaskMethodAsync2().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqYUxAABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG10yAABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]
@@ -2063,7 +2063,7 @@ namespace MyAspectGenerator
 		/// </summary>
 		//
 		// Intercepts ValueTaskThrowMethodAsync().
-		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "3IKqlG6ZrpHGUzRMlBpyqdw0AABVbml0VGVzdHMuY3M=")]
+		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7Q1AABVbml0VGVzdHMuY3M=")]
 		//
 		[System.Runtime.CompilerServices.CompilerGenerated]
 		[System.Diagnostics.DebuggerStepThrough]

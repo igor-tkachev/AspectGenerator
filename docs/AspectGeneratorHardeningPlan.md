@@ -17,6 +17,7 @@ Completed:
 - automatic build-mode interceptor emission gate based on `DesignTimeBuild`;
 - `ValueTask` and `ValueTask<T>` async target support;
 - AOP-like target filters;
+- `DefaultTargetFilter` aspect-definition defaults and native `attributes:` target filter condition;
 - removal of the legacy explicit method selector in favor of applied target filters;
 - MSBuild-visible build report output through `AspectGeneratorReportFile`;
 - `AG0300` call-site markers through a dedicated `DiagnosticAnalyzer` using shared selection logic.
@@ -57,6 +58,7 @@ Scope:
 
 - `TargetFilter` is an ordered string list;
 - `TargetFilter` can be declared as `string?` or `string[]?`; every string is split into non-empty line rules and `string[]` values concatenate those rules;
+- `DefaultTargetFilter` can be declared on generated `AspectAttribute` to prepend aspect-author rules to assembly-level or type-level applications;
 - rule lines can use matcher prefixes: `pattern:`, `contains:`, `regex:`;
 - lines starting with `#` are comments;
 - `contains:` uses ordinal substring matching;
@@ -87,6 +89,8 @@ TargetFilter sources:
 - [x] Support `Regex` target filters.
 - [x] Design and implement native `Pattern` target filters.
 - [x] Support native `Pattern` method rules, condition rules, dotted wildcards, return filters, and parameter filters.
+- [x] Support native `attributes` condition rules for method and containing type attributes.
+- [x] Support `DefaultTargetFilter` on aspect definitions with simple concatenation before applied `TargetFilter`.
 - [x] Support native condition groups: different keys are `AND`, repeated keys are `OR` by default, leading `&` forces `AND`, and leading `|` starts an alternative group.
 - [x] Support inline condition value expressions with `&` precedence over `|`, escaped operators, and no boolean parentheses in V1.
 - [x] Evaluate each filter set independently.

@@ -89,6 +89,13 @@
 		/// Gets or sets how generated interceptors create and reuse applied aspect attribute instances.
 		/// </summary>
 		public AspectInstanceLifetime Lifetime { get; set; } = AspectInstanceLifetime.Auto;
+		/// <summary>
+		/// Gets or sets default target filter rules supplied by the aspect author.
+		/// </summary>
+		/// <remarks>
+		/// These rules are prepended to the <c>TargetFilter</c> supplied when the aspect is applied. The resulting effective filter is evaluated using normal TargetFilter rule ordering.
+		/// </remarks>
+		public string? DefaultTargetFilter { get; set; }
 	}
 
 	/// <summary>

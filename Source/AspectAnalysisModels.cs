@@ -41,7 +41,8 @@ namespace AspectGenerator
 		INamedTypeSymbol AttributeClass,
 		AttributeData?   AspectDefinitionData,
 		AttributeSyntax? AspectDefinitionSyntax,
-		SemanticModel?   AspectDefinitionSemanticModel);
+		SemanticModel?   AspectDefinitionSemanticModel,
+		string?          DefaultTargetFilter);
 
 	record AspectFilterSet(
 		AttributeInfo                 Attribute,

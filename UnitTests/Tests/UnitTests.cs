@@ -80,6 +80,10 @@ namespace AspectGenerator.Tests
 			CollectionAssert.Contains(entries, "build/AspectGenerator.props");
 			CollectionAssert.Contains(entries, "build/AspectGenerator.targets");
 			CollectionAssert.Contains(entries, "analyzers/dotnet/cs/AspectGenerator.dll");
+			CollectionAssert.Contains(entries, "README.md");
+			CollectionAssert.Contains(entries, "SKILL.md");
+			CollectionAssert.Contains(entries, "CHANGELOG.md");
+			CollectionAssert.Contains(entries, "LICENSE.TXT");
 			CollectionAssert.DoesNotContain(entries, "buildTransitive/AspectGenerator.props");
 			CollectionAssert.DoesNotContain(entries, "buildTransitive/AspectGenerator.targets");
 

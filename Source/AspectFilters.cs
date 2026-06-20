@@ -364,6 +364,7 @@ namespace AspectGenerator
 			public string                FullMethodName     { get; init; }
 			public string                ReturnType         { get; init; }
 			public string                Signature          { get; init; }
+			public List<string>          Attributes         { get; init; }
 			public List<string>          NamespaceSegments  { get; init; }
 			public List<string>          FullTypeSegments   { get; init; }
 			public List<string>          FullMethodSegments { get; init; }

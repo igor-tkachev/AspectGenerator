@@ -75,6 +75,21 @@ Service.DoWork();
 
 AspectGenerator finds interceptable call sites to `DoWork` in the current compilation and emits interceptor methods for those locations.
 
+## Why AspectGenerator?
+
+| Approach | Strengths | Trade-offs |
+| --- | --- | --- |
+| AspectGenerator | Compile-time call-site rewriting, no runtime proxy dispatch, generated code, better fit for AOT/trimming-oriented applications | Requires the .NET 10 SDK/compiler, intercepts only visible call sites, method-call syntax only |
+| Runtime proxies | Mature and familiar; no compiler interceptor requirement | Calls must go through the proxy, runtime dispatch overhead, AOT/trimming concerns |
+| IL weaving | Can cover broader code patterns | Rewrites assemblies, harder debugging and deployment model |
+
+## Examples
+
+- [Aspect library mode](Examples/AspectLibrary)
+- [Multi-project usage](Examples/MultiProject)
+- [OpenTelemetry aspect](Examples/OpenTelemetryAspect)
+- [Transaction aspect](Examples/TransactionAspect)
+
 ## Configuration
 
 AspectGenerator can be configured with MSBuild properties:
@@ -114,6 +129,8 @@ The package `.props` asset defines defaults early. The package `.targets` asset 
 AspectGenerator analyzes code during design-time builds so IDE diagnostics and optional call-site markers can work. Interceptor source is emitted only during normal builds. This behavior is automatic and not user-configurable.
 
 AspectGenerator writes an informational build report file during normal builds. The report is not printed to the console by default. Diagnostics are reserved for errors, warnings, and actionable misconfiguration.
+
+For AI coding agents and automation-oriented reviews, see [SKILL.md](SKILL.md). It summarizes the required build toolchain, project configuration, aspect API, hook model, target filters, diagnostics, build report usage, and common review checks.
 
 ## Generated API Ownership
 
@@ -179,7 +196,7 @@ Hook names are strings, so prefer `nameof(...)`. Invalid names or signatures sho
 
 ## Target Filters
 
-`TargetFilter` applies an aspect to matching target methods. Unprefixed rules and `pattern:` use the native AspectGenerator target pattern syntax; `contains:` and `regex:` match the canonical method signature.
+`TargetFilter` applies an aspect to matching target methods. `DefaultTargetFilter` on `[Aspect]` lets the aspect author prepend default rules to every assembly-level or type-level application of that aspect. Unprefixed rules and `pattern:` use the native AspectGenerator target pattern syntax; `contains:` and `regex:` match the canonical method signature.
 
 ```csharp
 [assembly: Log(
@@ -207,6 +224,10 @@ sealed class LogAttribute : Attribute
 ```
 
 Filters are ordered rules. The property name is always `TargetFilter`; only the property type can differ. It can be declared as `string?` or `string[]?` on an aspect attribute. Every string is split into lines, empty lines are ignored, and lines starting with `#` are comments. `string[]` values are processed as a simple concatenation of all rules. A rule starting with `-` excludes the target for that filter set, and the last matching rule wins. `TargetFilter` plays the role of a pointcut-like method selector in AOP terminology; AspectGenerator still rewrites only call sites visible to the current compilation.
+
+`DefaultTargetFilter` belongs to the aspect definition, not to the applied aspect attribute. V1 uses simple concatenation: `DefaultTargetFilter` lines first, applied `TargetFilter` lines second. Later matching rules still win, so a consumer `TargetFilter` can override a default exclusion unless it repeats that exclusion later.
+
+The native `attributes:` condition matches method attributes and containing type attributes, including nested containing types. It accepts short names, short names without the `Attribute` suffix, and fully qualified names. Prefer fully qualified names such as `-attributes: MyCompany.Diagnostics.NoLogAttribute` for shared aspect libraries.
 
 Target filters are only supported on applied aspect attributes at assembly or type level. `[Aspect(TargetFilter = ...)]` is intentionally unsupported to avoid mixing aspect definition settings with aspect application.
 
@@ -265,6 +286,16 @@ To change the report path or file name, set `AspectGeneratorReportFile`:
 
 Diagnostics are reserved for errors, warnings, and actionable misconfiguration. The build report is informational, stored as a build artifact, and is not emitted as compiler diagnostics.
 
+## Build-time performance
+
+AspectGenerator avoids runtime proxy dispatch, but it performs compile-time analysis of candidate invocation expressions in the current compilation. Build-time cost depends on project size, number of invocation expressions, number of applied aspects, and `TargetFilter` complexity.
+
+For large projects, prefer narrow `TargetFilter` rules for assembly-level aspects and use the build report to inspect selected target methods and intercepted call sites.
+
+## Debugging generated interceptors
+
+Generated interceptors are generated C# source and can be inspected together with the build report. Keep `AspectGeneratorDebuggerStepThrough=false` when debugging generated interceptor behavior. Set it to `true` when you want the debugger to step over generated AspectGenerator code where applicable.
+
 ## Intercepted Call Markers
 
 AspectGenerator can mark calls where aspects are applied by reporting optional `AG0300` diagnostics. The default severity is `Info`:
@@ -277,7 +308,7 @@ AspectGenerator can mark calls where aspects are applied by reporting optional `
 
 Supported values are `Off`, `Hidden`, `Info`, `Warning`, and `Error`. Set `Off` to disable optional markers, use `Warning` for audit-style builds, or `Error` when intercepted calls must be explicitly inspected before a commit.
 
-`AG0300` shows where AspectGenerator applies aspects. Each marked call receives one diagnostic listing the applied aspect attributes and the generated interceptor method name. The diagnostic is informational by default and does not indicate a problem. Use the build report for complete and baseline-friendly information.
+`AG0300` shows where AspectGenerator applies aspects. Each marked call receives one diagnostic listing the applied aspect attributes and the generated interceptor method name. The diagnostic is informational by default and does not indicate a problem. Use the build report for complete aspect application analysis.
 
 The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail when the marker severity is configured as `Warning`.
 
@@ -285,12 +316,16 @@ The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarn
 
 The README is the concise entry point. The wiki should contain expanded pages with the same current terminology:
 
+- [SKILL.md](SKILL.md) is the compact agent-oriented guide for configuration, usage, diagnostics, build reports, and review workflows.
+- [CHANGELOG.md](CHANGELOG.md) contains release notes.
 - [Configuration](https://github.com/igor-tkachev/AspectGenerator/wiki/Configuration)
 - [Aspect library mode](https://github.com/igor-tkachev/AspectGenerator/wiki/Aspect-library-mode)
 - [Hook lifecycle](https://github.com/igor-tkachev/AspectGenerator/wiki/Hook-lifecycle)
 - [Target filters](https://github.com/igor-tkachev/AspectGenerator/wiki/Target-filters)
 - [Diagnostics](https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics)
 - [Limitations](https://github.com/igor-tkachev/AspectGenerator/wiki/Limitations)
+
+For diagnostic codes and troubleshooting, see [Diagnostics](https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics).
 
 When updating docs, keep README and wiki synchronized:
 
@@ -304,6 +339,8 @@ Any remaining preview-era wiki page should be updated or marked with an “Obsol
 
 ## Development
 
+`AspectGenerator.slnx` is the primary solution file for repository builds. `AspectGenerator.sln` is retained only for tool compatibility when present.
+
 Run the main checks locally:
 
 ```bash
@@ -313,4 +350,8 @@ dotnet test --no-build
 dotnet pack Source/AspectGenerator.csproj --no-build
 ```
 
-Build artifacts under `bin/` and `obj/` must not be committed. If generated source snapshots are needed, store them in an explicit baseline folder under `UnitTests/`, not under `obj/GeneratedFiles`.
+Use `dotnet clean` for normal cleanup. `Clean-BuildArtifacts.ps1` is a repository helper for deleting `.vs`, `bin`, and `obj` folders when a deeper local cleanup is needed.
+
+Build artifacts under `bin/` and `obj/` must not be committed. If generated source snapshots are needed, store them in explicit repository baseline folders such as `Baselines/GeneratedFiles`, not under `obj/GeneratedFiles`.
+
+`SKILL.md` is the package/user/agent operational guide. `AGENTS.md` contains repository maintenance instructions for coding agents working in this repo.

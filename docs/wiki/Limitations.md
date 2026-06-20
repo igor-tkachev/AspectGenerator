@@ -2,6 +2,8 @@
 
 AspectGenerator is compile-time call-site rewriting, not runtime AOP.
 
+Projects that use AspectGenerator must be built with the .NET 10 SDK/compiler. This is a build-toolchain requirement, not a target-framework requirement. AspectGenerator itself targets `netstandard2.0`, and the consuming project's `TargetFramework` is a separate decision.
+
 ## Supported
 
 - static method calls;

@@ -161,6 +161,7 @@ namespace AspectGenerator
 				"returns",
 				"param",
 				"params",
+				"attributes",
 				"signature"
 			};
 
@@ -511,6 +512,7 @@ namespace AspectGenerator
 			readonly TypePattern?          _typePattern;
 			readonly ParameterPattern?     _parameterPattern;
 			readonly ParameterListPattern? _parameterListPattern;
+			readonly TypePattern?          _attributePattern;
 			readonly SegmentMatcher?       _signaturePattern;
 
 			Condition(
@@ -520,6 +522,7 @@ namespace AspectGenerator
 				TypePattern?          typePattern,
 				ParameterPattern?     parameterPattern,
 				ParameterListPattern? parameterListPattern,
+				TypePattern?          attributePattern,
 				SegmentMatcher?       signaturePattern)
 			{
 				_children              = null;
@@ -530,6 +533,7 @@ namespace AspectGenerator
 				_typePattern          = typePattern;
 				_parameterPattern     = parameterPattern;
 				_parameterListPattern = parameterListPattern;
+				_attributePattern     = attributePattern;
 				_signaturePattern     = signaturePattern;
 			}
 
@@ -543,6 +547,7 @@ namespace AspectGenerator
 				_typePattern           = null;
 				_parameterPattern      = null;
 				_parameterListPattern  = null;
+				_attributePattern      = null;
 				_signaturePattern      = null;
 			}
 
@@ -622,7 +627,7 @@ namespace AspectGenerator
 						if (!DottedPattern.TryParse(value, diagnostics, allowRecursiveFinalSegment: true, out var dottedPattern))
 							return false;
 
-						condition = new Condition(key, dottedPattern, null, null, null, null, null);
+						condition = new Condition(key, dottedPattern, null, null, null, null, null, null);
 						return true;
 
 					case "type":
@@ -630,35 +635,42 @@ namespace AspectGenerator
 						if (!SegmentMatcher.TryParse(value, diagnostics, out var segmentPattern))
 							return false;
 
-						condition = new Condition(key, null, segmentPattern, null, null, null, null);
+						condition = new Condition(key, null, segmentPattern, null, null, null, null, null);
 						return true;
 
 					case "returns":
 						if (!TypePattern.TryParse(value, diagnostics, out var typePattern))
 							return false;
 
-						condition = new Condition(key, null, null, typePattern, null, null, null);
+						condition = new Condition(key, null, null, typePattern, null, null, null, null);
 						return true;
 
 					case "param":
 						if (!ParameterPattern.TryParse(value, diagnostics, out var parameterPattern))
 							return false;
 
-						condition = new Condition(key, null, null, null, parameterPattern, null, null);
+						condition = new Condition(key, null, null, null, parameterPattern, null, null, null);
 						return true;
 
 					case "params":
 						if (!ParameterListPattern.TryParse(value, diagnostics, out var parameterListPattern))
 							return false;
 
-						condition = new Condition(key, null, null, null, null, parameterListPattern, null);
+						condition = new Condition(key, null, null, null, null, parameterListPattern, null, null);
+						return true;
+
+					case "attributes":
+						if (!TypePattern.TryParse(value, diagnostics, out var attributePattern))
+							return false;
+
+						condition = new Condition(key, null, null, null, null, null, attributePattern, null);
 						return true;
 
 					case "signature":
 						if (!SegmentMatcher.TryParse(value, diagnostics, out var signaturePattern))
 							return false;
 
-						condition = new Condition(key, null, null, null, null, null, signaturePattern);
+						condition = new Condition(key, null, null, null, null, null, null, signaturePattern);
 						return true;
 
 					default:
@@ -697,6 +709,7 @@ namespace AspectGenerator
 					"returns"    => _typePattern!.IsMatch(target.ReturnType),
 					"param"      => target.Parameters.Any(p => _parameterPattern!.IsMatch(p)),
 					"params"     => _parameterListPattern!.IsMatch(target.Parameters),
+					"attributes" => target.Attributes.Any(attribute => _attributePattern!.IsMatch(attribute)),
 					"signature"  => _signaturePattern!.IsMatch(target.Signature),
 					_            => false
 				};

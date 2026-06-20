@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 
@@ -42,6 +43,7 @@ namespace AspectGenerator
 				FullMethodName     = fullMethodName,
 				ReturnType         = FormatType(sourceMethod.ReturnType),
 				Signature          = GetCanonicalSignature(method),
+				Attributes         = GetAttributeNames(sourceMethod),
 				NamespaceSegments  = SplitDottedName(namespaceName),
 				FullTypeSegments   = SplitDottedName(fullTypeName),
 				FullMethodSegments = SplitDottedName(fullMethodName),
@@ -116,6 +118,37 @@ namespace AspectGenerator
 			sb.Append(')');
 
 			return sb.ToString();
+		}
+
+		static List<string> GetAttributeNames(IMethodSymbol method)
+		{
+			var result = new List<string>();
+
+			AddAttributes(method.GetAttributes(), result);
+
+			for (var type = method.ContainingType; type is not null; type = type.ContainingType)
+				AddAttributes(type.GetAttributes(), result);
+
+			return result.Distinct().ToList();
+		}
+
+		static void AddAttributes(ImmutableArray<AttributeData> attributes, List<string> result)
+		{
+			foreach (var attribute in attributes)
+			{
+				if (attribute.AttributeClass is not {} attributeClass)
+					continue;
+
+				var shortName = GetMetadataNameWithoutArity(attributeClass.Name);
+				result.Add(shortName);
+
+				const string suffix = "Attribute";
+
+				if (shortName.EndsWith(suffix, System.StringComparison.Ordinal) && shortName.Length > suffix.Length)
+					result.Add(shortName[..^suffix.Length]);
+
+				result.Add(FormatNamedType(attributeClass, includeNamespace: true));
+			}
 		}
 
 		static AspectFilters.AccessibilityMask GetAccessibilityMask(Accessibility accessibility)

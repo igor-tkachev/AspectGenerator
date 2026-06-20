@@ -61,4 +61,4 @@ Supported values are `Off`, `Hidden`, `Info`, `Warning`, and `Error`. Set `Off` 
 
 The diagnostic is informational by default and does not indicate a problem. The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail when the marker severity is configured as `Warning`.
 
-Use the build report for complete and baseline-friendly information. Use `AG0300` marker mode only as a temporary IDE/source-code inspection aid.
+Use the build report for complete aspect application analysis. Use `AG0300` marker mode only as a temporary IDE/source-code inspection aid.

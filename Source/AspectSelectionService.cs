@@ -119,7 +119,8 @@ namespace AspectGenerator
 
 			foreach (var filterAttribute in _compilation.Assembly.GetAttributes())
 			{
-				if (!filterAttribute.NamedArguments.Any(static a => a.Key == "TargetFilter"))
+				if (!HasTargetFilter(filterAttribute) &&
+					!HasDefaultTargetFilter(filterAttribute.AttributeClass))
 					continue;
 
 				if (CreateAppliedAspectFilterSet(filterAttribute) is {} filterSet)
@@ -148,7 +149,8 @@ namespace AspectGenerator
 
 				foreach (var filterAttribute in typeDeclaration.AttributeLists.SelectMany(static list => list.Attributes))
 				{
-					if (!AspectSymbols.HasNamedArgument(filterAttribute, "TargetFilter"))
+					if (!AspectSymbols.HasNamedArgument(filterAttribute, "TargetFilter") &&
+						!HasDefaultTargetFilter(filterAttribute, semanticModel))
 						continue;
 
 					if (CreateAppliedAspectFilterSet(filterAttribute, semanticModel) is {} filterSet)
@@ -173,11 +175,11 @@ namespace AspectGenerator
 			if (!_registry.TryGetDefinition(aspectClass, out var definition))
 				return null;
 
-			var filters = GetNamedCompiledFilterValue(
+			var targetFilter = GetNamedFilterValue(
 				filterAttribute,
 				semanticModel,
-				"TargetFilter",
-				filterAttribute.GetLocation());
+				"TargetFilter");
+			var filters = CompileAspectFilters(definition.DefaultTargetFilter, targetFilter, filterAttribute.GetLocation());
 
 			if (filters.IsEmpty)
 				return null;
@@ -205,7 +207,8 @@ namespace AspectGenerator
 			var location = filterAttribute.ApplicationSyntaxReference is {} syntaxReference
 				? Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span)
 				: null;
-			var filters = GetNamedCompiledFilterValue(filterAttribute, "TargetFilter", location);
+			var targetFilter = GetNamedFilterValue(filterAttribute, "TargetFilter");
+			var filters      = CompileAspectFilters(definition.DefaultTargetFilter, targetFilter, location);
 
 			if (filters.IsEmpty)
 				return null;
@@ -218,29 +221,25 @@ namespace AspectGenerator
 				filters);
 		}
 
-		AspectFilters.TargetFilterSet GetNamedCompiledFilterValue(
+		object? GetNamedFilterValue(
 			AttributeSyntax attribute,
 			SemanticModel semanticModel,
-			string name,
-			Location? location)
+			string name)
 		{
 			foreach (var arg in attribute.ArgumentList?.Arguments ?? default)
 			{
 				if (arg.NameEquals?.Name.Identifier.ValueText != name)
 					continue;
 
-				var value = AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel);
-
-				return CompileAspectFilters(value, location);
+				return AspectSymbols.GetAttributeArgumentValue(arg.Expression, semanticModel);
 			}
 
-			return default;
+			return null;
 		}
 
-		AspectFilters.TargetFilterSet GetNamedCompiledFilterValue(
+		object? GetNamedFilterValue(
 			AttributeData attribute,
-			string name,
-			Location? location)
+			string name)
 		{
 			foreach (var arg in attribute.NamedArguments)
 			{
@@ -251,17 +250,27 @@ namespace AspectGenerator
 					? arg.Value.Values.Select(static v => v.Value).ToArray()
 					: arg.Value.Value;
 
-				return CompileAspectFilters(value, location);
+				return value;
 			}
 
-			return default;
+			return null;
 		}
 
-		AspectFilters.TargetFilterSet CompileAspectFilters(object? filterValue, Location? location)
+		AspectFilters.TargetFilterSet CompileAspectFilters(string? defaultTargetFilter, object? targetFilter, Location? location)
 		{
-			return filterValue is object?[] values
-				? AspectFilters.GetFilters(values.Select(static value => value as string), ReportFilterDiagnostic)
-				: AspectFilters.GetFilters(filterValue as string, ReportFilterDiagnostic);
+			var filters = new List<string?>();
+
+			if (targetFilter is null)
+				filters.Add("method: *");
+
+			filters.Add(defaultTargetFilter);
+
+			if (targetFilter is object?[] values)
+				filters.AddRange(values.Select(static value => value as string));
+			else
+				filters.Add(targetFilter as string);
+
+			return AspectFilters.GetFilters(filters, ReportFilterDiagnostic);
 
 			void ReportFilterDiagnostic(AspectFilters.TargetFilterDiagnostic diagnostic)
 			{
@@ -312,6 +321,24 @@ namespace AspectGenerator
 				AspectDiagnosticID.MethodLevelTargetFilter,
 				"TargetFilter is only supported on assembly-level or type-level aspect attributes. Remove TargetFilter from this method-level aspect attribute.",
 				location);
+		}
+
+		bool HasDefaultTargetFilter(INamedTypeSymbol? aspectClass)
+		{
+			return aspectClass is not null &&
+				_registry.TryGetDefinition(aspectClass, out var definition) &&
+				!string.IsNullOrWhiteSpace(definition.DefaultTargetFilter);
+		}
+
+		bool HasDefaultTargetFilter(AttributeSyntax filterAttribute, SemanticModel semanticModel)
+		{
+			return semanticModel.GetSymbolInfo(filterAttribute).Symbol is IMethodSymbol { ContainingType: var aspectClass } &&
+				HasDefaultTargetFilter(aspectClass);
+		}
+
+		static bool HasTargetFilter(AttributeData attribute)
+		{
+			return attribute.NamedArguments.Any(static a => a.Key == "TargetFilter");
 		}
 	}
 }
