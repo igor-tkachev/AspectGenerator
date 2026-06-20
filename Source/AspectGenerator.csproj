@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
@@ -34,5 +34,6 @@
 		<None Include="build\AspectGenerator.targets"     Pack="true" PackagePath="build\AspectGenerator.targets" />
 		<None Include="..\LICENSE.TXT"                    Pack="true" PackagePath="\" />
 		<None Include="..\README.md"                      Pack="true" PackagePath="\" />
+		<None Include="..\SKILL.md"                       Pack="true" PackagePath="\" />
 	</ItemGroup>
 </Project>
