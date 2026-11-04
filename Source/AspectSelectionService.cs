@@ -235,22 +235,44 @@ namespace AspectGenerator
 
 			var sourceTypes = GetSourceTypes();
 
+			// Direct source subtypes of each type, built once; a bucket then walks only its own containing types' subtrees.
+			var derivedTypes = new Dictionary<INamedTypeSymbol,List<INamedTypeSymbol>>(SymbolEqualityComparer.Default);
+
+			foreach (var type in sourceTypes)
+			{
+				if (type.BaseType?.OriginalDefinition is not {} baseType)
+					continue;
+
+				if (!derivedTypes.TryGetValue(baseType, out var derived))
+				{
+					derived = new List<INamedTypeSymbol>();
+					derivedTypes.Add(baseType, derived);
+				}
+
+				derived.Add(type);
+			}
+
 			foreach (var bucket in staticBuckets)
 			{
-				var containingTypes = new HashSet<INamedTypeSymbol>(
-					bucket.Methods.Select(static method => method.ContainingType.OriginalDefinition),
-					SymbolEqualityComparer.Default);
+				var visited = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+				var pending = new Stack<INamedTypeSymbol>(bucket.Methods.Select(static method => method.ContainingType.OriginalDefinition));
 
 				bucket.ReceiverTypeNames.UnionWith(bucket.ContainingTypeNames);
 				bucket.ReceiverTypeNames.UnionWith(aliases);
 
-				foreach (var type in sourceTypes)
-					for (var baseType = type.BaseType; baseType is not null; baseType = baseType.BaseType)
-						if (containingTypes.Contains(baseType.OriginalDefinition))
-						{
-							bucket.ReceiverTypeNames.Add(type.Name);
-							break;
-						}
+				while (pending.Count > 0)
+				{
+					var type = pending.Pop();
+
+					if (!visited.Add(type) || !derivedTypes.TryGetValue(type, out var derived))
+						continue;
+
+					foreach (var derivedType in derived)
+					{
+						bucket.ReceiverTypeNames.Add(derivedType.Name);
+						pending.Push(derivedType.OriginalDefinition);
+					}
+				}
 			}
 
 			static void AddAliases(SyntaxNode node, HashSet<string> aliases)

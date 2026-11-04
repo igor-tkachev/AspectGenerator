@@ -1450,6 +1450,12 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void StaticCallThroughIndirectlyDerivedTypeIsInterceptedTest()
+		{
+			AssertInterceptedCalls(CallShapeSource("MostDerivedService.StaticSave(); GenericDerivedService<int>.StaticSave(); MostDerivedService.Unrelated();"), 2);
+		}
+
+		[TestMethod]
 		public void StaticCallThroughUsingAliasIsInterceptedTest()
 		{
 			AssertInterceptedCalls(CallShapeSource("ServiceAlias.StaticSave();"), 1);
@@ -4101,6 +4107,17 @@ namespace AspectGenerator.Tests
 
 			class DerivedService : UserService
 			{
+			}
+
+			class GenericDerivedService<T> : DerivedService
+			{
+			}
+
+			sealed class MostDerivedService : GenericDerivedService<string>
+			{
+				public static void Unrelated()
+				{
+				}
 			}
 
 			static class Extensions
