@@ -593,7 +593,7 @@ namespace AspectGenerator
 
 			trace.SetCounter("Intercepted call sites", aspectedMethods.Length);
 			trace.SetCounter("Matched target methods", aspectedMethods.Select(static m => m.Method).Distinct(SymbolEqualityComparer.Default).Count());
-			trace.SetCounter("Generated interceptor methods", aspectedMethods.GroupBy(static m => m.GenericShape ?? m.Method, SymbolEqualityComparer.Default).Count());
+			trace.SetCounter("Generated interceptor methods", aspectedMethods.GroupBy(static m => m, InterceptorGroupComparer.Instance).Count());
 
 			if (!cancellationToken.IsCancellationRequested)
 				using (trace.TimePhase("Validate method hooks"))
@@ -975,6 +975,7 @@ namespace AspectGenerator
 				var typeParameters  = interceptor.TypeParameters;
 				var typeArguments   = InterceptorShape.PrintTypeParameterList(typeParameters);
 				var constraints     = InterceptorShape.PrintConstraints(typeParameters, PrintType);
+				var unsafeModifier  = InterceptorShape.HasPointerTypes(method) ? "unsafe " : "";
 
 				// A generic interceptor keeps what depends on its type arguments (the target method info) in a generic state
 				// class, and the aspect instances in the non-generic one, so they stay one per interceptor.
@@ -982,7 +983,7 @@ namespace AspectGenerator
 				{
 					sb.AppendLine(
 						$$"""
-								private static class {{interceptorName}}_State{{typeArguments}}{{constraints}}
+								private static {{unsafeModifier}}class {{interceptorName}}_State{{typeArguments}}{{constraints}}
 								{
 						""");
 
@@ -997,7 +998,7 @@ namespace AspectGenerator
 
 				sb.AppendLine(
 					$$"""
-							private static class {{interceptorName}}_State
+							private static {{(typeParameters.Count == 0 ? unsafeModifier : "")}}class {{interceptorName}}_State
 							{
 					""");
 
@@ -1058,12 +1059,15 @@ namespace AspectGenerator
 
 						if (location is null)
 						{
+							// The same rule as for calls the generator cannot express: AG0003 for an aspect applied to the
+							// target, AG0006 (information) for a call only a target filter selected.
+							var isApplied  = InterceptorShape.IsAppliedToTarget(analyzedInvocation.Method, analyzedInvocation.Attributes);
 							var descriptor = new DiagnosticDescriptor(
-								AspectDiagnosticID.CannotIntercept,
+								isApplied ? AspectDiagnosticID.CannotIntercept : AspectDiagnosticID.FilterSelectedCallNotIntercepted,
 								"AspectGenerator",
-								$"Invocation '{invocation}' cannot be intercepted by the compiler.",
+								$"Invocation '{SingleLine(invocation.ToString())}' cannot be intercepted by the compiler.",
 								"AspectGenerator",
-								DiagnosticSeverity.Warning,
+								isApplied ? DiagnosticSeverity.Warning : DiagnosticSeverity.Info,
 								true);
 
 							spc.ReportDiagnostic(
@@ -1101,7 +1105,7 @@ namespace AspectGenerator
 				if (options.DebuggerStepThrough)
 					sb.AppendLine("\t\t[global::System.Diagnostics.DebuggerStepThrough]");
 
-				sb.Append("\t\tpublic static ");
+				sb.Append(InterceptorShape.HasPointerTypes(method) ? "\t\tpublic static unsafe " : "\t\tpublic static ");
 
 				var methodModifierPosition = sb.Length;
 
@@ -1557,6 +1561,11 @@ namespace AspectGenerator
 			return @namespace is "" or "AspectGenerator";
 		}
 
+		internal static bool IsSupportedAsyncReturnTypeOf(IMethodSymbol method)
+		{
+			return IsSupportedAsyncReturnType(method.ReturnType, out _);
+		}
+
 		static bool IsSupportedAsyncReturnType(ITypeSymbol type, out ITypeSymbol? resultType)
 		{
 			resultType = null;
@@ -1802,6 +1811,14 @@ namespace AspectGenerator
 
 					if (method.MethodKind == MethodKind.ReducedExtension || onCall is not null && method.IsStatic is false)
 					{
+						if (onCall is null && method.MethodKind == MethodKind.ReducedExtension)
+							sb.Append(method.ReducedFrom!.Parameters[0].RefKind switch
+							{
+								RefKind.Ref                                  => "ref ",
+								RefKind.In or RefKind.RefReadOnlyParameter   => "in ",
+								_                                            => ""
+							});
+
 						sb.Append("__this__");
 
 						if (method.Parameters.Length > 0)
@@ -2119,9 +2136,10 @@ namespace AspectGenerator
 			{
 				return method.ReducedFrom!.Parameters[0].RefKind switch
 				{
-					RefKind.Ref => "ref ",
-					RefKind.In  => "in ",
-					_           => ""
+					RefKind.Ref                  => "ref ",
+					RefKind.In                   => "in ",
+					RefKind.RefReadOnlyParameter => "ref readonly ",
+					_                            => ""
 				};
 			}
 

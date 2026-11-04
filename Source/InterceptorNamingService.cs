@@ -19,10 +19,11 @@ namespace AspectGenerator
 				return nameSet.Add(methodName) ? methodName : GetInterceptorName($"{methodName}_{++nameCounter}");
 			}
 
-			// Calls that need a generic interceptor share one per target, whatever their type arguments.
-			foreach (var group in aspectedMethods.GroupBy(static m => m.GenericShape ?? m.Method, SymbolEqualityComparer.Default).OrderBy(static m => m.Key!.Name))
+			// Calls that need a generic interceptor share one per target and aspect list, whatever their type arguments:
+			// a filter evaluated on a referenced method's constructed signature can select different aspects per call.
+			foreach (var group in aspectedMethods.GroupBy(static m => m, InterceptorGroupComparer.Instance).OrderBy(static m => (m.Key.GenericShape ?? m.Key.Method).Name))
 			{
-				var method      = (IMethodSymbol)group.Key!;
+				var method      = group.Key.GenericShape ?? group.Key.Method;
 				var invocations = group.ToList();
 
 				result.Add(new InterceptorInfo(
@@ -59,6 +60,27 @@ namespace AspectGenerator
 				orderby n
 				select a
 			).ToList();
+		}
+	}
+
+	sealed class InterceptorGroupComparer : IEqualityComparer<AnalyzedInvocation>
+	{
+		public static readonly InterceptorGroupComparer Instance = new();
+
+		public bool Equals(AnalyzedInvocation? x, AnalyzedInvocation? y)
+		{
+			if (x is null || y is null)
+				return ReferenceEquals(x, y);
+
+			if (!SymbolEqualityComparer.Default.Equals(x.GenericShape ?? x.Method, y.GenericShape ?? y.Method))
+				return false;
+
+			return x.GenericShape is null || x.Attributes.SequenceEqual(y.Attributes);
+		}
+
+		public int GetHashCode(AnalyzedInvocation obj)
+		{
+			return SymbolEqualityComparer.Default.GetHashCode(obj.GenericShape ?? obj.Method);
 		}
 	}
 

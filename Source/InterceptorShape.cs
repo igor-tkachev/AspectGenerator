@@ -46,7 +46,7 @@ namespace AspectGenerator
 					return "members of C# 14 extension blocks are not supported";
 
 			if (!compilation.IsSymbolAccessibleWithin(target, compilation.Assembly))
-				return "the target method is not accessible from the generated interceptor class (it is private or protected)";
+				return "the target method is not accessible from the generated interceptor class";
 
 			if (method.IsVararg)
 				return "__arglist methods are not supported";
@@ -54,8 +54,24 @@ namespace AspectGenerator
 			if (method.ReturnsByRef || method.ReturnsByRefReadonly)
 				return "methods that return by reference are not supported";
 
-			if (method.ReturnType.IsRefLikeType)
+			if (method.ReturnType.IsRefLikeType || target.ReturnType is ITypeParameterSymbol { AllowsRefLikeType: true })
 				return "methods that return a ref struct are not supported";
+
+			// A pointer cannot be a type argument of InterceptInfo<T>.
+			if (method.ReturnType.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer)
+				return "methods that return a pointer are not supported";
+
+			if (method.IsStatic && (method.IsAbstract || method.IsVirtual) && method.ContainingType.TypeKind == TypeKind.Interface)
+				return "static abstract and static virtual interface members are not supported";
+
+			// The interceptor's receiver has the type that declares the method; a struct in a type parameter would be boxed
+			// and lose what the call changes. Such a receiver can only reach members of interfaces and of object,
+			// ValueType and Enum, so the call is bound again only for those.
+			if (!method.IsStatic && method.MethodKind == MethodKind.Ordinary &&
+				(method.ContainingType.TypeKind == TypeKind.Interface ||
+				 method.ContainingType.SpecialType is SpecialType.System_Object or SpecialType.System_ValueType or SpecialType.System_Enum) &&
+				semanticModel.GetOperation(invocation, cancellationToken) is IInvocationOperation { Instance.Type: ITypeParameterSymbol { IsReferenceType: false } })
+				return "calls on a type parameter receiver that may be a struct are not supported: the interceptor would box it";
 
 			foreach (var parameter in method.Parameters)
 				if (parameter.Type.TypeKind == TypeKind.Dynamic && parameter.RefKind != RefKind.None)
@@ -65,7 +81,12 @@ namespace AspectGenerator
 			var passArguments = options.Any(static o => o is { Key: "PassArguments", Value: true });
 			var usesOnCall    = options.Any(static o => o is { Key: "OnCall", Value: string s } && !string.IsNullOrWhiteSpace(s));
 
-			if (passArguments && (method.Parameters.Any(static p => p.Type.IsRefLikeType) || !method.IsStatic && method.ReceiverType?.IsRefLikeType == true))
+			// An unsafe method cannot be async, and an interceptor with async hooks is.
+			if (HasPointerTypes(method) && options.Any(static o => o.Key.EndsWith("Async", System.StringComparison.Ordinal) && o.Value is not null) &&
+				AspectSourceGenerator.IsSupportedAsyncReturnTypeOf(method))
+				return "methods with pointer parameters cannot get an async interceptor";
+
+			if (passArguments && (method.Parameters.Any(static p => IsRefLike(p.Type)) || target.Parameters.Any(static p => IsRefLike(p.Type)) || !method.IsStatic && method.ReceiverType?.IsRefLikeType == true))
 				return "PassArguments cannot box a ref struct argument";
 
 			if (RequiresReflectionLookup(method) && method.MethodKind != MethodKind.ReducedExtension && !method.IsStatic && method.IsGenericMethod)
@@ -186,6 +207,16 @@ namespace AspectGenerator
 		}
 
 		/// <summary>
+		/// Whether one of the aspects is applied to the target method itself, rather than selected by a target filter.
+		/// </summary>
+		public static bool IsAppliedToTarget(IMethodSymbol method, List<AttributeInfo> attributes)
+		{
+			var targetAttributes = (method.ReducedFrom ?? method).OriginalDefinition.GetAttributes();
+
+			return attributes.Any(a => a.AppliedAttributeData is {} data && targetAttributes.Contains(data));
+		}
+
+		/// <summary>
 		/// A non-generic interceptor names the call's type arguments. When one of them cannot be named in the generated
 		/// file (a type parameter of the calling method or type, an anonymous type, a type the file cannot access), the
 		/// interceptor is generic over the target's own type parameters instead; the compiler passes the call's type
@@ -284,12 +315,42 @@ namespace AspectGenerator
 			if (method.Parameters.Any(static p => IsExpressionTreeIncompatible(p.Type)))
 				return true;
 
+			// A by-reference 'this' cannot be passed a default value in the expression tree.
+			if (method.MethodKind == MethodKind.ReducedExtension && method.ReducedFrom!.Parameters[0].RefKind != RefKind.None)
+				return true;
+
 			return method.ReceiverType is {} receiver && (method.MethodKind == MethodKind.ReducedExtension || !method.IsStatic) && IsExpressionTreeIncompatible(receiver);
 		}
 
 		static bool IsExpressionTreeIncompatible(ITypeSymbol type)
 		{
-			return type.IsRefLikeType || type.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer;
+			return IsRefLike(type) || type.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer;
+		}
+
+		/// <summary>
+		/// A ref struct, or a type parameter that may be one (<c>allows ref struct</c>).
+		/// </summary>
+		static bool IsRefLike(ITypeSymbol type)
+		{
+			return type.IsRefLikeType || type is ITypeParameterSymbol { AllowsRefLikeType: true };
+		}
+
+		/// <summary>
+		/// Pointer and function pointer types need an unsafe context in the generated code.
+		/// </summary>
+		public static bool HasPointerTypes(IMethodSymbol method)
+		{
+			return method.Parameters.Any(static p => IsPointer(p.Type)) || IsPointer(method.ReturnType);
+
+			static bool IsPointer(ITypeSymbol type)
+			{
+				return type switch
+				{
+					IPointerTypeSymbol or IFunctionPointerTypeSymbol => true,
+					IArrayTypeSymbol array                           => IsPointer(array.ElementType),
+					_                                                => false
+				};
+			}
 		}
 
 		public static string PrintTypeParameterList(List<ITypeParameterSymbol> typeParameters)

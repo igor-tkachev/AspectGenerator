@@ -382,7 +382,8 @@ namespace AspectGenerator.Tests
 				""",
 				"p");
 
-			Assert.AreEqual(DiagnosticSeverity.Info, result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.CannotIntercept).Severity);
+			Assert.AreEqual(DiagnosticSeverity.Info, result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.FilterSelectedCallNotIntercepted).Severity);
+			AssertNoDiagnostic(result, AspectDiagnosticID.CannotIntercept);
 		}
 
 		[TestMethod]
@@ -404,7 +405,7 @@ namespace AspectGenerator.Tests
 				""",
 				"inner");
 
-			StringAssert.Contains(result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.CannotIntercept).GetMessage(), "local functions");
+			StringAssert.Contains(result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.FilterSelectedCallNotIntercepted).GetMessage(), "local functions");
 		}
 
 		[TestMethod]
@@ -465,6 +466,27 @@ namespace AspectGenerator.Tests
 				"Base.Name<>;derived+base");
 
 			StringAssert.Contains(result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.CannotIntercept).GetMessage(), "base calls");
+		}
+
+		[TestMethod]
+		public void PointerReturnIsReportedAndSkippedTest()
+		{
+			var result = Breaker(
+				"""
+				unsafe static class Helper
+				{
+					[Log]
+					public static int* Nothing() => null;
+				}
+
+				static class Calls
+				{
+					public static unsafe string Run() => Helper.Nothing() == null ? "null" : "pointer";
+				}
+				""",
+				"null");
+
+			StringAssert.Contains(result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.CannotIntercept).GetMessage(), "return a pointer");
 		}
 
 		[TestMethod]

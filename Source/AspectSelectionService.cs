@@ -22,6 +22,7 @@ namespace AspectGenerator
 		readonly object _cacheGate = new();
 		readonly Dictionary<SyntaxTree,SemanticModel> _semanticModels = new();
 		readonly Dictionary<IMethodSymbol,IMethodSymbol> _genericShapes = new(SymbolEqualityComparer.Default);
+		readonly Dictionary<IMethodSymbol,IMethodSymbol> _reducedGenericShapes = new(SymbolEqualityComparer.Default);
 		List<INamedTypeSymbol>? _sourceTypes;
 
 		public AspectSelectionService(
@@ -344,12 +345,15 @@ namespace AspectGenerator
 		{
 			var key = (method.ReducedFrom ?? method).OriginalDefinition;
 
+			// An instance-form extension call needs an interceptor with a 'this' parameter, a static-form call one without.
+			var shapes = method.MethodKind == MethodKind.ReducedExtension ? _reducedGenericShapes : _genericShapes;
+
 			lock (_cacheGate)
 			{
-				if (!_genericShapes.TryGetValue(key, out var shape))
+				if (!shapes.TryGetValue(key, out var shape))
 				{
 					shape = InterceptorShape.GetGenericShape(method)!;
-					_genericShapes.Add(key, shape);
+					shapes.Add(key, shape);
 				}
 
 				return shape;
@@ -357,20 +361,19 @@ namespace AspectGenerator
 		}
 
 		/// <summary>
-		/// A call that cannot be intercepted is left as it is. The report is a warning when the aspect was applied to the
-		/// target method itself, and information when only a target filter selected it: a broad filter is expected to
-		/// skip what it cannot rewrite.
+		/// A call that cannot be intercepted is left as it is. It is reported with AG0003, a warning, when the aspect was
+		/// applied to the target method itself, and with AG0006, information, when only a target filter selected it: a
+		/// broad filter is expected to skip what it cannot rewrite. The two ids can be configured separately.
 		/// </summary>
 		void ReportNotIntercepted(InvocationExpressionSyntax invocation, IMethodSymbol method, List<AttributeInfo> attributes, string reason)
 		{
-			var targetAttributes = (method.ReducedFrom ?? method).OriginalDefinition.GetAttributes();
-			var isExplicit       = attributes.Any(a => a.AppliedAttributeData is {} data && targetAttributes.Contains(data));
+			var isApplied = InterceptorShape.IsAppliedToTarget(method, attributes);
 
 			_diagnostics.Report(
-				AspectDiagnosticID.CannotIntercept,
+				isApplied ? AspectDiagnosticID.CannotIntercept : AspectDiagnosticID.FilterSelectedCallNotIntercepted,
 				$"Call to '{method.ToDisplayString()}' is not intercepted: {reason}.",
 				invocation.GetLocation(),
-				isExplicit ? DiagnosticSeverity.Warning : DiagnosticSeverity.Info);
+				isApplied ? DiagnosticSeverity.Warning : DiagnosticSeverity.Info);
 		}
 
 		public List<AttributeInfo> GetSelectedAttributes(IMethodSymbol method)
