@@ -29,6 +29,26 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0209`: invalid `AspectGeneratorAspectDiagnosticSeverity` or `AspectGeneratorOptions.AspectDiagnosticSeverity` value.
 - `AG0300`: marks a call where AspectGenerator applies aspects. Controlled by `AspectGeneratorAspectDiagnosticSeverity`; default severity is `Info`.
 
+## Design-Time Builds
+
+The IDE runs the generator on every edit in a design-time build (`DesignTimeBuild=true`). A design-time build emits no interceptors, so the generator does not select target methods or bind calls there; it compiles the target filters only. This keeps the editor responsive on large projects, but splits the diagnostics in two groups.
+
+Reported live, in design-time builds and in builds:
+
+- `AG0101` and `AG0102` for aspects declared in the project;
+- `AG0201`, `AG0202`, `AG0204`, `AG0205`, `AG0206` for assembly-level and type-level target filters, including an aspect's `DefaultTargetFilter` at each type-level application;
+- `AG0208`;
+- `AG0209`.
+
+Reported by builds only, because they need a selected target method or a bound call:
+
+- `AG0001` and `AG0002`;
+- `AG0103` through `AG0107`;
+- `AG0101` and `AG0102` for aspects declared in referenced assemblies, which are checked against each intercepted target;
+- `AG0003` through `AG0006`, which are about the generated interceptors and the calls they skip.
+
+The build-only diagnostics appear when the project is built, in the build output and the IDE's error list from that build. `AG0300` markers come from a separate analyzer and are not affected.
+
 ## Build Report
 
 AspectGenerator writes a human-readable build report during normal builds. The report is intended for developers, reviewers, maintainers, and AI coding agents that need to inspect how aspects were applied in the current compilation.

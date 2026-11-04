@@ -40,6 +40,145 @@ namespace AspectGenerator
 			_assemblyFilters = BuildAssemblyFilters();
 		}
 
+		/// <summary>
+		/// Reports the target filter diagnostics of a design-time build without selecting a target method or binding a call:
+		/// the constructor has compiled the assembly-level filters; this compiles the type-level ones and checks method-level
+		/// aspect applications for a <c>TargetFilter</c>. Only attributes that can carry a filter are bound: those with a
+		/// <c>TargetFilter</c> argument, and type-level ones named after an aspect that has a <c>DefaultTargetFilter</c>.
+		/// A build reports the same diagnostics while it selects the target methods.
+		/// </summary>
+		public void ReportDesignTimeFilterDiagnostics(ImmutableArray<AttributeSyntax> attributes, CancellationToken cancellationToken)
+		{
+			HashSet<string>? defaultFilterNames = null;
+
+			foreach (var attribute in attributes)
+			{
+				if (cancellationToken.IsCancellationRequested)
+					break;
+
+				if (attribute.Parent is not AttributeListSyntax list)
+					continue;
+
+				var hasTargetFilter = AspectSymbols.HasNamedArgument(attribute, "TargetFilter");
+
+				if (list.Parent is TypeDeclarationSyntax)
+				{
+					if (!hasTargetFilter)
+					{
+						defaultFilterNames ??= GetDefaultTargetFilterAspectNames(cancellationToken);
+
+						if (!defaultFilterNames.Contains(GetRightmostName(attribute.Name)))
+							continue;
+					}
+
+					CreateAppliedAspectFilterSet(attribute, GetSemanticModel(attribute.SyntaxTree));
+				}
+				else if (list.Parent is MethodDeclarationSyntax && hasTargetFilter && list.Target is null or { Identifier.ValueText: "method" })
+				{
+					var semanticModel = GetSemanticModel(attribute.SyntaxTree);
+
+					if (semanticModel.GetSymbolInfo(attribute, cancellationToken).Symbol is not IMethodSymbol { ContainingType: var aspectClass } ||
+						!AspectSymbols.IsConditionalAspectEnabled(aspectClass, _compilation, attribute.SyntaxTree) ||
+						!_registry.TryGetDefinition(aspectClass, out _))
+						continue;
+
+					ReportMethodLevelTargetFilter(attribute.GetLocation());
+				}
+			}
+		}
+
+		/// <summary>
+		/// The names a type-level application of an aspect with a <c>DefaultTargetFilter</c> can be written with: the aspect
+		/// class name with and without the <c>Attribute</c> suffix, and the using aliases of those names. The aspects are the
+		/// ones declared here and the ones of referenced aspect libraries.
+		/// </summary>
+		HashSet<string> GetDefaultTargetFilterAspectNames(CancellationToken cancellationToken)
+		{
+			var names = new HashSet<string>(StringComparer.Ordinal);
+
+			foreach (var symbol in _registry.AspectAttributes.Keys)
+				if (symbol is INamedTypeSymbol aspectClass && HasDefaultTargetFilter(aspectClass))
+					AddName(aspectClass.Name);
+
+			foreach (var assembly in _compilation.SourceModule.ReferencedAssemblySymbols)
+				if (assembly.GetTypeByMetadataName("AspectGenerator.AspectAttribute") is not null)
+					AddExternalAspectNames(assembly.GlobalNamespace);
+
+			if (names.Count == 0)
+				return names;
+
+			var aliases = new List<(string Alias, string Target)>();
+
+			foreach (var tree in _compilation.SyntaxTrees)
+				AddAliases(tree.GetRoot(cancellationToken), aliases);
+
+			foreach (var (alias, target) in aliases)
+				if (names.Contains(target))
+					names.Add(alias);
+
+			return names;
+
+			void AddName(string name)
+			{
+				names.Add(name);
+
+				if (name.EndsWith("Attribute", StringComparison.Ordinal) && name.Length > "Attribute".Length)
+					names.Add(name.Substring(0, name.Length - "Attribute".Length));
+			}
+
+			void AddExternalAspectNames(INamespaceOrTypeSymbol container)
+			{
+				foreach (var member in container.GetMembers())
+				{
+					if (member is INamespaceSymbol namespaceSymbol)
+						AddExternalAspectNames(namespaceSymbol);
+					else if (member is INamedTypeSymbol type)
+					{
+						if (_registry.TryGetExternalAspectDefinition(type, out _) && HasDefaultTargetFilter(type))
+							AddName(type.Name);
+
+						AddExternalAspectNames(type);
+					}
+				}
+			}
+
+			static void AddAliases(SyntaxNode node, List<(string Alias, string Target)> aliases)
+			{
+				var usings = node switch
+				{
+					CompilationUnitSyntax compilationUnit               => compilationUnit.Usings,
+					BaseNamespaceDeclarationSyntax namespaceDeclaration => namespaceDeclaration.Usings,
+					_                                                   => default
+				};
+
+				foreach (var usingDirective in usings)
+					if (usingDirective is { Alias: {} alias, NamespaceOrType: NameSyntax target })
+						aliases.Add((alias.Name.Identifier.ValueText, GetRightmostName(target)));
+
+				var members = node switch
+				{
+					CompilationUnitSyntax compilationUnit               => compilationUnit.Members,
+					BaseNamespaceDeclarationSyntax namespaceDeclaration => namespaceDeclaration.Members,
+					_                                                   => default
+				};
+
+				foreach (var member in members)
+					if (member is BaseNamespaceDeclarationSyntax)
+						AddAliases(member, aliases);
+			}
+		}
+
+		static string GetRightmostName(NameSyntax name)
+		{
+			return name switch
+			{
+				QualifiedNameSyntax qualified           => qualified.Right.Identifier.ValueText,
+				AliasQualifiedNameSyntax aliasQualified => aliasQualified.Name.Identifier.ValueText,
+				SimpleNameSyntax simple                 => simple.Identifier.ValueText,
+				_                                       => ""
+			};
+		}
+
 		public ImmutableArray<AnalyzedInvocation> AnalyzeInvocations(
 			ImmutableArray<InvocationExpressionSyntax> invocations,
 			AspectSelectionPlan                        plan,
@@ -643,6 +782,11 @@ namespace AspectGenerator
 				? Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span)
 				: null;
 
+			ReportMethodLevelTargetFilter(location);
+		}
+
+		void ReportMethodLevelTargetFilter(Location? location)
+		{
 			_diagnostics.Report(
 				AspectDiagnosticID.MethodLevelTargetFilter,
 				"TargetFilter is only supported on assembly-level or type-level aspect attributes. Remove TargetFilter from this method-level aspect attribute.",

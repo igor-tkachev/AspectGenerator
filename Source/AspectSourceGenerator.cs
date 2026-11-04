@@ -502,6 +502,10 @@ namespace AspectGenerator
 				ValidateAspectHooks(diagnostics, registry.AspectAttributes, reportedDiagnostics);
 
 			var externalAspectDefinitionsPossible = AspectDefinitionRegistry.HasExternalAspectDefinitions(compilation);
+
+			if (options.DesignTimeBuild)
+				return AnalyzeDesignTimeBuild(compilation, options, registry, diagnosticSink, trace, appliedAttributes, externalAspectDefinitionsPossible, cancellationToken);
+
 			var appliedAspectCount = CountAppliedAspectAttributes(compilation, registry, appliedAttributes, cancellationToken);
 			trace.SetCounter("Applied aspect attributes", appliedAspectCount);
 
@@ -625,6 +629,50 @@ namespace AspectGenerator
 			trace.SetCounter("Diagnostics reported", diagnostics.Count);
 
 			return new AnalysisResult(compilation, options, aspectedMethods, [..diagnostics], trace);
+		}
+
+		/// <summary>
+		/// A design-time build (the IDE) emits no interceptors, so it needs neither the applied-aspect count, nor the
+		/// selection plan, nor bound call sites, which together cost seconds per edit on a large project. The target filters
+		/// are still compiled, from the attributes that carry one, so that their diagnostics stay live in the editor, as do
+		/// the hook checks of the aspects declared here and the options checks. The checks that need a selected target
+		/// method or a bound call (AG0001, AG0002, AG0006, AG0103 to AG0107, and AG0101/AG0102 for aspects of referenced
+		/// assemblies) are reported by builds only, as are AG0003 to AG0005, which concern the generated interceptors.
+		/// </summary>
+		static AnalysisResult AnalyzeDesignTimeBuild(
+			Compilation                     compilation,
+			GeneratorExecutionOptions       options,
+			AspectDefinitionRegistry        registry,
+			GeneratorDiagnosticSink         diagnosticSink,
+			GeneratorTraceReport            trace,
+			ImmutableArray<AttributeSyntax> appliedAttributes,
+			bool                            externalAspectDefinitionsPossible,
+			CancellationToken               cancellationToken)
+		{
+			trace.AddDecision("design-time build: target selection and call binding skipped");
+			trace.SkipPhase("Collect target methods");
+			trace.SkipPhase("Scan call sites");
+			trace.SkipPhase("Resolve call symbols");
+			trace.SkipPhase("Apply target filters");
+
+			if (registry.AspectAttributes.Count == 0 && !externalAspectDefinitionsPossible)
+			{
+				trace.AddDecision("Fast path: no AspectAttribute definitions found.");
+				trace.SkipPhase("Build target filters");
+			}
+			else
+			{
+				using (trace.TimePhase("Build target filters"))
+				{
+					var selection = new AspectSelectionService(compilation, options, registry, diagnosticSink, trace);
+
+					selection.ReportDesignTimeFilterDiagnostics(appliedAttributes, cancellationToken);
+				}
+			}
+
+			trace.SetCounter("Diagnostics reported", diagnosticSink.Diagnostics.Count);
+
+			return new AnalysisResult(compilation, options, [], [..diagnosticSink.Diagnostics], trace);
 		}
 
 		static int CountAppliedAspectAttributes(

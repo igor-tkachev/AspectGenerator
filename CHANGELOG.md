@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Changed: design-time builds (the IDE's live analysis, `DesignTimeBuild=true`) no longer select target methods or bind calls; they only compile the target filters. On a large project this takes the generator from seconds per edit to tens of milliseconds, independent of the filters used. Target filter errors (`AG0201`, `AG0202`, `AG0204`–`AG0206`, `AG0208`), the options check `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project are still reported live. The checks that need a selected target method or a bound call are now reported by builds only: `AG0001`, `AG0002`, `AG0003` and `AG0006` (calls left as they are), `AG0103`–`AG0107`, and `AG0101`/`AG0102` for aspects declared in referenced assemblies. See [Diagnostics](docs/wiki/Diagnostics.md#design-time-builds).
+
 ## 1.1.0 — 2026-11-04
 
 - Changed: the package is now a development dependency (`<DevelopmentDependency>true</DevelopmentDependency>`). `dotnet add package AspectGenerator` adds it with `PrivateAssets="all"`, and it no longer appears as a dependency of a package that references it. Before, a normal `PackageReference` flowed transitively to the consumers of a library; there the analyzer ran without the package's `build/*.props` (`InterceptorsNamespaces` and the generator options), which silently dropped aspects or broke interceptors. A library author who relied on the package flowing to consumers either writes `PrivateAssets="none"` on the reference (the generator then flows, with its props) or references AspectGenerator directly in every project where it is used. Existing references without `PrivateAssets="all"` should add it, or write `PrivateAssets="none"` to keep the flow (omitting `PrivateAssets` also flows; only `all` keeps the package private).
