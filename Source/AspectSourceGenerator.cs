@@ -1027,7 +1027,10 @@ namespace AspectGenerator
 							semanticModels.Add(invocation.SyntaxTree, semantic);
 						}
 
+						// The API is marked experimental before Roslyn 4.14 and is used since 4.11 (SDK 8.0.4xx, Visual Studio 17.11).
+#pragma warning disable RSEXPERIMENTAL002
 						var location = semantic.GetInterceptableLocation(invocation, spc.CancellationToken);
+#pragma warning restore RSEXPERIMENTAL002
 
 						if (location is null)
 						{
@@ -1044,7 +1047,9 @@ namespace AspectGenerator
 							return;
 						}
 
+#pragma warning disable RSEXPERIMENTAL002
 						sb.Append("\t\t").AppendLine(location.GetInterceptsLocationAttributeSyntax());
+#pragma warning restore RSEXPERIMENTAL002
 					}
 
 					switch (inv.Expression)

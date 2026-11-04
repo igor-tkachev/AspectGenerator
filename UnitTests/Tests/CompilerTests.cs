@@ -1528,7 +1528,9 @@ namespace AspectGenerator.Tests
 						var tree       = compilation.SyntaxTrees.Single(t => t.FilePath == d.Location.SourceTree!.FilePath);
 						var invocation = tree.GetRoot().FindNode(d.Location.SourceSpan).FirstAncestorOrSelf<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()!;
 
+#pragma warning disable RSEXPERIMENTAL002 // experimental before Roslyn 4.14
 						return compilation.GetSemanticModel(tree).GetInterceptableLocation(invocation)!.Data;
+#pragma warning restore RSEXPERIMENTAL002
 					})
 					.OrderBy(static d => d, StringComparer.Ordinal)
 					.ToArray();
