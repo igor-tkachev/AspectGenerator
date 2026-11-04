@@ -1,6 +1,6 @@
 # Configuration
 
-AspectGenerator itself targets `netstandard2.0`, but consuming projects must be built with .NET SDK 10.0.200 or later (Roslyn 5.3) because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data.
+AspectGenerator itself targets `netstandard2.0`, but consuming projects must be built with .NET SDK 9.0.100 or later (Roslyn 4.12) because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data.
 
 ## Configuration Model
 

@@ -45,7 +45,9 @@ jobs:
       if: matrix.configuration == 'Release'
       run: dotnet pack Source/AspectGenerator.csproj --no-build --configuration ${{ env.BUILD_CONFIGURATION }}
 
-  # The documented minimum build toolchain: SDK 10.0.200 is the first one that ships Roslyn 5.3.
+  # The documented minimum build toolchain: SDK 9.0.100 is the first one that ships Roslyn 4.12, the Roslyn the generator is built against.
+  # The generator and its tests are built with the current SDK (the solution targets net10.0); SDK 9.0.100 builds consumers of the packed generator,
+  # which is what the minimum applies to. The unit tests compile against the same Roslyn 4.12 and run in the build job. The 8.0 runtime runs the net8.0 consumer.
   minimum-sdk:
     runs-on: ubuntu-latest
 
@@ -54,12 +56,70 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '10.0.200'
-    - name: Pin SDK
-      run: dotnet new globaljson --sdk-version 10.0.200 --roll-forward disable --force
-    - name: Restore dependencies
-      run: dotnet restore AspectGenerator.slnx
-    - name: Build
-      run: dotnet build AspectGenerator.slnx --no-restore --configuration Release
-    - name: Test
-      run: dotnet test AspectGenerator.slnx --no-build --configuration Release --verbosity normal
+        dotnet-version: |
+          8.0.x
+          9.0.100
+          10.0.x
+    - name: Build and pack the generator
+      run: |
+        dotnet build Source/AspectGenerator.csproj --configuration Release -warnaserror
+        dotnet pack Source/AspectGenerator.csproj --no-build --configuration Release --output "$RUNNER_TEMP/feed"
+    - name: Build and run consumers
+      shell: bash
+      run: |
+        set -euo pipefail
+        for tfm in net8.0 net9.0; do
+          dir="$RUNNER_TEMP/consumer-$tfm"
+          mkdir -p "$dir"
+          (cd "$dir" && dotnet new globaljson --sdk-version 9.0.100 --roll-forward disable --force)
+          cat > "$dir/nuget.config" <<EOF
+        <configuration>
+          <packageSources>
+            <clear />
+            <add key="feed" value="$RUNNER_TEMP/feed" />
+            <add key="nuget" value="https://api.nuget.org/v3/index.json" />
+          </packageSources>
+        </configuration>
+        EOF
+          cat > "$dir/Consumer.csproj" <<EOF
+        <Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <OutputType>Exe</OutputType>
+            <TargetFramework>$tfm</TargetFramework>
+            <Nullable>enable</Nullable>
+            <ImplicitUsings>enable</ImplicitUsings>
+            <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+          </PropertyGroup>
+          <ItemGroup>
+            <PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />
+          </ItemGroup>
+        </Project>
+        EOF
+          cat > "$dir/Program.cs" <<'EOF'
+        using AspectGenerator;
+
+        [Aspect(OnBeforeCall = nameof(OnBeforeCall))]
+        [AttributeUsage(AttributeTargets.Method)]
+        sealed class CountAttribute : Attribute
+        {
+            public static int Calls;
+            public static void OnBeforeCall(InterceptInfo info) { Calls++; }
+        }
+
+        static class Service
+        {
+            [Count] public static int Twice(int x) { return x * 2; }
+        }
+
+        static class Program
+        {
+            static int Main()
+            {
+                var result = Service.Twice(21);
+                Console.WriteLine($"result={result} calls={CountAttribute.Calls}");
+                return result == 42 && CountAttribute.Calls == 1 ? 0 : 1;
+            }
+        }
+        EOF
+          (cd "$dir" && dotnet --version && dotnet build --configuration Release && dotnet run --configuration Release --no-build)
+        done

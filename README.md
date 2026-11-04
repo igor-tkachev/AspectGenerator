@@ -10,11 +10,11 @@ AspectGenerator provides AOP-like method aspects for C# using compile-time call-
 AspectGenerator is not traditional runtime AOP. Aspects are applied to call sites visible to the current compilation.
 
 > [!IMPORTANT]
-> **Projects that use AspectGenerator must be built with .NET SDK 10.0.200 or later (Roslyn 5.3; Visual Studio 2026 18.3 or later).**
+> **Projects that use AspectGenerator must be built with .NET SDK 9.0.100 or later (Roslyn 4.12; Visual Studio 2022 17.12 or later).**
 >
-> This is a build-toolchain requirement, not a target-framework requirement. AspectGenerator itself targets `netstandard2.0`, and your project target framework is a separate decision. The project must be compiled with the .NET 10 SDK/compiler because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
+> This is a build-toolchain requirement, not a target-framework requirement. AspectGenerator itself targets `netstandard2.0`, and your project target framework is a separate decision. The project must be compiled with a Roslyn 4.12 or newer compiler (the .NET 9 SDK or later) because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data and the `InterceptorsNamespaces` property. Projects that target `net8.0` are supported when they are built with such an SDK. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
 >
-> An older compiler, such as SDK 10.0.1xx or an earlier Visual Studio 2026 update, cannot load the generator: the build reports `CS9057` (the analyzer references a newer compiler version) and the aspects are silently not applied.
+> An older compiler, such as SDK 8.0.x or Visual Studio 2022 before 17.12, cannot load the generator: the build reports `CS9057` (the analyzer references a newer compiler version) and the aspects are silently not applied.
 
 > [!IMPORTANT]
 > This is not runtime AOP. Aspects are applied by rewriting call sites visible to the current compilation. Calls made through reflection, delegates, already-compiled external assemblies, or unsupported C# constructs are outside the interception model.
@@ -35,14 +35,14 @@ The package is a development dependency, so `dotnet add package` adds it with `P
 
 AspectGenerator is a build-time generator, not a runtime reference. The package ships only the analyzer and the MSBuild props and targets that configure it; it has no assembly your code references and nothing is deployed with your application. Because the analyzer needs the package's MSBuild wiring (`InterceptorsNamespaces` and the generator options) to produce interceptors that compile, it must run only in the project that references the package directly. Marking the package private keeps it from flowing to the consumers of your library, where the analyzer would run without that wiring and silently drop aspects or break the interceptors.
 
-Build the consuming project with .NET SDK 10.0.200 or later. This requirement is about the build tools used by `dotnet build`, MSBuild, or Visual Studio, not about forcing a specific `TargetFramework`.
+Build the consuming project with .NET SDK 9.0.100 or later. This requirement is about the build tools used by `dotnet build`, MSBuild, or Visual Studio, not about forcing a specific `TargetFramework`.
 
-If the repository uses a `global.json`, require at least 10.0.200 and let newer feature bands roll forward:
+If the repository uses a `global.json`, require at least 9.0.100 and let newer feature bands roll forward:
 
 ```json
 {
   "sdk": {
-    "version": "10.0.200",
+    "version": "9.0.100",
     "rollForward": "latestFeature"
   }
 }
@@ -90,7 +90,7 @@ AspectGenerator finds interceptable call sites to `DoWork` in the current compil
 
 | Approach | Strengths | Trade-offs |
 | --- | --- | --- |
-| AspectGenerator | Compile-time call-site rewriting, no runtime proxy dispatch, generated code, better fit for AOT/trimming-oriented applications | Requires the .NET 10 SDK/compiler, intercepts only visible call sites, method-call syntax only |
+| AspectGenerator | Compile-time call-site rewriting, no runtime proxy dispatch, generated code, better fit for AOT/trimming-oriented applications | Requires the .NET 9 SDK or later (Roslyn 4.12) to build, intercepts only visible call sites, method-call syntax only |
 | Runtime proxies | Mature and familiar; no compiler interceptor requirement | Calls must go through the proxy, runtime dispatch overhead, AOT/trimming concerns |
 | IL weaving | Can cover broader code patterns | Rewrites assemblies, harder debugging and deployment model |
 
@@ -368,7 +368,7 @@ For diagnostic codes and troubleshooting, see [Diagnostics](https://github.com/i
 
 When updating docs, keep README and wiki synchronized:
 
-- document the .NET 10 SDK/compiler requirement and avoid implying that `net10.0` is required as the target framework;
+- document the .NET 9 SDK (Roslyn 4.12) minimum build requirement and avoid implying that `net9.0` or `net10.0` is required as the target framework;
 - use `InterceptorsNamespaces`, not `InterceptorsPreviewNamespaces`;
 - use `AspectGeneratorGenerateApi`, `AspectGeneratorPublicApi`, `AspectGeneratorDebuggerStepThrough`, and `AspectGeneratorInterceptorsNamespace`;
 - describe `InterceptableLocation` as opaque compiler data;
