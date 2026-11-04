@@ -28,7 +28,7 @@ Projects that use AspectGenerator must be built with .NET SDK 9.0.100 or later (
 
 Unsupported cases either cannot be represented as ordinary interceptable invocation syntax or are not implemented by AspectGenerator yet.
 
-The source generator runs in the compilation of the project that references the generator package. A transitive reference to an aspect library is not enough to run AspectGenerator in the consuming project; projects with intercepted call sites must reference AspectGenerator directly.
+The source generator runs in the compilation of the project that references the generator package. A transitive reference to an aspect library is not enough to run AspectGenerator in the consuming project, unless the library passes the generator on with `PrivateAssets="none"`; otherwise projects with intercepted call sites must reference AspectGenerator directly.
 
 ## Known Issues
 

@@ -41,4 +41,4 @@ In consuming projects:
 </PropertyGroup>
 ```
 
-Every project whose call sites should be intercepted must reference AspectGenerator directly. The reference does not flow through a library: the package is a development dependency, so a consumer of your library (or of a shared aspect library) does not get AspectGenerator unless it references it itself. The package appends the generated interceptor namespace to `InterceptorsNamespaces` automatically for direct package consumers.
+Every project whose call sites should be intercepted needs the generator. The default private reference does not flow through a library: the package is a development dependency, so a consumer of your library (or of a shared aspect library) does not get AspectGenerator unless it references it itself or the library opts in with `PrivateAssets="none"`. See [Using AspectGenerator in libraries](Using-AspectGenerator-in-libraries). The package appends the generated interceptor namespace to `InterceptorsNamespaces` automatically for direct package consumers.

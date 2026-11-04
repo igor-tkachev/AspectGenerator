@@ -9,6 +9,7 @@ AspectGenerator is a source generator for compile-time call-site rewriting with 
 
 - [Configuration](Configuration)
 - [Aspect library mode](Aspect-library-mode)
+- [Using AspectGenerator in libraries](Using-AspectGenerator-in-libraries)
 - [Hook lifecycle](Hook-lifecycle)
 - [Target filters](Target-filters)
 - [Diagnostics](Diagnostics)
@@ -34,4 +35,4 @@ The AspectGenerator NuGet package imports the required MSBuild wiring automatica
 
 The package is a development dependency: `dotnet add package AspectGenerator` adds it with `PrivateAssets="all"`, and the package does not become a dependency of your own package. If you edit the project file by hand, write `<PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />`.
 
-AspectGenerator is a build-time generator, not a runtime reference: the package contains only the analyzer and the MSBuild props and targets that configure it, with no assembly your code references. The analyzer needs that MSBuild wiring (`InterceptorsNamespaces` and the generator options) to produce interceptors that compile, so it must run only in the project that references the package directly. Keeping the reference private stops it from flowing to the consumers of a library, where the analyzer would run without the wiring and silently drop aspects or break the interceptors.
+AspectGenerator is a build-time generator, not a runtime reference: the package contains only the analyzer and the MSBuild props and targets that configure it, with no assembly your code references. The analyzer needs that MSBuild wiring (`InterceptorsNamespaces` and the generator options) to produce interceptors that compile, so it must run only in the project that references the package directly. Keeping the reference private stops it from flowing to the consumers of a library. A library that wants its consumers to get the generator opts in with `PrivateAssets="none"`; the wiring then flows with it. See [Using AspectGenerator in libraries](Using-AspectGenerator-in-libraries).

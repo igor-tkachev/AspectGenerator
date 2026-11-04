@@ -33,7 +33,7 @@ The package is a development dependency, so `dotnet add package` adds it with `P
 <PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />
 ```
 
-AspectGenerator is a build-time generator, not a runtime reference. The package ships only the analyzer and the MSBuild props and targets that configure it; it has no assembly your code references and nothing is deployed with your application. Because the analyzer needs the package's MSBuild wiring (`InterceptorsNamespaces` and the generator options) to produce interceptors that compile, it must run only in the project that references the package directly. Marking the package private keeps it from flowing to the consumers of your library, where the analyzer would run without that wiring and silently drop aspects or break the interceptors.
+AspectGenerator is a build-time generator, not a runtime reference. The package ships only the analyzer and the MSBuild props and targets that configure it; it has no assembly your code references and nothing is deployed with your application. Because the analyzer needs the package's MSBuild wiring (`InterceptorsNamespaces` and the generator options) to produce interceptors that compile, it must run only in the project that references the package directly. Marking the package private keeps it from flowing to the consumers of your library. A library that wants its consumers to get the generator opts in with `PrivateAssets="none"`; the wiring flows with it (see [Using AspectGenerator in libraries](#using-aspectgenerator-in-libraries)).
 
 Build the consuming project with .NET SDK 9.0.100 or later. This requirement is about the build tools used by `dotnet build`, MSBuild, or Visual Studio, not about forcing a specific `TargetFramework`.
 
@@ -143,12 +143,27 @@ AspectGenerator writes an informational build report file during normal builds. 
 
 For AI coding agents and automation-oriented reviews, see [SKILL.md](SKILL.md). It summarizes the required build toolchain, project configuration, aspect API, hook model, target filters, diagnostics, build report usage, and common review checks.
 
+## Using AspectGenerator in libraries
+
+The generator rewrites only the calls compiled in the project that references it, and the default reference is private, so by default it does not reach the consumers of a library. A library that ships public aspects for its consumers can pass the generator on with `PrivateAssets="none"` (the props and targets ship in `buildTransitive/`, so `InterceptorsNamespaces` and the options flow with it); otherwise each consumer references AspectGenerator itself. The [wiki page](https://github.com/igor-tkachev/AspectGenerator/wiki/Using-AspectGenerator-in-libraries) has a table of the scenarios (app, library with internal aspects, shared aspect library, opt-in flow, multi-project solutions, test projects, upgrading from 1.0.0).
+
+```xml
+<!-- Library whose public aspects should apply in its consumers -->
+<PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="none" />
+<PropertyGroup>
+  <AspectGeneratorPublicApi>true</AspectGeneratorPublicApi>
+</PropertyGroup>
+```
+
+If the analyzer runs in a project without the package's props, the build reports warning `AG0005` that names the fix.
+
 ## Generated API Ownership
 
 AspectGenerator normally generates the authoring/runtime API into each consuming compilation. This runtime API includes `AspectAttribute`, `InterceptInfo`, `InterceptInfo<T>`, `InterceptData<T>`, `InterceptResult`, and related types.
 
 - `GenerateApi=true`: generate `AspectAttribute`, `InterceptInfo`, `InterceptData<T>`, `InterceptResult`, and related types.
 - `GenerateApi=false`: do not generate the API. Use this when the API is supplied by an aspect library.
+- `GenerateApi` unset (the default): generate the API, unless a referenced assembly already declares a public `AspectAttribute`; then that API is used.
 - `PublicApi=false`: generated API is internal to the consuming assembly.
 - `PublicApi=true`: generated API is public. Treat this mode as experimental until the public contract is stabilized.
 
@@ -359,6 +374,7 @@ The README is the concise entry point. The wiki should contain expanded pages wi
 - [CHANGELOG.md](CHANGELOG.md) contains release notes.
 - [Configuration](https://github.com/igor-tkachev/AspectGenerator/wiki/Configuration)
 - [Aspect library mode](https://github.com/igor-tkachev/AspectGenerator/wiki/Aspect-library-mode)
+- [Using AspectGenerator in libraries](https://github.com/igor-tkachev/AspectGenerator/wiki/Using-AspectGenerator-in-libraries)
 - [Hook lifecycle](https://github.com/igor-tkachev/AspectGenerator/wiki/Hook-lifecycle)
 - [Target filters](https://github.com/igor-tkachev/AspectGenerator/wiki/Target-filters)
 - [Diagnostics](https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics)
