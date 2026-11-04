@@ -13,7 +13,12 @@
 		<AspectGeneratorTraceLevel Condition="'$(AspectGeneratorTraceLevel)' == ''">Normal</AspectGeneratorTraceLevel>
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(_AspectGeneratorPropsLoaded)' != 'true'">
+	<!-- MSBuild evaluates every property before any item, so the items below test the value captured before this file sets the flag. -->
+	<PropertyGroup>
+		<_AspectGeneratorItemsLoaded>$(_AspectGeneratorPropsLoaded)</_AspectGeneratorItemsLoaded>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(_AspectGeneratorItemsLoaded)' != 'true'">
 		<!-- Marker: the analyzer reports AG0005 when it runs without this file. -->
 		<CompilerVisibleProperty Include="AspectGeneratorPropsImported" />
 		<CompilerVisibleProperty Include="AspectGeneratorGenerateApi" />
