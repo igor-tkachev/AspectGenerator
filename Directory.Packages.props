@@ -14,5 +14,11 @@
 		<PackageVersion Include="OpenTelemetry" Version="1.15.3" />
 		<PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.15.3" />
 		<PackageVersion Include="PolySharp" Version="1.16.0" />
+		<!--
+		Microsoft.Data.Sqlite brings the SQLite native library through SQLitePCLRaw.bundle_e_sqlite3, whose 2.1.x
+		lib.e_sqlite3 carries SQLite before 3.50.2 (CVE-2025-6965, GHSA-2m69-gcr7-jv3q). The lib package is versioned by
+		the SQLite release from 3.x on and satisfies the bundle's dependency, so the example references it directly.
+		-->
+		<PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
 	</ItemGroup>
 </Project>
