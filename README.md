@@ -306,8 +306,9 @@ Trace is disabled by default and does not emit compiler diagnostics or runtime t
 
 To produce AGTRACE output from a local package, pack AspectGenerator in Debug configuration:
 
-```bat
-dotnet pack P:\AspectGenerator\Source\AspectGenerator.csproj -c Debug -o P:\.local-nuget -p:PackageVersion=2.0.0-dev.trace.1
+```shell
+# From the root of an AspectGenerator clone; add the output folder as a local NuGet package source.
+dotnet pack Source/AspectGenerator.csproj -c Debug -o local-nuget -p:PackageVersion=2.0.0-dev.trace.1
 ```
 
 Then build one consuming project and one target framework, and combine the report with normal MSBuild tools:

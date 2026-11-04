@@ -14,18 +14,6 @@ Planned work:
 
 - add a synthetic performance regression test or benchmark project with many invocations.
 
-## P1: Generated Interceptor Type Shape
-
-Status: not implemented.
-
-Generated code still emits a fixed `static partial class Interceptors` in the configured namespace. This can collide with user code or other generated code.
-
-Planned work:
-
-- evaluate `file static class AspectGeneratorInterceptors_<stable hash>`;
-- preserve configurable interceptor namespace;
-- update generated source baselines after choosing the final shape.
-
 ## P2: `AG0004` Severity Policy
 
 Status: not implemented.
@@ -49,6 +37,12 @@ Planned work:
 - keep the existing fields for compatibility in the generated/internal path;
 - decide whether public API should use properties, a separate runtime package, or an explicit versioned contract;
 - document migration guidance before any breaking change.
+
+## Completed: Generated Interceptor Type Shape
+
+Status: implemented.
+
+Interceptors are emitted into a file-local `file static class AspectGeneratorInterceptors` in the configured interceptor namespace, so the generated type cannot collide with user code or other generated code. The namespace stays configurable through `AspectGeneratorInterceptorsNamespace`, and generated source baselines cover the final shape.
 
 ## Completed: `MemberInfo` Initialization
 

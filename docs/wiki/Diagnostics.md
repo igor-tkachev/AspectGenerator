@@ -62,8 +62,9 @@ Trace implementation is compiled into Debug-built AspectGenerator packages only.
 
 For local AGTRACE package debugging, pack AspectGenerator in Debug configuration:
 
-```bat
-dotnet pack P:\AspectGenerator\Source\AspectGenerator.csproj -c Debug -o P:\.local-nuget -p:PackageVersion=2.0.0-dev.trace.1
+```shell
+# From the root of an AspectGenerator clone; add the output folder as a local NuGet package source.
+dotnet pack Source/AspectGenerator.csproj -c Debug -o local-nuget -p:PackageVersion=2.0.0-dev.trace.1
 ```
 
 For local package debugging, build one project and one target framework:

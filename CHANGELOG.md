@@ -8,6 +8,7 @@
 - `AG0300` markers now use the generator's selection plan, so they are reported exactly for the intercepted calls, and the marker analyzer no longer binds every invocation.
 - Generated interceptors use fully qualified (`global::`) type names. Aspect attributes declared in the global namespace or nested in a class no longer produce code that does not compile.
 - Calls with explicit type arguments (`M<T>()`) and conditional calls (`a?.M()`) are intercepted; the generated code no longer contains `#error` for them.
+- Documentation: removed machine-specific paths, added the trace properties to the repository build props, and marked the file-local interceptor type as implemented in the roadmap.
 
 ## 1.0.1
 
