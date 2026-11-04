@@ -44,3 +44,22 @@ jobs:
     - name: Pack
       if: matrix.configuration == 'Release'
       run: dotnet pack Source/AspectGenerator.csproj --no-build --configuration ${{ env.BUILD_CONFIGURATION }}
+
+  # The documented minimum build toolchain: SDK 10.0.200 is the first one that ships Roslyn 5.3.
+  minimum-sdk:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.200'
+    - name: Pin SDK
+      run: dotnet new globaljson --sdk-version 10.0.200 --roll-forward disable --force
+    - name: Restore dependencies
+      run: dotnet restore AspectGenerator.slnx
+    - name: Build
+      run: dotnet build AspectGenerator.slnx --no-restore --configuration Release
+    - name: Test
+      run: dotnet test AspectGenerator.slnx --no-build --configuration Release --verbosity normal
