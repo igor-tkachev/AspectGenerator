@@ -603,7 +603,14 @@ namespace AspectGenerator
 			if (options.EmitInterceptors && aspectedMethods.Length > 0)
 			{
 				using (trace.TimePhase("Interceptors namespace validation"))
-					ReportMissingInterceptorsNamespace(diagnostics, options);
+				{
+					// Without the package's build props the interceptors namespace and the options are not set up either,
+					// so one warning that names the cause replaces the follow-up AG0004 and the interceptor compile errors.
+					if (options.PropsImported)
+						ReportMissingInterceptorsNamespace(diagnostics, options);
+					else
+						ReportBuildPropsNotImported(diagnostics);
+				}
 			}
 			else
 			{
@@ -737,6 +744,18 @@ namespace AspectGenerator
 		static string GetInterceptorsNamespace(GeneratorExecutionOptions options)
 		{
 			return string.IsNullOrWhiteSpace(options.InterceptorsNamespace) ? "AspectGenerator" : options.InterceptorsNamespace!;
+		}
+
+		static void ReportBuildPropsNotImported(List<DiagnosticInfo> diagnostics)
+		{
+			diagnostics.Add(
+				new DiagnosticInfo(
+				AspectDiagnosticID.BuildPropsNotImported,
+				"AspectGenerator is running without its MSBuild props (the AspectGeneratorPropsImported property is not set), so InterceptorsNamespaces and the generator options are missing and the generated interceptors may not compile. " +
+				"Reference the AspectGenerator package from this project (<PackageReference Include=\"AspectGenerator\" PrivateAssets=\"all\" />) instead of receiving the analyzer from a library or adding it by hand; " +
+				"a library that ships aspects can pass the generator on to its consumers with PrivateAssets=\"none\" on its own reference.",
+				Location.None,
+				DiagnosticSeverity.Warning));
 		}
 
 		static void ReportMissingInterceptorsNamespace(List<DiagnosticInfo> diagnostics, GeneratorExecutionOptions options)

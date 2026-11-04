@@ -32,6 +32,7 @@ namespace AspectGenerator
 				CompilerGeneratedFilesOutputPath     = options.TryGetValue("build_property.CompilerGeneratedFilesOutputPath",                         out var generatedFilesPath) ? generatedFilesPath : null,
 				InterceptorsNamespace                = options.TryGetValue($"build_property.AspectGenerator{AspectOptionName.InterceptorsNamespace}", out var ns) ? ns : null,
 				InterceptorsNamespaces               = options.TryGetValue("build_property.InterceptorsNamespaces",                                   out var namespaces) ? namespaces : null,
+				PropsImported                        = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.PropsImported}"),
 			};
 		}
 
@@ -59,6 +60,7 @@ namespace AspectGenerator
 				CompilerGeneratedFilesOutputPath = msBuildOptions.CompilerGeneratedFilesOutputPath,
 				InterceptorsNamespace  = msBuildOptions.InterceptorsNamespace,
 				InterceptorsNamespaces = msBuildOptions.InterceptorsNamespaces,
+				PropsImported          = msBuildOptions.PropsImported,
 			};
 
 			var attr = compilation.Assembly.GetAttributes().FirstOrDefault(a =>
@@ -134,7 +136,8 @@ namespace AspectGenerator
 				options.ProjectDirectory,
 				options.CompilerGeneratedFilesOutputPath,
 				options.InterceptorsNamespace,
-				options.InterceptorsNamespaces);
+				options.InterceptorsNamespaces,
+				options.PropsImported is true);
 		}
 
 		static bool? GetTraceBoolProperty(AnalyzerConfigOptions options, string name)

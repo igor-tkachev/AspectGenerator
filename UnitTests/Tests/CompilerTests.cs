@@ -1426,6 +1426,33 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void MissingBuildPropsReportsSingleDiagnosticTest()
+		{
+			var result = RunGenerator(
+				TraceDirectSource,
+				new()
+				{
+					["build_property.AspectGeneratorPropsImported"] = "false",
+					["build_property.InterceptorsNamespaces"]       = "",
+				});
+
+			var diagnostic = result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.BuildPropsNotImported);
+
+			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
+			StringAssert.Contains(diagnostic.GetMessage(), "AspectGeneratorPropsImported");
+			StringAssert.Contains(diagnostic.GetMessage(), "PrivateAssets");
+			AssertNoDiagnostic(result, AspectDiagnosticID.NamespaceNotAllowed);
+		}
+
+		[TestMethod]
+		public void ImportedBuildPropsDoNotReportMissingPropsTest()
+		{
+			var result = RunGenerator(TraceDirectSource);
+
+			AssertNoDiagnostic(result, AspectDiagnosticID.BuildPropsNotImported);
+		}
+
+		[TestMethod]
 		public void CallThroughPascalCasePropertyIsInterceptedTest()
 		{
 			AssertInterceptedCalls(CallShapeSource("new Holder().Service.Save();"), 1);
@@ -1665,6 +1692,7 @@ namespace AspectGenerator.Tests
 				: new Dictionary<string,string>(properties);
 
 			effectiveProperties.TryAdd("build_property.InterceptorsNamespaces", "AspectGenerator");
+			effectiveProperties.TryAdd("build_property.AspectGeneratorPropsImported", "true");
 
 			var optionsProvider = new TestAnalyzerConfigOptionsProvider(effectiveProperties);
 			var generator       = new AspectSourceGenerator();
@@ -1688,6 +1716,7 @@ namespace AspectGenerator.Tests
 				: new Dictionary<string,string>(properties);
 
 			effectiveProperties.TryAdd("build_property.InterceptorsNamespaces", "AspectGenerator");
+			effectiveProperties.TryAdd("build_property.AspectGeneratorPropsImported", "true");
 
 			var optionsProvider = new TestAnalyzerConfigOptionsProvider(effectiveProperties);
 			var analyzerOptions = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);

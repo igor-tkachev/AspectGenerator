@@ -5,7 +5,13 @@
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<!-- This repository references the generator as a project, so it sets the marker that the package props would set. -->
+		<AspectGeneratorPropsImported>true</AspectGeneratorPropsImported>
+	</PropertyGroup>
+
 	<ItemGroup>
+		<CompilerVisibleProperty Include="AspectGeneratorPropsImported" />
 		<CompilerVisibleProperty Include="AspectGeneratorGenerateApi" />
 		<CompilerVisibleProperty Include="AspectGeneratorPublicApi" />
 		<CompilerVisibleProperty Include="AspectGeneratorDebuggerStepThrough" />

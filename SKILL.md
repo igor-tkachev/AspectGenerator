@@ -381,6 +381,7 @@ AG0001  OnCall aspect must be last when applied directly
 AG0002  OnCall aspect must be last when inferred from method metadata
 AG0003  invocation cannot be intercepted by the compiler
 AG0004  generated interceptor namespace is not listed in InterceptorsNamespaces
+AG0005  generator runs without the package MSBuild props (reference the package, or PrivateAssets="none" in the library)
 AG0101  hook method not found
 AG0102  hook method must be static
 AG0103  invalid hook parameter type
