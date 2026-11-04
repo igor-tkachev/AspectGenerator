@@ -25,6 +25,21 @@ namespace AspectGenerator
 			};
 		}
 
+		/// <summary>
+		/// The AG0007 message: how many calls selected only by a target filter were left as they are for one reason. The
+		/// calls themselves are AG0006, which is off by default: every diagnostic with a source location makes the compiler
+		/// look for [SuppressMessage] on the declarations around it, binding the enclosing method again each time, and a
+		/// broad filter can skip thousands of calls.
+		/// </summary>
+		public static string GetFilterSelectedCallsNotInterceptedMessage(int count, string reason)
+		{
+			var calls = count.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
+
+			return count == 1
+				? $"1 call selected by a target filter was not intercepted ({reason}). Enable {AspectDiagnosticID.FilterSelectedCallNotIntercepted} to list it."
+				: $"{calls} calls selected by a target filter were not intercepted ({reason}). Enable {AspectDiagnosticID.FilterSelectedCallNotIntercepted} to list them.";
+		}
+
 		static DiagnosticDescriptor CreateInterceptedCallMarkerDescriptor(DiagnosticSeverity severity)
 		{
 			return new DiagnosticDescriptor(

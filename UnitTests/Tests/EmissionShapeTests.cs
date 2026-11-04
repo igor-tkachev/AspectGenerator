@@ -380,9 +380,11 @@ namespace AspectGenerator.Tests
 					public static string Run() => new Derived().Go();
 				}
 				""",
-				"p");
+				"p",
+				EnableAG0006);
 
 			Assert.AreEqual(DiagnosticSeverity.Info, result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.FilterSelectedCallNotIntercepted).Severity);
+			StringAssert.Contains(result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.FilterSelectedCallsNotIntercepted).GetMessage(), "1 call selected by a target filter was not intercepted (the target method is not accessible");
 			AssertNoDiagnostic(result, AspectDiagnosticID.CannotIntercept);
 		}
 
@@ -403,7 +405,8 @@ namespace AspectGenerator.Tests
 					}
 				}
 				""",
-				"inner");
+				"inner",
+				EnableAG0006);
 
 			StringAssert.Contains(result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.FilterSelectedCallNotIntercepted).GetMessage(), "local functions");
 		}
@@ -652,7 +655,7 @@ namespace AspectGenerator.Tests
 			return GetGeneratedSourceOrEmpty(AssertRunsWithResult(body, expected), "Interceptors.g.cs");
 		}
 
-		static GeneratorDriverRunResult AssertRunsWithResult(string body, string expected)
+		static GeneratorDriverRunResult AssertRunsWithResult(string body, string expected, string? globalConfig = null)
 		{
 			var source =
 				$$"""
@@ -685,7 +688,7 @@ namespace AspectGenerator.Tests
 				}
 				""";
 
-			var result      = RunGeneratorAndGetCompilation(source, out var compilation);
+			var result      = RunGeneratorAndGetCompilation(source, out var compilation, globalConfig: globalConfig);
 			var errors      = compilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error).ToArray();
 			var interceptors = GetGeneratedSourceOrEmpty(result, "Interceptors.g.cs");
 

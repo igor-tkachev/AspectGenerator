@@ -10,6 +10,7 @@ namespace AspectGenerator
 		public const string NamespaceNotAllowed                 = "AG0004";
 		public const string BuildPropsNotImported               = "AG0005";
 		public const string FilterSelectedCallNotIntercepted    = "AG0006";
+		public const string FilterSelectedCallsNotIntercepted   = "AG0007";
 		public const string HookMethodNotFound                  = "AG0101";
 		public const string HookMethodNotStatic                 = "AG0102";
 		public const string HookInvalidParameters               = "AG0103";

@@ -23,6 +23,7 @@ namespace AspectGenerator
 		readonly Dictionary<SyntaxTree,SemanticModel> _semanticModels = new();
 		readonly Dictionary<IMethodSymbol,IMethodSymbol> _genericShapes = new(SymbolEqualityComparer.Default);
 		readonly Dictionary<IMethodSymbol,IMethodSymbol> _reducedGenericShapes = new(SymbolEqualityComparer.Default);
+		readonly Dictionary<string,int> _filterSelectedSkips = new(StringComparer.Ordinal);
 		List<INamedTypeSymbol>? _sourceTypes;
 
 		public AspectSelectionService(
@@ -541,11 +542,33 @@ namespace AspectGenerator
 		{
 			var isApplied = InterceptorShape.IsAppliedToTarget(method, attributes);
 
+			if (!isApplied)
+			{
+				lock (_cacheGate)
+				{
+					_filterSelectedSkips.TryGetValue(reason, out var count);
+					_filterSelectedSkips[reason] = count + 1;
+				}
+			}
+
 			_diagnostics.Report(
 				isApplied ? AspectDiagnosticID.CannotIntercept : AspectDiagnosticID.FilterSelectedCallNotIntercepted,
 				$"Call to '{method.ToDisplayString()}' is not intercepted: {reason}.",
 				invocation.GetLocation(),
 				isApplied ? DiagnosticSeverity.Warning : DiagnosticSeverity.Info);
+		}
+
+		/// <summary>
+		/// The number of calls selected only by a target filter that were left as they are, per reason, in ordinal order of
+		/// the reason.
+		/// </summary>
+		public List<(string Reason, int Count)> GetFilterSelectedSkips()
+		{
+			lock (_cacheGate)
+				return _filterSelectedSkips
+					.OrderBy(static s => s.Key, StringComparer.Ordinal)
+					.Select(static s => (s.Key, s.Value))
+					.ToList();
 		}
 
 		public List<AttributeInfo> GetSelectedAttributes(IMethodSymbol method)

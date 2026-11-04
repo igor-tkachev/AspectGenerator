@@ -208,7 +208,7 @@ namespace AspectGenerator.Tests
 				("async hook",                HookContractDiagnosticsSource,     AspectDiagnosticID.AsyncHookRequiresTask,     null),
 				("library hook not found",    LibraryHookDiagnosticsSource,      AspectDiagnosticID.HookMethodNotFound,        library),
 				("library hook not static",   LibraryHookDiagnosticsSource,      AspectDiagnosticID.HookMethodNotStatic,       library),
-				("filter-selected call skipped", FilterSelectedLocalFunctionSource, AspectDiagnosticID.FilterSelectedCallNotIntercepted, null),
+				("filter-selected calls skipped", FilterSelectedLocalFunctionSource, AspectDiagnosticID.FilterSelectedCallsNotIntercepted, null),
 				("applied call skipped",      AppliedProtectedTargetSource,      AspectDiagnosticID.CannotIntercept,           null),
 			};
 
@@ -225,6 +225,72 @@ namespace AspectGenerator.Tests
 					$"{name}: did not expect {id} in a design-time build. Actual diagnostics: {string.Join(", ", designTime.Diagnostics.Select(static d => d.Id))}");
 				AssertNotGenerated(designTime, "Interceptors.g.cs");
 			}
+		}
+
+		const string EnableAG0006 =
+			"""
+			is_global = true
+			dotnet_diagnostic.AG0006.severity = suggestion
+			""";
+
+		[TestMethod]
+		public void FilterSelectedSkipsAreSummarizedPerReasonTest()
+		{
+			var result = RunGenerator(FilterSelectedSkipsSource);
+
+			// AG0006 is off by default: no per-call reports.
+			AssertNoDiagnostic(result, AspectDiagnosticID.FilterSelectedCallNotIntercepted);
+			AssertNoDiagnostic(result, AspectDiagnosticID.CannotIntercept);
+
+			var summaries = result.Diagnostics.Where(static d => d.Id == AspectDiagnosticID.FilterSelectedCallsNotIntercepted).ToArray();
+
+			CollectionAssert.AreEqual(
+				new[]
+				{
+					"2 calls selected by a target filter were not intercepted (base calls are not intercepted: the interceptor would call the override instead). Enable AG0006 to list them.",
+					"3 calls selected by a target filter were not intercepted (local functions are not supported). Enable AG0006 to list them.",
+				},
+				summaries.Select(static d => d.GetMessage()).ToArray(),
+				string.Join(Environment.NewLine, result.Diagnostics.Select(static d => $"{d.Id}: {d.GetMessage()}")));
+
+			foreach (var summary in summaries)
+			{
+				Assert.AreEqual(DiagnosticSeverity.Info, summary.Severity);
+				Assert.AreEqual(Location.None, summary.Location);
+			}
+		}
+
+		[TestMethod]
+		public void FilterSelectedSkipsAreListedWhenAG0006IsEnabledTest()
+		{
+			var result = RunGeneratorAndGetCompilation(FilterSelectedSkipsSource, out _, globalConfig: EnableAG0006);
+			var calls  = result.Diagnostics.Where(static d => d.Id == AspectDiagnosticID.FilterSelectedCallNotIntercepted).ToArray();
+
+			Assert.AreEqual(5, calls.Length, string.Join(Environment.NewLine, result.Diagnostics.Select(static d => $"{d.Id}: {d.GetMessage()}")));
+			Assert.AreEqual(2, calls.Count(static d => d.GetMessage().Contains("base calls", StringComparison.Ordinal)));
+			Assert.AreEqual(3, calls.Count(static d => d.GetMessage().Contains("local functions", StringComparison.Ordinal)));
+
+			foreach (var call in calls)
+			{
+				Assert.AreEqual(DiagnosticSeverity.Info, call.Severity);
+				Assert.IsTrue(call.Location.IsInSource, call.ToString());
+			}
+
+			// The summaries stay.
+			Assert.AreEqual(2, result.Diagnostics.Count(static d => d.Id == AspectDiagnosticID.FilterSelectedCallsNotIntercepted));
+		}
+
+		[TestMethod]
+		public void FilterSelectedSkipsAreNotReportedInDesignTimeBuildsTest()
+		{
+			var result = RunGeneratorAndGetCompilation(
+				FilterSelectedSkipsSource,
+				out _,
+				new() { ["build_property.DesignTimeBuild"] = "true" },
+				globalConfig: EnableAG0006);
+
+			AssertNoDiagnostic(result, AspectDiagnosticID.FilterSelectedCallNotIntercepted);
+			AssertNoDiagnostic(result, AspectDiagnosticID.FilterSelectedCallsNotIntercepted);
 		}
 
 		[TestMethod]
@@ -1897,12 +1963,14 @@ namespace AspectGenerator.Tests
 			return RunGeneratorAndGetCompilation(sources, out _, properties, preprocessorSymbols, reference);
 		}
 
-		static GeneratorDriverRunResult RunGeneratorAndGetCompilation(string source, out Compilation outputCompilation, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null, MetadataReference? reference = null)
+		static GeneratorDriverRunResult RunGeneratorAndGetCompilation(string source, out Compilation outputCompilation, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null, MetadataReference? reference = null, string? globalConfig = null)
 		{
-			return RunGeneratorAndGetCompilation([source], out outputCompilation, properties, preprocessorSymbols, reference);
+			return RunGeneratorAndGetCompilation([source], out outputCompilation, properties, preprocessorSymbols, reference, globalConfig);
 		}
 
-		static GeneratorDriverRunResult RunGeneratorAndGetCompilation(string[] sources, out Compilation outputCompilation, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null, MetadataReference? reference = null)
+		/// <param name="globalConfig">The text of a global analyzer config (<c>.globalconfig</c>); its <c>dotnet_diagnostic.*.severity</c>
+		/// entries apply to the compilation as the compiler applies them from <c>.editorconfig</c>.</param>
+		static GeneratorDriverRunResult RunGeneratorAndGetCompilation(string[] sources, out Compilation outputCompilation, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null, MetadataReference? reference = null, string? globalConfig = null)
 		{
 			// The feature lets the output compilation accept the generated interceptors, as InterceptorsNamespaces does in a build.
 			var parseOptions = CSharpParseOptions.Default
@@ -1916,7 +1984,8 @@ namespace AspectGenerator.Tests
 				"AspectGenerator.Tests.GeneratorDriver",
 				sources.Select((source, index) => CSharpSyntaxTree.ParseText(source, parseOptions, index == 0 ? "GeneratorDriverTest.cs" : $"GeneratorDriverTest{index}.cs")),
 				reference is null ? GetMetadataReferences() : GetMetadataReferences().Append(reference),
-				new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+				new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+					.WithSyntaxTreeOptionsProvider(globalConfig is null ? null : new TestSyntaxTreeOptionsProvider(globalConfig)));
 
 			var effectiveProperties = properties is null
 				? new Dictionary<string,string>()
@@ -2078,6 +2147,36 @@ namespace AspectGenerator.Tests
 			public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => _globalOptions;
 
 			public override AnalyzerConfigOptions GetOptions(AdditionalText textFile) => _globalOptions;
+		}
+
+		/// <summary>
+		/// Diagnostic severities from a global analyzer config, for every tree, as the compiler applies <c>.editorconfig</c>.
+		/// </summary>
+		sealed class TestSyntaxTreeOptionsProvider : SyntaxTreeOptionsProvider
+		{
+			readonly ImmutableDictionary<string,ReportDiagnostic> _severities;
+
+			public TestSyntaxTreeOptionsProvider(string globalConfig)
+			{
+				var config = AnalyzerConfig.Parse(globalConfig, Path.GetFullPath(".globalconfig"));
+
+				_severities = AnalyzerConfigSet.Create(ImmutableArray.Create(config)).GlobalConfigOptions.TreeOptions;
+			}
+
+			public override GeneratedKind IsGenerated(SyntaxTree tree, System.Threading.CancellationToken cancellationToken)
+			{
+				return GeneratedKind.Unknown;
+			}
+
+			public override bool TryGetDiagnosticValue(SyntaxTree tree, string diagnosticId, System.Threading.CancellationToken cancellationToken, out ReportDiagnostic severity)
+			{
+				return _severities.TryGetValue(diagnosticId, out severity);
+			}
+
+			public override bool TryGetGlobalDiagnosticValue(string diagnosticId, System.Threading.CancellationToken cancellationToken, out ReportDiagnostic severity)
+			{
+				return _severities.TryGetValue(diagnosticId, out severity);
+			}
 		}
 
 		sealed class TestAnalyzerConfigOptions : AnalyzerConfigOptions
@@ -2470,6 +2569,47 @@ namespace AspectGenerator.Tests
 					return Inner();
 
 					static string Inner() => "inner";
+				}
+			}
+			""";
+
+		// Five calls a target filter selects and the generator leaves as they are, for two reasons.
+		const string FilterSelectedSkipsSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "method: Skip*")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			public class Base
+			{
+				public virtual string SkipVirtual() => "base";
+			}
+
+			public class Derived : Base
+			{
+				public override string SkipVirtual() => base.SkipVirtual() + base.SkipVirtual();
+			}
+
+			static class Target
+			{
+				public static string Invoke()
+				{
+					return SkipFirst() + SkipSecond() + SkipFirst();
+
+					static string SkipFirst() => "first";
+					static string SkipSecond() => "second";
 				}
 			}
 			""";

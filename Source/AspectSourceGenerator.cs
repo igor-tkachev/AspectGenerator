@@ -589,6 +589,14 @@ namespace AspectGenerator
 					using (trace.TimePhase("Resolve call symbols"))
 						aspectedMethods = selection.AnalyzeInvocations(invocations, selectionPlan, cancellationToken);
 
+					foreach (var (reason, count) in selection.GetFilterSelectedSkips())
+						diagnostics.Add(
+							new DiagnosticInfo(
+								AspectDiagnosticID.FilterSelectedCallsNotIntercepted,
+								AspectDiagnostics.GetFilterSelectedCallsNotInterceptedMessage(count, reason),
+								Location.None,
+								DiagnosticSeverity.Info));
+
 					using (trace.TimePhase("Apply target filters"))
 					{
 					}
@@ -636,7 +644,7 @@ namespace AspectGenerator
 		/// selection plan, nor bound call sites, which together cost seconds per edit on a large project. The target filters
 		/// are still compiled, from the attributes that carry one, so that their diagnostics stay live in the editor, as do
 		/// the hook checks of the aspects declared here and the options checks. The checks that need a selected target
-		/// method or a bound call (AG0001, AG0002, AG0003, AG0006, AG0103 to AG0107, and AG0101/AG0102 for aspects of
+		/// method or a bound call (AG0001, AG0002, AG0003, AG0006, AG0007, AG0103 to AG0107, and AG0101/AG0102 for aspects of
 		/// referenced assemblies) are reported by builds only. AG0004 and AG0005 concern the generated interceptors and
 		/// were never reported in design-time builds.
 		/// </summary>
@@ -772,12 +780,21 @@ namespace AspectGenerator
 						diagnostic.Message,
 						diagnostic.Severity,
 						diagnostic.Severity,
-						true,
+						IsEnabledByDefault(diagnostic.Id),
 						diagnostic.Severity == DiagnosticSeverity.Error ? 0 : 1,
 						location: diagnostic.Location));
 			}
 
 			AspectBuildReport.Write(analysis);
+		}
+
+		/// <summary>
+		/// AG0006 lists every call a target filter selected and the generator left as it is; it is off by default, and
+		/// AG0007 summarizes those calls per reason instead (see <see cref="AspectDiagnostics.GetFilterSelectedCallsNotInterceptedMessage"/>).
+		/// </summary>
+		static bool IsEnabledByDefault(string id)
+		{
+			return id != AspectDiagnosticID.FilterSelectedCallNotIntercepted;
 		}
 
 		static void EmitInterceptors(SourceProductionContext spc, AnalysisResult analysis)
@@ -971,6 +988,7 @@ namespace AspectGenerator
 		{
 			var interceptorsNamespace = GetInterceptorsNamespace(options);
 			var semanticModels        = new Dictionary<SyntaxTree,SemanticModel>();
+			var compilerRejectedCalls = 0;
 
 			// Generate source. One file for all the interceptors.
 			// Interceptors.g.cs
@@ -1110,15 +1128,20 @@ namespace AspectGenerator
 						if (location is null)
 						{
 							// The same rule as for calls the generator cannot express: AG0003 for an aspect applied to the
-							// target, AG0006 (information) for a call only a target filter selected.
+							// target, AG0006 (information, off by default, summarized by AG0007) for a call only a target
+							// filter selected.
 							var isApplied  = InterceptorShape.IsAppliedToTarget(analyzedInvocation.Method, analyzedInvocation.Attributes);
+							var id         = isApplied ? AspectDiagnosticID.CannotIntercept : AspectDiagnosticID.FilterSelectedCallNotIntercepted;
 							var descriptor = new DiagnosticDescriptor(
-								isApplied ? AspectDiagnosticID.CannotIntercept : AspectDiagnosticID.FilterSelectedCallNotIntercepted,
+								id,
 								"AspectGenerator",
 								$"Invocation '{SingleLine(invocation.ToString())}' cannot be intercepted by the compiler.",
 								"AspectGenerator",
 								isApplied ? DiagnosticSeverity.Warning : DiagnosticSeverity.Info,
-								true);
+								IsEnabledByDefault(id));
+
+							if (!isApplied)
+								compilerRejectedCalls++;
 
 							spc.ReportDiagnostic(
 								Diagnostic.Create(descriptor, invocation.GetLocation()));
@@ -1187,6 +1210,18 @@ namespace AspectGenerator
 					""");
 
 			spc.AddSource("Interceptors.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
+
+			if (compilerRejectedCalls > 0)
+				spc.ReportDiagnostic(
+					Diagnostic.Create(
+						AspectDiagnosticID.FilterSelectedCallsNotIntercepted,
+						"AspectGenerator",
+						AspectDiagnostics.GetFilterSelectedCallsNotInterceptedMessage(compilerRejectedCalls, "the compiler cannot intercept the call"),
+						DiagnosticSeverity.Info,
+						DiagnosticSeverity.Info,
+						true,
+						1,
+						location: Location.None));
 
 			void AppendTargetMethod(IMethodSymbol method, string interceptorName)
 			{

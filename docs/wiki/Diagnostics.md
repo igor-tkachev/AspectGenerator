@@ -8,7 +8,8 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0002`: `OnCall` aspect must be last when the aspect is inferred from method metadata.
 - `AG0003` (warning): a call to a method that carries the aspect itself is not intercepted, because the compiler cannot intercept it or because generated code cannot express it. The message gives the reason; see [Limitations](Limitations).
 - `AG0004`: generated interceptor namespace is not listed in `InterceptorsNamespaces`.
-- `AG0006` (information): the same, for a call that only a target filter selected. A broad filter is expected to skip what it cannot rewrite, so this is not a warning; it has its own id so that it can be raised or silenced separately in `.editorconfig` (`dotnet_diagnostic.AG0006.severity`).
+- `AG0006` (information, **off by default**): the same, for a call that only a target filter selected, reported at the call. A broad filter is expected to skip what it cannot rewrite, so this is not a warning. It is off because a broad filter can skip thousands of calls, and the compiler pays several milliseconds for every diagnostic reported at a source location (it binds the enclosing method again to look for `[SuppressMessage]`); on a large project that added tens of seconds to a build. Turn it on in `.editorconfig` to get the list with locations: `dotnet_diagnostic.AG0006.severity = suggestion` (or `warning`).
+- `AG0007` (information): one summary per reason for the calls `AG0006` would list, with their number, for example `1,697 calls selected by a target filter were not intercepted (calls inside expression trees are not intercepted: the expression must keep the original method). Enable AG0006 to list them.` It has no source location; the summaries are ordered by reason.
 - `AG0005`: the analyzer runs without the package's MSBuild props (the `AspectGeneratorPropsImported` marker is not visible), and the generated interceptor namespace is not listed in `InterceptorsNamespaces`; typically the generator reached the project transitively or as a manual analyzer reference. Reference the package from the project, or have the library flow it on with `PrivateAssets="none"`; see [Using AspectGenerator in libraries](Using-AspectGenerator-in-libraries).
 
 ## Hook Contract Diagnostics
@@ -45,7 +46,7 @@ Reported by builds only, because they need a selected target method or a bound c
 - `AG0001` and `AG0002`;
 - `AG0103` through `AG0107`;
 - `AG0101` and `AG0102` for aspects declared in referenced assemblies, which are checked against each intercepted target;
-- `AG0003` and `AG0006`, for calls that are left as they are;
+- `AG0003`, `AG0006` and `AG0007`, for calls that are left as they are;
 - `AG0004` and `AG0005`, which are about the generated interceptors (these were never reported in design-time builds).
 
 A build is never treated as a design-time build: when MSBuild sets `BuildingProject=true` (it does at the start of every real build), the generator ignores a `DesignTimeBuild=true` left set by the project.

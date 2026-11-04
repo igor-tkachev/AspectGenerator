@@ -92,7 +92,7 @@ normal build      -> analyzes and emits interceptor source
 DesignTimeBuild   -> analyzes for IDE diagnostics/markers but does not emit interceptor source
 ```
 
-Design-time builds report a reduced set of diagnostics: target filter errors (`AG0201`-`AG0206`, `AG0208`), `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project. `AG0001`, `AG0002`, `AG0003`, `AG0006`, `AG0103`-`AG0107` and `AG0101`/`AG0102` for library aspects need a bound call and appear only after a real build. A build that leaves `DesignTimeBuild=true` set is still a build when `BuildingProject` is `true`.
+Design-time builds report a reduced set of diagnostics: target filter errors (`AG0201`-`AG0206`, `AG0208`), `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project. `AG0001`, `AG0002`, `AG0003`, `AG0006`, `AG0007`, `AG0103`-`AG0107` and `AG0101`/`AG0102` for library aspects need a bound call and appear only after a real build. A build that leaves `DesignTimeBuild=true` set is still a build when `BuildingProject` is `true`.
 
 There is no public `GenerateInterceptors` option.
 
@@ -383,6 +383,8 @@ AG0002  OnCall aspect must be last when inferred from method metadata
 AG0003  invocation cannot be intercepted by the compiler
 AG0004  generated interceptor namespace is not listed in InterceptorsNamespaces
 AG0005  generator runs without the package MSBuild props (reference the package, or PrivateAssets="none" in the library)
+AG0006  call selected only by a target filter is not intercepted (off by default; dotnet_diagnostic.AG0006.severity = suggestion lists them)
+AG0007  summary per reason of the calls AG0006 would list, with their number
 AG0101  hook method not found
 AG0102  hook method must be static
 AG0103  invalid hook parameter type
