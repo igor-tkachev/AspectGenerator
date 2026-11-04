@@ -1445,6 +1445,53 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void UnsetGenerateApiUsesReferencedPublicApiTest()
+		{
+			var libraryResult = RunGeneratorAndGetCompilation(
+				TraceDirectSource,
+				out var libraryCompilation,
+				new()
+				{
+					["build_property.AspectGeneratorPublicApi"] = "true",
+				});
+
+			AssertGenerated(libraryResult, "AspectAttribute.g.cs");
+
+			using var stream = new MemoryStream();
+
+			Assert.IsTrue(libraryCompilation.Emit(stream).Success);
+
+			var reference = MetadataReference.CreateFromImage(stream.ToArray());
+
+			var unset         = RunGeneratorWithReference(reference, new());
+			var explicitTrue  = RunGeneratorWithReference(reference, new() { ["build_property.AspectGeneratorGenerateApi"] = "true" });
+			var explicitFalse = RunGeneratorWithReference(reference, new() { ["build_property.AspectGeneratorGenerateApi"] = "false" });
+
+			AssertNotGenerated(unset,         "AspectAttribute.g.cs");
+			AssertGenerated   (explicitTrue,  "AspectAttribute.g.cs");
+			AssertNotGenerated(explicitFalse, "AspectAttribute.g.cs");
+
+			static GeneratorDriverRunResult RunGeneratorWithReference(MetadataReference reference, Dictionary<string,string> properties)
+			{
+				var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
+				var compilation  = CSharpCompilation.Create(
+					"AspectGenerator.Tests.GeneratorDriverApp",
+					[CSharpSyntaxTree.ParseText("class C { }", parseOptions)],
+					GetMetadataReferences().Append(reference),
+					new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+				properties["build_property.AspectGeneratorPropsImported"] = "true";
+
+				GeneratorDriver driver = CSharpGeneratorDriver.Create(
+					[new AspectSourceGenerator().AsSourceGenerator()],
+					parseOptions: parseOptions,
+					optionsProvider: new TestAnalyzerConfigOptionsProvider(properties));
+
+				return driver.RunGenerators(compilation).GetRunResult();
+			}
+		}
+
+		[TestMethod]
 		public void ImportedBuildPropsDoNotReportMissingPropsTest()
 		{
 			var result = RunGenerator(TraceDirectSource);

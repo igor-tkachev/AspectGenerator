@@ -92,7 +92,20 @@ namespace AspectGenerator
 
 			ApplyAssemblyOptionsFromSyntax(compilation, result, diagnostics);
 
+			// A project that does not choose uses the API of an aspect library it references instead of declaring a second copy.
+			if (result.GenerateApi is null && ReferencesPublicAspectApi(compilation))
+				result.GenerateApi = false;
+
 			return CreateExecutionOptions(result);
+		}
+
+		static bool ReferencesPublicAspectApi(Compilation compilation)
+		{
+			foreach (var assembly in compilation.SourceModule.ReferencedAssemblySymbols)
+				if (assembly.GetTypeByMetadataName("AspectGenerator.AspectAttribute") is { DeclaredAccessibility: Accessibility.Public })
+					return true;
+
+			return false;
 		}
 
 		static bool? GetBoolProperty(AnalyzerConfigOptions options, string name)

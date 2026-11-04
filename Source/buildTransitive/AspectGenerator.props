@@ -4,7 +4,7 @@
 	<PropertyGroup>
 		<AspectGeneratorInterceptorsNamespace Condition="'$(AspectGeneratorInterceptorsNamespace)' == ''">AspectGenerator</AspectGeneratorInterceptorsNamespace>
 
-		<AspectGeneratorGenerateApi Condition="'$(AspectGeneratorGenerateApi)' == ''">true</AspectGeneratorGenerateApi>
+		<!-- AspectGeneratorGenerateApi has no default here: unset means "generate, unless a referenced assembly already exposes the public API". -->
 		<AspectGeneratorPublicApi Condition="'$(AspectGeneratorPublicApi)' == ''">false</AspectGeneratorPublicApi>
 		<AspectGeneratorDebuggerStepThrough Condition="'$(AspectGeneratorDebuggerStepThrough)' == ''">false</AspectGeneratorDebuggerStepThrough>
 		<AspectGeneratorReportFile Condition="'$(AspectGeneratorReportFile)' == ''">$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>

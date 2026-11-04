@@ -84,11 +84,18 @@ namespace AspectGenerator.Tests
 			CollectionAssert.Contains(entries, "SKILL.md");
 			CollectionAssert.Contains(entries, "CHANGELOG.md");
 			CollectionAssert.Contains(entries, "LICENSE.TXT");
-			CollectionAssert.DoesNotContain(entries, "buildTransitive/AspectGenerator.props");
-			CollectionAssert.DoesNotContain(entries, "buildTransitive/AspectGenerator.targets");
+			CollectionAssert.Contains(entries, "buildTransitive/AspectGenerator.props");
+			CollectionAssert.Contains(entries, "buildTransitive/AspectGenerator.targets");
 
-			var props   = ReadEntryText(archive, "build/AspectGenerator.props");
-			var targets = ReadEntryText(archive, "build/AspectGenerator.targets");
+			// build/ only forwards to buildTransitive/, so a direct reference never applies the content twice.
+			StringAssert.Contains(ReadEntryText(archive, "build/AspectGenerator.props"),   "..\\buildTransitive\\AspectGenerator.props");
+			StringAssert.Contains(ReadEntryText(archive, "build/AspectGenerator.targets"), "..\\buildTransitive\\AspectGenerator.targets");
+
+			var props   = ReadEntryText(archive, "buildTransitive/AspectGenerator.props");
+			var targets = ReadEntryText(archive, "buildTransitive/AspectGenerator.targets");
+
+			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorPropsImported\" />");
+			StringAssert.Contains(props, "<AspectGeneratorPropsImported>true</AspectGeneratorPropsImported>");
 
 			StringAssert.Contains(props, "<AspectGeneratorInterceptorsNamespace Condition=\"'$(AspectGeneratorInterceptorsNamespace)' == ''\">AspectGenerator</AspectGeneratorInterceptorsNamespace>");
 			StringAssert.Contains(props, "<AspectGeneratorReportFile Condition=\"'$(AspectGeneratorReportFile)' == ''\">$(BaseIntermediateOutputPath)\\GeneratedFiles\\AspectGenerator\\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>");
