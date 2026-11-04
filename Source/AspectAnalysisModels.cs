@@ -95,7 +95,8 @@ namespace AspectGenerator
 
 		public bool TryGetSelectedAttributes(IMethodSymbol method, out List<AttributeInfo> attributes)
 		{
-			return SelectedTargetAttributes.TryGetValue(method.OriginalDefinition, out attributes!);
+			// An instance-form extension call binds to the reduced method; the plan holds the declared static method.
+			return SelectedTargetAttributes.TryGetValue((method.ReducedFrom ?? method).OriginalDefinition, out attributes!);
 		}
 	}
 

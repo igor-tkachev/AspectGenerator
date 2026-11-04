@@ -1503,7 +1503,7 @@ namespace AspectGenerator.Tests
 				TraceDirectSource,
 			};
 
-			probes = [..probes, AspectLocationSource, CallShapeSource("UserService.Create<Holder>(); UserService? service = new(); service?.Save();")];
+			probes = [..probes, AspectLocationSource, CallShapeSource("UserService.Create<Holder>(); UserService? service = new(); service?.Save(); \"a\".Length(); new[] { 1 }.Count();")];
 
 			foreach (var probe in probes)
 			{
@@ -1565,6 +1565,12 @@ namespace AspectGenerator.Tests
 		public void TargetWithDefaultParameterValuesIsInterceptedTest()
 		{
 			AssertInterceptedCalls(DefaultParameterValuesSource, 1);
+		}
+
+		[TestMethod]
+		public void InstanceFormExtensionCallsAreInterceptedTest()
+		{
+			AssertInterceptedCalls(CallShapeSource("\"a\".Length(); new[] { 1 }.Count(); string? text = \"b\"; text?.Length();"), 3);
 		}
 
 		static void AssertInterceptedCalls(string source, int expectedCount)
@@ -4079,6 +4085,15 @@ namespace AspectGenerator.Tests
 
 			class DerivedService : UserService
 			{
+			}
+
+			static class Extensions
+			{
+				[Log]
+				public static int Length(this string text) => text.Length;
+
+				[Log]
+				public static int Count<T>(this T[] items) => items.Length;
 			}
 
 			static class Unrelated
