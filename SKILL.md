@@ -32,6 +32,8 @@ call sites live in another project
 
 The package imports the required MSBuild wiring automatically for direct package consumers.
 
+AspectGenerator is a development dependency (`developmentDependency` in the nuspec): `dotnet add package AspectGenerator` adds it with `PrivateAssets="all"`. When editing a project file by hand, write `<PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />`. The reference never flows transitively: a project that consumes a library does not get the generator, so every project with call sites to intercept must reference it directly. It is a build-time generator; the package ships no runtime assembly.
+
 ## Generated API ownership
 
 AspectGenerator can generate the authoring/runtime API into the current compilation:

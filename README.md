@@ -27,6 +27,14 @@ Install the package:
 dotnet add package AspectGenerator
 ```
 
+The package is a development dependency, so `dotnet add package` adds it with `PrivateAssets="all"`. If you edit the project file by hand, write the same thing:
+
+```xml
+<PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />
+```
+
+AspectGenerator is a build-time generator, not a runtime reference. The package ships only the analyzer and the MSBuild props and targets that configure it; it has no assembly your code references and nothing is deployed with your application. Because the analyzer needs the package's MSBuild wiring (`InterceptorsNamespaces` and the generator options) to produce interceptors that compile, it must run only in the project that references the package directly. Marking the package private keeps it from flowing to the consumers of your library, where the analyzer would run without that wiring and silently drop aspects or break the interceptors.
+
 Build the consuming project with .NET SDK 10.0.200 or later. This requirement is about the build tools used by `dotnet build`, MSBuild, or Visual Studio, not about forcing a specific `TargetFramework`.
 
 If the repository uses a `global.json`, require at least 10.0.200 and let newer feature bands roll forward:
