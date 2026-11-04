@@ -9,14 +9,16 @@ on:
 jobs:
   build:
     env:
-      BUILD_CONFIGURATION: Release
-      SOLUTION: AspectGenerator.sln
+      BUILD_CONFIGURATION: ${{ matrix.configuration }}
+      SOLUTION: AspectGenerator.slnx
 
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         dotnet: ['10.0.x']
+        # Debug also runs the generator trace and call-site prefilter assertions, which are compiled only under DEBUG.
+        configuration: [Release, Debug]
 
     runs-on: ${{ matrix.os }}
 
@@ -40,4 +42,5 @@ jobs:
     - name: Test
       run: dotnet test ${{ env.SOLUTION }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal
     - name: Pack
+      if: matrix.configuration == 'Release'
       run: dotnet pack Source/AspectGenerator.csproj --no-build --configuration ${{ env.BUILD_CONFIGURATION }}
