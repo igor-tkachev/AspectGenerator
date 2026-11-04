@@ -197,10 +197,12 @@ namespace AspectGenerator
 		}
 	}
 
+	/// <param name="GenericShape">The target in terms of its own type parameters when the interceptor has to be generic; otherwise <c>null</c>.</param>
 	internal record AnalyzedInvocation(
 		InvocationExpressionSyntax Inv,
 		IMethodSymbol              Method,
-		List<AttributeInfo>        Attributes);
+		List<AttributeInfo>        Attributes,
+		IMethodSymbol?             GenericShape = null);
 
 	internal record DiagnosticInfo(
 		string             Id,

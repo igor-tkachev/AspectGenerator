@@ -21,6 +21,7 @@ namespace AspectGenerator
 		readonly Dictionary<INamedTypeSymbol,ImmutableArray<AspectFilterSet>> _typeFilterCache = new(SymbolEqualityComparer.Default);
 		readonly object _cacheGate = new();
 		readonly Dictionary<SyntaxTree,SemanticModel> _semanticModels = new();
+		readonly Dictionary<IMethodSymbol,IMethodSymbol> _genericShapes = new(SymbolEqualityComparer.Default);
 		List<INamedTypeSymbol>? _sourceTypes;
 
 		public AspectSelectionService(
@@ -133,9 +134,8 @@ namespace AspectGenerator
 				SelectMethod(method);
 			}
 
-			// Records get ToString, Equals, GetHashCode and PrintMembers from the compiler, with no declaration the
-			// syntax provider could see; target filters still select them. A generated Deconstruct is left out: its
-			// out parameters are not supported by interceptor emission.
+			// Records get ToString, Equals, GetHashCode, PrintMembers and Deconstruct from the compiler, with no
+			// declaration the syntax provider could see; target filters still select them.
 			foreach (var type in GetSourceTypes())
 			{
 				if (cancellationToken.IsCancellationRequested)
@@ -145,8 +145,7 @@ namespace AspectGenerator
 					continue;
 
 				foreach (var member in type.GetMembers())
-					if (member is IMethodSymbol { IsImplicitlyDeclared: true, MethodKind: MethodKind.Ordinary, CanBeReferencedByName: true } method &&
-						method.Name != "Deconstruct")
+					if (member is IMethodSymbol { IsImplicitlyDeclared: true, MethodKind: MethodKind.Ordinary, CanBeReferencedByName: true } method)
 						SelectMethod(method);
 			}
 
@@ -324,8 +323,54 @@ namespace AspectGenerator
 			if (attributes.Count == 0)
 				return false;
 
-			analyzedInvocation = new AnalyzedInvocation(invocation, method, attributes);
+			if (InterceptorShape.GetUnsupportedReason(invocation, method, attributes, semanticModel, cancellationToken) is {} reason)
+			{
+				ReportNotIntercepted(invocation, method, attributes, reason);
+				return false;
+			}
+
+			var genericShape = InterceptorShape.NeedsGenericInterceptor(method, _compilation)
+				? GetGenericShape(method)
+				: null;
+
+			analyzedInvocation = new AnalyzedInvocation(invocation, method, attributes, genericShape);
 			return true;
+		}
+
+		/// <summary>
+		/// One shape symbol per target, so that every call of the target that needs a generic interceptor shares it.
+		/// </summary>
+		IMethodSymbol GetGenericShape(IMethodSymbol method)
+		{
+			var key = (method.ReducedFrom ?? method).OriginalDefinition;
+
+			lock (_cacheGate)
+			{
+				if (!_genericShapes.TryGetValue(key, out var shape))
+				{
+					shape = InterceptorShape.GetGenericShape(method)!;
+					_genericShapes.Add(key, shape);
+				}
+
+				return shape;
+			}
+		}
+
+		/// <summary>
+		/// A call that cannot be intercepted is left as it is. The report is a warning when the aspect was applied to the
+		/// target method itself, and information when only a target filter selected it: a broad filter is expected to
+		/// skip what it cannot rewrite.
+		/// </summary>
+		void ReportNotIntercepted(InvocationExpressionSyntax invocation, IMethodSymbol method, List<AttributeInfo> attributes, string reason)
+		{
+			var targetAttributes = (method.ReducedFrom ?? method).OriginalDefinition.GetAttributes();
+			var isExplicit       = attributes.Any(a => a.AppliedAttributeData is {} data && targetAttributes.Contains(data));
+
+			_diagnostics.Report(
+				AspectDiagnosticID.CannotIntercept,
+				$"Call to '{method.ToDisplayString()}' is not intercepted: {reason}.",
+				invocation.GetLocation(),
+				isExplicit ? DiagnosticSeverity.Warning : DiagnosticSeverity.Info);
 		}
 
 		public List<AttributeInfo> GetSelectedAttributes(IMethodSymbol method)

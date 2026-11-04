@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace AspectGenerator.Tests
 {
 	[TestClass]
-	public class CompilerTests
+	public partial class CompilerTests
 	{
 		[TestMethod]
 		public void HookContractDiagnosticsTest()
@@ -1673,7 +1673,7 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void AssemblyFilterSelectsCompilerGeneratedRecordMethodsTest()
 		{
-			AssertInterceptedCalls(RecordMembersSource.Replace("/*TYPE-FILTER*/", "", StringComparison.Ordinal), 3);
+			AssertInterceptedCalls(RecordMembersSource.Replace("/*TYPE-FILTER*/", "", StringComparison.Ordinal), 4);
 		}
 
 		[TestMethod]
@@ -1683,7 +1683,7 @@ namespace AspectGenerator.Tests
 				RecordMembersSource
 					.Replace("[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = \"fulltype: AspectGenerator.Tests.GeneratorDriver.Person\")]", "", StringComparison.Ordinal)
 					.Replace("/*TYPE-FILTER*/", "[Log(TargetFilter = \"method: *\")]", StringComparison.Ordinal),
-				3);
+				4);
 		}
 
 		static void AssertInterceptedCalls(string source, int expectedCount)

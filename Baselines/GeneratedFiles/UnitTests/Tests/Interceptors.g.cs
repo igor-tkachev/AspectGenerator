@@ -624,6 +624,8 @@ namespace MyAspectGenerator
 		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsOutMethod_Interceptor(out string s)
 		{
+			s = default!;
+
 			var __args__ = new object?[] { s = default };
 
 			// Aspects.ArgumentsAttribute

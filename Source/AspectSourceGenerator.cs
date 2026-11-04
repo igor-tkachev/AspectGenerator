@@ -593,7 +593,7 @@ namespace AspectGenerator
 
 			trace.SetCounter("Intercepted call sites", aspectedMethods.Length);
 			trace.SetCounter("Matched target methods", aspectedMethods.Select(static m => m.Method).Distinct(SymbolEqualityComparer.Default).Count());
-			trace.SetCounter("Generated interceptor methods", aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default).Count());
+			trace.SetCounter("Generated interceptor methods", aspectedMethods.GroupBy(static m => m.GenericShape ?? m.Method, SymbolEqualityComparer.Default).Count());
 
 			if (!cancellationToken.IsCancellationRequested)
 				using (trace.TimePhase("Validate method hooks"))
@@ -972,6 +972,28 @@ namespace AspectGenerator
 				var interceptorName = interceptor.Name;
 				var methods         = interceptor.Invocations;
 				var attributes      = interceptor.Attributes;
+				var typeParameters  = interceptor.TypeParameters;
+				var typeArguments   = InterceptorShape.PrintTypeParameterList(typeParameters);
+				var constraints     = InterceptorShape.PrintConstraints(typeParameters, PrintType);
+
+				// A generic interceptor keeps what depends on its type arguments (the target method info) in a generic state
+				// class, and the aspect instances in the non-generic one, so they stay one per interceptor.
+				if (typeParameters.Count > 0)
+				{
+					sb.AppendLine(
+						$$"""
+								private static class {{interceptorName}}_State{{typeArguments}}{{constraints}}
+								{
+						""");
+
+					AppendTargetMethod(method, interceptorName);
+
+					sb.AppendLine(
+						"""
+								}
+
+						""");
+				}
 
 				sb.AppendLine(
 					$$"""
@@ -979,32 +1001,8 @@ namespace AspectGenerator
 							{
 					""");
 
-				bool parametersAdded = false;
-
-				foreach (var p in method.Parameters)
-				{
-					switch (p.RefKind)
-					{
-						case RefKind.Ref :
-						case RefKind.Out :
-						case RefKind.In  :
-							sb.AppendLine(
-								$$"""
-											static {{PrintType(p.Type)}} {{interceptorName}}_Arg_{{p.Name}} = default({{PrintType(p.Type)}});
-								""");
-							parametersAdded = true;
-							break;
-					}
-				}
-
-				if (parametersAdded)
-					sb.AppendLine();
-
-				sb.AppendLine(
-					$$"""
-								internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf{{GetMethodOf(method, interceptorName)}};
-
-					""");
+				if (typeParameters.Count == 0)
+					AppendTargetMethod(method, interceptorName);
 
 				for (var i = 0; i < attributes.Count; i++)
 				{
@@ -1031,7 +1029,7 @@ namespace AspectGenerator
 					$$"""
 							//
 							/// <summary>
-							/// Intercepts {{method}}.
+							/// Intercepts {{SingleLine(method.ToDisplayString())}}.
 							/// </summary>
 							//
 					""");
@@ -1042,7 +1040,7 @@ namespace AspectGenerator
 
 					sb.AppendLine(
 						$"""
-								// Intercepts {inv}.
+								// Intercepts {SingleLine(inv.ToString())}.
 						""");
 
 					void AppendInterceptsLocation(InvocationExpressionSyntax invocation)
@@ -1087,7 +1085,7 @@ namespace AspectGenerator
 						default :
 							sb.AppendLine(
 								$"""
-										#error Unknown expression type {inv.Expression.GetType()} for : {inv.Expression}
+										#error Unknown expression type {inv.Expression.GetType()} for : {SingleLine(inv.Expression.ToString())}
 								""");
 							break;
 					}
@@ -1110,12 +1108,12 @@ namespace AspectGenerator
 				sb
 					.AppendLine(
 						$$"""
-						{{PrintType(method.ReturnType)}} {{interceptorName}}({{PrintParameters(method)}})
+						{{PrintType(method.ReturnType)}} {{interceptorName}}{{typeArguments}}({{PrintParameters(method)}}){{constraints}}
 								{
 						""")
 					;
 
-				GenerateMethodBody(spc, sb, methods[0].Inv, method, interceptorName, attributes, methodModifierPosition);
+				GenerateMethodBody(spc, sb, methods[0].Inv, method, interceptorName, typeArguments, attributes, methodModifierPosition);
 
 				sb
 					.AppendLine(
@@ -1136,6 +1134,50 @@ namespace AspectGenerator
 
 			spc.AddSource("Interceptors.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
 
+			void AppendTargetMethod(IMethodSymbol method, string interceptorName)
+			{
+				if (InterceptorShape.RequiresReflectionLookup(method))
+				{
+					var (expression, delegateDeclaration) = GetTargetMethodByReflection(method);
+
+					if (delegateDeclaration is not null)
+						sb.AppendLine($"\t\t\t{delegateDeclaration}").AppendLine();
+
+					sb.AppendLine(
+						$$"""
+									internal static readonly global::System.Reflection.MemberInfo TargetMethod = {{expression}};
+
+						""");
+					return;
+				}
+
+				var parametersAdded = false;
+
+				foreach (var p in method.Parameters)
+				{
+					switch (p.RefKind)
+					{
+						case RefKind.Ref :
+						case RefKind.Out :
+						case RefKind.In  :
+							sb.AppendLine(
+								$$"""
+											static {{PrintType(p.Type)}} {{interceptorName}}_Arg_{{p.Name}} = default({{PrintType(p.Type)}});
+								""");
+							parametersAdded = true;
+							break;
+					}
+				}
+
+				if (parametersAdded)
+					sb.AppendLine();
+
+				sb.AppendLine(
+					$$"""
+								internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf{{GetMethodOf(method, interceptorName)}};
+
+					""");
+			}
 		}
 
 		static void ValidateAspectHooksForMethod(
@@ -1425,7 +1467,7 @@ namespace AspectGenerator
 
 		static IEnumerable<(ITypeSymbol Type, RefKind RefKind)> GetOnCallParameters(IMethodSymbol targetMethod)
 		{
-			if (targetMethod.IsExtensionMethod || !targetMethod.IsStatic)
+			if (targetMethod.MethodKind == MethodKind.ReducedExtension || !targetMethod.IsStatic)
 			{
 				var receiverType = targetMethod.ReceiverType ?? targetMethod.ContainingType;
 
@@ -1550,6 +1592,7 @@ namespace AspectGenerator
 			InvocationExpressionSyntax invocationExpression,
 			IMethodSymbol              method,
 			string                     interceptorName,
+			string                     typeArguments,
 			List<AttributeInfo>        attributes,
 			int                        methodModifierPosition)
 		{
@@ -1557,6 +1600,16 @@ namespace AspectGenerator
 			var generateAsync      = isReturnsAsyncType && attributes.Any(d => GetAspectOptions(d).Any(a => a.Key.EndsWith("Async") && a.Value is not null));
 			var generateArgs       = attributes.Any(d => GetAspectOptions(d).Any(a => a is { Key: "PassArguments", Value: true }));
 			var targetMethodLocalGenerated = false;
+			var returnsValue       = !(method.ReturnsVoid || generateAsync && asyncResultType is null);
+
+			// A hook can skip the call or swallow its exception, so out parameters are assigned up front.
+			//
+			foreach (var p in method.Parameters)
+				if (p.RefKind == RefKind.Out)
+					sb.AppendLine($"\t\t\t{EscapeIdentifier(p.Name)} = default!;");
+
+			if (method.Parameters.Any(static p => p.RefKind == RefKind.Out))
+				sb.AppendLine();
 
 			// Generate arguments.
 			//
@@ -1628,7 +1681,7 @@ namespace AspectGenerator
 				if (needInfo)
 				{
 					sb
-						.Append(indent).AppendLine($"// {(object?)attributes[idx].AppliedAttributeData ?? attributes[idx].AttributeClass}")
+						.Append(indent).AppendLine($"// {SingleLine(((object?)attributes[idx].AppliedAttributeData ?? attributes[idx].AttributeClass).ToString())}")
 						.Append(indent).AppendLine("//")
 						;
 
@@ -1636,7 +1689,7 @@ namespace AspectGenerator
 					{
 						sb
 							.Append(indent)
-							.AppendLine($"var __targetMethod__ = {interceptorName}_State.TargetMethod;")
+							.AppendLine($"var __targetMethod__ = {interceptorName}_State{typeArguments}.TargetMethod;")
 							.AppendLine()
 							;
 						targetMethodLocalGenerated = true;
@@ -1733,13 +1786,13 @@ namespace AspectGenerator
 					sb
 						.Append(indent)
 						.Append(
-							method.ReturnsVoid || isReturnsAsyncType && asyncResultType is null
+							!returnsValue
 								? string.Empty
 								: $"{(needInfo ? $"__info__{idx}.ReturnValue" : "var __return__")} = {(generateAsync ? "await " : "")}")
 						.Append(
 							onCall is null
-								? method.IsExtensionMethod || method.IsStatic
-									? PrintType(method.OriginalDefinition.ContainingType)
+								? method.IsStatic || method.MethodKind == MethodKind.ReducedExtension
+									? PrintType(method.ContainingType)
 									: "__this__"
 								: PrintType(attr))
 						.Append('.')
@@ -1747,7 +1800,7 @@ namespace AspectGenerator
 						.Append('(')
 						;
 
-					if (method.IsExtensionMethod || onCall is not null && method.IsStatic is false)
+					if (method.MethodKind == MethodKind.ReducedExtension || onCall is not null && method.IsStatic is false)
 					{
 						sb.Append("__this__");
 
@@ -1766,6 +1819,8 @@ namespace AspectGenerator
 									RefKind.In  => "in ",
 									_           => ""
 								})
+							// A dynamic argument would bind the call at run time, possibly to another overload.
+							.Append(p.Type.TypeKind == TypeKind.Dynamic && p.RefKind == RefKind.None ? "(object?)" : "")
 							.Append(EscapeIdentifier(p.Name))
 							.Append(", ");
 					}
@@ -1883,7 +1938,7 @@ namespace AspectGenerator
 				//
 				if (idx > 0)
 					sb.Append(indent).AppendLine($"__info__{idx - 1}.ReturnValue = __info__{idx}.ReturnValue;");
-				else if (!(method.ReturnsVoid || isReturnsAsyncType && asyncResultType is null))
+				else if (returnsValue)
 					sb.AppendLine($"\t\t\treturn {(needInfo ? $"__info__{idx}.ReturnValue" : "__return__")};");
 
 				TrimEnd(sb);
@@ -2040,11 +2095,11 @@ namespace AspectGenerator
 			var sb         = new StringBuilder();
 
 			if (method.IsStatic == false)
-				sb.Append($"this {PrintType(method.ReceiverType!)} __this__, ");
+				sb.Append($"this {GetReceiverRefKind(method)}{PrintType(method.ReceiverType!)} __this__, ");
 
 			foreach (var p in parameters)
 				sb
-					.Append(p.ToDisplayString(_parameterFormat))
+					.Append(PrintParameter(p))
 					.Append(", ")
 					;
 
@@ -2054,6 +2109,89 @@ namespace AspectGenerator
 			return sb.ToString();
 		}
 
+		/// <summary>
+		/// The interceptor of a struct instance method takes the receiver by reference, as the target's <c>this</c> is;
+		/// a reduced extension method passes on the ref kind of its <c>this</c> parameter.
+		/// </summary>
+		static string GetReceiverRefKind(IMethodSymbol method)
+		{
+			if (method.MethodKind == MethodKind.ReducedExtension)
+			{
+				return method.ReducedFrom!.Parameters[0].RefKind switch
+				{
+					RefKind.Ref => "ref ",
+					RefKind.In  => "in ",
+					_           => ""
+				};
+			}
+
+			if (method.ReceiverType is not { IsValueType: true } receiver || receiver.TypeKind == TypeKind.TypeParameter)
+				return "";
+
+			return method.IsReadOnly || receiver.IsReadOnly ? "in " : "ref ";
+		}
+
+		static string PrintParameter(IParameterSymbol parameter)
+		{
+			return parameter.ToDisplayString(_parameterFormat);
+		}
+
+		/// <summary>
+		/// Text inserted into a generated comment: a line break in it would end the comment and turn the rest into code.
+		/// </summary>
+		static string SingleLine(string text)
+		{
+			var sb      = new StringBuilder(text.Length);
+			var inSpace = false;
+
+			foreach (var c in text)
+			{
+				if (char.IsWhiteSpace(c) || char.IsControl(c))
+				{
+					if (!inSpace)
+						sb.Append(' ');
+					inSpace = true;
+				}
+				else
+				{
+					sb.Append(c);
+					inSpace = false;
+				}
+			}
+
+			return sb.ToString().Trim();
+		}
+
+		/// <summary>
+		/// The method info of a target whose ref struct or pointer parameters cannot appear in an expression tree. A static or
+		/// extension method is taken from a delegate created over its method group; an instance method (never generic
+		/// here, see <see cref="InterceptorShape.GetUnsupportedReason"/>) is looked up by its parameter types.
+		/// </summary>
+		static (string Expression, string? DelegateDeclaration) GetTargetMethodByReflection(IMethodSymbol method)
+		{
+			var definition = method.MethodKind == MethodKind.ReducedExtension
+				? method.GetConstructedReducedFrom()!
+				: method;
+
+			if (definition.IsStatic)
+			{
+				var parameters = string.Join(", ", definition.Parameters.Select(PrintParameter));
+				var returnType = definition.ReturnsVoid ? "void" : PrintType(definition.ReturnType);
+
+				return ($"new TargetDelegate({PrintType(definition.ContainingType)}.{PrintMethodName(definition)}).Method", $"delegate {returnType} TargetDelegate({parameters});");
+			}
+
+			var types = string.Join(", ", definition.Parameters.Select(static p =>
+			{
+				// typeof takes no nullable reference annotations.
+				var type = p.Type.TypeKind == TypeKind.Dynamic ? "typeof(object)" : $"typeof({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
+
+				return p.RefKind == RefKind.None ? type : $"{type}.MakeByRefType()";
+			}));
+
+			return ($"typeof({PrintType(definition.ContainingType)}).GetMethod(\"{definition.Name}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.DeclaredOnly, null, new global::System.Type[] {{ {types} }}, null)!", null);
+		}
+
 		static string GetMethodOf(IMethodSymbol method, string interceptorName)
 		{
 			var sb = new StringBuilder();
@@ -2061,13 +2199,13 @@ namespace AspectGenerator
 			sb.Append("(() => ");
 
 			sb
-				.Append(method.IsExtensionMethod || method.IsStatic ? PrintType(method.OriginalDefinition.ContainingType) : $"default({PrintType(method.ReceiverType!)})")
+				.Append(method.IsStatic || method.MethodKind == MethodKind.ReducedExtension ? PrintType(method.ContainingType) : $"default({PrintType(method.ReceiverType!)})")
 				.Append('.')
 				.Append(PrintMethodName(method))
 				.Append('(')
 				;
 
-			if (method.IsExtensionMethod)
+			if (method.MethodKind == MethodKind.ReducedExtension)
 				sb.Append($"default({PrintType(method.ReceiverType!)}), ");
 
 			foreach (var p in method.Parameters)
@@ -2076,7 +2214,8 @@ namespace AspectGenerator
 					case RefKind.Ref : sb.Append($"ref {interceptorName}_Arg_{p.Name}, "); break;
 					case RefKind.In  : sb.Append($"in {interceptorName}_Arg_{p.Name}, ");  break;
 					case RefKind.Out : sb.Append($"out {interceptorName}_Arg_{p.Name}, "); break;
-					default          : sb.Append($"default({PrintType(p.Type)}), ");       break;
+					// A dynamic argument would make the call in the expression tree a dynamic operation.
+					default          : sb.Append($"default({(p.Type.TypeKind == TypeKind.Dynamic ? "object" : PrintType(p.Type))}), "); break;
 				}
 
 			while (sb[^1] is ',' or ' ')

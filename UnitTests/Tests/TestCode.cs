@@ -40,6 +40,19 @@ namespace AspectGenerator.Tests
 		}
 	}
 
+	static class TestCodeExtensionBlocks
+	{
+		extension(string text)
+		{
+			// The generator reports the call (AG0003) and leaves it as it is: members of extension blocks are not intercepted.
+			[Aspects.TestAspect]
+			public string ExtensionBlockMethod()
+			{
+				return text;
+			}
+		}
+	}
+
 	class OnCallObject
 	{
 		public int OnCall(int n)

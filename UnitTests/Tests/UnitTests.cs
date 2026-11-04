@@ -280,6 +280,17 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void ExtensionBlockMemberIsNotInterceptedTest()
+		{
+			// AG0003: the call is reported as not intercepted, and it still compiles and runs.
+#pragma warning disable AG0003
+			var str = "block".ExtensionBlockMethod();
+#pragma warning restore AG0003
+
+			Assert.AreEqual("block", str);
+		}
+
+		[TestMethod]
 		public void ClassExtensionTest()
 		{
 			var str = new TestClassExtension().ExtensionMethod(1);

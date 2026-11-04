@@ -19,7 +19,8 @@ namespace AspectGenerator
 				return nameSet.Add(methodName) ? methodName : GetInterceptorName($"{methodName}_{++nameCounter}");
 			}
 
-			foreach (var group in aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default).OrderBy(static m => m.Key!.Name))
+			// Calls that need a generic interceptor share one per target, whatever their type arguments.
+			foreach (var group in aspectedMethods.GroupBy(static m => m.GenericShape ?? m.Method, SymbolEqualityComparer.Default).OrderBy(static m => m.Key!.Name))
 			{
 				var method      = (IMethodSymbol)group.Key!;
 				var invocations = group.ToList();
@@ -28,7 +29,8 @@ namespace AspectGenerator
 					method,
 					invocations,
 					GetInterceptorName(GetBaseName(method)),
-					GetOrderedAttributes(invocations[0].Attributes)));
+					GetOrderedAttributes(invocations[0].Attributes),
+					invocations[0].GenericShape is null ? [] : InterceptorShape.GetTypeParameters(method)));
 			}
 
 			return result;
@@ -61,8 +63,9 @@ namespace AspectGenerator
 	}
 
 	record InterceptorInfo(
-		IMethodSymbol            Method,
-		List<AnalyzedInvocation> Invocations,
-		string                   Name,
-		List<AttributeInfo>      Attributes);
+		IMethodSymbol              Method,
+		List<AnalyzedInvocation>   Invocations,
+		string                     Name,
+		List<AttributeInfo>        Attributes,
+		List<ITypeParameterSymbol> TypeParameters);
 }
