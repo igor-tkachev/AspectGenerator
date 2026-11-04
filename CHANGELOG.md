@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 — 2026-11-04
+
+- Breaking: the package is now a development dependency (`<DevelopmentDependency>true</DevelopmentDependency>`). `dotnet add package AspectGenerator` adds it with `PrivateAssets="all"`, and it no longer appears as a dependency of a package that references it. Before, a normal `PackageReference` flowed transitively to the consumers of a library; there the analyzer ran without the package's `build/*.props` (`InterceptorsNamespaces` and the generator options), which silently dropped aspects or broke interceptors. A library author who relied on the package flowing to consumers must now reference AspectGenerator directly in every project where it is used. Existing references without `PrivateAssets="all"` should add it.
+- The package contains only the analyzer (`analyzers/dotnet/cs`) and the build props and targets; it has no `lib` assembly.
 
 - Documented the minimum build toolchain: .NET SDK 10.0.200 or later (Roslyn 5.3; Visual Studio 2026 18.3 or later). An older compiler reports `CS9057` and does not load the generator, so aspects are not applied. The documentation no longer suggests pinning SDK 10.0.100.
 - Selected target methods are found from their declarations before call sites are bound, and call sites are rejected by name, generic arity and argument count before binding. Semantic models are reused per syntax tree. Together this makes the generator several times faster on large projects.
