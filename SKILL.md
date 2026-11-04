@@ -383,8 +383,8 @@ AG0002  OnCall aspect must be last when inferred from method metadata
 AG0003  invocation cannot be intercepted by the compiler
 AG0004  generated interceptor namespace is not listed in InterceptorsNamespaces
 AG0005  generator runs without the package MSBuild props (reference the package, or PrivateAssets="none" in the library)
-AG0006  call selected only by a target filter is not intercepted (off by default; dotnet_diagnostic.AG0006.severity = suggestion lists them)
-AG0007  summary per reason of the calls AG0006 would list, with their number
+AG0006  call selected only by a target filter is not intercepted (off by default; dotnet_diagnostic.AG0006.severity = warning lists them on the console, suggestion in the IDE only)
+AG0007  summary per reason of the calls AG0006 would list, with their number (information, no location: severity = warning in a .globalconfig to see it on the console)
 AG0101  hook method not found
 AG0102  hook method must be static
 AG0103  invalid hook parameter type
