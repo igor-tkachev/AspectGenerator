@@ -1100,7 +1100,8 @@ namespace AspectGenerator
 							semanticModels.Add(invocation.SyntaxTree, semantic);
 						}
 
-						// The API is marked experimental before Roslyn 4.14 and is used since 4.11 (SDK 8.0.4xx, Visual Studio 17.11).
+						// GetInterceptableLocation appeared in Roslyn 4.11 and is marked experimental before 4.14. The generator's
+						// floor is 4.12 all the same, because the compiler reads the InterceptorsNamespaces key from 4.12 on.
 #pragma warning disable RSEXPERIMENTAL002
 						var location = semantic.GetInterceptableLocation(invocation, spc.CancellationToken);
 #pragma warning restore RSEXPERIMENTAL002

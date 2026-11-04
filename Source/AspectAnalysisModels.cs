@@ -129,15 +129,12 @@ namespace AspectGenerator
 		/// </summary>
 		public bool CanRejectByTypeReceiver { get; private set; } = true;
 
-		// INamedTypeSymbol.IsExtension (C# 14 extension blocks) exists only in Roslyn 4.14 and later. The generator is built
-		// against an older Roslyn so that it loads in older compilers, so the property is read reflectively; a compiler
-		// without it cannot produce extension block types.
-		static readonly System.Reflection.PropertyInfo? _isExtensionProperty =
-			typeof(INamedTypeSymbol).GetProperty("IsExtension", typeof(bool));
-
+		// C# 14 extension blocks have TypeKind.Extension, value 14, which Roslyn 4.14 added. The generator is built against
+		// an older Roslyn so that it loads in older compilers, so the value is compared as a number; a compiler without it
+		// cannot produce extension block types.
 		static bool IsExtensionBlock(INamedTypeSymbol type)
 		{
-			return _isExtensionProperty is not null && (bool)_isExtensionProperty.GetValue(type)!;
+			return (int)type.TypeKind == 14;
 		}
 
 		public void Add(IMethodSymbol method)
