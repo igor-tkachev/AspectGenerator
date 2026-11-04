@@ -10,9 +10,11 @@ AspectGenerator provides AOP-like method aspects for C# using compile-time call-
 AspectGenerator is not traditional runtime AOP. Aspects are applied to call sites visible to the current compilation.
 
 > [!IMPORTANT]
-> **Projects that use AspectGenerator must be built with the .NET 10 SDK/compiler.**
+> **Projects that use AspectGenerator must be built with .NET SDK 10.0.200 or later (Roslyn 5.3; Visual Studio 2026 18.3 or later).**
 >
 > This is a build-toolchain requirement, not a target-framework requirement. AspectGenerator itself targets `netstandard2.0`, and your project target framework is a separate decision. The project must be compiled with the .NET 10 SDK/compiler because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
+>
+> An older compiler, such as SDK 10.0.1xx or an earlier Visual Studio 2026 update, cannot load the generator: the build reports `CS9057` (the analyzer references a newer compiler version) and the aspects are silently not applied.
 
 > [!IMPORTANT]
 > This is not runtime AOP. Aspects are applied by rewriting call sites visible to the current compilation. Calls made through reflection, delegates, already-compiled external assemblies, or unsupported C# constructs are outside the interception model.
@@ -25,14 +27,15 @@ Install the package:
 dotnet add package AspectGenerator
 ```
 
-Build the consuming project with the .NET 10 SDK/compiler. This requirement is about the build tools used by `dotnet build`, MSBuild, or Visual Studio, not about forcing a specific `TargetFramework`.
+Build the consuming project with .NET SDK 10.0.200 or later. This requirement is about the build tools used by `dotnet build`, MSBuild, or Visual Studio, not about forcing a specific `TargetFramework`.
 
-For example, use a `global.json` to pin the repository to a .NET 10 SDK:
+If the repository uses a `global.json`, require at least 10.0.200 and let newer feature bands roll forward:
 
 ```json
 {
   "sdk": {
-    "version": "10.0.100"
+    "version": "10.0.200",
+    "rollForward": "latestFeature"
   }
 }
 ```

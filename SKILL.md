@@ -6,7 +6,9 @@ AspectGenerator provides AOP-like compile-time method aspects for C# by rewritin
 
 ## Build-tool requirement
 
-AspectGenerator requires projects that use it to be built with the .NET 10 SDK/compiler.
+AspectGenerator requires projects that use it to be built with .NET SDK 10.0.200 or later (Roslyn 5.3; Visual Studio 2026 18.3 or later).
+
+An older compiler, such as SDK 10.0.1xx or an earlier Visual Studio 2026 update, cannot load the generator: the build reports `CS9057` (the analyzer references a newer compiler version) and the aspects are silently not applied. When aspects seem to be ignored, check the build output for `CS9057` first.
 
 This is a build-toolchain requirement, not necessarily the same thing as the project target framework requirement. The important part is the SDK/compiler used by `dotnet build`, MSBuild, or Visual Studio. AspectGenerator itself targets `netstandard2.0`; consuming projects need the .NET 10 compiler because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data.
 
@@ -398,7 +400,7 @@ AG0300  optional intercepted-call marker
 When asked to analyze a project using AspectGenerator:
 
 ```text
-1. Verify the project is built with the .NET 10 SDK/compiler.
+1. Verify the project is built with .NET SDK 10.0.200 or later and the build output has no `CS9057`.
 2. Find every project containing call sites that should be intercepted.
 3. Verify each such project references AspectGenerator directly.
 4. Check AspectGeneratorGenerateApi / PublicApi ownership mode.

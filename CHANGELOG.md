@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Documented the minimum build toolchain: .NET SDK 10.0.200 or later (Roslyn 5.3; Visual Studio 2026 18.3 or later). An older compiler reports `CS9057` and does not load the generator, so aspects are not applied. The documentation no longer suggests pinning SDK 10.0.100.
+
 ## 1.0.1
 
 - Added compile-time method aspects using C# interceptors.
