@@ -6,7 +6,7 @@ Filters are not runtime AOP. They select target methods, but AspectGenerator sti
 
 Assembly-level filters also select methods of referenced assemblies, for example `public static System.Math.Max(System.Int32, System.Int32)`. Such rules cost build time, because a call can only be matched to a referenced method after it is bound. A rule with a literal method name binds only the calls with that name. A rule whose root namespace is a literal that no referenced assembly declares (for example `fulltype: MyApp.**` when only `MyApp` itself uses that root) is matched against the current compilation's declarations only. Any other assembly-level rule, including `contains:`, `regex:`, and wildcard method names, binds every call site of the compilation.
 
-Filters also select the methods the compiler generates for records (`ToString`, `Equals`, `GetHashCode`, `PrintMembers`). A generated `Deconstruct` is never selected, because interceptors do not support its `out` parameters yet.
+Filters also select the methods the compiler generates for records (`ToString`, `Equals`, `GetHashCode`, `PrintMembers`, `Deconstruct`).
 
 ## Filter Model
 

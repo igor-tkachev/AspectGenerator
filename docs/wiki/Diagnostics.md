@@ -6,7 +6,7 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 
 - `AG0001`: `OnCall` aspect must be last when the aspect is applied directly.
 - `AG0002`: `OnCall` aspect must be last when the aspect is inferred from method metadata.
-- `AG0003`: invocation cannot be intercepted by the compiler.
+- `AG0003`: the call is not intercepted, because the compiler cannot intercept it or because generated code cannot express it (the message gives the reason; see [Limitations](Limitations)). A warning when the aspect is applied to the target method, information when a target filter selected it.
 - `AG0004`: generated interceptor namespace is not listed in `InterceptorsNamespaces`.
 - `AG0005`: the analyzer runs without the package's MSBuild props (the `AspectGeneratorPropsImported` marker is not visible), and the generated interceptor namespace is not listed in `InterceptorsNamespaces`; typically the generator reached the project transitively or as a manual analyzer reference. Reference the package from the project, or have the library flow it on with `PrivateAssets="none"`; see [Using AspectGenerator in libraries](Using-AspectGenerator-in-libraries).
 

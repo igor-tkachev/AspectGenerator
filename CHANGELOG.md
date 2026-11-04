@@ -15,6 +15,12 @@
 - `AG0300` markers now use the generator's selection plan, so they are reported exactly for the intercepted calls, and the marker analyzer no longer binds every invocation.
 - Generated interceptors use fully qualified (`global::`) type names. Aspect attributes declared in the global namespace or nested in a class no longer produce code that does not compile.
 - Calls with explicit type arguments (`M<T>()`) and conditional calls (`a?.M()`) are intercepted; the generated code no longer contains `#error` for them.
+- Fixed interceptors that did not compile, found by applying aspects to a large code base: a call that spans several lines (or an aspect whose `TargetFilter` does) is no longer echoed into a generated comment with its line breaks, which turned the rest of the text into code.
+- Calls whose type arguments cannot be named in generated code (type parameters of the calling method or type, anonymous types, private nested types) get a generic interceptor over the target's type parameters with the same constraints, one per target.
+- Fixed interceptors for static-form extension calls (`Extensions.Ext(value)`), `out` parameters (including a record's generated `Deconstruct`, which target filters now select), non-generic `Task` and `ValueTask` targets without async hooks, `dynamic` parameters, ref struct parameters such as `params ReadOnlySpan<T>`, instance methods of structs (the receiver is passed by reference), and static methods of constructed generic types.
+- Calls inside expression trees (lambdas converted to `Expression<T>`, query clauses over `IQueryable`) are no longer intercepted: a query provider must see the original method. Before, a target filter could select them, and the compiler failed.
+- `base.M()` calls are no longer intercepted: the interceptor called the method through its receiver, so a virtual target recursed into the override.
+- Calls that still cannot be intercepted (local functions, members of C# 14 extension blocks, calls removed by `[Conditional]`, `private` or `protected` targets, by-reference and ref struct returns, and a few rarer shapes listed in Limitations) are left as they are and reported with `AG0003`: a warning when the aspect is applied to the target method, information when a target filter selected it. Before, they produced code that did not compile.
 - Documentation: removed machine-specific paths, added the trace properties to the repository build props, and marked the file-local interceptor type as implemented in the roadmap.
 
 ## 1.0.1

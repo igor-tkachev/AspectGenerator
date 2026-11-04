@@ -9,10 +9,12 @@ Projects that use AspectGenerator must be built with .NET SDK 9.0.100 or later (
 - static method calls;
 - instance method calls;
 - extension method calls;
-- generic method calls;
+- generic method calls, including calls inside generic methods and types whose type arguments are the caller's type parameters;
 - target filters;
 - `Task`, `Task<T>`, `ValueTask`, and `ValueTask<T>` targets;
-- `ref`, `out`, and `in` parameters.
+- `ref`, `out`, and `in` parameters;
+- ref struct parameters (`Span<T>`, `params ReadOnlySpan<T>`) and `dynamic` parameters;
+- instance methods of structs.
 
 ## Unsupported
 
@@ -30,16 +32,21 @@ Unsupported cases either cannot be represented as ordinary interceptable invocat
 
 The source generator runs in the compilation of the project that references the generator package. A transitive reference to an aspect library is not enough to run AspectGenerator in the consuming project, unless the library passes the generator on with `PrivateAssets="none"`; otherwise projects with intercepted call sites must reference AspectGenerator directly.
 
-## Known Issues
+## Calls That Are Reported and Left As They Are
 
-These call shapes are selected but the generated interceptor does not compile yet. They are tracked for a later release:
+A selected call that cannot get a compilable interceptor is not intercepted. The generator reports `AG0003` at the call, with the reason, and the call runs as written. The report is a warning when the aspect is applied to the target method itself, and information when only a target filter selected the method:
 
-- extension methods called in static form (`Extensions.Ext(value)`): the interceptor refers to an undefined `__this__` (`CS0103`); instance-form calls (`value.Ext()`) work;
-- calls inside generic types or methods whose type arguments are the caller's own type parameters (`CS0246`);
-- calls whose type arguments are anonymous types;
-- `protected` static targets, which the file-local interceptor class cannot access (`CS0122`);
-- `params ReadOnlySpan<T>` parameters (`CS8640`);
-- `out` parameters (`CS0177`), including a record's generated `Deconstruct`, which target filters therefore never select;
-- non-generic `async Task` targets whose interceptor does not return on every path (`CS0161`);
-- calls with `dynamic` arguments (`CS1963`);
-- members of C# 14 extension blocks (`extension(T) { ... }`).
+- calls inside expression trees (lambdas converted to `Expression<T>`, query clauses over `IQueryable`): the expression keeps the original method for the query provider;
+- `base.M()` calls, which an interceptor could only make as a virtual call;
+- local functions;
+- members of C# 14 extension blocks (`extension(T) { ... }`);
+- calls removed by `[Conditional]` and partial methods without an implementation;
+- calls whose type arguments are the target's own type parameters (a generic method calling itself, a generic type calling its own members), which the compiler does not accept for a generic interceptor;
+- `private` or `protected` targets, which the generated file-local interceptor class cannot access;
+- methods that return by reference or return a ref struct;
+- `__arglist` methods and by-reference `dynamic` parameters;
+- `PassArguments` with a ref struct argument, which cannot be boxed;
+- generic instance methods with ref struct or pointer parameters;
+- `OnCall` hooks on calls whose type arguments cannot be named in generated code (see below).
+
+Calls whose type arguments cannot be named in the generated file — a type parameter of the calling method or type, an anonymous type, a private nested type — get a generic interceptor over the target's own type parameters, with the same constraints; the compiler passes the call's type arguments to it.
