@@ -92,6 +92,8 @@ normal build      -> analyzes and emits interceptor source
 DesignTimeBuild   -> analyzes for IDE diagnostics/markers but does not emit interceptor source
 ```
 
+Design-time builds report a reduced set of diagnostics: target filter errors (`AG0201`-`AG0206`, `AG0208`), `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project. `AG0001`, `AG0002`, `AG0003`, `AG0006`, `AG0103`-`AG0107` and `AG0101`/`AG0102` for library aspects need a bound call and appear only after a real build. A build that leaves `DesignTimeBuild=true` set is still a build when `BuildingProject` is `true`.
+
 There is no public `GenerateInterceptors` option.
 
 ## Assembly-level configuration

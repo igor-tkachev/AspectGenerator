@@ -11,6 +11,7 @@ namespace AspectGenerator
 	{
 		public bool?                     GenerateApi;
 		public bool?                     DesignTimeBuild;
+		public bool?                     BuildingProject;
 		public bool?                     PublicApi;
 		public bool?                     DebuggerStepThrough;
 		public string?                   ReportFile;

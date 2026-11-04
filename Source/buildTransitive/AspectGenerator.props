@@ -18,6 +18,7 @@
 			<ItemGroup>
 				<!-- Marker: the analyzer reports AG0005 when it runs without this file. -->
 				<CompilerVisibleProperty Include="AspectGeneratorPropsImported" />
+				<CompilerVisibleProperty Include="BuildingProject" />
 				<CompilerVisibleProperty Include="AspectGeneratorGenerateApi" />
 				<CompilerVisibleProperty Include="AspectGeneratorPublicApi" />
 				<CompilerVisibleProperty Include="AspectGeneratorDebuggerStepThrough" />

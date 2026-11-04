@@ -13,6 +13,7 @@
 		<CompilerVisibleProperty Include="AspectGeneratorAspectDiagnosticSeverity" />
 		<CompilerVisibleProperty Include="AspectGeneratorTrace" />
 		<CompilerVisibleProperty Include="AspectGeneratorTraceLevel" />
+		<CompilerVisibleProperty Include="BuildingProject" />
 		<CompilerVisibleProperty Include="AspectGeneratorInterceptorsNamespace" />
 		<CompilerVisibleProperty Include="CompilerGeneratedFilesOutputPath" />
 		<CompilerVisibleProperty Include="Configuration" />

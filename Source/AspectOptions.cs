@@ -19,6 +19,7 @@ namespace AspectGenerator
 			{
 				GenerateApi                          = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.GenerateApi}"),
 				DesignTimeBuild                      = GetBoolProperty(options,  "build_property.DesignTimeBuild"),
+				BuildingProject                      = GetBoolProperty(options,  "build_property.BuildingProject"),
 				PublicApi                            = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.PublicApi}"),
 				DebuggerStepThrough                  = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.DebuggerStepThrough}"),
 				ReportFile                           = options.TryGetValue($"build_property.AspectGenerator{AspectOptionName.ReportFile}",            out var reportFile) ? reportFile : null,
@@ -47,6 +48,7 @@ namespace AspectGenerator
 			{
 				GenerateApi            = msBuildOptions.GenerateApi,
 				DesignTimeBuild        = msBuildOptions.DesignTimeBuild,
+				BuildingProject        = msBuildOptions.BuildingProject,
 				PublicApi              = msBuildOptions.PublicApi,
 				DebuggerStepThrough    = msBuildOptions.DebuggerStepThrough,
 				ReportFile             = msBuildOptions.ReportFile,
@@ -131,12 +133,15 @@ namespace AspectGenerator
 
 		static GeneratorExecutionOptions CreateExecutionOptions(Options options)
 		{
-			var emitInterceptors = options.DesignTimeBuild is not true;
+			// MSBuild sets BuildingProject to true at the start of every real build (BuildOnlySettings), so a project that
+			// leaves DesignTimeBuild=true set in a real build is still treated as a build.
+			var designTimeBuild  = options.DesignTimeBuild is true && options.BuildingProject is not true;
+			var emitInterceptors = !designTimeBuild;
 
 			return new GeneratorExecutionOptions(
 				options.GenerateApi is not false,
 				emitInterceptors,
-				options.DesignTimeBuild is true,
+				designTimeBuild,
 				options.PublicApi is true,
 				options.DebuggerStepThrough is true,
 				options.ReportFile,

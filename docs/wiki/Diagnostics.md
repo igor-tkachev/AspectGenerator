@@ -45,7 +45,10 @@ Reported by builds only, because they need a selected target method or a bound c
 - `AG0001` and `AG0002`;
 - `AG0103` through `AG0107`;
 - `AG0101` and `AG0102` for aspects declared in referenced assemblies, which are checked against each intercepted target;
-- `AG0003` through `AG0006`, which are about the generated interceptors and the calls they skip.
+- `AG0003` and `AG0006`, for calls that are left as they are;
+- `AG0004` and `AG0005`, which are about the generated interceptors (these were never reported in design-time builds).
+
+A build is never treated as a design-time build: when MSBuild sets `BuildingProject=true` (it does at the start of every real build), the generator ignores a `DesignTimeBuild=true` left set by the project.
 
 The build-only diagnostics appear when the project is built, in the build output and the IDE's error list from that build. `AG0300` markers come from a separate analyzer and are not affected.
 

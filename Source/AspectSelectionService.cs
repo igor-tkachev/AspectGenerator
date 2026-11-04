@@ -61,7 +61,7 @@ namespace AspectGenerator
 
 				var hasTargetFilter = AspectSymbols.HasNamedArgument(attribute, "TargetFilter");
 
-				if (list.Parent is TypeDeclarationSyntax)
+				if (list.Parent is TypeDeclarationSyntax typeDeclaration)
 				{
 					if (!hasTargetFilter)
 					{
@@ -71,7 +71,14 @@ namespace AspectGenerator
 							continue;
 					}
 
-					CreateAppliedAspectFilterSet(attribute, GetSemanticModel(attribute.SyntaxTree));
+					var semanticModel = GetSemanticModel(attribute.SyntaxTree);
+
+					// A build compiles the filters of a type while it selects the type's methods, so a type without any
+					// reports nothing.
+					if (!MayHaveSelectableMethods(typeDeclaration, semanticModel, cancellationToken))
+						continue;
+
+					CreateAppliedAspectFilterSet(attribute, semanticModel);
 				}
 				else if (list.Parent is MethodDeclarationSyntax && hasTargetFilter && list.Target is null or { Identifier.ValueText: "method" })
 				{
@@ -88,9 +95,36 @@ namespace AspectGenerator
 		}
 
 		/// <summary>
+		/// A record (its compiler-generated methods are selectable), or a type one of whose declarations declares a method.
+		/// </summary>
+		static bool MayHaveSelectableMethods(TypeDeclarationSyntax typeDeclaration, SemanticModel semanticModel, CancellationToken cancellationToken)
+		{
+			if (typeDeclaration is RecordDeclarationSyntax || HasMethodDeclaration(typeDeclaration))
+				return true;
+
+			if (!typeDeclaration.Modifiers.Any(static m => m.ValueText == "partial"))
+				return false;
+
+			if (semanticModel.GetDeclaredSymbol(typeDeclaration, cancellationToken) is not {} type)
+				return false;
+
+			foreach (var reference in type.DeclaringSyntaxReferences)
+				if (reference.GetSyntax(cancellationToken) is TypeDeclarationSyntax declaration && HasMethodDeclaration(declaration))
+					return true;
+
+			return false;
+
+			static bool HasMethodDeclaration(TypeDeclarationSyntax declaration)
+			{
+				return declaration.Members.Any(static member => member is MethodDeclarationSyntax);
+			}
+		}
+
+		/// <summary>
 		/// The names a type-level application of an aspect with a <c>DefaultTargetFilter</c> can be written with: the aspect
-		/// class name with and without the <c>Attribute</c> suffix, and the using aliases of those names. The aspects are the
-		/// ones declared here and the ones of referenced aspect libraries.
+		/// class name with and without the <c>Attribute</c> suffix, and every using alias. Whether an alias denotes such an
+		/// aspect is left to binding: an alias may name another alias, in another file. The aspects are the ones declared
+		/// here and the ones of referenced aspect libraries.
 		/// </summary>
 		HashSet<string> GetDefaultTargetFilterAspectNames(CancellationToken cancellationToken)
 		{
@@ -107,14 +141,13 @@ namespace AspectGenerator
 			if (names.Count == 0)
 				return names;
 
-			var aliases = new List<(string Alias, string Target)>();
+			var aliases = new List<string>();
 
 			foreach (var tree in _compilation.SyntaxTrees)
 				AddAliases(tree.GetRoot(cancellationToken), aliases);
 
-			foreach (var (alias, target) in aliases)
-				if (names.Contains(target))
-					names.Add(alias);
+			foreach (var alias in aliases)
+				AddName(alias);
 
 			return names;
 
@@ -142,7 +175,7 @@ namespace AspectGenerator
 				}
 			}
 
-			static void AddAliases(SyntaxNode node, List<(string Alias, string Target)> aliases)
+			static void AddAliases(SyntaxNode node, List<string> aliases)
 			{
 				var usings = node switch
 				{
@@ -152,8 +185,8 @@ namespace AspectGenerator
 				};
 
 				foreach (var usingDirective in usings)
-					if (usingDirective is { Alias: {} alias, NamespaceOrType: NameSyntax target })
-						aliases.Add((alias.Name.Identifier.ValueText, GetRightmostName(target)));
+					if (usingDirective.Alias is {} alias)
+						aliases.Add(alias.Name.Identifier.ValueText);
 
 				var members = node switch
 				{

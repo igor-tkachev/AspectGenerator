@@ -129,47 +129,62 @@ namespace AspectGenerator.Tests
 			var library    = GetDesignTimeLibraryReference();
 			var typeFilter = TypeLevelFilterRuleDiagnosticSource;
 
-			var cases = new (string Name, string Source, string Id, MetadataReference? Reference)[]
+			var cases = new (string Name, string[] Sources, string? Id, MetadataReference? Reference)[]
 			{
-				("assembly regex",                FilterInvalidRegexSource,                                                                    AspectDiagnosticID.InvalidAspectFilterRegex,            null),
-				("assembly rule",                 FilterInvalidConditionPrefixSource,                                                          AspectDiagnosticID.InvalidAspectFilterRule,             null),
-				("assembly unknown key",          InvalidUnknownConditionKeyFilterSource,                                                      AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
-				("assembly parameter pattern",    FilterRuleDiagnosticSource.Replace("FILTER_RULE", "params: this string", StringComparison.Ordinal), AspectDiagnosticID.InvalidAspectFilterParameterPattern, null),
-				("assembly dotted pattern",       FilterInvalidPatternSource,                                                                  AspectDiagnosticID.InvalidAspectFilterDottedPattern,    null),
-				("type regex",                    typeFilter.Replace("FILTER_RULE", "regex: [", StringComparison.Ordinal),                    AspectDiagnosticID.InvalidAspectFilterRegex,            null),
-				("type rule",                     typeFilter.Replace("FILTER_RULE", "& method: Save", StringComparison.Ordinal),              AspectDiagnosticID.InvalidAspectFilterRule,             null),
-				("type unknown key",              typeFilter.Replace("FILTER_RULE", "foo: bar", StringComparison.Ordinal),                    AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
-				("type parameter pattern",        typeFilter.Replace("FILTER_RULE", "Save(..., ...)", StringComparison.Ordinal),              AspectDiagnosticID.InvalidAspectFilterParameterPattern, null),
-				("type dotted pattern",           typeFilter.Replace("FILTER_RULE", "A.**.B.**", StringComparison.Ordinal),                   AspectDiagnosticID.InvalidAspectFilterDottedPattern,    null),
-				("type default filter",           DefaultTargetFilterSingularAttributeSource,                                                  AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
-				("type default filter, alias",    DefaultTargetFilterAliasSource,                                                              AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
-				("library default filter",        LibraryDefaultTargetFilterSource,                                                            AspectDiagnosticID.UnknownAspectFilterConditionKey,     library),
-				("method-level TargetFilter",     FilterMethodLevelTargetFilterSource,                                                         AspectDiagnosticID.MethodLevelTargetFilter,             null),
-				("diagnostic severity option",    TraceDirectSource,                                                                           AspectDiagnosticID.InvalidAspectDiagnosticSeverity,     null),
-				("hook not found",                HookMethodDiagnosticsSource,                                                                 AspectDiagnosticID.HookMethodNotFound,                  null),
-				("hook not static",               HookMethodDiagnosticsSource,                                                                 AspectDiagnosticID.HookMethodNotStatic,                 null),
+				("assembly regex",                Files(FilterInvalidRegexSource),                                                                    AspectDiagnosticID.InvalidAspectFilterRegex,            null),
+				("assembly rule",                 Files(FilterInvalidConditionPrefixSource),                                                          AspectDiagnosticID.InvalidAspectFilterRule,             null),
+				("assembly unknown key",          Files(InvalidUnknownConditionKeyFilterSource),                                                      AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
+				("assembly parameter pattern",    Files(FilterRuleDiagnosticSource.Replace("FILTER_RULE", "params: this string", StringComparison.Ordinal)), AspectDiagnosticID.InvalidAspectFilterParameterPattern, null),
+				("assembly dotted pattern",       Files(FilterInvalidPatternSource),                                                                  AspectDiagnosticID.InvalidAspectFilterDottedPattern,    null),
+				("type regex",                    Files(typeFilter.Replace("FILTER_RULE", "regex: [", StringComparison.Ordinal)),                    AspectDiagnosticID.InvalidAspectFilterRegex,            null),
+				("type rule",                     Files(typeFilter.Replace("FILTER_RULE", "& method: Save", StringComparison.Ordinal)),              AspectDiagnosticID.InvalidAspectFilterRule,             null),
+				("type unknown key",              Files(typeFilter.Replace("FILTER_RULE", "foo: bar", StringComparison.Ordinal)),                    AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
+				("type parameter pattern",        Files(typeFilter.Replace("FILTER_RULE", "Save(..., ...)", StringComparison.Ordinal)),              AspectDiagnosticID.InvalidAspectFilterParameterPattern, null),
+				("type dotted pattern",           Files(typeFilter.Replace("FILTER_RULE", "A.**.B.**", StringComparison.Ordinal)),                   AspectDiagnosticID.InvalidAspectFilterDottedPattern,    null),
+				("type default filter",           Files(DefaultTargetFilterSingularAttributeSource),                                                  AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
+				("type default filter, alias",    Files(DefaultTargetFilterAliasSource),                                                              AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
+				("library default filter",        Files(LibraryDefaultTargetFilterSource),                                                            AspectDiagnosticID.UnknownAspectFilterConditionKey,     library),
+				("method-level TargetFilter",     Files(FilterMethodLevelTargetFilterSource),                                                         AspectDiagnosticID.MethodLevelTargetFilter,             null),
+				("diagnostic severity option",    Files(TraceDirectSource),                                                                           AspectDiagnosticID.InvalidAspectDiagnosticSeverity,     null),
+				("hook not found",                Files(HookMethodDiagnosticsSource),                                                                 AspectDiagnosticID.HookMethodNotFound,                  null),
+				("hook not static",               Files(HookMethodDiagnosticsSource),                                                                 AspectDiagnosticID.HookMethodNotStatic,                 null),
+				("default filter, alias with suffix", Files(DefaultTargetFilterAliasSource.Replace("using Logged =", "using LoggedAttribute =", StringComparison.Ordinal)), AspectDiagnosticID.UnknownAspectFilterConditionKey, null),
+				("default filter, alias chain",   Files(DefaultTargetFilterAliasChainUseSource, DefaultTargetFilterAliasChainSource),          AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
+				("default filter, global::",      Files(DefaultTargetFilterSingularAttributeSource.Replace("[Log]", "[global::AspectGenerator.Tests.GeneratorDriver.Log]", StringComparison.Ordinal)), AspectDiagnosticID.UnknownAspectFilterConditionKey, null),
+				("type filter, no methods",       Files(TypeLevelFilterWithoutMethodsSource),                                                  null,                                                   null),
+				("type filter, methods in a part", Files(TypeLevelFilterWithoutMethodsSource, TypeLevelFilterOtherPartSource),                AspectDiagnosticID.InvalidAspectFilterRegex,            null),
+
 			};
 
-			foreach (var (name, source, id, reference) in cases)
+			foreach (var (name, sources, id, reference) in cases)
 			{
 				var properties = id == AspectDiagnosticID.InvalidAspectDiagnosticSeverity
 					? new Dictionary<string,string> { [$"build_property.AspectGenerator{AspectOptionName.AspectDiagnosticSeverity}"] = "Offf" }
 					: new Dictionary<string,string>();
-				var build      = RunGenerator(source, properties, reference: reference);
-				var designTime = RunGenerator(source, new(properties) { ["build_property.DesignTimeBuild"] = "true" }, reference: reference);
+				var build      = RunGenerator(sources, properties, reference: reference);
+				var designTime = RunGenerator(sources, new(properties) { ["build_property.DesignTimeBuild"] = "true" }, reference: reference);
 
-				var expected = Describe(build,      id);
-				var actual   = Describe(designTime, id);
+				var expected = Describe(build);
+				var actual   = Describe(designTime);
 
-				Assert.AreNotEqual(0, expected.Length, $"{name}: expected {id} in a build. Actual diagnostics: {string.Join(", ", build.Diagnostics.Select(static d => d.Id))}");
-				CollectionAssert.AreEqual(expected, actual, $"{name}: {id} in a design-time build differs from a build. Actual diagnostics: {string.Join(", ", designTime.Diagnostics.Select(static d => d.Id))}");
+				if (id is null)
+					Assert.AreEqual(0, expected.Length, $"{name}: expected no live diagnostic in a build. Actual: {string.Join(", ", expected)}");
+				else
+					Assert.IsTrue(build.Diagnostics.Any(d => d.Id == id), $"{name}: expected {id} in a build. Actual diagnostics: {string.Join(", ", build.Diagnostics.Select(static d => d.Id))}");
+
+				CollectionAssert.AreEqual(expected, actual, $"{name}: the live diagnostics of a design-time build differ from a build. Build: {string.Join(" | ", expected)}. Design time: {string.Join(" | ", actual)}");
 				AssertNotGenerated(designTime, "Interceptors.g.cs");
 			}
 
-			static string[] Describe(GeneratorDriverRunResult result, string id)
+			static string[] Files(params string[] sources)
+			{
+				return sources;
+			}
+
+			static string[] Describe(GeneratorDriverRunResult result)
 			{
 				return result.Diagnostics
-					.Where(d => d.Id == id)
+					.Where(static d => LiveDiagnosticIds.Contains(d.Id))
 					.Select(static d => $"{d.Location.GetLineSpan()} {d.Severity} {d.GetMessage()}")
 					.OrderBy(static d => d, StringComparer.Ordinal)
 					.ToArray();
@@ -211,6 +226,50 @@ namespace AspectGenerator.Tests
 				AssertNotGenerated(designTime, "Interceptors.g.cs");
 			}
 		}
+
+		[TestMethod]
+		public void BuildingProjectOverridesDesignTimeBuildTest()
+		{
+			// MSBuild sets BuildingProject=true in every real build; DesignTimeBuild=true left set there must not turn the
+			// build into a design-time one.
+			var result = RunGenerator(
+				HookContractDiagnosticsSource,
+				new()
+				{
+					["build_property.DesignTimeBuild"] = "true",
+					["build_property.BuildingProject"] = "true",
+				});
+
+			AssertDiagnostic(result, AspectDiagnosticID.HookInvalidParameters);
+			AssertGenerated(result, "Interceptors.g.cs");
+
+			var designTime = RunGenerator(
+				HookContractDiagnosticsSource,
+				new()
+				{
+					["build_property.DesignTimeBuild"] = "true",
+					["build_property.BuildingProject"] = "false",
+				});
+
+			AssertNoDiagnostic(designTime, AspectDiagnosticID.HookInvalidParameters);
+			AssertNotGenerated(designTime, "Interceptors.g.cs");
+		}
+
+		/// <summary>
+		/// The diagnostics a design-time build still reports; every other id is reported by builds only.
+		/// </summary>
+		static readonly HashSet<string> LiveDiagnosticIds =
+		[
+			AspectDiagnosticID.HookMethodNotFound,
+			AspectDiagnosticID.HookMethodNotStatic,
+			AspectDiagnosticID.InvalidAspectFilterRegex,
+			AspectDiagnosticID.InvalidAspectFilterRule,
+			AspectDiagnosticID.UnknownAspectFilterConditionKey,
+			AspectDiagnosticID.InvalidAspectFilterParameterPattern,
+			AspectDiagnosticID.InvalidAspectFilterDottedPattern,
+			AspectDiagnosticID.MethodLevelTargetFilter,
+			AspectDiagnosticID.InvalidAspectDiagnosticSeverity,
+		];
 
 		/// <summary>
 		/// An aspect library: aspects with a missing hook, an instance hook and an invalid default target filter.
@@ -1827,10 +1886,23 @@ namespace AspectGenerator.Tests
 
 		static GeneratorDriverRunResult RunGenerator(string source, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null, MetadataReference? reference = null)
 		{
-			return RunGeneratorAndGetCompilation(source, out _, properties, preprocessorSymbols, reference);
+			return RunGeneratorAndGetCompilation([source], out _, properties, preprocessorSymbols, reference);
+		}
+
+		/// <summary>
+		/// One syntax tree per source: GeneratorDriverTest.cs, GeneratorDriverTest1.cs, GeneratorDriverTest2.cs, ...
+		/// </summary>
+		static GeneratorDriverRunResult RunGenerator(string[] sources, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null, MetadataReference? reference = null)
+		{
+			return RunGeneratorAndGetCompilation(sources, out _, properties, preprocessorSymbols, reference);
 		}
 
 		static GeneratorDriverRunResult RunGeneratorAndGetCompilation(string source, out Compilation outputCompilation, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null, MetadataReference? reference = null)
+		{
+			return RunGeneratorAndGetCompilation([source], out outputCompilation, properties, preprocessorSymbols, reference);
+		}
+
+		static GeneratorDriverRunResult RunGeneratorAndGetCompilation(string[] sources, out Compilation outputCompilation, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null, MetadataReference? reference = null)
 		{
 			// The feature lets the output compilation accept the generated interceptors, as InterceptorsNamespaces does in a build.
 			var parseOptions = CSharpParseOptions.Default
@@ -1842,7 +1914,7 @@ namespace AspectGenerator.Tests
 
 			var compilation  = CSharpCompilation.Create(
 				"AspectGenerator.Tests.GeneratorDriver",
-				[CSharpSyntaxTree.ParseText(source, parseOptions, "GeneratorDriverTest.cs")],
+				sources.Select((source, index) => CSharpSyntaxTree.ParseText(source, parseOptions, index == 0 ? "GeneratorDriverTest.cs" : $"GeneratorDriverTest{index}.cs")),
 				reference is null ? GetMetadataReferences() : GetMetadataReferences().Append(reference),
 				new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
@@ -2225,6 +2297,77 @@ namespace AspectGenerator.Tests
 				}
 
 				public string Save() => "";
+			}
+			""";
+
+		const string DefaultTargetFilterAliasChainSource =
+			"""
+			global using LogAlias = AspectGenerator.Tests.GeneratorDriver.LogAttribute;
+
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(
+				OnAfterCall = nameof(After),
+				DefaultTargetFilter = "attribute: NoLogAttribute")]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
+			}
+			""";
+
+		const string DefaultTargetFilterAliasChainUseSource =
+			"""
+			namespace AspectGenerator.Tests.Chained
+			{
+				using Chained = LogAlias;
+
+				[Chained]
+				sealed class Service
+				{
+					public void Invoke()
+					{
+						Save();
+					}
+
+					public string Save() => "";
+				}
+			}
+			""";
+
+		const string TypeLevelFilterWithoutMethodsSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			[FilterAspect(TargetFilter = "regex: [")]
+			partial class Target
+			{
+				public string Name { get; set; } = "";
+			}
+			""";
+
+		const string TypeLevelFilterOtherPartSource =
+			"""
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			partial class Target
+			{
+				public string Save() => Name;
 			}
 			""";
 

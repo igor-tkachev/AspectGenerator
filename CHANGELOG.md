@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Changed: design-time builds (the IDE's live analysis, `DesignTimeBuild=true`) no longer select target methods or bind calls; they only compile the target filters. On a large project this takes the generator from seconds per edit to tens of milliseconds, independent of the filters used. Target filter errors (`AG0201`, `AG0202`, `AG0204`–`AG0206`, `AG0208`), the options check `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project are still reported live. The checks that need a selected target method or a bound call are now reported by builds only: `AG0001`, `AG0002`, `AG0003` and `AG0006` (calls left as they are), `AG0103`–`AG0107`, and `AG0101`/`AG0102` for aspects declared in referenced assemblies. See [Diagnostics](docs/wiki/Diagnostics.md#design-time-builds).
+- Changed: design-time builds (the IDE's live analysis, `DesignTimeBuild=true`) no longer select target methods or bind calls; they only compile the target filters. On a large project, in a driver configured as the IDE configures it, the generator drops from seconds to tens of milliseconds per edit, independent of the filters used. Target filter errors (`AG0201`, `AG0202`, `AG0204`–`AG0206`, `AG0208`), the options check `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project are still reported live. The checks that need a selected target method or a bound call are now reported by builds only: `AG0001`, `AG0002`, `AG0003` and `AG0006` (calls left as they are), `AG0103`–`AG0107`, and `AG0101`/`AG0102` for aspects declared in referenced assemblies. See [Diagnostics](docs/wiki/Diagnostics.md#design-time-builds).
 
 ## 1.1.0 — 2026-11-04
 

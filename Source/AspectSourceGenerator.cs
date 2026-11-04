@@ -636,8 +636,9 @@ namespace AspectGenerator
 		/// selection plan, nor bound call sites, which together cost seconds per edit on a large project. The target filters
 		/// are still compiled, from the attributes that carry one, so that their diagnostics stay live in the editor, as do
 		/// the hook checks of the aspects declared here and the options checks. The checks that need a selected target
-		/// method or a bound call (AG0001, AG0002, AG0006, AG0103 to AG0107, and AG0101/AG0102 for aspects of referenced
-		/// assemblies) are reported by builds only, as are AG0003 to AG0005, which concern the generated interceptors.
+		/// method or a bound call (AG0001, AG0002, AG0003, AG0006, AG0103 to AG0107, and AG0101/AG0102 for aspects of
+		/// referenced assemblies) are reported by builds only. AG0004 and AG0005 concern the generated interceptors and
+		/// were never reported in design-time builds.
 		/// </summary>
 		static AnalysisResult AnalyzeDesignTimeBuild(
 			Compilation                     compilation,
