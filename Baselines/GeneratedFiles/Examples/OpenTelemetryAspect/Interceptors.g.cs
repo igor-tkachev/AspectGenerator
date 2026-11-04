@@ -35,7 +35,7 @@ namespace AspectGenerator
 
 		private static class AsyncMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.AsyncMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::OpenTelemetryAspect.Program.AsyncMethod());
 
 			internal static readonly global::Aspects.MetricsAttribute Aspect0 = new global::Aspects.MetricsAttribute();
 
@@ -51,34 +51,34 @@ namespace AspectGenerator
 		// Intercepts AsyncMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKDIBAABQcm9ncmFtLmNz")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		public static async System.Threading.Tasks.Task<string> AsyncMethod_Interceptor()
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		public static async global::System.Threading.Tasks.Task<string> AsyncMethod_Interceptor()
 		{
 			// Aspects.MetricsAttribute
 			//
 			var __targetMethod__ = AsyncMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = AsyncMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			await using (Aspects.MetricsAttribute.OnUsingAsync(__info__0))
+			await using (global::Aspects.MetricsAttribute.OnUsingAsync(__info__0))
 			{
 				try
 				{
-					__info__0.ReturnValue = await OpenTelemetryAspect.Program.AsyncMethod();
+					__info__0.ReturnValue = await global::OpenTelemetryAspect.Program.AsyncMethod();
 				}
-				catch (Exception __ex__)
+				catch (global::System.Exception __ex__)
 				{
 					__info__0.Exception = __ex__;
 					throw;
 				}
 				finally
 				{
-					Aspects.MetricsAttribute.OnFinally(__info__0);
+					global::Aspects.MetricsAttribute.OnFinally(__info__0);
 				}
 			}
 
@@ -87,7 +87,7 @@ namespace AspectGenerator
 
 		private static class Method1_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.Method1());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::OpenTelemetryAspect.Program.Method1());
 
 			internal static readonly global::Aspects.MetricsAttribute Aspect0 = new global::Aspects.MetricsAttribute();
 
@@ -106,7 +106,7 @@ namespace AspectGenerator
 		// Intercepts Method1().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKAUBAABQcm9ncmFtLmNz")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
 		public static void Method1_Interceptor()
 		{
 			// Aspects.MetricsAttribute
@@ -114,33 +114,33 @@ namespace AspectGenerator
 			var __targetMethod__ = Method1_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = Method1_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<global::AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			using (Aspects.MetricsAttribute.OnUsing(__info__0))
+			using (global::Aspects.MetricsAttribute.OnUsing(__info__0))
 			{
 				try
 				{
-					OpenTelemetryAspect.Program.Method1();
+					global::OpenTelemetryAspect.Program.Method1();
 				}
-				catch (Exception __ex__)
+				catch (global::System.Exception __ex__)
 				{
 					__info__0.Exception = __ex__;
 					throw;
 				}
 				finally
 				{
-					Aspects.MetricsAttribute.OnFinally(__info__0);
+					global::Aspects.MetricsAttribute.OnFinally(__info__0);
 				}
 			}
 		}
 
 		private static class Method2_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.Method2());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::OpenTelemetryAspect.Program.Method2());
 
 			internal static readonly global::Aspects.MetricsAttribute Aspect0 = new global::Aspects.MetricsAttribute();
 
@@ -156,7 +156,7 @@ namespace AspectGenerator
 		// Intercepts Method2().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKPYAAABQcm9ncmFtLmNz")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
 		public static void Method2_Interceptor()
 		{
 			// Aspects.MetricsAttribute
@@ -164,33 +164,33 @@ namespace AspectGenerator
 			var __targetMethod__ = Method2_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = Method2_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<global::AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			using (Aspects.MetricsAttribute.OnUsing(__info__0))
+			using (global::Aspects.MetricsAttribute.OnUsing(__info__0))
 			{
 				try
 				{
-					OpenTelemetryAspect.Program.Method2();
+					global::OpenTelemetryAspect.Program.Method2();
 				}
-				catch (Exception __ex__)
+				catch (global::System.Exception __ex__)
 				{
 					__info__0.Exception = __ex__;
 					throw;
 				}
 				finally
 				{
-					Aspects.MetricsAttribute.OnFinally(__info__0);
+					global::Aspects.MetricsAttribute.OnFinally(__info__0);
 				}
 			}
 		}
 
 		private static class MethodException_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => OpenTelemetryAspect.Program.MethodException());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::OpenTelemetryAspect.Program.MethodException());
 
 			internal static readonly global::Aspects.IgnoreCatchAttribute Aspect0 = new global::Aspects.IgnoreCatchAttribute();
 			internal static readonly global::Aspects.MetricsAttribute Aspect1 = new global::Aspects.MetricsAttribute();
@@ -207,7 +207,7 @@ namespace AspectGenerator
 		// Intercepts MethodException().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "FeZlU2OG8Ygf85iSYjbQKBQBAABQcm9ncmFtLmNz")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
 		public static void MethodException_Interceptor()
 		{
 			// Aspects.IgnoreCatchAttribute
@@ -215,7 +215,7 @@ namespace AspectGenerator
 			var __targetMethod__ = MethodException_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = MethodException_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<global::AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -227,41 +227,41 @@ namespace AspectGenerator
 					// Aspects.MetricsAttribute
 					//
 					var __aspect__1 = MethodException_Interceptor_State.Aspect1;
-					var __info__1   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+					var __info__1   = new global::AspectGenerator.InterceptInfo<global::AspectGenerator.Void>
 					{
 						MemberInfo = __targetMethod__,
 						Aspect     = __aspect__1,
 						PreviousInfo = __info__0
 					};
 
-					using (Aspects.MetricsAttribute.OnUsing(__info__1))
+					using (global::Aspects.MetricsAttribute.OnUsing(__info__1))
 					{
 						try
 						{
-							OpenTelemetryAspect.Program.MethodException();
+							global::OpenTelemetryAspect.Program.MethodException();
 						}
-						catch (Exception __ex__)
+						catch (global::System.Exception __ex__)
 						{
 							__info__1.Exception = __ex__;
 							throw;
 						}
 						finally
 						{
-							Aspects.MetricsAttribute.OnFinally(__info__1);
+							global::Aspects.MetricsAttribute.OnFinally(__info__1);
 						}
 					}
 
 					__info__0.ReturnValue = __info__1.ReturnValue;
 				}
 			}
-			catch (Exception __ex__)
+			catch (global::System.Exception __ex__)
 			{
 				__info__0.Exception       = __ex__;
-				__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
+				__info__0.InterceptResult = global::AspectGenerator.InterceptResult.ReThrow;
 
-				Aspects.IgnoreCatchAttribute.OnCatch(__info__0);
+				global::Aspects.IgnoreCatchAttribute.OnCatch(__info__0);
 
-				if (__info__0.InterceptResult == AspectGenerator.InterceptResult.ReThrow)
+				if (__info__0.InterceptResult == global::AspectGenerator.InterceptResult.ReThrow)
 					throw;
 			}
 		}

@@ -35,7 +35,7 @@ namespace AspectGenerator
 
 		private static class TestMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.ClassLibrary.TestClass.TestMethod(default(string)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.ClassLibrary.TestClass.TestMethod(default(string)));
 
 			internal static readonly global::Aspects.CrossProjectAttribute Aspect0 = new global::Aspects.CrossProjectAttribute();
 
@@ -51,7 +51,7 @@ namespace AspectGenerator
 		// Intercepts TestMethod(str + " MainMethod").
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "aJ+70nNHAWZ4fneAjRgLSqkAAABUZXN0Q2xhc3MuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
 		public static string TestMethod_Interceptor(string str)
 		{
 			// Aspects.CrossProjectAttribute
@@ -59,15 +59,15 @@ namespace AspectGenerator
 			var __targetMethod__ = TestMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = TestMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.ClassLibrary.TestClass.TestMethod(str);
+			__info__0.ReturnValue = global::AspectGenerator.ClassLibrary.TestClass.TestMethod(str);
 
-			Aspects.CrossProjectAttribute.OnAfterCall(__info__0);
+			global::Aspects.CrossProjectAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}

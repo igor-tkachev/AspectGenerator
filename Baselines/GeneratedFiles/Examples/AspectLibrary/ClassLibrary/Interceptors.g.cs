@@ -35,7 +35,7 @@ namespace AspectGenerator
 
 		private static class StaticMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => ClassLibrary.Class1.StaticMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::ClassLibrary.Class1.StaticMethod());
 
 			internal static readonly global::AspectLibrary.ConsoleLogAttribute Aspect0 = new global::AspectLibrary.ConsoleLogAttribute();
 
@@ -51,7 +51,7 @@ namespace AspectGenerator
 		// Intercepts StaticMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "AncmHYx311mIhEhZRSZqHJMAAABDbGFzczEuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
 		public static void StaticMethod_Interceptor()
 		{
 			// AspectLibrary.ConsoleLogAttribute
@@ -59,19 +59,19 @@ namespace AspectGenerator
 			var __targetMethod__ = StaticMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = StaticMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<global::AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			AspectLibrary.ConsoleLogAttribute.OnBeforeCall(__info__0);
+			global::AspectLibrary.ConsoleLogAttribute.OnBeforeCall(__info__0);
 
-			if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+			if (__info__0.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 			{
-				ClassLibrary.Class1.StaticMethod();
+				global::ClassLibrary.Class1.StaticMethod();
 
-				AspectLibrary.ConsoleLogAttribute.OnAfterCall(__info__0);
+				global::AspectLibrary.ConsoleLogAttribute.OnAfterCall(__info__0);
 			}
 		}
 	}

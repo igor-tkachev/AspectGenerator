@@ -35,9 +35,9 @@ namespace ExampleAspectGenerator
 
 		private static class GetCustomers_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => TransactionAspect.Program.GetCustomers(default(LinqToDB.Data.DataConnection)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::TransactionAspect.Program.GetCustomers(default(global::LinqToDB.Data.DataConnection)));
 
-			internal static readonly global::Aspects.TransactionAttribute Aspect0 = new global::Aspects.TransactionAttribute() { IsolationLevel = (System.Data.IsolationLevel)256 };
+			internal static readonly global::Aspects.TransactionAttribute Aspect0 = new global::Aspects.TransactionAttribute() { IsolationLevel = (global::System.Data.IsolationLevel)256 };
 
 			static GetCustomers_Interceptor_State()
 			{
@@ -51,8 +51,8 @@ namespace ExampleAspectGenerator
 		// Intercepts GetCustomers(db).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "ZKlJ3/dLCHFyq3z8/hvMxngDAABQcm9ncmFtLmNz")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		public static System.Collections.Generic.List<TransactionAspect.Program.Customer> GetCustomers_Interceptor(LinqToDB.Data.DataConnection db)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		public static global::System.Collections.Generic.List<global::TransactionAspect.Program.Customer> GetCustomers_Interceptor(global::LinqToDB.Data.DataConnection db)
 		{
 			var __args__ = new object?[] { db };
 
@@ -61,7 +61,7 @@ namespace ExampleAspectGenerator
 			var __targetMethod__ = GetCustomers_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = GetCustomers_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<System.Collections.Generic.List<TransactionAspect.Program.Customer>>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<global::System.Collections.Generic.List<global::TransactionAspect.Program.Customer>>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -70,21 +70,21 @@ namespace ExampleAspectGenerator
 
 			try
 			{
-				Aspects.TransactionAttribute.OnBeforeCall(__info__0);
+				global::Aspects.TransactionAttribute.OnBeforeCall(__info__0);
 
-				if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+				if (__info__0.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 				{
-					__info__0.ReturnValue = TransactionAspect.Program.GetCustomers(db);
+					__info__0.ReturnValue = global::TransactionAspect.Program.GetCustomers(db);
 				}
 			}
-			catch (Exception __ex__)
+			catch (global::System.Exception __ex__)
 			{
 				__info__0.Exception = __ex__;
 				throw;
 			}
 			finally
 			{
-				Aspects.TransactionAttribute.OnFinally(__info__0);
+				global::Aspects.TransactionAttribute.OnFinally(__info__0);
 			}
 
 			return __info__0.ReturnValue;
@@ -92,7 +92,7 @@ namespace ExampleAspectGenerator
 
 		private static class GetCustomersAsync_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => TransactionAspect.Program.GetCustomersAsync(default(LinqToDB.Data.DataConnection)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::TransactionAspect.Program.GetCustomersAsync(default(global::LinqToDB.Data.DataConnection)));
 
 			internal static readonly global::Aspects.TransactionAttribute Aspect0 = new global::Aspects.TransactionAttribute();
 
@@ -108,8 +108,8 @@ namespace ExampleAspectGenerator
 		// Intercepts GetCustomersAsync(db).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "ZKlJ3/dLCHFyq3z8/hvMxpkDAABQcm9ncmFtLmNz")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		public static async System.Threading.Tasks.Task<System.Collections.Generic.List<TransactionAspect.Program.Customer>> GetCustomersAsync_Interceptor(LinqToDB.Data.DataConnection db)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		public static async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<global::TransactionAspect.Program.Customer>> GetCustomersAsync_Interceptor(global::LinqToDB.Data.DataConnection db)
 		{
 			var __args__ = new object?[] { db };
 
@@ -118,7 +118,7 @@ namespace ExampleAspectGenerator
 			var __targetMethod__ = GetCustomersAsync_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = GetCustomersAsync_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<System.Collections.Generic.List<TransactionAspect.Program.Customer>>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<global::System.Collections.Generic.List<global::TransactionAspect.Program.Customer>>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -127,21 +127,21 @@ namespace ExampleAspectGenerator
 
 			try
 			{
-				await Aspects.TransactionAttribute.OnBeforeCallAsync(__info__0);
+				await global::Aspects.TransactionAttribute.OnBeforeCallAsync(__info__0);
 
-				if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+				if (__info__0.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 				{
-					__info__0.ReturnValue = await TransactionAspect.Program.GetCustomersAsync(db);
+					__info__0.ReturnValue = await global::TransactionAspect.Program.GetCustomersAsync(db);
 				}
 			}
-			catch (Exception __ex__)
+			catch (global::System.Exception __ex__)
 			{
 				__info__0.Exception = __ex__;
 				throw;
 			}
 			finally
 			{
-				await Aspects.TransactionAttribute.OnFinallyAsync(__info__0);
+				await global::Aspects.TransactionAttribute.OnFinallyAsync(__info__0);
 			}
 
 			return __info__0.ReturnValue;

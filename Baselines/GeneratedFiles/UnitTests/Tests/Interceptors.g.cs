@@ -35,7 +35,7 @@ namespace MyAspectGenerator
 
 		private static class AllEventsMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).AllEventsMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).AllEventsMethod());
 
 			internal static readonly global::Aspects.AllEventsAttribute Aspect0 = new global::Aspects.AllEventsAttribute();
 
@@ -51,56 +51,56 @@ namespace MyAspectGenerator
 		// Intercepts AllEventsMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7MiAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static void AllEventsMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static void AllEventsMethod_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.AllEventsAttribute
 			//
 			var __targetMethod__ = AllEventsMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = AllEventsMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<global::AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0 = Aspects.AllEventsAttribute.OnInit(__info__0);
+			__info__0 = global::Aspects.AllEventsAttribute.OnInit(__info__0);
 
-			using (Aspects.AllEventsAttribute.OnUsing(__info__0))
+			using (global::Aspects.AllEventsAttribute.OnUsing(__info__0))
 			{
 				try
 				{
-					Aspects.AllEventsAttribute.OnBeforeCall(__info__0);
+					global::Aspects.AllEventsAttribute.OnBeforeCall(__info__0);
 
-					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+					if (__info__0.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 					{
 						__this__.AllEventsMethod();
 
-						Aspects.AllEventsAttribute.OnAfterCall(__info__0);
+						global::Aspects.AllEventsAttribute.OnAfterCall(__info__0);
 					}
 				}
-				catch (Exception __ex__)
+				catch (global::System.Exception __ex__)
 				{
 					__info__0.Exception       = __ex__;
-					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
+					__info__0.InterceptResult = global::AspectGenerator.InterceptResult.ReThrow;
 
-					Aspects.AllEventsAttribute.OnCatch(__info__0);
+					global::Aspects.AllEventsAttribute.OnCatch(__info__0);
 
-					if (__info__0.InterceptResult == AspectGenerator.InterceptResult.ReThrow)
+					if (__info__0.InterceptResult == global::AspectGenerator.InterceptResult.ReThrow)
 						throw;
 				}
 				finally
 				{
-					Aspects.AllEventsAttribute.OnFinally(__info__0);
+					global::Aspects.AllEventsAttribute.OnFinally(__info__0);
 				}
 			}
 		}
 
 		private static class AllEventsMethodAsync_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).AllEventsMethodAsync());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).AllEventsMethodAsync());
 
 			internal static readonly global::Aspects.AllEventsAttribute Aspect0 = new global::Aspects.AllEventsAttribute();
 
@@ -116,56 +116,56 @@ namespace MyAspectGenerator
 		// Intercepts AllEventsMethodAsync().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG80mAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static async System.Threading.Tasks.Task AllEventsMethodAsync_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static async global::System.Threading.Tasks.Task AllEventsMethodAsync_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.AllEventsAttribute
 			//
 			var __targetMethod__ = AllEventsMethodAsync_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = AllEventsMethodAsync_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<global::AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0 = Aspects.AllEventsAttribute.OnInit(__info__0);
+			__info__0 = global::Aspects.AllEventsAttribute.OnInit(__info__0);
 
-			await using (Aspects.AllEventsAttribute.OnUsingAsync(__info__0))
+			await using (global::Aspects.AllEventsAttribute.OnUsingAsync(__info__0))
 			{
 				try
 				{
-					await Aspects.AllEventsAttribute.OnBeforeCallAsync(__info__0);
+					await global::Aspects.AllEventsAttribute.OnBeforeCallAsync(__info__0);
 
-					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+					if (__info__0.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 					{
 						__this__.AllEventsMethodAsync();
 
-						await Aspects.AllEventsAttribute.OnAfterCallAsync(__info__0);
+						await global::Aspects.AllEventsAttribute.OnAfterCallAsync(__info__0);
 					}
 				}
-				catch (Exception __ex__)
+				catch (global::System.Exception __ex__)
 				{
 					__info__0.Exception       = __ex__;
-					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
+					__info__0.InterceptResult = global::AspectGenerator.InterceptResult.ReThrow;
 
-					await Aspects.AllEventsAttribute.OnCatchAsync(__info__0);
+					await global::Aspects.AllEventsAttribute.OnCatchAsync(__info__0);
 
-					if (__info__0.InterceptResult == AspectGenerator.InterceptResult.ReThrow)
+					if (__info__0.InterceptResult == global::AspectGenerator.InterceptResult.ReThrow)
 						throw;
 				}
 				finally
 				{
-					await Aspects.AllEventsAttribute.OnFinallyAsync(__info__0);
+					await global::Aspects.AllEventsAttribute.OnFinallyAsync(__info__0);
 				}
 			}
 		}
 
 		private static class AllEventsMethodAsync2_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).AllEventsMethodAsync2());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).AllEventsMethodAsync2());
 
 			internal static readonly global::Aspects.AllEventsAttribute Aspect0 = new global::Aspects.AllEventsAttribute();
 
@@ -181,49 +181,49 @@ namespace MyAspectGenerator
 		// Intercepts AllEventsMethodAsync2().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG/0qAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static async System.Threading.Tasks.Task<int> AllEventsMethodAsync2_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static async global::System.Threading.Tasks.Task<int> AllEventsMethodAsync2_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.AllEventsAttribute
 			//
 			var __targetMethod__ = AllEventsMethodAsync2_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = AllEventsMethodAsync2_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<int>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<int>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0 = Aspects.AllEventsAttribute.OnInit(__info__0);
+			__info__0 = global::Aspects.AllEventsAttribute.OnInit(__info__0);
 
-			await using (Aspects.AllEventsAttribute.OnUsingAsync(__info__0))
+			await using (global::Aspects.AllEventsAttribute.OnUsingAsync(__info__0))
 			{
 				try
 				{
-					await Aspects.AllEventsAttribute.OnBeforeCallAsync(__info__0);
+					await global::Aspects.AllEventsAttribute.OnBeforeCallAsync(__info__0);
 
-					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+					if (__info__0.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 					{
 						__info__0.ReturnValue = await __this__.AllEventsMethodAsync2();
 
-						await Aspects.AllEventsAttribute.OnAfterCallAsync(__info__0);
+						await global::Aspects.AllEventsAttribute.OnAfterCallAsync(__info__0);
 					}
 				}
-				catch (Exception __ex__)
+				catch (global::System.Exception __ex__)
 				{
 					__info__0.Exception       = __ex__;
-					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
+					__info__0.InterceptResult = global::AspectGenerator.InterceptResult.ReThrow;
 
-					await Aspects.AllEventsAttribute.OnCatchAsync(__info__0);
+					await global::Aspects.AllEventsAttribute.OnCatchAsync(__info__0);
 
-					if (__info__0.InterceptResult == AspectGenerator.InterceptResult.ReThrow)
+					if (__info__0.InterceptResult == global::AspectGenerator.InterceptResult.ReThrow)
 						throw;
 				}
 				finally
 				{
-					await Aspects.AllEventsAttribute.OnFinallyAsync(__info__0);
+					await global::Aspects.AllEventsAttribute.OnFinallyAsync(__info__0);
 				}
 			}
 
@@ -232,7 +232,7 @@ namespace MyAspectGenerator
 
 		private static class ArgsMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).ArgsMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).ArgsMethod());
 
 			internal static readonly global::Aspects.ArgsAttribute Aspect0 = new global::Aspects.ArgsAttribute() { Arg1 = "1", Arg2 = 2, Arg3 = new int[] { 1, 2, 3 } };
 			internal static readonly global::Aspects.ArgsAttribute Aspect1 = new global::Aspects.ArgsAttribute() { Arg3 = new int[] { 2 } };
@@ -257,16 +257,16 @@ namespace MyAspectGenerator
 		// Intercepts ArgsMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7c5AABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static string ArgsMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static string ArgsMethod_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.ArgsAttribute(Arg1 = "1", Arg2 = 2, Arg3 = {1, 2, 3})
 			//
 			var __targetMethod__ = ArgsMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = ArgsMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -276,7 +276,7 @@ namespace MyAspectGenerator
 				// Aspects.ArgsAttribute(Arg3 = {2})
 				//
 				var __aspect__1 = ArgsMethod_Interceptor_State.Aspect1;
-				var __info__1   = new AspectGenerator.InterceptInfo<string>
+				var __info__1   = new global::AspectGenerator.InterceptInfo<string>
 				{
 					MemberInfo = __targetMethod__,
 					Aspect     = __aspect__1,
@@ -287,7 +287,7 @@ namespace MyAspectGenerator
 					// Aspects.ArgsAttribute(Arg3 = {})
 					//
 					var __aspect__2 = ArgsMethod_Interceptor_State.Aspect2;
-					var __info__2   = new AspectGenerator.InterceptInfo<string>
+					var __info__2   = new global::AspectGenerator.InterceptInfo<string>
 					{
 						MemberInfo = __targetMethod__,
 						Aspect     = __aspect__2,
@@ -298,7 +298,7 @@ namespace MyAspectGenerator
 						// Aspects.ArgsAttribute(Arg1 = "xyz")
 						//
 						var __aspect__3 = ArgsMethod_Interceptor_State.Aspect3;
-						var __info__3   = new AspectGenerator.InterceptInfo<string>
+						var __info__3   = new global::AspectGenerator.InterceptInfo<string>
 						{
 							MemberInfo = __targetMethod__,
 							Aspect     = __aspect__3,
@@ -309,7 +309,7 @@ namespace MyAspectGenerator
 							// Aspects.ArgsAttribute(Arg4 = 'w')
 							//
 							var __aspect__4 = ArgsMethod_Interceptor_State.Aspect4;
-							var __info__4   = new AspectGenerator.InterceptInfo<string>
+							var __info__4   = new global::AspectGenerator.InterceptInfo<string>
 							{
 								MemberInfo = __targetMethod__,
 								Aspect     = __aspect__4,
@@ -320,7 +320,7 @@ namespace MyAspectGenerator
 								// Aspects.ArgsAttribute(Arg5 = null)
 								//
 								var __aspect__5 = ArgsMethod_Interceptor_State.Aspect5;
-								var __info__5   = new AspectGenerator.InterceptInfo<string>
+								var __info__5   = new global::AspectGenerator.InterceptInfo<string>
 								{
 									MemberInfo = __targetMethod__,
 									Aspect     = __aspect__5,
@@ -331,7 +331,7 @@ namespace MyAspectGenerator
 									// Aspects.ArgsAttribute(Arg5 = typeof(int))
 									//
 									var __aspect__6 = ArgsMethod_Interceptor_State.Aspect6;
-									var __info__6   = new AspectGenerator.InterceptInfo<string>
+									var __info__6   = new global::AspectGenerator.InterceptInfo<string>
 									{
 										MemberInfo = __targetMethod__,
 										Aspect     = __aspect__6,
@@ -342,7 +342,7 @@ namespace MyAspectGenerator
 										// Aspects.ArgsAttribute(Arg5 = typeof(System.Collections.Generic.List<>))
 										//
 										var __aspect__7 = ArgsMethod_Interceptor_State.Aspect7;
-										var __info__7   = new AspectGenerator.InterceptInfo<string>
+										var __info__7   = new global::AspectGenerator.InterceptInfo<string>
 										{
 											MemberInfo = __targetMethod__,
 											Aspect     = __aspect__7,
@@ -353,7 +353,7 @@ namespace MyAspectGenerator
 											// Aspects.ArgsAttribute(Arg5 = typeof(System.Collections.Generic.List<System.DateTime>))
 											//
 											var __aspect__8 = ArgsMethod_Interceptor_State.Aspect8;
-											var __info__8   = new AspectGenerator.InterceptInfo<string>
+											var __info__8   = new global::AspectGenerator.InterceptInfo<string>
 											{
 												MemberInfo = __targetMethod__,
 												Aspect     = __aspect__8,
@@ -364,7 +364,7 @@ namespace MyAspectGenerator
 												// Aspects.ArgsAttribute(Arg5 = 1.1)
 												//
 												var __aspect__9 = ArgsMethod_Interceptor_State.Aspect9;
-												var __info__9   = new AspectGenerator.InterceptInfo<string>
+												var __info__9   = new global::AspectGenerator.InterceptInfo<string>
 												{
 													MemberInfo = __targetMethod__,
 													Aspect     = __aspect__9,
@@ -373,52 +373,52 @@ namespace MyAspectGenerator
 
 												__info__9.ReturnValue = __this__.ArgsMethod();
 
-												Aspects.ArgsAttribute.OnAfterCall(__info__9);
+												global::Aspects.ArgsAttribute.OnAfterCall(__info__9);
 
 												__info__8.ReturnValue = __info__9.ReturnValue;
 											}
 
-											Aspects.ArgsAttribute.OnAfterCall(__info__8);
+											global::Aspects.ArgsAttribute.OnAfterCall(__info__8);
 
 											__info__7.ReturnValue = __info__8.ReturnValue;
 										}
 
-										Aspects.ArgsAttribute.OnAfterCall(__info__7);
+										global::Aspects.ArgsAttribute.OnAfterCall(__info__7);
 
 										__info__6.ReturnValue = __info__7.ReturnValue;
 									}
 
-									Aspects.ArgsAttribute.OnAfterCall(__info__6);
+									global::Aspects.ArgsAttribute.OnAfterCall(__info__6);
 
 									__info__5.ReturnValue = __info__6.ReturnValue;
 								}
 
-								Aspects.ArgsAttribute.OnAfterCall(__info__5);
+								global::Aspects.ArgsAttribute.OnAfterCall(__info__5);
 
 								__info__4.ReturnValue = __info__5.ReturnValue;
 							}
 
-							Aspects.ArgsAttribute.OnAfterCall(__info__4);
+							global::Aspects.ArgsAttribute.OnAfterCall(__info__4);
 
 							__info__3.ReturnValue = __info__4.ReturnValue;
 						}
 
-						Aspects.ArgsAttribute.OnAfterCall(__info__3);
+						global::Aspects.ArgsAttribute.OnAfterCall(__info__3);
 
 						__info__2.ReturnValue = __info__3.ReturnValue;
 					}
 
-					Aspects.ArgsAttribute.OnAfterCall(__info__2);
+					global::Aspects.ArgsAttribute.OnAfterCall(__info__2);
 
 					__info__1.ReturnValue = __info__2.ReturnValue;
 				}
 
-				Aspects.ArgsAttribute.OnAfterCall(__info__1);
+				global::Aspects.ArgsAttribute.OnAfterCall(__info__1);
 
 				__info__0.ReturnValue = __info__1.ReturnValue;
 			}
 
-			Aspects.ArgsAttribute.OnAfterCall(__info__0);
+			global::Aspects.ArgsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -428,7 +428,7 @@ namespace MyAspectGenerator
 			static bool ArgumentsInMethod_Interceptor_Arg_b = default(bool);
 			static int? ArgumentsInMethod_Interceptor_Arg__ = default(int?);
 
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.ArgumentsInMethod(default(string), default(int), in ArgumentsInMethod_Interceptor_Arg_b, ref ArgumentsInMethod_Interceptor_Arg__));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.ArgumentsInMethod(default(string), default(int), in ArgumentsInMethod_Interceptor_Arg_b, ref ArgumentsInMethod_Interceptor_Arg__));
 
 			internal static readonly global::Aspects.ArgumentsAttribute Aspect0 = new global::Aspects.ArgumentsAttribute();
 
@@ -444,8 +444,8 @@ namespace MyAspectGenerator
 		// Intercepts ArgumentsInMethod("_", 1, in b, ref n).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3FGAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsInMethod_Interceptor(string s, int i, in bool b, ref int? _)
 		{
 			var __args__ = new object?[] { s, i, b, _ };
@@ -455,16 +455,16 @@ namespace MyAspectGenerator
 			var __targetMethod__ = ArgumentsInMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = ArgumentsInMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 				MethodArguments = __args__,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsInMethod(s, i, in b, ref _);
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.ArgumentsInMethod(s, i, in b, ref _);
 
-			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
+			global::Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -473,7 +473,7 @@ namespace MyAspectGenerator
 		{
 			static int? ArgumentsInMethod_Interceptor_1_Arg__ = default(int?);
 
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.ArgumentsInMethod(default(string), default(int), default(bool), ref ArgumentsInMethod_Interceptor_1_Arg__));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.ArgumentsInMethod(default(string), default(int), default(bool), ref ArgumentsInMethod_Interceptor_1_Arg__));
 
 			internal static readonly global::Aspects.ArgumentsAttribute Aspect0 = new global::Aspects.ArgumentsAttribute();
 
@@ -489,8 +489,8 @@ namespace MyAspectGenerator
 		// Intercepts ArgumentsInMethod("_", 1, b, ref n).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7ZHAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsInMethod_Interceptor_1(string s, int i, bool b, ref int? _)
 		{
 			var __args__ = new object?[] { s, i, b, _ };
@@ -500,23 +500,23 @@ namespace MyAspectGenerator
 			var __targetMethod__ = ArgumentsInMethod_Interceptor_1_State.TargetMethod;
 
 			var __aspect__0 = ArgumentsInMethod_Interceptor_1_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 				MethodArguments = __args__,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsInMethod(s, i, b, ref _);
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.ArgumentsInMethod(s, i, b, ref _);
 
-			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
+			global::Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class ArgumentsMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.ArgumentsMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.ArgumentsMethod());
 
 			internal static readonly global::Aspects.ArgumentsAttribute Aspect0 = new global::Aspects.ArgumentsAttribute();
 
@@ -532,8 +532,8 @@ namespace MyAspectGenerator
 		// Intercepts ArgumentsMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGy9DAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsMethod_Interceptor()
 		{
 			var __args__ = new object?[] { };
@@ -543,23 +543,23 @@ namespace MyAspectGenerator
 			var __targetMethod__ = ArgumentsMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = ArgumentsMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 				MethodArguments = __args__,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsMethod();
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.ArgumentsMethod();
 
-			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
+			global::Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class ArgumentsMethod_Interceptor_2_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.ArgumentsMethod(default(string), default(int)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.ArgumentsMethod(default(string), default(int)));
 
 			internal static readonly global::Aspects.ArgumentsAttribute Aspect0 = new global::Aspects.ArgumentsAttribute();
 
@@ -575,8 +575,8 @@ namespace MyAspectGenerator
 		// Intercepts ArgumentsMethod("_", 1).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGxhEAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsMethod_Interceptor_2(string s, int i)
 		{
 			var __args__ = new object?[] { s, i };
@@ -586,16 +586,16 @@ namespace MyAspectGenerator
 			var __targetMethod__ = ArgumentsMethod_Interceptor_2_State.TargetMethod;
 
 			var __aspect__0 = ArgumentsMethod_Interceptor_2_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 				MethodArguments = __args__,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsMethod(s, i);
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.ArgumentsMethod(s, i);
 
-			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
+			global::Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -604,7 +604,7 @@ namespace MyAspectGenerator
 		{
 			static string ArgumentsOutMethod_Interceptor_Arg_s = default(string);
 
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.ArgumentsOutMethod(out ArgumentsOutMethod_Interceptor_Arg_s));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.ArgumentsOutMethod(out ArgumentsOutMethod_Interceptor_Arg_s));
 
 			internal static readonly global::Aspects.ArgumentsAttribute Aspect0 = new global::Aspects.ArgumentsAttribute();
 
@@ -620,8 +620,8 @@ namespace MyAspectGenerator
 		// Intercepts ArgumentsOutMethod(out _).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG8pIAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsOutMethod_Interceptor(out string s)
 		{
 			var __args__ = new object?[] { s = default };
@@ -631,16 +631,16 @@ namespace MyAspectGenerator
 			var __targetMethod__ = ArgumentsOutMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = ArgumentsOutMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 				MethodArguments = __args__,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsOutMethod(out s);
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.ArgumentsOutMethod(out s);
 
-			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
+			global::Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -649,7 +649,7 @@ namespace MyAspectGenerator
 		{
 			static bool ArgumentsRefMethod_Interceptor_Arg_b = default(bool);
 
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.ArgumentsRefMethod(default(string), default(int), ref ArgumentsRefMethod_Interceptor_Arg_b));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.ArgumentsRefMethod(default(string), default(int), ref ArgumentsRefMethod_Interceptor_Arg_b));
 
 			internal static readonly global::Aspects.ArgumentsAttribute Aspect0 = new global::Aspects.ArgumentsAttribute();
 
@@ -665,8 +665,8 @@ namespace MyAspectGenerator
 		// Intercepts ArgumentsRefMethod("_", 1, ref b).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGy9FAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string ArgumentsRefMethod_Interceptor(string s, int i, ref bool b)
 		{
 			var __args__ = new object?[] { s, i, b };
@@ -676,23 +676,23 @@ namespace MyAspectGenerator
 			var __targetMethod__ = ArgumentsRefMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = ArgumentsRefMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 				MethodArguments = __args__,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.ArgumentsRefMethod(s, i, ref b);
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.ArgumentsRefMethod(s, i, ref b);
 
-			Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
+			global::Aspects.ArgumentsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class AssemblyFilterTarget_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.AssemblyFilterTarget());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.AssemblyFilterTarget());
 
 			internal static readonly global::Aspects.LogAttribute Aspect0 = new global::Aspects.LogAttribute();
 
@@ -708,8 +708,8 @@ namespace MyAspectGenerator
 		// Intercepts AssemblyFilterTarget().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG5gYAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string AssemblyFilterTarget_Interceptor()
 		{
 			// Aspects.LogAttribute(TargetFilter = {"regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.AssemblyFilterTarget\\(\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedMethod\\(System.String\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedGenericMethod<System.String>\\(System.String\\)$", "regex: ^public System.String System.String.Substring\\(System.Int32\\)$"})
@@ -717,22 +717,22 @@ namespace MyAspectGenerator
 			var __targetMethod__ = AssemblyFilterTarget_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = AssemblyFilterTarget_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.AssemblyFilterTarget();
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.AssemblyFilterTarget();
 
-			Aspects.LogAttribute.OnAfterCall(__info__0);
+			global::Aspects.LogAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class EmptyMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.EmptyMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.EmptyMethod());
 
 			internal static readonly global::Aspects.EmptyAspectAttribute Aspect0 = new global::Aspects.EmptyAspectAttribute();
 
@@ -748,18 +748,18 @@ namespace MyAspectGenerator
 		// Intercepts EmptyMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG2kcAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static int EmptyMethod_Interceptor()
 		{
-			var __return__ = AspectGenerator.Tests.UnitTests.EmptyMethod();
+			var __return__ = global::AspectGenerator.Tests.UnitTests.EmptyMethod();
 
 			return __return__;
 		}
 
 		private static class ExtensionMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod(default(AspectGenerator.Tests.UnitTests), default(int)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod<int>(default(global::AspectGenerator.Tests.UnitTests), default(int)));
 
 			internal static readonly global::Aspects.TestAspectAttribute Aspect0 = new global::Aspects.TestAspectAttribute();
 
@@ -775,32 +775,32 @@ namespace MyAspectGenerator
 		// Intercepts this.ExtensionMethod(1).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGykgAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static string ExtensionMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__, int value)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static string ExtensionMethod_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__, int value)
 		{
 			// Aspects.TestAspectAttribute
 			//
 			var __targetMethod__ = ExtensionMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = ExtensionMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptData<string>
+			var __info__0   = new global::AspectGenerator.InterceptData<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod(__this__, value);
+			__info__0.ReturnValue = global::AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod<int>(__this__, value);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
+			__info__0.InterceptType = global::AspectGenerator.InterceptType.OnAfterCall;
+			global::Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class ExtensionMethod_Interceptor_3_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod(default(AspectGenerator.Tests.TestClassExtension), default(int)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod<int>(default(global::AspectGenerator.Tests.TestClassExtension), default(int)));
 
 			internal static readonly global::Aspects.TestAspectAttribute Aspect0 = new global::Aspects.TestAspectAttribute();
 
@@ -816,32 +816,32 @@ namespace MyAspectGenerator
 		// Intercepts new TestClassExtension().ExtensionMethod(1).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG+ggAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static string ExtensionMethod_Interceptor_3(this AspectGenerator.Tests.TestClassExtension __this__, int value)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static string ExtensionMethod_Interceptor_3(this global::AspectGenerator.Tests.TestClassExtension __this__, int value)
 		{
 			// Aspects.TestAspectAttribute
 			//
 			var __targetMethod__ = ExtensionMethod_Interceptor_3_State.TargetMethod;
 
 			var __aspect__0 = ExtensionMethod_Interceptor_3_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptData<string>
+			var __info__0   = new global::AspectGenerator.InterceptData<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod(__this__, value);
+			__info__0.ReturnValue = global::AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod<int>(__this__, value);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
+			__info__0.InterceptType = global::AspectGenerator.InterceptType.OnAfterCall;
+			global::Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class ExtensionMethod_Interceptor_4_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod(default(AspectGenerator.Tests.TestStructExtension), default(int)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod<int>(default(global::AspectGenerator.Tests.TestStructExtension), default(int)));
 
 			internal static readonly global::Aspects.TestAspectAttribute Aspect0 = new global::Aspects.TestAspectAttribute();
 
@@ -857,32 +857,32 @@ namespace MyAspectGenerator
 		// Intercepts new TestStructExtension().ExtensionMethod(2).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG6khAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static string ExtensionMethod_Interceptor_4(this AspectGenerator.Tests.TestStructExtension __this__, int value)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static string ExtensionMethod_Interceptor_4(this global::AspectGenerator.Tests.TestStructExtension __this__, int value)
 		{
 			// Aspects.TestAspectAttribute
 			//
 			var __targetMethod__ = ExtensionMethod_Interceptor_4_State.TargetMethod;
 
 			var __aspect__0 = ExtensionMethod_Interceptor_4_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptData<string>
+			var __info__0   = new global::AspectGenerator.InterceptData<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod(__this__, value);
+			__info__0.ReturnValue = global::AspectGenerator.Tests.TestCodeExtensions.ExtensionMethod<int>(__this__, value);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
+			__info__0.InterceptType = global::AspectGenerator.InterceptType.OnAfterCall;
+			global::Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class FinallyMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.FinallyMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.FinallyMethod());
 
 			internal static readonly global::Aspects.FinallyAttribute Aspect0 = new global::Aspects.FinallyAttribute();
 
@@ -898,8 +898,8 @@ namespace MyAspectGenerator
 		// Intercepts FinallyMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG+QeAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static int FinallyMethod_Interceptor()
 		{
 			// Aspects.FinallyAttribute
@@ -907,7 +907,7 @@ namespace MyAspectGenerator
 			var __targetMethod__ = FinallyMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = FinallyMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<int>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<int>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -915,16 +915,16 @@ namespace MyAspectGenerator
 
 			try
 			{
-				__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.FinallyMethod();
+				__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.FinallyMethod();
 			}
-			catch (Exception __ex__)
+			catch (global::System.Exception __ex__)
 			{
 				__info__0.Exception = __ex__;
 				throw;
 			}
 			finally
 			{
-				Aspects.FinallyAttribute.OnFinally(__info__0);
+				global::Aspects.FinallyAttribute.OnFinally(__info__0);
 			}
 
 			return __info__0.ReturnValue;
@@ -932,7 +932,7 @@ namespace MyAspectGenerator
 
 		private static class GenericMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.TestCode.GenericMethod(default(int)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.TestCode.GenericMethod<int>(default(int)));
 
 			internal static readonly global::Aspects.TestAspectAttribute Aspect0 = new global::Aspects.TestAspectAttribute();
 			internal static readonly global::Aspects.TestAspect2Attribute Aspect1 = new global::Aspects.TestAspect2Attribute();
@@ -949,8 +949,8 @@ namespace MyAspectGenerator
 		// Intercepts TestCode.GenericMethod(1).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGywaAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string GenericMethod_Interceptor(int value)
 		{
 			// Aspects.TestAspectAttribute
@@ -958,7 +958,7 @@ namespace MyAspectGenerator
 			var __targetMethod__ = GenericMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = GenericMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptData<string>
+			var __info__0   = new global::AspectGenerator.InterceptData<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -968,35 +968,35 @@ namespace MyAspectGenerator
 				// Aspects.TestAspect2Attribute
 				//
 				var __aspect__1 = GenericMethod_Interceptor_State.Aspect1;
-				var __info__1   = new AspectGenerator.InterceptInfo<string>
+				var __info__1   = new global::AspectGenerator.InterceptInfo<string>
 				{
 					MemberInfo = __targetMethod__,
 					Aspect     = __aspect__1,
 				};
 
-				__info__1.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;
-				Aspects.TestAspect2Attribute.OnBeforeCall(__info__1);
+				__info__1.InterceptType = global::AspectGenerator.InterceptType.OnBeforeCall;
+				global::Aspects.TestAspect2Attribute.OnBeforeCall(__info__1);
 
-				if (__info__1.InterceptResult != AspectGenerator.InterceptResult.Return)
+				if (__info__1.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 				{
-					__info__1.ReturnValue = AspectGenerator.Tests.TestCode.GenericMethod(value);
+					__info__1.ReturnValue = global::AspectGenerator.Tests.TestCode.GenericMethod<int>(value);
 
-					__info__1.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-					Aspects.TestAspect2Attribute.OnCall(__info__1);
+					__info__1.InterceptType = global::AspectGenerator.InterceptType.OnAfterCall;
+					global::Aspects.TestAspect2Attribute.OnCall(__info__1);
 				}
 
 				__info__0.ReturnValue = __info__1.ReturnValue;
 			}
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
+			__info__0.InterceptType = global::AspectGenerator.InterceptType.OnAfterCall;
+			global::Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class GenericMethod_Interceptor_5_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.TestCode.GenericMethod(default(System.DateTime)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.TestCode.GenericMethod<global::System.DateTime>(default(global::System.DateTime)));
 
 			internal static readonly global::Aspects.TestAspectAttribute Aspect0 = new global::Aspects.TestAspectAttribute();
 			internal static readonly global::Aspects.TestAspect2Attribute Aspect1 = new global::Aspects.TestAspect2Attribute();
@@ -1016,16 +1016,16 @@ namespace MyAspectGenerator
 		// Intercepts TestCode.GenericMethod(now).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3EaAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static string GenericMethod_Interceptor_5(System.DateTime value)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static string GenericMethod_Interceptor_5(global::System.DateTime value)
 		{
 			// Aspects.TestAspectAttribute
 			//
 			var __targetMethod__ = GenericMethod_Interceptor_5_State.TargetMethod;
 
 			var __aspect__0 = GenericMethod_Interceptor_5_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptData<string>
+			var __info__0   = new global::AspectGenerator.InterceptData<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -1035,35 +1035,35 @@ namespace MyAspectGenerator
 				// Aspects.TestAspect2Attribute
 				//
 				var __aspect__1 = GenericMethod_Interceptor_5_State.Aspect1;
-				var __info__1   = new AspectGenerator.InterceptInfo<string>
+				var __info__1   = new global::AspectGenerator.InterceptInfo<string>
 				{
 					MemberInfo = __targetMethod__,
 					Aspect     = __aspect__1,
 				};
 
-				__info__1.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;
-				Aspects.TestAspect2Attribute.OnBeforeCall(__info__1);
+				__info__1.InterceptType = global::AspectGenerator.InterceptType.OnBeforeCall;
+				global::Aspects.TestAspect2Attribute.OnBeforeCall(__info__1);
 
-				if (__info__1.InterceptResult != AspectGenerator.InterceptResult.Return)
+				if (__info__1.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 				{
-					__info__1.ReturnValue = AspectGenerator.Tests.TestCode.GenericMethod(value);
+					__info__1.ReturnValue = global::AspectGenerator.Tests.TestCode.GenericMethod<global::System.DateTime>(value);
 
-					__info__1.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-					Aspects.TestAspect2Attribute.OnCall(__info__1);
+					__info__1.InterceptType = global::AspectGenerator.InterceptType.OnAfterCall;
+					global::Aspects.TestAspect2Attribute.OnCall(__info__1);
 				}
 
 				__info__0.ReturnValue = __info__1.ReturnValue;
 			}
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
+			__info__0.InterceptType = global::AspectGenerator.InterceptType.OnAfterCall;
+			global::Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class IgnoreCatchMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.IgnoreCatchMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.IgnoreCatchMethod());
 
 			internal static readonly global::Aspects.IgnoreCatchAttribute Aspect0 = new global::Aspects.IgnoreCatchAttribute();
 
@@ -1079,8 +1079,8 @@ namespace MyAspectGenerator
 		// Intercepts IgnoreCatchMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGzMeAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static int IgnoreCatchMethod_Interceptor()
 		{
 			// Aspects.IgnoreCatchAttribute
@@ -1088,7 +1088,7 @@ namespace MyAspectGenerator
 			var __targetMethod__ = IgnoreCatchMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = IgnoreCatchMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<int>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<int>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -1096,16 +1096,16 @@ namespace MyAspectGenerator
 
 			try
 			{
-				__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.IgnoreCatchMethod();
+				__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.IgnoreCatchMethod();
 			}
-			catch (Exception __ex__)
+			catch (global::System.Exception __ex__)
 			{
 				__info__0.Exception       = __ex__;
-				__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
+				__info__0.InterceptResult = global::AspectGenerator.InterceptResult.ReThrow;
 
-				Aspects.IgnoreCatchAttribute.OnCatch(__info__0);
+				global::Aspects.IgnoreCatchAttribute.OnCatch(__info__0);
 
-				if (__info__0.InterceptResult == AspectGenerator.InterceptResult.ReThrow)
+				if (__info__0.InterceptResult == global::AspectGenerator.InterceptResult.ReThrow)
 					throw;
 			}
 
@@ -1114,7 +1114,7 @@ namespace MyAspectGenerator
 
 		private static class InitMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.InitMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.InitMethod());
 
 			internal static readonly global::Aspects.InitAspectAttribute Aspect0 = new global::Aspects.InitAspectAttribute();
 
@@ -1130,8 +1130,8 @@ namespace MyAspectGenerator
 		// Intercepts InitMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG0EdAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static int InitMethod_Interceptor()
 		{
 			// Aspects.InitAspectAttribute
@@ -1139,22 +1139,22 @@ namespace MyAspectGenerator
 			var __targetMethod__ = InitMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = InitMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<int>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<int>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0 = Aspects.InitAspectAttribute.OnInit(__info__0);
+			__info__0 = global::Aspects.InitAspectAttribute.OnInit(__info__0);
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.InitMethod();
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.InitMethod();
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class InterceptedGenericMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.InterceptedGenericMethod(default(string)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.InterceptedGenericMethod<string>(default(string)));
 
 			internal static readonly global::Aspects.LogAttribute Aspect0 = new global::Aspects.LogAttribute();
 
@@ -1170,8 +1170,8 @@ namespace MyAspectGenerator
 		// Intercepts InterceptedGenericMethod("Intercepted").
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG5pMAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string InterceptedGenericMethod_Interceptor(string p)
 		{
 			// Aspects.LogAttribute(TargetFilter = {"regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.AssemblyFilterTarget\\(\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedMethod\\(System.String\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedGenericMethod<System.String>\\(System.String\\)$", "regex: ^public System.String System.String.Substring\\(System.Int32\\)$"})
@@ -1179,22 +1179,22 @@ namespace MyAspectGenerator
 			var __targetMethod__ = InterceptedGenericMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = InterceptedGenericMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.InterceptedGenericMethod(p);
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.InterceptedGenericMethod<string>(p);
 
-			Aspects.LogAttribute.OnAfterCall(__info__0);
+			global::Aspects.LogAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class InterceptedMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.InterceptedMethod(default(string)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.InterceptedMethod(default(string)));
 
 			internal static readonly global::Aspects.LogAttribute Aspect0 = new global::Aspects.LogAttribute();
 
@@ -1210,8 +1210,8 @@ namespace MyAspectGenerator
 		// Intercepts InterceptedMethod("Intercepted").
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3hLAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string InterceptedMethod_Interceptor(string str)
 		{
 			// Aspects.LogAttribute(TargetFilter = {"regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.AssemblyFilterTarget\\(\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedMethod\\(System.String\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedGenericMethod<System.String>\\(System.String\\)$", "regex: ^public System.String System.String.Substring\\(System.Int32\\)$"})
@@ -1219,24 +1219,24 @@ namespace MyAspectGenerator
 			var __targetMethod__ = InterceptedMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = InterceptedMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.InterceptedMethod(str);
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.InterceptedMethod(str);
 
-			Aspects.LogAttribute.OnAfterCall(__info__0);
+			global::Aspects.LogAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class LiteralArgsMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).LiteralArgsMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).LiteralArgsMethod());
 
-			internal static readonly global::Aspects.LiteralArgsAttribute Aspect0 = new global::Aspects.LiteralArgsAttribute() { Text = "quote\" slash\\ newline\n", Character = '\'', Number = 1.25d, Single = 3.5f, Kind = (Aspects.LiteralKind)1, Values = new string[] { "a\"b", "c\\d", "e\nf" } };
+			internal static readonly global::Aspects.LiteralArgsAttribute Aspect0 = new global::Aspects.LiteralArgsAttribute() { Text = "quote\" slash\\ newline\n", Character = '\'', Number = 1.25d, Single = 3.5f, Kind = (global::Aspects.LiteralKind)1, Values = new string[] { "a\"b", "c\\d", "e\nf" } };
 
 			static LiteralArgsMethod_Interceptor_State()
 			{
@@ -1250,16 +1250,16 @@ namespace MyAspectGenerator
 		// Intercepts LiteralArgsMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3I7AABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static string LiteralArgsMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static string LiteralArgsMethod_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.LiteralArgsAttribute(Text = "quote\" slash\\ newline\n", Character = '\'', Number = 1.25, Single = 3.5, Kind = Aspects.LiteralKind.Second, Values = {"a\"b", "c\\d", "e\nf"})
 			//
 			var __targetMethod__ = LiteralArgsMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = LiteralArgsMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -1267,14 +1267,14 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = __this__.LiteralArgsMethod();
 
-			Aspects.LiteralArgsAttribute.OnAfterCall(__info__0);
+			global::Aspects.LiteralArgsAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class MemberMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).MemberMethod(default(int)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).MemberMethod(default(int)));
 
 			internal static readonly global::Aspects.FinallyAttribute Aspect0 = new global::Aspects.FinallyAttribute();
 
@@ -1290,16 +1290,16 @@ namespace MyAspectGenerator
 		// Intercepts MemberMethod(1).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG60fAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static int MemberMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__, int n)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static int MemberMethod_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__, int n)
 		{
 			// Aspects.FinallyAttribute
 			//
 			var __targetMethod__ = MemberMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = MemberMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<int>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<int>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -1309,14 +1309,14 @@ namespace MyAspectGenerator
 			{
 				__info__0.ReturnValue = __this__.MemberMethod(n);
 			}
-			catch (Exception __ex__)
+			catch (global::System.Exception __ex__)
 			{
 				__info__0.Exception = __ex__;
 				throw;
 			}
 			finally
 			{
-				Aspects.FinallyAttribute.OnFinally(__info__0);
+				global::Aspects.FinallyAttribute.OnFinally(__info__0);
 			}
 
 			return __info__0.ReturnValue;
@@ -1324,7 +1324,7 @@ namespace MyAspectGenerator
 
 		private static class OnCall_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.OnCallObject).OnCall(default(int)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.OnCallObject).OnCall(default(int)));
 
 			internal static readonly global::AspectGenerator.Tests.OnCallAttribute Aspect0 = new global::AspectGenerator.Tests.OnCallAttribute();
 
@@ -1340,18 +1340,18 @@ namespace MyAspectGenerator
 		// Intercepts obj.OnCall(2).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3lPAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static int OnCall_Interceptor(this AspectGenerator.Tests.OnCallObject __this__, int n)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static int OnCall_Interceptor(this global::AspectGenerator.Tests.OnCallObject __this__, int n)
 		{
-			var __return__ = AspectGenerator.Tests.OnCallAttribute.OnCall(__this__, n);
+			var __return__ = global::AspectGenerator.Tests.OnCallAttribute.OnCall(__this__, n);
 
 			return __return__;
 		}
 
 		private static class OnCallTestMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.OnCallTestMethod(default(int)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.OnCallTestMethod(default(int)));
 
 			internal static readonly global::AspectGenerator.Tests.OnCallAttribute Aspect0 = new global::AspectGenerator.Tests.OnCallAttribute();
 
@@ -1367,18 +1367,18 @@ namespace MyAspectGenerator
 		// Intercepts OnCallTestMethod(2).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7tOAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static int OnCallTestMethod_Interceptor(int n)
 		{
-			var __return__ = AspectGenerator.Tests.OnCallAttribute.OnCall(n);
+			var __return__ = global::AspectGenerator.Tests.OnCallAttribute.OnCall(n);
 
 			return __return__;
 		}
 
 		private static class OrderedMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.OrderedMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.OrderedMethod());
 
 			internal static readonly global::Aspects.OrderedAttribute Aspect0 = new global::Aspects.OrderedAttribute() { Order = 1, Value = "2" };
 			internal static readonly global::Aspects.OrderedAttribute Aspect1 = new global::Aspects.OrderedAttribute() { Order = 2, Value = "1" };
@@ -1395,8 +1395,8 @@ namespace MyAspectGenerator
 		// Intercepts OrderedMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypGxNCAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string OrderedMethod_Interceptor()
 		{
 			// Aspects.OrderedAttribute(Order = 1, Value = "2")
@@ -1404,7 +1404,7 @@ namespace MyAspectGenerator
 			var __targetMethod__ = OrderedMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = OrderedMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -1414,28 +1414,28 @@ namespace MyAspectGenerator
 				// Aspects.OrderedAttribute(Order = 2, Value = "1")
 				//
 				var __aspect__1 = OrderedMethod_Interceptor_State.Aspect1;
-				var __info__1   = new AspectGenerator.InterceptInfo<string>
+				var __info__1   = new global::AspectGenerator.InterceptInfo<string>
 				{
 					MemberInfo = __targetMethod__,
 					Aspect     = __aspect__1,
 					PreviousInfo = __info__0
 				};
 
-				__info__1.ReturnValue = AspectGenerator.Tests.UnitTests.OrderedMethod();
+				__info__1.ReturnValue = global::AspectGenerator.Tests.UnitTests.OrderedMethod();
 
-				Aspects.OrderedAttribute.OnAfterCall(__info__1);
+				global::Aspects.OrderedAttribute.OnAfterCall(__info__1);
 
 				__info__0.ReturnValue = __info__1.ReturnValue;
 			}
 
-			Aspects.OrderedAttribute.OnAfterCall(__info__0);
+			global::Aspects.OrderedAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class OrderedMethod2_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.OrderedMethod2());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.OrderedMethod2());
 
 			internal static readonly global::Aspects.OrderedAttribute Aspect0 = new global::Aspects.OrderedAttribute() { Order = 2, Value = "2" };
 			internal static readonly global::Aspects.OrderedAttribute Aspect1 = new global::Aspects.OrderedAttribute() { Order = 3, Value = "3" };
@@ -1452,8 +1452,8 @@ namespace MyAspectGenerator
 		// Intercepts OrderedMethod2().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG1VCAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static int OrderedMethod2_Interceptor()
 		{
 			// Aspects.OrderedAttribute(Order = 2, Value = "2")
@@ -1461,7 +1461,7 @@ namespace MyAspectGenerator
 			var __targetMethod__ = OrderedMethod2_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = OrderedMethod2_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<int>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<int>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -1471,28 +1471,28 @@ namespace MyAspectGenerator
 				// Aspects.OrderedAttribute(Order = 3, Value = "3")
 				//
 				var __aspect__1 = OrderedMethod2_Interceptor_State.Aspect1;
-				var __info__1   = new AspectGenerator.InterceptInfo<int>
+				var __info__1   = new global::AspectGenerator.InterceptInfo<int>
 				{
 					MemberInfo = __targetMethod__,
 					Aspect     = __aspect__1,
 					PreviousInfo = __info__0
 				};
 
-				__info__1.ReturnValue = AspectGenerator.Tests.UnitTests.OrderedMethod2();
+				__info__1.ReturnValue = global::AspectGenerator.Tests.UnitTests.OrderedMethod2();
 
-				Aspects.OrderedAttribute.OnAfterCall(__info__1);
+				global::Aspects.OrderedAttribute.OnAfterCall(__info__1);
 
 				__info__0.ReturnValue = __info__1.ReturnValue;
 			}
 
-			Aspects.OrderedAttribute.OnAfterCall(__info__0);
+			global::Aspects.OrderedAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class ReturnVoidMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.ReturnVoidMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.ReturnVoidMethod());
 
 			internal static readonly global::Aspects.TestAspectAttribute Aspect0 = new global::Aspects.TestAspectAttribute();
 			internal static readonly global::Aspects.TestAspect2Attribute Aspect1 = new global::Aspects.TestAspect2Attribute();
@@ -1509,8 +1509,8 @@ namespace MyAspectGenerator
 		// Intercepts ReturnVoidMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7gbAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static void ReturnVoidMethod_Interceptor()
 		{
 			// Aspects.TestAspectAttribute
@@ -1518,7 +1518,7 @@ namespace MyAspectGenerator
 			var __targetMethod__ = ReturnVoidMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = ReturnVoidMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptData<AspectGenerator.Void>
+			var __info__0   = new global::AspectGenerator.InterceptData<global::AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -1528,33 +1528,33 @@ namespace MyAspectGenerator
 				// Aspects.TestAspect2Attribute
 				//
 				var __aspect__1 = ReturnVoidMethod_Interceptor_State.Aspect1;
-				var __info__1   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+				var __info__1   = new global::AspectGenerator.InterceptInfo<global::AspectGenerator.Void>
 				{
 					MemberInfo = __targetMethod__,
 					Aspect     = __aspect__1,
 				};
 
-				__info__1.InterceptType = AspectGenerator.InterceptType.OnBeforeCall;
-				Aspects.TestAspect2Attribute.OnBeforeCall(__info__1);
+				__info__1.InterceptType = global::AspectGenerator.InterceptType.OnBeforeCall;
+				global::Aspects.TestAspect2Attribute.OnBeforeCall(__info__1);
 
-				if (__info__1.InterceptResult != AspectGenerator.InterceptResult.Return)
+				if (__info__1.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 				{
-					AspectGenerator.Tests.UnitTests.ReturnVoidMethod();
+					global::AspectGenerator.Tests.UnitTests.ReturnVoidMethod();
 
-					__info__1.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-					Aspects.TestAspect2Attribute.OnCall(__info__1);
+					__info__1.InterceptType = global::AspectGenerator.InterceptType.OnAfterCall;
+					global::Aspects.TestAspect2Attribute.OnCall(__info__1);
 				}
 
 				__info__0.ReturnValue = __info__1.ReturnValue;
 			}
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
+			__info__0.InterceptType = global::AspectGenerator.InterceptType.OnAfterCall;
+			global::Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 		}
 
 		private static class StaticLifetimeCounterMethod1_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).StaticLifetimeCounterMethod1());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).StaticLifetimeCounterMethod1());
 
 			internal static readonly global::Aspects.StaticLifetimeCounterAttribute Aspect0 = new global::Aspects.StaticLifetimeCounterAttribute();
 
@@ -1570,16 +1570,16 @@ namespace MyAspectGenerator
 		// Intercepts StaticLifetimeCounterMethod1().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3k+AABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static string StaticLifetimeCounterMethod1_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static string StaticLifetimeCounterMethod1_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.StaticLifetimeCounterAttribute
 			//
 			var __targetMethod__ = StaticLifetimeCounterMethod1_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = StaticLifetimeCounterMethod1_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -1587,14 +1587,14 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = __this__.StaticLifetimeCounterMethod1();
 
-			Aspects.StaticLifetimeCounterAttribute.OnAfterCall(__aspect__0, __info__0);
+			global::Aspects.StaticLifetimeCounterAttribute.OnAfterCall(__aspect__0, __info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class StaticMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.StaticMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.StaticMethod());
 
 			internal static readonly global::Aspects.TestAspectAttribute Aspect0 = new global::Aspects.TestAspectAttribute();
 
@@ -1613,8 +1613,8 @@ namespace MyAspectGenerator
 		// Intercepts StaticMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG1sXAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string StaticMethod_Interceptor()
 		{
 			// Aspects.TestAspectAttribute
@@ -1622,23 +1622,23 @@ namespace MyAspectGenerator
 			var __targetMethod__ = StaticMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = StaticMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptData<string>
+			var __info__0   = new global::AspectGenerator.InterceptData<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.StaticMethod();
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.StaticMethod();
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
+			__info__0.InterceptType = global::AspectGenerator.InterceptType.OnAfterCall;
+			global::Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class StaticMethod_Interceptor_6_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.StaticMethod(default(string)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.StaticMethod(default(string)));
 
 			internal static readonly global::Aspects.TestAspectAttribute Aspect0 = new global::Aspects.TestAspectAttribute();
 
@@ -1654,8 +1654,8 @@ namespace MyAspectGenerator
 		// Intercepts StaticMethod("John").
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3QXAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string StaticMethod_Interceptor_6(string name)
 		{
 			// Aspects.TestAspectAttribute
@@ -1663,16 +1663,16 @@ namespace MyAspectGenerator
 			var __targetMethod__ = StaticMethod_Interceptor_6_State.TargetMethod;
 
 			var __aspect__0 = StaticMethod_Interceptor_6_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptData<string>
+			var __info__0   = new global::AspectGenerator.InterceptData<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.StaticMethod(name);
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.StaticMethod(name);
 
-			__info__0.InterceptType = AspectGenerator.InterceptType.OnAfterCall;
-			Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
+			__info__0.InterceptType = global::AspectGenerator.InterceptType.OnAfterCall;
+			global::Aspects.TestAspectAttribute.OnAfterCall(ref __info__0);
 
 			return __info__0.ReturnValue;
 		}
@@ -1695,8 +1695,8 @@ namespace MyAspectGenerator
 		// Intercepts "test string".Substring(5).
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG9FNAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string Substring_Interceptor(this string __this__, int startIndex)
 		{
 			// Aspects.LogAttribute(TargetFilter = {"regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.AssemblyFilterTarget\\(\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedMethod\\(System.String\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedGenericMethod<System.String>\\(System.String\\)$", "regex: ^public System.String System.String.Substring\\(System.Int32\\)$"})
@@ -1704,7 +1704,7 @@ namespace MyAspectGenerator
 			var __targetMethod__ = Substring_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = Substring_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -1712,14 +1712,14 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = __this__.Substring(startIndex);
 
-			Aspects.LogAttribute.OnAfterCall(__info__0);
+			global::Aspects.LogAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class TestMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.ClassLibrary.TestClass.TestMethod(default(string)));
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.ClassLibrary.TestClass.TestMethod(default(string)));
 
 			internal static readonly global::Aspects.CrossProjectAttribute Aspect0 = new global::Aspects.CrossProjectAttribute();
 
@@ -1735,8 +1735,8 @@ namespace MyAspectGenerator
 		// Intercepts ClassLibrary.TestClass.TestMethod("Test").
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG05KAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string TestMethod_Interceptor(string str)
 		{
 			// Aspects.CrossProjectAttribute
@@ -1744,24 +1744,24 @@ namespace MyAspectGenerator
 			var __targetMethod__ = TestMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = TestMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.ClassLibrary.TestClass.TestMethod(str);
+			__info__0.ReturnValue = global::AspectGenerator.ClassLibrary.TestClass.TestMethod(str);
 
-			Aspects.CrossProjectAttribute.OnAfterCall(__info__0);
+			global::Aspects.CrossProjectAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class TypedAspectMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).TypedAspectMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).TypedAspectMethod());
 
-			internal static readonly global::Aspects.TypedAspectAttribute Aspect0 = new global::Aspects.TypedAspectAttribute("typed") { Kind = (Aspects.LiteralKind)1 };
+			internal static readonly global::Aspects.TypedAspectAttribute Aspect0 = new global::Aspects.TypedAspectAttribute("typed") { Kind = (global::Aspects.LiteralKind)1 };
 
 			static TypedAspectMethod_Interceptor_State()
 			{
@@ -1775,16 +1775,16 @@ namespace MyAspectGenerator
 		// Intercepts TypedAspectMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG5M8AABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static string TypedAspectMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static string TypedAspectMethod_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.TypedAspectAttribute("typed", Kind = Aspects.LiteralKind.Second)
 			//
 			var __targetMethod__ = TypedAspectMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = TypedAspectMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
@@ -1792,14 +1792,14 @@ namespace MyAspectGenerator
 
 			__info__0.ReturnValue = __this__.TypedAspectMethod();
 
-			Aspects.TypedAspectAttribute.OnAfterCall(__aspect__0, __info__0);
+			global::Aspects.TypedAspectAttribute.OnAfterCall(__aspect__0, __info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class TypeFilterTarget_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => AspectGenerator.Tests.UnitTests.TypeFilterTarget());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => global::AspectGenerator.Tests.UnitTests.TypeFilterTarget());
 
 			internal static readonly global::Aspects.LogAttribute Aspect0 = new global::Aspects.LogAttribute();
 
@@ -1815,8 +1815,8 @@ namespace MyAspectGenerator
 		// Intercepts TypeFilterTarget().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG3kZAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string TypeFilterTarget_Interceptor()
 		{
 			// Aspects.LogAttribute
@@ -1824,22 +1824,22 @@ namespace MyAspectGenerator
 			var __targetMethod__ = TypeFilterTarget_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = TypeFilterTarget_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<string>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			__info__0.ReturnValue = AspectGenerator.Tests.UnitTests.TypeFilterTarget();
+			__info__0.ReturnValue = global::AspectGenerator.Tests.UnitTests.TypeFilterTarget();
 
-			Aspects.LogAttribute.OnAfterCall(__info__0);
+			global::Aspects.LogAttribute.OnAfterCall(__info__0);
 
 			return __info__0.ReturnValue;
 		}
 
 		private static class UsingMethod_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).UsingMethod());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).UsingMethod());
 
 			internal static readonly global::Aspects.UsingAttribute Aspect0 = new global::Aspects.UsingAttribute();
 
@@ -1855,22 +1855,22 @@ namespace MyAspectGenerator
 		// Intercepts UsingMethod().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG6s/AABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static string UsingMethod_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static string UsingMethod_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.UsingAttribute
 			//
 			var __targetMethod__ = UsingMethod_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = UsingMethod_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptData<string>
+			var __info__0   = new global::AspectGenerator.InterceptData<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			using (Aspects.UsingAttribute.OnUsing(ref __info__0))
+			using (global::Aspects.UsingAttribute.OnUsing(ref __info__0))
 			{
 				__info__0.ReturnValue = __this__.UsingMethod();
 			}
@@ -1880,7 +1880,7 @@ namespace MyAspectGenerator
 
 		private static class UsingMethodAsync_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).UsingMethodAsync());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).UsingMethodAsync());
 
 			internal static readonly global::Aspects.UsingAttribute Aspect0 = new global::Aspects.UsingAttribute();
 
@@ -1896,22 +1896,22 @@ namespace MyAspectGenerator
 		// Intercepts UsingMethodAsync().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG31AAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static async System.Threading.Tasks.Task<string> UsingMethodAsync_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static async global::System.Threading.Tasks.Task<string> UsingMethodAsync_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.UsingAttribute
 			//
 			var __targetMethod__ = UsingMethodAsync_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = UsingMethodAsync_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptData<string>
+			var __info__0   = new global::AspectGenerator.InterceptData<string>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			await using (Aspects.UsingAttribute.OnUsingAsync(ref __info__0))
+			await using (global::Aspects.UsingAttribute.OnUsingAsync(ref __info__0))
 			{
 				__info__0.ReturnValue = await __this__.UsingMethodAsync();
 			}
@@ -1921,7 +1921,7 @@ namespace MyAspectGenerator
 
 		private static class ValueTaskMethodAsync_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).ValueTaskMethodAsync());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).ValueTaskMethodAsync());
 
 			internal static readonly global::Aspects.ValueTaskFlowAttribute Aspect0 = new global::Aspects.ValueTaskFlowAttribute();
 
@@ -1937,54 +1937,54 @@ namespace MyAspectGenerator
 		// Intercepts ValueTaskMethodAsync().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG0UvAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static async System.Threading.Tasks.ValueTask ValueTaskMethodAsync_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static async global::System.Threading.Tasks.ValueTask ValueTaskMethodAsync_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.ValueTaskFlowAttribute
 			//
 			var __targetMethod__ = ValueTaskMethodAsync_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = ValueTaskMethodAsync_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<AspectGenerator.Void>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<global::AspectGenerator.Void>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			await using (Aspects.ValueTaskFlowAttribute.OnUsingAsync(__info__0))
+			await using (global::Aspects.ValueTaskFlowAttribute.OnUsingAsync(__info__0))
 			{
 				try
 				{
-					await Aspects.ValueTaskFlowAttribute.OnBeforeCallAsync(__info__0);
+					await global::Aspects.ValueTaskFlowAttribute.OnBeforeCallAsync(__info__0);
 
-					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+					if (__info__0.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 					{
 						__this__.ValueTaskMethodAsync();
 
-						await Aspects.ValueTaskFlowAttribute.OnAfterCallAsync(__info__0);
+						await global::Aspects.ValueTaskFlowAttribute.OnAfterCallAsync(__info__0);
 					}
 				}
-				catch (Exception __ex__)
+				catch (global::System.Exception __ex__)
 				{
 					__info__0.Exception = __ex__;
-					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
+					__info__0.InterceptResult = global::AspectGenerator.InterceptResult.ReThrow;
 
-					await Aspects.ValueTaskFlowAttribute.OnCatchAsync(__info__0);
+					await global::Aspects.ValueTaskFlowAttribute.OnCatchAsync(__info__0);
 
-					if (__info__0.InterceptResult == AspectGenerator.InterceptResult.ReThrow)
+					if (__info__0.InterceptResult == global::AspectGenerator.InterceptResult.ReThrow)
 						throw;
 				}
 				finally
 				{
-					await Aspects.ValueTaskFlowAttribute.OnFinallyAsync(__info__0);
+					await global::Aspects.ValueTaskFlowAttribute.OnFinallyAsync(__info__0);
 				}
 			}
 		}
 
 		private static class ValueTaskMethodAsync2_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).ValueTaskMethodAsync2());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).ValueTaskMethodAsync2());
 
 			internal static readonly global::Aspects.ValueTaskFlowAttribute Aspect0 = new global::Aspects.ValueTaskFlowAttribute();
 
@@ -2000,47 +2000,47 @@ namespace MyAspectGenerator
 		// Intercepts ValueTaskMethodAsync2().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG10yAABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static async System.Threading.Tasks.ValueTask<int> ValueTaskMethodAsync2_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static async global::System.Threading.Tasks.ValueTask<int> ValueTaskMethodAsync2_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.ValueTaskFlowAttribute
 			//
 			var __targetMethod__ = ValueTaskMethodAsync2_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = ValueTaskMethodAsync2_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<int>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<int>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			await using (Aspects.ValueTaskFlowAttribute.OnUsingAsync(__info__0))
+			await using (global::Aspects.ValueTaskFlowAttribute.OnUsingAsync(__info__0))
 			{
 				try
 				{
-					await Aspects.ValueTaskFlowAttribute.OnBeforeCallAsync(__info__0);
+					await global::Aspects.ValueTaskFlowAttribute.OnBeforeCallAsync(__info__0);
 
-					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+					if (__info__0.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 					{
 						__info__0.ReturnValue = await __this__.ValueTaskMethodAsync2();
 
-						await Aspects.ValueTaskFlowAttribute.OnAfterCallAsync(__info__0);
+						await global::Aspects.ValueTaskFlowAttribute.OnAfterCallAsync(__info__0);
 					}
 				}
-				catch (Exception __ex__)
+				catch (global::System.Exception __ex__)
 				{
 					__info__0.Exception = __ex__;
-					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
+					__info__0.InterceptResult = global::AspectGenerator.InterceptResult.ReThrow;
 
-					await Aspects.ValueTaskFlowAttribute.OnCatchAsync(__info__0);
+					await global::Aspects.ValueTaskFlowAttribute.OnCatchAsync(__info__0);
 
-					if (__info__0.InterceptResult == AspectGenerator.InterceptResult.ReThrow)
+					if (__info__0.InterceptResult == global::AspectGenerator.InterceptResult.ReThrow)
 						throw;
 				}
 				finally
 				{
-					await Aspects.ValueTaskFlowAttribute.OnFinallyAsync(__info__0);
+					await global::Aspects.ValueTaskFlowAttribute.OnFinallyAsync(__info__0);
 				}
 			}
 
@@ -2049,7 +2049,7 @@ namespace MyAspectGenerator
 
 		private static class ValueTaskThrowMethodAsync_Interceptor_State
 		{
-			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(AspectGenerator.Tests.UnitTests).ValueTaskThrowMethodAsync());
+			internal static readonly global::System.Reflection.MemberInfo TargetMethod = MethodOf(() => default(global::AspectGenerator.Tests.UnitTests).ValueTaskThrowMethodAsync());
 
 			internal static readonly global::Aspects.ValueTaskFlowAttribute Aspect0 = new global::Aspects.ValueTaskFlowAttribute();
 
@@ -2065,47 +2065,47 @@ namespace MyAspectGenerator
 		// Intercepts ValueTaskThrowMethodAsync().
 		[global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "756oMiAF/zk4KRCYxIypG7Q1AABVbml0VGVzdHMuY3M=")]
 		//
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		[System.Diagnostics.DebuggerStepThrough]
-		public static async System.Threading.Tasks.ValueTask<int> ValueTaskThrowMethodAsync_Interceptor(this AspectGenerator.Tests.UnitTests __this__)
+		[global::System.Runtime.CompilerServices.CompilerGenerated]
+		[global::System.Diagnostics.DebuggerStepThrough]
+		public static async global::System.Threading.Tasks.ValueTask<int> ValueTaskThrowMethodAsync_Interceptor(this global::AspectGenerator.Tests.UnitTests __this__)
 		{
 			// Aspects.ValueTaskFlowAttribute
 			//
 			var __targetMethod__ = ValueTaskThrowMethodAsync_Interceptor_State.TargetMethod;
 
 			var __aspect__0 = ValueTaskThrowMethodAsync_Interceptor_State.Aspect0;
-			var __info__0   = new AspectGenerator.InterceptInfo<int>
+			var __info__0   = new global::AspectGenerator.InterceptInfo<int>
 			{
 				MemberInfo = __targetMethod__,
 				Aspect     = __aspect__0,
 			};
 
-			await using (Aspects.ValueTaskFlowAttribute.OnUsingAsync(__info__0))
+			await using (global::Aspects.ValueTaskFlowAttribute.OnUsingAsync(__info__0))
 			{
 				try
 				{
-					await Aspects.ValueTaskFlowAttribute.OnBeforeCallAsync(__info__0);
+					await global::Aspects.ValueTaskFlowAttribute.OnBeforeCallAsync(__info__0);
 
-					if (__info__0.InterceptResult != AspectGenerator.InterceptResult.Return)
+					if (__info__0.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 					{
 						__info__0.ReturnValue = await __this__.ValueTaskThrowMethodAsync();
 
-						await Aspects.ValueTaskFlowAttribute.OnAfterCallAsync(__info__0);
+						await global::Aspects.ValueTaskFlowAttribute.OnAfterCallAsync(__info__0);
 					}
 				}
-				catch (Exception __ex__)
+				catch (global::System.Exception __ex__)
 				{
 					__info__0.Exception = __ex__;
-					__info__0.InterceptResult = AspectGenerator.InterceptResult.ReThrow;
+					__info__0.InterceptResult = global::AspectGenerator.InterceptResult.ReThrow;
 
-					await Aspects.ValueTaskFlowAttribute.OnCatchAsync(__info__0);
+					await global::Aspects.ValueTaskFlowAttribute.OnCatchAsync(__info__0);
 
-					if (__info__0.InterceptResult == AspectGenerator.InterceptResult.ReThrow)
+					if (__info__0.InterceptResult == global::AspectGenerator.InterceptResult.ReThrow)
 						throw;
 				}
 				finally
 				{
-					await Aspects.ValueTaskFlowAttribute.OnFinallyAsync(__info__0);
+					await global::Aspects.ValueTaskFlowAttribute.OnFinallyAsync(__info__0);
 				}
 			}
 

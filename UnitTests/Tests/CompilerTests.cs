@@ -1499,8 +1499,11 @@ namespace AspectGenerator.Tests
 				ExternalTargetSource("public static System.Math.Max(System.Int32, System.Int32)"),
 				ExternalTargetSource("public static System.Math.Ma*(System.Int32, System.Int32)"),
 				ExternalTargetSource("fulltype: System.Math; method: Max; params: System.Int32, System.Int32"),
+				CallSitePrefilterV2TraceSource,
 				TraceDirectSource,
 			};
+
+			probes = [..probes, AspectLocationSource, CallShapeSource("UserService.Create<Holder>(); UserService? service = new(); service?.Save();")];
 
 			foreach (var probe in probes)
 			{
@@ -1527,6 +1530,35 @@ namespace AspectGenerator.Tests
 				Assert.IsTrue(intercepted.Length > 0, probe);
 				CollectionAssert.AreEqual(intercepted, markers, probe);
 			}
+		}
+
+		[TestMethod]
+		public void CallWithExplicitTypeArgumentsIsInterceptedTest()
+		{
+			AssertInterceptedCalls(CallShapeSource("UserService.Create<Holder>();"), 1);
+		}
+
+		[TestMethod]
+		public void ConditionalAccessCallIsInterceptedTest()
+		{
+			AssertInterceptedCalls(CallShapeSource("UserService? service = new(); service?.Save();"), 1);
+		}
+
+		[TestMethod]
+		public void AspectAttributesInGlobalNamespaceAndNestedClassCompileTest()
+		{
+			AssertInterceptedCalls(AspectLocationSource, 2);
+		}
+
+		[TestMethod]
+		public void AspectAttributeLocationsProduceQualifiedHookCallsTest()
+		{
+			var result       = RunGenerator(AspectLocationSource);
+			var interceptors = GetGeneratedSource(result, "Interceptors.g.cs");
+
+			StringAssert.Contains(interceptors, "global::GlobalLogAttribute.Before(");
+			StringAssert.Contains(interceptors, "global::AspectGenerator.Tests.GeneratorDriver.Outer.NestedLogAttribute.Before(");
+			Assert.IsFalse(interceptors.Contains("<global namespace>", StringComparison.Ordinal), interceptors);
 		}
 
 		static void AssertInterceptedCalls(string source, int expectedCount)
@@ -4094,6 +4126,57 @@ namespace AspectGenerator.Tests
 				public static int Invoke()
 				{
 					return Math.Max(1, 2) + Math.Min(1, 2);
+				}
+			}
+			""";
+
+		const string AspectLocationSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[Aspect(OnBeforeCall = nameof(Before), OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+			sealed class GlobalLogAttribute : Attribute
+			{
+				public static void Before(InterceptInfo info)
+				{
+				}
+
+				public static void After(InterceptInfo info)
+				{
+				}
+			}
+
+			namespace AspectGenerator.Tests.GeneratorDriver
+			{
+				static class Outer
+				{
+					[Aspect(OnBeforeCall = nameof(Before), OnCall = nameof(Call))]
+					[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+					public sealed class NestedLogAttribute : Attribute
+					{
+						public static void Before(InterceptInfo info)
+						{
+						}
+
+						public static string Call(string? text, int[] values) => text ?? "";
+					}
+				}
+
+				static class Service
+				{
+					[GlobalLog]
+					public static string Global() => "";
+
+					[Outer.NestedLog]
+					public static string Nested(string? text, int[] values) => text ?? "";
+
+					public static void Invoke()
+					{
+						Global();
+						Nested(null, [1, 2]);
+					}
 				}
 			}
 			""";

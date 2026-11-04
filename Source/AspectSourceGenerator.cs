@@ -869,8 +869,8 @@ namespace AspectGenerator
 			if (value.Type is IArrayTypeSymbol arrayType)
 				return value.Values.Length switch
 				{
-					0 => $"new {arrayType.ElementType}[0]",
-					_ => $"new {value.Type} {{ {value.Values.Select(v => PrintValue(v.Value, arrayType.ElementType)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
+					0 => $"new {PrintType(arrayType.ElementType)}[0]",
+					_ => $"new {PrintType(arrayType)} {{ {value.Values.Select(v => PrintValue(v.Value, arrayType.ElementType)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
 				};
 
 			return PrintValue(value.Value, value.Type);
@@ -881,8 +881,8 @@ namespace AspectGenerator
 			if (type is IArrayTypeSymbol arrayType && value is object?[] values)
 				return values.Length switch
 				{
-					0 => $"new {arrayType.ElementType}[0]",
-					_ => $"new {type} {{ {values.Select(v => PrintValue(v, arrayType.ElementType)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
+					0 => $"new {PrintType(arrayType.ElementType)}[0]",
+					_ => $"new {PrintType(arrayType)} {{ {values.Select(v => PrintValue(v, arrayType.ElementType)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
 				};
 
 			return PrintValue(value, type);
@@ -964,7 +964,7 @@ namespace AspectGenerator
 						case RefKind.In  :
 							sb.AppendLine(
 								$$"""
-											static {{p.Type}} {{interceptorName}}_Arg_{{p.Name}} = default({{p.Type}});
+											static {{PrintType(p.Type)}} {{interceptorName}}_Arg_{{p.Name}} = default({{PrintType(p.Type)}});
 								""");
 							parametersAdded = true;
 							break;
@@ -1049,8 +1049,10 @@ namespace AspectGenerator
 
 					switch (inv.Expression)
 					{
-						case MemberAccessExpressionSyntax : AppendInterceptsLocation(inv); break;
-						case IdentifierNameSyntax         : AppendInterceptsLocation(inv); break;
+						case MemberAccessExpressionSyntax  : AppendInterceptsLocation(inv); break;
+						case IdentifierNameSyntax          : AppendInterceptsLocation(inv); break;
+						case GenericNameSyntax             : AppendInterceptsLocation(inv); break;
+						case MemberBindingExpressionSyntax : AppendInterceptsLocation(inv); break;
 						default :
 							sb.AppendLine(
 								$"""
@@ -1065,10 +1067,10 @@ namespace AspectGenerator
 						""");
 				}
 
-				sb.AppendLine("\t\t[System.Runtime.CompilerServices.CompilerGenerated]");
+				sb.AppendLine("\t\t[global::System.Runtime.CompilerServices.CompilerGenerated]");
 
 				if (options.DebuggerStepThrough)
-					sb.AppendLine("\t\t[System.Diagnostics.DebuggerStepThrough]");
+					sb.AppendLine("\t\t[global::System.Diagnostics.DebuggerStepThrough]");
 
 				sb.Append("\t\tpublic static ");
 
@@ -1535,7 +1537,7 @@ namespace AspectGenerator
 					sb.Append("__this__, ");
 
 				foreach (var p in method.Parameters)
-					sb.Append(p.Name).Append(p.RefKind == RefKind.Out ? " = default, " : ", ");
+					sb.Append(EscapeIdentifier(p.Name)).Append(p.RefKind == RefKind.Out ? " = default, " : ", ");
 
 				while (sb[^1] is ' ' or ',')
 					sb.Length--;
@@ -1586,7 +1588,9 @@ namespace AspectGenerator
 				if (generateAsync)
 					sb.Insert(methodModifierPosition, "async ");
 
-				var returnType = generateAsync ? asyncResultType?.ToString() ?? "AspectGenerator.Void" : method.ReturnsVoid ? "AspectGenerator.Void" : $"{method.ReturnType}";
+				var returnType = generateAsync
+					? asyncResultType is null ? "global::AspectGenerator.Void" : PrintType(asyncResultType)
+					: method.ReturnsVoid ? "global::AspectGenerator.Void" : PrintType(method.ReturnType);
 
 				// Generate AspectCallInfo.
 				//
@@ -1609,7 +1613,7 @@ namespace AspectGenerator
 
 					sb
 						.Append(indent).AppendLine($"var __aspect__{idx} = {(AspectLifetimeResolver.UsesInstanceLifetime(attributes[idx]) ? GetAppliedAspectConstruction(attributes[idx]) : $"{interceptorName}_State.Aspect{idx}")};")
-						.Append(indent).AppendLine($"var __info__{idx}   = new AspectGenerator.Intercept{(useInterceptData ? "Data" : "Info")}<{returnType}>")
+						.Append(indent).AppendLine($"var __info__{idx}   = new global::AspectGenerator.Intercept{(useInterceptData ? "Data" : "Info")}<{returnType}>")
 						.Append(indent).AppendLine("{")
 						//.Append(indent).AppendLine($"\tReturnValue     = {(idx > 0 ? $"__info__{idx - 1}.ReturnValue" : $"default({(method.ReturnsVoid ? "Void" : $"{method.ReturnType}")})")},")
 						.Append(indent).AppendLine($"\tMemberInfo = __targetMethod__,")
@@ -1635,7 +1639,7 @@ namespace AspectGenerator
 				if (onInit is not null)
 				{
 					GenerateInterceptType("", "OnInit")
-						.Append(indent).AppendLine($"__info__{idx} = {attr.ContainingNamespace}.{attr.Name}.{onInit}({PassInfo(idx)});")
+						.Append(indent).AppendLine($"__info__{idx} = {PrintType(attr)}.{onInit}({PassInfo(idx)});")
 						.AppendLine()
 						;
 				}
@@ -1646,7 +1650,7 @@ namespace AspectGenerator
 				{
 					var isAsync = generateAsync && onUsingAsync != null;
 					GenerateInterceptType("", "OnUsing")
-						.Append(indent).AppendLine($"{(isAsync ? "await " : "")}using ({attr.ContainingNamespace}.{attr.Name}.{(isAsync ? onUsingAsync : onUsing)}({PassInfo(idx)}))")
+						.Append(indent).AppendLine($"{(isAsync ? "await " : "")}using ({PrintType(attr)}.{(isAsync ? onUsingAsync : onUsing)}({PassInfo(idx)}))")
 						.Append(indent).AppendLine("{")
 						;
 					indent += '\t';
@@ -1669,7 +1673,7 @@ namespace AspectGenerator
 					GenerateInterceptType("", "OnBeforeCall");
 					GenerateMethodCall(onBeforeCallAsync, onBeforeCall)
 						.AppendLine()
-						.Append(indent).AppendLine($"if (__info__{idx}.InterceptResult != AspectGenerator.InterceptResult.Return)")
+						.Append(indent).AppendLine($"if (__info__{idx}.InterceptResult != global::AspectGenerator.InterceptResult.Return)")
 						.Append(indent).AppendLine("{")
 						;
 
@@ -1704,11 +1708,11 @@ namespace AspectGenerator
 						.Append(
 							onCall is null
 								? method.IsExtensionMethod || method.IsStatic
-									? method.OriginalDefinition.ContainingType
+									? PrintType(method.OriginalDefinition.ContainingType)
 									: "__this__"
-								: $"{attr.ContainingNamespace}.{attr.Name}")
+								: PrintType(attr))
 						.Append('.')
-						.Append(onCall ?? method.Name)
+						.Append(onCall is null ? PrintMethodName(method) : onCall)
 						.Append('(')
 						;
 
@@ -1731,7 +1735,7 @@ namespace AspectGenerator
 									RefKind.In  => "in ",
 									_           => ""
 								})
-							.Append(p.Name)
+							.Append(EscapeIdentifier(p.Name))
 							.Append(", ");
 					}
 
@@ -1782,14 +1786,14 @@ namespace AspectGenerator
 					// Generate OnCatch.
 					//
 					sb
-						.Append(indent).AppendLine("catch (Exception __ex__)")
+						.Append(indent).AppendLine("catch (global::System.Exception __ex__)")
 						.Append(indent).AppendLine("{")
 						.Append(indent).AppendLine($"\t__info__{idx}.Exception{(onCatch is null ? null : "      ")} = __ex__;")
 						;
 
 					if (generateAsync && onCatchAsync is not null || onCatch is not null)
 					{
-						sb.Append(indent).AppendLine($"\t__info__{idx}.InterceptResult = AspectGenerator.InterceptResult.ReThrow;");
+						sb.Append(indent).AppendLine($"\t__info__{idx}.InterceptResult = global::AspectGenerator.InterceptResult.ReThrow;");
 
 						GenerateInterceptType("\t", "OnCatch")
 							.AppendLine()
@@ -1798,7 +1802,7 @@ namespace AspectGenerator
 
 						GenerateMethodCall(onCatchAsync, onCatch)
 							.AppendLine()
-							.Append(indent).AppendLine($"\tif (__info__{idx}.InterceptResult == AspectGenerator.InterceptResult.ReThrow)")
+							.Append(indent).AppendLine($"\tif (__info__{idx}.InterceptResult == global::AspectGenerator.InterceptResult.ReThrow)")
 							.Append(indent).AppendLine("\t\tthrow;")
 							;
 					}
@@ -1861,8 +1865,8 @@ namespace AspectGenerator
 				StringBuilder GenerateMethodCall(object? onAsync, object? call)
 				{
 					if (generateAsync && onAsync is not null)
-						return sb.Append(indent).AppendLine($"await {attr.ContainingNamespace}.{attr.Name}.{onAsync}({PassHookArguments(onAsync)});");
-					return sb.Append(indent).AppendLine($"{attr.ContainingNamespace}.{attr.Name}.{call}({PassHookArguments(call)});");
+						return sb.Append(indent).AppendLine($"await {PrintType(attr)}.{onAsync}({PassHookArguments(onAsync)});");
+					return sb.Append(indent).AppendLine($"{PrintType(attr)}.{call}({PassHookArguments(call)});");
 				}
 
 				string PassHookArguments(object? hookName)
@@ -1891,7 +1895,7 @@ namespace AspectGenerator
 						sb
 							.Append(additionalIndent)
 							.Append(indent)
-							.AppendLine($"__info__{idx}.InterceptType = AspectGenerator.InterceptType.{interceptType};");
+							.AppendLine($"__info__{idx}.InterceptType = global::AspectGenerator.InterceptType.{interceptType};");
 					}
 
 					return sb;
@@ -1913,7 +1917,7 @@ namespace AspectGenerator
 				return "null";
 
 			if (type?.TypeKind == TypeKind.Enum)
-				return $"({type}){PrintValue(val, null)}";
+				return $"({PrintType(type)}){PrintValue(val, null)}";
 
 			return val switch
 			{
@@ -1960,9 +1964,42 @@ namespace AspectGenerator
 			}
 		}
 
+		/// <summary>
+		/// Type names in generated code are fully qualified with <c>global::</c>, so they bind the same way whatever
+		/// namespace the interceptors are emitted into and whatever the user's code declares there.
+		/// Nullable reference annotations are kept: the generated file is compiled with <c>#nullable enable</c>.
+		/// </summary>
+		static readonly SymbolDisplayFormat _typeFormat = SymbolDisplayFormat.FullyQualifiedFormat
+			.AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+
+		static readonly SymbolDisplayFormat _parameterFormat = _typeFormat
+			.WithParameterOptions(
+				SymbolDisplayParameterOptions.IncludeParamsRefOut |
+				SymbolDisplayParameterOptions.IncludeType         |
+				SymbolDisplayParameterOptions.IncludeName         |
+				SymbolDisplayParameterOptions.IncludeDefaultValue);
+
 		static string PrintType(ITypeSymbol type)
 		{
-			return $"{type}";
+			return type.ToDisplayString(_typeFormat);
+		}
+
+		static string PrintMethodName(IMethodSymbol method)
+		{
+			var name = EscapeIdentifier(method.Name);
+
+			// The call in the interceptor repeats the call site's type arguments; they cannot always be inferred again.
+			var callTarget = method.GetConstructedReducedFrom() ?? method;
+
+			if (!callTarget.IsGenericMethod)
+				return name;
+
+			return $"{name}<{string.Join(", ", callTarget.TypeArguments.Select(PrintType))}>";
+		}
+
+		static string EscapeIdentifier(string name)
+		{
+			return SyntaxFacts.IsReservedKeyword(SyntaxFacts.GetKeywordKind(name)) ? "@" + name : name;
 		}
 
 		static string PrintParameters(IMethodSymbol method)
@@ -1971,11 +2008,11 @@ namespace AspectGenerator
 			var sb         = new StringBuilder();
 
 			if (method.IsStatic == false)
-				sb.Append($"this {method.ReceiverType} __this__, ");
+				sb.Append($"this {PrintType(method.ReceiverType!)} __this__, ");
 
 			foreach (var p in parameters)
 				sb
-					.Append(p)
+					.Append(p.ToDisplayString(_parameterFormat))
 					.Append(", ")
 					;
 
@@ -1992,14 +2029,14 @@ namespace AspectGenerator
 			sb.Append("(() => ");
 
 			sb
-				.Append(method.IsExtensionMethod || method.IsStatic ? method.OriginalDefinition.ContainingType : $"default({method.ReceiverType})")
+				.Append(method.IsExtensionMethod || method.IsStatic ? PrintType(method.OriginalDefinition.ContainingType) : $"default({PrintType(method.ReceiverType!)})")
 				.Append('.')
-				.Append(method.Name)
+				.Append(PrintMethodName(method))
 				.Append('(')
 				;
 
 			if (method.IsExtensionMethod)
-				sb.Append($"default({method.ReceiverType}), ");
+				sb.Append($"default({PrintType(method.ReceiverType!)}), ");
 
 			foreach (var p in method.Parameters)
 				switch (p.RefKind)
@@ -2007,7 +2044,7 @@ namespace AspectGenerator
 					case RefKind.Ref : sb.Append($"ref {interceptorName}_Arg_{p.Name}, "); break;
 					case RefKind.In  : sb.Append($"in {interceptorName}_Arg_{p.Name}, ");  break;
 					case RefKind.Out : sb.Append($"out {interceptorName}_Arg_{p.Name}, "); break;
-					default          : sb.Append($"default({p.Type}), ");                  break;
+					default          : sb.Append($"default({PrintType(p.Type)}), ");       break;
 				}
 
 			while (sb[^1] is ',' or ' ')
