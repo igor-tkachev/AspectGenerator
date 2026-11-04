@@ -55,16 +55,16 @@ Common modes:
 
 ```text
 single project:
-  AspectGeneratorGenerateApi=true
+  AspectGeneratorGenerateApi unset
   AspectGeneratorPublicApi=false
 
 aspect library exposing reusable aspects:
-  AspectGeneratorGenerateApi=true
+  AspectGeneratorGenerateApi unset
   AspectGeneratorPublicApi=true
 
 consumer using public API from an aspect library:
-  AspectGeneratorGenerateApi=false
-  direct AspectGenerator package reference still required if this project has call sites to intercept
+  AspectGeneratorGenerateApi unset (a referenced public API is used instead of generating a copy)
+  AspectGenerator reference (direct, or passed on by the library with PrivateAssets="none") AspectGenerator package reference still required if this project has call sites to intercept
 ```
 
 `AspectGeneratorOptionsAttribute` and `AspectDiagnosticSeverity` are per-project configuration API. They are not the shared runtime contract for aspect libraries.
@@ -75,7 +75,6 @@ Relevant MSBuild properties:
 
 ```xml
 <PropertyGroup>
-  <AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
   <AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>

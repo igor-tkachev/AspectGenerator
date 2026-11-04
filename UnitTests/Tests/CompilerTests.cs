@@ -1492,6 +1492,21 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void HandWiredProjectWithoutMarkerReportsNeitherDiagnosticTest()
+		{
+			var result = RunGenerator(
+				TraceDirectSource,
+				new()
+				{
+					["build_property.AspectGeneratorPropsImported"] = "",
+					["build_property.InterceptorsNamespaces"]       = "AspectGenerator",
+				});
+
+			AssertNoDiagnostic(result, AspectDiagnosticID.BuildPropsNotImported);
+			AssertNoDiagnostic(result, AspectDiagnosticID.NamespaceNotAllowed);
+		}
+
+		[TestMethod]
 		public void ImportedBuildPropsDoNotReportMissingPropsTest()
 		{
 			var result = RunGenerator(TraceDirectSource);

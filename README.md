@@ -107,7 +107,6 @@ AspectGenerator can be configured with MSBuild properties:
 
 ```xml
 <PropertyGroup>
-  <AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
   <AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
@@ -149,7 +148,9 @@ The generator rewrites only the calls compiled in the project that references it
 
 ```xml
 <!-- Library whose public aspects should apply in its consumers -->
-<PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="none" />
+<ItemGroup>
+  <PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="none" />
+</ItemGroup>
 <PropertyGroup>
   <AspectGeneratorPublicApi>true</AspectGeneratorPublicApi>
 </PropertyGroup>
@@ -167,14 +168,14 @@ AspectGenerator normally generates the authoring/runtime API into each consuming
 - `PublicApi=false`: generated API is internal to the consuming assembly.
 - `PublicApi=true`: generated API is public. Treat this mode as experimental until the public contract is stabilized.
 
-Any project that exposes aspect attributes to other projects must set `AspectGeneratorPublicApi=true`. Consumer projects can either generate their own internal runtime API for local aspects or set `AspectGeneratorGenerateApi=false` and use the public runtime API supplied by an aspect library.
+Any project that exposes aspect attributes to other projects must set `AspectGeneratorPublicApi=true`. Consumer projects leave `AspectGeneratorGenerateApi` unset: they use the public runtime API of a referenced aspect library, or generate their own internal one when there is none. Only one assembly in an app's reference graph may expose the public API (otherwise CS0433).
 
 Common modes:
 
 | Mode | Configuration | Intended use |
 | --- | --- | --- |
-| Single project | `GenerateApi=true`, `PublicApi=false` | App defines and uses its own aspects. |
-| Aspect library | Library: `GenerateApi=true`, `PublicApi=true`; consumer: `GenerateApi=false` | Shared aspect attributes live in a reusable assembly. |
+| Single project | `GenerateApi` unset, `PublicApi=false` | App defines and uses its own aspects. |
+| Aspect library | Library: `PublicApi=true`; consumer: `GenerateApi` unset | Shared aspect attributes live in a reusable assembly. |
 | Cross-project app | Same interceptor namespace in each project via `AspectGeneratorInterceptorsNamespace` | Intercept calls compiled in multiple projects. |
 
 Every project whose call sites should be intercepted must reference AspectGenerator directly. A shared aspect library may reference AspectGenerator to define and build aspect attributes, but applications that use those aspect attributes must also reference AspectGenerator directly if their call sites should be intercepted. The source generator runs in the compilation of the project that references the generator package.

@@ -8,7 +8,7 @@
 	</PropertyGroup>
 
 	<!-- Imported after project properties, so custom AspectGeneratorInterceptorsNamespace values are appended here. -->
-	<!-- Shipped in buildTransitive/ and imported from build/ as well; the first When keeps a second import from appending again. -->
+	<!-- NuGet imports this file once; the first When keeps a repeated import (build/ forwards here) from appending the namespace again. -->
 	<Choose>
 		<When Condition="'$(_AspectGeneratorTargetsLoaded)' == 'true'" />
 		<When Condition="'$(AspectGeneratorInterceptorsNamespace)' != '' and '$(InterceptorsNamespaces)' == ''">

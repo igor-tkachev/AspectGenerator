@@ -604,9 +604,9 @@ namespace AspectGenerator
 			{
 				using (trace.TimePhase("Interceptors namespace validation"))
 				{
-					// Without the package's build props the interceptors namespace and the options are not set up either,
-					// so one warning that names the cause replaces the follow-up AG0004 and the interceptor compile errors.
-					if (options.PropsImported)
+					// Without the package's build props and without a namespace wired up by hand, the interceptors cannot compile:
+					// one warning names the cause instead of the less specific AG0004. A project wired by hand is checked as before.
+					if (options.PropsImported || IsInterceptorsNamespaceListed(options))
 						ReportMissingInterceptorsNamespace(diagnostics, options);
 					else
 						ReportBuildPropsNotImported(diagnostics);
@@ -758,6 +758,17 @@ namespace AspectGenerator
 				DiagnosticSeverity.Warning));
 		}
 
+		static bool IsInterceptorsNamespaceListed(GeneratorExecutionOptions options)
+		{
+			if (string.IsNullOrWhiteSpace(options.InterceptorsNamespaces))
+				return false;
+
+			return options.InterceptorsNamespaces!
+				.Split([';'], StringSplitOptions.RemoveEmptyEntries)
+				.Select(static n => n.Trim())
+				.Contains(GetInterceptorsNamespace(options), StringComparer.Ordinal);
+		}
+
 		static void ReportMissingInterceptorsNamespace(List<DiagnosticInfo> diagnostics, GeneratorExecutionOptions options)
 		{
 			var interceptorsNamespace = GetInterceptorsNamespace(options);
@@ -774,11 +785,7 @@ namespace AspectGenerator
 				return;
 			}
 
-			var namespaces = options.InterceptorsNamespaces!
-				.Split([';'], StringSplitOptions.RemoveEmptyEntries)
-				.Select(static n => n.Trim());
-
-			if (namespaces.Contains(interceptorsNamespace, StringComparer.Ordinal))
+			if (IsInterceptorsNamespaceListed(options))
 				return;
 
 			diagnostics.Add(

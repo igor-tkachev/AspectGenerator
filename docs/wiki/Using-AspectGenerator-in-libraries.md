@@ -1,21 +1,21 @@
 # Using AspectGenerator in libraries
 
-AspectGenerator is a development dependency: `dotnet add package AspectGenerator` writes `PrivateAssets="all"`, so the generator runs only in the project that references it and does not reach the projects that consume that project. A call site is rewritten only by the generator in the project that compiles it, so a project needs the generator when its own code contains calls to intercept.
+AspectGenerator is a development dependency: `dotnet add package AspectGenerator` writes `PrivateAssets="all"`, so the generator runs only in the project that references it and does not reach that project's consumers. A call site is rewritten only by the generator in the project that compiles it, so a project needs the generator when its own code contains calls to intercept.
 
-A library can opt in to passing the generator on with `PrivateAssets="none"`. The package ships its MSBuild props and targets in `buildTransitive/` (and `build/` forwards to it), so a transitive consumer gets `InterceptorsNamespaces` and the generator options as well, and a direct reference in the same project never applies them twice.
+A library can pass the generator on to its consumers by writing `PrivateAssets="none"`. The package ships its MSBuild props and targets in `buildTransitive/`, so a transitive consumer gets `InterceptorsNamespaces` and the generator options with it, and a direct reference in the same project is harmless.
 
 ## Scenarios
 
-| Scenario | Library csproj | What the app needs | What happens |
+| Scenario | Library csproj | App | Result |
 | --- | --- | --- | --- |
-| App with aspects | n/a | `<PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />` | Calls in the app are intercepted. |
-| Library with internal aspects only | `PackageReference` with `PrivateAssets="all"` | Nothing | Calls inside the library are rewritten when the library is built, and the rewrite is part of its IL. The app does not run the generator. |
-| Shared aspect library (public aspect attributes) | `PrivateAssets="all"` and `<AspectGeneratorPublicApi>true</AspectGeneratorPublicApi>` | A reference to the library, plus its own AspectGenerator reference (`PrivateAssets="all"`) to intercept calls in the app | The library exposes `AspectAttribute` and related types. The app does not generate a second copy of that API. Without its own reference the app compiles, but aspects applied in the app are not applied. |
-| Public aspects that apply in consumers, opt-in flow | `PrivateAssets="none"` and `AspectGeneratorPublicApi=true` | A reference to the library only | The library package depends on AspectGenerator; the generator, `InterceptorsNamespaces` and the options reach the app transitively, and calls in the app to aspected methods of the library are intercepted. Every consumer of the library runs the generator. |
-| Public aspects that apply in consumers, direct reference | `PrivateAssets="all"` and `AspectGeneratorPublicApi=true` | A reference to the library and its own AspectGenerator reference (`PrivateAssets="all"`) | Same result, and the library does not force the generator on its consumers. |
-| Multi-project solution | Each project that contains calls to intercept references the generator; put the reference in `Directory.Build.props` to write it once | The same | The generator runs per project, with its own report and API ownership. Set `AspectGeneratorPublicApi=true` only in the project that defines the shared aspects. |
-| Test project | n/a | Its own AspectGenerator reference if the tests should intercept their calls to aspected methods | The app's private reference does not reach the test project. Tests that only exercise the app's code need nothing, because the app's own call sites are already rewritten in its IL; tests that call aspected methods and expect the aspects to run need the reference. |
-| Upgrading from 1.0.0 | `PrivateAssets="all"` to keep it private (what `dotnet add package` does now); `PrivateAssets="none"` to keep the old flow | Nothing, unless the library relied on the flow and now keeps it private: then add the reference | In 1.0.0 the reference flowed implicitly, and in a consumer the analyzer could run without its props. Now the flow is explicit and always comes with the props. |
+| App with aspects | n/a | `PackageReference` with `PrivateAssets="all"` | Calls in the app are intercepted. |
+| Library with internal aspects only | `PrivateAssets="all"` | Nothing | Calls inside the library are rewritten when it is built. The app does not run the generator. |
+| Shared aspect library (public attributes) | `PrivateAssets="all"`, `AspectGeneratorPublicApi=true` | Library reference, plus its own AspectGenerator reference to intercept its calls | The app uses the library's API and generates no copy. Without its own reference the app builds, but aspects applied in the app are not applied. |
+| Public aspects applied in consumers: opt-in flow | `PrivateAssets="none"`, `AspectGeneratorPublicApi=true` | Library reference only | The generator and its props reach the app, and the app's calls to the library's aspected methods are intercepted. Every consumer of the library runs the generator. |
+| Public aspects applied in consumers: direct reference | `PrivateAssets="all"`, `AspectGeneratorPublicApi=true` | Library reference and its own AspectGenerator reference | Same result; the library does not force the generator on its consumers. |
+| Multi-project solution | Reference the generator in each project that has calls to intercept (once, in `Directory.Build.props`) | Same | One generator run per project. Set `AspectGeneratorPublicApi=true` only in the project that defines the shared aspects. |
+| Test project | n/a | Its own reference, only if the tests call aspected methods and expect the aspects to run | The app's private reference does not reach the test project. |
+| Upgrading from 1.0.0 | `PrivateAssets="all"` to keep it private; `PrivateAssets="none"` to keep the old flow | Add a reference if the library now stays private | In 1.0.0 the reference flowed implicitly and could reach a consumer without its props. Now the flow is explicit and always comes with the props. |
 
 ## Opt-in flow
 
@@ -30,26 +30,31 @@ A library can opt in to passing the generator on with `PrivateAssets="none"`. Th
 </PropertyGroup>
 ```
 
-Write `PrivateAssets="none"` explicitly. Leaving `PrivateAssets` out passes the generator through project references, but in a packed library NuGet then writes `exclude="Build,Analyzers"` into the dependency, so the generator does not reach the consumers of the package.
+Only `PrivateAssets="all"` keeps the generator private. Leaving `PrivateAssets` out behaves like `none` for consumers: in a packed library NuGet writes `exclude="Build,Analyzers"` into the dependency, but the analyzer and the `buildTransitive/` props still reach the consumers. Write `none` explicitly so the intent is visible.
 
-The app needs no AspectGenerator settings. `AspectGeneratorGenerateApi` is not set by default: when it is unset and a referenced assembly already declares a public `AspectAttribute`, the project uses that API instead of generating its own. Set `AspectGeneratorGenerateApi` to `true` or `false` to choose explicitly.
+The app needs no AspectGenerator settings. Leave `AspectGeneratorGenerateApi` unset: when a referenced assembly already declares a public `AspectAttribute`, the project uses that API instead of generating its own. Only one assembly in an app's reference graph may expose the public API, otherwise the types clash (CS0433). Setting `AspectGeneratorGenerateApi` to `true` or `false` chooses explicitly.
 
 ## Direct reference
 
 ```xml
 <!-- Library: keeps the generator private -->
-<PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />
+<ItemGroup>
+  <PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />
+</ItemGroup>
+
 <PropertyGroup>
   <AspectGeneratorPublicApi>true</AspectGeneratorPublicApi>
 </PropertyGroup>
 
 <!-- App: its own reference -->
-<PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />
-<PackageReference Include="MyCompany.Aspects" Version="..." />
+<ItemGroup>
+  <PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />
+  <PackageReference Include="MyCompany.Aspects" Version="..." />
+</ItemGroup>
 ```
 
-A reference that is both direct and transitive is safe: the props are guarded against a second import, and the app generates no duplicate API.
+A reference that is both direct and transitive is safe: NuGet imports the package's `buildTransitive/` files once, and the app generates no duplicate API.
 
 ## When the generator runs without its props
 
-If the analyzer reaches a project without the package's MSBuild props (for example through a manual `Analyzer` item), the project has no `InterceptorsNamespaces` and the interceptors do not compile. When the generator would intercept calls in such a project, it reports one warning, [`AG0005`](Diagnostics), instead of leaving only the compiler errors. Reference the package from that project, or let the library flow it with `PrivateAssets="none"`.
+If the analyzer reaches a project without the package's MSBuild props (for example an analyzer reference added by hand) and the generated interceptor namespace is not listed in `InterceptorsNamespaces`, the interceptors cannot compile. The generator then reports one warning, [`AG0005`](Diagnostics), next to the compiler's interceptor errors. Reference the package from that project, or let the library pass it on with `PrivateAssets="none"`. A project wired by hand with `InterceptorsNamespaces` set gets no AG0005.

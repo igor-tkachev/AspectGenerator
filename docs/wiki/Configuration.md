@@ -46,7 +46,6 @@ The recommended way to configure multiple projects consistently is to use MSBuil
 ```xml
 <Project>
   <PropertyGroup>
-    <AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
     <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
     <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
     <AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
@@ -123,15 +122,14 @@ Common modes:
 
 | Mode | Configuration | Meaning |
 | --- | --- | --- |
-| Single-project usage | `GenerateApi=true`, `PublicApi=false` | The project defines and uses its own aspects. Generated runtime API is internal. |
-| Aspect library | `GenerateApi=true`, `PublicApi=true` | The project exposes aspect attributes and runtime API to other projects. |
-| Consumer of aspect library | `GenerateApi=false` | The project uses public runtime API from a referenced aspect library. |
+| Single-project usage | `GenerateApi` unset, `PublicApi=false` | The project defines and uses its own aspects. Generated runtime API is internal. |
+| Aspect library | `GenerateApi` unset, `PublicApi=true` | The project exposes aspect attributes and runtime API to other projects. |
+| Consumer of aspect library | `GenerateApi` unset | The project uses the public runtime API of a referenced aspect library. Leave the property unset; setting it to `false` does the same, and `true` generates a second copy. |
 
 Any project that exposes aspect attributes to other projects must set:
 
 ```xml
 <PropertyGroup>
-  <AspectGeneratorGenerateApi>true</AspectGeneratorGenerateApi>
   <AspectGeneratorPublicApi>true</AspectGeneratorPublicApi>
 </PropertyGroup>
 ```
