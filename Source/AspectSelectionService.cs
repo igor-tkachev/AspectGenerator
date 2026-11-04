@@ -21,6 +21,7 @@ namespace AspectGenerator
 		readonly Dictionary<INamedTypeSymbol,ImmutableArray<AspectFilterSet>> _typeFilterCache = new(SymbolEqualityComparer.Default);
 		readonly object _cacheGate = new();
 		readonly Dictionary<SyntaxTree,SemanticModel> _semanticModels = new();
+		List<INamedTypeSymbol>? _sourceTypes;
 
 		public AspectSelectionService(
 			Compilation              compilation,
@@ -129,10 +130,41 @@ namespace AspectGenerator
 				if (semanticModel.GetDeclaredSymbol(methodDeclaration, cancellationToken) is not IMethodSymbol method)
 					continue;
 
+				SelectMethod(method);
+			}
+
+			// Records get ToString, Equals, GetHashCode and PrintMembers from the compiler, with no declaration the
+			// syntax provider could see; target filters still select them. A generated Deconstruct is left out: its
+			// out parameters are not supported by interceptor emission.
+			foreach (var type in GetSourceTypes())
+			{
+				if (cancellationToken.IsCancellationRequested)
+					break;
+
+				if (!type.IsRecord)
+					continue;
+
+				foreach (var member in type.GetMembers())
+					if (member is IMethodSymbol { IsImplicitlyDeclared: true, MethodKind: MethodKind.Ordinary, CanBeReferencedByName: true } method &&
+						method.Name != "Deconstruct")
+						SelectMethod(method);
+			}
+
+			_trace?.SetCounter("Target method declarations", targetMethodDeclarations);
+			_trace?.SetCounter("Target methods after declaration filter", selectedMethods.Count);
+			_trace?.SetCounter("Target methods after semantic filter", selectedMethods.Count);
+
+			if (!mayTargetExternalMethods)
+				AddReceiverTypeNames(buckets.Values, cancellationToken);
+
+			return new AspectSelectionPlan(selectedMethods, selectedAttributes, buckets, mayTargetExternalMethods, externalTargetMethodNames);
+
+			void SelectMethod(IMethodSymbol method)
+			{
 				var attributes = GetSelectedAttributes(method);
 
 				if (attributes.Count == 0)
-					continue;
+					return;
 
 				var originalMethod = method.OriginalDefinition;
 				selectedMethods.Add(originalMethod);
@@ -146,15 +178,36 @@ namespace AspectGenerator
 
 				bucket.Add(originalMethod);
 			}
+		}
 
-			_trace?.SetCounter("Target method declarations", targetMethodDeclarations);
-			_trace?.SetCounter("Target methods after declaration filter", selectedMethods.Count);
-			_trace?.SetCounter("Target methods after semantic filter", selectedMethods.Count);
+		/// <summary>
+		/// Every named type declared in this compilation, nested types included; collected once.
+		/// </summary>
+		List<INamedTypeSymbol> GetSourceTypes()
+		{
+			if (_sourceTypes is not null)
+				return _sourceTypes;
 
-			if (!mayTargetExternalMethods)
-				AddReceiverTypeNames(buckets.Values, cancellationToken);
+			var types = new List<INamedTypeSymbol>();
 
-			return new AspectSelectionPlan(selectedMethods, selectedAttributes, buckets, mayTargetExternalMethods, externalTargetMethodNames);
+			AddTypes(_compilation.Assembly.GlobalNamespace, types);
+			_sourceTypes = types;
+
+			return types;
+
+			static void AddTypes(INamespaceOrTypeSymbol container, List<INamedTypeSymbol> types)
+			{
+				foreach (var member in container.GetMembers())
+				{
+					if (member is INamespaceSymbol namespaceSymbol)
+						AddTypes(namespaceSymbol, types);
+					else if (member is INamedTypeSymbol type)
+					{
+						types.Add(type);
+						AddTypes(type, types);
+					}
+				}
+			}
 		}
 
 		bool ReferencedAssembliesContainRoot(string root)
@@ -180,9 +233,7 @@ namespace AspectGenerator
 			foreach (var tree in _compilation.SyntaxTrees)
 				AddAliases(tree.GetRoot(cancellationToken), aliases);
 
-			var sourceTypes = new List<INamedTypeSymbol>();
-
-			AddTypes(_compilation.Assembly.GlobalNamespace, sourceTypes);
+			var sourceTypes = GetSourceTypes();
 
 			foreach (var bucket in staticBuckets)
 			{
@@ -225,20 +276,6 @@ namespace AspectGenerator
 				foreach (var member in members)
 					if (member is BaseNamespaceDeclarationSyntax)
 						AddAliases(member, aliases);
-			}
-
-			static void AddTypes(INamespaceOrTypeSymbol container, List<INamedTypeSymbol> types)
-			{
-				foreach (var member in container.GetMembers())
-				{
-					if (member is INamespaceSymbol namespaceSymbol)
-						AddTypes(namespaceSymbol, types);
-					else if (member is INamedTypeSymbol type)
-					{
-						types.Add(type);
-						AddTypes(type, types);
-					}
-				}
 			}
 		}
 

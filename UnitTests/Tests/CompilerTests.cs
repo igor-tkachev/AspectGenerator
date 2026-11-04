@@ -1573,6 +1573,22 @@ namespace AspectGenerator.Tests
 			AssertInterceptedCalls(CallShapeSource("\"a\".Length(); new[] { 1 }.Count(); string? text = \"b\"; text?.Length();"), 3);
 		}
 
+		[TestMethod]
+		public void AssemblyFilterSelectsCompilerGeneratedRecordMethodsTest()
+		{
+			AssertInterceptedCalls(RecordMembersSource.Replace("/*TYPE-FILTER*/", "", StringComparison.Ordinal), 3);
+		}
+
+		[TestMethod]
+		public void TypeFilterSelectsCompilerGeneratedRecordMethodsTest()
+		{
+			AssertInterceptedCalls(
+				RecordMembersSource
+					.Replace("[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = \"fulltype: AspectGenerator.Tests.GeneratorDriver.Person\")]", "", StringComparison.Ordinal)
+					.Replace("/*TYPE-FILTER*/", "[Log(TargetFilter = \"method: *\")]", StringComparison.Ordinal),
+				3);
+		}
+
 		static void AssertInterceptedCalls(string source, int expectedCount)
 		{
 			var result = RunGeneratorAndGetCompilation(source, out var compilation);
@@ -4244,6 +4260,41 @@ namespace AspectGenerator.Tests
 				public static void Invoke()
 				{
 					Call(1);
+				}
+			}
+			""";
+
+		const string RecordMembersSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "fulltype: AspectGenerator.Tests.GeneratorDriver.Person")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnBeforeCall = nameof(Before))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void Before(InterceptInfo info)
+				{
+				}
+			}
+
+			/*TYPE-FILTER*/
+			sealed record Person(string Name);
+
+			static class Calls
+			{
+				public static void Invoke(Person person, Person other)
+				{
+					person.ToString();
+					person.Equals(other);
+					person.GetHashCode();
+					person.Deconstruct(out var name);
 				}
 			}
 			""";
