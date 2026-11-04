@@ -48,24 +48,94 @@ namespace AspectGenerator
 			return new AspectDefinitionRegistry(aspectAttributes);
 		}
 
-		public static ImmutableArray<ClassDeclarationSyntax> FindAspectDeclarations(Compilation compilation, CancellationToken cancellationToken)
+		/// <summary>
+		/// Collects the declarations the generator receives from its syntax providers: aspect definition classes and
+		/// method declarations. Both are type members, so the walk never enters member bodies.
+		/// </summary>
+		public static void FindDeclarations(
+			Compilation                                      compilation,
+			CancellationToken                                cancellationToken,
+			out ImmutableArray<ClassDeclarationSyntax>       aspectDeclarations,
+			out ImmutableArray<MethodDeclarationSyntax>      methodDeclarations)
 		{
-			var result = ImmutableArray.CreateBuilder<ClassDeclarationSyntax>();
+			var aspects = ImmutableArray.CreateBuilder<ClassDeclarationSyntax>();
+			var methods = ImmutableArray.CreateBuilder<MethodDeclarationSyntax>();
 
 			foreach (var tree in compilation.SyntaxTrees)
-			{
-				var root = tree.GetRoot(cancellationToken);
+				AddMembers(tree.GetRoot(cancellationToken));
 
-				foreach (var declaration in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+			aspectDeclarations = aspects.ToImmutable();
+			methodDeclarations = methods.ToImmutable();
+
+			void AddMembers(SyntaxNode node)
+			{
+				var members = node switch
 				{
-					if (declaration.AttributeLists
-						.SelectMany(static list => list.Attributes)
-						.Any(static attribute => AspectSymbols.IsAspectDefinitionAttribute(attribute)))
-						result.Add(declaration);
+					CompilationUnitSyntax compilationUnit                => compilationUnit.Members,
+					BaseNamespaceDeclarationSyntax namespaceDeclaration  => namespaceDeclaration.Members,
+					TypeDeclarationSyntax typeDeclaration                => typeDeclaration.Members,
+					_                                                    => default
+				};
+
+				foreach (var member in members)
+				{
+					if (member is MethodDeclarationSyntax method)
+						methods.Add(method);
+					else if (member is BaseNamespaceDeclarationSyntax or TypeDeclarationSyntax)
+					{
+						if (member is ClassDeclarationSyntax declaration && IsAspectDeclarationCandidate(declaration))
+							aspects.Add(declaration);
+
+						AddMembers(member);
+					}
 				}
 			}
+		}
 
-			return result.ToImmutable();
+		public static bool IsAspectDeclarationCandidate(SyntaxNode node)
+		{
+			return node is ClassDeclarationSyntax { AttributeLists.Count: > 0 } declaration && declaration.AttributeLists
+				.SelectMany(static list => list.Attributes)
+				.Any(static attribute => AspectSymbols.IsAspectAttributeName(attribute.Name.ToString()));
+		}
+
+		/// <summary>
+		/// A referenced assembly declares aspect attributes, so methods without a declaration in this compilation may carry aspects.
+		/// </summary>
+		public static bool HasExternalAspectDefinitions(Compilation compilation)
+		{
+			foreach (var assembly in compilation.SourceModule.ReferencedAssemblySymbols)
+				if (assembly.GetTypeByMetadataName("AspectGenerator.AspectAttribute") is not null &&
+					HasExternalAspectDefinitions(assembly.GlobalNamespace))
+					return true;
+
+			return false;
+
+			static bool HasExternalAspectDefinitions(INamespaceOrTypeSymbol symbol)
+			{
+				if (symbol is INamedTypeSymbol type)
+				{
+					if (type.GetAttributes().Any(static attribute => attribute.AttributeClass is
+						{
+							ContainingNamespace.Name: "AspectGenerator",
+							Name: "AspectAttribute"
+						}))
+						return true;
+
+					foreach (var nestedType in type.GetTypeMembers())
+						if (HasExternalAspectDefinitions(nestedType))
+							return true;
+				}
+
+				if (symbol is INamespaceSymbol namespaceSymbol)
+				{
+					foreach (var member in namespaceSymbol.GetMembers())
+						if (HasExternalAspectDefinitions(member))
+							return true;
+				}
+
+				return false;
+			}
 		}
 
 		public bool TryGetDefinition(INamedTypeSymbol attributeClass, out AttributeInfo definition)

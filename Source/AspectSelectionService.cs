@@ -269,28 +269,6 @@ namespace AspectGenerator
 			return true;
 		}
 
-		public bool TryAnalyzeInvocation(
-			InvocationExpressionSyntax invocation,
-			SemanticModel semanticModel,
-			CancellationToken cancellationToken,
-			out AnalyzedInvocation analyzedInvocation)
-		{
-			analyzedInvocation = null!;
-
-			var info = semanticModel.GetSymbolInfo(invocation, cancellationToken);
-
-			if (info.Symbol is not IMethodSymbol method)
-				return false;
-
-			var attributes = GetSelectedAttributes(method);
-
-			if (attributes.Count == 0)
-				return false;
-
-			analyzedInvocation = new AnalyzedInvocation(invocation, method, attributes);
-			return true;
-		}
-
 		public List<AttributeInfo> GetSelectedAttributes(IMethodSymbol method)
 		{
 			lock (_cacheGate)

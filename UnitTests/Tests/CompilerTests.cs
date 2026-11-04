@@ -1479,6 +1479,56 @@ namespace AspectGenerator.Tests
 			AssertInterceptedCalls(ExternalTargetSource("fulltype: System.Math; method: Max; params: System.Int32, System.Int32"), 1);
 		}
 
+		[TestMethod]
+		public void InterceptedCallMarkersMatchGeneratedInterceptorsTest()
+		{
+			var probes = new[]
+			{
+				CallShapeSource(
+					"""
+					new UserService().Save();
+					UserService.StaticSave();
+					new Holder().Service.Save();
+					new Holder().CallThroughOwnProperty();
+					Holder.Shared.Save();
+					DerivedService.StaticSave();
+					ServiceAlias.StaticSave();
+					Unrelated.StaticSave();
+					""",
+					ownCalls: "Service.Save();"),
+				ExternalTargetSource("public static System.Math.Max(System.Int32, System.Int32)"),
+				ExternalTargetSource("public static System.Math.Ma*(System.Int32, System.Int32)"),
+				ExternalTargetSource("fulltype: System.Math; method: Max; params: System.Int32, System.Int32"),
+				TraceDirectSource,
+			};
+
+			foreach (var probe in probes)
+			{
+				var result      = RunGeneratorAndGetCompilation(probe, out var compilation);
+				var generated   = GetGeneratedSourceOrEmpty(result, "Interceptors.g.cs");
+				var intercepted = System.Text.RegularExpressions.Regex
+					.Matches(generated, "InterceptsLocationAttribute\\(1, \"(?<data>[^\"]+)\"\\)")
+					.Select(static m => m.Groups["data"].Value)
+					.OrderBy(static d => d, StringComparer.Ordinal)
+					.ToArray();
+
+				var markers = RunAnalyzer(probe)
+					.Where(static d => d.Id == AspectDiagnosticID.InterceptedCallMarker)
+					.Select(d =>
+					{
+						var tree       = compilation.SyntaxTrees.Single(t => t.FilePath == d.Location.SourceTree!.FilePath);
+						var invocation = tree.GetRoot().FindNode(d.Location.SourceSpan).FirstAncestorOrSelf<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()!;
+
+						return compilation.GetSemanticModel(tree).GetInterceptableLocation(invocation)!.Data;
+					})
+					.OrderBy(static d => d, StringComparer.Ordinal)
+					.ToArray();
+
+				Assert.IsTrue(intercepted.Length > 0, probe);
+				CollectionAssert.AreEqual(intercepted, markers, probe);
+			}
+		}
+
 		static void AssertInterceptedCalls(string source, int expectedCount)
 		{
 			var result = RunGeneratorAndGetCompilation(source, out var compilation);

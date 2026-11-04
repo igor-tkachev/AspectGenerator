@@ -415,18 +415,13 @@ namespace AspectGenerator
 
 			var attributes = context.SyntaxProvider
 				.CreateSyntaxProvider(
-					predicate: static (node, _) => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 } c && c.AttributeLists
-						.SelectMany(static l => l.Attributes)
-						.Any(static a => AspectSymbols.IsAspectAttributeName(a.Name.ToString())),
+					predicate: static (node, _) => AspectDefinitionRegistry.IsAspectDeclarationCandidate(node),
 					transform: static (ctx, _) => (ClassDeclarationSyntax)ctx.Node)
 				.Collect();
 
 			var invocations = context.SyntaxProvider
 				.CreateSyntaxProvider(
-					predicate: static (node, _) => node is InvocationExpressionSyntax
-					{
-						Expression: MemberAccessExpressionSyntax or IdentifierNameSyntax or GenericNameSyntax or MemberBindingExpressionSyntax
-					},
+					predicate: static (node, _) => AspectSelectionService.IsCandidateInvocation(node),
 					transform: static (ctx, _) => (InvocationExpressionSyntax)ctx.Node)
 				.Collect();
 
@@ -506,7 +501,7 @@ namespace AspectGenerator
 			using (trace.TimePhase("Validate aspect hooks"))
 				ValidateAspectHooks(diagnostics, registry.AspectAttributes, reportedDiagnostics);
 
-			var externalAspectDefinitionsPossible = HasExternalAspectDefinitions(compilation);
+			var externalAspectDefinitionsPossible = AspectDefinitionRegistry.HasExternalAspectDefinitions(compilation);
 			var appliedAspectCount = CountAppliedAspectAttributes(compilation, registry, appliedAttributes, cancellationToken);
 			trace.SetCounter("Applied aspect attributes", appliedAspectCount);
 
@@ -623,42 +618,6 @@ namespace AspectGenerator
 			trace.SetCounter("Diagnostics reported", diagnostics.Count);
 
 			return new AnalysisResult(compilation, options, aspectedMethods, [..diagnostics], trace);
-		}
-
-		static bool HasExternalAspectDefinitions(Compilation compilation)
-		{
-			foreach (var assembly in compilation.SourceModule.ReferencedAssemblySymbols)
-				if (assembly.GetTypeByMetadataName("AspectGenerator.AspectAttribute") is not null &&
-					HasExternalAspectDefinitions(assembly.GlobalNamespace))
-					return true;
-
-			return false;
-
-			static bool HasExternalAspectDefinitions(INamespaceOrTypeSymbol symbol)
-			{
-				if (symbol is INamedTypeSymbol type)
-				{
-					if (type.GetAttributes().Any(static attribute => attribute.AttributeClass is
-						{
-							ContainingNamespace.Name: "AspectGenerator",
-							Name: "AspectAttribute"
-						}))
-						return true;
-
-					foreach (var nestedType in type.GetTypeMembers())
-						if (HasExternalAspectDefinitions(nestedType))
-							return true;
-				}
-
-				if (symbol is INamespaceSymbol namespaceSymbol)
-				{
-					foreach (var member in namespaceSymbol.GetMembers())
-						if (HasExternalAspectDefinitions(member))
-							return true;
-				}
-
-				return false;
-			}
 		}
 
 		static int CountAppliedAspectAttributes(

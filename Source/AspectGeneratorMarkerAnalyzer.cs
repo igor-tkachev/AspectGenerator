@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -34,29 +36,35 @@ namespace AspectGenerator
 				if (options.AspectDiagnosticSeverity == AspectDiagnosticSeverity.Off)
 					return;
 
-				var descriptor = AspectDiagnostics.GetInterceptedCallMarkerDescriptor(options.AspectDiagnosticSeverity);
-				var aspectDeclarations = AspectDefinitionRegistry.FindAspectDeclarations(
-					startContext.Compilation,
-					startContext.CancellationToken);
-				var registry = AspectDefinitionRegistry.Create(
-					startContext.Compilation,
-					aspectDeclarations,
-					NullDiagnosticSink.Instance,
-					startContext.CancellationToken);
-				var selection = new AspectSelectionService(
-					startContext.Compilation,
-					options,
-					registry,
-					NullDiagnosticSink.Instance);
+				var descriptor  = AspectDiagnostics.GetInterceptedCallMarkerDescriptor(options.AspectDiagnosticSeverity);
+				var compilation = startContext.Compilation;
+
+				// Markers must name exactly the calls the generator intercepts, so they use the generator's
+				// declaration-first selection plan and call-site prefilter. The plan is built once, on first use.
+				var selection = new Lazy<(AspectSelectionService Service, AspectSelectionPlan Plan)?>(
+					() => CreateSelection(compilation, options, startContext.CancellationToken),
+					LazyThreadSafetyMode.ExecutionAndPublication);
 
 				startContext.RegisterSyntaxNodeAction(
 					context =>
 					{
+						if (!AspectSelectionService.IsCandidateInvocation(context.Node))
+							return;
+
+						if (selection.Value is not {} selected)
+							return;
+
+						var (service, plan) = selected;
+
 						var invocation = (InvocationExpressionSyntax)context.Node;
 
-						if (!selection.TryAnalyzeInvocation(
+						if (!service.MayMatchCallSite(invocation, plan))
+							return;
+
+						if (!service.TryAnalyzeInvocation(
 							invocation,
 							context.SemanticModel,
+							plan,
 							context.CancellationToken,
 							out var analyzedInvocation))
 							return;
@@ -76,6 +84,32 @@ namespace AspectGenerator
 					},
 					SyntaxKind.InvocationExpression);
 			});
+		}
+
+		static (AspectSelectionService Service, AspectSelectionPlan Plan)? CreateSelection(
+			Compilation               compilation,
+			GeneratorExecutionOptions options,
+			CancellationToken         cancellationToken)
+		{
+			AspectDefinitionRegistry.FindDeclarations(compilation, cancellationToken, out var aspectDeclarations, out var methodDeclarations);
+
+			var registry = AspectDefinitionRegistry.Create(
+				compilation,
+				aspectDeclarations,
+				NullDiagnosticSink.Instance,
+				cancellationToken);
+			var externalAspectDefinitionsPossible = AspectDefinitionRegistry.HasExternalAspectDefinitions(compilation);
+
+			if (registry.AspectAttributes.Count == 0 && !externalAspectDefinitionsPossible)
+				return null;
+
+			var service = new AspectSelectionService(
+				compilation,
+				options,
+				registry,
+				NullDiagnosticSink.Instance);
+
+			return (service, service.BuildSelectionPlan(methodDeclarations, externalAspectDefinitionsPossible, cancellationToken));
 		}
 
 		static string GetGeneratedInterceptorType(GeneratorExecutionOptions options)
