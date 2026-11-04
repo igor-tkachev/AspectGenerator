@@ -1561,6 +1561,12 @@ namespace AspectGenerator.Tests
 			Assert.IsFalse(interceptors.Contains("<global namespace>", StringComparison.Ordinal), interceptors);
 		}
 
+		[TestMethod]
+		public void TargetWithDefaultParameterValuesIsInterceptedTest()
+		{
+			AssertInterceptedCalls(DefaultParameterValuesSource, 1);
+		}
+
 		static void AssertInterceptedCalls(string source, int expectedCount)
 		{
 			var result = RunGeneratorAndGetCompilation(source, out var compilation);
@@ -4177,6 +4183,52 @@ namespace AspectGenerator.Tests
 						Global();
 						Nested(null, [1, 2]);
 					}
+				}
+			}
+			""";
+
+		const string DefaultParameterValuesSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnBeforeCall = nameof(Before))]
+			[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+			sealed class LogAttribute : Attribute
+			{
+				public static void Before(InterceptInfo info)
+				{
+				}
+			}
+
+			[Flags]
+			enum Options
+			{
+				None  = 0,
+				Read  = 1,
+				Write = 2,
+			}
+
+			static class Service
+			{
+				[Log]
+				public static string Call(
+					int       value,
+					DayOfWeek day     = DayOfWeek.Friday,
+					double    number  = double.NaN,
+					decimal   money   = 1.5m,
+					float     single  = 1.5f,
+					Options   options = Options.Read | Options.Write,
+					string?   text    = "x")
+				{
+					return "";
+				}
+
+				public static void Invoke()
+				{
+					Call(1);
 				}
 			}
 			""";

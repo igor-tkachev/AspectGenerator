@@ -1972,12 +1972,13 @@ namespace AspectGenerator
 		static readonly SymbolDisplayFormat _typeFormat = SymbolDisplayFormat.FullyQualifiedFormat
 			.AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
 
+		// Default values are left out: every call site passes all arguments to the interceptor, and a default value
+		// printed by the symbol display (an enum member or double.NaN without its type, a decimal literal) does not compile.
 		static readonly SymbolDisplayFormat _parameterFormat = _typeFormat
 			.WithParameterOptions(
 				SymbolDisplayParameterOptions.IncludeParamsRefOut |
 				SymbolDisplayParameterOptions.IncludeType         |
-				SymbolDisplayParameterOptions.IncludeName         |
-				SymbolDisplayParameterOptions.IncludeDefaultValue);
+				SymbolDisplayParameterOptions.IncludeName);
 
 		static string PrintType(ITypeSymbol type)
 		{
