@@ -93,10 +93,16 @@ namespace AspectGenerator.Tests
 			StringAssert.Contains(props, "<AspectGeneratorInterceptorsNamespace Condition=\"'$(AspectGeneratorInterceptorsNamespace)' == ''\">AspectGenerator</AspectGeneratorInterceptorsNamespace>");
 			StringAssert.Contains(props, "<AspectGeneratorReportFile Condition=\"'$(AspectGeneratorReportFile)' == ''\">$(BaseIntermediateOutputPath)\\GeneratedFiles\\AspectGenerator\\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>");
 			StringAssert.Contains(props, "<AspectGeneratorAspectDiagnosticSeverity Condition=\"'$(AspectGeneratorAspectDiagnosticSeverity)' == ''\">Info</AspectGeneratorAspectDiagnosticSeverity>");
+			StringAssert.Contains(props, "<AspectGeneratorTrace Condition=\"'$(AspectGeneratorTrace)' == ''\">false</AspectGeneratorTrace>");
+			StringAssert.Contains(props, "<AspectGeneratorTraceLevel Condition=\"'$(AspectGeneratorTraceLevel)' == ''\">Normal</AspectGeneratorTraceLevel>");
 			Assert.IsFalse(props.Contains("AspectGeneratorPrintReport", StringComparison.Ordinal));
 			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorReportFile\" />");
 			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorAspectDiagnosticSeverity\" />");
+			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorTrace\" />");
+			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorTraceLevel\" />");
 			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"CompilerGeneratedFilesOutputPath\" />");
+			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"Configuration\" />");
+			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"TargetFramework\" />");
 			StringAssert.Contains(targets, "<InterceptorsNamespaces>$(InterceptorsNamespaces);$(AspectGeneratorInterceptorsNamespace)</InterceptorsNamespaces>");
 			StringAssert.Contains(targets, "<WarningsNotAsErrors>$(WarningsNotAsErrors);AG0300</WarningsNotAsErrors>");
 			StringAssert.Contains(targets, "Name=\"AspectGeneratorCleanReport\"");

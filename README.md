@@ -286,6 +286,33 @@ To change the report path or file name, set `AspectGeneratorReportFile`:
 
 Diagnostics are reserved for errors, warnings, and actionable misconfiguration. The build report is informational, stored as a build artifact, and is not emitted as compiler diagnostics.
 
+### Build Report Trace
+
+For source-generator performance and behavior diagnostics, enable opt-in trace output:
+
+```xml
+<PropertyGroup>
+  <AspectGeneratorTrace>true</AspectGeneratorTrace>
+  <AspectGeneratorTraceLevel>Normal</AspectGeneratorTraceLevel>
+</PropertyGroup>
+```
+
+Trace output is appended to `AspectGeneratorBuildReport.md` as an `AspectGenerator trace` section. It includes generator-visible options, `AGTRACE`-prefixed events, counters, phase timings, and fast-path decisions. Supported trace levels are `Normal` and `Verbose`; unknown values fall back to `Normal`.
+
+Trace is disabled by default and does not emit compiler diagnostics or runtime tracing/logging code. The implementation is compiled into Debug-built AspectGenerator packages only. Release-built packages accept `AspectGeneratorTrace=true` but do not write an `AspectGenerator trace` section.
+
+To produce AGTRACE output from a local package, pack AspectGenerator in Debug configuration:
+
+```bat
+dotnet pack P:\AspectGenerator\Source\AspectGenerator.csproj -c Debug -o P:\.local-nuget -p:PackageVersion=2.0.0-dev.trace.1
+```
+
+Then build one consuming project and one target framework, and combine the report with normal MSBuild tools:
+
+```bat
+dotnet build MyProject.csproj -f net10.0 -p:AspectGeneratorTrace=true /clp:PerformanceSummary /bl
+```
+
 ## Build-time performance
 
 AspectGenerator avoids runtime proxy dispatch, but it performs compile-time analysis of candidate invocation expressions in the current compilation. Build-time cost depends on project size, number of invocation expressions, number of applied aspects, and `TargetFilter` complexity.

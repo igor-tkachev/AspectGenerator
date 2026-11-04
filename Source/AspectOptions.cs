@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 using Microsoft.CodeAnalysis;
@@ -23,6 +24,10 @@ namespace AspectGenerator
 				ReportFile                           = options.TryGetValue($"build_property.AspectGenerator{AspectOptionName.ReportFile}",            out var reportFile) ? reportFile : null,
 				AspectDiagnosticSeverity             = aspectDiagnosticSeverity.Value,
 				InvalidAspectDiagnosticSeverityValue = aspectDiagnosticSeverity.InvalidValue,
+				Trace                                = GetTraceBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.Trace}"),
+				TraceLevel                           = options.TryGetValue($"build_property.AspectGenerator{AspectOptionName.TraceLevel}", out var traceLevel) ? traceLevel : null,
+				TargetFramework                      = options.TryGetValue("build_property.TargetFramework",                                      out var targetFramework) ? targetFramework : null,
+				Configuration                        = options.TryGetValue("build_property.Configuration",                                        out var configuration) ? configuration : null,
 				ProjectDirectory                     = options.TryGetValue("build_property.ProjectDir",                                               out var projectDir) ? projectDir : null,
 				CompilerGeneratedFilesOutputPath     = options.TryGetValue("build_property.CompilerGeneratedFilesOutputPath",                         out var generatedFilesPath) ? generatedFilesPath : null,
 				InterceptorsNamespace                = options.TryGetValue($"build_property.AspectGenerator{AspectOptionName.InterceptorsNamespace}", out var ns) ? ns : null,
@@ -46,6 +51,10 @@ namespace AspectGenerator
 				ReportFile             = msBuildOptions.ReportFile,
 				AspectDiagnosticSeverity = msBuildOptions.AspectDiagnosticSeverity,
 				InvalidAspectDiagnosticSeverityValue = msBuildOptions.InvalidAspectDiagnosticSeverityValue,
+				Trace                  = msBuildOptions.Trace,
+				TraceLevel             = msBuildOptions.TraceLevel,
+				TargetFramework        = msBuildOptions.TargetFramework,
+				Configuration          = msBuildOptions.Configuration,
 				ProjectDirectory       = msBuildOptions.ProjectDirectory,
 				CompilerGeneratedFilesOutputPath = msBuildOptions.CompilerGeneratedFilesOutputPath,
 				InterceptorsNamespace  = msBuildOptions.InterceptorsNamespace,
@@ -117,10 +126,47 @@ namespace AspectGenerator
 				options.DebuggerStepThrough is true,
 				options.ReportFile,
 				options.AspectDiagnosticSeverity ?? AspectDiagnosticSeverity.Info,
+				options.Trace is true,
+				GetTraceLevel(options.TraceLevel, out var invalidTraceLevelValue),
+				invalidTraceLevelValue,
+				options.TargetFramework,
+				options.Configuration,
 				options.ProjectDirectory,
 				options.CompilerGeneratedFilesOutputPath,
 				options.InterceptorsNamespace,
 				options.InterceptorsNamespaces);
+		}
+
+		static bool? GetTraceBoolProperty(AnalyzerConfigOptions options, string name)
+		{
+			if (!options.TryGetValue(name, out var value))
+				return null;
+
+			if (string.IsNullOrWhiteSpace(value))
+				return null;
+
+			value = value.Trim();
+
+			return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) ||
+				string.Equals(value, "1", StringComparison.OrdinalIgnoreCase) ||
+				string.Equals(value, "yes", StringComparison.OrdinalIgnoreCase);
+		}
+
+		static AspectTraceLevel GetTraceLevel(string? value, out string? invalidValue)
+		{
+			invalidValue = null;
+
+			var trimmedValue = value?.Trim();
+
+			if (string.IsNullOrWhiteSpace(trimmedValue))
+				return AspectTraceLevel.Normal;
+
+			if (Enum.TryParse(trimmedValue, ignoreCase: true, out AspectTraceLevel level) &&
+				level is AspectTraceLevel.Normal or AspectTraceLevel.Verbose)
+				return level;
+
+			invalidValue = trimmedValue;
+			return AspectTraceLevel.Normal;
 		}
 
 		static void ApplyAssemblyOptionsFromSyntax(Compilation compilation, Options options, IAspectDiagnosticSink diagnostics)

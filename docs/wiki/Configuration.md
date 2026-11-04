@@ -150,6 +150,19 @@ AspectGenerator analyzes code during design-time builds so IDE diagnostics and o
 
 The report can be used by developers and AI coding agents to inspect selected target methods, intercepted call sites, applied aspects, generated interceptor methods, generated source references, source locations, and aspect lifetime information. It is not printed to the console by default. Diagnostics are reserved for errors, warnings, optional call-site markers, and actionable misconfiguration.
 
+`AspectGeneratorTrace` enables an opt-in diagnostic trace section in the existing build report. It is disabled by default.
+
+```xml
+<PropertyGroup>
+    <AspectGeneratorTrace>true</AspectGeneratorTrace>
+    <AspectGeneratorTraceLevel>Normal</AspectGeneratorTraceLevel>
+</PropertyGroup>
+```
+
+Supported trace levels are `Normal` and `Verbose`; unknown values fall back to `Normal`. Trace output is written to `AspectGeneratorBuildReport.md` and includes generator-visible options, `AGTRACE`-prefixed events, counters, phase timings, and fast-path decisions. It is not emitted as compiler diagnostics and does not generate runtime tracing/logging code.
+
+Trace implementation is compiled into Debug-built AspectGenerator packages only. Release-built packages accept `AspectGeneratorTrace=true` but do not write an `AspectGenerator trace` section. For local AGTRACE diagnostics, pack AspectGenerator with `-c Debug` and consume that package with `PrivateAssets="all"`.
+
 `AspectGeneratorInterceptorsNamespace` controls the namespace used for generated interceptors. The AspectGenerator NuGet package appends this namespace to `InterceptorsNamespaces` automatically for projects that reference the package directly. Manual `InterceptorsNamespaces` configuration should only be needed for unusual or custom build setups.
 
 The package `.props` asset defines defaults early. The package `.targets` asset appends `InterceptorsNamespaces` late, after project-level overrides such as `AspectGeneratorInterceptorsNamespace` are evaluated.

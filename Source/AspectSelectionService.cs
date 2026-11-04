@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace AspectGenerator
 		readonly GeneratorExecutionOptions _options;
 		readonly AspectDefinitionRegistry _registry;
 		readonly IAspectDiagnosticSink _diagnostics;
+		readonly GeneratorTraceReport? _trace;
 		readonly ImmutableArray<AspectFilterSet> _assemblyFilters;
 		readonly Dictionary<IMethodSymbol,List<AttributeInfo>> _methodCache = new(SymbolEqualityComparer.Default);
 		readonly Dictionary<INamedTypeSymbol,ImmutableArray<AspectFilterSet>> _typeFilterCache = new(SymbolEqualityComparer.Default);
@@ -23,33 +25,123 @@ namespace AspectGenerator
 			Compilation              compilation,
 			GeneratorExecutionOptions options,
 			AspectDefinitionRegistry registry,
-			IAspectDiagnosticSink    diagnostics)
+			IAspectDiagnosticSink    diagnostics,
+			GeneratorTraceReport?    trace = null)
 		{
 			_compilation = compilation;
 			_options = options;
 			_registry = registry;
 			_diagnostics = diagnostics;
+			_trace = trace;
 			_assemblyFilters = BuildAssemblyFilters();
 		}
 
 		public ImmutableArray<AnalyzedInvocation> AnalyzeInvocations(
 			ImmutableArray<InvocationExpressionSyntax> invocations,
-			CancellationToken cancellationToken)
+			AspectSelectionPlan                        plan,
+			CancellationToken                          cancellationToken)
 		{
 			var result = ImmutableArray.CreateBuilder<AnalyzedInvocation>();
+			var afterPrefilter = 0;
 
 			foreach (var invocation in invocations)
 			{
-				var semanticModel = _compilation.GetSemanticModel(invocation.SyntaxTree);
+				if (!MayMatchCallSite(invocation, plan))
+					continue;
 
-				if (TryAnalyzeInvocation(invocation, semanticModel, cancellationToken, out var analyzedInvocation))
+				afterPrefilter++;
+				var semanticModel = _compilation.GetSemanticModel(invocation.SyntaxTree);
+				_trace?.IncrementCounter("Symbol resolution attempts");
+
+				if (TryAnalyzeInvocation(invocation, semanticModel, plan, cancellationToken, out var analyzedInvocation))
+				{
+					_trace?.IncrementCounter("Symbol resolution successes");
 					result.Add(analyzedInvocation);
+				}
+				else
+					_trace?.IncrementCounter("Symbol resolution failures");
 
 				if (cancellationToken.IsCancellationRequested)
 					break;
 			}
 
+			_trace?.SetCounter("Invocation candidates after prefilter", afterPrefilter);
 			return result.ToImmutable();
+		}
+
+		public AspectSelectionPlan BuildSelectionPlan(
+			ImmutableArray<MethodDeclarationSyntax> methodDeclarations,
+			bool                                    externalAspectDefinitionsPossible,
+			CancellationToken                       cancellationToken)
+		{
+			var selectedMethods    = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
+			var selectedAttributes = new Dictionary<IMethodSymbol,List<AttributeInfo>>(SymbolEqualityComparer.Default);
+			var buckets            = new Dictionary<string,TargetMethodBucket>(StringComparer.Ordinal);
+			var mayTargetExternalMethods = externalAspectDefinitionsPossible ||
+				_assemblyFilters.Any(static filterSet => filterSet.Filters.Plan.MayTargetExternalMethods);
+			var targetMethodDeclarations = 0;
+
+			foreach (var methodDeclaration in methodDeclarations)
+			{
+				if (cancellationToken.IsCancellationRequested)
+					break;
+
+				targetMethodDeclarations++;
+				var semanticModel = _compilation.GetSemanticModel(methodDeclaration.SyntaxTree);
+
+				if (semanticModel.GetDeclaredSymbol(methodDeclaration, cancellationToken) is not IMethodSymbol method)
+					continue;
+
+				var attributes = GetSelectedAttributes(method);
+
+				if (attributes.Count == 0)
+					continue;
+
+				var originalMethod = method.OriginalDefinition;
+				selectedMethods.Add(originalMethod);
+				selectedAttributes[originalMethod] = attributes;
+
+				if (!buckets.TryGetValue(originalMethod.Name, out var bucket))
+				{
+					bucket = new TargetMethodBucket(originalMethod.Name);
+					buckets.Add(originalMethod.Name, bucket);
+				}
+
+				bucket.Add(originalMethod);
+			}
+
+			_trace?.SetCounter("Target method declarations", targetMethodDeclarations);
+			_trace?.SetCounter("Target methods after declaration filter", selectedMethods.Count);
+			_trace?.SetCounter("Target methods after semantic filter", selectedMethods.Count);
+
+			return new AspectSelectionPlan(selectedMethods, selectedAttributes, buckets, mayTargetExternalMethods);
+		}
+
+		public bool TryAnalyzeInvocation(
+			InvocationExpressionSyntax invocation,
+			SemanticModel semanticModel,
+			AspectSelectionPlan plan,
+			CancellationToken cancellationToken,
+			out AnalyzedInvocation analyzedInvocation)
+		{
+			analyzedInvocation = null!;
+
+			var info = semanticModel.GetSymbolInfo(invocation, cancellationToken);
+
+			if (info.Symbol is not IMethodSymbol method)
+				return false;
+
+			var attributes = plan.TryGetSelectedAttributes(method, out var selectedAttributes)
+				? selectedAttributes
+				: plan.MayTargetExternalMethods
+					? GetSelectedAttributes(method)
+					: [];
+
+			if (attributes.Count == 0)
+				return false;
+
+			analyzedInvocation = new AnalyzedInvocation(invocation, method, attributes);
+			return true;
 		}
 
 		public bool TryAnalyzeInvocation(
@@ -74,7 +166,7 @@ namespace AspectGenerator
 			return true;
 		}
 
-		List<AttributeInfo> GetSelectedAttributes(IMethodSymbol method)
+		public List<AttributeInfo> GetSelectedAttributes(IMethodSymbol method)
 		{
 			lock (_cacheGate)
 			{
@@ -99,6 +191,7 @@ namespace AspectGenerator
 						{
 							AppliedAttributeData = methodAttribute
 						});
+						_trace?.IncrementCounter("Selected aspect applications");
 						explicitAttributeClasses.Add(attributeClass);
 					}
 				}
@@ -124,7 +217,18 @@ namespace AspectGenerator
 					continue;
 
 				if (CreateAppliedAspectFilterSet(filterAttribute) is {} filterSet)
+				{
 					result.Add(filterSet);
+					_trace?.IncrementCounter("Target filters");
+					_trace?.AddTargetFilter(
+						result.Count - 1,
+						filterSet.Filters.Plan.Classification,
+						filterSet.Filters.Plan.CanFilterDeclarations,
+						filterSet.Filters.Plan.CanPrefilterCallSites,
+						filterSet.Filters.Plan.RequiresTargetSemanticModel,
+						filterSet.Filters.Plan.RequiresCallSiteSemanticModel,
+						filterSet.Filters.Plan.MayTargetExternalMethods);
+				}
 			}
 
 			return result.ToImmutable();
@@ -154,7 +258,18 @@ namespace AspectGenerator
 						continue;
 
 					if (CreateAppliedAspectFilterSet(filterAttribute, semanticModel) is {} filterSet)
+					{
 						result.Add(filterSet);
+						_trace?.IncrementCounter("Target filters");
+						_trace?.AddTargetFilter(
+							result.Count - 1,
+							filterSet.Filters.Plan.Classification,
+							filterSet.Filters.Plan.CanFilterDeclarations,
+							filterSet.Filters.Plan.CanPrefilterCallSites,
+							filterSet.Filters.Plan.RequiresTargetSemanticModel,
+							filterSet.Filters.Plan.RequiresCallSiteSemanticModel,
+							filterSet.Filters.Plan.MayTargetExternalMethods);
+					}
 				}
 			}
 
@@ -305,6 +420,7 @@ namespace AspectGenerator
 					continue;
 
 				attributes.Add(filterSet.Attribute);
+				_trace?.IncrementCounter("Applied target filter matches");
 			}
 		}
 
@@ -339,6 +455,135 @@ namespace AspectGenerator
 		static bool HasTargetFilter(AttributeData attribute)
 		{
 			return attribute.NamedArguments.Any(static a => a.Key == "TargetFilter");
+		}
+
+		bool MayMatchCallSite(InvocationExpressionSyntax invocation, AspectSelectionPlan plan)
+		{
+			if (plan.MayTargetExternalMethods)
+				return true;
+
+			if (!TryGetInvocationName(invocation, out var name))
+			{
+				_trace?.IncrementCounter("Call-site prefilter rejected missing method name");
+				return false;
+			}
+
+			if (!plan.TargetMethodBuckets.TryGetValue(name, out var bucket))
+			{
+				_trace?.IncrementCounter("Call-site prefilter rejected missing method name");
+				return false;
+			}
+
+			if (TryGetGenericArity(invocation, out var genericArity) &&
+				!bucket.AllowsGenericArity(genericArity))
+			{
+				_trace?.IncrementCounter("Call-site prefilter rejected generic arity");
+				return false;
+			}
+
+			if (!bucket.AllowsArgumentCount(invocation.ArgumentList.Arguments.Count))
+			{
+				_trace?.IncrementCounter("Call-site prefilter rejected argument count");
+				return false;
+			}
+
+			if (TryGetExplicitReceiverTypeName(invocation, out var receiverTypeName) &&
+				!bucket.ContainingTypeNames.Contains(receiverTypeName))
+			{
+				_trace?.IncrementCounter("Call-site prefilter rejected receiver type");
+				return false;
+			}
+
+			return true;
+		}
+
+		static bool TryGetInvocationName(InvocationExpressionSyntax invocation, out string name)
+		{
+			return TryGetName(invocation.Expression, out name);
+
+			static bool TryGetName(ExpressionSyntax expression, out string name)
+			{
+				switch (expression)
+				{
+					case IdentifierNameSyntax identifier:
+						name = identifier.Identifier.ValueText;
+						return true;
+
+					case GenericNameSyntax generic:
+						name = generic.Identifier.ValueText;
+						return true;
+
+					case MemberAccessExpressionSyntax memberAccess:
+						return TryGetName(memberAccess.Name, out name);
+
+					case MemberBindingExpressionSyntax memberBinding:
+						return TryGetName(memberBinding.Name, out name);
+
+					default:
+						name = "";
+						return false;
+				}
+			}
+		}
+
+		static bool TryGetGenericArity(InvocationExpressionSyntax invocation, out int genericArity)
+		{
+			return TryGetGenericArity(invocation.Expression, out genericArity);
+
+			static bool TryGetGenericArity(ExpressionSyntax expression, out int genericArity)
+			{
+				switch (expression)
+				{
+					case GenericNameSyntax generic:
+						genericArity = generic.TypeArgumentList.Arguments.Count;
+						return true;
+
+					case MemberAccessExpressionSyntax memberAccess:
+						return TryGetGenericArity(memberAccess.Name, out genericArity);
+
+					case MemberBindingExpressionSyntax memberBinding:
+						return TryGetGenericArity(memberBinding.Name, out genericArity);
+
+					default:
+						genericArity = 0;
+						return false;
+				}
+			}
+		}
+
+		static bool TryGetExplicitReceiverTypeName(InvocationExpressionSyntax invocation, out string receiverTypeName)
+		{
+			receiverTypeName = "";
+
+			if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
+				return false;
+
+			if (!TryGetTypeLikeName(memberAccess.Expression, out receiverTypeName))
+				return false;
+
+			return true;
+
+			static bool TryGetTypeLikeName(ExpressionSyntax expression, out string name)
+			{
+				switch (expression)
+				{
+					case IdentifierNameSyntax identifier when IsTypeLike(identifier.Identifier.ValueText):
+						name = identifier.Identifier.ValueText;
+						return true;
+
+					case MemberAccessExpressionSyntax memberAccess when TryGetTypeLikeName(memberAccess.Name, out name):
+						return true;
+
+					default:
+						name = "";
+						return false;
+				}
+			}
+
+			static bool IsTypeLike(string name)
+			{
+				return name.Length > 0 && char.IsUpper(name[0]);
+			}
 		}
 	}
 }

@@ -1021,6 +1021,282 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void TraceDisabledDoesNotAddBuildReportTraceSectionTest()
+		{
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
+
+			try
+			{
+				RunGenerator(
+					TraceDirectSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
+					});
+
+				var report = File.ReadAllText(reportFile);
+
+				Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
+		}
+
+		[TestMethod]
+		public void TraceEnabledAddsBuildReportTraceSectionTest()
+		{
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
+
+			try
+			{
+				RunGenerator(
+					TraceDirectSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectOptionName.Trace}"] = "true",
+					});
+
+				var report = File.ReadAllText(reportFile);
+
+#if DEBUG
+				StringAssert.Contains(report, "## AspectGenerator trace");
+				StringAssert.Contains(report, "| AspectGeneratorTrace | True |");
+				StringAssert.Contains(report, "| AspectGeneratorTraceLevel | Normal |");
+				StringAssert.Contains(report, "| Aspect definitions | 1 |");
+				StringAssert.Contains(report, "| Applied aspect attributes | 1 |");
+				StringAssert.Contains(report, "| Candidate call syntax nodes | 2 |");
+				StringAssert.Contains(report, "| Invocation candidates before prefilter | 2 |");
+				StringAssert.Contains(report, "| Invocation candidates after prefilter | 1 |");
+				StringAssert.Contains(report, "| Symbol resolution attempts | 1 |");
+				StringAssert.Contains(report, "| Symbol resolution successes | 1 |");
+				StringAssert.Contains(report, "| Symbol resolution failures | 0 |");
+				StringAssert.Contains(report, "| Intercepted call sites | 1 |");
+				StringAssert.Contains(report, "| Generated interceptor methods | 1 |");
+				StringAssert.Contains(report, "| Generated source files | 3 |");
+				StringAssert.Contains(report, "| Discover aspect definitions |");
+				StringAssert.Contains(report, "| Resolve call symbols |");
+				StringAssert.Contains(report, "AGTRACE start: assembly=AspectGenerator.Tests.GeneratorDriver");
+				StringAssert.Contains(report, "AGTRACE counter: applied-aspects=1");
+				StringAssert.Contains(report, "AGTRACE counter: invocation-candidates-before-prefilter=2");
+				StringAssert.Contains(report, "AGTRACE counter: invocation-candidates-after-prefilter=1");
+				StringAssert.Contains(report, "AGTRACE counter: symbol-resolution-attempts=1");
+				StringAssert.Contains(report, "AGTRACE counter: generated-interceptors=1");
+				StringAssert.Contains(report, "AGTRACE result: totalElapsedMs=");
+				StringAssert.Contains(report, "AGTRACE result: slowestPhase=");
+#else
+				Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
+				Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
+#endif
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
+		}
+
+		[TestMethod]
+		public void TraceAcceptsTruthyValuesAndInvalidLevelFallsBackToNormalTest()
+		{
+			foreach (var value in new[] { "true", "True", "TRUE", "1", "yes" })
+			{
+				var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
+
+				try
+				{
+					RunGenerator(
+						TraceDirectSource,
+						new()
+						{
+							[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
+							[$"build_property.AspectGenerator{AspectOptionName.Trace}"] = value,
+							[$"build_property.AspectGenerator{AspectOptionName.TraceLevel}"] = "NotALevel",
+						});
+
+					var report = File.ReadAllText(reportFile);
+
+#if DEBUG
+					StringAssert.Contains(report, "## AspectGenerator trace");
+					StringAssert.Contains(report, "| AspectGeneratorTraceLevel | Normal |");
+					StringAssert.Contains(report, "AGTRACE warning: unknown AspectGeneratorTraceLevel 'NotALevel'; using Normal");
+#else
+					Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
+					Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
+#endif
+				}
+				finally
+				{
+					DeleteReportDirectory(reportFile);
+				}
+			}
+		}
+
+		[TestMethod]
+		public void TraceReportsNoAspectDefinitionsFastPathTest()
+		{
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
+
+			try
+			{
+				RunGenerator(
+					NoAspectDefinitionTraceSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectOptionName.Trace}"] = "true",
+					});
+
+				var report = File.ReadAllText(reportFile);
+
+#if DEBUG
+				StringAssert.Contains(report, "## AspectGenerator trace");
+				StringAssert.Contains(report, "| Aspect definitions | 0 |");
+				StringAssert.Contains(report, "| Intercepted call sites | 0 |");
+				StringAssert.Contains(report, "| Generated interceptor methods | 0 |");
+				StringAssert.Contains(report, "| Build target filters | skipped |");
+				StringAssert.Contains(report, "| Resolve call symbols | skipped |");
+				StringAssert.Contains(report, "Fast path: no AspectAttribute definitions found.");
+				StringAssert.Contains(report, "Interceptors namespace validation skipped: no generated interceptors.");
+				StringAssert.Contains(report, "AGTRACE decision: Fast path: no AspectAttribute definitions found.");
+				StringAssert.Contains(report, "AGTRACE phase: scan-call-sites: skipped");
+				StringAssert.Contains(report, "AGTRACE decision: ag0004: skipped reason=no-generated-interceptors");
+#else
+				Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
+				Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
+#endif
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
+		}
+
+		[TestMethod]
+		public void TraceReportsNoAppliedAspectsFastPathTest()
+		{
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
+
+			try
+			{
+				RunGenerator(
+					AspectDefinitionWithoutAppliedAspectTraceSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectOptionName.Trace}"] = "true",
+					});
+
+				var report = File.ReadAllText(reportFile);
+
+#if DEBUG
+				StringAssert.Contains(report, "## AspectGenerator trace");
+				StringAssert.Contains(report, "| Aspect definitions | 1 |");
+				StringAssert.Contains(report, "| Applied aspect attributes | 0 |");
+				StringAssert.Contains(report, "| Symbol resolution attempts | 0 |");
+				StringAssert.Contains(report, "| Intercepted call sites | 0 |");
+				StringAssert.Contains(report, "| Resolve call symbols | skipped |");
+				StringAssert.Contains(report, "Fast path: no applied aspect attributes found.");
+				StringAssert.Contains(report, "scan-call-sites: skipped reason=no-applied-aspects");
+				StringAssert.Contains(report, "AGTRACE counter: applied-aspects=0");
+				StringAssert.Contains(report, "AGTRACE phase: scan-call-sites: skipped");
+				StringAssert.Contains(report, "AGTRACE decision: scan-call-sites: skipped reason=no-applied-aspects");
+#else
+				Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
+				Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
+#endif
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
+		}
+
+		[TestMethod]
+		public void TraceReportsNoSelectedTargetsSkipsCallSiteSymbolResolutionTest()
+		{
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
+
+			try
+			{
+				var result = RunGenerator(
+					NoSelectedTargetFilterTraceSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectOptionName.Trace}"] = "true",
+					});
+
+				var report = File.ReadAllText(reportFile);
+
+#if DEBUG
+				AssertNotGenerated(result, "Interceptors.g.cs");
+				StringAssert.Contains(report, "## AspectGenerator trace");
+				StringAssert.Contains(report, "| Applied aspect attributes | 1 |");
+				StringAssert.Contains(report, "| Target filters | 1 |");
+				StringAssert.Contains(report, "| Target method declarations | 5 |");
+				StringAssert.Contains(report, "| Target methods after declaration filter | 0 |");
+				StringAssert.Contains(report, "| Target methods after semantic filter | 0 |");
+				StringAssert.Contains(report, "| Invocation candidates before prefilter | 4 |");
+				StringAssert.Contains(report, "| Invocation candidates after prefilter | 0 |");
+				StringAssert.Contains(report, "| Symbol resolution attempts | 0 |");
+				StringAssert.Contains(report, "target-selection: declaration-first enabled");
+				StringAssert.Contains(report, "scan-call-sites: skipped reason=no-selected-target-methods");
+				StringAssert.Contains(report, "resolve-call-symbols: skipped reason=no-selected-target-methods");
+				StringAssert.Contains(report, "AGTRACE counter: symbol-resolution-attempts=0");
+#else
+				Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
+				Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
+#endif
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
+		}
+
+		[TestMethod]
+		public void TraceReportsCallSitePrefilterV2RejectionsTest()
+		{
+			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
+
+			try
+			{
+				RunGenerator(
+					CallSitePrefilterV2TraceSource,
+					new()
+					{
+						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
+						[$"build_property.AspectGenerator{AspectOptionName.Trace}"] = "true",
+					});
+
+				var report = File.ReadAllText(reportFile);
+
+#if DEBUG
+				StringAssert.Contains(report, "| Invocation candidates before prefilter | 7 |");
+				StringAssert.Contains(report, "| Invocation candidates after prefilter | 2 |");
+				StringAssert.Contains(report, "| Symbol resolution attempts | 2 |");
+				StringAssert.Contains(report, "| Call-site prefilter rejected missing method name | 2 |");
+				StringAssert.Contains(report, "| Call-site prefilter rejected generic arity | 1 |");
+				StringAssert.Contains(report, "| Call-site prefilter rejected argument count | 1 |");
+				StringAssert.Contains(report, "| Call-site prefilter rejected receiver type | 1 |");
+				StringAssert.Contains(report, "AGTRACE counter: call-site-prefilter-rejected-missing-method-name=2");
+				StringAssert.Contains(report, "AGTRACE counter: call-site-prefilter-rejected-generic-arity=1");
+				StringAssert.Contains(report, "AGTRACE counter: call-site-prefilter-rejected-argument-count=1");
+				StringAssert.Contains(report, "AGTRACE counter: call-site-prefilter-rejected-receiver-type=1");
+#else
+				Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
+				Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
+#endif
+			}
+			finally
+			{
+				DeleteReportDirectory(reportFile);
+			}
+		}
+
+		[TestMethod]
 		public void RealDiagnosticsStillEmitWithoutReportDiagnosticsTest()
 		{
 			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.txt");
@@ -1213,6 +1489,7 @@ namespace AspectGenerator.Tests
 
 			return trustedPlatformAssemblies
 				.Split(Path.PathSeparator)
+				.Where(static path => !Path.GetFileName(path).StartsWith("AspectGenerator.", StringComparison.OrdinalIgnoreCase))
 				.Select(static path => MetadataReference.CreateFromFile(path));
 		}
 
@@ -2998,6 +3275,120 @@ namespace AspectGenerator.Tests
 
 				[TraceAspect]
 				public static string Target() => "";
+			}
+			""";
+
+		const string NoAspectDefinitionTraceSource =
+			"""
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				public static string Target() => "";
+			}
+			""";
+
+		const string AspectDefinitionWithoutAppliedAspectTraceSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			sealed class TraceAspectAttribute : Attribute
+			{
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " traced";
+			}
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Target();
+				}
+
+				public static string Target() => "";
+			}
+			""";
+
+		const string NoSelectedTargetFilterTraceSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.TraceAspect(TargetFilter = "namespace: NoSuchNamespace.*")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class TraceAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " traced";
+			}
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Save();
+					Load();
+					HealthCheck();
+				}
+
+				public static string Save() => "";
+				public static string Load() => "";
+				public static string HealthCheck() => "";
+			}
+			""";
+
+		const string CallSitePrefilterV2TraceSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.TraceAspect(
+				TargetFilter = "fulltype:AspectGenerator.Tests.GeneratorDriver.Service")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class TraceAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " traced";
+			}
+
+			static class Service
+			{
+				public static void Invoke()
+				{
+					Target(1);
+					Target();
+					Generic<string>(1);
+					Generic<string, int>(1);
+					Other.Target(1);
+					Other.NotSelected();
+				}
+
+				public static string Target(int value) => "";
+				public static string Generic<T>(int value) => "";
+			}
+
+			static class Other
+			{
+				public static string Target(int value) => "";
+				public static string NotSelected() => "";
 			}
 			""";
 

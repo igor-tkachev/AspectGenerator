@@ -25,6 +25,8 @@ Completed:
 - typed applied aspect instances exposed through `InterceptInfo.Aspect` / `InterceptData<T>.Aspect`;
 - per-interceptor static state holders for lazy `MemberInfo` and applied aspect instance initialization.
 - `AspectInstanceLifetime.Instance` local applied aspect construction for static typed hooks.
+- DEBUG-only opt-in `AspectGeneratorTrace` section in the build report for generator counters, timings, `AGTRACE` events, and decisions.
+- declaration-first target selection with call-site prefiltering before invocation symbol binding.
 
 Not completed:
 
@@ -286,7 +288,7 @@ Checklist:
 
 Status: partially implemented.
 
-Problem: the generator implements `IIncrementalGenerator`. The previous interception discovery path used `CompilationProvider` and scanned all syntax trees with `DescendantNodes()` to find invocations. That full syntax-tree scan has been removed; invocation candidates now come from `SyntaxProvider`. Diagnostics and interceptor emission now consume a shared analysis result, and `Interceptors.g.cs` emission is disabled by default during design-time builds.
+Problem: the generator implements `IIncrementalGenerator`. The previous interception discovery path used `CompilationProvider` and scanned all syntax trees with `DescendantNodes()` to find invocations. That full syntax-tree scan has been removed; invocation candidates now come from `SyntaxProvider`. Diagnostics and interceptor emission now consume a shared analysis result, and `Interceptors.g.cs` emission is disabled by default during design-time builds. The interceptor emission path now builds a declaration-first target selection plan before resolving invocation symbols, so an applied aspect is not by itself a reason to bind every call site.
 
 Checklist:
 
@@ -298,6 +300,18 @@ Checklist:
 - [x] Add early syntactic filtering before semantic model access.
 - [x] Resolve semantic information only for candidate invocations.
 - [x] Build and reuse an aspect metadata map.
+- [x] Collect method declarations through `SyntaxProvider`.
+- [x] Build an `AspectSelectionPlan` from selected target method declarations before call-site symbol binding.
+- [x] Skip call-site scanning and symbol binding when no target methods are selected and external targets are not possible.
+- [x] Prefilter call sites by selected method names when filters are limited to current-compilation targets.
+- [x] Group selected target methods into `TargetMethodBucket` entries by method name.
+- [x] Reject call-site candidates before symbol binding by missing method name, incompatible generic arity, incompatible argument count range, and safe explicit receiver/type mismatch.
+- [x] Emit per-gate call-site prefilter rejection counters in DEBUG trace output.
+- [x] Reuse selected target attributes from the selection plan after symbol binding instead of re-running target filter selection for current-compilation targets.
+- [x] Preserve conservative call-site binding for filters that can match external methods, such as signature text / regex filters.
+- [x] Aggregate trace counters and emit final `AGTRACE counter` events once.
+- [x] Add a regression test for the zero selected targets / zero symbol resolution attempts invariant.
+- [x] Add a regression test for call-site prefilter v2 rejection gates.
 - [x] Preserve support for:
   - aspect attributes from the current compilation;
   - aspect attributes from referenced assemblies;

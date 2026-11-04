@@ -396,7 +396,8 @@ namespace AspectGenerator
 			Compilation                        Compilation,
 			GeneratorExecutionOptions          Options,
 			ImmutableArray<AnalyzedInvocation> AspectedMethods,
-			ImmutableArray<DiagnosticInfo>     Diagnostics);
+			ImmutableArray<DiagnosticInfo>     Diagnostics,
+			GeneratorTraceReport               Trace);
 
 		public void Initialize(IncrementalGeneratorInitializationContext context)
 		{
@@ -424,9 +425,21 @@ namespace AspectGenerator
 				.CreateSyntaxProvider(
 					predicate: static (node, _) => node is InvocationExpressionSyntax
 					{
-						Expression: MemberAccessExpressionSyntax or IdentifierNameSyntax
+						Expression: MemberAccessExpressionSyntax or IdentifierNameSyntax or GenericNameSyntax or MemberBindingExpressionSyntax
 					},
 					transform: static (ctx, _) => (InvocationExpressionSyntax)ctx.Node)
+				.Collect();
+
+			var methodDeclarations = context.SyntaxProvider
+				.CreateSyntaxProvider(
+					predicate: static (node, _) => node is MethodDeclarationSyntax,
+					transform: static (ctx, _) => (MethodDeclarationSyntax)ctx.Node)
+				.Collect();
+
+			var appliedAttributes = context.SyntaxProvider
+				.CreateSyntaxProvider(
+					predicate: static (node, _) => node is AttributeSyntax,
+					transform: static (ctx, _) => (AttributeSyntax)ctx.Node)
 				.Collect();
 
 			var options = context.AnalyzerConfigOptionsProvider.Select(static (c, _) =>
@@ -435,7 +448,9 @@ namespace AspectGenerator
 			var analysis = context.CompilationProvider
 				.Combine(options)
 				.Combine(attributes)
+				.Combine(appliedAttributes)
 				.Combine(invocations)
+				.Combine(methodDeclarations)
 				.Select(static (data, ct) => Analyze(data, ct));
 
 			context.RegisterSourceOutput(analysis, ReportDiagnostics);
@@ -443,39 +458,231 @@ namespace AspectGenerator
 		}
 
 		static AnalysisResult Analyze(
-			(((Compilation Left, Options Right) Left, ImmutableArray<ClassDeclarationSyntax> Right) Left, ImmutableArray<InvocationExpressionSyntax> Right) data,
+			(((((Compilation Left, Options Right) Left, ImmutableArray<ClassDeclarationSyntax> Right) Left, ImmutableArray<AttributeSyntax> Right) Left, ImmutableArray<InvocationExpressionSyntax> Right) Left, ImmutableArray<MethodDeclarationSyntax> Right) data,
 			CancellationToken cancellationToken)
 		{
-			var compilation         = data.Left.Left.Left;
+			var compilation         = data.Left.Left.Left.Left.Left;
 			var diagnosticSink      = new GeneratorDiagnosticSink();
 			var diagnostics         = diagnosticSink.Diagnostics;
 			var reportedDiagnostics = new HashSet<string>();
-			var options             = AspectOptionsResolver.Resolve(compilation, data.Left.Left.Right, diagnosticSink);
-			var attrs               = data.Left.Right;
-			var invocations         = data.Right;
+			var options = AspectOptionsResolver.Resolve(compilation, data.Left.Left.Left.Left.Right, diagnosticSink);
+			var trace = GeneratorTraceReport.Create(options);
+			trace.AddCompilation(compilation, options);
+			trace.AddOptions(options);
+			var attrs               = data.Left.Left.Left.Right;
+			var appliedAttributes   = data.Left.Left.Right;
+			var invocations         = data.Left.Right;
+			var methodDeclarations  = data.Right;
 
-			var registry = AspectDefinitionRegistry.Create(
-				compilation,
-				attrs,
-				diagnosticSink,
-				cancellationToken);
+			trace.SetCounter("Applied aspect attributes", 0);
+			trace.SetCounter("Target filters", 0);
+			trace.SetCounter("Candidate target methods", 0);
+			trace.SetCounter("Target method declarations", 0);
+			trace.SetCounter("Target methods after declaration filter", 0);
+			trace.SetCounter("Target methods after semantic filter", 0);
+			trace.SetCounter("Invocation candidates before prefilter", invocations.Length);
+			trace.SetCounter("Invocation candidates after prefilter", 0);
+			trace.SetCounter("Symbol resolution attempts", 0);
+			trace.SetCounter("Symbol resolution successes", 0);
+			trace.SetCounter("Symbol resolution failures", 0);
+			trace.SetCounter("Call-site prefilter rejected missing method name", 0);
+			trace.SetCounter("Call-site prefilter rejected generic arity", 0);
+			trace.SetCounter("Call-site prefilter rejected argument count", 0);
+			trace.SetCounter("Call-site prefilter rejected receiver type", 0);
+			trace.SetCounter("Applied target filter matches", 0);
+			trace.SetCounter("AG0300 markers reported", 0);
+			trace.SetCounter("Candidate call syntax nodes", invocations.Length);
+			trace.SetCounter("Aspect definitions", attrs.Length);
+			trace.SetCounter("Applied aspect attribute candidates", appliedAttributes.Length);
 
-			ValidateAspectHooks(diagnostics, registry.AspectAttributes, reportedDiagnostics);
+			AspectDefinitionRegistry registry;
+			using (trace.TimePhase("Discover aspect definitions"))
+				registry = AspectDefinitionRegistry.Create(
+					compilation,
+					attrs,
+					diagnosticSink,
+					cancellationToken);
 
-			var selection = new AspectSelectionService(
-				compilation,
-				options,
-				registry,
-				diagnosticSink);
-			var aspectedMethods = selection.AnalyzeInvocations(invocations, cancellationToken);
+			using (trace.TimePhase("Validate aspect hooks"))
+				ValidateAspectHooks(diagnostics, registry.AspectAttributes, reportedDiagnostics);
+
+			var externalAspectDefinitionsPossible = HasExternalAspectDefinitions(compilation);
+			var appliedAspectCount = CountAppliedAspectAttributes(compilation, registry, appliedAttributes, cancellationToken);
+			trace.SetCounter("Applied aspect attributes", appliedAspectCount);
+
+			ImmutableArray<AnalyzedInvocation> aspectedMethods;
+
+			if (registry.AspectAttributes.Count == 0 && !externalAspectDefinitionsPossible)
+			{
+				trace.AddDecision("Fast path: no AspectAttribute definitions found.");
+				trace.AddDecision("scan-call-sites: skipped reason=no-aspect-definitions");
+				trace.AddDecision("resolve-call-symbols: skipped reason=no-aspect-definitions");
+				trace.SkipPhase("Build target filters");
+				trace.SkipPhase("Collect target methods");
+				trace.SkipPhase("Scan call sites");
+				trace.SkipPhase("Resolve call symbols");
+				trace.SkipPhase("Apply target filters");
+				aspectedMethods = [];
+			}
+			else if (appliedAspectCount == 0 && !externalAspectDefinitionsPossible)
+			{
+				trace.AddDecision("Fast path: no applied aspect attributes found.");
+				trace.AddDecision("scan-call-sites: skipped reason=no-applied-aspects");
+				trace.AddDecision("resolve-call-symbols: skipped reason=no-applied-aspects");
+				trace.SkipPhase("Build target filters");
+				trace.SkipPhase("Collect target methods");
+				trace.SkipPhase("Scan call sites");
+				trace.SkipPhase("Resolve call symbols");
+				trace.SkipPhase("Apply target filters");
+				aspectedMethods = [];
+			}
+			else
+			{
+				AspectSelectionService selection;
+				using (trace.TimePhase("Build target filters"))
+					selection = new AspectSelectionService(
+						compilation,
+						options,
+						registry,
+						diagnosticSink,
+						trace);
+
+				trace.AddDecision("target-selection: declaration-first enabled");
+
+				AspectSelectionPlan selectionPlan;
+				using (trace.TimePhase("Collect target methods"))
+					selectionPlan = selection.BuildSelectionPlan(methodDeclarations, externalAspectDefinitionsPossible, cancellationToken);
+
+				if (selectionPlan.SelectedTargetMethods.Count == 0 && !selectionPlan.MayTargetExternalMethods)
+				{
+					trace.AddDecision("scan-call-sites: skipped reason=no-selected-target-methods");
+					trace.AddDecision("resolve-call-symbols: skipped reason=no-selected-target-methods");
+					trace.SkipPhase("Scan call sites");
+					trace.SkipPhase("Resolve call symbols");
+					trace.SkipPhase("Apply target filters");
+					aspectedMethods = [];
+				}
+				else
+				{
+					if (selectionPlan.MayTargetExternalMethods)
+					{
+						trace.AddDecision("scan-call-sites: required reason=external-targets-possible");
+						trace.AddDecision("callsite-prefilter: disabled reason=external-targets-possible");
+						trace.AddDecision("resolve-call-symbols: required reason=external-targets-possible");
+					}
+					else
+					{
+						trace.AddDecision("scan-call-sites: required reason=selected-target-methods-found");
+						trace.AddDecision("callsite-prefilter: enabled kind=method-name-set");
+						trace.AddDecision("resolve-call-symbols: required reason=selected-target-methods-found");
+					}
+
+					using (trace.TimePhase("Scan call sites"))
+					{
+					}
+
+					using (trace.TimePhase("Resolve call symbols"))
+						aspectedMethods = selection.AnalyzeInvocations(invocations, selectionPlan, cancellationToken);
+
+					using (trace.TimePhase("Apply target filters"))
+					{
+					}
+				}
+			}
+
+			trace.SetCounter("Intercepted call sites", aspectedMethods.Length);
+			trace.SetCounter("Matched target methods", aspectedMethods.Select(static m => m.Method).Distinct(SymbolEqualityComparer.Default).Count());
+			trace.SetCounter("Generated interceptor methods", aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default).Count());
 
 			if (!cancellationToken.IsCancellationRequested)
-				foreach (var m in aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default))
-					ValidateAspectHooksForMethod(diagnostics, compilation, m.First().Inv, (IMethodSymbol)m.Key!, m.First().Attributes, reportedDiagnostics);
+				using (trace.TimePhase("Validate method hooks"))
+					foreach (var m in aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default))
+						ValidateAspectHooksForMethod(diagnostics, compilation, m.First().Inv, (IMethodSymbol)m.Key!, m.First().Attributes, reportedDiagnostics);
 
-			ReportMissingInterceptorsNamespace(diagnostics, options);
+			if (options.EmitInterceptors && aspectedMethods.Length > 0)
+			{
+				using (trace.TimePhase("Interceptors namespace validation"))
+					ReportMissingInterceptorsNamespace(diagnostics, options);
+			}
+			else
+			{
+				trace.AddDecision("Interceptors namespace validation skipped: no generated interceptors.");
+				trace.AddDecision("ag0004: skipped reason=no-generated-interceptors");
+				trace.SkipPhase("Interceptors namespace validation");
+			}
 
-			return new AnalysisResult(compilation, options, aspectedMethods, [..diagnostics]);
+			if (aspectedMethods.Length == 0)
+				trace.AddDecision("No intercepted call sites; source generation skipped.");
+
+			trace.SetCounter("Diagnostics reported", diagnostics.Count);
+
+			return new AnalysisResult(compilation, options, aspectedMethods, [..diagnostics], trace);
+		}
+
+		static bool HasExternalAspectDefinitions(Compilation compilation)
+		{
+			foreach (var assembly in compilation.SourceModule.ReferencedAssemblySymbols)
+				if (assembly.GetTypeByMetadataName("AspectGenerator.AspectAttribute") is not null &&
+					HasExternalAspectDefinitions(assembly.GlobalNamespace))
+					return true;
+
+			return false;
+
+			static bool HasExternalAspectDefinitions(INamespaceOrTypeSymbol symbol)
+			{
+				if (symbol is INamedTypeSymbol type)
+				{
+					if (type.GetAttributes().Any(static attribute => attribute.AttributeClass is
+						{
+							ContainingNamespace.Name: "AspectGenerator",
+							Name: "AspectAttribute"
+						}))
+						return true;
+
+					foreach (var nestedType in type.GetTypeMembers())
+						if (HasExternalAspectDefinitions(nestedType))
+							return true;
+				}
+
+				if (symbol is INamespaceSymbol namespaceSymbol)
+				{
+					foreach (var member in namespaceSymbol.GetMembers())
+						if (HasExternalAspectDefinitions(member))
+							return true;
+				}
+
+				return false;
+			}
+		}
+
+		static int CountAppliedAspectAttributes(
+			Compilation                     compilation,
+			AspectDefinitionRegistry        registry,
+			ImmutableArray<AttributeSyntax> attributes,
+			CancellationToken               cancellationToken)
+		{
+			var count = 0;
+
+			foreach (var attribute in attributes)
+			{
+				if (cancellationToken.IsCancellationRequested)
+					break;
+
+				var semanticModel = compilation.GetSemanticModel(attribute.SyntaxTree);
+
+				if (semanticModel.GetSymbolInfo(attribute, cancellationToken).Symbol is not IMethodSymbol { ContainingType: var attributeClass })
+					continue;
+
+				if (!registry.TryGetDefinition(attributeClass, out _))
+					continue;
+
+				if (!AspectSymbols.IsConditionalAspectEnabled(attributeClass, compilation, attribute.SyntaxTree))
+					continue;
+
+				count++;
+			}
+
+			return count;
 		}
 
 		static void ValidateAspectHooks(

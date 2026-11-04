@@ -45,6 +45,33 @@ obj/GeneratedFiles/AspectGenerator/AspectGeneratorBuildReport.md
 
 The report is not printed to the console. Users who need it can inspect the report file directly. Design-time builds do not write the report.
 
+## Build Report Trace
+
+`AspectGeneratorTrace` adds internal generator diagnostics to the existing build report file:
+
+```xml
+<PropertyGroup>
+  <AspectGeneratorTrace>true</AspectGeneratorTrace>
+  <AspectGeneratorTraceLevel>Normal</AspectGeneratorTraceLevel>
+</PropertyGroup>
+```
+
+The trace section contains generator-visible options, `AGTRACE`-prefixed events, counters, timings, and fast-path decisions such as skipped interceptor generation or skipped namespace validation. Supported trace levels are `Normal` and `Verbose`. Trace is disabled by default, does not create a second file, and does not emit compiler diagnostics.
+
+Trace implementation is compiled into Debug-built AspectGenerator packages only. Release-built packages accept `AspectGeneratorTrace=true` but do not write an `AspectGenerator trace` section.
+
+For local AGTRACE package debugging, pack AspectGenerator in Debug configuration:
+
+```bat
+dotnet pack P:\AspectGenerator\Source\AspectGenerator.csproj -c Debug -o P:\.local-nuget -p:PackageVersion=2.0.0-dev.trace.1
+```
+
+For local package debugging, build one project and one target framework:
+
+```bat
+dotnet build MyProject.csproj -f net10.0 -p:AspectGeneratorTrace=true /clp:PerformanceSummary /bl
+```
+
 ## Intercepted Call Markers
 
 AspectGenerator can mark calls where aspects are applied by reporting optional `AG0300` diagnostics. The default severity is `Info`:

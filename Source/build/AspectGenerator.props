@@ -8,6 +8,8 @@
 		<AspectGeneratorDebuggerStepThrough Condition="'$(AspectGeneratorDebuggerStepThrough)' == ''">false</AspectGeneratorDebuggerStepThrough>
 		<AspectGeneratorReportFile Condition="'$(AspectGeneratorReportFile)' == ''">$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
 		<AspectGeneratorAspectDiagnosticSeverity Condition="'$(AspectGeneratorAspectDiagnosticSeverity)' == ''">Info</AspectGeneratorAspectDiagnosticSeverity>
+		<AspectGeneratorTrace Condition="'$(AspectGeneratorTrace)' == ''">false</AspectGeneratorTrace>
+		<AspectGeneratorTraceLevel Condition="'$(AspectGeneratorTraceLevel)' == ''">Normal</AspectGeneratorTraceLevel>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -16,9 +18,13 @@
 		<CompilerVisibleProperty Include="AspectGeneratorDebuggerStepThrough" />
 		<CompilerVisibleProperty Include="AspectGeneratorReportFile" />
 		<CompilerVisibleProperty Include="AspectGeneratorAspectDiagnosticSeverity" />
+		<CompilerVisibleProperty Include="AspectGeneratorTrace" />
+		<CompilerVisibleProperty Include="AspectGeneratorTraceLevel" />
 		<CompilerVisibleProperty Include="AspectGeneratorInterceptorsNamespace" />
 		<CompilerVisibleProperty Include="CompilerGeneratedFilesOutputPath" />
+		<CompilerVisibleProperty Include="Configuration" />
 		<CompilerVisibleProperty Include="DesignTimeBuild" />
 		<CompilerVisibleProperty Include="InterceptorsNamespaces" />
+		<CompilerVisibleProperty Include="TargetFramework" />
 	</ItemGroup>
 </Project>

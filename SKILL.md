@@ -137,6 +137,33 @@ The report is intentionally human-friendly and agent-friendly, not a minimal det
 
 Design-time builds do not write the report.
 
+### Trace mode
+
+Use opt-in trace mode when investigating generator performance or no-op behavior:
+
+```xml
+<PropertyGroup>
+  <AspectGeneratorTrace>true</AspectGeneratorTrace>
+  <AspectGeneratorTraceLevel>Normal</AspectGeneratorTraceLevel>
+</PropertyGroup>
+```
+
+Trace mode appends an `AspectGenerator trace` section to `AspectGeneratorBuildReport.md`. It records visible options, `AGTRACE`-prefixed events, counters, timings, and fast-path decisions. It does not emit compiler diagnostics and does not generate runtime tracing/logging code.
+
+Trace implementation is compiled into Debug-built AspectGenerator packages only. Release-built packages accept `AspectGeneratorTrace=true` but do not write an `AspectGenerator trace` section.
+
+For AGTRACE diagnostics from a local package, pack AspectGenerator in Debug configuration:
+
+```bat
+dotnet pack P:\AspectGenerator\Source\AspectGenerator.csproj -c Debug -o P:\.local-nuget -p:PackageVersion=2.0.0-dev.trace.1
+```
+
+Then build a single consuming project and target framework:
+
+```bat
+dotnet build MyProject.csproj -f net10.0 -p:AspectGeneratorTrace=true /clp:PerformanceSummary /bl
+```
+
 ## Optional intercepted-call markers
 
 `AG0300` diagnostics mark call sites where AspectGenerator applies aspects. They are controlled by `AspectGeneratorAspectDiagnosticSeverity`:

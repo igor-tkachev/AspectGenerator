@@ -306,20 +306,23 @@ namespace AspectGenerator
 		{
 			readonly TargetFilterDiagnostic[] _diagnostics;
 			readonly CompiledFilter[]         _filters;
+			readonly TargetFilterPlan         _plan;
 
-			TargetFilterSet(CompiledFilter[] filters, TargetFilterDiagnostic[] diagnostics)
+			TargetFilterSet(CompiledFilter[] filters, TargetFilterDiagnostic[] diagnostics, TargetFilterPlan plan)
 			{
 				_filters     = filters;
 				_diagnostics = diagnostics;
+				_plan        = plan;
 			}
 
 			public bool IsEmpty => _filters.Length == 0;
+			public TargetFilterPlan Plan => _plan;
 
 			public static TargetFilterSet Create(string[] rules)
 			{
 				var diagnostics = new List<TargetFilterDiagnostic>();
 
-				return new TargetFilterSet(Compile(rules, diagnostics), diagnostics.ToArray());
+				return new TargetFilterSet(Compile(rules, diagnostics), diagnostics.ToArray(), TargetFilterPlan.Create(rules));
 			}
 
 			public TargetFilterEvaluation Evaluate(in MethodTarget target)
@@ -350,6 +353,62 @@ namespace AspectGenerator
 					reportDiagnostic(diagnostic);
 
 				return this;
+			}
+		}
+
+		public readonly struct TargetFilterPlan
+		{
+			TargetFilterPlan(
+				string classification,
+				bool   canFilterDeclarations,
+				bool   canPrefilterCallSites,
+				bool   requiresTargetSemanticModel,
+				bool   requiresCallSiteSemanticModel,
+				bool   mayTargetExternalMethods)
+			{
+				Classification                = classification;
+				CanFilterDeclarations         = canFilterDeclarations;
+				CanPrefilterCallSites         = canPrefilterCallSites;
+				RequiresTargetSemanticModel   = requiresTargetSemanticModel;
+				RequiresCallSiteSemanticModel = requiresCallSiteSemanticModel;
+				MayTargetExternalMethods      = mayTargetExternalMethods;
+			}
+
+			public string Classification                { get; }
+			public bool   CanFilterDeclarations         { get; }
+			public bool   CanPrefilterCallSites         { get; }
+			public bool   RequiresTargetSemanticModel   { get; }
+			public bool   RequiresCallSiteSemanticModel { get; }
+			public bool   MayTargetExternalMethods      { get; }
+
+			public static TargetFilterPlan Create(string[] rules)
+			{
+				var hasRegexOrContains = false;
+
+				foreach (var rule in rules)
+				{
+					var text = rule.TrimStart();
+
+					if (text.StartsWith("-", StringComparison.Ordinal) ||
+						text.StartsWith("&", StringComparison.Ordinal) ||
+						text.StartsWith("|", StringComparison.Ordinal))
+						text = text[1..].TrimStart();
+
+					if (text.StartsWith("regex:", StringComparison.OrdinalIgnoreCase) ||
+						text.StartsWith("contains:", StringComparison.OrdinalIgnoreCase))
+					{
+						hasRegexOrContains = true;
+						break;
+					}
+				}
+
+				return new TargetFilterPlan(
+					hasRegexOrContains ? "signature-text" : "target-pattern",
+					canFilterDeclarations: true,
+					canPrefilterCallSites: true,
+					requiresTargetSemanticModel: true,
+					requiresCallSiteSemanticModel: false,
+					mayTargetExternalMethods: hasRegexOrContains);
 			}
 		}
 

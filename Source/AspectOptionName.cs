@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace AspectGenerator
 {
@@ -9,6 +9,8 @@ namespace AspectGenerator
 		public const string DebuggerStepThrough      = "DebuggerStepThrough";
 		public const string ReportFile               = "ReportFile";
 		public const string AspectDiagnosticSeverity = "AspectDiagnosticSeverity";
+		public const string Trace                    = "Trace";
+		public const string TraceLevel               = "TraceLevel";
 		public const string InterceptorsNamespace    = "InterceptorsNamespace";
 	}
 }

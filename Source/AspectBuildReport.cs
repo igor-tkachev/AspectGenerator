@@ -57,6 +57,16 @@ namespace AspectGenerator
 			var interceptorsNamespace = GetInterceptorsNamespace(analysis.Options);
 			var interceptors          = InterceptorNamingService.Create(analysis.AspectedMethods);
 			var sb                    = new StringBuilder();
+			var generatedSourceFiles  = 1;
+
+			if (analysis.Options.GenerateApi)
+				generatedSourceFiles++;
+
+			if (analysis.Options.EmitInterceptors && analysis.AspectedMethods.Length > 0)
+				generatedSourceFiles++;
+
+			analysis.Trace.SetCounter("Generated source files", generatedSourceFiles);
+			analysis.Trace.SetCounter("Diagnostics reported", analysis.Diagnostics.Length);
 
 			sb
 				.AppendLine("# AspectGenerator Build Report")
@@ -153,6 +163,9 @@ namespace AspectGenerator
 					}
 				}
 			}
+
+			if (analysis.Trace.IsEnabled)
+				sb.AppendLine().Append(analysis.Trace.ToMarkdown());
 
 			return sb.ToString();
 		}
