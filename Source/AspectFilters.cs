@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -322,7 +323,9 @@ namespace AspectGenerator
 			{
 				var diagnostics = new List<TargetFilterDiagnostic>();
 
-				return new TargetFilterSet(Compile(rules, diagnostics), diagnostics.ToArray(), TargetFilterPlan.Create(rules));
+				var filters     = Compile(rules, diagnostics);
+
+				return new TargetFilterSet(filters, diagnostics.ToArray(), TargetFilterPlan.Create(filters));
 			}
 
 			public TargetFilterEvaluation Evaluate(in MethodTarget target)
@@ -364,7 +367,10 @@ namespace AspectGenerator
 				bool   canPrefilterCallSites,
 				bool   requiresTargetSemanticModel,
 				bool   requiresCallSiteSemanticModel,
-				bool   mayTargetExternalMethods)
+				bool   mayTargetExternalMethods,
+				bool   mayTargetAnyExternalMethod,
+				ImmutableArray<string> externalMethodNames,
+				ImmutableArray<string> externalRootSegments)
 			{
 				Classification                = classification;
 				CanFilterDeclarations         = canFilterDeclarations;
@@ -372,6 +378,9 @@ namespace AspectGenerator
 				RequiresTargetSemanticModel   = requiresTargetSemanticModel;
 				RequiresCallSiteSemanticModel = requiresCallSiteSemanticModel;
 				MayTargetExternalMethods      = mayTargetExternalMethods;
+				MayTargetAnyExternalMethod    = mayTargetAnyExternalMethod;
+				ExternalMethodNames           = externalMethodNames;
+				ExternalRootSegments          = externalRootSegments;
 			}
 
 			public string Classification                { get; }
@@ -381,34 +390,64 @@ namespace AspectGenerator
 			public bool   RequiresCallSiteSemanticModel { get; }
 			public bool   MayTargetExternalMethods      { get; }
 
-			public static TargetFilterPlan Create(string[] rules)
+			/// <summary>
+			/// A rule can match a method from a referenced assembly whatever its name or namespace (text rules, wildcard method names).
+			/// </summary>
+			public bool   MayTargetAnyExternalMethod    { get; }
+
+			/// <summary>
+			/// Literal method names of rules that can match methods from referenced assemblies only under these names.
+			/// </summary>
+			public ImmutableArray<string> ExternalMethodNames  { get; }
+
+			/// <summary>
+			/// Literal root segments (root namespace, or the type name for the global namespace) of rules that can match
+			/// methods from referenced assemblies only under these roots.
+			/// </summary>
+			public ImmutableArray<string> ExternalRootSegments { get; }
+
+			internal static TargetFilterPlan Create(CompiledFilter[] filters)
 			{
-				var hasRegexOrContains = false;
+				var hasSignatureText  = false;
+				var anyExternalMethod = false;
+				var methodNames       = new HashSet<string>(StringComparer.Ordinal);
+				var rootSegments      = new HashSet<string>(StringComparer.Ordinal);
 
-				foreach (var rule in rules)
+				foreach (var filter in filters)
 				{
-					var text = rule.TrimStart();
+					// An exclude rule never selects a method, so it cannot add external targets.
+					if (filter.IsNegative)
+						continue;
 
-					if (text.StartsWith("-", StringComparison.Ordinal) ||
-						text.StartsWith("&", StringComparison.Ordinal) ||
-						text.StartsWith("|", StringComparison.Ordinal))
-						text = text[1..].TrimStart();
-
-					if (text.StartsWith("regex:", StringComparison.OrdinalIgnoreCase) ||
-						text.StartsWith("contains:", StringComparison.OrdinalIgnoreCase))
+					switch (filter)
 					{
-						hasRegexOrContains = true;
-						break;
+						case PatternFilter pattern:
+							if (pattern.Matcher.TryGetLiteralMethodNames(methodNames))
+								break;
+
+							if (pattern.Matcher.TryGetLiteralRootSegments(rootSegments))
+								break;
+
+							anyExternalMethod = true;
+							break;
+
+						default:
+							hasSignatureText  = true;
+							anyExternalMethod = true;
+							break;
 					}
 				}
 
 				return new TargetFilterPlan(
-					hasRegexOrContains ? "signature-text" : "target-pattern",
+					hasSignatureText ? "signature-text" : "target-pattern",
 					canFilterDeclarations: true,
-					canPrefilterCallSites: true,
+					canPrefilterCallSites: !anyExternalMethod,
 					requiresTargetSemanticModel: true,
 					requiresCallSiteSemanticModel: false,
-					mayTargetExternalMethods: hasRegexOrContains);
+					mayTargetExternalMethods: anyExternalMethod || methodNames.Count > 0 || rootSegments.Count > 0,
+					mayTargetAnyExternalMethod: anyExternalMethod,
+					externalMethodNames: [..methodNames],
+					externalRootSegments: [..rootSegments]);
 			}
 		}
 
@@ -596,7 +635,7 @@ namespace AspectGenerator
 			Params
 		}
 
-		abstract class CompiledFilter(bool isNegative, string ruleText)
+		internal abstract class CompiledFilter(bool isNegative, string ruleText)
 		{
 			public bool IsNegative { get; } = isNegative;
 			public string RuleText { get; } = ruleText;
@@ -606,9 +645,11 @@ namespace AspectGenerator
 
 		sealed class PatternFilter(bool isNegative, string ruleText, CompiledPatternMatcher matcher) : CompiledFilter(isNegative, ruleText)
 		{
+			public CompiledPatternMatcher Matcher { get; } = matcher;
+
 			public override bool IsMatch(in MethodTarget target)
 			{
-				return matcher.IsMatch(target);
+				return Matcher.IsMatch(target);
 			}
 		}
 

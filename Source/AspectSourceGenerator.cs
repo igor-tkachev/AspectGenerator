@@ -553,7 +553,7 @@ namespace AspectGenerator
 				using (trace.TimePhase("Collect target methods"))
 					selectionPlan = selection.BuildSelectionPlan(methodDeclarations, externalAspectDefinitionsPossible, cancellationToken);
 
-				if (selectionPlan.SelectedTargetMethods.Count == 0 && !selectionPlan.MayTargetExternalMethods)
+				if (selectionPlan.SelectedTargetMethods.Count == 0 && !selectionPlan.MayTargetExternalMethods && selectionPlan.ExternalTargetMethodNames.Count == 0)
 				{
 					trace.AddDecision("scan-call-sites: skipped reason=no-selected-target-methods");
 					trace.AddDecision("resolve-call-symbols: skipped reason=no-selected-target-methods");
@@ -569,6 +569,12 @@ namespace AspectGenerator
 						trace.AddDecision("scan-call-sites: required reason=external-targets-possible");
 						trace.AddDecision("callsite-prefilter: disabled reason=external-targets-possible");
 						trace.AddDecision("resolve-call-symbols: required reason=external-targets-possible");
+					}
+					else if (selectionPlan.SelectedTargetMethods.Count == 0)
+					{
+						trace.AddDecision("scan-call-sites: required reason=external-target-names");
+						trace.AddDecision("callsite-prefilter: enabled kind=method-name-set");
+						trace.AddDecision("resolve-call-symbols: required reason=external-target-names");
 					}
 					else
 					{
@@ -930,6 +936,7 @@ namespace AspectGenerator
 			ImmutableArray<AnalyzedInvocation> aspectedMethods)
 		{
 			var interceptorsNamespace = GetInterceptorsNamespace(options);
+			var semanticModels        = new Dictionary<SyntaxTree,SemanticModel>();
 
 			// Generate source. One file for all the interceptors.
 			// Interceptors.g.cs
@@ -1055,7 +1062,11 @@ namespace AspectGenerator
 
 					void AppendInterceptsLocation(InvocationExpressionSyntax invocation)
 					{
-						var semantic = compilation.GetSemanticModel(invocation.SyntaxTree);
+						if (!semanticModels.TryGetValue(invocation.SyntaxTree, out var semantic))
+						{
+							semantic = compilation.GetSemanticModel(invocation.SyntaxTree);
+							semanticModels.Add(invocation.SyntaxTree, semantic);
+						}
 
 						var location = semantic.GetInterceptableLocation(invocation, spc.CancellationToken);
 

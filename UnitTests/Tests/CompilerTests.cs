@@ -1425,6 +1425,102 @@ namespace AspectGenerator.Tests
 				d.GetMessage().Contains("InterceptorsNamespaces MSBuild property is empty.", StringComparison.Ordinal)));
 		}
 
+		[TestMethod]
+		public void CallThroughPascalCasePropertyIsInterceptedTest()
+		{
+			AssertInterceptedCalls(CallShapeSource("new Holder().Service.Save();"), 1);
+		}
+
+		[TestMethod]
+		public void CallThroughUnqualifiedPascalCasePropertyIsInterceptedTest()
+		{
+			AssertInterceptedCalls(CallShapeSource("", ownCalls: "Service.Save();"), 1);
+		}
+
+		[TestMethod]
+		public void CallThroughStaticMemberChainIsInterceptedTest()
+		{
+			AssertInterceptedCalls(CallShapeSource("Holder.Shared.Save();"), 1);
+		}
+
+		[TestMethod]
+		public void StaticCallThroughDerivedTypeIsInterceptedTest()
+		{
+			AssertInterceptedCalls(CallShapeSource("DerivedService.StaticSave();"), 1);
+		}
+
+		[TestMethod]
+		public void StaticCallThroughUsingAliasIsInterceptedTest()
+		{
+			AssertInterceptedCalls(CallShapeSource("ServiceAlias.StaticSave();"), 1);
+		}
+
+		[TestMethod]
+		public void StaticCallThroughUnrelatedTypeIsNotInterceptedTest()
+		{
+			AssertInterceptedCalls(CallShapeSource("UserService.StaticSave(); Unrelated.StaticSave();"), 1);
+		}
+
+		[TestMethod]
+		public void LiteralNativePatternInterceptsReferencedAssemblyMethodTest()
+		{
+			AssertInterceptedCalls(ExternalTargetSource("public static System.Math.Max(System.Int32, System.Int32)"), 1);
+		}
+
+		[TestMethod]
+		public void WildcardNativePatternInterceptsReferencedAssemblyMethodTest()
+		{
+			AssertInterceptedCalls(ExternalTargetSource("public static System.Math.Ma*(System.Int32, System.Int32)"), 1);
+		}
+
+		[TestMethod]
+		public void ConditionNativePatternInterceptsReferencedAssemblyMethodTest()
+		{
+			AssertInterceptedCalls(ExternalTargetSource("fulltype: System.Math; method: Max; params: System.Int32, System.Int32"), 1);
+		}
+
+		static void AssertInterceptedCalls(string source, int expectedCount)
+		{
+			var result = RunGeneratorAndGetCompilation(source, out var compilation);
+
+			Assert.IsFalse(
+				compilation.GetDiagnostics().Any(static d => d.Severity == DiagnosticSeverity.Error),
+				string.Join(Environment.NewLine, compilation.GetDiagnostics()));
+
+			var interceptors = GetGeneratedSourceOrEmpty(result, "Interceptors.g.cs");
+
+			Assert.AreEqual(expectedCount, CountOccurrences(interceptors, "InterceptsLocationAttribute(1, \""), interceptors);
+		}
+
+		static string GetGeneratedSourceOrEmpty(GeneratorDriverRunResult result, string hintName)
+		{
+			return result.Results.SelectMany(static r => r.GeneratedSources).Any(s => s.HintName == hintName)
+				? GetGeneratedSource(result, hintName)
+				: "";
+		}
+
+		static int CountOccurrences(string text, string value)
+		{
+			var count = 0;
+
+			for (var index = text.IndexOf(value, StringComparison.Ordinal); index >= 0; index = text.IndexOf(value, index + value.Length, StringComparison.Ordinal))
+				count++;
+
+			return count;
+		}
+
+		static string CallShapeSource(string calls, string ownCalls = "")
+		{
+			return CallShapeSourceTemplate
+				.Replace("/*CALLS*/",     calls,    StringComparison.Ordinal)
+				.Replace("/*OWN-CALLS*/", ownCalls, StringComparison.Ordinal);
+		}
+
+		static string ExternalTargetSource(string targetFilter)
+		{
+			return ExternalTargetSourceTemplate.Replace("/*FILTER*/", targetFilter, StringComparison.Ordinal);
+		}
+
 		static GeneratorDriverRunResult RunGenerator(string source, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null)
 		{
 			return RunGeneratorAndGetCompilation(source, out _, properties, preprocessorSymbols);
@@ -1432,7 +1528,10 @@ namespace AspectGenerator.Tests
 
 		static GeneratorDriverRunResult RunGeneratorAndGetCompilation(string source, out Compilation outputCompilation, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null)
 		{
-			var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
+			// The feature lets the output compilation accept the generated interceptors, as InterceptorsNamespaces does in a build.
+			var parseOptions = CSharpParseOptions.Default
+				.WithLanguageVersion(LanguageVersion.Preview)
+				.WithFeatures([new("InterceptorsNamespaces", "AspectGenerator")]);
 
 			if (preprocessorSymbols is not null)
 				parseOptions = parseOptions.WithPreprocessorSymbols(preprocessorSymbols);
@@ -3860,5 +3959,93 @@ namespace AspectGenerator.Tests
 			}
 			""";
 
+
+		const string CallShapeSourceTemplate =
+			"""
+			using System;
+			using AspectGenerator;
+			using ServiceAlias = AspectGenerator.Tests.GeneratorDriver.UserService;
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnBeforeCall = nameof(Before))]
+			[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+			sealed class LogAttribute : Attribute
+			{
+				public static void Before(InterceptInfo info)
+				{
+				}
+			}
+
+			class UserService
+			{
+				[Log]
+				public string Save() => "";
+
+				[Log]
+				public static string StaticSave() => "";
+
+				[Log]
+				public static T Create<T>() where T : new() => new T();
+			}
+
+			class DerivedService : UserService
+			{
+			}
+
+			static class Unrelated
+			{
+				public static string StaticSave() => "";
+			}
+
+			class Holder
+			{
+				public static UserService Shared { get; } = new();
+
+				public UserService Service { get; } = new();
+
+				public void CallThroughOwnProperty()
+				{
+					/*OWN-CALLS*/
+				}
+			}
+
+			static class Calls
+			{
+				public static void Invoke()
+				{
+					/*CALLS*/
+				}
+			}
+			""";
+
+		const string ExternalTargetSourceTemplate =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "/*FILTER*/")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnBeforeCall = nameof(Before))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class LogAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void Before(InterceptInfo info)
+				{
+				}
+			}
+
+			static class Calls
+			{
+				public static int Invoke()
+				{
+					return Math.Max(1, 2) + Math.Min(1, 2);
+				}
+			}
+			""";
 	}
 }

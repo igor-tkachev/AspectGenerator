@@ -20,6 +20,7 @@ namespace AspectGenerator
 		readonly Dictionary<IMethodSymbol,List<AttributeInfo>> _methodCache = new(SymbolEqualityComparer.Default);
 		readonly Dictionary<INamedTypeSymbol,ImmutableArray<AspectFilterSet>> _typeFilterCache = new(SymbolEqualityComparer.Default);
 		readonly object _cacheGate = new();
+		readonly Dictionary<SyntaxTree,SemanticModel> _semanticModels = new();
 
 		public AspectSelectionService(
 			Compilation              compilation,
@@ -50,7 +51,7 @@ namespace AspectGenerator
 					continue;
 
 				afterPrefilter++;
-				var semanticModel = _compilation.GetSemanticModel(invocation.SyntaxTree);
+				var semanticModel = GetSemanticModel(invocation.SyntaxTree);
 				_trace?.IncrementCounter("Symbol resolution attempts");
 
 				if (TryAnalyzeInvocation(invocation, semanticModel, plan, cancellationToken, out var analyzedInvocation))
@@ -69,6 +70,24 @@ namespace AspectGenerator
 			return result.ToImmutable();
 		}
 
+		/// <summary>
+		/// One semantic model per tree: a semantic model caches what it binds, so a new model per call site would bind the
+		/// enclosing method body again for every call in it.
+		/// </summary>
+		SemanticModel GetSemanticModel(SyntaxTree tree)
+		{
+			lock (_semanticModels)
+			{
+				if (!_semanticModels.TryGetValue(tree, out var semanticModel))
+				{
+					semanticModel = _compilation.GetSemanticModel(tree);
+					_semanticModels.Add(tree, semanticModel);
+				}
+
+				return semanticModel;
+			}
+		}
+
 		public AspectSelectionPlan BuildSelectionPlan(
 			ImmutableArray<MethodDeclarationSyntax> methodDeclarations,
 			bool                                    externalAspectDefinitionsPossible,
@@ -77,8 +96,26 @@ namespace AspectGenerator
 			var selectedMethods    = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
 			var selectedAttributes = new Dictionary<IMethodSymbol,List<AttributeInfo>>(SymbolEqualityComparer.Default);
 			var buckets            = new Dictionary<string,TargetMethodBucket>(StringComparer.Ordinal);
-			var mayTargetExternalMethods = externalAspectDefinitionsPossible ||
-				_assemblyFilters.Any(static filterSet => filterSet.Filters.Plan.MayTargetExternalMethods);
+			var mayTargetExternalMethods  = externalAspectDefinitionsPossible;
+			var externalTargetMethodNames = new HashSet<string>(StringComparer.Ordinal);
+
+			// Assembly-level filters also select methods of referenced assemblies, which have no declaration here.
+			// Type-level filters only select methods of the source type they are applied to.
+			foreach (var filterSet in _assemblyFilters)
+			{
+				var filterPlan = filterSet.Filters.Plan;
+
+				if (filterPlan.MayTargetAnyExternalMethod)
+					mayTargetExternalMethods = true;
+				else
+				{
+					externalTargetMethodNames.UnionWith(filterPlan.ExternalMethodNames);
+
+					if (filterPlan.ExternalRootSegments.Any(ReferencedAssembliesContainRoot))
+						mayTargetExternalMethods = true;
+				}
+			}
+
 			var targetMethodDeclarations = 0;
 
 			foreach (var methodDeclaration in methodDeclarations)
@@ -87,7 +124,7 @@ namespace AspectGenerator
 					break;
 
 				targetMethodDeclarations++;
-				var semanticModel = _compilation.GetSemanticModel(methodDeclaration.SyntaxTree);
+				var semanticModel = GetSemanticModel(methodDeclaration.SyntaxTree);
 
 				if (semanticModel.GetDeclaredSymbol(methodDeclaration, cancellationToken) is not IMethodSymbol method)
 					continue;
@@ -114,7 +151,95 @@ namespace AspectGenerator
 			_trace?.SetCounter("Target methods after declaration filter", selectedMethods.Count);
 			_trace?.SetCounter("Target methods after semantic filter", selectedMethods.Count);
 
-			return new AspectSelectionPlan(selectedMethods, selectedAttributes, buckets, mayTargetExternalMethods);
+			if (!mayTargetExternalMethods)
+				AddReceiverTypeNames(buckets.Values, cancellationToken);
+
+			return new AspectSelectionPlan(selectedMethods, selectedAttributes, buckets, mayTargetExternalMethods, externalTargetMethodNames);
+		}
+
+		bool ReferencedAssembliesContainRoot(string root)
+		{
+			foreach (var assembly in _compilation.SourceModule.ReferencedAssemblySymbols)
+				if (assembly.GlobalNamespace.GetMembers(root).Any())
+					return true;
+
+			return false;
+		}
+
+		void AddReceiverTypeNames(IEnumerable<TargetMethodBucket> buckets, CancellationToken cancellationToken)
+		{
+			var staticBuckets = buckets.Where(static bucket => bucket.CanRejectByTypeReceiver).ToList();
+
+			if (staticBuckets.Count == 0)
+				return;
+
+			// A static method can be called through its containing type, through any type derived from it,
+			// and through a using alias of any of them. Derived types of a source type can only be source types.
+			var aliases = new HashSet<string>(StringComparer.Ordinal);
+
+			foreach (var tree in _compilation.SyntaxTrees)
+				AddAliases(tree.GetRoot(cancellationToken), aliases);
+
+			var sourceTypes = new List<INamedTypeSymbol>();
+
+			AddTypes(_compilation.Assembly.GlobalNamespace, sourceTypes);
+
+			foreach (var bucket in staticBuckets)
+			{
+				var containingTypes = new HashSet<INamedTypeSymbol>(
+					bucket.Methods.Select(static method => method.ContainingType.OriginalDefinition),
+					SymbolEqualityComparer.Default);
+
+				bucket.ReceiverTypeNames.UnionWith(bucket.ContainingTypeNames);
+				bucket.ReceiverTypeNames.UnionWith(aliases);
+
+				foreach (var type in sourceTypes)
+					for (var baseType = type.BaseType; baseType is not null; baseType = baseType.BaseType)
+						if (containingTypes.Contains(baseType.OriginalDefinition))
+						{
+							bucket.ReceiverTypeNames.Add(type.Name);
+							break;
+						}
+			}
+
+			static void AddAliases(SyntaxNode node, HashSet<string> aliases)
+			{
+				var usings = node switch
+				{
+					CompilationUnitSyntax compilationUnit           => compilationUnit.Usings,
+					BaseNamespaceDeclarationSyntax namespaceDeclaration => namespaceDeclaration.Usings,
+					_                                               => default
+				};
+
+				foreach (var usingDirective in usings)
+					if (usingDirective.Alias is {} alias)
+						aliases.Add(alias.Name.Identifier.ValueText);
+
+				var members = node switch
+				{
+					CompilationUnitSyntax compilationUnit           => compilationUnit.Members,
+					BaseNamespaceDeclarationSyntax namespaceDeclaration => namespaceDeclaration.Members,
+					_                                               => default
+				};
+
+				foreach (var member in members)
+					if (member is BaseNamespaceDeclarationSyntax)
+						AddAliases(member, aliases);
+			}
+
+			static void AddTypes(INamespaceOrTypeSymbol container, List<INamedTypeSymbol> types)
+			{
+				foreach (var member in container.GetMembers())
+				{
+					if (member is INamespaceSymbol namespaceSymbol)
+						AddTypes(namespaceSymbol, types);
+					else if (member is INamedTypeSymbol type)
+					{
+						types.Add(type);
+						AddTypes(type, types);
+					}
+				}
+			}
 		}
 
 		public bool TryAnalyzeInvocation(
@@ -133,7 +258,7 @@ namespace AspectGenerator
 
 			var attributes = plan.TryGetSelectedAttributes(method, out var selectedAttributes)
 				? selectedAttributes
-				: plan.MayTargetExternalMethods
+				: plan.MayTargetExternalMethod(method)
 					? GetSelectedAttributes(method)
 					: [];
 
@@ -249,7 +374,7 @@ namespace AspectGenerator
 				if (syntaxReference.GetSyntax() is not TypeDeclarationSyntax typeDeclaration)
 					continue;
 
-				var semanticModel = _compilation.GetSemanticModel(typeDeclaration.SyntaxTree);
+				var semanticModel = GetSemanticModel(typeDeclaration.SyntaxTree);
 
 				foreach (var filterAttribute in typeDeclaration.AttributeLists.SelectMany(static list => list.Attributes))
 				{
@@ -457,7 +582,21 @@ namespace AspectGenerator
 			return attribute.NamedArguments.Any(static a => a.Key == "TargetFilter");
 		}
 
-		bool MayMatchCallSite(InvocationExpressionSyntax invocation, AspectSelectionPlan plan)
+		/// <summary>
+		/// The invocation shapes the generator can intercept; other invocations are never candidates.
+		/// </summary>
+		public static bool IsCandidateInvocation(SyntaxNode node)
+		{
+			return node is InvocationExpressionSyntax
+			{
+				Expression: MemberAccessExpressionSyntax or IdentifierNameSyntax or GenericNameSyntax or MemberBindingExpressionSyntax
+			};
+		}
+
+		/// <summary>
+		/// Rejects a call site before symbol binding when the plan proves it cannot bind to a selected method.
+		/// </summary>
+		public bool MayMatchCallSite(InvocationExpressionSyntax invocation, AspectSelectionPlan plan)
 		{
 			if (plan.MayTargetExternalMethods)
 				return true;
@@ -467,6 +606,10 @@ namespace AspectGenerator
 				_trace?.IncrementCounter("Call-site prefilter rejected missing method name");
 				return false;
 			}
+
+			// A filter may select a method of a referenced assembly under this name; only binding can tell.
+			if (plan.ExternalTargetMethodNames.Contains(name))
+				return true;
 
 			if (!plan.TargetMethodBuckets.TryGetValue(name, out var bucket))
 			{
@@ -487,8 +630,9 @@ namespace AspectGenerator
 				return false;
 			}
 
-			if (TryGetExplicitReceiverTypeName(invocation, out var receiverTypeName) &&
-				!bucket.ContainingTypeNames.Contains(receiverTypeName))
+			if (bucket.CanRejectByTypeReceiver &&
+				TryGetExplicitReceiverName(invocation, out var receiverName) &&
+				!bucket.ReceiverTypeNames.Contains(receiverName))
 			{
 				_trace?.IncrementCounter("Call-site prefilter rejected receiver type");
 				return false;
@@ -551,38 +695,31 @@ namespace AspectGenerator
 			}
 		}
 
-		static bool TryGetExplicitReceiverTypeName(InvocationExpressionSyntax invocation, out string receiverTypeName)
+		static bool TryGetExplicitReceiverName(InvocationExpressionSyntax invocation, out string receiverName)
 		{
-			receiverTypeName = "";
+			receiverName = "";
 
 			if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
 				return false;
 
-			if (!TryGetTypeLikeName(memberAccess.Expression, out receiverTypeName))
-				return false;
-
-			return true;
-
-			static bool TryGetTypeLikeName(ExpressionSyntax expression, out string name)
+			// The receiver is a simple name or ends in one (Name, A.B.Name, global::A.Name). It may denote a type,
+			// an alias, a namespace or a value; the caller decides what a mismatch proves.
+			switch (memberAccess.Expression)
 			{
-				switch (expression)
-				{
-					case IdentifierNameSyntax identifier when IsTypeLike(identifier.Identifier.ValueText):
-						name = identifier.Identifier.ValueText;
-						return true;
+				case IdentifierNameSyntax identifier:
+					receiverName = identifier.Identifier.ValueText;
+					return true;
 
-					case MemberAccessExpressionSyntax memberAccess when TryGetTypeLikeName(memberAccess.Name, out name):
-						return true;
+				case MemberAccessExpressionSyntax { Name: IdentifierNameSyntax identifier }:
+					receiverName = identifier.Identifier.ValueText;
+					return true;
 
-					default:
-						name = "";
-						return false;
-				}
-			}
+				case QualifiedNameSyntax { Right: IdentifierNameSyntax identifier }:
+					receiverName = identifier.Identifier.ValueText;
+					return true;
 
-			static bool IsTypeLike(string name)
-			{
-				return name.Length > 0 && char.IsUpper(name[0]);
+				default:
+					return false;
 			}
 		}
 	}

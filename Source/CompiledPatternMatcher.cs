@@ -445,6 +445,65 @@ namespace AspectGenerator
 				return valid;
 			}
 
+			/// <summary>
+			/// Adds the method names this rule can match when every match must have one of a known set of literal names.
+			/// Returns <see langword="false"/> when the rule can match a method with any name.
+			/// </summary>
+			public bool TryGetLiteralMethodNames(HashSet<string> names)
+			{
+				if (_fullMethodPattern is not null)
+					return TryAddLiteralName(_fullMethodPattern.Segments[^1], names);
+
+				foreach (var condition in _conditions)
+				{
+					var conditionNames = new HashSet<string>(StringComparer.Ordinal);
+
+					if (condition.TryGetLiteralMethodNames(conditionNames))
+					{
+						names.UnionWith(conditionNames);
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+			/// <summary>
+			/// Adds the first segment of the full method name (the root namespace, or the type for a type in the global namespace)
+			/// when every match must start with one of a known set of literal segments.
+			/// Returns <see langword="false"/> when the rule can match a method under any root.
+			/// </summary>
+			public bool TryGetLiteralRootSegments(HashSet<string> roots)
+			{
+				if (_fullMethodPattern is not null)
+					return TryAddLiteralName(_fullMethodPattern.Segments[0], roots);
+
+				foreach (var condition in _conditions)
+				{
+					var conditionRoots = new HashSet<string>(StringComparer.Ordinal);
+
+					if (condition.TryGetLiteralRootSegments(conditionRoots))
+					{
+						roots.UnionWith(conditionRoots);
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+			internal static bool TryAddLiteralName(SegmentMatcher segment, HashSet<string> names)
+			{
+				if (segment.ExactText is not {} text)
+					return false;
+
+				// A generic method or type segment is written as Name<...>; the call site and the symbol use the bare name.
+				var genericStart = text.IndexOf('<');
+
+				names.Add(genericStart >= 0 ? text[..genericStart] : text);
+				return true;
+			}
+
 			public bool IsMatch(in MethodTarget target)
 			{
 				if (_accessibility != AccessibilityMask.None && (target.Accessibility & _accessibility) != _accessibility)
@@ -677,6 +736,59 @@ namespace AspectGenerator
 						diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(key));
 						return false;
 				}
+			}
+
+			public bool TryGetLiteralMethodNames(HashSet<string> names)
+			{
+				return TryGetLiteralValues(names, static (condition, values) => condition._key switch
+				{
+					"method"     => CompiledPatternMatcher.TryAddLiteralName(condition._segmentPattern!, values),
+					"fullmethod" => condition._dottedPattern!.Segments[^1].Kind != SegmentMatcherKind.Recursive &&
+						CompiledPatternMatcher.TryAddLiteralName(condition._dottedPattern.Segments[^1], values),
+					_            => false
+				});
+			}
+
+			public bool TryGetLiteralRootSegments(HashSet<string> roots)
+			{
+				return TryGetLiteralValues(roots, static (condition, values) => condition._key switch
+				{
+					"namespace" or "fulltype" or "fullmethod" => CompiledPatternMatcher.TryAddLiteralName(condition._dottedPattern!.Segments[0], values),
+					_                                          => false
+				});
+			}
+
+			bool TryGetLiteralValues(HashSet<string> values, Func<Condition,HashSet<string>,bool> getLeafValues)
+			{
+				if (_children is null)
+					return getLeafValues(this, values);
+
+				if (_operator == ConditionOperator.Any)
+				{
+					// Every alternative must be restricted, otherwise one of them can match anything.
+					var alternatives = new HashSet<string>(StringComparer.Ordinal);
+
+					foreach (var child in _children)
+						if (!child.TryGetLiteralValues(alternatives, getLeafValues))
+							return false;
+
+					values.UnionWith(alternatives);
+					return true;
+				}
+
+				// All children must match, so one restricted child restricts the whole condition.
+				foreach (var child in _children)
+				{
+					var childValues = new HashSet<string>(StringComparer.Ordinal);
+
+					if (child.TryGetLiteralValues(childValues, getLeafValues))
+					{
+						values.UnionWith(childValues);
+						return true;
+					}
+				}
+
+				return false;
 			}
 
 			public bool IsMatch(in MethodTarget target)
@@ -1276,6 +1388,8 @@ namespace AspectGenerator
 			}
 
 			public SegmentMatcherKind Kind { get; }
+
+			public string? ExactText => Kind == SegmentMatcherKind.Exact ? _text : null;
 
 			public static bool TryParse(string pattern, List<TargetFilterDiagnostic> diagnostics, out SegmentMatcher matcher)
 			{

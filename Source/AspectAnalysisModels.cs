@@ -64,18 +64,34 @@ namespace AspectGenerator
 			HashSet<IMethodSymbol>              selectedTargetMethods,
 			Dictionary<IMethodSymbol,List<AttributeInfo>> selectedTargetAttributes,
 			Dictionary<string,TargetMethodBucket>          targetMethodBuckets,
-			bool                                mayTargetExternalMethods)
+			bool                                mayTargetExternalMethods,
+			HashSet<string>                     externalTargetMethodNames)
 		{
 			SelectedTargetMethods      = selectedTargetMethods;
 			SelectedTargetAttributes   = selectedTargetAttributes;
 			TargetMethodBuckets        = targetMethodBuckets;
 			MayTargetExternalMethods   = mayTargetExternalMethods;
+			ExternalTargetMethodNames  = externalTargetMethodNames;
 		}
 
 		public HashSet<IMethodSymbol>                       SelectedTargetMethods    { get; }
 		public Dictionary<IMethodSymbol,List<AttributeInfo>> SelectedTargetAttributes { get; }
 		public Dictionary<string,TargetMethodBucket>         TargetMethodBuckets      { get; }
+		/// <summary>
+		/// Any call site may target a selected method that has no declaration in this compilation, so every call site is bound.
+		/// </summary>
 		public bool                                          MayTargetExternalMethods { get; }
+
+		/// <summary>
+		/// Names of methods without a declaration in this compilation that target filters may still select.
+		/// Call sites with these names are bound and evaluated against the filters.
+		/// </summary>
+		public HashSet<string>                               ExternalTargetMethodNames { get; }
+
+		public bool MayTargetExternalMethod(IMethodSymbol method)
+		{
+			return MayTargetExternalMethods || ExternalTargetMethodNames.Contains(method.Name);
+		}
 
 		public bool TryGetSelectedAttributes(IMethodSymbol method, out List<AttributeInfo> attributes)
 		{
@@ -96,10 +112,28 @@ namespace AspectGenerator
 		public HashSet<string> ContainingTypeNames   { get; } = new(StringComparer.Ordinal);
 		public List<IMethodSymbol> Methods           { get; } = new();
 
+		/// <summary>
+		/// Simple names a type receiver of a call to one of <see cref="Methods"/> can have: the containing types,
+		/// the source types derived from them, and every using alias of the compilation.
+		/// Filled by the selection plan when <see cref="CanRejectByTypeReceiver"/> is true.
+		/// </summary>
+		public HashSet<string> ReceiverTypeNames     { get; } = new(StringComparer.Ordinal);
+
+		/// <summary>
+		/// Every method is an ordinary static method, so a call can only name a type (or an alias of one) as its receiver,
+		/// never a value: an explicit receiver whose simple name is not in <see cref="ReceiverTypeNames"/> cannot bind to them.
+		/// Instance, extension, extension-block and static abstract or virtual interface members keep every receiver.
+		/// </summary>
+		public bool CanRejectByTypeReceiver { get; private set; } = true;
+
 		public void Add(IMethodSymbol method)
 		{
 			Methods.Add(method);
 			GenericArities.Add(method.TypeParameters.Length);
+
+			if (!method.IsStatic || method.IsExtensionMethod || method.IsAbstract || method.IsVirtual ||
+				method.ContainingType is null or { IsExtension: true })
+				CanRejectByTypeReceiver = false;
 
 			foreach (var containingName in GetContainingTypeNames(method.ContainingType))
 				ContainingTypeNames.Add(containingName);
