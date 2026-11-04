@@ -41,9 +41,7 @@ namespace AspectGenerator
 
 				// Markers must name exactly the calls the generator intercepts, so they use the generator's
 				// declaration-first selection plan and call-site prefilter. The plan is built once, on first use.
-				var selection = new Lazy<(AspectSelectionService Service, AspectSelectionPlan Plan)?>(
-					() => CreateSelection(compilation, options, startContext.CancellationToken),
-					LazyThreadSafetyMode.ExecutionAndPublication);
+				var selection = new SelectionCache(compilation, options);
 
 				startContext.RegisterSyntaxNodeAction(
 					context =>
@@ -51,7 +49,7 @@ namespace AspectGenerator
 						if (!AspectSelectionService.IsCandidateInvocation(context.Node))
 							return;
 
-						if (selection.Value is not {} selected)
+						if (selection.Get(context.CancellationToken) is not {} selected)
 							return;
 
 						var (service, plan) = selected;
@@ -84,6 +82,48 @@ namespace AspectGenerator
 					},
 					SyntaxKind.InvocationExpression);
 			});
+		}
+
+		/// <summary>
+		/// Builds the selection plan once per compilation. A build that is cancelled is not kept: the plan builder stops
+		/// early on cancellation, and a partial plan would hide markers for the rest of the compilation.
+		/// </summary>
+		sealed class SelectionCache
+		{
+			readonly Compilation               _compilation;
+			readonly GeneratorExecutionOptions _options;
+			readonly object                    _gate = new();
+
+			(AspectSelectionService Service, AspectSelectionPlan Plan)? _selection;
+			bool _built;
+
+			public SelectionCache(Compilation compilation, GeneratorExecutionOptions options)
+			{
+				_compilation = compilation;
+				_options     = options;
+			}
+
+			public (AspectSelectionService Service, AspectSelectionPlan Plan)? Get(CancellationToken cancellationToken)
+			{
+				// _selection is written before _built is published, so a reader that sees _built also sees the plan.
+				if (Volatile.Read(ref _built))
+					return _selection;
+
+				lock (_gate)
+				{
+					if (_built)
+						return _selection;
+
+					var selection = CreateSelection(_compilation, _options, cancellationToken);
+
+					cancellationToken.ThrowIfCancellationRequested();
+
+					_selection = selection;
+					Volatile.Write(ref _built, true);
+
+					return selection;
+				}
+			}
 		}
 
 		static (AspectSelectionService Service, AspectSelectionPlan Plan)? CreateSelection(
