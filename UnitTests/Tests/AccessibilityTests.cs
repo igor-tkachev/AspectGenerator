@@ -411,7 +411,341 @@ namespace AspectGenerator.Tests
 			Assert.AreEqual(1, skips.Count(static m => m.Contains("'LocalAttribute'")),          string.Join(System.Environment.NewLine, skips));
 		}
 
-		static string EmitAndRun(Compilation compilation, string interceptors)
+		const string HookLogSource =
+			"""
+			public static class HookLog
+			{
+				public static readonly System.Text.StringBuilder Text = new();
+			}
+			""";
+
+		static (GeneratorDriverRunResult Result, string Value) RunCalls(string source, params byte[][] libraries)
+		{
+			var references = libraries.Select(static l => MetadataReference.CreateFromImage(l)).ToArray();
+			var result     = references.Length == 0
+				? RunGeneratorAndGetCompilation([HookLogSource, source], out var compilation)
+				: RunGeneratorAndGetCompilation([source], out compilation, reference: references[0]);
+
+			return (result, EmitAndRun(compilation, GetGeneratedSourceOrEmpty(result, "Interceptors.g.cs"), libraries));
+		}
+
+		static byte[] CompileAspectLibrary(string source)
+		{
+			RunGeneratorAndGetCompilation(
+				[HookLogSource, source],
+				out var library,
+				new()
+				{
+					["build_property.AspectGeneratorPublicApi"] = "true",
+				});
+
+			using var stream = new System.IO.MemoryStream();
+
+			var emit = library.WithAssemblyName("AspectGenerator.Tests.HookLibrary").Emit(stream);
+
+			Assert.IsTrue(emit.Success, string.Join(System.Environment.NewLine, emit.Diagnostics));
+
+			return stream.ToArray();
+		}
+
+		[TestMethod]
+		public void AccessUncalledHooksDoNotMatterTest()
+		{
+			// A synchronous call never calls the async hooks and an async call with async hooks never calls the synchronous
+			// ones, so whether those are accessible does not decide anything.
+			var (result, value) = RunCalls(
+				"""
+				using System;
+				using System.Threading.Tasks;
+				using AspectGenerator;
+
+				[Aspect(OnBeforeCall = nameof(Before), OnBeforeCallAsync = nameof(BeforeAsync))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class PrivateAsyncAttribute : Attribute
+				{
+					public static void Before(InterceptInfo info)
+					{
+						HookLog.Text.Append("before;");
+					}
+
+					private static Task BeforeAsync(InterceptInfo info)
+					{
+						return Task.CompletedTask;
+					}
+				}
+
+				[Aspect(OnBeforeCall = nameof(Before), OnBeforeCallAsync = nameof(BeforeAsync))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class PrivateSyncAttribute : Attribute
+				{
+					private static void Before(InterceptInfo info)
+					{
+					}
+
+					public static Task BeforeAsync(InterceptInfo info)
+					{
+						HookLog.Text.Append("before-async;");
+						return Task.CompletedTask;
+					}
+				}
+
+				static class Calls
+				{
+					[PrivateAsync] public static string Sync() { return "sync;"; }
+					[PrivateSync]  public static async Task<string> Async() { await Task.Yield(); return "async;"; }
+
+					public static string Run()
+					{
+						return Sync() + Async().GetAwaiter().GetResult() + HookLog.Text;
+					}
+				}
+				""");
+
+			Assert.AreEqual("sync;async;before;before-async;", value);
+			AssertNoDiagnostic(result, AspectDiagnosticID.CannotIntercept);
+		}
+
+		[TestMethod]
+		public void AccessHookOverloadsTest()
+		{
+			// The interceptor calls the overload the checks resolved: an accessible one, the form with the aspect first.
+			var (result, value) = RunCalls(
+				"""
+				using System;
+				using AspectGenerator;
+
+				[Aspect(OnBeforeCall = nameof(Before))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class PrivateAspectFormAttribute : Attribute
+				{
+					public static void Before(InterceptInfo info)
+					{
+						HookLog.Text.Append("public-info;");
+					}
+
+					private static void Before(PrivateAspectFormAttribute aspect, InterceptInfo info)
+					{
+						HookLog.Text.Append("private-aspect;");
+					}
+				}
+
+				[Aspect(OnBeforeCall = nameof(Before))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class PublicAspectFormAttribute : Attribute
+				{
+					private static void Before(InterceptInfo info)
+					{
+						HookLog.Text.Append("private-info;");
+					}
+
+					public static void Before(PublicAspectFormAttribute aspect, InterceptInfo info)
+					{
+						HookLog.Text.Append("public-aspect;");
+					}
+				}
+
+				static class Calls
+				{
+					[PrivateAspectForm] public static string A() { return "a;"; }
+					[PublicAspectForm]  public static string B() { return "b;"; }
+
+					public static string Run()
+					{
+						return A() + B() + HookLog.Text;
+					}
+				}
+				""");
+
+			Assert.AreEqual("a;b;public-info;public-aspect;", value);
+			AssertNoDiagnostic(result, AspectDiagnosticID.CannotIntercept);
+		}
+
+		[TestMethod]
+		public void AccessHooksOfBaseTypesTest()
+		{
+			// The generated Aspect.Hook(...) call finds static hooks of base types; a public one works without AG0101, and
+			// an inaccessible one leaves the call as it is.
+			var (result, value) = RunCalls(
+				"""
+				using System;
+				using AspectGenerator;
+
+				class PublicBase : Attribute
+				{
+					public static void Before(InterceptInfo info)
+					{
+						HookLog.Text.Append("base;");
+					}
+				}
+
+				class ProtectedBase : Attribute
+				{
+					protected static void Before(InterceptInfo info)
+					{
+						HookLog.Text.Append("protected;");
+					}
+				}
+
+				[Aspect(OnBeforeCall = "Before")]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class InheritsPublicAttribute : PublicBase
+				{
+				}
+
+				[Aspect(OnBeforeCall = "Before")]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class InheritsProtectedAttribute : ProtectedBase
+				{
+				}
+
+				static class Calls
+				{
+					[InheritsPublic]    public static string A() { return "a;"; }
+					[InheritsProtected] public static string B() { return "b;"; }
+
+					public static string Run()
+					{
+						return A() + B() + HookLog.Text;
+					}
+				}
+				""");
+
+			Assert.AreEqual("a;b;base;", value);
+			AssertNoDiagnostic(result, AspectDiagnosticID.HookMethodNotFound);
+			StringAssert.Contains(result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.CannotIntercept).GetMessage(), "the aspect hook method 'InheritsProtectedAttribute.Before' is not accessible");
+		}
+
+		[TestMethod]
+		public void AccessInternalHookOfReferencedAspectTest()
+		{
+			// Metadata does not show this assembly the internal hook: AG0101 says so, and no interceptor is generated that
+			// would fail to compile next to it.
+			var library = CompileAspectLibrary(
+				"""
+				using System;
+				using AspectGenerator;
+
+				[Aspect(OnBeforeCall = nameof(Before))]
+				[AttributeUsage(AttributeTargets.Method)]
+				public sealed class LibraryAttribute : Attribute
+				{
+					internal static void Before(InterceptInfo info)
+					{
+					}
+				}
+
+				public static class Library
+				{
+					[Library] public static string M() { return "m;"; }
+				}
+				""");
+
+			var result = RunGeneratorAndGetCompilation(
+				["static class Calls { public static string Run() { return Library.M(); } }"],
+				out var compilation,
+				new()
+				{
+					["build_property.AspectGeneratorGenerateApi"] = "false",
+				},
+				reference: MetadataReference.CreateFromImage(library));
+
+			StringAssert.Contains(result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.HookMethodNotFound).GetMessage(), "was not found, or is not accessible from this assembly, on aspect type 'LibraryAttribute'");
+			AssertNotGenerated(result, "Interceptors.g.cs");
+			Assert.AreEqual(0, compilation.GetDiagnostics().Count(static d => d.Severity == DiagnosticSeverity.Error && d.Id.StartsWith("CS", System.StringComparison.Ordinal)), string.Join(System.Environment.NewLine, compilation.GetDiagnostics()));
+		}
+
+		[TestMethod]
+		public void GenericAspectsTest()
+		{
+			// A generic aspect is applied constructed; its [Aspect] is on the definition. A type argument the interceptor
+			// cannot name leaves the call as it is, and the reason names that argument.
+			var (result, value) = RunCalls(
+				"""
+				using System;
+				using AspectGenerator;
+
+				[Aspect(OnBeforeCall = nameof(Before))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class GenAttribute<T> : Attribute
+				{
+					public static void Before(InterceptInfo info)
+					{
+						HookLog.Text.Append(typeof(T).Name).Append(';');
+					}
+				}
+
+				class Host
+				{
+					private class Secret
+					{
+					}
+
+					[Gen<Secret>] public static string Hidden() { return "h;"; }
+				}
+
+				static class Calls
+				{
+					[Gen<int>]        public static string A() { return "a;"; }
+					[Gen<string>]     public static string B() { return "b;"; }
+
+					public static string Run()
+					{
+						return A() + B() + Host.Hidden() + HookLog.Text;
+					}
+				}
+				""");
+
+			Assert.AreEqual("a;b;h;Int32;String;", value);
+			StringAssert.Contains(result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.CannotIntercept).GetMessage(), "the type argument 'Host.Secret' of the aspect type 'GenAttribute<Host.Secret>' is not accessible");
+		}
+
+		[TestMethod]
+		public void GenericAspectOfReferencedAssemblyTest()
+		{
+			var library = CompileAspectLibrary(
+				"""
+				using System;
+				using AspectGenerator;
+
+				[Aspect(OnBeforeCall = nameof(Before))]
+				[AttributeUsage(AttributeTargets.Method)]
+				public sealed class LibGenAttribute<T> : Attribute
+				{
+					public static void Before(InterceptInfo info)
+					{
+						HookLog.Text.Append(typeof(T).Name).Append(';');
+					}
+				}
+				""");
+
+			var (result, value) = RunCalls(
+				"""
+				class Host
+				{
+					private class Secret
+					{
+					}
+
+					[LibGen<Secret>] public static string Hidden() { return "h;"; }
+				}
+
+				static class Calls
+				{
+					[LibGen<long>] public static string A() { return "a;"; }
+
+					public static string Run()
+					{
+						return A() + Host.Hidden() + HookLog.Text;
+					}
+				}
+				""",
+				library);
+
+			Assert.AreEqual("a;h;Int64;", value);
+			StringAssert.Contains(result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.CannotIntercept).GetMessage(), "the type argument 'Host.Secret' of the aspect type 'LibGenAttribute<Host.Secret>'");
+		}
+
+		static string EmitAndRun(Compilation compilation, string interceptors, params byte[][] libraries)
 		{
 			var errors = compilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error).ToArray();
 
@@ -427,6 +761,9 @@ namespace AspectGenerator.Tests
 
 			try
 			{
+				foreach (var library in libraries)
+					context.LoadFromStream(new System.IO.MemoryStream(library));
+
 				stream.Position = 0;
 
 				var assembly = context.LoadFromStream(stream);

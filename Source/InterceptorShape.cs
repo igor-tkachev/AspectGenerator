@@ -48,8 +48,10 @@ namespace AspectGenerator
 			if (!IsAccessibleFromInterceptors(target, compilation))
 				return "the target method is not accessible from the generated interceptor class";
 
+			var generateAsync = AspectSourceGenerator.GeneratesAsyncInterceptor(method, attributes);
+
 			foreach (var attribute in attributes)
-				if (GetInaccessibleAspectReason(attribute, compilation) is {} aspectReason)
+				if (GetInaccessibleAspectReason(attribute, compilation, generateAsync) is {} aspectReason)
 					return aspectReason;
 
 			if (method.IsVararg)
@@ -148,46 +150,20 @@ namespace AspectGenerator
 		}
 
 		/// <summary>
-		/// The interceptor names the aspect type, the constructor of the applied attribute, the types of its enum and
-		/// <c>typeof</c> arguments and the hook methods. Returns why one of them cannot be named, or <c>null</c>.
+		/// The type the generated full name of the aspect binds to. An internal aspect of a referenced assembly that this
+		/// one cannot see (no InternalsVisibleTo) still works when the same source is compiled into this assembly (a
+		/// shared aspect file): the name binds to this assembly's own type. Otherwise the aspect type itself.
 		/// </summary>
-		static string? GetInaccessibleAspectReason(AttributeInfo attribute, Compilation compilation)
+		public static INamedTypeSymbol GetAspectTypeAsWritten(INamedTypeSymbol aspectClass, Compilation compilation)
 		{
-			var aspectClass = attribute.AttributeClass;
+			if (IsAccessibleFromInterceptors(aspectClass.OriginalDefinition, compilation) ||
+				aspectClass.ContainingAssembly is not {} assembly ||
+				SymbolEqualityComparer.Default.Equals(assembly, compilation.Assembly) ||
+				compilation.Assembly.GetTypeByMetadataName(GetFullMetadataName(aspectClass.OriginalDefinition)) is not {} own ||
+				!IsAccessibleFromInterceptors(own, compilation))
+				return aspectClass;
 
-			if (!IsAccessibleFromInterceptors(aspectClass.OriginalDefinition, compilation))
-			{
-				// The interceptor names the aspect type by its full name. An internal aspect of a referenced assembly
-				// still works when the same source is compiled into this one (a shared aspect file): the name binds to
-				// this assembly's own type, and that type is the one to check.
-				if (aspectClass.ContainingAssembly is {} assembly && !SymbolEqualityComparer.Default.Equals(assembly, compilation.Assembly) &&
-					compilation.Assembly.GetTypeByMetadataName(GetFullMetadataName(aspectClass.OriginalDefinition)) is {} own &&
-					IsAccessibleFromInterceptors(own, compilation))
-					aspectClass = own;
-				else
-					return $"the aspect type '{aspectClass.ToDisplayString()}' is not accessible from the generated interceptor class";
-			}
-			else if (GetAppliedConstructor(attribute) is {} constructor && !IsAccessibleFromInterceptors(constructor.OriginalDefinition, compilation))
-				return $"the constructor of the aspect type '{aspectClass.ToDisplayString()}' is not accessible from the generated interceptor class";
-
-			foreach (var type in GetAppliedArgumentTypes(attribute))
-				if (!IsNameableFromInterceptors(type, compilation))
-					return $"the aspect argument type '{type.ToDisplayString()}' is not accessible from the generated interceptor class";
-
-			foreach (var (key, value) in AspectSourceGenerator.GetAspectOptions(attribute))
-			{
-				if (value is not string hookName || string.IsNullOrWhiteSpace(hookName) || !AspectSourceGenerator.IsHookOption(key))
-					continue;
-
-				// A missing or non-static hook is reported by the hook validation; here only a hook the interceptor
-				// cannot call although it exists.
-				var hooks = aspectClass.GetMembers(hookName).OfType<IMethodSymbol>().Where(static m => m.IsStatic).ToList();
-
-				if (hooks.Count > 0 && !hooks.Any(h => IsAccessibleFromInterceptors(h, compilation)))
-					return $"the aspect hook method '{aspectClass.ToDisplayString()}.{hookName}' is not accessible from the generated interceptor class";
-			}
-
-			return null;
+			return own;
 
 			static string GetFullMetadataName(INamedTypeSymbol type)
 			{
@@ -200,6 +176,52 @@ namespace AspectGenerator
 					? ns.ToDisplayString() + "." + name
 					: name;
 			}
+		}
+
+		/// <summary>
+		/// The interceptor names the aspect type, the constructor of the applied attribute, the types of its enum and
+		/// <c>typeof</c> arguments and the hook methods. Returns why one of them cannot be named, or <c>null</c>.
+		/// </summary>
+		static string? GetInaccessibleAspectReason(AttributeInfo attribute, Compilation compilation, bool generateAsync)
+		{
+			var aspectClass = attribute.AttributeClass;
+
+			if (!IsAccessibleFromInterceptors(aspectClass.OriginalDefinition, compilation))
+			{
+				if (GetAspectTypeAsWritten(aspectClass, compilation) is var own && SymbolEqualityComparer.Default.Equals(own, aspectClass))
+					return $"the aspect type '{aspectClass.ToDisplayString()}' is not accessible from the generated interceptor class";
+
+				aspectClass = own;
+			}
+			else if (GetAppliedConstructor(attribute) is {} constructor && !IsAccessibleFromInterceptors(constructor.OriginalDefinition, compilation))
+				return $"the constructor of the aspect type '{aspectClass.ToDisplayString()}' is not accessible from the generated interceptor class";
+
+			for (var type = attribute.AttributeClass; type is not null; type = type.ContainingType)
+				foreach (var typeArgument in type.TypeArguments)
+					if (!IsNameableFromInterceptors(typeArgument, compilation))
+						return $"the type argument '{typeArgument.ToDisplayString()}' of the aspect type '{attribute.AttributeClass.ToDisplayString()}' is not accessible from the generated interceptor class";
+
+			foreach (var type in GetAppliedArgumentTypes(attribute))
+				if (!IsNameableFromInterceptors(type, compilation))
+					return $"the aspect argument type '{type.ToDisplayString()}' is not accessible from the generated interceptor class";
+
+			var options = AspectSourceGenerator.GetAspectOptions(attribute).GroupBy(static o => o.Key).ToDictionary(static g => g.Key, static g => g.First().Value);
+
+			// Only the hooks this interceptor calls: an async hook of a synchronous call, for one, is never called. A missing
+			// or non-static hook is reported by the hook validation; here only a hook that exists and that the interceptor
+			// cannot call.
+			foreach (var option in AspectSourceGenerator.GetCalledHookOptions(options, generateAsync))
+			{
+				if (options[option] is not string hookName || string.IsNullOrWhiteSpace(hookName))
+					continue;
+
+				var hooks = AspectSourceGenerator.GetHookCandidates(aspectClass, hookName).Where(static m => m.IsStatic).ToList();
+
+				if (hooks.Count > 0 && !hooks.Any(h => IsAccessibleFromInterceptors(h, compilation)))
+					return $"the aspect hook method '{aspectClass.ToDisplayString()}.{hookName}' is not accessible from the generated interceptor class";
+			}
+
+			return null;
 
 			static IMethodSymbol? GetAppliedConstructor(AttributeInfo attribute)
 			{

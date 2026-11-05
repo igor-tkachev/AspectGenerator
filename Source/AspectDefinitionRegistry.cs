@@ -140,7 +140,9 @@ namespace AspectGenerator
 
 		public bool TryGetDefinition(INamedTypeSymbol attributeClass, out AttributeInfo definition)
 		{
-			if (_aspectAttributes.TryGetValue(attributeClass, out var aspectAttribute))
+			// A generic aspect is applied constructed ([Gen<int>]); its [Aspect] is declared on the definition.
+			if (_aspectAttributes.TryGetValue(attributeClass, out var aspectAttribute) ||
+				_aspectAttributes.TryGetValue(attributeClass.OriginalDefinition, out aspectAttribute))
 			{
 				definition = new AttributeInfo(
 					null,

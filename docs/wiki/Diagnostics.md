@@ -14,7 +14,7 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 
 ## Hook Contract Diagnostics
 
-- `AG0101`: hook method not found.
+- `AG0101`: hook method not found on the aspect type or its base types. For an aspect of a referenced assembly the message says the hook may also be inaccessible: metadata does not show the internal members of another assembly without `InternalsVisibleTo`. When a hook the interceptor would call fails `AG0101` to `AG0107`, no interceptor is generated for that target.
 - `AG0102`: hook method must be static.
 - `AG0103`: invalid hook parameter type.
 - `AG0104`: invalid hook return type. The message names the return type the hook needs; for an async hook on a target framework without `ValueTask`, it says that only `Task` is available there. A return type the compiler cannot resolve is left to the compiler's own error (`CS0246`).

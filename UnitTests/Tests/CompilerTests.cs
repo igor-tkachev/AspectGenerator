@@ -297,9 +297,9 @@ namespace AspectGenerator.Tests
 		public void BuildingProjectOverridesDesignTimeBuildTest()
 		{
 			// MSBuild sets BuildingProject=true in every real build; DesignTimeBuild=true left set there must not turn the
-			// build into a design-time one.
+			// build into a design-time one. The targets with invalid hooks get no interceptor; the valid one does.
 			var result = RunGenerator(
-				HookContractDiagnosticsSource,
+				[HookContractDiagnosticsSource, ValidHookCallSource],
 				new()
 				{
 					["build_property.DesignTimeBuild"] = "true",
@@ -310,7 +310,7 @@ namespace AspectGenerator.Tests
 			AssertGenerated(result, "Interceptors.g.cs");
 
 			var designTime = RunGenerator(
-				HookContractDiagnosticsSource,
+				[HookContractDiagnosticsSource, ValidHookCallSource],
 				new()
 				{
 					["build_property.DesignTimeBuild"] = "true",
@@ -320,6 +320,35 @@ namespace AspectGenerator.Tests
 			AssertNoDiagnostic(designTime, AspectDiagnosticID.HookInvalidParameters);
 			AssertNotGenerated(designTime, "Interceptors.g.cs");
 		}
+
+		const string ValidHookCallSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[Aspect(OnBeforeCall = nameof(Before))]
+			[AttributeUsage(AttributeTargets.Method)]
+			sealed class ValidHookAttribute : Attribute
+			{
+				public static void Before(InterceptInfo info)
+				{
+				}
+			}
+
+			static class ValidHookCalls
+			{
+				[ValidHook]
+				public static int Target()
+				{
+					return 1;
+				}
+
+				public static int Run()
+				{
+					return Target();
+				}
+			}
+			""";
 
 		/// <summary>
 		/// The diagnostics a design-time build still reports; every other id is reported by builds only.

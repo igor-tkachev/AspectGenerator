@@ -337,5 +337,109 @@ namespace AspectGenerator.Tests
 			StringAssert.Contains(diagnostic.GetMessage(), "on iterator method 'IteratorLibrary.Source.Items()': OnCatch runs when the call returns the sequence");
 			Assert.AreEqual("IteratorLibrary.Source.Items()", diagnostic.Location.SourceTree!.GetText().ToString(diagnostic.Location.SourceSpan));
 		}
+
+		[TestMethod]
+		public void IteratorDiagnosticFollowsWhatTheCallCanRunTest()
+		{
+			// A virtual, abstract or interface target runs its own body or any override or implementation; the warning is
+			// given when one of them is an iterator, and names it when it is not the target itself.
+			var result = RunGenerator(
+				[
+					IteratorGuardSource,
+					"""
+					using System.Collections.Generic;
+
+					class EagerBase
+					{
+						[Guard] public virtual IEnumerable<int> M() { return new[] { 0 }; }
+					}
+
+					sealed class IteratorOverride : EagerBase
+					{
+						public override IEnumerable<int> M() { yield return 1; }
+					}
+
+					abstract class AbstractBase
+					{
+						[Guard] public abstract IEnumerable<int> M();
+					}
+
+					sealed class EagerOverride : AbstractBase
+					{
+						public override IEnumerable<int> M() { return new[] { 2 }; }
+					}
+
+					interface ISource
+					{
+						[Guard] IEnumerable<int> M();
+					}
+
+					sealed class ExplicitIterator : ISource
+					{
+						IEnumerable<int> ISource.M() { yield return 3; }
+					}
+
+					static class Calls
+					{
+						public static void Run(EagerBase e, AbstractBase a, ISource s)
+						{
+							e.M();
+							a.M();
+							s.M();
+						}
+					}
+					"""
+				]);
+
+			var messages = result.Diagnostics
+				.Where(static d => d.Id == AspectDiagnosticID.IteratorBodyNotCovered)
+				.Select(static d => d.GetMessage())
+				.OrderBy(static m => m, StringComparer.Ordinal)
+				.ToArray();
+
+			Assert.AreEqual(2, messages.Length, string.Join(Environment.NewLine, messages));
+			StringAssert.Contains(messages[0], "on method 'EagerBase.M()', whose call can run the iterator 'IteratorOverride.M()'");
+			StringAssert.Contains(messages[1], "on method 'ISource.M()', whose call can run the iterator 'ExplicitIterator.ISource.M()'");
+		}
+
+		[TestMethod]
+		public void IteratorDiagnosticOncePerAttributeTest()
+		{
+			// A generic extension iterator called in reduced and static form binds two constructed methods; the warning is
+			// about the one attribute.
+			var result = RunGenerator(
+				[
+					IteratorGuardSource,
+					"""
+					using System.Collections.Generic;
+
+					static class Extensions
+					{
+						[Guard]
+						public static IEnumerable<T> Twice<T>(this IEnumerable<T> items)
+						{
+							foreach (var item in items)
+							{
+								yield return item;
+								yield return item;
+							}
+						}
+					}
+
+					static class Calls
+					{
+						public static void Run()
+						{
+							new[] { 1 }.Twice();
+							Extensions.Twice(new[] { "a" });
+						}
+					}
+					"""
+				]);
+
+			var diagnostic = result.Diagnostics.Single(static d => d.Id == AspectDiagnosticID.IteratorBodyNotCovered);
+
+			StringAssert.Contains(diagnostic.GetMessage(), "on iterator method 'Extensions.Twice<T>(System.Collections.Generic.IEnumerable<T>)'");
+		}
 	}
 }

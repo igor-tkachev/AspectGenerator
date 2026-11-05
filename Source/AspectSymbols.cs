@@ -35,6 +35,112 @@ namespace AspectGenerator
 		}
 
 		/// <summary>
+		/// The iterators a call of the method can run. A non-virtual method runs itself. A virtual, abstract or interface
+		/// method runs its own body (when it has one) or any override or implementation in this compilation, so each of
+		/// them that is an iterator counts; overrides in other assemblies cannot be seen. Only methods that return a
+		/// sequence or enumerator type can be iterators, which keeps the search of overrides to those.
+		/// </summary>
+		public static List<IMethodSymbol> GetIteratorsTheCallCanRun(IMethodSymbol method, Compilation compilation)
+		{
+			var target = (method.ReducedFrom ?? method).OriginalDefinition;
+			var result = new List<IMethodSymbol>();
+
+			if (!IsSequenceType(target.ReturnType))
+				return result;
+
+			if (!target.IsAbstract && IsIterator(target))
+				result.Add(target);
+
+			var isVirtual = !target.IsStatic && !target.IsSealed &&
+				(target.IsVirtual || target.IsAbstract || target.IsOverride || target.ContainingType.TypeKind == TypeKind.Interface);
+
+			if (!isVirtual)
+				return result;
+
+			foreach (var type in GetSourceTypes(compilation.Assembly.GlobalNamespace))
+			{
+				if (SymbolEqualityComparer.Default.Equals(type, target.ContainingType))
+					continue;
+
+				foreach (var candidate in GetOverridesIn(type, target))
+					if (!candidate.IsAbstract && !result.Contains(candidate, SymbolEqualityComparer.Default) && IsIterator(candidate))
+						result.Add(candidate);
+			}
+
+			return result;
+
+			// Overrides of the target declared in the type, or for an interface member the type's implementations of it
+			// (explicit ones included, which are not found by name).
+			static IEnumerable<IMethodSymbol> GetOverridesIn(INamedTypeSymbol type, IMethodSymbol target)
+			{
+				if (target.ContainingType.TypeKind == TypeKind.Interface)
+				{
+					foreach (var face in type.AllInterfaces)
+					{
+						if (!SymbolEqualityComparer.Default.Equals(face.OriginalDefinition, target.ContainingType))
+							continue;
+
+						foreach (var member in face.GetMembers(target.Name))
+							if (SymbolEqualityComparer.Default.Equals(member.OriginalDefinition, target) &&
+								type.FindImplementationForInterfaceMember(member) is IMethodSymbol implementation &&
+								SymbolEqualityComparer.Default.Equals(implementation.ContainingType.OriginalDefinition, type))
+								yield return implementation.OriginalDefinition;
+					}
+
+					yield break;
+				}
+
+				foreach (var member in type.GetMembers(target.Name))
+				{
+					if (member is not IMethodSymbol { IsOverride: true } candidate)
+						continue;
+
+					for (var overridden = candidate.OverriddenMethod; overridden is not null; overridden = overridden.OverriddenMethod)
+						if (SymbolEqualityComparer.Default.Equals(overridden.OriginalDefinition, target))
+						{
+							yield return candidate.OriginalDefinition;
+							break;
+						}
+				}
+			}
+
+			static bool IsSequenceType(ITypeSymbol type)
+			{
+				return type is INamedTypeSymbol
+				{
+					Name               : "IEnumerable" or "IEnumerator" or "IAsyncEnumerable" or "IAsyncEnumerator",
+					ContainingNamespace: { Name: "Generic" or "Collections" }
+				};
+			}
+
+			static IEnumerable<INamedTypeSymbol> GetSourceTypes(INamespaceSymbol ns)
+			{
+				foreach (var member in ns.GetMembers())
+				{
+					if (member is INamespaceSymbol child)
+					{
+						foreach (var type in GetSourceTypes(child))
+							yield return type;
+					}
+					else if (member is INamedTypeSymbol type)
+					{
+						foreach (var nested in GetNested(type))
+							yield return nested;
+					}
+				}
+			}
+
+			static IEnumerable<INamedTypeSymbol> GetNested(INamedTypeSymbol type)
+			{
+				yield return type;
+
+				foreach (var nested in type.GetTypeMembers())
+					foreach (var inner in GetNested(nested))
+						yield return inner;
+			}
+		}
+
+		/// <summary>
 		/// Whether the method is an iterator (<c>yield</c>, sync or async): its body runs while the returned sequence is
 		/// enumerated, not during the call. A source method is recognized by a <c>yield</c> statement in its own body
 		/// (not in a lambda or local function), a compiled one by the state machine attribute the compiler puts on it.

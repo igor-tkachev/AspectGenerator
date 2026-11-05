@@ -209,5 +209,43 @@ namespace AspectGenerator.Tests
 				EmitAndRun(compilation, interceptors),
 				interceptors);
 		}
+
+		[TestMethod]
+		public void ObjectNullKeepsTheConstructorTest()
+		{
+			var (_, value) = RunCalls(
+				"""
+				using System;
+				using AspectGenerator;
+
+				[Aspect(OnBeforeCall = nameof(Before))]
+				[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+				sealed class CtorAttribute : Attribute
+				{
+					public CtorAttribute(object? value) { Ctor = "object"; }
+					public CtorAttribute(string? value) { Ctor = "string"; }
+
+					public string Ctor { get; }
+
+					public static void Before(CtorAttribute aspect, InterceptInfo info)
+					{
+						HookLog.Text.Append(aspect.Ctor).Append(';');
+					}
+				}
+
+				static class Calls
+				{
+					[Ctor((object?)null)] public static string A() { return "a;"; }
+					[Ctor((string?)null)] public static string B() { return "b;"; }
+
+					public static string Run()
+					{
+						return A() + B() + HookLog.Text;
+					}
+				}
+				""");
+
+			Assert.AreEqual("a;b;object;string;", value);
+		}
 	}
 }
