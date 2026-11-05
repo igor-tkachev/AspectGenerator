@@ -441,5 +441,33 @@ namespace AspectGenerator.Tests
 
 			StringAssert.Contains(diagnostic.GetMessage(), "on iterator method 'Extensions.Twice<T>(System.Collections.Generic.IEnumerable<T>)'");
 		}
+
+		// AG0108 is decided on the bound declaration; a virtual iterator whose override is eager is reported.
+		[TestMethod]
+		public void VirtualIteratorEagerOverrideTest()
+		{
+			var result = RunGenerator(
+				[ProbeLogAspect,
+				"""
+				using System.Collections.Generic;
+
+				class B { [After] public virtual IEnumerable<int> M() { yield return 0; } }
+				sealed class D : B { public override IEnumerable<int> M() { return new[] { 1 }; } }
+				abstract class X { [After] public abstract IEnumerable<int> M(); }
+				sealed class Y : X { public override IEnumerable<int> M() { yield return 1; } }
+
+				static class Calls
+				{
+					public static void Run(X x) { ((B)new D()).M(); x.M(); }
+				}
+				"""]);
+
+			// Decision since 2f72cef: reported whenever the call can run an iterator (B.M's own body, Y.M overriding X.M).
+			var ids = result.Diagnostics.Where(static d => d.Id == AspectDiagnosticID.IteratorBodyNotCovered).Select(static d => d.GetMessage()).ToArray();
+
+			Assert.AreEqual(2, ids.Length, string.Join(Environment.NewLine, ids));
+			Assert.IsTrue(ids.Any(static m => m.Contains("'B.M()'")), string.Join(Environment.NewLine, ids));
+			Assert.IsTrue(ids.Any(static m => m.Contains("'Y.M()'")), string.Join(Environment.NewLine, ids));
+		}
 	}
 }

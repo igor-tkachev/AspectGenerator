@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 using Microsoft.CodeAnalysis;
@@ -789,6 +790,192 @@ namespace AspectGenerator.Tests
 				Assert.AreEqual(DiagnosticSeverity.Warning, skip.Severity);
 				StringAssert.Contains(skip.GetMessage(), "not accessible");
 			}
+		}
+
+		// a private async hook that the synchronous interceptor never calls skips the call.
+		[TestMethod]
+		public void UnusedInaccessibleAsyncHookDoesNotSkipTest()
+		{
+			var value = RunProbe(
+				[ProbeLogAspect,
+				"""
+				using System;
+				using System.Threading.Tasks;
+				using AspectGenerator;
+
+				[Aspect(OnBeforeCall = nameof(Before), OnBeforeCallAsync = nameof(BeforeAsync))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class AAttribute : Attribute
+				{
+					public  static void Before(InterceptInfo info) { ProbeLog.Text.Append("before;"); }
+					private static Task BeforeAsync(InterceptInfo info) { return Task.CompletedTask; }
+				}
+
+				static class Calls
+				{
+					[A] public static string M() { return "m;"; }
+					public static string Run() { return M() + ProbeLog.Text; }
+				}
+				"""]);
+
+			Assert.AreEqual("AG0003=0 | m;before;", value, value);
+		}
+
+		// a generic aspect attribute of a referenced assembly with a private type argument.
+		[TestMethod]
+		public void GenericAspectWithPrivateTypeArgumentCompilesTest()
+		{
+			var value = RunProbe(
+				["""
+				class Host
+				{
+					private class Secret { }
+
+					[GenA<Secret>] public static string M() { return "m;"; }
+				}
+
+				static class Calls { public static string Run() { return Host.M() + LibLog.Text; } }
+				"""],
+				CompileProbeLibrary(ProbeLibAspect +
+					"""
+					[Aspect(OnBeforeCall = nameof(Before))]
+					[AttributeUsage(AttributeTargets.Method)]
+					public sealed class GenAAttribute<T> : Attribute
+					{
+						public static void Before(InterceptInfo info) { LibLog.Text.Append(typeof(T).Name).Append(';'); }
+					}
+					"""));
+
+			Console.WriteLine("RRVALUE " + value);
+			StringAssert.DoesNotMatch(value, new System.Text.RegularExpressions.Regex("ERRORS"), value);
+		}
+
+		// an accessible overload of the hook hides the inaccessible overload the interceptor calls.
+		[TestMethod]
+		public void InaccessibleHookOverloadWithAspectParameterTest()
+		{
+			var value = RunProbe(
+				[ProbeLogAspect,
+				"""
+				using System;
+				using AspectGenerator;
+
+				[Aspect(OnBeforeCall = nameof(Before))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class AAttribute : Attribute
+				{
+					public  static void Before(InterceptInfo info) { ProbeLog.Text.Append("public;"); }
+					private static void Before(AAttribute aspect, InterceptInfo info) { ProbeLog.Text.Append("private;"); }
+				}
+
+				static class Calls
+				{
+					[A] public static string M() { return "m;"; }
+					public static string Run() { return M() + ProbeLog.Text; }
+				}
+				"""]);
+
+			StringAssert.DoesNotMatch(value, new System.Text.RegularExpressions.Regex("ERRORS"), value);
+		}
+
+		// Internal hook of a public aspect in a referenced assembly without InternalsVisibleTo: metadata import hides it.
+		[TestMethod]
+		public void InternalHookOfReferencedAspectTest()
+		{
+			var result = RunGeneratorAndGetCompilation(
+				["static class Calls { public static string Run() { return Lib.M() + LibLog.Text; } }"],
+				out var compilation,
+				reference: CompileProbeLibrary(ProbeLibAspect +
+					"""
+					[Aspect(OnBeforeCall = nameof(Before))]
+					[AttributeUsage(AttributeTargets.Method)]
+					public sealed class PAttribute : Attribute
+					{
+						internal static void Before(InterceptInfo info) { LibLog.Text.Append("before;"); }
+					}
+
+					public static class Lib
+					{
+						[P] public static string M() { return "m;"; }
+					}
+					""").Reference);
+
+			Assert.AreEqual("", string.Join(Environment.NewLine, ProbeGeneratedErrors(compilation)), string.Join(Environment.NewLine, result.Diagnostics));
+		}
+
+		// Inaccessible hook inherited from a base class of the aspect.
+		[TestMethod]
+		public void ProtectedHookInBaseAspectTest()
+		{
+			var result = RunGeneratorAndGetCompilation(
+				[ProbeLogAspect,
+				"""
+				using System;
+				using AspectGenerator;
+
+				class BaseAspect : Attribute
+				{
+					protected static void Before(InterceptInfo info) { ProbeLog.Text.Append("base;"); }
+				}
+
+				[Aspect(OnBeforeCall = "Before")]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class DerivedAttribute : BaseAspect
+				{
+				}
+
+				static class Calls
+				{
+					[Derived] public static string M() { return "m;"; }
+					public static string Run() { return M() + ProbeLog.Text; }
+				}
+				"""],
+				out var compilation);
+
+			Assert.AreEqual("", string.Join(Environment.NewLine, ProbeGeneratedErrors(compilation)), string.Join(Environment.NewLine, result.Diagnostics));
+		}
+
+		[TestMethod]
+		public void HookOnGenericBaseAspectTakesTheBaseAspectTest()
+		{
+			// The interceptor passes the aspect, which converts to the base aspect type the inherited hook takes.
+			var (result, value) = RunCalls(
+				"""
+				using System;
+				using AspectGenerator;
+
+				class BaseAspect<T> : Attribute
+				{
+					public static void Before(InterceptInfo info)
+					{
+						HookLog.Text.Append(typeof(T).Name).Append(';');
+					}
+
+					public static void After(BaseAspect<T> aspect, InterceptInfo info)
+					{
+						HookLog.Text.Append(aspect.GetType().Name).Append(';');
+					}
+				}
+
+				[Aspect(OnBeforeCall = "Before", OnAfterCall = "After")]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class DerivedAttribute : BaseAspect<int>
+				{
+				}
+
+				static class Calls
+				{
+					[Derived] public static string M() { return "m;"; }
+
+					public static string Run()
+					{
+						return M() + HookLog.Text;
+					}
+				}
+				""");
+
+			Assert.AreEqual("m;Int32;DerivedAttribute;", value);
+			AssertNoDiagnostic(result, AspectDiagnosticID.HookInvalidParameters);
 		}
 	}
 }

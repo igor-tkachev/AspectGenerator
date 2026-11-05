@@ -131,5 +131,101 @@ namespace AspectGenerator.Tests
 			Assert.IsTrue(compilation.GetDiagnostics().Any(static d => d.Id == "CS0246"), string.Join(Environment.NewLine, compilation.GetDiagnostics()));
 			AssertNoDiagnostic(result, AspectDiagnosticID.HookInvalidReturnType);
 		}
+
+		// the unresolved-return suppression matches the generator's API types by simple name only.
+		[TestMethod]
+		public void UnresolvedQualifiedInterceptInfoReturnTypeTest()
+		{
+			var result = RunGenerator(
+				[ProbeLogAspect,
+				"""
+				using System;
+				using AspectGenerator;
+
+				[Aspect(OnAfterCall = nameof(After))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class AAttribute : Attribute
+				{
+					public static Missing.InterceptInfo After(InterceptInfo info) { return default!; }
+				}
+
+				static class Calls
+				{
+					[A] public static string M() { return "m;"; }
+					public static string Run() { return M(); }
+				}
+				"""]);
+
+			AssertNoDiagnostic(result, AspectDiagnosticID.HookInvalidReturnType);
+		}
+
+		[TestMethod]
+		public void LoweredHookDiagnosticKeepsTheOtherAspectsTest()
+		{
+			// A synchronous hook that returns a value is called as a statement, which compiles: with AG0104 lowered, both
+			// aspects still run. An OnInit hook with the wrong return type cannot be assigned: only that aspect is left out.
+			const string source =
+				"""
+				using System;
+				using AspectGenerator;
+
+				[Aspect(OnBeforeCall = nameof(Before))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class BoolHookAttribute : Attribute
+				{
+					public static bool Before(InterceptInfo info)
+					{
+						HookLog.Text.Append("bool;");
+						return true;
+					}
+				}
+
+				[Aspect(OnInit = nameof(Init), OnBeforeCall = nameof(Before))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class BadInitAttribute : Attribute
+				{
+					public static int Init(InterceptInfo info)
+					{
+						return 0;
+					}
+
+					public static void Before(InterceptInfo info)
+					{
+						HookLog.Text.Append("bad-init;");
+					}
+				}
+
+				[Aspect(OnBeforeCall = nameof(Before))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class OkAttribute : Attribute
+				{
+					public static void Before(InterceptInfo info)
+					{
+						HookLog.Text.Append("ok;");
+					}
+				}
+
+				static class Calls
+				{
+					[BoolHook, Ok]  public static string A() { return "a;"; }
+					[BadInit, Ok]   public static string B() { return "b;"; }
+
+					public static string Run()
+					{
+						return A() + B() + HookLog.Text;
+					}
+				}
+				""";
+
+			foreach (var severity in new[] { "warning", "none" })
+			{
+				var result = RunGeneratorAndGetCompilation(
+					[HookLogSource, source],
+					out var compilation,
+					globalConfig: $"is_global = true\ndotnet_diagnostic.AG0104.severity = {severity}\n");
+
+				Assert.AreEqual("a;b;bool;ok;ok;", EmitAndRun(compilation, GetGeneratedSourceOrEmpty(result, "Interceptors.g.cs")), severity);
+			}
+		}
 	}
 }

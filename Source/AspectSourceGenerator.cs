@@ -610,16 +610,22 @@ namespace AspectGenerator
 			if (!cancellationToken.IsCancellationRequested)
 				using (trace.TimePhase("Validate method hooks"))
 				{
-					var failedTargets = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
+					var iteratorIndex = new IteratorOverrideIndex(compilation, trace);
+					var dropped = new Dictionary<IMethodSymbol,List<AttributeInfo>>(SymbolEqualityComparer.Default);
 
 					foreach (var m in aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default))
-						if (ValidateAspectHooksForMethod(diagnostics, compilation, options.TargetFramework, m.First().Inv, (IMethodSymbol)m.Key!, m.First().Attributes, reportedDiagnostics))
-							failedTargets.Add((IMethodSymbol)m.Key!);
+						if (ValidateAspectHooksForMethod(diagnostics, compilation, options.TargetFramework, m.First().Inv, (IMethodSymbol)m.Key!, m.First().Attributes, reportedDiagnostics, iteratorIndex) is { Count: > 0 } failed)
+							dropped.Add((IMethodSymbol)m.Key!, failed);
 
-					// A hook the interceptor cannot call has been reported as an error; an interceptor calling it would only
-					// add compiler errors in the generated file.
-					if (failedTargets.Count > 0)
-						aspectedMethods = [..aspectedMethods.Where(m => !failedTargets.Contains(m.Method))];
+					// An aspect whose hook call would not compile has been reported; it is left out of the interceptor, and a
+					// target with no aspect left gets none.
+					if (dropped.Count > 0)
+						aspectedMethods =
+						[
+							..aspectedMethods
+								.Select(m => dropped.TryGetValue(m.Method, out var failed) ? m with { Attributes = m.Attributes.Where(a => !failed.Contains(a)).ToList() } : m)
+								.Where(static m => m.Attributes.Count > 0)
+						];
 				}
 
 			if (options.EmitInterceptors && aspectedMethods.Length > 0)
@@ -1320,23 +1326,27 @@ namespace AspectGenerator
 		}
 
 		/// <summary>
-		/// Checks the hooks of the aspects of one target. Returns <c>true</c> when a hook the interceptor would call cannot
-		/// be resolved (AG0101 to AG0107): the interceptor is then not generated, so the build fails with that diagnostic
-		/// alone instead of with compiler errors in the generated file.
+		/// Checks the hooks of the aspects of one target and returns the aspects whose generated hook call would not
+		/// compile: a called hook that is missing, not static, has no valid parameter list or does not match OnCall, or whose
+		/// return type the generated statement cannot use (OnInit assigns it, OnUsing disposes it, an async hook awaits it).
+		/// Those aspects are left out of the interceptor, so the build reports the AG01xx diagnostic instead of compiler
+		/// errors in the generated file, and the other aspects of the target still apply when the diagnostic is lowered. A
+		/// synchronous hook with a non-void return type is called as a statement, which compiles; it stays.
 		/// </summary>
-		static bool ValidateAspectHooksForMethod(
+		static List<AttributeInfo> ValidateAspectHooksForMethod(
 			List<DiagnosticInfo>    diagnostics,
 			Compilation             compilation,
 			string?                 targetFramework,
 			InvocationExpressionSyntax invocationExpression,
 			IMethodSymbol           targetMethod,
 			List<AttributeInfo>     attributes,
-			HashSet<string>         reportedDiagnostics)
+			HashSet<string>         reportedDiagnostics,
+			IteratorOverrideIndex   iteratorIndex)
 		{
 			var targetIsAsync    = IsSupportedAsyncReturnType(targetMethod.ReturnType, out var asyncResultType);
 			var generateAsync    = GeneratesAsyncInterceptor(targetMethod, attributes);
 			var iterators        = (List<IMethodSymbol>?)null;
-			var hookFailed       = false;
+			var dropped          = new List<AttributeInfo>();
 
 			for (var idx = 0; idx < attributes.Count; idx++)
 			{
@@ -1345,12 +1355,13 @@ namespace AspectGenerator
 				var useInterceptData = aspectArguments.TryGetValue("UseInterceptData", out var useData) && useData is true;
 
 				var calledHooks     = GetCalledHookOptions(aspectArguments, generateAsync).ToList();
+				var hookFailed      = false;
 				var aspectType      = InterceptorShape.GetAspectTypeAsWritten(attribute.AttributeClass, compilation);
 
-				// Looking for iterators among the overrides of a virtual target costs a walk over the source types; only
-				// aspects with hooks that would surround the body need it.
+				// Only aspects with hooks that would surround the body need to know which iterators the call can run (the
+				// override index behind it is built once per run, on first use).
 				if (_bodyHooks.Any(h => aspectArguments.TryGetValue(h, out var value) && value is string s && !string.IsNullOrWhiteSpace(s)) &&
-					(iterators ??= AspectSymbols.GetIteratorsTheCallCanRun(targetMethod, compilation)).Count > 0)
+					(iterators ??= iteratorIndex.GetIteratorsTheCallCanRun(targetMethod)).Count > 0)
 					ReportIteratorBodyNotCovered(diagnostics, reportedDiagnostics, invocationExpression, targetMethod, iterators, attribute, aspectArguments);
 
 				if (idx < attributes.Count - 1 &&
@@ -1389,9 +1400,9 @@ namespace AspectGenerator
 
 					var isCalled = calledHooks.Contains(hook.Name);
 
+					// Not called by this interceptor, so nothing is dropped for it.
 					if (hook.IsAsync && !targetIsAsync && !HasSyncFallback(aspectArguments, hook.Name))
 					{
-						hookFailed = true;
 
 						var asyncVoidMessage = targetMethod is { IsAsync: true, ReturnsVoid: true }
 							? " Async void target methods are not supported."
@@ -1486,7 +1497,7 @@ namespace AspectGenerator
 					if (!methodsWithValidParameters.Any(m => IsValidLifecycleHookReturnType(m, hook, targetMethod, targetIsAsync, asyncResultType, useInterceptData)) &&
 						!methodsWithValidParameters.Any(static m => HasUnresolvedReturnType(m)))
 					{
-						hookFailed |= isCalled;
+						hookFailed |= isCalled && (hook.IsAsync || hook.Name is "OnInit" or "OnUsing");
 
 						ReportDiagnostic(
 							diagnostics,
@@ -1496,9 +1507,12 @@ namespace AspectGenerator
 							location);
 					}
 				}
+
+				if (hookFailed)
+					dropped.Add(attribute);
 			}
 
-			return hookFailed;
+			return dropped;
 
 			static bool HasSyncFallback(Dictionary<string,object?> aspectArguments, string asyncHookName)
 			{
@@ -1737,8 +1751,9 @@ namespace AspectGenerator
 			{
 				var aspectParameter = hookMethod.Parameters[0];
 
-				if (aspectParameter.RefKind != RefKind.None ||
-					!SymbolEqualityComparer.Default.Equals(aspectParameter.Type, aspectClass))
+				// The interceptor passes the aspect itself, so a parameter of a base type of the aspect (a hook declared on a
+				// generic base aspect, for one) or of an interface it implements binds as well.
+				if (aspectParameter.RefKind != RefKind.None || !IsAspectParameterType(aspectParameter.Type, aspectClass))
 					return false;
 
 				parameterIndex = 1;
@@ -1757,6 +1772,15 @@ namespace AspectGenerator
 			return parameter.RefKind == RefKind.None &&
 				(parameter.Type.TypeKind == TypeKind.Dynamic ||
 				IsInterceptInfoType(parameter.Type, hookMethod, GetHookReturnValueType(targetMethod, targetIsAsync, asyncResultType), allowNonGeneric: true));
+		}
+
+		static bool IsAspectParameterType(ITypeSymbol parameterType, INamedTypeSymbol aspectClass)
+		{
+			for (var type = aspectClass; type is not null; type = type.BaseType)
+				if (SymbolEqualityComparer.Default.Equals(type, parameterType))
+					return true;
+
+			return aspectClass.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, parameterType));
 		}
 
 		static bool IsValidLifecycleHookReturnType(

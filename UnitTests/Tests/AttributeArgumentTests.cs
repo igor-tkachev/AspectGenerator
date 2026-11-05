@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AspectGenerator.Tests
@@ -246,6 +248,85 @@ namespace AspectGenerator.Tests
 				""");
 
 			Assert.AreEqual("a;b;object;string;", value);
+		}
+
+		// typeof(pointer) as an aspect argument needs an unsafe context in the generated code.
+		[TestMethod]
+		public void PointerTypeofArgumentCompilesTest()
+		{
+			var parseOptions = CSharpParseOptions.Default
+				.WithLanguageVersion(LanguageVersion.Preview)
+				.WithFeatures([new("InterceptorsNamespaces", "AspectGenerator")]);
+			var compilation  = CSharpCompilation.Create(
+				"AspectGenerator.Tests.GeneratorDriver",
+				[
+					CSharpSyntaxTree.ParseText(ProbeLogAspect, parseOptions, "A.cs"),
+					CSharpSyntaxTree.ParseText(
+						"""
+						using System;
+						using AspectGenerator;
+
+						[Aspect(OnBeforeCall = nameof(Before))]
+						[AttributeUsage(AttributeTargets.Method)]
+						sealed class TAttribute : Attribute
+						{
+							public TAttribute(Type type) { }
+							public static void Before(InterceptInfo info) { ProbeLog.Text.Append("t;"); }
+						}
+
+						unsafe static class Calls
+						{
+							[T(typeof(int*))] public static string M() { return "m;"; }
+							public static string Run() { return M() + ProbeLog.Text; }
+						}
+						""", parseOptions, "B.cs"),
+				],
+				GetMetadataReferences(),
+				new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+			GeneratorDriver driver = CSharpGeneratorDriver.Create(
+				[new AspectSourceGenerator().AsSourceGenerator()],
+				parseOptions: parseOptions,
+				optionsProvider: new TestAnalyzerConfigOptionsProvider(new()
+				{
+					["build_property.InterceptorsNamespaces"]       = "AspectGenerator",
+					["build_property.AspectGeneratorPropsImported"] = "true",
+				}));
+
+			driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out _);
+
+			Assert.AreEqual("", string.Join(Environment.NewLine, ProbeGeneratedErrors(output)));
+			StringAssert.Contains(output.SyntaxTrees.Last().ToString(), "InterceptsLocation", "the call was not intercepted");
+		}
+
+		// an object-typed null loses its type and the copy of the aspect binds to another constructor.
+		[TestMethod]
+		public void ObjectNullKeepsConstructorTest()
+		{
+			var value = RunProbe(
+				[ProbeLogAspect,
+				"""
+				using System;
+				using AspectGenerator;
+
+				[Aspect(OnBeforeCall = nameof(Before))]
+				[AttributeUsage(AttributeTargets.Method)]
+				sealed class AAttribute : Attribute
+				{
+					public AAttribute(object? value) { Ctor = "object"; }
+					public AAttribute(string? value) { Ctor = "string"; }
+					public string Ctor { get; }
+					public static void Before(InterceptInfo info) { ProbeLog.Text.Append(((AAttribute)info.Aspect).Ctor).Append(';'); }
+				}
+
+				static class Calls
+				{
+					[A((object?)null)] public static string M() { return "m;"; }
+					public static string Run() { return M() + ProbeLog.Text; }
+				}
+				"""]);
+
+			Assert.AreEqual("AG0003=0 | m;object;", value, value);
 		}
 	}
 }
