@@ -610,7 +610,7 @@ namespace AspectGenerator
 			if (!cancellationToken.IsCancellationRequested)
 				using (trace.TimePhase("Validate method hooks"))
 					foreach (var m in aspectedMethods.GroupBy(static m => m.Method, SymbolEqualityComparer.Default))
-						ValidateAspectHooksForMethod(diagnostics, compilation, m.First().Inv, (IMethodSymbol)m.Key!, m.First().Attributes, reportedDiagnostics);
+						ValidateAspectHooksForMethod(diagnostics, compilation, options.TargetFramework, m.First().Inv, (IMethodSymbol)m.Key!, m.First().Attributes, reportedDiagnostics);
 
 			if (options.EmitInterceptors && aspectedMethods.Length > 0)
 			{
@@ -1272,6 +1272,7 @@ namespace AspectGenerator
 		static void ValidateAspectHooksForMethod(
 			List<DiagnosticInfo>    diagnostics,
 			Compilation             compilation,
+			string?                 targetFramework,
 			InvocationExpressionSyntax invocationExpression,
 			IMethodSymbol           targetMethod,
 			List<AttributeInfo>     attributes,
@@ -1392,13 +1393,16 @@ namespace AspectGenerator
 						continue;
 					}
 
-					if (!methodsWithValidParameters.Any(m => IsValidLifecycleHookReturnType(m, hook, targetMethod, targetIsAsync, asyncResultType, useInterceptData)))
+					// A return type the compiler cannot resolve is already an error of its own (CS0246, for example ValueTask
+					// on a target framework without it); AG0104 on top would only repeat it with a less precise cause.
+					if (!methodsWithValidParameters.Any(m => IsValidLifecycleHookReturnType(m, hook, targetMethod, targetIsAsync, asyncResultType, useInterceptData)) &&
+						!methodsWithValidParameters.Any(static m => HasUnresolvedReturnType(m)))
 					{
 						ReportDiagnostic(
 							diagnostics,
 							reportedDiagnostics,
 							AspectDiagnosticID.HookInvalidReturnType,
-							$"Hook method '{hookName}' on aspect type '{attribute.AttributeClass.ToDisplayString()}' has an invalid return type for '{hook.Name}'.",
+							$"Hook method '{hookName}' on aspect type '{attribute.AttributeClass.ToDisplayString()}' has an invalid return type for '{hook.Name}': {GetExpectedHookReturnType(hook, useInterceptData, compilation, targetFramework)}.",
 							location);
 					}
 				}
@@ -1415,6 +1419,40 @@ namespace AspectGenerator
 					value is string s &&
 					!string.IsNullOrWhiteSpace(s);
 			}
+		}
+
+		/// <summary>
+		/// The generator's own API types (InterceptInfo, InterceptData) are unresolved in the compilation it reads when it
+		/// generates them itself, so they do not count.
+		/// </summary>
+		static bool HasUnresolvedReturnType(IMethodSymbol method)
+		{
+			return method.ReturnType is IErrorTypeSymbol { Name: not ("InterceptInfo" or "InterceptData") };
+		}
+
+		/// <summary>
+		/// What the hook has to return, for the AG0104 message. An async hook names the task types the compilation has:
+		/// a target framework without ValueTask (.NET Framework, netstandard2.0 without System.Threading.Tasks.Extensions)
+		/// leaves only Task.
+		/// </summary>
+		static string GetExpectedHookReturnType(HookContract hook, bool useInterceptData, Compilation compilation, string? targetFramework)
+		{
+			switch (hook.Name)
+			{
+				case "OnInit"       : return useInterceptData ? "it must return InterceptData<T>" : "it must return InterceptInfo<T>";
+				case "OnUsing"      : return "it must return a type that implements System.IDisposable";
+				case "OnUsingAsync" : return "it must return a type that implements System.IAsyncDisposable";
+			}
+
+			if (!hook.IsAsync)
+				return "it must return void";
+
+			if (compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask") is not null)
+				return "an async hook must return System.Threading.Tasks.Task or System.Threading.Tasks.ValueTask";
+
+			var framework = string.IsNullOrEmpty(targetFramework) ? "this target framework" : $"target framework '{targetFramework}'";
+
+			return $"an async hook must return System.Threading.Tasks.Task; ValueTask is not available on {framework} unless the System.Threading.Tasks.Extensions package is referenced";
 		}
 
 		readonly record struct HookContract(string Name, bool IsAsync);
