@@ -655,7 +655,7 @@ namespace AspectGenerator.Tests
 			return GetGeneratedSourceOrEmpty(AssertRunsWithResult(body, expected), "Interceptors.g.cs");
 		}
 
-		static GeneratorDriverRunResult AssertRunsWithResult(string body, string expected, string? globalConfig = null)
+		static GeneratorDriverRunResult AssertRunsWithResult(string body, string expected, string? globalConfig = null, params string[] otherSources)
 		{
 			var source =
 				$$"""
@@ -688,7 +688,7 @@ namespace AspectGenerator.Tests
 				}
 				""";
 
-			var result      = RunGeneratorAndGetCompilation(source, out var compilation, globalConfig: globalConfig);
+			var result      = RunGeneratorAndGetCompilation([source, ..otherSources], out var compilation, globalConfig: globalConfig);
 			var errors      = compilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error).ToArray();
 			var interceptors = GetGeneratedSourceOrEmpty(result, "Interceptors.g.cs");
 

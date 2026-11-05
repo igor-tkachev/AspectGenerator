@@ -45,8 +45,12 @@ namespace AspectGenerator
 				if (!type.CanBeReferencedByName)
 					return "members of C# 14 extension blocks are not supported";
 
-			if (!compilation.IsSymbolAccessibleWithin(target, compilation.Assembly))
+			if (!IsAccessibleFromInterceptors(target, compilation))
 				return "the target method is not accessible from the generated interceptor class";
+
+			foreach (var attribute in attributes)
+				if (GetInaccessibleAspectReason(attribute, compilation) is {} aspectReason)
+					return aspectReason;
 
 			if (method.IsVararg)
 				return "__arglist methods are not supported";
@@ -123,6 +127,184 @@ namespace AspectGenerator
 				return "calls inside expression trees are not intercepted: the expression must keep the original method";
 
 			return null;
+		}
+
+		/// <summary>
+		/// The generated interceptors are members of a file-local class in a generated file of their own. They can name
+		/// a symbol only when it is accessible from the whole assembly and no type that contains it (or the symbol itself)
+		/// is file-local: a file-local type cannot be named from another file, although the compiler counts it as
+		/// accessible within the assembly.
+		/// </summary>
+		public static bool IsAccessibleFromInterceptors(ISymbol symbol, Compilation compilation)
+		{
+			if (!compilation.IsSymbolAccessibleWithin(symbol, compilation.Assembly))
+				return false;
+
+			for (var type = symbol as INamedTypeSymbol ?? symbol.ContainingType; type is not null; type = type.ContainingType)
+				if (type.IsFileLocal)
+					return false;
+
+			return true;
+		}
+
+		/// <summary>
+		/// The interceptor names the aspect type, the constructor of the applied attribute, the types of its enum and
+		/// <c>typeof</c> arguments and the hook methods. Returns why one of them cannot be named, or <c>null</c>.
+		/// </summary>
+		static string? GetInaccessibleAspectReason(AttributeInfo attribute, Compilation compilation)
+		{
+			var aspectClass = attribute.AttributeClass;
+
+			if (!IsAccessibleFromInterceptors(aspectClass.OriginalDefinition, compilation))
+			{
+				// The interceptor names the aspect type by its full name. An internal aspect of a referenced assembly
+				// still works when the same source is compiled into this one (a shared aspect file): the name binds to
+				// this assembly's own type, and that type is the one to check.
+				if (aspectClass.ContainingAssembly is {} assembly && !SymbolEqualityComparer.Default.Equals(assembly, compilation.Assembly) &&
+					compilation.Assembly.GetTypeByMetadataName(GetFullMetadataName(aspectClass.OriginalDefinition)) is {} own &&
+					IsAccessibleFromInterceptors(own, compilation))
+					aspectClass = own;
+				else
+					return $"the aspect type '{aspectClass.ToDisplayString()}' is not accessible from the generated interceptor class";
+			}
+			else if (GetAppliedConstructor(attribute) is {} constructor && !IsAccessibleFromInterceptors(constructor.OriginalDefinition, compilation))
+				return $"the constructor of the aspect type '{aspectClass.ToDisplayString()}' is not accessible from the generated interceptor class";
+
+			foreach (var type in GetAppliedArgumentTypes(attribute))
+				if (!IsNameableFromInterceptors(type, compilation))
+					return $"the aspect argument type '{type.ToDisplayString()}' is not accessible from the generated interceptor class";
+
+			foreach (var (key, value) in AspectSourceGenerator.GetAspectOptions(attribute))
+			{
+				if (value is not string hookName || string.IsNullOrWhiteSpace(hookName) || !AspectSourceGenerator.IsHookOption(key))
+					continue;
+
+				// A missing or non-static hook is reported by the hook validation; here only a hook the interceptor
+				// cannot call although it exists.
+				var hooks = aspectClass.GetMembers(hookName).OfType<IMethodSymbol>().Where(static m => m.IsStatic).ToList();
+
+				if (hooks.Count > 0 && !hooks.Any(h => IsAccessibleFromInterceptors(h, compilation)))
+					return $"the aspect hook method '{aspectClass.ToDisplayString()}.{hookName}' is not accessible from the generated interceptor class";
+			}
+
+			return null;
+
+			static string GetFullMetadataName(INamedTypeSymbol type)
+			{
+				var name = type.MetadataName;
+
+				for (var containing = type.ContainingType; containing is not null; containing = containing.ContainingType)
+					name = containing.MetadataName + "+" + name;
+
+				return type.ContainingNamespace is { IsGlobalNamespace: false } ns
+					? ns.ToDisplayString() + "." + name
+					: name;
+			}
+
+			static IMethodSymbol? GetAppliedConstructor(AttributeInfo attribute)
+			{
+				if (attribute.AppliedAttributeData is {} data)
+					return data.AttributeConstructor;
+
+				if (attribute is { AppliedAttributeSyntax: {} syntax, AppliedSemanticModel: {} semanticModel })
+					return semanticModel.GetSymbolInfo(syntax).Symbol as IMethodSymbol;
+
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// The types the generated aspect construction names, as <c>GetAppliedAspectConstruction</c> prints the arguments:
+		/// an enum value is cast to its type, a <c>typeof</c> argument names its type, an array names its type.
+		/// </summary>
+		static IEnumerable<ITypeSymbol> GetAppliedArgumentTypes(AttributeInfo attribute)
+		{
+			if (attribute.AppliedAttributeData is {} data)
+			{
+				foreach (var constant in data.ConstructorArguments)
+					foreach (var type in GetConstantTypes(constant))
+						yield return type;
+
+				foreach (var argument in data.NamedArguments)
+					if (argument.Key != "TargetFilter")
+						foreach (var type in GetConstantTypes(argument.Value))
+							yield return type;
+			}
+			else if (attribute is { AppliedAttributeSyntax: {} syntax, AppliedSemanticModel: {} semanticModel })
+			{
+				foreach (var argument in syntax.ArgumentList?.Arguments ?? default)
+				{
+					if (argument.NameEquals?.Name.Identifier.ValueText == "TargetFilter")
+						continue;
+
+					var typeInfo = semanticModel.GetTypeInfo(argument.Expression);
+
+					if ((typeInfo.ConvertedType ?? typeInfo.Type) is {} type && (type.TypeKind is TypeKind.Enum or TypeKind.Array))
+						yield return type;
+
+					switch (AspectSymbols.GetAttributeArgumentValue(argument.Expression, semanticModel))
+					{
+						case ITypeSymbol typeValue :
+							yield return typeValue;
+							break;
+						case object?[] values :
+							foreach (var value in values)
+								if (value is ITypeSymbol elementTypeValue)
+									yield return elementTypeValue;
+							break;
+					}
+				}
+			}
+
+			static IEnumerable<ITypeSymbol> GetConstantTypes(TypedConstant constant)
+			{
+				if (constant.Kind == TypedConstantKind.Array)
+				{
+					if (constant.Type is {} arrayType)
+						yield return arrayType;
+
+					foreach (var value in constant.Values)
+						if (value.Value is ITypeSymbol elementTypeValue)
+							yield return elementTypeValue;
+
+					yield break;
+				}
+
+				if (constant.Type is { TypeKind: TypeKind.Enum } enumType)
+					yield return enumType;
+
+				if (constant.Value is ITypeSymbol typeValue)
+					yield return typeValue;
+			}
+		}
+
+		/// <summary>
+		/// Whether generated code can write the type; unlike <see cref="CanBeNamed"/>, a type parameter (of an unbound
+		/// generic type in <c>typeof</c>) does not count against it.
+		/// </summary>
+		static bool IsNameableFromInterceptors(ITypeSymbol type, Compilation compilation)
+		{
+			switch (type)
+			{
+				case IArrayTypeSymbol array :
+					return IsNameableFromInterceptors(array.ElementType, compilation);
+				case IPointerTypeSymbol pointer :
+					return IsNameableFromInterceptors(pointer.PointedAtType, compilation);
+				case INamedTypeSymbol named :
+				{
+					if (named.IsAnonymousType || !IsAccessibleFromInterceptors(named.OriginalDefinition, compilation))
+						return false;
+
+					for (var t = named; t is not null; t = t.ContainingType)
+						foreach (var typeArgument in t.TypeArguments)
+							if (!IsNameableFromInterceptors(typeArgument, compilation))
+								return false;
+
+					return true;
+				}
+				default :
+					return true;
+			}
 		}
 
 		static IEnumerable<ITypeSymbol> GetCallTypeArguments(IMethodSymbol method)
@@ -250,7 +432,7 @@ namespace AspectGenerator
 					return CanBeNamed(pointer.PointedAtType, compilation);
 				case INamedTypeSymbol named :
 				{
-					if (named.IsAnonymousType || !compilation.IsSymbolAccessibleWithin(named.OriginalDefinition, compilation.Assembly))
+					if (named.IsAnonymousType || !IsAccessibleFromInterceptors(named.OriginalDefinition, compilation))
 						return false;
 
 					for (var t = named; t is not null; t = t.ContainingType)

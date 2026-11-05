@@ -1435,6 +1435,14 @@ namespace AspectGenerator
 			new ("OnFinallyAsync",    true),
 		];
 
+		/// <summary>
+		/// Whether the aspect option names a hook method, which the generated interceptor calls.
+		/// </summary>
+		internal static bool IsHookOption(string optionName)
+		{
+			return _hookContracts.Any(h => h.Name == optionName);
+		}
+
 		static Location GetHookLocation(AttributeInfo attribute, string hookName, InvocationExpressionSyntax invocationExpression)
 		{
 			if (attribute is { AspectDefinitionSyntax: {} syntax, AspectDefinitionSemanticModel: not null })
