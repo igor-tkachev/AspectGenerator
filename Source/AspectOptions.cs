@@ -135,14 +135,14 @@ namespace AspectGenerator
 
 		static GeneratorExecutionOptions CreateExecutionOptions(Options options)
 		{
-			// The host decides first (see GeneratorHost): the compiler always builds, a workspace never does. The properties
-			// decide only for other hosts: MSBuild sets BuildingProject to true at the start of every real build
-			// (BuildOnlySettings), so a project that leaves DesignTimeBuild=true set in a real build is still treated as a build.
+			// The host decides first (see GeneratorHost): the compiler and every unknown host build. Only a known editor
+			// follows the properties: DesignTimeBuild=true is its live analysis, unless BuildingProject=true says that a real
+			// build has run (MSBuild sets it at the start of every build, BuildOnlySettings): then the editor builds too,
+			// because Hot Reload emits its delta from the editor's compilation.
 			var designTimeBuild = options.Host switch
 			{
-				GeneratorHostKind.Compiler  => false,
-				GeneratorHostKind.Workspace => true,
-				_                           => options.DesignTimeBuild is true && options.BuildingProject is not true,
+				GeneratorHostKind.Editor => options.DesignTimeBuild is true && options.BuildingProject is not true,
+				_                        => false,
 			};
 
 			var emitInterceptors = !designTimeBuild;

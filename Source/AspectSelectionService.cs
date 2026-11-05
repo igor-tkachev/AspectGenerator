@@ -145,7 +145,8 @@ namespace AspectGenerator
 			var aliases = new List<string>();
 
 			foreach (var tree in _compilation.SyntaxTrees)
-				AddAliases(tree.GetRoot(cancellationToken), aliases);
+				if (!AspectSymbols.IsGeneratedInterceptorsTree(tree))
+					AddAliases(tree.GetRoot(cancellationToken), aliases);
 
 			foreach (var alias in aliases)
 				AddName(alias);
@@ -404,7 +405,8 @@ namespace AspectGenerator
 			var aliases = new HashSet<string>(StringComparer.Ordinal);
 
 			foreach (var tree in _compilation.SyntaxTrees)
-				AddAliases(tree.GetRoot(cancellationToken), aliases);
+				if (!AspectSymbols.IsGeneratedInterceptorsTree(tree))
+					AddAliases(tree.GetRoot(cancellationToken), aliases);
 
 			var sourceTypes = GetSourceTypes();
 

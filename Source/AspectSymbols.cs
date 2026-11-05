@@ -152,5 +152,18 @@ namespace AspectGenerator
 
 			return semanticModel.GetConstantValue(expression).Value;
 		}
+
+		/// <summary>
+		/// The generator's own <c>Interceptors.g.cs</c>, present in a compilation the analyzer sees after the generator ran
+		/// (the editor after a build, a test driver). The generator itself never sees it, so the analyzer skips it to select
+		/// the same targets; on a large project it is megabytes of attributes that cost most of a per-edit analysis.
+		/// </summary>
+		public static bool IsGeneratedInterceptorsTree(SyntaxTree tree)
+		{
+			var path = tree.FilePath;
+
+			return path.EndsWith("Interceptors.g.cs", StringComparison.Ordinal) &&
+				path.IndexOf(nameof(AspectSourceGenerator), StringComparison.Ordinal) >= 0;
+		}
 	}
 }

@@ -88,12 +88,14 @@ Relevant MSBuild properties:
 Interceptor source emission is automatic:
 
 ```text
-compiler (csc, VBCSCompiler)          -> build: analyzes and emits interceptor source
-IDE (a Roslyn workspace host)         -> design time: analyzes for IDE diagnostics/markers, no interceptor source
-other hosts (test drivers, tools)     -> DesignTimeBuild=true without BuildingProject=true is design time; else build
+compiler (csc, VBCSCompiler)                       -> build: analyzes and emits interceptor source
+known editor (Visual Studio, VS Code's C# server)  -> DesignTimeBuild=true without BuildingProject=true: live analysis,
+                                                      no interceptor source; after a build (BuildingProject=true): build
+any other host (dotnet watch, test harnesses,
+  AdhocWorkspace/MSBuildWorkspace tools, unknown IDEs) -> build
 ```
 
-The generator tells the hosts apart by the process (the compiler's entry assembly, the workspace's options provider), not by the MSBuild properties alone: the IDE reads `DesignTimeBuild` and `BuildingProject` from `obj/.../*.GeneratedMSBuildEditorConfig.editorconfig`, which every real build rewrites with a build's values.
+The generator tells the hosts apart by the process (the entry assembly), not by the MSBuild properties alone. Every host that may emit and run the compilation builds; only a known editor skips the expensive work, and only before a build: after one, the editor's compilation feeds Hot Reload and Edit and Continue, whose delta would otherwise drop the aspects of the edited method. The editor reads `DesignTimeBuild` and `BuildingProject` from `obj/.../*.GeneratedMSBuildEditorConfig.editorconfig`, which every real build rewrites with a build's values, so after a build it builds until the next design-time build.
 
 Design-time builds report a reduced set of diagnostics: target filter errors (`AG0201`-`AG0206`, `AG0208`), `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project. `AG0001`, `AG0002`, `AG0003`, `AG0006`, `AG0007`, `AG0103`-`AG0108` and `AG0101`/`AG0102` for library aspects need a bound call and appear only after a real build.
 
@@ -143,7 +145,7 @@ The report is not a compiler diagnostic stream and is not printed to the console
 
 The report is intentionally human-friendly and agent-friendly, not a minimal deterministic baseline format. Absolute file links, line/column locations, generated source references, Markdown tables, and detailed call-site rows are useful and should not be removed merely because they are not golden-file friendly.
 
-Design-time builds do not write the report; the IDE never does, whatever the properties say. The report's `Generator host` row names the process that wrote it.
+Design-time builds do not write the report, and a known editor never does, also after a build. The report's `Generator host` row names the process that wrote it.
 
 ### Trace mode
 

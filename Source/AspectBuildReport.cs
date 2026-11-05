@@ -15,7 +15,10 @@ namespace AspectGenerator
 
 		public static void Write(AspectSourceGenerator.AnalysisResult analysis)
 		{
+			// An editor builds after a real build (Hot Reload needs its interceptors), but its report would overwrite the
+			// compiler's with the state of an edit in progress; only the compiler and unknown hosts write one.
 			if (analysis.Options.DesignTimeBuild ||
+				analysis.Options.Host == GeneratorHostKind.Editor ||
 				string.IsNullOrWhiteSpace(analysis.Options.ReportFile))
 				return;
 

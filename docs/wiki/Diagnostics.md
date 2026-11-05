@@ -53,10 +53,14 @@ Reported by builds only, because they need a selected target method or a bound c
 Which mode applies is decided by the process that runs the generator, before the MSBuild properties:
 
 - the compiler (`csc`, or the compiler server `VBCSCompiler`) always builds, so a `DesignTimeBuild=true` left set by the project does not switch a real build to design time;
-- a Roslyn workspace host (Visual Studio, the C# language server of VS Code, `MSBuildWorkspace` tools) always runs at design time;
-- any other host (a test driver, a custom tool) follows the properties: `DesignTimeBuild=true` is design time unless MSBuild's `BuildingProject=true` says it is a real build.
+- a known editor — Visual Studio 2022 and 2026, the C# language server of VS Code — follows the properties: `DesignTimeBuild=true` without `BuildingProject=true` is the live analysis; anything else is a build;
+- every other host builds: `dotnet watch`, generator test harnesses such as `Microsoft.CodeAnalysis.Testing`, tools on `AdhocWorkspace` or `MSBuildWorkspace`, and editors the generator does not know. Any of them may emit and run the compilation, and a compilation built at design time silently has no aspects. An unknown editor pays the full analysis on every generator run; the build report's `Generator host` row names the process.
 
-The properties alone are not enough for the IDE: it reads them from `obj/.../<Project>.GeneratedMSBuildEditorConfig.editorconfig`, which every real build rewrites with `BuildingProject=true` and an empty `DesignTimeBuild`. Until the next design-time build the IDE would otherwise run the full build analysis on every edit and overwrite the build report with its own.
+The editor reads the properties from `obj/.../<Project>.GeneratedMSBuildEditorConfig.editorconfig`, which every real build rewrites with `BuildingProject=true` and an empty `DesignTimeBuild`. From then until the next design-time build the editor builds too — on purpose, see Hot Reload below — and the build-only diagnostics appear live in that period.
+
+### Hot Reload and Edit and Continue
+
+Visual Studio and `dotnet watch` compile a Hot Reload delta from their own workspace compilation, generator output included. If that compilation was produced at design time, the edited method is re-emitted without interceptors and its aspects stop applying, with no error shown. That is why the editor builds after a real build (Hot Reload always starts with one), and why `dotnet watch` and every other unknown host build always. If a design-time build runs between the build and the edit (a project file change, a restore), the editor is back at design time until the next build; start the debug session again after such a change.
 
 The build-only diagnostics appear when the project is built, in the build output and the IDE's error list from that build. `AG0300` markers come from a separate analyzer and are not affected.
 
@@ -76,7 +80,7 @@ Default report path:
 obj/GeneratedFiles/AspectGenerator/AspectGeneratorBuildReport.md
 ```
 
-The report is not printed to the console. Users who need it can inspect the report file directly. Design-time builds do not write the report, and the IDE never does, whatever the properties say; the `Generator host` row of the summary names the process that wrote it.
+The report is not printed to the console. Users who need it can inspect the report file directly. Design-time builds do not write the report, and a known editor never does, also when it builds after a real build (its report would describe an edit in progress); the `Generator host` row of the summary names the process that wrote it.
 
 ## Build Report Trace
 

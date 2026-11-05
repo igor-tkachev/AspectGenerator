@@ -136,7 +136,7 @@ Configuration is evaluated per project because the generator and analyzer run in
 
 The package `.props` asset defines defaults early. The package `.targets` asset appends `InterceptorsNamespaces` late, after project-level overrides such as `AspectGeneratorInterceptorsNamespace` are evaluated.
 
-AspectGenerator analyzes code during design-time builds so IDE diagnostics and optional call-site markers can work. Interceptor source is emitted only during normal builds. The generator tells a build from the IDE by the process that runs it (the compiler, or a Roslyn workspace host), so the IDE stays at design time after a build as well. This behavior is automatic and not user-configurable.
+AspectGenerator analyzes code during the editor's live analysis so IDE diagnostics and optional call-site markers can work; interceptor source is emitted by builds. The generator tells the two apart by the process that runs it: the compiler always builds, and so does every other host that may run the result (`dotnet watch`, test harnesses, workspace tools); only Visual Studio and the C# language server of VS Code follow `DesignTimeBuild`, and after a build they emit interceptors too, so that Hot Reload keeps the aspects of an edited method. This behavior is automatic and not user-configurable.
 
 AspectGenerator writes an informational build report file during normal builds. The report is not printed to the console by default. Diagnostics are reserved for errors, warnings, and actionable misconfiguration.
 

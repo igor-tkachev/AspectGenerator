@@ -62,7 +62,8 @@ namespace AspectGenerator
 			var methods = ImmutableArray.CreateBuilder<MethodDeclarationSyntax>();
 
 			foreach (var tree in compilation.SyntaxTrees)
-				AddMembers(tree.GetRoot(cancellationToken));
+				if (!AspectSymbols.IsGeneratedInterceptorsTree(tree))
+					AddMembers(tree.GetRoot(cancellationToken));
 
 			aspectDeclarations = aspects.ToImmutable();
 			methodDeclarations = methods.ToImmutable();

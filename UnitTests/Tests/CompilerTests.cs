@@ -2031,9 +2031,38 @@ namespace AspectGenerator.Tests
 				parseOptions: parseOptions,
 				optionsProvider: optionsProvider);
 
-			driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out outputCompilation, out _);
+			using (PretendEditorFor(effectiveProperties))
+				driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out outputCompilation, out _);
 
 			return driver.GetRunResult();
+		}
+
+		/// <summary>
+		/// The test driver is an unknown host, which always builds; a test that sets <c>DesignTimeBuild</c> or
+		/// <c>BuildingProject</c> means an editor, the only host where those properties decide.
+		/// </summary>
+		static IDisposable? PretendEditorFor(Dictionary<string,string> properties)
+		{
+			if (GeneratorHost.TestHost is not null)
+				return null;
+
+			if (!properties.ContainsKey("build_property.DesignTimeBuild") && !properties.ContainsKey("build_property.BuildingProject"))
+				return null;
+
+			return new TestHostScope(GeneratorHostKind.Editor);
+		}
+
+		sealed class TestHostScope : IDisposable
+		{
+			public TestHostScope(GeneratorHostKind host)
+			{
+				GeneratorHost.TestHost = host;
+			}
+
+			public void Dispose()
+			{
+				GeneratorHost.TestHost = null;
+			}
 		}
 
 		static ImmutableArray<Diagnostic> RunAnalyzer(string source, Dictionary<string,string>? properties = null, string[]? preprocessorSymbols = null)
@@ -2051,11 +2080,12 @@ namespace AspectGenerator.Tests
 			var analyzerOptions = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
 			var analyzers       = ImmutableArray.Create<DiagnosticAnalyzer>(new AspectGeneratorMarkerAnalyzer());
 
-			return compilation
-				.WithAnalyzers(analyzers, analyzerOptions)
-				.GetAnalyzerDiagnosticsAsync()
-				.GetAwaiter()
-				.GetResult();
+			using (PretendEditorFor(effectiveProperties))
+				return compilation
+					.WithAnalyzers(analyzers, analyzerOptions)
+					.GetAnalyzerDiagnosticsAsync()
+					.GetAwaiter()
+					.GetResult();
 		}
 
 		static IEnumerable<MetadataReference> GetMetadataReferences()
