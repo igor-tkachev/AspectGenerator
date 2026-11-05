@@ -103,9 +103,9 @@ namespace AspectGenerator
 						if (member is not IMethodSymbol { IsStatic: false } interfaceMethod || !IsSequenceType(interfaceMethod.ReturnType))
 							continue;
 
-						// Declared in this type: an inherited implementation is indexed with the type that declares it.
-						if (type.FindImplementationForInterfaceMember(interfaceMethod) is IMethodSymbol implementation &&
-							SymbolEqualityComparer.Default.Equals(implementation.ContainingType.OriginalDefinition, type))
+						// The implementation may be declared in a base type that does not implement the interface itself
+						// (class B : A, I with A.M), so it is indexed for every type that implements the interface.
+						if (type.FindImplementationForInterfaceMember(interfaceMethod) is IMethodSymbol implementation)
 							Add(interfaceMethod.OriginalDefinition, implementation.OriginalDefinition);
 					}
 				}

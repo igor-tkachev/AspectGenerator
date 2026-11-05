@@ -469,5 +469,149 @@ namespace AspectGenerator.Tests
 			Assert.IsTrue(ids.Any(static m => m.Contains("'B.M()'")), string.Join(Environment.NewLine, ids));
 			Assert.IsTrue(ids.Any(static m => m.Contains("'Y.M()'")), string.Join(Environment.NewLine, ids));
 		}
+
+		[TestMethod]
+		public void IteratorDiagnosticIsReportedAtEachTargetsOwnAttributeTest()
+		{
+			// Several virtual, abstract, interface and own-body targets in one compilation: each AG0108 names its target and
+			// is reported at the attribute that applied the aspect to that target, and none is lost.
+			var cases = new (string Name, int Count, string Source)[]
+			{
+				("InterfaceTargetExplicitIteratorImplementation", 1,
+					"""
+					interface I { [After] IEnumerable<int> M(); }
+					class It : I { IEnumerable<int> I.M() { yield return 1; } }
+					class Eager : I { public IEnumerable<int> M() { return new[] { 1 }; } }
+					static class Calls { public static string Run() { foreach (var _ in ((I)new Eager()).M()) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("InterfaceImplementedThroughBaseClassMethod", 1,
+					"""
+					interface I { [After] IEnumerable<int> M(); }
+					class A { public IEnumerable<int> M() { yield return 1; } }
+					class B : A, I { }
+					static class Calls { public static string Run() { foreach (var _ in ((I)new B()).M()) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("DerivedInterfaceOverridesDefaultMember", 1,
+					"""
+					interface I { [After] IEnumerable<int> M() { return new[] { 1 }; } }
+					interface J : I { IEnumerable<int> I.M() { yield return 2; } }
+					class C : J { }
+					static class Calls { public static string Run() { foreach (var _ in ((I)new C()).M()) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("GenericBaseClosedAndGenericMethodOverrides", 2,
+					"""
+					abstract class B<T> { [After] public abstract IEnumerable<T> M(); [After] public virtual IEnumerable<U> G<U>(U u) { return new[] { u }; } }
+					sealed class D : B<int> { public override IEnumerable<int> M() { yield return 1; } public override IEnumerable<U> G<U>(U u) { yield return u; } }
+					static class Calls { public static string Run() { B<int> b = new D(); foreach (var _ in b.M()) { } foreach (var _ in b.G("x")) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("PartialOverrideAndGenericInterfaceExplicitImplementation", 2,
+					"""
+					interface I<T> { [After] IEnumerable<T> M(); }
+					partial class P : I<string> { }
+					partial class P { IEnumerable<string> I<string>.M() { yield return "a"; } }
+					abstract class Q { [After] public abstract IEnumerable<int> N(); }
+					partial class R : Q { }
+					partial class R { public override IEnumerable<int> N() { yield return 1; } }
+					static class Calls { public static string Run() { foreach (var _ in ((I<string>)new P()).M()) { } foreach (var _ in ((Q)new R()).N()) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("OverrideChainWithEagerMiddle", 1,
+					"""
+					class A { [After] public virtual IEnumerable<int> M() { return new[] { 0 }; } }
+					class B : A { public override IEnumerable<int> M() { return new[] { 1 }; } }
+					class C : B { public override IEnumerable<int> M() { yield return 2; } }
+					class S : A { public sealed override IEnumerable<int> M() { return new[] { 3 }; } }
+					static class Calls { public static string Run() { foreach (var _ in ((A)new C()).M()) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("NoIteratorAnywhere", 0,
+					"""
+					interface I { [After] IEnumerable<int> M(); }
+					class A : I { public IEnumerable<int> M() { return new[] { 1 }; } }
+					static class Calls { public static string Run() { foreach (var _ in ((I)new A()).M()) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("GenericMethodOverrideOnly", 1,
+					"""
+					class B { [After] public virtual IEnumerable<U> G<U>(U u) { return new[] { u }; } }
+					sealed class D : B { public override IEnumerable<U> G<U>(U u) { yield return u; } }
+					static class Calls { public static string Run() { B b = new D(); foreach (var _ in b.G("x")) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("PartialOverrideOnly", 1,
+					"""
+					abstract class Q { [After] public abstract IEnumerable<int> N(); }
+					partial class R : Q { }
+					partial class R { public override IEnumerable<int> N() { yield return 1; } }
+					static class Calls { public static string Run() { foreach (var _ in ((Q)new R()).N()) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("TwoAbstractTargets", 2,
+					"""
+					abstract class Q { [After] public abstract IEnumerable<int> N(); }
+					abstract class Q2 { [After] public abstract IEnumerable<int> N2(); }
+					class R : Q { public override IEnumerable<int> N() { yield return 1; } }
+					class R2 : Q2 { public override IEnumerable<int> N2() { yield return 1; } }
+					static class Calls { public static string Run() { foreach (var _ in ((Q)new R()).N()) { } foreach (var _ in ((Q2)new R2()).N2()) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("TwoAbstractTargetsOneCalled", 1,
+					"""
+					abstract class Q { [After] public abstract IEnumerable<int> N(); }
+					abstract class Q2 { [After] public abstract IEnumerable<int> N2(); }
+					class R : Q { public override IEnumerable<int> N() { yield return 1; } }
+					class R2 : Q2 { public override IEnumerable<int> N2() { yield return 1; } }
+					static class Calls { public static string Run() { foreach (var _ in ((Q2)new R2()).N2()) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("TwoAbstractTargetsCalledInReverseOrder", 2,
+					"""
+					abstract class Q { [After] public abstract IEnumerable<int> N(); }
+					abstract class Q2 { [After] public abstract IEnumerable<int> N2(); }
+					class R : Q { public override IEnumerable<int> N() { yield return 1; } }
+					class R2 : Q2 { public override IEnumerable<int> N2() { yield return 1; } }
+					static class Calls { public static string Run() { foreach (var _ in ((Q2)new R2()).N2()) { } foreach (var _ in ((Q)new R()).N()) { } return ProbeLog.Text.ToString(); } }
+					"""),
+				("TwoAbstractTargetsCalledFromSeparateMethods", 2,
+					"""
+					abstract class Q { [After] public abstract IEnumerable<int> N(); }
+					class R : Q { public override IEnumerable<int> N() { yield return 1; } }
+					abstract class Q2
+					{
+						[After]
+						public abstract IEnumerable<int> N2();
+					}
+					class R2 : Q2 { public override IEnumerable<int> N2() { yield return 1; } }
+					static class Calls
+					{
+						static void A() { foreach (var _ in ((Q)new R()).N()) { } }
+						static void B() { foreach (var _ in ((Q2)new R2()).N2()) { } }
+						public static string Run() { A(); B(); return ProbeLog.Text.ToString(); }
+					}
+					"""),
+				("AbstractTargetAndOwnBodyIterator", 2,
+					"""
+					abstract class Q { [After] public abstract IEnumerable<int> N(); }
+					class R : Q { public override IEnumerable<int> N() { yield return 1; } }
+					static class S { [After] public static IEnumerable<int> M() { yield return 1; } }
+					static class Calls { public static string Run() { foreach (var _ in ((Q)new R()).N()) { } foreach (var _ in S.M()) { } return ProbeLog.Text.ToString(); } }
+					"""),
+			};
+
+			foreach (var (name, count, source) in cases)
+			{
+				var result = RunGeneratorAndGetCompilation([ProbeLogAspect, "using System.Collections.Generic;\n" + source], out var compilation);
+				var found  = result.Diagnostics.Where(static d => d.Id == AspectDiagnosticID.IteratorBodyNotCovered).ToArray();
+
+				Assert.AreEqual(count, found.Length, $"{name}: {string.Join(Environment.NewLine, found.Select(static d => d.GetMessage()))}");
+				Assert.AreEqual("", string.Join(Environment.NewLine, ProbeGeneratedErrors(compilation)), name);
+
+				foreach (var diagnostic in found)
+				{
+					var node   = diagnostic.Location.SourceTree!.GetRoot().FindNode(diagnostic.Location.SourceSpan);
+					var method = node.AncestorsAndSelf().OfType<Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax>().First();
+					var type   = method.Ancestors().OfType<Microsoft.CodeAnalysis.CSharp.Syntax.TypeDeclarationSyntax>().First();
+
+					Assert.AreEqual("After", node.ToString(), name);
+					StringAssert.Contains(diagnostic.GetMessage(), $"method '{type.Identifier.ValueText}", name);
+					StringAssert.Contains(diagnostic.GetMessage(), $".{method.Identifier.ValueText}", name);
+				}
+
+				Assert.AreEqual(found.Length, found.Select(static d => d.Location.SourceSpan.Start).Distinct().Count(), name);
+			}
+		}
 	}
 }
