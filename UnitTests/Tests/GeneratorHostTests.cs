@@ -27,9 +27,10 @@ namespace AspectGenerator.Tests
 			// The compiler never loads the workspace assembly; if it ever did, it is still the compiler.
 			Assert.AreEqual(GeneratorHostKind.Compiler,  GeneratorHost.Classify("csc",          WorkspacesAssemblyName));
 
-			// devenv.exe is a native host: no entry assembly. The out-of-process hosts of VS 2022 and VS 2026 have one.
+			// devenv.exe is a native host: no entry assembly. The out-of-process hosts have one: ServiceHub.Host.dotnet.x64
+			// in VS 2022 17.14 (process ServiceHub.RoslynCodeAnalysisService.exe), DevHub in VS 2026 18.11, as measured.
 			Assert.AreEqual(GeneratorHostKind.Workspace, GeneratorHost.Classify(null,                                  WorkspacesAssemblyName));
-			Assert.AreEqual(GeneratorHostKind.Workspace, GeneratorHost.Classify("ServiceHub.RoslynCodeAnalysisService", WorkspacesAssemblyName));
+			Assert.AreEqual(GeneratorHostKind.Workspace, GeneratorHost.Classify("ServiceHub.Host.dotnet.x64",          WorkspacesAssemblyName));
 			Assert.AreEqual(GeneratorHostKind.Workspace, GeneratorHost.Classify("DevHub",                              WorkspacesAssemblyName));
 			Assert.AreEqual(GeneratorHostKind.Workspace, GeneratorHost.Classify("Microsoft.CodeAnalysis.LanguageServer", WorkspacesAssemblyName));
 
