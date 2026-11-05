@@ -1278,13 +1278,17 @@ namespace AspectGenerator
 			List<AttributeInfo>     attributes,
 			HashSet<string>         reportedDiagnostics)
 		{
-			var targetIsAsync = IsSupportedAsyncReturnType(targetMethod.ReturnType, out var asyncResultType);
+			var targetIsAsync    = IsSupportedAsyncReturnType(targetMethod.ReturnType, out var asyncResultType);
+			var targetIsIterator = AspectSymbols.IsIterator(targetMethod);
 
 			for (var idx = 0; idx < attributes.Count; idx++)
 			{
 				var attribute       = attributes[idx];
 				var aspectArguments = GetAspectOptions(attribute).ToDictionary(static a => a.Key, static a => a.Value);
 				var useInterceptData = aspectArguments.TryGetValue("UseInterceptData", out var useData) && useData is true;
+
+				if (targetIsIterator)
+					ReportIteratorBodyNotCovered(diagnostics, reportedDiagnostics, invocationExpression, targetMethod, attribute, aspectArguments);
 
 				if (idx < attributes.Count - 1 &&
 					aspectArguments.TryGetValue("OnCall", out var onCallValue) &&
@@ -1420,6 +1424,54 @@ namespace AspectGenerator
 					!string.IsNullOrWhiteSpace(s);
 			}
 		}
+
+		/// <summary>
+		/// The interceptor wraps the call, and the call of an iterator only creates the sequence: the iterator body runs
+		/// later, while the caller enumerates it. Hooks that are meant to surround the body (OnAfterCall, OnCatch, OnFinally and
+		/// OnUsing) then run before any of it, and an exception thrown by the body never reaches
+		/// OnCatch. The interception still happens as written, so this is reported rather than skipped: a warning at the
+		/// aspect applied to the iterator, information at the call when only a target filter selected it.
+		/// </summary>
+		static void ReportIteratorBodyNotCovered(
+			List<DiagnosticInfo>       diagnostics,
+			HashSet<string>            reportedDiagnostics,
+			InvocationExpressionSyntax invocationExpression,
+			IMethodSymbol              targetMethod,
+			AttributeInfo              attribute,
+			Dictionary<string,object?> aspectArguments)
+		{
+			var hooks = _bodyHooks
+				.Where(name => aspectArguments.TryGetValue(name, out var value) && value is string s && !string.IsNullOrWhiteSpace(s))
+				.ToList();
+
+			if (hooks.Count == 0)
+				return;
+
+			// An aspect applied in source is reported where it is applied; one applied in a referenced assembly, at the call.
+			var isApplied = InterceptorShape.IsAppliedToTarget(targetMethod, [attribute]);
+			var location  = isApplied && attribute.AppliedAttributeData?.ApplicationSyntaxReference is {} asr
+				? Location.Create(asr.SyntaxTree, asr.Span)
+				: invocationExpression.GetLocation();
+			var message   =
+				$"Aspect '{attribute.AttributeClass.ToDisplayString()}' on iterator method '{targetMethod.ToDisplayString()}': " +
+				$"{string.Join(", ", hooks)} {(hooks.Count == 1 ? "runs" : "run")} when the call returns the sequence, before the iterator body runs. " +
+				"Exceptions thrown and work done while the sequence is enumerated do not reach the aspect. " +
+				"Apply the aspect to a method that enumerates the sequence, or return a materialized collection.";
+			var key       = $"{AspectDiagnosticID.IteratorBodyNotCovered}:{location.SourceTree?.FilePath}:{location.SourceSpan.Start}:{message}";
+
+			if (reportedDiagnostics.Add(key))
+				diagnostics.Add(new DiagnosticInfo(AspectDiagnosticID.IteratorBodyNotCovered, message, location, isApplied ? DiagnosticSeverity.Warning : DiagnosticSeverity.Info));
+		}
+
+		// An iterator does not return a task, so its interceptor calls the synchronous hooks only (an async hook without
+		// a synchronous fallback is AG0107).
+		static readonly string[] _bodyHooks =
+		[
+			"OnUsing",
+			"OnAfterCall",
+			"OnCatch",
+			"OnFinally",
+		];
 
 		/// <summary>
 		/// The generator's own API types (InterceptInfo, InterceptData) are unresolved in the compilation it reads when it

@@ -10,6 +10,41 @@ namespace AspectGenerator
 {
 	static class AspectSymbols
 	{
+		/// <summary>
+		/// Whether the method is an iterator (<c>yield</c>, sync or async): its body runs while the returned sequence is
+		/// enumerated, not during the call. A source method is recognized by a <c>yield</c> statement in its own body
+		/// (not in a lambda or local function), a compiled one by the state machine attribute the compiler puts on it.
+		/// </summary>
+		public static bool IsIterator(IMethodSymbol method)
+		{
+			var target = (method.ReducedFrom ?? method).OriginalDefinition;
+
+			target = target.PartialImplementationPart ?? target;
+
+			if (target.DeclaringSyntaxReferences.Length == 0)
+				return target.GetAttributes().Any(static a => a.AttributeClass is
+				{
+					Name               : "IteratorStateMachineAttribute" or "AsyncIteratorStateMachineAttribute",
+					ContainingNamespace: { Name: "CompilerServices", ContainingNamespace: { Name: "Runtime", ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } }
+				});
+
+			foreach (var reference in target.DeclaringSyntaxReferences)
+			{
+				if (reference.GetSyntax() is not MethodDeclarationSyntax declaration)
+					continue;
+
+				SyntaxNode? body = declaration.Body ?? (SyntaxNode?)declaration.ExpressionBody;
+
+				if (body is not null && body
+					.DescendantNodes(static node => node is not (LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax))
+					.OfType<YieldStatementSyntax>()
+					.Any())
+					return true;
+			}
+
+			return false;
+		}
+
 		public static bool IsAspectAttributeName(string name)
 		{
 			return name is "Aspect" or "AspectAttribute" or "AspectGenerator.Aspect" or "AspectGenerator.AspectAttribute";

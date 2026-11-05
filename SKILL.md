@@ -92,7 +92,7 @@ normal build      -> analyzes and emits interceptor source
 DesignTimeBuild   -> analyzes for IDE diagnostics/markers but does not emit interceptor source
 ```
 
-Design-time builds report a reduced set of diagnostics: target filter errors (`AG0201`-`AG0206`, `AG0208`), `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project. `AG0001`, `AG0002`, `AG0003`, `AG0006`, `AG0007`, `AG0103`-`AG0107` and `AG0101`/`AG0102` for library aspects need a bound call and appear only after a real build. A build that leaves `DesignTimeBuild=true` set is still a build when `BuildingProject` is `true`.
+Design-time builds report a reduced set of diagnostics: target filter errors (`AG0201`-`AG0206`, `AG0208`), `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project. `AG0001`, `AG0002`, `AG0003`, `AG0006`, `AG0007`, `AG0103`-`AG0108` and `AG0101`/`AG0102` for library aspects need a bound call and appear only after a real build. A build that leaves `DesignTimeBuild=true` set is still a build when `BuildingProject` is `true`.
 
 There is no public `GenerateInterceptors` option.
 
@@ -392,6 +392,7 @@ AG0104  invalid hook return type
 AG0105  OnCall signature mismatch
 AG0106  UseInterceptData=true requires ref InterceptData<T>
 AG0107  async hook requires supported async target
+AG0108  OnAfterCall/OnCatch/OnFinally/OnUsing on an iterator run before its body (warning when applied, information when filter-selected)
 AG0201  invalid TargetFilter regex
 AG0202  invalid TargetFilter rule
 AG0204  unknown TargetFilter condition key

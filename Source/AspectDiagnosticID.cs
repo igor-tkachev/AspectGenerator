@@ -18,6 +18,7 @@ namespace AspectGenerator
 		public const string OnCallHookMismatch                  = "AG0105";
 		public const string HookRequiresInterceptData           = "AG0106";
 		public const string AsyncHookRequiresTask               = "AG0107";
+		public const string IteratorBodyNotCovered              = "AG0108";
 		public const string InvalidAspectFilterRegex            = "AG0201";
 		public const string InvalidAspectFilterRule             = "AG0202";
 		public const string UnknownAspectFilterConditionKey     = "AG0204";

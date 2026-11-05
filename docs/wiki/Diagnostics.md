@@ -17,10 +17,11 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0101`: hook method not found.
 - `AG0102`: hook method must be static.
 - `AG0103`: invalid hook parameter type.
-- `AG0104`: invalid hook return type.
+- `AG0104`: invalid hook return type. The message names the return type the hook needs; for an async hook on a target framework without `ValueTask`, it says that only `Task` is available there. A return type the compiler cannot resolve is left to the compiler's own error (`CS0246`).
 - `AG0105`: `OnCall` signature mismatch.
 - `AG0106`: `UseInterceptData=true` requires `ref InterceptData<T>`.
 - `AG0107`: async hook requires a supported async target.
+- `AG0108`: the aspect has `OnAfterCall`, `OnCatch`, `OnFinally` or `OnUsing` hooks on an iterator method, whose body runs only while the returned sequence is enumerated, after those hooks; see [Hook lifecycle](Hook-lifecycle#iterators). A warning at the aspect applied to the method, information at the call when only a target filter selected it.
 - `AG0201`: invalid aspect filter regex.
 - `AG0202`: invalid target filter rule.
 - `AG0204`: unknown target filter condition key.
@@ -44,7 +45,7 @@ Reported live, in design-time builds and in builds:
 Reported by builds only, because they need a selected target method or a bound call:
 
 - `AG0001` and `AG0002`;
-- `AG0103` through `AG0107`;
+- `AG0103` through `AG0108`;
 - `AG0101` and `AG0102` for aspects declared in referenced assemblies, which are checked against each intercepted target;
 - `AG0003`, `AG0006` and `AG0007`, for calls that are left as they are;
 - `AG0004` and `AG0005`, which are about the generated interceptors (these were never reported in design-time builds).

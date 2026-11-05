@@ -42,7 +42,8 @@ A selected call that cannot get a compilable interceptor is not intercepted. The
 - members of C# 14 extension blocks (`extension(T) { ... }`);
 - calls removed by `[Conditional]` and partial methods without an implementation;
 - calls whose type arguments are the target's own type parameters (a generic method calling itself, a generic type calling its own members), which the compiler does not accept for a generic interceptor;
-- `private` or `protected` targets, which the generated file-local interceptor class cannot access (an interceptor emitted into a partial declaration of the target's type could reach them; that is a possible later feature);
+- `private`, `protected` and `private protected` targets, and members of types that are themselves private, protected or file-local (`file class`), which the generated file-local interceptor class cannot access (an interceptor emitted into a partial declaration of the target's type could reach the private and protected ones; that is a possible later feature);
+- calls whose aspect the generated code cannot name: an aspect type that is private, protected or file-local, an attribute constructor it cannot access, an enum or `typeof` argument of such a type, or a hook method that is private or protected. An `internal` aspect of a referenced assembly works only when the same aspect source is also compiled into the calling project;
 - methods that return by reference, a ref struct (or a type parameter that `allows ref struct`), or a pointer;
 - static abstract and static virtual interface members called through a type parameter (`T.Create()`);
 - interface, `object` and `ValueType` methods called on a type parameter receiver that may be a struct: the interceptor would box it, and what the call changes would be lost;
@@ -52,4 +53,4 @@ A selected call that cannot get a compilable interceptor is not intercepted. The
 - generic instance methods with ref struct or pointer parameters;
 - `OnCall` hooks on calls whose type arguments cannot be named in generated code (see below).
 
-Calls whose type arguments cannot be named in the generated file — a type parameter of the calling method or type, an anonymous type, a private nested type — get a generic interceptor over the target's own type parameters, with the same constraints; the compiler passes the call's type arguments to it.
+Calls whose type arguments cannot be named in the generated file — a type parameter of the calling method or type, an anonymous type, a private nested or file-local type — get a generic interceptor over the target's own type parameters, with the same constraints; the compiler passes the call's type arguments to it.
