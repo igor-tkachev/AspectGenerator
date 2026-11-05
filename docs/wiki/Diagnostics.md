@@ -33,7 +33,7 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 
 ## Design-Time Builds
 
-The IDE runs the generator on every edit in a design-time build (`DesignTimeBuild=true`). A design-time build emits no interceptors, so the generator does not select target methods or bind calls there; it compiles the target filters only. This keeps the editor responsive on large projects, but splits the diagnostics in two groups.
+The IDE runs the generator on every edit in a design-time build. A design-time build emits no interceptors, so the generator does not select target methods or bind calls there; it compiles the target filters only. This keeps the editor responsive on large projects, but splits the diagnostics in two groups.
 
 Reported live, in design-time builds and in builds:
 
@@ -50,7 +50,13 @@ Reported by builds only, because they need a selected target method or a bound c
 - `AG0003`, `AG0006` and `AG0007`, for calls that are left as they are;
 - `AG0004` and `AG0005`, which are about the generated interceptors (these were never reported in design-time builds).
 
-A build is never treated as a design-time build: when MSBuild sets `BuildingProject=true` (it does at the start of every real build), the generator ignores a `DesignTimeBuild=true` left set by the project.
+Which mode applies is decided by the process that runs the generator, before the MSBuild properties:
+
+- the compiler (`csc`, or the compiler server `VBCSCompiler`) always builds, so a `DesignTimeBuild=true` left set by the project does not switch a real build to design time;
+- a Roslyn workspace host (Visual Studio, the C# language server of VS Code, `MSBuildWorkspace` tools) always runs at design time;
+- any other host (a test driver, a custom tool) follows the properties: `DesignTimeBuild=true` is design time unless MSBuild's `BuildingProject=true` says it is a real build.
+
+The properties alone are not enough for the IDE: it reads them from `obj/.../<Project>.GeneratedMSBuildEditorConfig.editorconfig`, which every real build rewrites with `BuildingProject=true` and an empty `DesignTimeBuild`. Until the next design-time build the IDE would otherwise run the full build analysis on every edit and overwrite the build report with its own.
 
 The build-only diagnostics appear when the project is built, in the build output and the IDE's error list from that build. `AG0300` markers come from a separate analyzer and are not affected.
 
@@ -70,7 +76,7 @@ Default report path:
 obj/GeneratedFiles/AspectGenerator/AspectGeneratorBuildReport.md
 ```
 
-The report is not printed to the console. Users who need it can inspect the report file directly. Design-time builds do not write the report.
+The report is not printed to the console. Users who need it can inspect the report file directly. Design-time builds do not write the report, and the IDE never does, whatever the properties say; the `Generator host` row of the summary names the process that wrote it.
 
 ## Build Report Trace
 

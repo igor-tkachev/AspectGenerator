@@ -26,6 +26,7 @@ namespace AspectGenerator
 		public string?                   InterceptorsNamespace;
 		public string?                   InterceptorsNamespaces;
 		public bool?                     PropsImported;
+		public GeneratorHostKind         Host;
 	}
 
 	internal record GeneratorExecutionOptions(
@@ -45,7 +46,8 @@ namespace AspectGenerator
 		string?                  CompilerGeneratedFilesOutputPath,
 		string?                  InterceptorsNamespace,
 		string?                  InterceptorsNamespaces,
-		bool                     PropsImported);
+		bool                     PropsImported,
+		GeneratorHostKind        Host);
 
 	internal record AttributeInfo(
 		AttributeData?   AppliedAttributeData,

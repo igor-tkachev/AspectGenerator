@@ -127,6 +127,7 @@ namespace AspectGenerator
 			SetOption("TargetFramework", options.TargetFramework);
 			SetOption("Configuration", options.Configuration);
 			SetOption("DesignTimeBuild", options.DesignTimeBuild.ToString());
+			SetOption("Host", GeneratorHost.Describe(options.Host));
 			SetOption("Language version", compilation.SyntaxTrees.FirstOrDefault()?.Options is CSharpParseOptions parseOptions
 				? parseOptions.LanguageVersion.ToString()
 				: "");

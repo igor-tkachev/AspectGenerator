@@ -30,6 +30,9 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
 		<PackageReference Include="PolySharp"                        PrivateAssets="all" />
 
+		<!-- The host classification and the mode it selects have no public surface; the tests pin them directly. -->
+		<InternalsVisibleTo Include="AspectGenerator.Tests" />
+
 		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 		<None Include="build\AspectGenerator.props"                Pack="true" PackagePath="build\AspectGenerator.props" />
 		<None Include="build\AspectGenerator.targets"              Pack="true" PackagePath="build\AspectGenerator.targets" />

@@ -88,11 +88,14 @@ Relevant MSBuild properties:
 Interceptor source emission is automatic:
 
 ```text
-normal build      -> analyzes and emits interceptor source
-DesignTimeBuild   -> analyzes for IDE diagnostics/markers but does not emit interceptor source
+compiler (csc, VBCSCompiler)          -> build: analyzes and emits interceptor source
+IDE (a Roslyn workspace host)         -> design time: analyzes for IDE diagnostics/markers, no interceptor source
+other hosts (test drivers, tools)     -> DesignTimeBuild=true without BuildingProject=true is design time; else build
 ```
 
-Design-time builds report a reduced set of diagnostics: target filter errors (`AG0201`-`AG0206`, `AG0208`), `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project. `AG0001`, `AG0002`, `AG0003`, `AG0006`, `AG0007`, `AG0103`-`AG0108` and `AG0101`/`AG0102` for library aspects need a bound call and appear only after a real build. A build that leaves `DesignTimeBuild=true` set is still a build when `BuildingProject` is `true`.
+The generator tells the hosts apart by the process (the compiler's entry assembly, the workspace's options provider), not by the MSBuild properties alone: the IDE reads `DesignTimeBuild` and `BuildingProject` from `obj/.../*.GeneratedMSBuildEditorConfig.editorconfig`, which every real build rewrites with a build's values.
+
+Design-time builds report a reduced set of diagnostics: target filter errors (`AG0201`-`AG0206`, `AG0208`), `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project. `AG0001`, `AG0002`, `AG0003`, `AG0006`, `AG0007`, `AG0103`-`AG0108` and `AG0101`/`AG0102` for library aspects need a bound call and appear only after a real build.
 
 There is no public `GenerateInterceptors` option.
 
@@ -140,7 +143,7 @@ The report is not a compiler diagnostic stream and is not printed to the console
 
 The report is intentionally human-friendly and agent-friendly, not a minimal deterministic baseline format. Absolute file links, line/column locations, generated source references, Markdown tables, and detailed call-site rows are useful and should not be removed merely because they are not golden-file friendly.
 
-Design-time builds do not write the report.
+Design-time builds do not write the report; the IDE never does, whatever the properties say. The report's `Generator host` row names the process that wrote it.
 
 ### Trace mode
 

@@ -34,6 +34,7 @@ namespace AspectGenerator
 				InterceptorsNamespace                = options.TryGetValue($"build_property.AspectGenerator{AspectOptionName.InterceptorsNamespace}", out var ns) ? ns : null,
 				InterceptorsNamespaces               = options.TryGetValue("build_property.InterceptorsNamespaces",                                   out var namespaces) ? namespaces : null,
 				PropsImported                        = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.PropsImported}"),
+				Host                                 = GeneratorHost.Detect(optionsProvider),
 			};
 		}
 
@@ -63,6 +64,7 @@ namespace AspectGenerator
 				InterceptorsNamespace  = msBuildOptions.InterceptorsNamespace,
 				InterceptorsNamespaces = msBuildOptions.InterceptorsNamespaces,
 				PropsImported          = msBuildOptions.PropsImported,
+				Host                   = msBuildOptions.Host,
 			};
 
 			var attr = compilation.Assembly.GetAttributes().FirstOrDefault(a =>
@@ -133,9 +135,16 @@ namespace AspectGenerator
 
 		static GeneratorExecutionOptions CreateExecutionOptions(Options options)
 		{
-			// MSBuild sets BuildingProject to true at the start of every real build (BuildOnlySettings), so a project that
-			// leaves DesignTimeBuild=true set in a real build is still treated as a build.
-			var designTimeBuild  = options.DesignTimeBuild is true && options.BuildingProject is not true;
+			// The host decides first (see GeneratorHost): the compiler always builds, a workspace never does. The properties
+			// decide only for other hosts: MSBuild sets BuildingProject to true at the start of every real build
+			// (BuildOnlySettings), so a project that leaves DesignTimeBuild=true set in a real build is still treated as a build.
+			var designTimeBuild = options.Host switch
+			{
+				GeneratorHostKind.Compiler  => false,
+				GeneratorHostKind.Workspace => true,
+				_                           => options.DesignTimeBuild is true && options.BuildingProject is not true,
+			};
+
 			var emitInterceptors = !designTimeBuild;
 
 			return new GeneratorExecutionOptions(
@@ -155,7 +164,8 @@ namespace AspectGenerator
 				options.CompilerGeneratedFilesOutputPath,
 				options.InterceptorsNamespace,
 				options.InterceptorsNamespaces,
-				options.PropsImported is true);
+				options.PropsImported is true,
+				options.Host);
 		}
 
 		static bool? GetTraceBoolProperty(AnalyzerConfigOptions options, string name)

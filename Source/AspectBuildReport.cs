@@ -77,6 +77,7 @@ namespace AspectGenerator
 				.AppendLine("| --- | --- |");
 
 			AppendTableRow(sb, "Project", analysis.Compilation.AssemblyName ?? analysis.Compilation.Assembly.Identity.Name);
+			AppendTableRow(sb, "Generator host", GeneratorHost.Describe(analysis.Options.Host));
 			AppendTableRow(sb, analysis.Options.EmitInterceptors ? "Generated call sites" : "Selected call sites", selectedCallSiteCount.ToString(CultureInfo.InvariantCulture));
 			AppendTableRow(sb, "Target methods", targetMethodCount.ToString(CultureInfo.InvariantCulture));
 			AppendTableRow(sb, "Interceptor generation", interceptorState);
