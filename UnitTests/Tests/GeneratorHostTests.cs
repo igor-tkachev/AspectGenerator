@@ -201,8 +201,15 @@ namespace AspectGenerator.Tests
 			foreach (var tree in result.GeneratedTrees.Where(t => t != interceptors))
 				Assert.IsFalse(AspectSymbols.IsGeneratedInterceptorsTree(tree), tree.FilePath);
 
+			// Decoys: a user's own files, named or placed like the generator's output.
+			var generatorFolder = Path.GetDirectoryName(interceptors.FilePath)!;
+
 			Assert.IsFalse(AspectSymbols.IsGeneratedInterceptorsTree(CSharpSyntaxTree.ParseText("", path: "Interceptors.g.cs")));
-			Assert.IsFalse(AspectSymbols.IsGeneratedInterceptorsTree(CSharpSyntaxTree.ParseText("", path: "/src/AspectGenerator.AspectSourceGenerator/Program.cs")));
+			Assert.IsFalse(AspectSymbols.IsGeneratedInterceptorsTree(CSharpSyntaxTree.ParseText("", path: Path.Combine(generatorFolder, "MyInterceptors.g.cs"))));
+			Assert.IsFalse(AspectSymbols.IsGeneratedInterceptorsTree(CSharpSyntaxTree.ParseText("", path: Path.Combine(generatorFolder, "Program.cs"))));
+			Assert.IsFalse(AspectSymbols.IsGeneratedInterceptorsTree(CSharpSyntaxTree.ParseText("", path: Path.Combine("src", "AspectGenerator.AspectSourceGenerator.Tests", "Interceptors.g.cs"))));
+			Assert.IsFalse(AspectSymbols.IsGeneratedInterceptorsTree(CSharpSyntaxTree.ParseText("", path: Path.Combine("src", "AspectGenerator.AspectSourceGenerator", "Nested", "Interceptors.g.cs"))));
+			Assert.IsTrue (AspectSymbols.IsGeneratedInterceptorsTree(CSharpSyntaxTree.ParseText("", path: Path.Combine("obj", "AspectGenerator", "AspectGenerator.AspectSourceGenerator", "Interceptors.g.cs"))));
 		}
 
 		static GeneratorExecutionOptions ResolveFor(GeneratorHostKind host, bool? designTimeBuild, bool? buildingProject, string? reportFile = null)

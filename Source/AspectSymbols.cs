@@ -160,10 +160,17 @@ namespace AspectGenerator
 		/// </summary>
 		public static bool IsGeneratedInterceptorsTree(SyntaxTree tree)
 		{
+			// The driver names a generated tree <assembly>/<generator type>/<hint name>; only that exact file, not a user's
+			// own Interceptors.g.cs or MyInterceptors.g.cs elsewhere.
 			var path = tree.FilePath;
 
-			return path.EndsWith("Interceptors.g.cs", StringComparison.Ordinal) &&
-				path.IndexOf(nameof(AspectSourceGenerator), StringComparison.Ordinal) >= 0;
+			if (!string.Equals(System.IO.Path.GetFileName(path), "Interceptors.g.cs", StringComparison.Ordinal))
+				return false;
+
+			var directory = System.IO.Path.GetDirectoryName(path);
+
+			return directory is not null &&
+				string.Equals(System.IO.Path.GetFileName(directory), typeof(AspectSourceGenerator).FullName, StringComparison.Ordinal);
 		}
 	}
 }
