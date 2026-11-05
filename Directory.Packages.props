@@ -7,6 +7,8 @@
 		<PackageVersion Include="linq2db" Version="6.3.0" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
+		<!-- Tests only: the generator run through a real Roslyn workspace (AdhocWorkspace), as workspace tools and test harnesses run it. -->
+		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
 		<PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.8" />
 		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.6.0" />
 		<PackageVersion Include="MSTest.TestAdapter" Version="4.2.3" />

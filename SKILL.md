@@ -145,7 +145,7 @@ The report is not a compiler diagnostic stream and is not printed to the console
 
 The report is intentionally human-friendly and agent-friendly, not a minimal deterministic baseline format. Absolute file links, line/column locations, generated source references, Markdown tables, and detailed call-site rows are useful and should not be removed merely because they are not golden-file friendly.
 
-Design-time builds do not write the report, and a known editor never does, also after a build. The report's `Generator host` row names the process that wrote it.
+Design-time builds do not write the report, and a known editor never does, also after a build. The report's `Generator host` row names the process that wrote it; an IDE the generator does not know shows there as `unknown (<process>)` after editing in it — report that row, with the IDE's name and version, to have the IDE recognized.
 
 ### Trace mode
 
