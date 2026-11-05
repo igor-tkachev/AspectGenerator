@@ -203,7 +203,7 @@ namespace AspectGenerator
 
 			static IMethodSymbol? GetAppliedConstructor(AttributeInfo attribute)
 			{
-				if (attribute.AppliedAttributeData is {} data)
+				if (AspectSymbols.GetAppliedAttributeData(attribute) is {} data)
 					return data.AttributeConstructor;
 
 				if (attribute is { AppliedAttributeSyntax: {} syntax, AppliedSemanticModel: {} semanticModel })
@@ -215,11 +215,12 @@ namespace AspectGenerator
 
 		/// <summary>
 		/// The types the generated aspect construction names, as <c>GetAppliedAspectConstruction</c> prints the arguments:
-		/// an enum value is cast to its type, a <c>typeof</c> argument names its type, an array names its type.
+		/// an enum value is cast to its type, a <c>typeof</c> argument names its type, an array names its type, and the
+		/// elements of an array are written with their own types.
 		/// </summary>
 		static IEnumerable<ITypeSymbol> GetAppliedArgumentTypes(AttributeInfo attribute)
 		{
-			if (attribute.AppliedAttributeData is {} data)
+			if (AspectSymbols.GetAppliedAttributeData(attribute) is {} data)
 			{
 				foreach (var constant in data.ConstructorArguments)
 					foreach (var type in GetConstantTypes(constant))
@@ -263,15 +264,20 @@ namespace AspectGenerator
 					if (constant.Type is {} arrayType)
 						yield return arrayType;
 
-					foreach (var value in constant.Values)
-						if (value.Value is ITypeSymbol elementTypeValue)
-							yield return elementTypeValue;
+					// Each element is written with its own type (an enum in an object[] is cast to the enum).
+					if (!constant.IsNull)
+						foreach (var value in constant.Values)
+							foreach (var type in GetConstantTypes(value))
+								yield return type;
 
 					yield break;
 				}
 
 				if (constant.Type is { TypeKind: TypeKind.Enum } enumType)
 					yield return enumType;
+
+				if (constant.Kind == TypedConstantKind.Primitive && constant.Value is null && constant.Type is {} nullType)
+					yield return nullType;
 
 				if (constant.Value is ITypeSymbol typeValue)
 					yield return typeValue;

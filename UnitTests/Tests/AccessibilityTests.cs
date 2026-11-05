@@ -347,9 +347,10 @@ namespace AspectGenerator.Tests
 						[Argument(Mode.B)]                    public static string E() => "e";
 						[Argument(typeof(Mode))]              public static string T() => "t";
 						[Argument(1, Named = Mode.A)]         public static string P() => "p";
+						[Argument(new object[] { Mode.A })]   public static string R() => "r";
 						[Argument(1, Named = typeof(int))]    public static string I() => "i";
 
-						public static string Go() => N() + E() + T() + P() + I();
+						public static string Go() => N() + E() + T() + P() + R() + I();
 					}
 
 					[Aspect(OnBeforeCall = nameof(Before), OnAfterCall = nameof(After))]
@@ -399,13 +400,13 @@ namespace AspectGenerator.Tests
 			var interceptors = GetGeneratedSourceOrEmpty(result, "Interceptors.g.cs");
 			var value        = EmitAndRun(compilation, interceptors);
 
-			Assert.AreEqual("netpihkl" + "argument;internal;", value, interceptors);
+			Assert.AreEqual("netprihkl" + "argument;internal;", value, interceptors);
 
 			var skips = result.Diagnostics.Where(static d => d.Id == AspectDiagnosticID.CannotIntercept).Select(static d => d.GetMessage()).ToArray();
 
-			Assert.AreEqual(6, skips.Length, string.Join(System.Environment.NewLine, skips));
+			Assert.AreEqual(7, skips.Length, string.Join(System.Environment.NewLine, skips));
 			Assert.AreEqual(1, skips.Count(static m => m.Contains("'Host.NestedAttribute'")),   string.Join(System.Environment.NewLine, skips));
-			Assert.AreEqual(3, skips.Count(static m => m.Contains("'Host.Mode'")),              string.Join(System.Environment.NewLine, skips));
+			Assert.AreEqual(4, skips.Count(static m => m.Contains("'Host.Mode'")),              string.Join(System.Environment.NewLine, skips));
 			Assert.AreEqual(1, skips.Count(static m => m.Contains("'HooksAttribute.After")),     string.Join(System.Environment.NewLine, skips));
 			Assert.AreEqual(1, skips.Count(static m => m.Contains("'LocalAttribute'")),          string.Join(System.Environment.NewLine, skips));
 		}

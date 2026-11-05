@@ -905,7 +905,7 @@ namespace AspectGenerator
 		{
 			var attributeType = attribute.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-			if (attribute.AppliedAttributeData is {} data)
+			if (AspectSymbols.GetAppliedAttributeData(attribute) is {} data)
 			{
 				var constructorArguments = data.ConstructorArguments
 					.Select(PrintTypedConstant)
@@ -956,16 +956,55 @@ namespace AspectGenerator
 			}
 		}
 
+		/// <summary>
+		/// An attribute argument as an expression of exactly the type the attribute model gives it, so that a parameter,
+		/// property or array element of type <c>object</c> receives the same boxed value as the attribute itself: an enum
+		/// keeps its enum type, a byte or short its own type, an element of an <c>object[]</c> its own type (an array,
+		/// a <c>typeof</c>, a null), recursively.
+		/// </summary>
 		static string PrintTypedConstant(TypedConstant value)
 		{
-			if (value.Type is IArrayTypeSymbol arrayType)
-				return value.Values.Length switch
-				{
-					0 => $"new {PrintType(arrayType.ElementType)}[0]",
-					_ => $"new {PrintType(arrayType)} {{ {value.Values.Select(v => PrintValue(v.Value, arrayType.ElementType)).Aggregate((v1, v2) => $"{v1}, {v2}")} }}"
-				};
+			switch (value.Kind)
+			{
+				case TypedConstantKind.Array when value.Type is IArrayTypeSymbol arrayType :
+					if (value.IsNull)
+						return $"({PrintType(arrayType)})null";
 
-			return PrintValue(value.Value, value.Type);
+					// new T[0] cannot be written for an array of arrays (new int[0][] is); an empty initializer can.
+					if (value.Values.Length == 0)
+						return arrayType.ElementType is IArrayTypeSymbol
+							? $"new {PrintType(arrayType)} {{ }}"
+							: $"new {PrintType(arrayType.ElementType)}[0]";
+
+					return $"new {PrintType(arrayType)} {{ {string.Join(", ", value.Values.Select(PrintTypedConstant))} }}";
+
+				case TypedConstantKind.Type :
+					return value.Value is ITypeSymbol type ? $"typeof({PrintType(type)})" : "(global::System.Type)null";
+
+				case TypedConstantKind.Enum when value.Type is {} enumType :
+					return PrintCast(enumType, PrintValue(value.Value, null));
+
+				// A typed null keeps its type, which can pick the constructor overload; an object null has nothing to keep.
+				case TypedConstantKind.Primitive when value.Value is null :
+					return value.Type is { SpecialType: not SpecialType.System_Object } nullType ? $"({PrintType(nullType)})null" : "null";
+
+				// These have no literal suffix: without the cast, an object slot would receive an int.
+				case TypedConstantKind.Primitive when value.Value is byte or sbyte or short or ushort :
+					return PrintCast(value.Type!, PrintValue(value.Value, null));
+
+				default :
+					return PrintValue(value.Value, value.Type);
+			}
+		}
+
+		/// <summary>
+		/// A cast of a literal; a negative one needs parentheses (<c>(T)-1</c> parses as a subtraction).
+		/// </summary>
+		static string PrintCast(ITypeSymbol type, string literal)
+		{
+			return literal.StartsWith("-", StringComparison.Ordinal)
+				? $"({PrintType(type)})({literal})"
+				: $"({PrintType(type)}){literal}";
 		}
 
 		static string PrintAttributeValue(object? value, ITypeSymbol? type)
@@ -2203,7 +2242,7 @@ namespace AspectGenerator
 				return "null";
 
 			if (type?.TypeKind == TypeKind.Enum)
-				return $"({PrintType(type)}){PrintValue(val, null)}";
+				return PrintCast(type, PrintValue(val, null));
 
 			return val switch
 			{
@@ -2221,7 +2260,7 @@ namespace AspectGenerator
 				float            f => PrintSingle(f),
 				double           d => PrintDouble(d),
 				decimal          d => d.ToString(CultureInfo.InvariantCulture) + "m",
-				INamedTypeSymbol s => $"typeof({s.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})",
+				ITypeSymbol      t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})",
 				_                  => Convert.ToString(val, CultureInfo.InvariantCulture) ?? "null"
 			};
 

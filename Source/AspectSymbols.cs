@@ -11,6 +11,30 @@ namespace AspectGenerator
 	static class AspectSymbols
 	{
 		/// <summary>
+		/// The attribute data of an applied aspect. An aspect applied to a type with a target filter is kept as syntax; its
+		/// data is looked up on the type, so the arguments keep the types the attribute model gives them (an enum or
+		/// <c>typeof</c> inside an <c>object[]</c>, for example), which constants read from the syntax lose.
+		/// </summary>
+		public static AttributeData? GetAppliedAttributeData(AttributeInfo attribute)
+		{
+			if (attribute.AppliedAttributeData is {} data)
+				return data;
+
+			if (attribute is not { AppliedAttributeSyntax: {} syntax, AppliedSemanticModel: {} semanticModel } ||
+				syntax.Parent?.Parent is not BaseTypeDeclarationSyntax typeDeclaration ||
+				semanticModel.GetDeclaredSymbol(typeDeclaration) is not {} type)
+				return null;
+
+			foreach (var typeAttribute in type.GetAttributes())
+				if (typeAttribute.ApplicationSyntaxReference is {} reference &&
+					reference.SyntaxTree == syntax.SyntaxTree &&
+					reference.Span == syntax.Span)
+					return typeAttribute;
+
+			return null;
+		}
+
+		/// <summary>
 		/// Whether the method is an iterator (<c>yield</c>, sync or async): its body runs while the returned sequence is
 		/// enumerated, not during the call. A source method is recognized by a <c>yield</c> statement in its own body
 		/// (not in a lambda or local function), a compiled one by the state machine attribute the compiler puts on it.
