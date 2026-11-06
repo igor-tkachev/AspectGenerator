@@ -30,7 +30,7 @@ namespace AspectGenerator
 					method,
 					invocations,
 					GetInterceptorName(GetBaseName(method)),
-					GetOrderedAttributes(invocations[0].Attributes),
+					invocations[0].Attributes,
 					invocations[0].GenericShape is null ? [] : InterceptorShape.GetTypeParameters(method)));
 			}
 
@@ -42,7 +42,7 @@ namespace AspectGenerator
 			return $"{method.Name}_Interceptor";
 		}
 
-		static List<AttributeInfo> GetOrderedAttributes(List<AttributeInfo> attributes)
+		public static List<AttributeInfo> GetOrderedAttributes(List<AttributeInfo> attributes)
 		{
 			if (!attributes.Any(static a => a.AppliedAttributeData?.NamedArguments.Any(static na => na.Key == "Order") is true))
 				return attributes;

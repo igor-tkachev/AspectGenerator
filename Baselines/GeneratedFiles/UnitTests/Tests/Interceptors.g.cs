@@ -141,7 +141,7 @@ namespace MyAspectGenerator
 
 					if (__info__0.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 					{
-						__this__.AllEventsMethodAsync();
+						await __this__.AllEventsMethodAsync();
 
 						await global::Aspects.AllEventsAttribute.OnAfterCallAsync(__info__0);
 					}
@@ -1962,7 +1962,7 @@ namespace MyAspectGenerator
 
 					if (__info__0.InterceptResult != global::AspectGenerator.InterceptResult.Return)
 					{
-						__this__.ValueTaskMethodAsync();
+						await __this__.ValueTaskMethodAsync();
 
 						await global::Aspects.ValueTaskFlowAttribute.OnAfterCallAsync(__info__0);
 					}

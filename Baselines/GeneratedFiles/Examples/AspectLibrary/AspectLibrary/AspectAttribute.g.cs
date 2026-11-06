@@ -94,6 +94,7 @@
 		/// </summary>
 		/// <remarks>
 		/// These rules are prepended to the <c>TargetFilter</c> supplied when the aspect is applied. The resulting effective filter is evaluated using normal TargetFilter rule ordering.
+		/// TargetFilter is compile-time selection metadata and is not copied to the runtime aspect instance.
 		/// </remarks>
 		public string? DefaultTargetFilter { get; set; }
 	}
@@ -110,6 +111,10 @@
 		/// <summary>
 		/// Reuse one lazily-created aspect attribute instance per generated interceptor.
 		/// </summary>
+		/// <remarks>
+		/// The instance is shared across threads; hooks that mutate it must be thread-safe.
+		/// An exception during construction surfaces as a <see cref="TypeInitializationException"/>.
+		/// </remarks>
 		Static,
 		/// <summary>
 		/// Create a new aspect attribute instance for each intercepted call.

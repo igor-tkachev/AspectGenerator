@@ -25,6 +25,8 @@ Each rule can use a matcher prefix. Unprefixed rules and `pattern:` use the nati
 - no matching entry means the filter set does not apply;
 - exclude filters do not suppress explicit method-level aspect attributes.
 
+`TargetFilter` is compile-time selection metadata and is not copied to the runtime aspect instance; its constructor or property initializer default remains in effect there.
+
 The property name is always `TargetFilter`; only the property type can differ. The aspect attribute can expose it as `string?` or `string[]?`. Every string is split into lines, empty lines are ignored, and each non-comment line is one rule. For `string[]`, rules from all items are concatenated in order.
 
 Standalone rule syntax:
@@ -302,6 +304,9 @@ For assembly or type filters, the aspect attribute itself is applied to the asse
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
 sealed class LogAttribute : Attribute
 {
+    /// <summary>
+    /// Compile-time selection metadata; this value is not copied to the runtime aspect instance.
+    /// </summary>
     public string? TargetFilter { get; set; }
 
     public static void OnAfterCall(InterceptInfo info) {}

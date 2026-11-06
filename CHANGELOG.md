@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.2 — Unreleased
+
+- Fixed generated interceptors with multiple aspects and async hooks emitting duplicate `async` modifiers; non-generic `Task` and `ValueTask` targets are now awaited before running completion hooks.
+- Fixed `OnCall` ordering diagnostics to use the same `Order`-sorted aspect chain as grouping and code generation.
+- The minimum-SDK CI consumers now use the project package version and verify the restored package matches the locally packed bytes.
+- Documented that `TargetFilter` is compile-time metadata and is not copied to runtime aspect instances, and that Static-lifetime instances are shared across threads and construction failures surface as `TypeInitializationException`.
+
 ## 1.1.1 — 2026-11-05
 
 - Fixed interceptors that did not compile because they named something they cannot access. Calls to members of file-local types (`file class`) are now left as they are and reported with `AG0003`, like calls to private and protected targets: the compiler counts a file-local type as accessible within the assembly, but the generated file cannot name it. The same now holds for the aspect side: an aspect type that is private, protected or file-local, an attribute constructor the generated code cannot access, an enum or `typeof` argument of such a type, a type argument of a generic aspect that cannot be named, and a hook method that is private or protected (the hooks are checked as the interceptor of that call uses them: an async hook a synchronous call never calls does not count). Before, each of these failed the build with `CS0122` or `CS0400` in `Interceptors.g.cs`. A file-local type argument of a generic call gets a generic interceptor, as a private nested one does.

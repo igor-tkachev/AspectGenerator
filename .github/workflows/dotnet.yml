@@ -61,7 +61,11 @@ jobs:
           9.0.100
           10.0.x
     - name: Build and pack the generator
+      shell: bash
       run: |
+        set -euo pipefail
+        version="$(dotnet msbuild Source/AspectGenerator.csproj -getProperty:Version)"
+        echo "ASPECT_GENERATOR_VERSION=$version" >> "$GITHUB_ENV"
         dotnet build Source/AspectGenerator.csproj --configuration Release -warnaserror
         dotnet pack Source/AspectGenerator.csproj --no-build --configuration Release --output "$RUNNER_TEMP/feed"
     - name: Build and run consumers
@@ -79,6 +83,14 @@ jobs:
             <add key="feed" value="$RUNNER_TEMP/feed" />
             <add key="nuget" value="https://api.nuget.org/v3/index.json" />
           </packageSources>
+          <packageSourceMapping>
+            <packageSource key="feed">
+              <package pattern="AspectGenerator" />
+            </packageSource>
+            <packageSource key="nuget">
+              <package pattern="*" />
+            </packageSource>
+          </packageSourceMapping>
         </configuration>
         EOF
           cat > "$dir/Consumer.csproj" <<EOF
@@ -91,7 +103,7 @@ jobs:
             <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
           </PropertyGroup>
           <ItemGroup>
-            <PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />
+            <PackageReference Include="AspectGenerator" Version="$ASPECT_GENERATOR_VERSION" PrivateAssets="all" />
           </ItemGroup>
         </Project>
         EOF
@@ -121,5 +133,8 @@ jobs:
             }
         }
         EOF
-          (cd "$dir" && dotnet --version && dotnet build --configuration Release && dotnet run --configuration Release --no-build)
+          (cd "$dir" && dotnet --version && dotnet restore --packages "$dir/packages")
+          # An isolated cache and source mapping require the local package; verify its exact bytes as well.
+          cmp "$RUNNER_TEMP/feed/AspectGenerator.$ASPECT_GENERATOR_VERSION.nupkg" "$dir/packages/aspectgenerator/$ASPECT_GENERATOR_VERSION/aspectgenerator.$ASPECT_GENERATOR_VERSION.nupkg"
+          (cd "$dir" && dotnet build --configuration Release --no-restore && dotnet run --configuration Release --no-build)
         done

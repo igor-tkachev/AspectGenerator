@@ -207,6 +207,7 @@ namespace AspectGenerator
 					/// </summary>
 					/// <remarks>
 					/// These rules are prepended to the <c>TargetFilter</c> supplied when the aspect is applied. The resulting effective filter is evaluated using normal TargetFilter rule ordering.
+					/// TargetFilter is compile-time selection metadata and is not copied to the runtime aspect instance.
 					/// </remarks>
 					public string? DefaultTargetFilter { get; set; }
 				}
@@ -223,6 +224,10 @@ namespace AspectGenerator
 					/// <summary>
 					/// Reuse one lazily-created aspect attribute instance per generated interceptor.
 					/// </summary>
+					/// <remarks>
+					/// The instance is shared across threads; hooks that mutate it must be thread-safe.
+					/// An exception during construction surfaces as a <see cref="TypeInitializationException"/>.
+					/// </remarks>
 					Static,
 					/// <summary>
 					/// Create a new aspect attribute instance for each intercepted call.
@@ -602,6 +607,8 @@ namespace AspectGenerator
 					}
 				}
 			}
+
+			aspectedMethods = [..aspectedMethods.Select(static m => m with { Attributes = InterceptorNamingService.GetOrderedAttributes(m.Attributes) })];
 
 			trace.SetCounter("Intercepted call sites", aspectedMethods.Length);
 			trace.SetCounter("Matched target methods", aspectedMethods.Select(static m => m.Method).Distinct(SymbolEqualityComparer.Default).Count());
@@ -2015,6 +2022,9 @@ namespace AspectGenerator
 				sb.Append(" };").AppendLine().AppendLine();
 			}
 
+			if (generateAsync)
+				sb.Insert(methodModifierPosition, "async ");
+
 			GenerateAttribute(0, "\t\t\t", false);
 
 			void GenerateAttribute(int idx, string indent, bool isPrevData)
@@ -2054,9 +2064,6 @@ namespace AspectGenerator
 						case "PassArguments"     : passArguments     = arg.Value is true; break;
 						case "UseInterceptData"  : useInterceptData  = arg.Value is true; break;
 					}
-
-				if (generateAsync)
-					sb.Insert(methodModifierPosition, "async ");
 
 				var returnType = generateAsync
 					? asyncResultType is null ? "global::AspectGenerator.Void" : PrintType(asyncResultType)
@@ -2173,7 +2180,7 @@ namespace AspectGenerator
 						.Append(indent)
 						.Append(
 							!returnsValue
-								? string.Empty
+								? generateAsync ? "await " : string.Empty
 								: $"{(needInfo ? $"__info__{idx}.ReturnValue" : "var __return__")} = {(generateAsync ? "await " : "")}")
 						.Append(
 							onCall is null

@@ -48,7 +48,7 @@ sealed class TimingAttribute : Attribute
 
 `AspectInstanceLifetime.Static` stores the constructed aspect attribute in a per-interceptor generated static state holder. The holder is initialized lazily on first use of that interceptor, so unrelated interceptor aspect instances are not constructed.
 
-Static lifetime aspect instances are shared. Aspect authors should treat them as immutable configuration objects or implement their own synchronization for shared mutable state.
+Static lifetime aspect instances are shared across threads; hooks that mutate the attribute must be thread-safe. An exception during construction surfaces as `TypeInitializationException` from the generated static state holder.
 
 `AspectInstanceLifetime.Instance` creates a new applied aspect attribute instance for every intercepted call. Hooks still need to be static and accessible from generated code.
 
