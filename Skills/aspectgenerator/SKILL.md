@@ -9,7 +9,7 @@ AspectGenerator provides AOP-like compile-time method aspects for C# by rewritin
 
 Build consuming projects with .NET SDK 9.0.100 or later (Roslyn 4.12; Visual Studio 2022 17.12 or later). An older compiler reports `CS9057` and does not load the generator, so aspects are not applied. This is a build-toolchain requirement; a `net8.0` project built with that SDK works.
 
-Use `<PackageReference Include="AspectGenerator" Version="1.1.1" PrivateAssets="all" />` for a private build-time dependency. Each project compiling call sites to intercept needs the generator, normally through a direct reference. A library can explicitly pass it and its MSBuild wiring to consumers with `PrivateAssets="none"`. The package has no runtime assembly.
+Use `<PackageReference Include="AspectGenerator" PrivateAssets="all" />` for a private build-time dependency, with `Version` set to the version of the AspectGenerator package this skill ships in. Each project compiling call sites to intercept needs the generator, normally through a direct reference. A library can explicitly pass it and its MSBuild wiring to consumers with `PrivateAssets="none"`. The package has no runtime assembly.
 
 The skill is available at `<global-packages>/aspectgenerator/<version>/skills/aspectgenerator/` or as a copy in `.agents/skills/aspectgenerator/` or `.claude/skills/aspectgenerator/`. Its guides use relative links and work in either location.
 

@@ -6,6 +6,8 @@
 
 `TargetFilter` applies an aspect to matching target methods at assembly or type level. It belongs to the applied aspect attribute, not to `[Aspect]`.
 
+`TargetFilter` is compile-time selection metadata and is not copied to the runtime aspect instance; its constructor or property initializer default remains in effect there.
+
 `DefaultTargetFilter` belongs to `[Aspect]` on the aspect definition. It lets aspect authors prepend default rules to assembly-level or type-level applications of that aspect. V1 uses simple concatenation:
 
 ```text

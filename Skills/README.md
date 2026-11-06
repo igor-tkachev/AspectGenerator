@@ -12,7 +12,7 @@ Consumers read the installed skill from `<global-packages>/aspectgenerator/<vers
 - Text written into user code, including comments and names, is ordinary code text, with no notes about the agent that wrote it.
 - Keep guidance versioned with the implementation. Changes to a documented public API, generator capability or default update the corresponding guide in the same change. Keep the README and wiki synchronized as behavior changes.
 - Do not put maintainer prompts, roadmaps, test prompts or internal notes under `aspectgenerator/`; every file there ships to consumers.
-- Files are UTF-8 without BOM. Follow `.gitattributes` and preserve the repository's CRLF line endings.
+- Files are UTF-8 without BOM. Follow `.gitattributes` (`text=auto`); repository text files are stored with LF line endings.
 
 ## Validation
 

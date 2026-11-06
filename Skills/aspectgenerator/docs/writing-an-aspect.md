@@ -71,7 +71,7 @@ Instance  create a new applied aspect attribute instance for every intercepted c
 
 Static lifetime stores aspect instances in per-interceptor generated static state holders. These holders are initialized lazily on first use of the corresponding interceptor, so unrelated interceptor aspect instances are not constructed.
 
-Static aspect instances are shared. Treat them as immutable configuration objects or implement synchronization for shared mutable state.
+Static lifetime aspect instances are shared across threads; hooks that mutate the attribute must be thread-safe. An exception during construction surfaces as `TypeInitializationException` from the generated static state holder. Treat static instances as immutable configuration objects or implement synchronization for shared mutable state.
 
 Use this guidance:
 
