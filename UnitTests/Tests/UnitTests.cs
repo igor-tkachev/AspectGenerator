@@ -81,7 +81,7 @@ namespace AspectGenerator.Tests
 			CollectionAssert.Contains(entries, "build/AspectGenerator.targets");
 			CollectionAssert.Contains(entries, "analyzers/dotnet/cs/AspectGenerator.dll");
 			CollectionAssert.Contains(entries, "README.md");
-			CollectionAssert.Contains(entries, "SKILL.md");
+			SkillPackageValidation.Validate(archive);
 			CollectionAssert.Contains(entries, "CHANGELOG.md");
 			CollectionAssert.Contains(entries, "LICENSE.TXT");
 			CollectionAssert.Contains(entries, "buildTransitive/AspectGenerator.props");

@@ -40,7 +40,7 @@
 		<None Include="buildTransitive\AspectGenerator.targets"    Pack="true" PackagePath="buildTransitive\AspectGenerator.targets" />
 		<None Include="..\LICENSE.TXT"                    Pack="true" PackagePath="\" />
 		<None Include="..\README.md"                      Pack="true" PackagePath="\" />
-		<None Include="..\SKILL.md"                       Pack="true" PackagePath="\" />
+		<None Include="..\Skills\aspectgenerator\**\*.md" Pack="true" PackagePath="skills/aspectgenerator/%(RecursiveDir)%(Filename)%(Extension)" />
 		<None Include="..\CHANGELOG.md"                   Pack="true" PackagePath="\" />
 	</ItemGroup>
 </Project>

@@ -140,7 +140,7 @@ AspectGenerator analyzes code during the editor's live analysis so IDE diagnosti
 
 AspectGenerator writes an informational build report file during normal builds. The report is not printed to the console by default. Diagnostics are reserved for errors, warnings, and actionable misconfiguration.
 
-For AI coding agents and automation-oriented reviews, see [SKILL.md](SKILL.md). It summarizes the required build toolchain, project configuration, aspect API, hook model, target filters, diagnostics, build report usage, and common review checks.
+For AI coding agents and automation-oriented reviews, see [AspectGenerator skill](https://github.com/igor-tkachev/AspectGenerator/blob/master/Skills/aspectgenerator/SKILL.md). It summarizes the required build toolchain, project configuration, aspect API, hook model, target filters, diagnostics, build report usage, and common review checks.
 
 ## Using AspectGenerator in libraries
 
@@ -371,7 +371,7 @@ The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarn
 
 The README is the concise entry point. The wiki should contain expanded pages with the same current terminology:
 
-- [SKILL.md](SKILL.md) is the compact agent-oriented guide for configuration, usage, diagnostics, build reports, and review workflows.
+- [AspectGenerator skill](https://github.com/igor-tkachev/AspectGenerator/blob/master/Skills/aspectgenerator/SKILL.md) is the compact agent-oriented guide for configuration, usage, diagnostics, build reports, and review workflows.
 - [CHANGELOG.md](CHANGELOG.md) contains release notes.
 - [Configuration](https://github.com/igor-tkachev/AspectGenerator/wiki/Configuration)
 - [Aspect library mode](https://github.com/igor-tkachev/AspectGenerator/wiki/Aspect-library-mode)
@@ -410,4 +410,4 @@ Use `dotnet clean` for normal cleanup. `Clean-BuildArtifacts.ps1` is a repositor
 
 Build artifacts under `bin/` and `obj/` must not be committed. If generated source snapshots are needed, store them in explicit repository baseline folders such as `Baselines/GeneratedFiles`, not under `obj/GeneratedFiles`.
 
-`SKILL.md` is the package/user/agent operational guide. `AGENTS.md` contains repository maintenance instructions for coding agents working in this repo.
+[Skills/aspectgenerator/SKILL.md](https://github.com/igor-tkachev/AspectGenerator/blob/master/Skills/aspectgenerator/SKILL.md) is the packaged agent skill entry point, with task guides under `docs/`. The package installs it at `skills/aspectgenerator/`; consumers can use it from their NuGet global-packages folder or copy it into `.agents/skills/aspectgenerator/` or `.claude/skills/aspectgenerator/`. [Skills/README.md](https://github.com/igor-tkachev/AspectGenerator/blob/master/Skills/README.md) describes maintenance and validation. `AGENTS.md` contains repository maintenance instructions for coding agents working in this repo.

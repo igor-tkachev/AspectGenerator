@@ -11,6 +11,7 @@ jobs:
     env:
       BUILD_CONFIGURATION: ${{ matrix.configuration }}
       SOLUTION: AspectGenerator.slnx
+      MSBUILDDISABLENODEREUSE: "1"
 
     strategy:
       fail-fast: false
@@ -38,12 +39,11 @@ jobs:
           exit 1
         fi
     - name: Build
-      run: dotnet build ${{ env.SOLUTION }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
+      run: dotnet build ${{ env.SOLUTION }} --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} -warnaserror -nodeReuse:false
+    - name: Pack for package-content validation
+      run: dotnet pack Source/AspectGenerator.csproj --no-build --configuration ${{ env.BUILD_CONFIGURATION }} -warnaserror -nodeReuse:false
     - name: Test
       run: dotnet test ${{ env.SOLUTION }} --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal
-    - name: Pack
-      if: matrix.configuration == 'Release'
-      run: dotnet pack Source/AspectGenerator.csproj --no-build --configuration ${{ env.BUILD_CONFIGURATION }}
 
   # The documented minimum build toolchain: SDK 9.0.100 is the first one that ships Roslyn 4.12, the Roslyn the generator is built against.
   # The generator and its tests are built with the current SDK (the solution targets net10.0); SDK 9.0.100 builds consumers of the packed generator,
