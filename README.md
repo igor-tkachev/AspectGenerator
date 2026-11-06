@@ -30,7 +30,7 @@ dotnet add package AspectGenerator
 The package is a development dependency, so `dotnet add package` adds it with `PrivateAssets="all"`. If you edit the project file by hand, write the same thing:
 
 ```xml
-<PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />
+<PackageReference Include="AspectGenerator" Version="1.1.1" PrivateAssets="all" />
 ```
 
 AspectGenerator is a build-time generator, not a runtime reference. The package ships only the analyzer and the MSBuild props and targets that configure it; it has no assembly your code references and nothing is deployed with your application. Because the analyzer needs the package's MSBuild wiring (`InterceptorsNamespaces` and the generator options) to produce interceptors that compile, it must run only in the project that references the package directly. Marking the package private keeps it from flowing to the consumers of your library. A library that wants its consumers to get the generator opts in with `PrivateAssets="none"`; the wiring flows with it (see [Using AspectGenerator in libraries](#using-aspectgenerator-in-libraries)).
@@ -149,7 +149,7 @@ The generator rewrites only the calls compiled in the project that references it
 ```xml
 <!-- Library whose public aspects should apply in its consumers -->
 <ItemGroup>
-  <PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="none" />
+  <PackageReference Include="AspectGenerator" Version="1.1.1" PrivateAssets="none" />
 </ItemGroup>
 <PropertyGroup>
   <AspectGeneratorPublicApi>true</AspectGeneratorPublicApi>

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.1 — Unreleased
+## 1.1.1 — 2026-11-05
 
 - Fixed interceptors that did not compile because they named something they cannot access. Calls to members of file-local types (`file class`) are now left as they are and reported with `AG0003`, like calls to private and protected targets: the compiler counts a file-local type as accessible within the assembly, but the generated file cannot name it. The same now holds for the aspect side: an aspect type that is private, protected or file-local, an attribute constructor the generated code cannot access, an enum or `typeof` argument of such a type, a type argument of a generic aspect that cannot be named, and a hook method that is private or protected (the hooks are checked as the interceptor of that call uses them: an async hook a synchronous call never calls does not count). Before, each of these failed the build with `CS0122` or `CS0400` in `Interceptors.g.cs`. A file-local type argument of a generic call gets a generic interceptor, as a private nested one does.
 - Changed: an aspect applied to a type or the assembly with a `TargetFilter` whose arguments include an enum or `typeof` of a type the generated file cannot name (a private nested enum, for example) is no longer intercepted; the calls are reported with `AG0006`/`AG0007` (information). Before, the interceptor passed such an enum as its number and compiled.

@@ -20,7 +20,7 @@ In the library that defines shared aspects:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />
+  <PackageReference Include="AspectGenerator" Version="1.1.1" PrivateAssets="all" />
 </ItemGroup>
 
 <PropertyGroup>
@@ -32,7 +32,7 @@ In consuming projects:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="AspectGenerator" Version="1.1.0" PrivateAssets="all" />
+  <PackageReference Include="AspectGenerator" Version="1.1.1" PrivateAssets="all" />
   <PackageReference Include="MyCompany.Aspects" Version="..." />
 </ItemGroup>
 ```
