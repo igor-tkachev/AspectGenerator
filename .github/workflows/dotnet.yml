@@ -65,6 +65,7 @@ jobs:
       run: |
         set -euo pipefail
         version="$(dotnet msbuild Source/AspectGenerator.csproj -getProperty:Version)"
+        [ -n "$version" ] || { echo "Cannot read the package version from Source/AspectGenerator.csproj" >&2; exit 1; }
         echo "ASPECT_GENERATOR_VERSION=$version" >> "$GITHUB_ENV"
         dotnet build Source/AspectGenerator.csproj --configuration Release -warnaserror
         dotnet pack Source/AspectGenerator.csproj --no-build --configuration Release --output "$RUNNER_TEMP/feed"
@@ -135,6 +136,6 @@ jobs:
         EOF
           (cd "$dir" && dotnet --version && dotnet restore --packages "$dir/packages")
           # An isolated cache and source mapping require the local package; verify its exact bytes as well.
-          cmp "$RUNNER_TEMP/feed/AspectGenerator.$ASPECT_GENERATOR_VERSION.nupkg" "$dir/packages/aspectgenerator/$ASPECT_GENERATOR_VERSION/aspectgenerator.$ASPECT_GENERATOR_VERSION.nupkg"
+          cmp "$RUNNER_TEMP/feed/AspectGenerator.$ASPECT_GENERATOR_VERSION.nupkg" "$dir/packages/aspectgenerator/${ASPECT_GENERATOR_VERSION,,}/aspectgenerator.${ASPECT_GENERATOR_VERSION,,}.nupkg"
           (cd "$dir" && dotnet build --configuration Release --no-restore && dotnet run --configuration Release --no-build)
         done
