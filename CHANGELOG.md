@@ -6,6 +6,7 @@
 - Fixed `OnCall` ordering diagnostics to use the same `Order`-sorted aspect chain as grouping and code generation.
 - The minimum-SDK CI consumers now use the project package version and verify the restored package matches the locally packed bytes.
 - Documented that `TargetFilter` is compile-time metadata and is not copied to runtime aspect instances, and that Static-lifetime instances are shared across threads and construction failures surface as `TypeInitializationException`.
+- Clarified the build-toolchain requirement: the .NET 9 SDK is what Visual Studio 2022 has shipped since 17.12, so any Visual Studio 2022 from 17.12 on (including the 17.14 LTSC release), Visual Studio 2026, Rider 2024.3 or later, or the `dotnet` CLI builds a project that uses AspectGenerator; the newest Visual Studio is not required.
 - Ship the AspectGenerator agent guide as the discoverable `aspectgenerator` skill under `skills/aspectgenerator/`, with YAML frontmatter, a short entry point and focused task guides. Remove the former package-root `SKILL.md`; validate the packed skill metadata and relative links in CI.
 
 ## 1.1.1 — 2026-11-05

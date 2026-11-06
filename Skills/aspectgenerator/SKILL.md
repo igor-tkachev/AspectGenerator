@@ -7,7 +7,7 @@ description: Configure and use AspectGenerator compile-time C# method aspects in
 
 AspectGenerator provides AOP-like compile-time method aspects for C# by rewriting visible call sites with C# interceptors. It is not runtime AOP, does not use runtime proxies, and does not weave IL.
 
-Build consuming projects with .NET SDK 9.0.100 or later (Roslyn 4.12; Visual Studio 2022 17.12 or later). An older compiler reports `CS9057` and does not load the generator, so aspects are not applied. This is a build-toolchain requirement; a `net8.0` project built with that SDK works.
+Build consuming projects with .NET SDK 9.0.100 or later (Roslyn 4.12), which Visual Studio 2022 has shipped since version 17.12 (November 2024). An older compiler reports `CS9057` and does not load the generator, so aspects are not applied. This is a build-toolchain requirement; a `net8.0` project built with that SDK works.
 
 Use `<PackageReference Include="AspectGenerator" PrivateAssets="all" />` for a private build-time dependency, with `Version` set to the version of the AspectGenerator package this skill ships in. Each project compiling call sites to intercept needs the generator, normally through a direct reference. A library can explicitly pass it and its MSBuild wiring to consumers with `PrivateAssets="none"`. The package has no runtime assembly.
 

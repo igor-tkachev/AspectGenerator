@@ -6,7 +6,7 @@
 
 ## Build-tool requirement
 
-AspectGenerator requires projects that use it to be built with .NET SDK 9.0.100 or later (Roslyn 4.12; Visual Studio 2022 17.12 or later).
+AspectGenerator requires projects that use it to be built with .NET SDK 9.0.100 or later (Roslyn 4.12), which Visual Studio 2022 has shipped since version 17.12 (November 2024).
 
 An older compiler, such as SDK 8.0.x or Visual Studio 2022 before 17.12, cannot load the generator: the build reports `CS9057` (the analyzer references a newer compiler version) and the aspects are silently not applied. When aspects seem to be ignored, check the build output for `CS9057` first.
 

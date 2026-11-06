@@ -10,9 +10,11 @@ AspectGenerator provides AOP-like method aspects for C# using compile-time call-
 AspectGenerator is not traditional runtime AOP. Aspects are applied to call sites visible to the current compilation.
 
 > [!IMPORTANT]
-> **Projects that use AspectGenerator must be built with .NET SDK 9.0.100 or later (Roslyn 4.12; Visual Studio 2022 17.12 or later).**
+> **Projects that use AspectGenerator must be built with .NET SDK 9.0.100 or later (Roslyn 4.12), which Visual Studio 2022 has shipped since version 17.12 (November 2024).**
 >
 > This is a build-toolchain requirement, not a target-framework requirement. AspectGenerator itself targets `netstandard2.0`, and your project target framework is a separate decision. The project must be compiled with a Roslyn 4.12 or newer compiler (the .NET 9 SDK or later) because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data and the `InterceptorsNamespaces` property. Projects that target `net8.0` are supported when they are built with such an SDK. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
+>
+> This does not mean the newest Visual Studio. Any Visual Studio 2022 from 17.12 on builds it, including the 17.14 Long-Term Servicing Channel release; so do Visual Studio 2026, JetBrains Rider 2024.3 or later, and the `dotnet` CLI with the .NET 9 or 10 SDK. An existing Visual Studio 2022 installation needs only an update, not a new major version, and the SDK installs side by side with older ones.
 >
 > An older compiler, such as SDK 8.0.x or Visual Studio 2022 before 17.12, cannot load the generator: the build reports `CS9057` (the analyzer references a newer compiler version) and the aspects are silently not applied.
 
