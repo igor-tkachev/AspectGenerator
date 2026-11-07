@@ -539,6 +539,30 @@ namespace AspectGenerator.Tests.TargetFilters
 		}
 
 		[TestMethod]
+		public void BracketThatIsNotARankSpecifierStaysAnOrdinaryCharacterTest()
+		{
+			// "*[*" is a wildcard, not an array rank: the ; after it still separates two conditions.
+			const string matrix = "public System.Int32[,] Acme.Core.Service.Matrix()";
+
+			var include = Probe("returns: *[*; method: Matrix");
+
+			AssertDiagnostics("returns: *[*; method: Matrix");
+			Assert.AreEqual(1, include.RuleCount);
+			Assert.AreEqual('i', Kind(include, matrix));
+			Assert.AreEqual(1, include.Kinds.Count(static k => k == 'i'));
+
+			// The same rule as an exclusion still excludes.
+			var exclude = Probe("method: *\n-returns: *[*; method: Matrix");
+
+			Assert.AreEqual('e', Kind(exclude, matrix));
+			Assert.AreEqual('i', Kind(exclude, SaveVoid));
+			Assert.AreEqual(1, exclude.Kinds.Count(static k => k == 'e'));
+
+			// A rank specifier with spaces is still one unit.
+			AssertDiagnostics("Fill(int[ , ], string[])");
+		}
+
+		[TestMethod]
 		public void ArrayOfMultiDimensionalArraysKeepsTheOrderOfRankSpecifiersTest()
 		{
 			// An array of int[,] is int[][,] in C#; the rank specifier of the outer array comes first.

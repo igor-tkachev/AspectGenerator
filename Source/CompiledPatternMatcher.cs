@@ -9,6 +9,21 @@ namespace AspectGenerator
 {
 	static partial class AspectFilters
 	{
+		/// <summary>
+		/// Reads an array rank specifier at <paramref name="start"/>: '[', then only commas and spaces, then ']'
+		/// (<c>[]</c>, <c>[,]</c>, <c>[,,]</c>). It is one unit for the top-level splits, so the commas of a rank do not
+		/// separate parameters. Any other '[' (a wildcard rule such as <c>*[*</c>) is an ordinary character.
+		/// </summary>
+		static bool TryReadRankSpecifier(string text, int start, out int end)
+		{
+			end = start + 1;
+
+			while (end < text.Length && (text[end] == ',' || text[end] == ' '))
+				end++;
+
+			return end < text.Length && text[end] == ']';
+		}
+
 		static int IndexOfTopLevel(string text, char value)
 		{
 			var depth   = 0;
@@ -30,9 +45,15 @@ namespace AspectGenerator
 					continue;
 				}
 
-				if (ch == '<' || ch == '[')
+				if (ch == '[' && TryReadRankSpecifier(text, i, out var rankEnd))
+				{
+					i = rankEnd;
+					continue;
+				}
+
+				if (ch == '<')
 					depth++;
-				else if ((ch == '>' || ch == ']') && depth > 0)
+				else if (ch == '>' && depth > 0)
 					depth--;
 				else if (depth == 0 && ch == value)
 					return i;
@@ -64,9 +85,15 @@ namespace AspectGenerator
 					continue;
 				}
 
-				if (ch == '<' || ch == '[')
+				if (ch == '[' && TryReadRankSpecifier(text, i, out var rankEnd))
+				{
+					i = rankEnd;
+					continue;
+				}
+
+				if (ch == '<')
 					depth++;
-				else if ((ch == '>' || ch == ']') && depth > 0)
+				else if (ch == '>' && depth > 0)
 					depth--;
 				else if (depth == 0 && ch == separator)
 				{
@@ -102,9 +129,18 @@ namespace AspectGenerator
 					continue;
 				}
 
-				if (ch == '<' || ch == '[')
+				if (ch == '[' && TryReadRankSpecifier(text, i, out var rankEnd))
+				{
+					if (start < 0)
+						start = i;
+
+					i = rankEnd;
+					continue;
+				}
+
+				if (ch == '<')
 					depth++;
-				else if ((ch == '>' || ch == ']') && depth > 0)
+				else if (ch == '>' && depth > 0)
 					depth--;
 
 				if (depth == 0 && char.IsWhiteSpace(ch))

@@ -68,24 +68,51 @@ namespace AspectGenerator.Tests
 		public void GenericMethodDeclaredInTheProjectIsJudgedByItsDefinitionTest()
 		{
 			const string selected = "Repository`1[String].Get<Int32>;7";
+			const string unrelated = "contains: NoSuchMethodAnywhere";
 
 			// A method declared in the project is judged by its definition, with its type parameters. A call the
-			// definition does not select is judged again by the call's type arguments only when the filter can also
-			// select methods of referenced assemblies (contains: and regex: can; fulltype: with a constructed type
-			// cannot). A method of a referenced assembly is judged per call.
-			foreach (var (filter, expected) in new[]
+			// definition does not select is judged again by the call's type arguments only when the project's
+			// assembly-level filters can also select methods of referenced assemblies; that is one flag for the whole
+			// project, so a type-level rule depends on the other filters (an unrelated contains: rule turns it on).
+			foreach (var (typeFilter, assemblyFilter, expected) in new[]
 			{
-				("Repository<TEntity>.Get<TKey>(TKey)",                                         selected),
-				("fulltype: Repository<TEntity>",                                               selected),
-				("fulltype: Repository<System.String>",                                         "7"),
-				("contains: Repository<TEntity>.Get<TKey>(TKey)",                               selected),
-				("contains: Repository<System.String>.Get<System.Int32>(System.Int32)",         selected),
-				("System.Collections.Generic.List<System.Int32>.Add(System.Int32)",             "List`1[Int32].Add<>;7"),
-				("contains: System.Collections.Generic.List<System.Int32>.Add(System.Int32)",   "List`1[Int32].Add<>;7"),
-				("contains: System.Collections.Generic.List<T>.Add(T)",                         "7"),
+				("fulltype: Repository<TEntity>",          "",         selected),
+				("fulltype: Repository<System.String>",    "",         "7"),
+				("fulltype: Repository<System.String>",    unrelated,  selected),
+				("fulltype: Repository<TEntity>",          unrelated,  selected),
+				("fulltype: Repository<System.Int32>",     unrelated,  "7"),
+				("",                                       "Repository<TEntity>.Get<TKey>(TKey)",                                         selected),
+				("",                                       "contains: Repository<TEntity>.Get<TKey>(TKey)",                               selected),
+				("",                                       "contains: Repository<System.String>.Get<System.Int32>(System.Int32)",         selected),
+				("",                                       "System.Collections.Generic.List<System.Int32>.Add(System.Int32)",             "List`1[Int32].Add<>;7"),
+				("",                                       "contains: System.Collections.Generic.List<System.Int32>.Add(System.Int32)",   "List`1[Int32].Add<>;7"),
+				("",                                       "contains: System.Collections.Generic.List<T>.Add(T)",                         "7"),
 			})
 				AssertRunsWithResult(
-					GenericSource.Replace("FILTER", filter),
+					GenericSource
+						.Replace("TYPE_ATTRIBUTE", typeFilter.Length == 0 ? "" : $"[AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = \"{typeFilter}\")]")
+						.Replace("ASSEMBLY_ATTRIBUTE", assemblyFilter.Length == 0 ? "" : $"[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = \"{assemblyFilter}\")]"),
+					expected);
+		}
+
+		[TestMethod]
+		public void ReducedGenericExtensionCallOfAReferencedAssemblyKeepsItsTypeParametersTest()
+		{
+			// Known exception to "a method of a referenced assembly is judged per call": an instance-form call of a generic
+			// extension method is described by the reduced symbol, whose method type parameters are not substituted
+			// (Any<TSource>(this IEnumerable<System.Int32>)), while the static form is constructed (Any<System.Int32>(...)).
+			const string instance = "a.Any()";
+			const string @static  = "Enumerable.Any<int>(a)";
+
+			foreach (var (call, filter, expected) in new[]
+			{
+				(instance, "contains: Any<System.Int32>",                                                                   "True"),
+				(@static,  "contains: Any<System.Int32>",                                                                   "Enumerable.Any<Int32>;True"),
+				(instance, "contains: Any<TSource>(this System.Collections.Generic.IEnumerable<System.Int32>)",             "Enumerable.Any<Int32>;True"),
+				(@static,  "contains: Any<TSource>(this System.Collections.Generic.IEnumerable<System.Int32>)",             "True"),
+			})
+				AssertRunsWithResult(
+					ReferencedExtensionSource.Replace("FILTER", filter).Replace("CALL", call),
 					expected);
 		}
 
@@ -152,8 +179,9 @@ namespace AspectGenerator.Tests
 
 		const string GenericSource =
 			"""
-			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "FILTER")]
+			ASSEMBLY_ATTRIBUTE
 
+			TYPE_ATTRIBUTE
 			class Repository<TEntity>
 			{
 				public TKey Get<TKey>(TKey key) { return key; }
@@ -168,6 +196,23 @@ namespace AspectGenerator.Tests
 					list.Add(new Repository<string>().Get<int>(7));
 
 					return $"{list[0]}";
+				}
+			}
+			""";
+
+		const string ReferencedExtensionSource =
+			"""
+			using System.Linq;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "FILTER")]
+
+			static class Calls
+			{
+				public static string Run()
+				{
+					var a = new[] { 1 };
+
+					return $"{CALL}";
 				}
 			}
 			""";
