@@ -162,8 +162,8 @@ namespace AspectGenerator.Tests.TargetFilters
 		{
 			var outcome = Probe(Misspelled);
 
-			// The name has a space, which no method name has: the rule matches nothing and says so.
-			CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterRuleMatchesNothing }, outcome.Ids);
+			// The name has a space, which no C# method name has: the rule matches nothing here, and is told about as a likely typo.
+			CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterNameWithWhiteSpace }, outcome.Ids);
 			AssertMatchesNothing(outcome);
 		}
 
@@ -172,8 +172,8 @@ namespace AspectGenerator.Tests.TargetFilters
 		{
 			AssertMatchesNothing(Probe(ModifierUpperCase));
 			AssertMatchesNothing(Probe(ModifierOnlyUpperCase));
-			CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterRuleMatchesNothing }, Probe(ModifierUpperCase).Ids);
-			CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterRuleMatchesNothing }, Probe(ModifierOnlyUpperCase).Ids);
+			CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterNameWithWhiteSpace }, Probe(ModifierUpperCase).Ids);
+			CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterNameWithWhiteSpace }, Probe(ModifierOnlyUpperCase).Ids);
 
 			Assert.AreEqual('i', Kind(Probe(ModifierLowerCase), SaveVoid));
 			Assert.AreEqual('i', Kind(Probe(ModifierOnlyLowerCase), PublicStatic));
@@ -202,13 +202,13 @@ namespace AspectGenerator.Tests.TargetFilters
 		public void ExcludePrefixReadsOnlyTheFirstPrefixTest()
 		{
 			// "-&" is an exclude whose body starts with "&": the second prefix is not read, so the rule is a compact
-			// method pattern whose name has a space ("& method"). It matches nothing, which is reported, and there is no
-			// leading-& diagnostic.
+			// method pattern whose name has a space ("& method"). It matches nothing, the space is told about as a likely
+			// typo, and there is no leading-& diagnostic.
 			foreach (var input in new[] { ExcludeAndPrefix, ExcludeOrPrefix })
 			{
 				var outcome = Probe(input);
 
-				CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterRuleMatchesNothing }, outcome.Ids, input);
+				CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterNameWithWhiteSpace }, outcome.Ids, input);
 				AssertMatchesNothing(outcome);
 			}
 		}

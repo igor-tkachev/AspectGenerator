@@ -8,28 +8,36 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace AspectGenerator.Tests.TargetFilters
 {
 	/// <summary>
-	/// <c>AG0210</c>, a valid rule that can match no method. It is defined by the rule (an accessibility mask no method
-	/// has; white space in a namespace, type or method name), and measured here: every rule it names matches none of the
-	/// targets of the golden corpus, it is silent where a filter may hold white space, and in the curated set it is reported
-	/// only for the inputs listed below.
+	/// <c>AG0210</c>, a valid rule that can match no method (an accessibility mask no method has), and <c>AG0211</c>, a rule
+	/// that names white space where no C# name has it (a likely typo; F# and IL names can hold it, so it says nothing about
+	/// matching). <c>AG0210</c> is measured: every rule it names matches none of the targets of the golden corpus nor of the
+	/// methods with unusual names added here. Both are silent where a filter may hold white space, and in the curated set
+	/// they are reported only for the rules listed below.
 	/// </summary>
 	[TestClass]
 	public class TargetFilterRuleMatchesNothingTests
 	{
 		public TestContext TestContext { get; set; } = null!;
 
-		/// <summary>
-		/// The rules of the curated set <c>AG0210</c> is reported for. Every one of them matches nothing: the hand cases were
-		/// written to pin what the parser does with such a rule, and the documentation lines are not filters at all
-		/// (canonical signatures, the grammar of the language, prose); they are in the curated set because every string of
-		/// the documentation is.
-		/// </summary>
-		static readonly string[] CuratedReported =
+		const string MatchesNothing = AspectDiagnosticID.AspectFilterRuleMatchesNothing;
+		const string WhiteSpace     = AspectDiagnosticID.AspectFilterNameWithWhiteSpace;
+
+		/// <summary>The rules of the curated set <c>AG0210</c> is reported for, written to pin contradictory accessibility.</summary>
+		static readonly string[] CuratedMatchesNothing =
 		[
-			// Written as rules that match nothing (here and in the design-time test): contradictory accessibility, a misspelled or capitalized modifier word
-			// that becomes part of the name, a second operator read as part of a method name, a word key with a space.
 			"public private",
 			"public protected **.*",
+		];
+
+		/// <summary>
+		/// The rules of the curated set <c>AG0211</c> is reported for. The hand cases were written to pin what the parser does
+		/// with such a rule, and the documentation lines are not filters at all (canonical signatures, the grammar of the
+		/// language, prose); they are in the curated set because every string of the documentation is.
+		/// </summary>
+		static readonly string[] CuratedWhiteSpace =
+		[
+			// Written (here and in the design-time test) with a misspelled or capitalized modifier word that becomes part of
+			// the name, a second operator read as part of a method name, a word key with a space.
 			"publik Save",
 			"publik Invoke",
 			"PUBLIC Save",
@@ -71,13 +79,13 @@ namespace AspectGenerator.Tests.TargetFilters
 				("names with white space and wildcards", NamesWithWhiteSpace()),
 			};
 
-			var targets  = TargetFilterTargets.Entries.Select(static e => e.Target).Concat(FunctionPointerTargets.Value).ToArray();
+			var targets  = TargetFilterTargets.Entries.Select(static e => e.Target).Concat(ExtraTargets.Value).ToArray();
 			var failures = new List<string>();
 
 			foreach (var (name, inputs) in sets)
 			{
 				var inputsReported = 0;
-				var accessibility  = 0;
+				var matchesNothing = 0;
 				var whiteSpace     = 0;
 				var total          = 0;
 
@@ -88,8 +96,10 @@ namespace AspectGenerator.Tests.TargetFilters
 					var reported = new List<AspectFilters.TargetFilterDiagnostic>();
 					var set      = AspectFilters.GetFilters(input, d =>
 					{
-						if (d.Id == AspectDiagnosticID.AspectFilterRuleMatchesNothing)
+						if (d.Id == MatchesNothing)
 							reported.Add(d);
+						else if (d.Id == WhiteSpace)
+							whiteSpace++;
 					});
 
 					if (reported.Count == 0)
@@ -99,10 +109,7 @@ namespace AspectGenerator.Tests.TargetFilters
 
 					foreach (var diagnostic in reported)
 					{
-						if (diagnostic.Message.Contains("accessibility", StringComparison.Ordinal))
-							accessibility++;
-						else
-							whiteSpace++;
+						matchesNothing++;
 
 						Assert.IsTrue(diagnostic.RuleIndex >= 0 && diagnostic.RuleIndex < set.Rules.Count, $"AG0210 for '{TargetFilterProbe.Escape(input)}' names no compiled rule.");
 
@@ -114,17 +121,18 @@ namespace AspectGenerator.Tests.TargetFilters
 					}
 				}
 
-				TestContext.WriteLine($"{name}: {total} inputs, {inputsReported} with AG0210; rules reported: {accessibility} for accessibility, {whiteSpace} for white space in a name");
+				TestContext.WriteLine($"{name}: {total} inputs, {inputsReported} with AG0210 ({matchesNothing} rules); AG0211 for {whiteSpace} rules");
 			}
 
 			Assert.AreEqual(0, failures.Count, "AG0210 named rules that match a target:" + Environment.NewLine + string.Join(Environment.NewLine, failures));
 		}
 
 		/// <summary>
-		/// Methods whose names hold white space: a function pointer type argument formats as
-		/// <c>delegate* unmanaged&lt;System.Void&gt;</c>. The golden targets have none, so the soundness check adds these.
+		/// Methods whose names hold white space, which the golden targets do not have: a function pointer type argument
+		/// formats as <c>delegate* unmanaged&lt;System.Void&gt;</c>, and a referenced assembly written in F# or IL can name a
+		/// namespace, a type or a method with spaces (<c>Weird.Plain.My Type</c>, <c>do it</c>), even with brackets.
 		/// </summary>
-		static readonly Lazy<AspectFilters.MethodTarget[]> FunctionPointerTargets = new(static () =>
+		static readonly Lazy<AspectFilters.MethodTarget[]> ExtraTargets = new(static () =>
 		{
 			const string source =
 				"""
@@ -146,31 +154,84 @@ namespace AspectGenerator.Tests.TargetFilters
 							new List<delegate* unmanaged<void>[]>().Clear();
 							new Box<delegate*<int, string>[]>().Put(null!);
 							Box<int>.Make<delegate* managed<System.Collections.Generic.List<int>, void>[]>();
+							Weird.Plain.Factory.Make().Run();
+							Weird.Plain.Factory.MakeLt().Run();
+							Weird.Plain.Factory.MakeGt().Run();
+							Weird.Plain.Factory.MakeNs().Run();
 						}
 					}
 				}
 				""";
 
 			var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create(
-				"FunctionPointerTargets",
+				"ExtraTargets",
 				[Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(source)],
-				TargetFilterTargets.Compilation.References,
-				new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+				TargetFilterTargets.Compilation.References.Append(MetadataReference.CreateFromImage(WeirdNamesAssembly())),
+				new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+			var errors = compilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error).ToArray();
+
+			Assert.AreEqual(0, errors.Length, string.Join(Environment.NewLine, errors.Select(static e => e.ToString())));
+
 			var tree  = compilation.SyntaxTrees[0];
 			var model = compilation.GetSemanticModel(tree);
-
-			return tree.GetRoot().DescendantNodes()
+			var calls = tree.GetRoot().DescendantNodes()
 				.OfType<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()
-				.Select(i => (Microsoft.CodeAnalysis.IMethodSymbol)model.GetSymbolInfo(i).Symbol!)
-				.Select(static m => AspectTargetFactory.Create(m))
-				.ToArray();
+				.Select(i => (IMethodSymbol)model.GetSymbolInfo(i).Symbol!)
+				.ToList();
+
+			// Methods called in C# of types named by other languages, and their spaced static methods.
+			var weird = compilation.GetTypeByMetadataName("Weird.Plain.My Type")!;
+
+			calls.Add(weird.GetMembers("do it").OfType<IMethodSymbol>().Single());
+
+			return calls.Select(static m => AspectTargetFactory.Create(m)).ToArray();
 		});
+
+		/// <summary>An assembly with names C# cannot write, as F# (double backticks) or IL would write them.</summary>
+		static byte[] WeirdNamesAssembly()
+		{
+			var assembly = new System.Reflection.Emit.PersistedAssemblyBuilder(new System.Reflection.AssemblyName("WeirdNames"), typeof(object).Assembly);
+			var module   = assembly.DefineDynamicModule("WeirdNames");
+			var types    = new List<System.Reflection.Emit.TypeBuilder>();
+
+			System.Reflection.Emit.TypeBuilder MakeType(string name)
+			{
+				var type = module.DefineType(name, System.Reflection.TypeAttributes.Public | System.Reflection.TypeAttributes.Class, typeof(object));
+
+				type.DefineDefaultConstructor(System.Reflection.MethodAttributes.Public);
+				type.DefineMethod("Run", System.Reflection.MethodAttributes.Public, typeof(void), Type.EmptyTypes).GetILGenerator().Emit(System.Reflection.Emit.OpCodes.Ret);
+				type.DefineMethod("do it", System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, typeof(void), Type.EmptyTypes).GetILGenerator().Emit(System.Reflection.Emit.OpCodes.Ret);
+				types.Add(type);
+
+				return type;
+			}
+
+			var factory = module.DefineType("Weird.Plain.Factory", System.Reflection.TypeAttributes.Public | System.Reflection.TypeAttributes.Class | System.Reflection.TypeAttributes.Abstract | System.Reflection.TypeAttributes.Sealed, typeof(object));
+
+			foreach (var (maker, name) in new[] { ("Make", "Weird.Plain.My Type"), ("MakeLt", "Weird.Plain.A<B C"), ("MakeGt", "Weird.Plain.A>B C"), ("MakeNs", "Weird.My Ns.T") })
+			{
+				var il = factory.DefineMethod(maker, System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, MakeType(name), Type.EmptyTypes).GetILGenerator();
+
+				il.Emit(System.Reflection.Emit.OpCodes.Ldnull);
+				il.Emit(System.Reflection.Emit.OpCodes.Ret);
+			}
+
+			foreach (var type in types)
+				type.CreateType();
+
+			factory.CreateType();
+
+			using var stream = new System.IO.MemoryStream();
+
+			assembly.Save(stream);
+			return stream.ToArray();
+		}
 
 		/// <summary>Name segments with white space and wildcards in every arrangement, for each key that reads a name.</summary>
 		static IEnumerable<string> NamesWithWhiteSpace()
 		{
-			string[] pieces = ["*", "?", "Empty", "Put", "Clear", "Make", "delegate", "unmanaged", "<", ">", "[]", "Box", "List", "Acme", "\\<", "\\>"];
-			string[] keys   = ["method: ", "type: ", "fullmethod: **.", "fulltype: **.", "namespace: ", "Acme.Pointers.Box<*>.", ""];
+			string[] pieces = ["*", "?", "Empty", "Put", "Clear", "Make", "delegate", "unmanaged", "<", ">", "[]", "Box", "List", "Acme", "\\<", "\\>", "My", "Type", "do", "it", "A", "B", "C", "Ns", "Weird"];
+			string[] keys   = ["method: ", "type: ", "fullmethod: **.", "fulltype: **.", "namespace: ", "Acme.Pointers.Box<*>.", "Weird.Plain.", ""];
 			var random      = new TargetFilterCorpus.SplitMix64(0x4147_5446_5753_0001UL);
 
 			for (var i = 0; i < 5_000; i++)
@@ -183,19 +244,39 @@ namespace AspectGenerator.Tests.TargetFilters
 		}
 
 		[TestMethod]
-		public void FunctionPointerTypeArgumentsAreMatchedWithoutAG0210Test()
+		public void FunctionPointerTypeArgumentsAreMatchedWithoutAG0210OrAG0211Test()
 		{
-			var targets = FunctionPointerTargets.Value;
-
-			Assert.AreEqual(4, targets.Length);
+			var targets = ExtraTargets.Value;
 
 			foreach (var filter in new[] { "method: * *", "type: * *", "method: Empty<delegate* unmanaged<System.Void>[]>", "type: List<delegate* unmanaged<*>[]>", "Put", "fulltype: **.Box<delegate* *>" })
 			{
-				var reported = false;
-				var set      = AspectFilters.GetFilters(filter, d => reported |= d.Id == AspectDiagnosticID.AspectFilterRuleMatchesNothing);
+				var ids = new List<string>();
+				var set = AspectFilters.GetFilters(filter, d => ids.Add(d.Id));
 
 				Assert.IsTrue(targets.Any(t => set.Evaluate(t).IsMatch), $"'{filter}' matches none of {string.Join(" | ", targets.Select(static t => t.Signature))}");
-				Assert.IsFalse(reported, $"AG0210 for '{filter}', which matches a method.");
+				Assert.AreEqual(0, ids.Count, $"'{filter}', which matches a method: {string.Join(", ", ids)}");
+			}
+		}
+
+		[TestMethod]
+		public void NamesOfOtherLanguagesWithWhiteSpaceAreMatchedAndToldAboutTest()
+		{
+			// F# and IL can name a type, a namespace or a method with spaces, and C# calls them: such a rule matches, so it
+			// is no AG0210; AG0211 tells the author that a C# name would not have the space, which is information only.
+			var targets = ExtraTargets.Value;
+
+			foreach (var filter in new[]
+			{
+				"type: My Type", "fulltype: Weird.Plain.My Type", "path: Weird.Plain.My Type", "fullmethod: Weird.Plain.My Type.Run", "namespace: Weird.My Ns",
+				"method: do it", "Weird.Plain.My Type.Run", "public Weird.Plain.My Type.Run() : System.Void", "public static do it",
+			})
+			{
+				var diagnostics = new List<AspectFilters.TargetFilterDiagnostic>();
+				var set         = AspectFilters.GetFilters(filter, diagnostics.Add);
+
+				Assert.IsTrue(targets.Any(t => set.Evaluate(t).IsMatch), $"'{filter}' matches none of {string.Join(" | ", targets.Select(static t => t.Signature))}");
+				CollectionAssert.AreEqual(new[] { WhiteSpace }, diagnostics.Select(static d => d.Id).ToArray(), filter);
+				Assert.AreEqual(Microsoft.CodeAnalysis.DiagnosticSeverity.Info, diagnostics[0].Severity, filter);
 			}
 		}
 
@@ -209,19 +290,21 @@ namespace AspectGenerator.Tests.TargetFilters
 				var diagnostics = new List<AspectFilters.TargetFilterDiagnostic>();
 				var set         = AspectFilters.GetFilters(input.Text, diagnostics.Add);
 
-				foreach (var diagnostic in diagnostics.Where(static d => d.Id == AspectDiagnosticID.AspectFilterRuleMatchesNothing))
-					reported.Add(set.Rules[diagnostic.RuleIndex].RuleText);
+				foreach (var diagnostic in diagnostics.Where(static d => d.Id is MatchesNothing or WhiteSpace))
+					reported.Add(diagnostic.Id + " " + set.Rules[diagnostic.RuleIndex].RuleText);
 			}
 
-			CollectionAssert.AreEquivalent(CuratedReported, reported.ToArray(), "Curated rules with AG0210: " + string.Join(" | ", reported.Select(TargetFilterProbe.Escape)));
+			var expected = CuratedMatchesNothing.Select(static r => MatchesNothing + " " + r).Concat(CuratedWhiteSpace.Select(static r => WhiteSpace + " " + r)).ToArray();
+
+			CollectionAssert.AreEquivalent(expected, reported.ToArray(), "Curated rules with AG0210 or AG0211: " + string.Join(" | ", reported.Select(TargetFilterProbe.Escape)));
 		}
 
 		[TestMethod]
 		public void WhiteSpaceThatFiltersMayHoldIsNotReportedTest()
 		{
-			var reported = TargetFilterSpacedInputs.Generate().Where(static text => Reports(text)).Take(20).ToArray();
+			var reported = TargetFilterSpacedInputs.Generate().Where(static text => Reports(text, MatchesNothing) || Reports(text, WhiteSpace)).Take(20).ToArray();
 
-			Assert.AreEqual(0, reported.Length, "AG0210 for white space a filter may hold:" + Environment.NewLine + string.Join(Environment.NewLine, reported.Select(TargetFilterProbe.Escape)));
+			Assert.AreEqual(0, reported.Length, "AG0210 or AG0211 for white space a filter may hold:" + Environment.NewLine + string.Join(Environment.NewLine, reported.Select(TargetFilterProbe.Escape)));
 		}
 
 		[TestMethod]
@@ -260,7 +343,10 @@ namespace AspectGenerator.Tests.TargetFilters
 				"publik Save", "Acme.Core Service.Save", "Sa ve*", "Save\\ Item", "method: Save Item", "type: My Service", "namespace: Acme Core.**",
 				"fullmethod: Acme.Core.Save Item", "path: Acme.Core.My Service", "method: Save Item | Save Items", "method: Save* & Sa ve",
 			})
-				Assert.IsTrue(Reports(text), $"No AG0210 for '{text}'.");
+			{
+				Assert.IsTrue(Reports(text, WhiteSpace), $"No AG0211 for '{text}'.");
+				Assert.IsFalse(Reports(text, MatchesNothing), $"AG0210 for '{text}', which another language's name can match.");
+			}
 
 			foreach (var text in new[]
 			{
@@ -269,40 +355,42 @@ namespace AspectGenerator.Tests.TargetFilters
 				"Save(ref readonly int, params string [])", "Save(int ?) : int ?", "returns: string []", "signature: public *", "Save( int , int )",
 				"contains: Save Item", "regex: Save Item",
 			})
-				Assert.IsFalse(Reports(text), $"AG0210 for '{text}'.");
+				Assert.IsFalse(Reports(text, WhiteSpace) || Reports(text, MatchesNothing), $"AG0210 or AG0211 for '{text}'.");
 		}
 
 		[TestMethod]
 		public void InvalidRuleIsNotReportedAsMatchingNothingTest()
 		{
 			Assert.IsFalse(Reports("public private Save(..., ...)"));
-			Assert.IsFalse(Reports("publik Save.**"));
+			Assert.IsFalse(Reports("publik Save.**", WhiteSpace));
 		}
 
 		[TestMethod]
-		public void RuleMatchingNothingIsAWarningAboutItsRuleTest()
+		public void RuleMatchingNothingIsAWarningAndAWhiteSpaceNameInformationTest()
 		{
 			var diagnostics = new List<AspectFilters.TargetFilterDiagnostic>();
-			var set         = AspectFilters.GetFilters("method: Save\npublik Load\npublic private", diagnostics.Add);
+			var set         = AspectFilters.GetFilters("method: Save\npublik Load\npublic private\npublic private publik Save", diagnostics.Add);
 
-			CollectionAssert.AreEqual(new[] { "AG0210", "AG0210" }, diagnostics.Select(static d => d.Id).ToArray());
-			Assert.IsTrue(diagnostics.All(static d => d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Warning));
-			CollectionAssert.AreEqual(new[] { 1, 2 }, diagnostics.Select(static d => d.RuleIndex).ToArray());
+			CollectionAssert.AreEqual(new[] { WhiteSpace, MatchesNothing, MatchesNothing, WhiteSpace }, diagnostics.Select(static d => d.Id).ToArray());
+			CollectionAssert.AreEqual(
+				new[] { Microsoft.CodeAnalysis.DiagnosticSeverity.Info, Microsoft.CodeAnalysis.DiagnosticSeverity.Warning, Microsoft.CodeAnalysis.DiagnosticSeverity.Warning, Microsoft.CodeAnalysis.DiagnosticSeverity.Info },
+				diagnostics.Select(static d => d.Severity).ToArray());
+			CollectionAssert.AreEqual(new[] { 1, 2, 3, 3 }, diagnostics.Select(static d => d.RuleIndex).ToArray());
 			Assert.AreEqual("publik Load",    set.Rules[1].RuleText);
 			Assert.AreEqual("public private", set.Rules[2].RuleText);
 			Assert.AreEqual(
-				"Target filter rule 'publik Load' can match no method: the name segment 'publik Load' contains white space outside '<...>', which no namespace, type or method name has",
+				"Target filter rule 'publik Load' names 'publik Load', with white space outside '<...>': a C# name never has white space there, so the rule probably holds a typo, such as a misspelled modifier word",
 				diagnostics[0].Message);
 			Assert.AreEqual(
 				"Target filter rule 'public private' can match no method: no method is public and private at once; a method must have every accessibility word of a rule",
 				diagnostics[1].Message);
 		}
 
-		static bool Reports(string text)
+		static bool Reports(string text, string id = MatchesNothing)
 		{
 			var reported = false;
 
-			AspectFilters.GetFilters(text, d => reported |= d.Id == AspectDiagnosticID.AspectFilterRuleMatchesNothing);
+			AspectFilters.GetFilters(text, d => reported |= d.Id == id);
 
 			return reported;
 		}

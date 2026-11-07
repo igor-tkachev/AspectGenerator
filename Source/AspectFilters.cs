@@ -209,8 +209,8 @@ namespace AspectGenerator
 
 			void AddPattern(bool isNegative, FilterRule rule)
 			{
-				if (front.TryCompilePattern(rule, diagnostics, out var pattern, out var matchesNothing))
-					Add(new PatternFilter(isNegative, FormatRule(isNegative ? RulePrefix.Exclude : RulePrefix.None, rule.Body), pattern), matchesNothing);
+				if (front.TryCompilePattern(rule, diagnostics, out var pattern, out var notes))
+					Add(new PatternFilter(isNegative, FormatRule(isNegative ? RulePrefix.Exclude : RulePrefix.None, rule.Body), pattern), notes);
 			}
 
 			void FlushConditionGroup()
@@ -218,18 +218,21 @@ namespace AspectGenerator
 				if (conditionGroup is null)
 					return;
 
-				if (front.TryCompileConditionGroup(conditionGroup, diagnostics, out var pattern, out var matchesNothing))
-					Add(new PatternFilter(conditionGroupAction, FormatConditionGroup(conditionGroupAction, conditionGroup), pattern), matchesNothing);
+				if (front.TryCompileConditionGroup(conditionGroup, diagnostics, out var pattern, out var notes))
+					Add(new PatternFilter(conditionGroupAction, FormatConditionGroup(conditionGroupAction, conditionGroup), pattern), notes);
 
 				previousWasConditionGroup = true;
 				previousGroupAction       = conditionGroupAction;
 				conditionGroup = null;
 			}
 
-			void Add(CompiledFilter filter, string? matchesNothing)
+			void Add(CompiledFilter filter, RuleNotes notes)
 			{
-				if (matchesNothing is not null)
-					diagnostics.Add(TargetFilterDiagnostic.RuleMatchesNothing(filter.RuleText, matchesNothing, result.Count));
+				if (notes.MatchesNothing is {} reason)
+					diagnostics.Add(TargetFilterDiagnostic.RuleMatchesNothing(filter.RuleText, reason, result.Count));
+
+				if (notes.WhiteSpaceSegment is {} segment)
+					diagnostics.Add(TargetFilterDiagnostic.NameWithWhiteSpace(filter.RuleText, segment, result.Count));
 
 				result.Add(filter);
 			}
@@ -537,6 +540,15 @@ namespace AspectGenerator
 			{
 				return new TargetFilterDiagnostic(AspectDiagnosticID.AspectFilterRuleMatchesNothing, $"Target filter rule '{rule}' can match no method: {reason}", DiagnosticSeverity.Warning, ruleIndex);
 			}
+
+			public static TargetFilterDiagnostic NameWithWhiteSpace(string rule, string segment, int ruleIndex)
+			{
+				return new TargetFilterDiagnostic(
+					AspectDiagnosticID.AspectFilterNameWithWhiteSpace,
+					$"Target filter rule '{rule}' names '{segment}', with white space outside '<...>': a C# name never has white space there, so the rule probably holds a typo, such as a misspelled modifier word",
+					DiagnosticSeverity.Info,
+					ruleIndex);
+			}
 		}
 
 		readonly struct TargetFilterKey : IEquatable<TargetFilterKey>
@@ -647,19 +659,32 @@ namespace AspectGenerator
 		/// How rule lines are read and compiled. <see cref="GramTargetFilterFront"/> reads them with the generated parser and
 		/// is the one filters use; the hand-written splitter it replaced is kept only to compare the two in the tests.
 		/// </summary>
+		/// <summary>What is worth telling about a valid rule: why it can match no method, and a name segment with white space where no C# name has it.</summary>
+		readonly struct RuleNotes
+		{
+			public RuleNotes(string? matchesNothing, string? whiteSpaceSegment)
+			{
+				MatchesNothing    = matchesNothing;
+				WhiteSpaceSegment = whiteSpaceSegment;
+			}
+
+			public string? MatchesNothing    { get; }
+			public string? WhiteSpaceSegment { get; }
+		}
+
 		interface ITargetFilterFront
 		{
 			/// <summary>Reads one rule line; <see langword="false"/>, with a diagnostic, for a line without a body.</summary>
 			bool TryReadRule(string text, List<TargetFilterDiagnostic> diagnostics, out FilterRule rule);
 
 			/// <summary>
-			/// Compiles a <c>pattern:</c> rule or a native method pattern. <paramref name="matchesNothing"/> is the reason a valid
-			/// rule can match no method, or <see langword="null"/>.
+			/// Compiles a <c>pattern:</c> rule or a native method pattern. <paramref name="notes"/> says what is worth telling
+			/// about it when it is valid.
 			/// </summary>
-			bool TryCompilePattern(FilterRule rule, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out string? matchesNothing);
+			bool TryCompilePattern(FilterRule rule, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes);
 
 			/// <summary>Compiles the lines of one native condition group into one rule.</summary>
-			bool TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out string? matchesNothing);
+			bool TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes);
 		}
 
 		[Flags]

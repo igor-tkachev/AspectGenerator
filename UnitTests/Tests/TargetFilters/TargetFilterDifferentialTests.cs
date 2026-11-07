@@ -25,11 +25,12 @@ namespace AspectGenerator.Tests.TargetFilters
 		[
 			("identical", static (legacy, gram) => Differences(legacy, gram, ignoreRuleMatchesNothing: false).Count == 0),
 
-			// The generated parser's front tells a valid rule that can match no method (AG0210); the splitter did not.
-			// Nothing else may differ: the same rules, the same decisions, the other diagnostics the same and in order.
-			("AG0210 added", static (legacy, gram) =>
-				!legacy.Ids.Contains(AspectDiagnosticID.AspectFilterRuleMatchesNothing) &&
-				gram.Ids.Contains(AspectDiagnosticID.AspectFilterRuleMatchesNothing) &&
+			// The generated parser's front tells a valid rule that can match no method (AG0210) and a name with white space
+			// where no C# name has it (AG0211); the splitter did not. Nothing else may differ: the same rules, the same
+			// decisions, the other diagnostics the same and in order.
+			("AG0210 or AG0211 added", static (legacy, gram) =>
+				!legacy.Ids.Any(IsRuleNote) &&
+				gram.Ids.Any(IsRuleNote) &&
 				Differences(legacy, gram, ignoreRuleMatchesNothing: true).Count == 0),
 		];
 
@@ -163,8 +164,13 @@ namespace AspectGenerator.Tests.TargetFilters
 				" ;; ",
 				outcome.Ids
 					.Select((id, i) => (Id: id, Text: $"{id} {outcome.Severities[i]} {outcome.Messages[i]}"))
-					.Where(d => !ignoreRuleMatchesNothing || d.Id != AspectDiagnosticID.AspectFilterRuleMatchesNothing)
+					.Where(d => !ignoreRuleMatchesNothing || !IsRuleNote(d.Id))
 					.Select(static d => d.Text));
+		}
+
+		static bool IsRuleNote(string id)
+		{
+			return id is AspectDiagnosticID.AspectFilterRuleMatchesNothing or AspectDiagnosticID.AspectFilterNameWithWhiteSpace;
 		}
 
 		static string Decisions(TargetFilterProbe.Outcome outcome)

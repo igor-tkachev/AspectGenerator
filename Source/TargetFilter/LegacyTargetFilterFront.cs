@@ -51,15 +51,15 @@ namespace AspectGenerator
 				return true;
 			}
 
-			bool ITargetFilterFront.TryCompilePattern(FilterRule rule, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out string? matchesNothing)
+			bool ITargetFilterFront.TryCompilePattern(FilterRule rule, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes)
 			{
-				matchesNothing = null;
+				notes = default;
 				return TryCompile(rule.Body, diagnostics, out pattern);
 			}
 
-			bool ITargetFilterFront.TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out string? matchesNothing)
+			bool ITargetFilterFront.TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes)
 			{
-				matchesNothing = null;
+				notes = default;
 				return TryParseConditionRule(lines.Select(static l => (l.Text, l.ForceAnd)), diagnostics, out pattern);
 			}
 

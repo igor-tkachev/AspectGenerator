@@ -27,6 +27,7 @@ namespace AspectGenerator
 		public const string MethodLevelTargetFilter             = "AG0208";
 		public const string InvalidAspectDiagnosticSeverity     = "AG0209";
 		public const string AspectFilterRuleMatchesNothing      = "AG0210";
+		public const string AspectFilterNameWithWhiteSpace      = "AG0211";
 		public const string InterceptedCallMarker               = "AG0300";
 	}
 }

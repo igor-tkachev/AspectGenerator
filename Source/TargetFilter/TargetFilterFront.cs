@@ -16,8 +16,8 @@ namespace AspectGenerator
 		/// the filter language has always reported, in the same order.
 		/// </summary>
 		/// <remarks>
-		/// It also tells which valid rules can match no method (<c>AG0210</c>): a rule whose accessibility words no method
-		/// can have all of, and a rule that requires white space in a namespace, type or method name.
+		/// It also tells which valid rules can match no method (<c>AG0210</c>: accessibility words no method can have all
+		/// of), and which require white space where no C# name has it (<c>AG0211</c>, a likely typo).
 		/// </remarks>
 		sealed class GramTargetFilterFront : ITargetFilterFront
 		{
@@ -76,16 +76,16 @@ namespace AspectGenerator
 				return true;
 			}
 
-			public bool TryCompilePattern(FilterRule rule, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out string? matchesNothing)
+			public bool TryCompilePattern(FilterRule rule, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes)
 			{
-				pattern        = null!;
-				matchesNothing = null;
+				pattern = null!;
+				notes   = default;
 
 				try
 				{
 					return rule.Syntax!.Body is ConditionLineSyntax
-						? TryCompileConditionLines([(rule, false)], diagnostics, out pattern, out matchesNothing)
-						: TryCompileMethodPattern(rule.Text, (MethodPatternSyntax)rule.Syntax.Body, diagnostics, out pattern, out matchesNothing);
+						? TryCompileConditionLines([(rule, false)], diagnostics, out pattern, out notes)
+						: TryCompileMethodPattern(rule.Text, (MethodPatternSyntax)rule.Syntax.Body, diagnostics, out pattern, out notes);
 				}
 				catch (Exception ex) when (Unreadable(ex, rule.Text) is {} diagnostic)
 				{
@@ -94,14 +94,14 @@ namespace AspectGenerator
 				}
 			}
 
-			public bool TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out string? matchesNothing)
+			public bool TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes)
 			{
-				pattern        = null!;
-				matchesNothing = null;
+				pattern = null!;
+				notes   = default;
 
 				try
 				{
-					return TryCompileConditionLines(lines.Select(static l => (l.Rule, l.ForceAnd)), diagnostics, out pattern, out matchesNothing);
+					return TryCompileConditionLines(lines.Select(static l => (l.Rule, l.ForceAnd)), diagnostics, out pattern, out notes);
 				}
 				catch (Exception ex) when (Unreadable(ex, lines[0].Rule.Text) is {} diagnostic)
 				{
@@ -135,7 +135,7 @@ namespace AspectGenerator
 				IEnumerable<(FilterRule Rule, bool ForceAnd)> lines,
 				List<TargetFilterDiagnostic>                  diagnostics,
 				out CompiledPatternMatcher                    compiledPattern,
-				out string?                                   matchesNothing)
+				out RuleNotes                                 notes)
 			{
 				var accessibility = AccessibilityMask.None;
 				var modifiers     = ModifierMask.None;
@@ -197,7 +197,7 @@ namespace AspectGenerator
 				}
 
 				var conditions = ImmutableArray.CreateBuilder<Condition>();
-				var nothing    = MatchesNothing(accessibility);
+				var whiteSpace = default(string);
 
 				foreach (var bucket in GroupConditionItems(items))
 				{
@@ -208,17 +208,17 @@ namespace AspectGenerator
 					var span   = bucket.Items.Count == 1 ? bucket.Items[0].ValueSpan : new TextSpan(0, value.Length);
 					var syntax = Read(TargetFilterParser.TryParseConditionValue(source, span.Start, span.Length), source);
 
-					if (TryCompileCondition(bucket.Key, source, value, syntax, diagnostics, out var condition, out var conditionMatchesNothing))
+					if (TryCompileCondition(bucket.Key, source, value, syntax, diagnostics, out var condition, out var conditionWhiteSpace))
 					{
 						conditions.Add(condition);
-						nothing ??= conditionMatchesNothing;
+						whiteSpace ??= conditionWhiteSpace;
 					}
 					else
 						valid = false;
 				}
 
 				compiledPattern = CompiledPatternMatcher.Create(accessibility, modifiers, conditions.ToImmutable(), null, null, null);
-				matchesNothing  = valid ? nothing : null;
+				notes           = valid ? new RuleNotes(MatchesNothing(accessibility), whiteSpace) : default;
 				return valid;
 			}
 
@@ -229,10 +229,10 @@ namespace AspectGenerator
 				ConditionValueSyntax         syntax,
 				List<TargetFilterDiagnostic> diagnostics,
 				out Condition                condition,
-				out string?                  matchesNothing)
+				out string?                  whiteSpace)
 			{
 				condition      = null!;
-				matchesNothing = null;
+				whiteSpace = null;
 				key            = key.ToLowerInvariant();
 
 				if (key == "path")
@@ -247,7 +247,7 @@ namespace AspectGenerator
 				}
 
 				if (alternatives.Length == 1)
-					return TryCompileAlternative(key, source, alternatives[0], diagnostics, out condition, out matchesNothing);
+					return TryCompileAlternative(key, source, alternatives[0], diagnostics, out condition, out whiteSpace);
 
 				var conditions = new List<Condition>(alternatives.Length);
 				var reasons    = new List<string?>(alternatives.Length);
@@ -268,7 +268,7 @@ namespace AspectGenerator
 
 				// Any alternative that can match makes the condition one that can.
 				if (valid && reasons.All(static r => r is not null))
-					matchesNothing = reasons[0];
+					whiteSpace = reasons[0];
 
 				return valid;
 			}
@@ -279,10 +279,10 @@ namespace AspectGenerator
 				ConditionAlternativeSyntax   alternative,
 				List<TargetFilterDiagnostic> diagnostics,
 				out Condition                condition,
-				out string?                  matchesNothing)
+				out string?                  whiteSpace)
 			{
 				condition      = null!;
-				matchesNothing = null;
+				whiteSpace = null;
 
 				var operands = alternative.Operands.Select(o => Trim(source, o)).ToArray();
 
@@ -293,7 +293,7 @@ namespace AspectGenerator
 				}
 
 				if (operands.Length == 1)
-					return TryCompileSingle(key, source, operands[0], diagnostics, out condition, out matchesNothing);
+					return TryCompileSingle(key, source, operands[0], diagnostics, out condition, out whiteSpace);
 
 				var conditions = new List<Condition>(operands.Length);
 				var valid      = true;
@@ -303,7 +303,7 @@ namespace AspectGenerator
 					if (TryCompileSingle(key, source, operand, diagnostics, out var operandCondition, out var reason))
 					{
 						conditions.Add(operandCondition);
-						matchesNothing ??= reason;
+						whiteSpace ??= reason;
 					}
 					else
 						valid = false;
@@ -319,10 +319,10 @@ namespace AspectGenerator
 				TextSpan                     span,
 				List<TargetFilterDiagnostic> diagnostics,
 				out Condition                condition,
-				out string?                  matchesNothing)
+				out string?                  whiteSpace)
 			{
 				condition      = null!;
-				matchesNothing = null;
+				whiteSpace = null;
 
 				var value = Text(source, span);
 
@@ -331,7 +331,7 @@ namespace AspectGenerator
 					case "namespace":
 					case "fulltype":
 					case "fullmethod":
-						if (!TryCompileDotted(value, Read(TargetFilterParser.TryParseDotted(source, span.Start, span.Length), source), source, allowRecursiveFinalSegment: true, diagnostics, out var dottedPattern, out matchesNothing))
+						if (!TryCompileDotted(value, Read(TargetFilterParser.TryParseDotted(source, span.Start, span.Length), source), source, allowRecursiveFinalSegment: true, diagnostics, out var dottedPattern, out whiteSpace))
 							return false;
 
 						condition = Condition.Leaf(key, dottedPattern, null, null, null, null, null, null);
@@ -342,7 +342,7 @@ namespace AspectGenerator
 						if (!SegmentMatcher.TryParse(value, diagnostics, out var segmentPattern))
 							return false;
 
-						matchesNothing = NameMatchesNothing(value);
+						whiteSpace = WhiteSpaceSegment(value);
 						condition      = Condition.Leaf(key, null, segmentPattern, null, null, null, null, null);
 						return true;
 
@@ -394,7 +394,7 @@ namespace AspectGenerator
 				MethodPatternSyntax          syntax,
 				List<TargetFilterDiagnostic> diagnostics,
 				out CompiledPatternMatcher   matcher,
-				out string?                  matchesNothing)
+				out RuleNotes                notes)
 			{
 				var accessibility = AccessibilityMask.None;
 				var modifiers     = ModifierMask.None;
@@ -402,7 +402,7 @@ namespace AspectGenerator
 				var parameters    = default(ParameterListPattern?);
 				var valid         = true;
 
-				matchesNothing = null;
+				notes = default;
 
 				if (syntax.Returns is {} returns && !TryCompileType(source, Trim(source, returns), diagnostics, out returnType))
 					valid = false;
@@ -456,7 +456,7 @@ namespace AspectGenerator
 					return false;
 				}
 
-				if (!TryCompileDotted(patternText, Read(TargetFilterParser.TryParseDotted(patternText), patternText), patternText, allowRecursiveFinalSegment: false, diagnostics, out var methodPattern, out var nameMatchesNothing))
+				if (!TryCompileDotted(patternText, Read(TargetFilterParser.TryParseDotted(patternText), patternText), patternText, allowRecursiveFinalSegment: false, diagnostics, out var methodPattern, out var nameWhiteSpace))
 				{
 					valid = false;
 
@@ -471,8 +471,8 @@ namespace AspectGenerator
 				if (methodPattern.Segments.Length == 1)
 					methodPattern = DottedPattern.FromSegments([SegmentMatcher.Recursive, methodPattern.Segments[0]]);
 
-				matcher        = CompiledPatternMatcher.Create(accessibility, modifiers, [], methodPattern, parameters, returnType);
-				matchesNothing = valid ? MatchesNothing(accessibility) ?? nameMatchesNothing : null;
+				matcher = CompiledPatternMatcher.Create(accessibility, modifiers, [], methodPattern, parameters, returnType);
+				notes   = valid ? new RuleNotes(MatchesNothing(accessibility), nameWhiteSpace) : default;
 				return valid;
 			}
 
@@ -485,14 +485,14 @@ namespace AspectGenerator
 				bool                         allowRecursiveFinalSegment,
 				List<TargetFilterDiagnostic> diagnostics,
 				out DottedPattern            pattern,
-				out string?                  matchesNothing)
+				out string?                  whiteSpace)
 			{
 				var parts = syntax.Parts.Select(p => Text(source, Trim(source, p))).ToArray();
 
-				matchesNothing = null;
+				whiteSpace = null;
 
 				foreach (var part in parts)
-					matchesNothing ??= NameMatchesNothing(part);
+					whiteSpace ??= WhiteSpaceSegment(part);
 
 				return DottedPattern.TryCreate(text, parts, diagnostics, allowRecursiveFinalSegment, out pattern);
 			}
@@ -613,7 +613,7 @@ namespace AspectGenerator
 				}
 			}
 
-			// ---- rules that match nothing ----
+			// ---- rules that match nothing, and names with white space ----
 
 			/// <summary>Why a rule with these accessibility words can match no method, or <see langword="null"/>.</summary>
 			static string? MatchesNothing(AccessibilityMask accessibility)
@@ -632,14 +632,15 @@ namespace AspectGenerator
 			}
 
 			/// <summary>
-			/// Why a name segment (of a namespace, a type or a method) can match nothing, or <see langword="null"/>. A name
-			/// holds white space only inside <c>&lt;…&gt;</c>, between the type arguments of a function pointer
-			/// (<c>Empty&lt;delegate* unmanaged&lt;System.Void&gt;[]&gt;</c>). So a segment can match nothing when white space
-			/// stands outside <c>&lt;…&gt;</c> in the part of it that is compared character for character with the start of a
-			/// name: before its first wildcard, which could stand for a <c>&lt;</c> of the name. An escaped bracket counts as
-			/// a bracket, since it matches the name's own; an array rank is passed over.
+			/// The segment, where a name segment (of a namespace, a type or a method) holds white space where a C# name never
+			/// does, or <see langword="null"/>. A C# name holds white space only inside <c>&lt;…&gt;</c>, between the type
+			/// arguments of a function pointer (<c>Empty&lt;delegate* unmanaged&lt;System.Void&gt;[]&gt;</c>); white space
+			/// counts when it stands outside <c>&lt;…&gt;</c> in the part of the segment that is compared character for
+			/// character with the start of a name, before its first wildcard, which could stand for a <c>&lt;</c>. An escaped
+			/// bracket counts as a bracket, since it matches the name's own; an array rank is passed over. Names that are not
+			/// C#'s, written in F# or IL, can hold white space anywhere: such a rule is told about, not called empty.
 			/// </summary>
-			static string? NameMatchesNothing(string segment)
+			static string? WhiteSpaceSegment(string segment)
 			{
 				var depth   = 0;
 				var escaped = false;
@@ -673,7 +674,7 @@ namespace AspectGenerator
 					else if (ch == '>' && depth > 0)
 						depth--;
 					else if (depth == 0 && char.IsWhiteSpace(ch))
-						return $"the name segment '{segment}' contains white space outside '<...>', which no namespace, type or method name has";
+						return segment;
 				}
 
 				return null;
