@@ -5,6 +5,7 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -119,9 +120,26 @@ jobs:
             public static void OnBeforeCall(InterceptInfo info) { Calls++; }
         }
 
+        // Applied to a type with a TargetFilter, so that the filter parser runs inside the packed generator on the oldest toolchain.
+        [Aspect(OnBeforeCall = nameof(OnBeforeCall))]
+        [AttributeUsage(AttributeTargets.Class)]
+        sealed class FilteredAttribute : Attribute
+        {
+            public static int Calls;
+            public string? TargetFilter { get; set; }
+            public static void OnBeforeCall(InterceptInfo info) { Calls++; }
+        }
+
         static class Service
         {
             [Count] public static int Twice(int x) { return x * 2; }
+        }
+
+        [Filtered(TargetFilter = "contains: Selected")]
+        static class FilteredService
+        {
+            public static int Selected(int x) { return x + 1; }
+            public static int Other(int x) { return x + 2; }
         }
 
         static class Program
@@ -129,8 +147,10 @@ jobs:
             static int Main()
             {
                 var result = Service.Twice(21);
-                Console.WriteLine($"result={result} calls={CountAttribute.Calls}");
-                return result == 42 && CountAttribute.Calls == 1 ? 0 : 1;
+                var filtered = FilteredService.Selected(1) + FilteredService.Other(1);
+                Console.WriteLine($"result={result} calls={CountAttribute.Calls} filtered={filtered} filteredCalls={FilteredAttribute.Calls}");
+                // Only the call the filter selects is intercepted.
+                return result == 42 && CountAttribute.Calls == 1 && filtered == 5 && FilteredAttribute.Calls == 1 ? 0 : 1;
             }
         }
         EOF
@@ -139,3 +159,47 @@ jobs:
           cmp "$RUNNER_TEMP/feed/AspectGenerator.$ASPECT_GENERATOR_VERSION.nupkg" "$dir/packages/aspectgenerator/${ASPECT_GENERATOR_VERSION,,}/aspectgenerator.${ASPECT_GENERATOR_VERSION,,}.nupkg"
           (cd "$dir" && dotnet build --configuration Release --no-restore && dotnet run --configuration Release --no-build)
         done
+
+  # The target filter parser is generated ahead of the build (Source/TargetFilter/regenerate.sh, at the DotGram commit and
+  # SDK in Source/TargetFilter/dotgram.pin) and committed. This job regenerates it exactly as a developer does and fails
+  # when the committed folder differs: a grammar edited without regenerating, a stale or hand-edited file, a leftover file.
+  # Windows checks as well that the checkout's line-ending conversion leaves the generated folder byte for byte as written.
+  filter-parser:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Read the pin
+      id: pin
+      shell: bash
+      run: |
+        set -euo pipefail
+        sdk="$(sed -n 's/^sdk=//p' Source/TargetFilter/dotgram.pin | tr -d '\r')"
+        [ -n "$sdk" ] || { echo "Source/TargetFilter/dotgram.pin has no sdk=" >&2; exit 1; }
+        echo "sdk=$sdk" >> "$GITHUB_OUTPUT"
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ steps.pin.outputs.sdk }}
+    - name: Select the pinned SDK
+      shell: bash
+      # The runner image may have a newer SDK installed; the script refuses anything but the pinned one.
+      run: dotnet new globaljson --sdk-version "${{ steps.pin.outputs.sdk }}" --roll-forward disable --force
+    - name: Regenerate the parser
+      shell: bash
+      run: Source/TargetFilter/regenerate.sh
+    - name: The committed parser is current
+      shell: bash
+      run: |
+        status="$(git status --porcelain --untracked-files=all -- Source/TargetFilter)"
+        if [ -n "$status" ]; then
+          echo "Source/TargetFilter differs after regeneration; run Source/TargetFilter/regenerate.sh and commit the result:" >&2
+          echo "$status" >&2
+          git --no-pager diff --stat -- Source/TargetFilter >&2
+          exit 1
+        fi
