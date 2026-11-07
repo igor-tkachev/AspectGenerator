@@ -317,6 +317,9 @@ namespace AspectGenerator
 			}
 
 			public bool IsEmpty => _filters.Length == 0;
+
+			// The compiled rules in evaluation order, for tests that need to know which rule decided.
+			internal IReadOnlyList<CompiledFilter> Rules => _filters;
 			public TargetFilterPlan Plan => _plan;
 
 			public static TargetFilterSet Create(string[] rules)
