@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.2 — Unreleased
+## 1.1.2 — 2026-11-07
 
 - Fixed generated interceptors with multiple aspects and async hooks emitting duplicate `async` modifiers; non-generic `Task` and `ValueTask` targets are now awaited before running completion hooks.
 - Fixed aspects of a library that uses the public aspect API of another assembly and declares no `AspectAttribute` of its own: in a project that references both, calls to the methods they carry were not intercepted, the aspects applied in the project itself were ignored, and their `DefaultTargetFilter` was not checked, with no diagnostic. Only assemblies that declared `AspectAttribute` themselves were searched for aspects; an assembly that references one that declares it is searched as well now.

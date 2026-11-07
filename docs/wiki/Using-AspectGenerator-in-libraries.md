@@ -22,7 +22,7 @@ A library can pass the generator on to its consumers by writing `PrivateAssets="
 ```xml
 <!-- Library -->
 <ItemGroup>
-  <PackageReference Include="AspectGenerator" Version="1.1.1" PrivateAssets="none" />
+  <PackageReference Include="AspectGenerator" Version="1.1.2" PrivateAssets="none" />
 </ItemGroup>
 
 <PropertyGroup>
@@ -39,7 +39,7 @@ The app needs no AspectGenerator settings. Leave `AspectGeneratorGenerateApi` un
 ```xml
 <!-- Library: keeps the generator private -->
 <ItemGroup>
-  <PackageReference Include="AspectGenerator" Version="1.1.1" PrivateAssets="all" />
+  <PackageReference Include="AspectGenerator" Version="1.1.2" PrivateAssets="all" />
 </ItemGroup>
 
 <PropertyGroup>
@@ -48,7 +48,7 @@ The app needs no AspectGenerator settings. Leave `AspectGeneratorGenerateApi` un
 
 <!-- App: its own reference -->
 <ItemGroup>
-  <PackageReference Include="AspectGenerator" Version="1.1.1" PrivateAssets="all" />
+  <PackageReference Include="AspectGenerator" Version="1.1.2" PrivateAssets="all" />
   <PackageReference Include="MyCompany.Aspects" Version="..." />
 </ItemGroup>
 ```
