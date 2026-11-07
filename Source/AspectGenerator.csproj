@@ -25,6 +25,26 @@
 		<IsRoslynComponent>true</IsRoslynComponent>
 	</PropertyGroup>
 
+	<!--
+	  The target filter parser is written in DotGram and generated ahead of the build: Source/TargetFilter/regenerate.sh
+	  writes Source/TargetFilter/Generated, which is committed and compiled like any other source, so the build needs no
+	  DotGram and the package gains no dependency. The grammar is an additional file so that the generation sees it.
+
+	  -p:DotGramLocal=true builds the parser from the grammar instead, with the DotGram sources in $(DotGramRoot) as the
+	  generator, and leaves the committed folder out; compare its output with the folder to try a DotGram change.
+	-->
+	<ItemGroup>
+		<AdditionalFiles Include="TargetFilter\TargetFilter.gram" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(DotGramLocal)' == 'true'">
+		<Compile Remove="TargetFilter\Generated\**" />
+		<ProjectReference Include="$(DotGramRoot)\src\DotGram\DotGram.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
+
+	<!-- A project reference does not bring the package's build/DotGram.targets: take what it adds, as the package would. -->
+	<Import Project="$(DotGramRoot)\src\DotGram\build\DotGram.targets" Condition="'$(DotGramLocal)' == 'true'" />
+
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp"    PrivateAssets="all" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />

@@ -1,0 +1,17 @@
+// The grammar of one line of a target filter. The generated parser is the internal TargetFilterParser;
+// regenerate it with Source/TargetFilter/regenerate.sh after any change to this file.
+//
+// A line is an optional operator, an optional matcher prefix and the rest of the line.
+
+@using System;
+
+Operator : @string = t: ('-' | '&' | '|') => @(t)
+
+MatcherPrefix : @string = t: ("pattern:" | "contains:" | "regex:") => @(t)
+
+Rest : @string = t: [^ '\r' | '\n']* => @(t)
+
+Line : @TargetFilterLine = op: Operator? & matcher: MatcherPrefix? & rest: Rest & eof
+	=> @(new TargetFilterLine(op, matcher, rest))
+
+parse Line

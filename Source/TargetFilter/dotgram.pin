@@ -1,0 +1,9 @@
+# What generates Source/TargetFilter/Generated: read by regenerate.sh, by the filter-parser CI job and by the
+# setup-dotnet step of that job. Move the commit only to a commit of the DotGram repository whose CI is green, in a
+# commit of its own together with the regenerated folder.
+#
+# commit  the DotGram commit whose DotGram.Cli generates the parser (the tool's version string does not tell commits apart)
+# sdk     the exact .NET SDK the generation runs with: the generated text includes the compiler's own text of the
+#         embedded attribute, so another SDK may write different bytes
+commit=2adfb25704001eeded51e1cebb9570d77421e3a9
+sdk=10.0.401

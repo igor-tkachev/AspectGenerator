@@ -61,3 +61,14 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+###############################################################################
+# The target filter parser is generated (Source/TargetFilter/regenerate.sh).
+# The grammar and the scripts are read as checked out, so every machine reads
+# the same text; the generated folder is kept byte for byte as the generator
+# writes it (CRLF), and its rule comes last so that no rule above converts it.
+###############################################################################
+*.gram text eol=lf
+*.sh   text eol=lf
+Source/TargetFilter/dotgram.pin text eol=lf
+Source/TargetFilter/Generated/** -text

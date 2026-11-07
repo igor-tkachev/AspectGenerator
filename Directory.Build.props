@@ -5,6 +5,12 @@
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
+	<!-- Off by default: the target filter parser is generated ahead of the build and committed. See Source/AspectGenerator.csproj. -->
+	<PropertyGroup>
+		<DotGramLocal Condition="'$(DotGramLocal)' == ''">false</DotGramLocal>
+		<DotGramRoot Condition="'$(DotGramRoot)' == ''">$(MSBuildThisFileDirectory)..\dotgram</DotGramRoot>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<CompilerVisibleProperty Include="AspectGeneratorGenerateApi" />
 		<CompilerVisibleProperty Include="AspectGeneratorPublicApi" />
