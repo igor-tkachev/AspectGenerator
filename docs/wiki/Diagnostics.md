@@ -29,6 +29,7 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0206`: invalid target filter dotted pattern.
 - `AG0208`: `TargetFilter` is used on a method-level aspect attribute, including one applied to a local function.
 - `AG0209`: invalid `AspectGeneratorAspectDiagnosticSeverity` or `AspectGeneratorOptions.AspectDiagnosticSeverity` value.
+- `AG0210` (warning): a target filter rule that can match no method. The rule is valid and kept, but no method can satisfy it: its accessibility words cannot all hold for one method (they are combined with AND, so `public private` matches nothing, while `protected internal` and `private protected` do match), or it requires white space in a namespace, type or method name, which no name has (`publik Save` is read as the method name `publik Save`, not as an accessibility word and a name). White space inside `<…>`, around the commas of a parameter list, after a parameter modifier and in type patterns is not reported. The rule selected nothing before this warning existed either, so a build with `TreatWarningsAsErrors` fails on it only where a filter already holds a rule that never worked.
 - `AG0300`: marks a call where AspectGenerator applies aspects. Controlled by `AspectGeneratorAspectDiagnosticSeverity`; default severity is `Info`.
 
 ## Design-Time Builds
@@ -38,7 +39,7 @@ The IDE runs the generator on every edit in a design-time build. A design-time b
 Reported live, in design-time builds and in builds:
 
 - `AG0101` and `AG0102` for aspects declared in the project;
-- `AG0201`, `AG0202`, `AG0204`, `AG0205`, `AG0206` for assembly-level and type-level target filters, including an aspect's `DefaultTargetFilter` at each type-level application;
+- `AG0201`, `AG0202`, `AG0204`, `AG0205`, `AG0206`, `AG0210` for assembly-level and type-level target filters, including an aspect's `DefaultTargetFilter` at each type-level application;
 - `AG0208`;
 - `AG0209`.
 

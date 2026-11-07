@@ -112,6 +112,8 @@ jobs:
           cat > "$dir/Program.cs" <<'EOF'
         using AspectGenerator;
 
+        namespace ConsumerApp;
+
         [Aspect(OnBeforeCall = nameof(OnBeforeCall))]
         [AttributeUsage(AttributeTargets.Method)]
         sealed class CountAttribute : Attribute
@@ -120,8 +122,9 @@ jobs:
             public static void OnBeforeCall(InterceptInfo info) { Calls++; }
         }
 
-        // Applied to a type with a TargetFilter, so that a filter is selected by the packed generator on the oldest toolchain.
-        // Filters are parsed by the hand-written parser for now; this covers the generated one once filters are parsed by it.
+        // Applied to a type with a TargetFilter, so that the packed generator reads a filter on the oldest toolchain: the filter
+        // parser is generated, and this runs it in the SDK 9.0.100 compiler. The filter has a condition rule, a compact method
+        // pattern and an exclusion, so that the grammar's main readings are taken.
         [Aspect(OnBeforeCall = nameof(OnBeforeCall))]
         [AttributeUsage(AttributeTargets.Class)]
         sealed class FilteredAttribute : Attribute
@@ -136,7 +139,7 @@ jobs:
             [Count] public static int Twice(int x) { return x * 2; }
         }
 
-        [Filtered(TargetFilter = "contains: Selected")]
+        [Filtered(TargetFilter = "namespace: Consumer*; method: Sel*ed\npublic static Consumer*.FilteredService.Sel*(int) : int\n- **.Other(...)")]
         static class FilteredService
         {
             public static int Selected(int x) { return x + 1; }

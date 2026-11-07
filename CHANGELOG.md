@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0 — Unreleased
+
+- Changed: target filters are read by a new parser, generated from a grammar of the filter language (`Source/TargetFilter/TargetFilter.gram`) and compiled into the generator; it adds no package dependency. It reads every filter as before: the same rules, the same diagnostics and the same selections, checked against the previous parser over the whole test corpus (the documented filters, their mutations and fifty thousand generated filters), except for the two changes below. A rule nested hundreds of thousands of `<` or `(` deep, deeper than the compiler's stack allows, is reported as `AG0202` and skipped instead of read.
+- Fixed: a backslash-escaped `*` or `?` in a name, type or signature pattern is a literal character wherever it stands. The pattern `*a\*` was read as "contains `a`" (the trailing backslash and star were dropped); it now means "ends with `a*`", so `returns: *Int32\*` selects the methods that return `System.Int32*` and no longer every method that returns `System.Int32`. Patterns with an escaped wildcard elsewhere (`a\*b*`) already matched correctly.
+- Added: `AG0210`, a warning for a valid target filter rule that can match no method: accessibility words that no method can have together (`public private`; they are combined with AND, so `protected internal` and `private protected` still match), or white space inside a namespace, type or method name (`publik Save`, where a misspelled modifier becomes part of the name). Such a rule selected nothing before as well, so a build with `TreatWarningsAsErrors` fails on the new warning only where a filter already holds a rule that never worked. It is reported live in the IDE like the other target filter diagnostics. See [Diagnostics](docs/wiki/Diagnostics.md).
+
 ## 1.1.3 — Unreleased
 
 - Fixed: a dotted pattern with several `**` took time exponential in their number to match a name: each `**` tried every number of segments again for every `**` after it, so `fullmethod: **.**.**.…` with a dozen of them cost milliseconds per method and forty of them seconds, for every call the generator judged. Matching now remembers the ways that failed, so no way is tried twice, and still stops at the first way that matches; it costs a polynomial of the pattern's and the name's lengths, and what matches is unchanged.
