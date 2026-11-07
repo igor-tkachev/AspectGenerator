@@ -33,6 +33,8 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0211` (information): a target filter rule names a namespace, type or method with white space outside `<…>`, which a C# name never has, so the rule probably holds a typo: `publik Save` is read as the method name `publik Save`, not as an accessibility word and a name. Names written in other languages (F# double-backtick names, IL) can hold such white space and the rule matches them, so this is information only and never fails a build. Only the part of a name segment before its first wildcard is looked at, since a wildcard can stand for a `<` and C# names hold white space inside type arguments (`Empty<delegate* unmanaged<System.Void>[]>`); white space inside `<…>`, around the commas of a parameter list, after a parameter modifier and in type patterns is not reported.
 - `AG0300`: marks a call where AspectGenerator applies aspects. Controlled by `AspectGeneratorAspectDiagnosticSeverity`; default severity is `Info`.
 
+The target filter diagnostics (`AG0201`, `AG0202`, `AG0204`–`AG0206`, `AG0210`, `AG0211`) point at the characters of the filter they are about, inside the string literal: the unknown key, the word that is not a modifier, the invalid regex, the whole rule (across lines where it spans them) for `AG0210` and `AG0211`. This works for regular, verbatim and raw literals (single- and multi-line), interpolated strings of constants, concatenations and `const` references declared in the project. Where the characters cannot be traced exactly (`nameof`, a `const` of a referenced assembly, a rule that continues from one element of a `TargetFilter` array into the next), the diagnostic is reported on the attribute instead. A `DefaultTargetFilter` of an aspect declared in the project is reported in the aspect's `[Aspect]` attribute, once; one of an aspect from a referenced assembly is reported on each attribute that applies it.
+
 ## Design-Time Builds
 
 The IDE runs the generator on every edit in a design-time build. A design-time build emits no interceptors, so the generator does not select target methods or bind calls there; it compiles the target filters only. This keeps the editor responsive on large projects, but splits the diagnostics in two groups.
@@ -40,7 +42,7 @@ The IDE runs the generator on every edit in a design-time build. A design-time b
 Reported live, in design-time builds and in builds:
 
 - `AG0101` and `AG0102` for aspects declared in the project;
-- `AG0201`, `AG0202`, `AG0204`, `AG0205`, `AG0206`, `AG0210`, `AG0211` for assembly-level and type-level target filters, including an aspect's `DefaultTargetFilter` at each type-level application;
+- `AG0201`, `AG0202`, `AG0204`, `AG0205`, `AG0206`, `AG0210`, `AG0211` for assembly-level and type-level target filters, including an aspect's `DefaultTargetFilter` (checked at each type-level application);
 - `AG0208`;
 - `AG0209`.
 
