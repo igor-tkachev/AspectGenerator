@@ -60,7 +60,7 @@ Canonical method signature format:
 <accessibility>[ <modifier>...] <return-type> <containing-type>.<method-name>[<type-parameters>](<parameter-types>)
 ```
 
-Types are fully qualified without C# aliases. Nullable annotations and parameter names are omitted. Extension method receivers are formatted with `this`.
+Types are fully qualified without C# aliases. Nullable annotations and parameter names are omitted. Parameter modifiers are `ref`, `ref readonly`, `out`, `in` and `params`; array types carry their rank (`System.Int32[,]`). An extension method receiver is written `this` plus the type of its first parameter. A generic method declared in the project is described by its definition (`Repository<TEntity>.Get<TKey>(TKey)`); a generic method of a referenced assembly by the call (`List<System.Int32>.Add(System.Int32)`).
 
 The `attributes:` condition checks method attributes and containing type attributes, including nested containing types. It supports short attribute names, short names without the `Attribute` suffix, and fully qualified names. `attribute:` is intentionally not supported.
 

@@ -114,7 +114,8 @@ Parameter rules:
 - `(...)` matches any parameter list;
 - `_` matches exactly one arbitrary parameter;
 - `...` inside a parameter list matches zero or more parameters and can appear once;
-- typed parameters can use `ref`, `out`, `in`, or `params`.
+- typed parameters can use `ref`, `ref readonly`, `out`, `in`, or `params`; a modifier written in the pattern must match the parameter's modifier exactly (`ref` does not match `ref readonly` or `in`), and a parameter pattern without a modifier accepts a parameter with any modifier;
+- array ranks are part of the type: `int[,]` is not `int[]`, and the commas inside `[...]` do not separate parameters.
 
 Condition-rule form combines conditions with `;` or grouped lines:
 
@@ -436,9 +437,14 @@ public static System.Void MyApp.Services.Cache.Clear()
 public virtual System.Threading.Tasks.Task<System.String> MyApp.Services.UserService.GetNameAsync(System.Int32,System.Threading.CancellationToken)
 public System.Boolean MyApp.Services.UserService.TryGet(System.String,out System.Int32)
 public System.Void MyApp.Services.UserService.Update(ref MyApp.Models.User)
+public System.Int32 MyApp.Services.UserService.Peek(ref readonly System.Int32)
+public System.Int32[,] MyApp.Services.UserService.Matrix(System.Int32[][,])
 public static System.String MyApp.Extensions.UserExtensions.Format(this MyApp.Models.User,System.Int32)
-public MyApp.Models.User MyApp.Data.Repository<MyApp.Models.User>.Get<System.Int32>(System.Int32)
+public MyApp.Models.User MyApp.Data.Repository<TEntity>.Get<TKey>(TKey)
+public static System.Void System.Collections.Generic.List<System.Int32>.Add(System.Int32)
 ```
+
+The last two lines show how generic methods are described. A method declared in the project is described by its definition, with its type parameters (`Repository<TEntity>.Get<TKey>(TKey)`). A method of a referenced assembly is described by the call, with the call's type arguments (`List<System.Int32>.Add(System.Int32)`).
 
 Formatting rules:
 
@@ -446,6 +452,8 @@ Formatting rules:
 - stable modifiers such as `static`, `abstract`, `virtual`, `override`, `sealed`, and `extern` are included;
 - `async`, `partial`, parameter names, nullable annotations, attributes, and generic constraints are omitted;
 - type names are fully qualified and do not use C# aliases;
-- generic calls use constructed type arguments from the intercepted call site;
-- parameter entries include only parameter modifiers and parameter types;
-- extension method receivers use `this`.
+- a generic method declared in the project is described by its definition: the type parameters of the method and of its containing type, not the type arguments of a call. A call the definition does not select is also judged by the call's type arguments when the filter can select methods of referenced assemblies as well (for example `contains:` and `regex:` rules, or a rule that names the method); a rule that cannot, such as `fulltype: Repository<System.String>`, never sees them;
+- a generic method of a referenced assembly is described by the intercepted call: its constructed type arguments and those of its containing type;
+- parameter entries include only parameter modifiers (`ref`, `ref readonly`, `out`, `in`, `params`) and parameter types;
+- array types carry their rank in C# order: `System.Int32[]`, `System.Int32[,]`, `System.Int32[,,]`, and an array of two-dimensional arrays is `System.Int32[][,]`;
+- an extension method receiver is written `this <type of the first parameter>`, for a declared method and for a call alike (`this MyApp.Models.User`).
