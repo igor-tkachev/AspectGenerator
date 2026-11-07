@@ -159,18 +159,21 @@ namespace AspectGenerator
 			return buckets;
 		}
 
-		/// <summary>The accessibility masks a method can have: the matcher requires every bit of a rule's mask.</summary>
+		/// <summary>The accessibility masks a method can have (<c>protected internal</c> and <c>private protected</c> are two bits).</summary>
+		static readonly AccessibilityMask[] _methodAccessibilities =
+		[
+			AccessibilityMask.Public,
+			AccessibilityMask.Protected,
+			AccessibilityMask.Internal,
+			AccessibilityMask.Private,
+			AccessibilityMask.Protected | AccessibilityMask.Internal,
+			AccessibilityMask.Private   | AccessibilityMask.Protected
+		];
+
+		/// <summary>Whether some method can have every bit of <paramref name="mask"/>, which is what the matcher requires.</summary>
 		static bool IsAchievableAccessibility(AccessibilityMask mask)
 		{
-			foreach (var achievable in new[]
-			{
-				AccessibilityMask.Public,
-				AccessibilityMask.Protected,
-				AccessibilityMask.Internal,
-				AccessibilityMask.Private,
-				AccessibilityMask.Protected | AccessibilityMask.Internal,
-				AccessibilityMask.Private   | AccessibilityMask.Protected
-			})
+			foreach (var achievable in _methodAccessibilities)
 				if ((mask & achievable) == mask)
 					return true;
 
@@ -212,8 +215,6 @@ namespace AspectGenerator
 			{
 				return new CompiledPatternMatcher(accessibility, modifiers, conditions, fullMethodPattern, parameters, returnType);
 			}
-
-			public AccessibilityMask Accessibility => _accessibility;
 
 			/// <summary>
 			/// Adds the method names this rule can match when every match must have one of a known set of literal names.

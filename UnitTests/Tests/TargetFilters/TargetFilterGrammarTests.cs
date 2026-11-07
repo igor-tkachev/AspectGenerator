@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 
 using Microsoft.CodeAnalysis.Text;
@@ -16,6 +15,8 @@ namespace AspectGenerator.Tests.TargetFilters
 	[TestClass]
 	public class TargetFilterGrammarTests
 	{
+		public TestContext TestContext { get; set; } = null!;
+
 		static TargetFilterLineSyntax Line(string text)
 		{
 			var match = TargetFilterParser.TryParseLine(text);
@@ -233,25 +234,33 @@ namespace AspectGenerator.Tests.TargetFilters
 		[TestMethod]
 		public void DeepNestingIsReadOnTheCallingThreadTest()
 		{
-			// Two thousand levels read on a thread with a 1 MB stack (the default of a Windows thread) and compile to what
-			// the splitter compiled, which counted the levels instead. A generator built without optimization has frames
-			// too large for that, and reports the rule as too deep to read instead.
-			var optimized = typeof(AspectFilters).Assembly.GetCustomAttribute<System.Diagnostics.DebuggableAttribute>()?.IsJITOptimizerDisabled != true;
+			// Nesting is read on the thread that asks, on a 1 MB stack (the default of a Windows thread), and compiles to
+			// what the splitter compiled, which counted the levels instead. Two hundred levels always fit.
+			foreach (var input in DeepInputs(200))
+				OnThread(1024 * 1024, () => AssertReadsAsTheSplitter(input, allowTooDeep: false));
 
+			// Two thousand fit or are reported as too deep, depending on how large the frames of the platform's JIT and the
+			// build's optimization make them; nothing else may happen.
 			foreach (var input in DeepInputs(2_000))
-				OnThread(1024 * 1024, () =>
+				OnThread(1024 * 1024, () => AssertReadsAsTheSplitter(input, allowTooDeep: true));
+
+			void AssertReadsAsTheSplitter(string input, bool allowTooDeep)
+			{
+				var legacy = TargetFilterProbe.Probe(input, TargetFilterProbe.ReadLegacy);
+				var gram   = TargetFilterProbe.Probe(input, TargetFilterProbe.Read);
+
+				Assert.IsNull(gram.Exception, $"{input[..20]}…: {gram.Exception}");
+
+				if (allowTooDeep && gram.Ids.Length == 1 && gram.Messages[0].EndsWith("': The rule nests '<' or '(' too deeply to be read.", StringComparison.Ordinal))
 				{
-					var legacy = TargetFilterProbe.Probe(input, TargetFilterProbe.ReadLegacy);
-					var gram   = TargetFilterProbe.Probe(input, TargetFilterProbe.Read);
+					TestContext.WriteLine($"{input[..20]}… ({input.Length} characters): too deep");
+					return;
+				}
 
-					Assert.IsNull(gram.Exception, $"{input[..20]}…: {gram.Exception}");
-
-					if (!optimized && gram.Messages.Any(static m => m.EndsWith("too deeply to be read.", StringComparison.Ordinal)))
-						return;
-
-					CollectionAssert.AreEqual(legacy.Ids, gram.Ids, input[..20]);
-					Assert.AreEqual(legacy.Kinds, gram.Kinds, input[..20]);
-				});
+				CollectionAssert.AreEqual(legacy.Ids, gram.Ids, input[..20]);
+				Assert.AreEqual(legacy.Kinds, gram.Kinds, input[..20]);
+				TestContext.WriteLine($"{input[..20]}… ({input.Length} characters): read");
+			}
 		}
 
 		[TestMethod]
