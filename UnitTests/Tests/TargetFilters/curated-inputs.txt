@@ -1,0 +1,178 @@
+source	regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.AssemblyFilterTarget\\(\\)$\nregex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedMethod\\(System.String\\)$\nregex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedGenericMethod<System.String>\\(System.String\\)$\nregex: ^public System.String System.String.Substring\\(System.Int32\\)$
+source	regex: ^public System.Int32 AspectGenerator\\.Tests\\.OnCallObject\\.OnCall\\(System.Int32\\)$
+source	method: FromAssembly
+source	method: FromType
+source	params: this string
+source	regex: [
+source	& method: Save
+source	foo: bar
+source	Save(..., ...)
+source	A.**.B.**
+source	contains:
+source	regex:
+source	pattern:
+source	& regex: .*Save.*
+source	| contains: Save
+source	method: Save | 
+source	method: Save & 
+source	regex:^public .*$
+source	contains: Save
+source	pattern: MyApp.**.Save*
+source	Save*: System.String
+source	public static System.Math.Max(System.Int32, System.Int32)
+source	public static System.Math.Ma*(System.Int32, System.Int32)
+source	fulltype: System.Math; method: Max; params: System.Int32, System.Int32
+source	method: Value
+source	fulltype: AspectGenerator.Tests.GeneratorDriver.Person
+source	method: *
+source	FILTER_RULE
+source	attribute: NoLogAttribute
+source	method: Inner
+source	method: Skip*
+source	regex: .*\\.AssemblyTarget\\(\\)$
+source	regex: .*\\.SaveUser\\(\\)$
+source	contains: Save\n-contains: HealthCheck
+source	contains: Save\n# Exclude health probes.\n-contains: HealthCheck
+source	contains: SaveUser
+source	-regex: .*\\.Target\\(\\)$
+source	public **.SaveUser()
+source	namespace:AspectGenerator.Tests.GeneratorDriver; type:*Service; method:*Async; returns:System.Threading.Tasks.Task*\n-method:HealthCheckAsync
+source	namespace:AspectGenerator.Tests.GeneratorDriver | AspectGenerator.Tests.GeneratorDriver.Jobs; type:*Service | *Repository; method:Save* | Update*; returns:System.Threading.Tasks.Task* | System.Threading.Tasks.ValueTask*; param:*CancellationToken | out System.Int32\n| namespace:AspectGenerator.Tests.GeneratorDriver; type:*Service; method:TryGet; params:(string, out int)\n-method:Ping | HealthCheck
+source	\n\tnamespace: AspectGenerator.Tests.GeneratorDriver\n\ttype: *Service\n\tmethod: Save*\n\tparams: ..., *CancellationToken\n\t
+source	method: Save* & *Async\n| param: *CancellationToken & *IDisposable
+source	\n\ttype: *Service\n\tmethod: Save*\n\tmethod: Update*\n\t
+source	\n\tnamespace: AspectGenerator.Tests.GeneratorDriver\n\t& type: *Service\n\t& method: Save*\n\n\t| namespace: AspectGenerator.Tests.GeneratorDriver\n\t& type: *Job\n\t& method: Run*\n\n\t- method: HealthCheck\n\t| method: Ping\n\t
+source	contains: Save|\nregex: ^public .*\\.Save\\(\\)$
+source	path:AspectGenerator.Tests.GeneratorDriver.*Service; method:Save
+source	method:IncludedThenExcludedThenIncluded\n-method:IncludedThenExcludedThenIncluded\nmethod:IncludedThenExcludedThenIncluded\nmethod:IncludedThenExcluded\n-method:IncludedThenExcluded\n-method:NegativeBeforeInclude\nmethod:NegativeBeforeInclude\nmethod:IncludeThenInclude\nmethod:IncludeThenInclude
+source	fulltype:AspectGenerator.Tests.GeneratorDriver.UserService; protected internal
+source	Save*(..., *CancellationToken)
+source	TryGet(string, out int) : bool\nLoadAsync() : System.Threading.Tasks.Task<string>
+source	fulltype:**.Outer<*>.Inner<*>; method:Save; returns:*Inner<*>
+source	Save
+source	-attributes: NoLogAttribute
+source	-attributes: AspectGenerator.Tests.GeneratorDriver.NoLogAttribute
+source	public **.*(...)
+source	public **.*(...)\n-attributes: NoLogAttribute
+source	regex: ^public System.String AspectGenerator\\.Tests\\.GeneratorDriver\\.CanonicalTarget\\.PublicInstance\\(System.Int32\\)$\nregex: ^public static System.Void AspectGenerator\\.Tests\\.GeneratorDriver\\.CanonicalTarget\\.StaticVoid\\(\\)$\nregex: ^public System.Threading.Tasks.Task<System.String> AspectGenerator\\.Tests\\.GeneratorDriver\\.CanonicalTarget\\.TaskResult\\(\\)$\nregex: ^public System.String AspectGenerator\\.Tests\\.GeneratorDriver\\.CanonicalTarget\\.GenericMethod<System.String>\\(System.String\\)$\nregex: ^public System.String AspectGenerator\\.Tests\\.GeneratorDriver\\.GenericContainer<System.String>\\.GenericContainerMethod\\(System.String\\)$\nregex: ^public System.Boolean AspectGenerator\\.Tests\\.GeneratorDriver\\.CanonicalTarget\\.ByRef\\(ref System.Int32,out System.Int32,in System.Int32\\)$\nregex: ^public static System.String AspectGenerator\\.Tests\\.GeneratorDriver\\.CanonicalExtensions\\.ExtensionTarget\\(this AspectGenerator\\.Tests\\.GeneratorDriver\\.CanonicalTarget,System.Int32\\)$\nregex: ^public System.String\\[\\] AspectGenerator\\.Tests\\.GeneratorDriver\\.CanonicalTarget\\.ArrayParameter\\(System.String\\[\\]\\)$\nregex: ^public System.String AspectGenerator\\.Tests\\.GeneratorDriver\\.CanonicalTarget\\.NullableIgnored\\(System.String\\)$\nregex: ^public virtual System.String AspectGenerator\\.Tests\\.GeneratorDriver\\.CanonicalBase\\.VirtualTarget\\(\\)$\nregex: ^public override System.String AspectGenerator\\.Tests\\.GeneratorDriver\\.CanonicalDerived\\.OverrideTarget\\(\\)$
+source	method: Target
+source	namespace: NoSuchNamespace.*
+source	fulltype:AspectGenerator.Tests.GeneratorDriver.Service
+source	\n\tmethod: *\n\t- method: HealthCheck\n\t
+source	\n\tnamespace: MyApp.Services\n\tFILTER_RULE\n\t| method: Save*\n\t
+source	namespace: AspectGenerator.Tests.GeneratorDriver
+source	- method: HealthCheck
+source	method: Save
+source	method: Load
+source	method: HealthCheck
+source	\n\tmethod: Save*\n\t& method: *Async\n\tmethod: Update*\n\t
+source	/*FILTER*/
+source	method: Text
+source	method: Protected
+source	method: Deconstruct
+source	method: Items
+source	contains: Hidden>.Add
+source	regex: List<[^>]+>\\.Add\\(
+source	regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.TypeFilterTarget\\(\\)$
+doc-code	# Include service saves and exclude health checks.\npublic **.*Service.Save*(..., *CancellationToken)\n-contains: HealthCheck
+doc-block	<accessibility>[ <modifier>...] <return-type> <containing-type>.<method-name>[<type-parameters>](<parameter-types>)
+doc-block	obj/GeneratedFiles/AspectGenerator/AspectGeneratorBuildReport.md
+doc-block	EffectiveTargetFilter = DefaultTargetFilter + TargetFilter
+doc-block	unprefixed  native AspectGenerator target pattern syntax\npattern:     native AspectGenerator target pattern syntax\ncontains:    ordinal substring match against canonical method signature\nregex:       regex match against canonical method signature\n-attributes: exclude targets with a matching method or containing type attribute\n-rule        exclude rule; last matching rule wins inside one filter set
+doc-line	unprefixed  native AspectGenerator target pattern syntax
+doc-line	pattern:     native AspectGenerator target pattern syntax
+doc-line	contains:    ordinal substring match against canonical method signature
+doc-line	regex:       regex match against canonical method signature
+doc-line	-attributes: exclude targets with a matching method or containing type attribute
+doc-line	-rule        exclude rule; last matching rule wins inside one filter set
+doc-code	# Include service save methods and exclude health checks.\npublic **.*Service.Save*(..., *CancellationToken)\n-contains: HealthCheck
+doc-block	[-] [pattern:|regex:|contains:] rule-body
+doc-block	filter          ::= line*\nline            ::= blank | comment | rule\ncomment         ::= "#" text\nrule            ::= prefix? matcher-rule\nprefix          ::= "-" | "&" | "|"\nmatcher-rule    ::= prefixed-rule | native-rule\nprefixed-rule   ::= ("pattern" | "contains" | "regex") ":" text\nnative-rule     ::= condition-rule | method-pattern\ncondition-rule  ::= condition-item (";" condition-item)*\ncondition-item  ::= condition-key ":" condition-expr | modifier-token+\ncondition-expr  ::= condition-term ("|" condition-term)*\ncondition-term  ::= condition-atom ("&" condition-atom)*\nmethod-pattern  ::= modifier-token* method-name-pattern parameter-list? return-pattern?\nreturn-pattern  ::= ":" type-pattern
+doc-line	filter          ::= line*
+doc-line	line            ::= blank | comment | rule
+doc-line	comment         ::= "#" text
+doc-line	rule            ::= prefix? matcher-rule
+doc-line	prefix          ::= "-" | "&" | "|"
+doc-line	matcher-rule    ::= prefixed-rule | native-rule
+doc-line	prefixed-rule   ::= ("pattern" | "contains" | "regex") ":" text
+doc-line	native-rule     ::= condition-rule | method-pattern
+doc-line	condition-rule  ::= condition-item (";" condition-item)*
+doc-line	condition-item  ::= condition-key ":" condition-expr | modifier-token+
+doc-line	condition-expr  ::= condition-term ("|" condition-term)*
+doc-line	condition-term  ::= condition-atom ("&" condition-atom)*
+doc-line	method-pattern  ::= modifier-token* method-name-pattern parameter-list? return-pattern?
+doc-line	return-pattern  ::= ":" type-pattern
+doc-block	public Save* : System.Void\nMyApp.Service.Save* : System.String
+doc-line	public Save* : System.Void
+doc-line	MyApp.Service.Save* : System.String
+doc-block	public **.*Service.Save*(..., *CancellationToken) : System.Threading.Tasks.Task*\npattern: public **.*Service.Save*(..., *CancellationToken) : System.Threading.Tasks.Task*
+doc-line	public **.*Service.Save*(..., *CancellationToken) : System.Threading.Tasks.Task*
+doc-line	pattern: public **.*Service.Save*(..., *CancellationToken) : System.Threading.Tasks.Task*
+doc-block	[accessibility/modifiers...] [namespace/type path.]method[(parameters)] [: return-type]
+doc-block	Save\nSave()\nSave(...)\npublic Save*\npublic static MyApp.Services.*Service.Save*\nprotected internal MyApp.**.*Service.Save*(..., *CancellationToken) : System.Threading.Tasks.Task*\nMyApp.Data.Repository<*>.Get<*>(_)\n*.TryGet(System.String, out System.Int32) : System.Boolean
+doc-line	Save()
+doc-line	Save(...)
+doc-line	public Save*
+doc-line	public static MyApp.Services.*Service.Save*
+doc-line	protected internal MyApp.**.*Service.Save*(..., *CancellationToken) : System.Threading.Tasks.Task*
+doc-line	MyApp.Data.Repository<*>.Get<*>(_)
+doc-line	*.TryGet(System.String, out System.Int32) : System.Boolean
+doc-block	namespace:MyApp.Services.**; type:*Service; method:Save*\nmethod:*Async; returns:System.Threading.Tasks.Task*\nparams:..., *CancellationToken\nparam:out System.Int32\nsignature:public * MyApp.Services.*
+doc-line	namespace:MyApp.Services.**; type:*Service; method:Save*
+doc-line	method:*Async; returns:System.Threading.Tasks.Task*
+doc-line	params:..., *CancellationToken
+doc-line	param:out System.Int32
+doc-line	signature:public * MyApp.Services.*
+doc-block	namespace: MyApp.Services\nnamespace: MyApp.Jobs\nmethod: Save*\nmethod: Update*\nparams: ..., *CancellationToken
+doc-line	namespace: MyApp.Services
+doc-line	namespace: MyApp.Jobs
+doc-line	method: Save*
+doc-line	method: Update*
+doc-line	params: ..., *CancellationToken
+doc-block	(namespace is MyApp.Services OR MyApp.Jobs)\nAND (method is Save* OR Update*)\nAND params match ..., *CancellationToken
+doc-line	(namespace is MyApp.Services OR MyApp.Jobs)
+doc-line	AND (method is Save* OR Update*)
+doc-line	AND params match ..., *CancellationToken
+doc-block	method: Save*\n& method: *Async
+doc-line	& method: *Async
+doc-block	method: Save*\n& method: *Async\nmethod: Update*
+doc-block	method matches Save*\nAND method matches (*Async OR Update*)
+doc-line	method matches Save*
+doc-line	AND method matches (*Async OR Update*)
+doc-block	method: Save* & *Async | Update* & *Async
+doc-block	method: Save* & *Async | Update* & *Async\nparam: *CancellationToken & *DbConnection
+doc-line	param: *CancellationToken & *DbConnection
+doc-block	namespace: MyApp.Services\n& type: *Service\n& method: Save*\n\n| namespace: MyApp.Jobs\n& type: *Job\n& method: Run*
+doc-line	& type: *Service
+doc-line	& method: Save*
+doc-line	| namespace: MyApp.Jobs
+doc-line	& type: *Job
+doc-line	& method: Run*
+doc-block	namespace: MyApp.Services\nregex:^public .*$\n| method: Save*
+doc-line	| method: Save*
+doc-block	namespace: MyApp.Services\ncontains: Save\n| method: Update*
+doc-line	| method: Update*
+doc-block	namespace: MyApp.Services\npattern: MyApp.**.Save*\n| method: Update*
+doc-block	- method: HealthCheck\n| method: Ping
+doc-line	| method: Ping
+doc-block	pattern: namespace: MyApp.Services; method: Save*
+doc-block	attributes: NoLog\nattributes: NoLogAttribute\nattributes: MyCompany.Diagnostics.NoLogAttribute
+doc-line	attributes: NoLog
+doc-line	attributes: NoLogAttribute
+doc-line	attributes: MyCompany.Diagnostics.NoLogAttribute
+doc-block	-attributes: MyCompany.Diagnostics.NoLogAttribute
+doc-code	# Include service/job methods with CancellationToken.\nnamespace: MyApp.Services\nnamespace: MyApp.Jobs\n& type: *Service | *Job\n& method: Save* | Update* | Run*\n& params: ..., *CancellationToken\n\n# Exclude health checks.\n- method: HealthCheck\n| method: Ping\n\n# Expert/agent escape hatch.\nregex:^public .* MyApp\\.Generated\\..*\\.Map.*\\(.*\\)$
+doc-block	DefaultTargetFilter:\n  -attributes: NoLogAttribute\n\nTargetFilter:\n  public **.*(...)\n\nEffectiveTargetFilter:\n  -attributes: NoLogAttribute\n  public **.*(...)
+doc-line	DefaultTargetFilter:
+doc-line	  -attributes: NoLogAttribute
+doc-line	TargetFilter:
+doc-line	  public **.*(...)
+doc-line	EffectiveTargetFilter:
+doc-block	public System.String MyApp.Services.UserService.GetName(System.Int32)\npublic static System.Void MyApp.Services.Cache.Clear()\npublic virtual System.Threading.Tasks.Task<System.String> MyApp.Services.UserService.GetNameAsync(System.Int32,System.Threading.CancellationToken)\npublic System.Boolean MyApp.Services.UserService.TryGet(System.String,out System.Int32)\npublic System.Void MyApp.Services.UserService.Update(ref MyApp.Models.User)\npublic static System.String MyApp.Extensions.UserExtensions.Format(this MyApp.Models.User,System.Int32)\npublic MyApp.Models.User MyApp.Data.Repository<MyApp.Models.User>.Get<System.Int32>(System.Int32)
+doc-line	public System.String MyApp.Services.UserService.GetName(System.Int32)
+doc-line	public static System.Void MyApp.Services.Cache.Clear()
+doc-line	public virtual System.Threading.Tasks.Task<System.String> MyApp.Services.UserService.GetNameAsync(System.Int32,System.Threading.CancellationToken)
+doc-line	public System.Boolean MyApp.Services.UserService.TryGet(System.String,out System.Int32)
+doc-line	public System.Void MyApp.Services.UserService.Update(ref MyApp.Models.User)
+doc-line	public static System.String MyApp.Extensions.UserExtensions.Format(this MyApp.Models.User,System.Int32)
+doc-line	public MyApp.Models.User MyApp.Data.Repository<MyApp.Models.User>.Get<System.Int32>(System.Int32)
