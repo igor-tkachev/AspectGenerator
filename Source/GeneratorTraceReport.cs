@@ -119,7 +119,8 @@ namespace AspectGenerator
 			SetOption("AspectGeneratorInterceptorsNamespace", options.InterceptorsNamespace);
 			SetOption("InterceptorsNamespaces", options.InterceptorsNamespaces);
 			SetOption("AspectGeneratorReportFile", options.ReportFile);
-			SetOption("AspectGeneratorReportSizeLimit", options.ReportSizeLimit.ToString(CultureInfo.InvariantCulture));
+			// In kilobytes, as the property takes it.
+			SetOption("AspectGeneratorReportSizeLimit", (options.ReportSizeLimit / 1024).ToString(CultureInfo.InvariantCulture));
 			SetOption("AspectGeneratorTrace", options.Trace.ToString());
 			SetOption("AspectGeneratorTraceLevel", options.TraceLevel.ToString());
 			AddEvent("options", $"generateApi={options.GenerateApi.ToString()}, trace={options.Trace.ToString()}, diagnosticSeverity={options.AspectDiagnosticSeverity}");

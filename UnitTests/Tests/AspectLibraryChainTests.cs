@@ -124,7 +124,43 @@ namespace AspectGenerator.Tests
 			var errors = compilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error).ToArray();
 
 			Assert.AreEqual(0, errors.Length, string.Join(Environment.NewLine, errors.Select(static e => e.ToString())));
-			Assert.AreEqual("Get;Value;3", RunChainApp(compilation, api.Image, aspects.Image));
+			Assert.AreEqual("Get;Value;3", RunChainApp(compilation, ("ChainApi", api.Image), ("ChainAspects", aspects.Image)));
+		}
+
+		[TestMethod]
+		public void AspectsOfLibraryUsingForwardedApiAreAppliedTest()
+		{
+			// The aspect library was compiled against ChainFacade when it declared the API; ChainFacade now forwards the API to
+			// ChainApi. The library references ChainFacade only.
+			var api         = CompileChainLibrary("ChainApi",    ChainApiSource,    new() { ["build_property.AspectGeneratorPublicApi"] = "true" });
+			var facadeV1    = CompileChainLibrary("ChainFacade", ChainApiSource.Replace("ChainApi", "ChainFacade", StringComparison.Ordinal), new() { ["build_property.AspectGeneratorPublicApi"] = "true" });
+			var aspects     = CompileChainLibrary("ChainAspects", ChainAspectsSource, new(), facadeV1.Reference);
+			var facadeV2    = CompileChainLibrary("ChainFacade", GetForwardersSource(api.Reference), new() { ["build_property.AspectGeneratorGenerateApi"] = "false" }, api.Reference);
+
+			var result       = RunChainApp([ChainAppSource], new(), out var compilation, api.Reference, facadeV2.Reference, aspects.Reference);
+			var interceptors = GetGeneratedSourceOrEmpty(result, "Interceptors.g.cs");
+
+			StringAssert.Contains(interceptors, "Service.Get()");
+			StringAssert.Contains(interceptors, "Own.Value()");
+
+			var errors = compilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error).ToArray();
+
+			Assert.AreEqual(0, errors.Length, string.Join(Environment.NewLine, errors.Select(static e => e.ToString())));
+			Assert.AreEqual("Get;Value;3", RunChainApp(compilation, ("ChainApi", api.Image), ("ChainFacade", facadeV2.Image), ("ChainAspects", aspects.Image)));
+
+			// [assembly: TypeForwardedTo] for every public type of the API.
+			static string GetForwardersSource(MetadataReference apiReference)
+			{
+				var probe = CSharpCompilation.Create("ForwarderProbe", references: GetMetadataReferences().Append(apiReference));
+				var api   = probe.SourceModule.ReferencedAssemblySymbols.Single(static a => a.Identity.Name == "ChainApi");
+				var types = api.GlobalNamespace.GetNamespaceMembers().Single(static n => n.Name == "AspectGenerator").GetTypeMembers()
+					.Where(static t => t.DeclaredAccessibility == Accessibility.Public)
+					.Select(static t => t.Arity == 0
+						? $"[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(global::AspectGenerator.{t.Name}))]"
+						: $"[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(global::AspectGenerator.{t.Name}<{new string(',', t.Arity - 1)}>))]");
+
+				return string.Join(Environment.NewLine, types);
+			}
 		}
 
 		[TestMethod]
@@ -201,7 +237,7 @@ namespace AspectGenerator.Tests
 			return driver.GetRunResult();
 		}
 
-		static string RunChainApp(Compilation compilation, byte[] apiImage, byte[] aspectsImage)
+		static string RunChainApp(Compilation compilation, params (string Name, byte[] Image)[] libraries)
 		{
 			using var stream = new MemoryStream();
 
@@ -209,7 +245,7 @@ namespace AspectGenerator.Tests
 
 			Assert.IsTrue(emit.Success, string.Join(Environment.NewLine, emit.Diagnostics));
 
-			var context = new ChainContext(apiImage, aspectsImage);
+			var context = new ChainContext(libraries.ToDictionary(static l => l.Name, static l => l.Image, StringComparer.Ordinal));
 
 			try
 			{
@@ -226,19 +262,22 @@ namespace AspectGenerator.Tests
 			}
 		}
 
-		sealed class ChainContext(byte[] apiImage, byte[] aspectsImage) : AssemblyLoadContext("ChainTests", isCollectible: true)
+		sealed class ChainContext(Dictionary<string,byte[]> images) : AssemblyLoadContext("ChainTests", isCollectible: true)
 		{
-			Assembly? _api;
-			Assembly? _aspects;
+			readonly Dictionary<string,Assembly> _loaded = new(StringComparer.Ordinal);
 
 			protected override Assembly? Load(AssemblyName name)
 			{
-				return name.Name switch
+				if (name.Name is not {} simpleName || !images.TryGetValue(simpleName, out var image))
+					return null;
+
+				if (!_loaded.TryGetValue(simpleName, out var assembly))
 				{
-					"ChainApi"     => _api     ??= LoadFromStream(new MemoryStream(apiImage)),
-					"ChainAspects" => _aspects ??= LoadFromStream(new MemoryStream(aspectsImage)),
-					_              => null
-				};
+					assembly = LoadFromStream(new MemoryStream(image));
+					_loaded.Add(simpleName, assembly);
+				}
+
+				return assembly;
 			}
 		}
 	}

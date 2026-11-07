@@ -66,13 +66,16 @@ namespace AspectGenerator.Tests
 			return sb.ToString();
 		}
 
-		static string WriteReport(string source, string? sizeLimit)
+		static string WriteReport(string source, string? sizeLimit, bool trace = false)
 		{
 			var reportFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "report.md");
 			var properties = new Dictionary<string,string>
 			{
 				[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
 			};
+
+			if (trace)
+				properties[$"build_property.AspectGenerator{AspectOptionName.Trace}"] = "true";
 
 			if (sizeLimit is not null)
 				properties[$"build_property.AspectGenerator{AspectOptionName.ReportSizeLimit}"] = sizeLimit;
@@ -100,7 +103,7 @@ namespace AspectGenerator.Tests
 			Assert.IsTrue(reportSize <= 1024 * 1024, $"The report is {reportSize} bytes.");
 			StringAssert.Contains(report, "| Generated call sites | 4000 |");
 			StringAssert.Contains(report, "| Target methods | 200 |");
-			StringAssert.Contains(report, " of 4,000 call sites are not listed: the report is limited to 1,024 KB. Set `AspectGeneratorReportSizeLimit` to `0` to list them all");
+			StringAssert.Contains(report, " of 4,000 call sites are not listed: the lists get what is left of the 1,024 KB `AspectGeneratorReportSizeLimit` after the summary, the generated sources and the trace, which are always written in full. Set `AspectGeneratorReportSizeLimit` to `0` to list them all");
 		}
 
 		[TestMethod]
@@ -115,7 +118,7 @@ namespace AspectGenerator.Tests
 			StringAssert.Contains(limited, "| Generated call sites | 200 |");
 			StringAssert.Contains(limited, "| Target methods | 40 |");
 			StringAssert.Contains(limited, "## Intercepted Call Sites");
-			StringAssert.Contains(limited, " of 200 call sites are not listed: the report is limited to 16 KB.");
+			StringAssert.Contains(limited, " of 200 call sites are not listed: the lists get what is left of the 16 KB `AspectGeneratorReportSizeLimit`");
 			Assert.IsTrue(CountOccurrences(limited, "Interceptor`") > 0, "Some rows are still listed.");
 
 			// The target methods take at most half of what is left, so some call sites are listed as well.
@@ -136,6 +139,27 @@ namespace AspectGenerator.Tests
 			{
 				return string.Join("\n", report.Split('\n').Where(static line => !line.Contains("AspectGeneratorReportSizeLimit", StringComparison.Ordinal)));
 			}
+		}
+
+		[TestMethod]
+		public void BuildReportSizeLimitAppliesToTheListsOnlyTest()
+		{
+			// 1 KB is less than the summary, the generated sources and the trace take: they are written in full all the same,
+			// and only the lists are left empty, each with its note.
+			var report = WriteReport(ManyCallSitesSource(1, 1), "1", trace: true);
+
+			Assert.IsTrue(Encoding.UTF8.GetByteCount(report) > 1024, "The mandatory content alone is larger than the limit.");
+			StringAssert.Contains(report, "| Generated call sites | 1 |");
+			StringAssert.Contains(report, "| Target methods | 1 |");
+			StringAssert.Contains(report, "| Interceptors namespace |");
+			StringAssert.Contains(report, "## Generated Sources");
+			StringAssert.Contains(report, "Interceptors.g.cs");
+			StringAssert.Contains(report, "> 1 of 1 target methods are not listed: the lists get what is left of the 1 KB `AspectGeneratorReportSizeLimit` after the summary, the generated sources and the trace, which are always written in full.");
+			StringAssert.Contains(report, "> 1 of 1 call sites are not listed:");
+			Assert.IsFalse(report.Contains("| 1 | [", StringComparison.Ordinal), "No call site row is listed.");
+			StringAssert.Contains(report, "## AspectGenerator trace");
+			StringAssert.Contains(report, "### AGTRACE events");
+			StringAssert.Contains(report, "AGTRACE result: totalElapsedMs=");
 		}
 	}
 }

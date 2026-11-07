@@ -25,7 +25,7 @@ Completed:
 - typed applied aspect instances exposed through `InterceptInfo.Aspect` / `InterceptData<T>.Aspect`;
 - per-interceptor static state holders for lazy `MemberInfo` and applied aspect instance initialization.
 - `AspectInstanceLifetime.Instance` local applied aspect construction for static typed hooks.
-- DEBUG-only opt-in `AspectGeneratorTrace` section in the build report for generator counters, timings, `AGTRACE` events, and decisions.
+- opt-in `AspectGeneratorTrace` section (in Debug and Release builds of the generator) in the build report for generator counters, timings, `AGTRACE` events, and decisions.
 - declaration-first target selection with call-site prefiltering before invocation symbol binding.
 - fully qualified (`global::`) type names in generated interceptors, including aspect attributes in the global namespace or nested in classes.
 
@@ -308,7 +308,7 @@ Checklist:
 - [x] Group selected target methods into `TargetMethodBucket` entries by method name.
 - [x] Reject call-site candidates before symbol binding by missing method name, incompatible generic arity, incompatible argument count range, and safe explicit receiver/type mismatch.
   - The receiver gate applies only when every selected method with that name is an ordinary static method: its receiver must then name a type, so a receiver whose simple name is not a containing type, a source type derived from one, or a using alias cannot bind. Instance, extension, extension-block and static abstract or virtual interface members keep every receiver, because a receiver name says nothing about a value's type.
-- [x] Emit per-gate call-site prefilter rejection counters in DEBUG trace output.
+- [x] Emit per-gate call-site prefilter rejection counters in the trace output.
 - [x] Reuse selected target attributes from the selection plan after symbol binding instead of re-running target filter selection for current-compilation targets.
 - [x] Preserve conservative call-site binding for filters that can match external methods, such as signature text / regex filters.
   - Assembly-level native patterns also match methods of referenced assemblies. A rule whose method name is a literal binds only call sites with that name; a rule whose root namespace (or global type) is a literal that no referenced assembly declares cannot match external methods; any other positive native rule binds every call site.

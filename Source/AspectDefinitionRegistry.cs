@@ -140,8 +140,8 @@ namespace AspectGenerator
 
 		/// <summary>
 		/// The referenced assemblies that can declare aspects: the ones that declare <c>AspectGenerator.AspectAttribute</c>
-		/// themselves (a generated API, internal or public), and the ones that reference an assembly that declares it (an aspect
-		/// library that uses the public API of another assembly and has none of its own). Only the reference lists of the
+		/// themselves (a generated API, internal or public), and the ones that reference an assembly that declares or forwards
+		/// it (an aspect library that uses the public API of another assembly and has none of its own). Only the reference lists of the
 		/// assemblies are read; the types of an assembly are walked by the caller, and only for the assemblies returned.
 		/// </summary>
 		public static List<IAssemblySymbol> GetAspectDefinitionAssemblies(Compilation compilation)
@@ -149,8 +149,12 @@ namespace AspectGenerator
 			var referencedAssemblies = compilation.SourceModule.ReferencedAssemblySymbols;
 			var apiAssemblyNames     = new HashSet<string>(StringComparer.Ordinal);
 
+			// A facade that forwards the attribute to another assembly counts too: a library compiled against the facade
+			// references the facade, not the assembly the attribute lives in now. ResolveForwardedType is a lookup in the
+			// forwarder table of the assembly's manifest.
 			foreach (var assembly in referencedAssemblies)
-				if (assembly.GetTypeByMetadataName("AspectGenerator.AspectAttribute") is not null)
+				if (assembly.GetTypeByMetadataName("AspectGenerator.AspectAttribute") is not null ||
+					assembly.ResolveForwardedType("AspectGenerator.AspectAttribute") is not null)
 					apiAssemblyNames.Add(assembly.Identity.Name);
 
 			var result = new List<IAssemblySymbol>();

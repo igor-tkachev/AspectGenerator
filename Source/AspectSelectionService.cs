@@ -98,7 +98,8 @@ namespace AspectGenerator
 				if (cancellationToken.IsCancellationRequested)
 					break;
 
-				if (attribute.Parent is AttributeListSyntax { Parent: LocalFunctionStatementSyntax } &&
+				// [return: ...] applies the attribute to the return value, not to the local function.
+				if (attribute.Parent is AttributeListSyntax { Parent: LocalFunctionStatementSyntax, Target: null or { Identifier.ValueText: "method" } } &&
 					AspectSymbols.HasNamedArgument(attribute, "TargetFilter"))
 					ReportMethodLevelTargetFilter(attribute, cancellationToken);
 			}

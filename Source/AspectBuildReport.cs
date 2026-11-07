@@ -111,8 +111,9 @@ namespace AspectGenerator
 
 			var trace = analysis.Trace.IsEnabled ? analysis.Trace.ToMarkdown() : "";
 
-			// The summary and the sources above are always complete; the two lists share what the size limit leaves, the
-			// target methods up to half of it. The headings and the notes on omitted rows fit in the reserve.
+			// The limit applies to the lists only: the summary, the sources above and the trace are always written in full, so a
+			// limit below their size still yields them. The two lists share what the limit leaves after them, the target methods
+			// up to half of it. The headings and the notes on omitted rows fit in the reserve.
 			var remaining = analysis.Options.ReportSizeLimit <= 0
 				? long.MaxValue
 				: analysis.Options.ReportSizeLimit - Encoding.UTF8.GetByteCount(sb.ToString()) - Encoding.UTF8.GetByteCount(trace) - ListReserve;
@@ -232,9 +233,9 @@ namespace AspectGenerator
 				.Append(total.ToString("N0", CultureInfo.InvariantCulture))
 				.Append(' ')
 				.Append(what)
-				.Append(" are not listed: the report is limited to ")
+				.Append(" are not listed: the lists get what is left of the ")
 				.Append(limit)
-				.Append(" KB. Set `AspectGeneratorReportSizeLimit` to `0` to list them all, or to a larger size in kilobytes.")
+				.Append(" KB `AspectGeneratorReportSizeLimit` after the summary, the generated sources and the trace, which are always written in full. Set `AspectGeneratorReportSizeLimit` to `0` to list them all, or to a larger size in kilobytes.")
 				.AppendLine();
 		}
 

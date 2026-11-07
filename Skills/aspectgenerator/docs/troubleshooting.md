@@ -74,7 +74,7 @@ The report is not a compiler diagnostic stream and is not printed to the console
 
 The report is intentionally human-friendly and agent-friendly, not a minimal deterministic baseline format. Absolute file links, line/column locations, generated source references, Markdown tables, and detailed call-site rows are useful and should not be removed merely because they are not golden-file friendly.
 
-The report is limited to 1,024 KB by default. The summary is always complete; when the lists of target methods and call sites do not fit, the report says under each list how many rows it left out. Set `AspectGeneratorReportSizeLimit` (kilobytes) to `0` to list everything, for example `-p:AspectGeneratorReportSizeLimit=0` on the command line.
+The report is limited to 1,024 KB by default. The limit applies to the lists of target methods and call sites: the summary, the generated sources and, when it is on, the trace are always written in full, so with a limit smaller than they are the report is larger than the limit and the lists are empty. When the lists of target methods and call sites do not fit, the report says under each list how many rows it left out. Set `AspectGeneratorReportSizeLimit` (kilobytes) to `0` to list everything, for example `-p:AspectGeneratorReportSizeLimit=0` on the command line.
 
 Design-time builds do not write the report, and a known editor never does, also after a build. The report's `Generator host` row names the process that wrote it; an IDE the generator does not know shows there as `unknown (<process>)` after editing in it — report that row, with the IDE's name and version, to have the IDE recognized.
 

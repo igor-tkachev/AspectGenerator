@@ -775,6 +775,34 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void LocalFunctionReturnTargetFilterIsNotReportedTest()
+		{
+			// [return: ...] applies the attribute to the return value; it is not a method-level aspect attribute.
+			var cases = new (string Name, string AssemblyFilter)[]
+			{
+				("no other filter",               ""),
+				("filter that may target external methods", "[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = \"namespace: System.**\")]"),
+			};
+
+			foreach (var (name, assemblyFilter) in cases)
+			{
+				var source = FilterLocalFunctionTargetFilterSource
+					.Replace("/*ASSEMBLY*/", assemblyFilter, StringComparison.Ordinal)
+					.Replace("[FilterAspect(TargetFilter = \"Save\")]", "[return: FilterAspect(TargetFilter = \"Save\")]", StringComparison.Ordinal);
+
+				foreach (var designTime in new[] { false, true })
+				{
+					var result = RunGenerator(source, designTime ? new() { ["build_property.DesignTimeBuild"] = "true" } : null);
+					var mode   = designTime ? "design-time build" : "build";
+
+					Assert.IsFalse(
+						result.Diagnostics.Any(static d => d.Id == AspectDiagnosticID.MethodLevelTargetFilter),
+						$"{name}, {mode}: did not expect {AspectDiagnosticID.MethodLevelTargetFilter}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(static d => d.Id))}");
+				}
+			}
+		}
+
+		[TestMethod]
 		public void DefaultTargetFilterExcludesTypeAttributeTargetsTest()
 		{
 			var result = RunGenerator(DefaultTargetFilterTypeNoLogSource);
@@ -1345,6 +1373,7 @@ namespace AspectGenerator.Tests
 				StringAssert.Contains(report, "## AspectGenerator trace");
 				StringAssert.Contains(report, "| AspectGeneratorTrace | True |");
 				StringAssert.Contains(report, "| AspectGeneratorTraceLevel | Normal |");
+				StringAssert.Contains(report, "| AspectGeneratorReportSizeLimit | 1024 |");
 				StringAssert.Contains(report, "| Aspect definitions | 1 |");
 				StringAssert.Contains(report, "| Applied aspect attributes | 1 |");
 				StringAssert.Contains(report, "| Candidate call syntax nodes | 2 |");
@@ -3852,7 +3881,7 @@ namespace AspectGenerator.Tests
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
 			[Aspect(OnAfterCall = nameof(After))]
-			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method | AttributeTargets.ReturnValue, Inherited = false, AllowMultiple = true)]
 			sealed class FilterAspectAttribute : Attribute
 			{
 				public string? TargetFilter { get; set; }

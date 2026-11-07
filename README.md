@@ -314,7 +314,7 @@ To change the report path or file name, set `AspectGeneratorReportFile`:
 </PropertyGroup>
 ```
 
-The report is limited to 1,024 KB by default (`AspectGeneratorReportSizeLimit`, in kilobytes): a broad target filter on a large project selects tens of thousands of calls, and a report that lists each of them reaches tens of megabytes. The summary and the generated sources are always complete. When the lists of target methods and call sites do not fit, the report lists their first rows (the target methods take at most half of the space left) and says under each list how many rows it left out. Set `AspectGeneratorReportSizeLimit` to `0` to list everything, or to a larger size; a value that is not a whole number of kilobytes uses the default.
+The report is limited to 1,024 KB by default (`AspectGeneratorReportSizeLimit`, in kilobytes): a broad target filter on a large project selects tens of thousands of calls, and a report that lists each of them reaches tens of megabytes. The limit applies to the lists of target methods and call sites: the summary, the generated sources and, when it is on, the trace are always written in full, so with a limit smaller than they are the report is larger than the limit and the lists are empty. When the lists of target methods and call sites do not fit, the report lists their first rows (the target methods take at most half of the space left) and says under each list how many rows it left out. Set `AspectGeneratorReportSizeLimit` to `0` to list everything, or to a larger size; a value that is not a whole number of kilobytes uses the default.
 
 ```xml
 <PropertyGroup>
