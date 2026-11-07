@@ -38,6 +38,12 @@ namespace AspectGenerator
 				.ReportDiagnostics(reportDiagnostic);
 		}
 
+		/// <summary>The filters as <see cref="GetFilters(IEnumerable{string?}, Action{TargetFilterDiagnostic}?)"/> reads them, without the cache: for the tests that time the reader.</summary>
+		internal static TargetFilterSet ReadFiltersUncached(IEnumerable<string?> filters)
+		{
+			return CreateFilterSet(ReadRules(filters).ToArray(), GramTargetFilterFront.Instance);
+		}
+
 		static TargetFilterSet CreateFilterSet(string[] rules, ITargetFilterFront front)
 		{
 			var diagnostics = new List<TargetFilterDiagnostic>();

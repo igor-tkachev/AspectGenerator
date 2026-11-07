@@ -37,9 +37,9 @@ namespace AspectGenerator
 				{
 					line = Read(TargetFilterParser.TryParseLine(text), text);
 				}
-				catch (InsufficientExecutionStackException)
+				catch (Exception ex) when (Unreadable(ex, text) is {} diagnostic)
 				{
-					diagnostics.Add(TooDeep(text));
+					diagnostics.Add(diagnostic);
 					return false;
 				}
 
@@ -87,9 +87,9 @@ namespace AspectGenerator
 						? TryCompileConditionLines([(rule, false)], diagnostics, out pattern, out matchesNothing)
 						: TryCompileMethodPattern(rule.Text, (MethodPatternSyntax)rule.Syntax.Body, diagnostics, out pattern, out matchesNothing);
 				}
-				catch (InsufficientExecutionStackException)
+				catch (Exception ex) when (Unreadable(ex, rule.Text) is {} diagnostic)
 				{
-					diagnostics.Add(TooDeep(rule.Text));
+					diagnostics.Add(diagnostic);
 					return false;
 				}
 			}
@@ -103,21 +103,31 @@ namespace AspectGenerator
 				{
 					return TryCompileConditionLines(lines.Select(static l => (l.Rule, l.ForceAnd)), diagnostics, out pattern, out matchesNothing);
 				}
-				catch (InsufficientExecutionStackException)
+				catch (Exception ex) when (Unreadable(ex, lines[0].Rule.Text) is {} diagnostic)
 				{
-					diagnostics.Add(TooDeep(lines[0].Rule.Text));
+					diagnostics.Add(diagnostic);
 					return false;
 				}
 			}
 
 			/// <summary>
-			/// A line nested so deeply that reading it would run out of stack. The generated parser takes a stack of its own
-			/// before that, so this is reached only where it may not (see <see cref="TargetFilterParser"/>).
+			/// The diagnostic of a rule that cannot be read, or <see langword="null"/> for any other failure. A rule nested
+			/// deeper than the stack allows is one (the parser does not move a reading to a thread of its own, see
+			/// <see cref="TargetFilterParser"/>); a text one of the grammar's readings refuses is another, which the
+			/// readings are written never to do, and which is reported rather than let fail the generator.
 			/// </summary>
-			static TargetFilterDiagnostic TooDeep(string rule)
+			static TargetFilterDiagnostic? Unreadable(Exception exception, string rule)
 			{
-				return TargetFilterDiagnostic.InvalidRule(rule, "The rule nests '<', '(' or '[' too deeply to be read.");
+				return exception switch
+				{
+					InsufficientExecutionStackException => TargetFilterDiagnostic.InvalidRule(rule, "The rule nests '<' or '(' too deeply to be read."),
+					RefusedException                    => TargetFilterDiagnostic.InvalidRule(rule, "The rule cannot be read."),
+					_                                   => null
+				};
 			}
+
+			/// <summary>A reading of the grammar refused its text.</summary>
+			sealed class RefusedException(string message) : Exception(message);
 
 			// ---- condition rules ----
 
@@ -678,7 +688,7 @@ namespace AspectGenerator
 			{
 				// Every publication reads every text; a refusal is a defect of the grammar.
 				if (!match.IsSuccess)
-					throw new InvalidOperationException($"The target filter grammar refused '{source}': {match.Error}");
+					throw new RefusedException($"The target filter grammar refused '{source}': {match.Error}");
 
 				return match.Value;
 			}

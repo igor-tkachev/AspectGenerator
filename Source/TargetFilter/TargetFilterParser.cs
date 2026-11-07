@@ -104,11 +104,6 @@ namespace AspectGenerator
 			return result;
 		}
 
-		static TextSpan[] Spans(TextSpan? first, TextSpan[]? more)
-		{
-			return first is {} span ? Spans(span, more ?? []) : [];
-		}
-
 		static TextSpan[] Spans(ChunkSyntax? first, ChunkSyntax[]? more)
 		{
 			var result = new List<TextSpan>();

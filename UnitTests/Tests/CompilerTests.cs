@@ -141,6 +141,8 @@ namespace AspectGenerator.Tests
 				("type unknown key",              Files(typeFilter.Replace("FILTER_RULE", "foo: bar", StringComparison.Ordinal)),                    AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
 				("type parameter pattern",        Files(typeFilter.Replace("FILTER_RULE", "Save(..., ...)", StringComparison.Ordinal)),              AspectDiagnosticID.InvalidAspectFilterParameterPattern, null),
 				("type dotted pattern",           Files(typeFilter.Replace("FILTER_RULE", "A.**.B.**", StringComparison.Ordinal)),                   AspectDiagnosticID.InvalidAspectFilterDottedPattern,    null),
+				("assembly rule matches nothing", Files(FilterRuleDiagnosticSource.Replace("FILTER_RULE", "public private", StringComparison.Ordinal)), AspectDiagnosticID.AspectFilterRuleMatchesNothing, null),
+				("type rule matches nothing",     Files(typeFilter.Replace("FILTER_RULE", "publik Invoke", StringComparison.Ordinal)),               AspectDiagnosticID.AspectFilterRuleMatchesNothing,      null),
 				("type default filter",           Files(DefaultTargetFilterSingularAttributeSource),                                                  AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
 				("type default filter, alias",    Files(DefaultTargetFilterAliasSource),                                                              AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
 				("library default filter",        Files(LibraryDefaultTargetFilterSource),                                                            AspectDiagnosticID.UnknownAspectFilterConditionKey,     library),
@@ -362,6 +364,7 @@ namespace AspectGenerator.Tests
 			AspectDiagnosticID.UnknownAspectFilterConditionKey,
 			AspectDiagnosticID.InvalidAspectFilterParameterPattern,
 			AspectDiagnosticID.InvalidAspectFilterDottedPattern,
+			AspectDiagnosticID.AspectFilterRuleMatchesNothing,
 			AspectDiagnosticID.MethodLevelTargetFilter,
 			AspectDiagnosticID.InvalidAspectDiagnosticSeverity,
 		];
