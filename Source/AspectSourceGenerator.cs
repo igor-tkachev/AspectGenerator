@@ -553,6 +553,8 @@ namespace AspectGenerator
 
 				trace.AddDecision("target-selection: declaration-first enabled");
 
+				selection.ReportLocalFunctionTargetFilters(appliedAttributes, cancellationToken);
+
 				AspectSelectionPlan selectionPlan;
 				using (trace.TimePhase("Collect target methods"))
 					selectionPlan = selection.BuildSelectionPlan(methodDeclarations, externalAspectDefinitionsPossible, cancellationToken);

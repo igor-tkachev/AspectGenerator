@@ -745,6 +745,36 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void LocalFunctionTargetFilterReportsDiagnosticTest()
+		{
+			// A local function has no declaration the generator selects from; AG0208 must not depend on whether another
+			// filter makes the generator bind every call, and a design-time build reports it as a build does.
+			var cases = new (string Name, string AssemblyFilter)[]
+			{
+				("no other filter",               ""),
+				("filter that may target external methods", "[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = \"namespace: System.**\")]"),
+			};
+
+			foreach (var (name, assemblyFilter) in cases)
+			{
+				var source = FilterLocalFunctionTargetFilterSource.Replace("/*ASSEMBLY*/", assemblyFilter, StringComparison.Ordinal);
+
+				foreach (var designTime in new[] { false, true })
+				{
+					var result = RunGenerator(source, designTime ? new() { ["build_property.DesignTimeBuild"] = "true" } : null);
+					var diagnostics = result.Diagnostics.Where(static d => d.Id == AspectDiagnosticID.MethodLevelTargetFilter).ToArray();
+					var mode = designTime ? "design-time build" : "build";
+
+					Assert.AreEqual(1, diagnostics.Length, $"{name}, {mode}: expected one {AspectDiagnosticID.MethodLevelTargetFilter}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(static d => d.Id))}");
+					Assert.AreEqual(
+						source.IndexOf("FilterAspect(TargetFilter = \"Save\")", StringComparison.Ordinal),
+						diagnostics[0].Location.SourceSpan.Start,
+						$"{name}, {mode}: AG0208 is reported at the attribute of the local function.");
+				}
+			}
+		}
+
+		[TestMethod]
 		public void DefaultTargetFilterExcludesTypeAttributeTargetsTest()
 		{
 			var result = RunGenerator(DefaultTargetFilterTypeNoLogSource);
@@ -3839,6 +3869,36 @@ namespace AspectGenerator.Tests
 
 				[FilterAspect(TargetFilter = "Save")]
 				public static string Load() => "load";
+			}
+			""";
+
+		const string FilterLocalFunctionTargetFilterSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			/*ASSEMBLY*/
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static string Invoke()
+				{
+					return Inner();
+
+					[FilterAspect(TargetFilter = "Save")]
+					static string Inner() => "inner";
+				}
 			}
 			""";
 

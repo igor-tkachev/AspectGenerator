@@ -81,18 +81,39 @@ namespace AspectGenerator
 
 					CreateAppliedAspectFilterSet(attribute, semanticModel);
 				}
-				else if (list.Parent is MethodDeclarationSyntax && hasTargetFilter && list.Target is null or { Identifier.ValueText: "method" })
-				{
-					var semanticModel = GetSemanticModel(attribute.SyntaxTree);
-
-					if (semanticModel.GetSymbolInfo(attribute, cancellationToken).Symbol is not IMethodSymbol { ContainingType: var aspectClass } ||
-						!AspectSymbols.IsConditionalAspectEnabled(aspectClass, _compilation, attribute.SyntaxTree) ||
-						!_registry.TryGetDefinition(aspectClass, out _))
-						continue;
-
-					ReportMethodLevelTargetFilter(attribute.GetLocation());
-				}
+				else if (list.Parent is (MethodDeclarationSyntax or LocalFunctionStatementSyntax) && hasTargetFilter && list.Target is null or { Identifier.ValueText: "method" })
+					ReportMethodLevelTargetFilter(attribute, cancellationToken);
 			}
+		}
+
+		/// <summary>
+		/// Reports AG0208 for the aspects applied to local functions with a <c>TargetFilter</c>. A build reports it for other
+		/// methods while it selects them from their declarations; a local function has no declaration the selection sees, and
+		/// is only reached when a call to it is bound, which depends on the other filters of the compilation.
+		/// </summary>
+		public void ReportLocalFunctionTargetFilters(ImmutableArray<AttributeSyntax> attributes, CancellationToken cancellationToken)
+		{
+			foreach (var attribute in attributes)
+			{
+				if (cancellationToken.IsCancellationRequested)
+					break;
+
+				if (attribute.Parent is AttributeListSyntax { Parent: LocalFunctionStatementSyntax } &&
+					AspectSymbols.HasNamedArgument(attribute, "TargetFilter"))
+					ReportMethodLevelTargetFilter(attribute, cancellationToken);
+			}
+		}
+
+		void ReportMethodLevelTargetFilter(AttributeSyntax attribute, CancellationToken cancellationToken)
+		{
+			var semanticModel = GetSemanticModel(attribute.SyntaxTree);
+
+			if (semanticModel.GetSymbolInfo(attribute, cancellationToken).Symbol is not IMethodSymbol { ContainingType: var aspectClass } ||
+				!AspectSymbols.IsConditionalAspectEnabled(aspectClass, _compilation, attribute.SyntaxTree) ||
+				!_registry.TryGetDefinition(aspectClass, out _))
+				return;
+
+			ReportMethodLevelTargetFilter(attribute.GetLocation());
 		}
 
 		/// <summary>
