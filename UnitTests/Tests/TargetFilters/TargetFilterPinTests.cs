@@ -129,16 +129,20 @@ namespace AspectGenerator.Tests.TargetFilters
 		}
 
 		[TestMethod]
-		public void EscapedStarAfterContainsWildcardMatchesContainsTest()
+		public void EscapedStarAfterLeadingWildcardIsALiteralStarTest()
 		{
-			// Known defect: "*a\*" should mean a name that contains "a*", but the trailing backslash is dropped and the
-			// pattern becomes "contains a". Update this test when the escape is honoured.
-			AssertSameDecisions(MethodContainsA, MethodContainsEscaped);
+			// "*a\*" is a name that ends with "a*": the escaped star is a character, not a second wildcard. No method name
+			// has a star, so the rule matches nothing, where "*a*" matches every name with an "a".
+			AssertMatchesNothing(Probe(MethodContainsEscaped));
+			Assert.AreEqual('i', Kind(Probe(MethodContainsA), SaveVoid));
 
-			var outcome = Probe(MethodContainsEscaped);
+			// A pointer type does end with a star.
+			var pointer = Probe(@"returns: *Int32\*");
 
-			Assert.AreEqual('i', Kind(outcome, SaveVoid));
-			Assert.AreEqual('n', Kind(outcome, Ping));
+			Assert.AreEqual('i', Kind(pointer, "public unsafe System.Int32* Acme.Core.Service.Pointer(System.Int32*)"));
+			Assert.AreEqual('i', Kind(pointer, "public System.Int32* Acme.Core.UnsafeHost.Address(System.Int32*)"));
+			Assert.AreEqual('n', Kind(pointer, "public static System.Int32 GlobalService.Count()"));
+			Assert.AreEqual(2, pointer.Kinds.Count(static k => k == 'i'));
 		}
 
 		// ---- modifiers and accessibility ----
@@ -149,7 +153,7 @@ namespace AspectGenerator.Tests.TargetFilters
 			var outcome = Probe(PublicPrivate);
 
 			AssertMatchesNothing(outcome);
-			Assert.AreEqual(0, outcome.Ids.Length);
+			CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterRuleMatchesNothing }, outcome.Ids);
 			Assert.AreEqual('i', Kind(Probe(PublicOnly), SaveVoid));
 		}
 
@@ -158,7 +162,8 @@ namespace AspectGenerator.Tests.TargetFilters
 		{
 			var outcome = Probe(Misspelled);
 
-			Assert.AreEqual(0, outcome.Ids.Length);
+			// The name has a space, which no method name has: the rule matches nothing and says so.
+			CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterRuleMatchesNothing }, outcome.Ids);
 			AssertMatchesNothing(outcome);
 		}
 
@@ -167,8 +172,8 @@ namespace AspectGenerator.Tests.TargetFilters
 		{
 			AssertMatchesNothing(Probe(ModifierUpperCase));
 			AssertMatchesNothing(Probe(ModifierOnlyUpperCase));
-			Assert.AreEqual(0, Probe(ModifierUpperCase).Ids.Length);
-			Assert.AreEqual(0, Probe(ModifierOnlyUpperCase).Ids.Length);
+			CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterRuleMatchesNothing }, Probe(ModifierUpperCase).Ids);
+			CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterRuleMatchesNothing }, Probe(ModifierOnlyUpperCase).Ids);
 
 			Assert.AreEqual('i', Kind(Probe(ModifierLowerCase), SaveVoid));
 			Assert.AreEqual('i', Kind(Probe(ModifierOnlyLowerCase), PublicStatic));
@@ -197,12 +202,13 @@ namespace AspectGenerator.Tests.TargetFilters
 		public void ExcludePrefixReadsOnlyTheFirstPrefixTest()
 		{
 			// "-&" is an exclude whose body starts with "&": the second prefix is not read, so the rule is a compact
-			// method pattern that matches nothing, and there is no leading-& diagnostic.
+			// method pattern whose name has a space ("& method"). It matches nothing, which is reported, and there is no
+			// leading-& diagnostic.
 			foreach (var input in new[] { ExcludeAndPrefix, ExcludeOrPrefix })
 			{
 				var outcome = Probe(input);
 
-				Assert.AreEqual(0, outcome.Ids.Length, input);
+				CollectionAssert.AreEqual(new[] { AspectDiagnosticID.AspectFilterRuleMatchesNothing }, outcome.Ids, input);
 				AssertMatchesNothing(outcome);
 			}
 		}

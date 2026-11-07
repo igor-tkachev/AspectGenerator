@@ -27,7 +27,7 @@ namespace AspectGenerator.Tests.TargetFilters
 		public const string MethodStarQuestion    = "method: *?";
 		public const string MethodStar            = "method: *";
 
-		// a trailing escaped star after a contains-wildcard drops the backslash instead of keeping a literal star
+		// a trailing escaped star after a leading wildcard is a literal star: the name ends with "a*"
 		public const string MethodContainsEscaped = @"method: *a\*";
 		public const string MethodContainsA       = "method: *a*";
 
