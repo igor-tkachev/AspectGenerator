@@ -1,7 +1,9 @@
 source	regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.AssemblyFilterTarget\\(\\)$\nregex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedMethod\\(System.String\\)$\nregex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedGenericMethod<System.String>\\(System.String\\)$\nregex: ^public System.String System.String.Substring\\(System.Int32\\)$
 source	regex: ^public System.Int32 AspectGenerator\\.Tests\\.OnCallObject\\.OnCall\\(System.Int32\\)$
+source	unknownkey: value
 source	method: FromAssembly
 source	method: FromType
+source	method: Target*
 source	params: this string
 source	regex: [
 source	& method: Save
@@ -23,6 +25,8 @@ source	public static System.Math.Max(System.Int32, System.Int32)
 source	public static System.Math.Ma*(System.Int32, System.Int32)
 source	fulltype: System.Math; method: Max; params: System.Int32, System.Int32
 source	method: Value
+source	namespace: System.**
+source	Save
 source	fulltype: AspectGenerator.Tests.GeneratorDriver.Person
 source	method: *
 source	FILTER_RULE
@@ -49,7 +53,6 @@ source	fulltype:AspectGenerator.Tests.GeneratorDriver.UserService; protected int
 source	Save*(..., *CancellationToken)
 source	TryGet(string, out int) : bool\nLoadAsync() : System.Threading.Tasks.Task<string>
 source	fulltype:**.Outer<*>.Inner<*>; method:Save; returns:*Inner<*>
-source	Save
 source	-attributes: NoLogAttribute
 source	-attributes: AspectGenerator.Tests.GeneratorDriver.NoLogAttribute
 source	public **.*(...)

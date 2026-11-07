@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace AspectGenerator.Tests.TargetFilters
@@ -12,13 +11,6 @@ namespace AspectGenerator.Tests.TargetFilters
 	/// </summary>
 	static class TargetFilterProbe
 	{
-		// The compiled rules are private to the set. The matched rule is reported by its text only, which is not
-		// unique (a contains: rule and a pattern rule with the same body print alike), so the index of the matched
-		// rule is found by asking the compiled rules themselves.
-		static readonly FieldInfo _filtersField =
-			typeof(AspectFilters.TargetFilterSet).GetField("_filters", BindingFlags.Instance | BindingFlags.NonPublic)
-			?? throw new InvalidOperationException("TargetFilterSet no longer has a _filters field.");
-
 		const string RuleIndexDigits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 		public sealed class Decision
@@ -72,7 +64,7 @@ namespace AspectGenerator.Tests.TargetFilters
 				return new Outcome { Ids = ids.ToArray(), Plan = null, Exception = ex.GetType().Name, RuleCount = 0, Decisions = decisions };
 			}
 
-			var filters = (AspectFilters.CompiledFilter[])_filtersField.GetValue(set)!;
+			var filters = set.Rules;
 
 			for (var i = 0; i < targets.Length; i++)
 			{
@@ -85,7 +77,7 @@ namespace AspectGenerator.Tests.TargetFilters
 					continue;
 				}
 
-				var index = filters.Length - 1;
+				var index = filters.Count - 1;
 
 				while (index >= 0 && !filters[index].IsMatch(target))
 					index--;
@@ -96,7 +88,7 @@ namespace AspectGenerator.Tests.TargetFilters
 				decisions[i] = new Decision { Kind = evaluation.IsMatch ? 'i' : 'e', RuleIndex = index };
 			}
 
-			return new Outcome { Ids = ids.ToArray(), Plan = set.Plan, Exception = null, RuleCount = filters.Length, Decisions = decisions };
+			return new Outcome { Ids = ids.ToArray(), Plan = set.Plan, Exception = null, RuleCount = filters.Count, Decisions = decisions };
 		}
 
 		/// <summary>
