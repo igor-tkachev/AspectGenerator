@@ -811,6 +811,7 @@ namespace AspectGenerator
 						diagnostic.Severity,
 						IsEnabledByDefault(diagnostic.Id),
 						diagnostic.Severity == DiagnosticSeverity.Error ? 0 : 1,
+						helpLink: AspectDiagnostics.HelpLink,
 						location: diagnostic.Location));
 			}
 
@@ -1290,6 +1291,7 @@ namespace AspectGenerator
 						DiagnosticSeverity.Info,
 						true,
 						1,
+						helpLink: AspectDiagnostics.HelpLink,
 						location: Location.None));
 
 			void AppendTargetMethod(IMethodSymbol method, string interceptorName)

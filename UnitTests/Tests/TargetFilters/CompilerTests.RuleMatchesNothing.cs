@@ -26,6 +26,12 @@ namespace AspectGenerator.Tests
 				"Target filter rule 'publik Save' names 'publik Save', with white space outside '<...>': a C# name never has white space there, so the rule probably holds a typo, such as a misspelled modifier word",
 				typo.GetMessage());
 			Assert.IsTrue(typo.Location.IsInSource);
+
+			// Every diagnostic of the generator links to the diagnostics page, these two included.
+			Assert.IsTrue(result.Diagnostics.Length >= 2);
+			Assert.IsTrue(
+				result.Diagnostics.All(static d => d.Descriptor.HelpLinkUri == "https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics"),
+				string.Join(", ", result.Diagnostics.Select(static d => $"{d.Id} '{d.Descriptor.HelpLinkUri}'")));
 			Assert.IsTrue(diagnostic.Location.IsInSource);
 			Assert.IsFalse(result.Results.Any(static r => r.Exception is not null), "The generator threw.");
 			Assert.IsFalse(

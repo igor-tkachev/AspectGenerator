@@ -40,6 +40,9 @@ namespace AspectGenerator
 				: $"{calls} calls selected by a target filter were not intercepted ({reason}). Enable {AspectDiagnosticID.FilterSelectedCallNotIntercepted} to list them.";
 		}
 
+		/// <summary>The page every diagnostic of the generator links to.</summary>
+		public const string HelpLink = "https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics";
+
 		static DiagnosticDescriptor CreateInterceptedCallMarkerDescriptor(DiagnosticSeverity severity)
 		{
 			return new DiagnosticDescriptor(
@@ -50,7 +53,7 @@ namespace AspectGenerator
 			severity,
 			true,
 			"Shows where AspectGenerator applies aspects and names the generated interceptor method.",
-			"https://github.com/igor-tkachev/AspectGenerator/wiki/Diagnostics");
+			HelpLink);
 		}
 	}
 }
