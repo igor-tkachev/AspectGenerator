@@ -135,9 +135,8 @@ namespace AspectGenerator
 				if (symbol is INamedTypeSymbol aspectClass && HasDefaultTargetFilter(aspectClass))
 					AddName(aspectClass.Name);
 
-			foreach (var assembly in _compilation.SourceModule.ReferencedAssemblySymbols)
-				if (assembly.GetTypeByMetadataName("AspectGenerator.AspectAttribute") is not null)
-					AddExternalAspectNames(assembly.GlobalNamespace);
+			foreach (var assembly in AspectDefinitionRegistry.GetAspectDefinitionAssemblies(_compilation))
+				AddExternalAspectNames(assembly.GlobalNamespace);
 
 			if (names.Count == 0)
 				return names;

@@ -105,9 +105,8 @@ namespace AspectGenerator
 		/// </summary>
 		public static bool HasExternalAspectDefinitions(Compilation compilation)
 		{
-			foreach (var assembly in compilation.SourceModule.ReferencedAssemblySymbols)
-				if (assembly.GetTypeByMetadataName("AspectGenerator.AspectAttribute") is not null &&
-					HasExternalAspectDefinitions(assembly.GlobalNamespace))
+			foreach (var assembly in GetAspectDefinitionAssemblies(compilation))
+				if (HasExternalAspectDefinitions(assembly.GlobalNamespace))
 					return true;
 
 			return false;
@@ -134,6 +133,43 @@ namespace AspectGenerator
 						if (HasExternalAspectDefinitions(member))
 							return true;
 				}
+
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// The referenced assemblies that can declare aspects: the ones that declare <c>AspectGenerator.AspectAttribute</c>
+		/// themselves (a generated API, internal or public), and the ones that reference an assembly that declares it (an aspect
+		/// library that uses the public API of another assembly and has none of its own). Only the reference lists of the
+		/// assemblies are read; the types of an assembly are walked by the caller, and only for the assemblies returned.
+		/// </summary>
+		public static List<IAssemblySymbol> GetAspectDefinitionAssemblies(Compilation compilation)
+		{
+			var referencedAssemblies = compilation.SourceModule.ReferencedAssemblySymbols;
+			var apiAssemblyNames     = new HashSet<string>(StringComparer.Ordinal);
+
+			foreach (var assembly in referencedAssemblies)
+				if (assembly.GetTypeByMetadataName("AspectGenerator.AspectAttribute") is not null)
+					apiAssemblyNames.Add(assembly.Identity.Name);
+
+			var result = new List<IAssemblySymbol>();
+
+			if (apiAssemblyNames.Count == 0)
+				return result;
+
+			foreach (var assembly in referencedAssemblies)
+				if (apiAssemblyNames.Contains(assembly.Identity.Name) || ReferencesApiAssembly(assembly, apiAssemblyNames))
+					result.Add(assembly);
+
+			return result;
+
+			static bool ReferencesApiAssembly(IAssemblySymbol assembly, HashSet<string> apiAssemblyNames)
+			{
+				foreach (var module in assembly.Modules)
+					foreach (var reference in module.ReferencedAssemblies)
+						if (apiAssemblyNames.Contains(reference.Name))
+							return true;
 
 				return false;
 			}
