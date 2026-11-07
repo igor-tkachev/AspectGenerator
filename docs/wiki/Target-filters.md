@@ -441,7 +441,7 @@ public System.Int32 MyApp.Services.UserService.Peek(ref readonly System.Int32)
 public System.Int32[,] MyApp.Services.UserService.Matrix(System.Int32[][,])
 public static System.String MyApp.Extensions.UserExtensions.Format(this MyApp.Models.User,System.Int32)
 public MyApp.Models.User MyApp.Data.Repository<TEntity>.Get<TKey>(TKey)
-public static System.Void System.Collections.Generic.List<System.Int32>.Add(System.Int32)
+public System.Void System.Collections.Generic.List<System.Int32>.Add(System.Int32)
 ```
 
 The last two lines show how generic methods are described. A method declared in the project is described by its definition, with its type parameters (`Repository<TEntity>.Get<TKey>(TKey)`). A method of a referenced assembly is described by the call, with the call's type arguments (`List<System.Int32>.Add(System.Int32)`).
@@ -452,8 +452,9 @@ Formatting rules:
 - stable modifiers such as `static`, `abstract`, `virtual`, `override`, `sealed`, and `extern` are included;
 - `async`, `partial`, parameter names, nullable annotations, attributes, and generic constraints are omitted;
 - type names are fully qualified and do not use C# aliases;
-- a generic method declared in the project is described by its definition: the type parameters of the method and of its containing type, not the type arguments of a call. A call the definition does not select is also judged by the call's type arguments when the filter can select methods of referenced assemblies as well (for example `contains:` and `regex:` rules, or a rule that names the method); a rule that cannot, such as `fulltype: Repository<System.String>`, never sees them;
+- a generic method declared in the project is described by its definition: the type parameters of the method and of its containing type. A call the definition does not select is judged again by the call's type arguments only when the project's assembly-level filters can also select methods of referenced assemblies (a `contains:` or `regex:` rule, a rule that names the method, a namespace that a referenced assembly declares) or a referenced assembly declares aspects. Whether a rule such as `fulltype: Repository<System.String>` selects such a call therefore depends on the project's other filters, not on the rule alone;
 - a generic method of a referenced assembly is described by the intercepted call: its constructed type arguments and those of its containing type;
+- known exception: an instance-form call of a generic extension method of a referenced assembly (`numbers.Any()`) is described by the reduced symbol, which keeps the method's type parameters (`Any<TSource>(this System.Collections.Generic.IEnumerable<System.Int32>)`), while the static form `Enumerable.Any<int>(numbers)` is constructed (`Any<System.Int32>(...)`); `contains: Any<System.Int32>` therefore selects only the static form;
 - parameter entries include only parameter modifiers (`ref`, `ref readonly`, `out`, `in`, `params`) and parameter types;
 - array types carry their rank in C# order: `System.Int32[]`, `System.Int32[,]`, `System.Int32[,,]`, and an array of two-dimensional arrays is `System.Int32[][,]`;
 - an extension method receiver is written `this <type of the first parameter>`, for a declared method and for a call alike (`this MyApp.Models.User`).
