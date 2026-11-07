@@ -333,12 +333,7 @@ namespace AspectGenerator.Tests.TargetFilters
 
 		public static void WriteList(IEnumerable<Input> inputs)
 		{
-			var sb = new StringBuilder();
-
-			foreach (var input in inputs)
-				sb.Append(input.Class).Append('\t').Append(TargetFilterProbe.Escape(input.Text)).Append('\n');
-
-			File.WriteAllText(ListPath, sb.ToString(), new UTF8Encoding(false));
+			TargetFilterBaseline.WriteLines(ListPath, inputs.Select(static i => i.Class + "\t" + TargetFilterProbe.Escape(i.Text)));
 		}
 
 		static bool _listRefreshed;

@@ -11,7 +11,8 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void EmptyDottedSegmentInTargetFilterIsReportedAndOtherRulesStillApplyTest()
 		{
-			var result       = RunGeneratorAndGetCompilation(EmptyDottedSegmentSource.Replace("BAD_FILTER", "Save.\\nmethod: Ping"), out var compilation);
+			var source       = EmptyDottedSegmentSource.Replace("BAD_FILTER", "Save.\\nmethod: Ping");
+			var result       = RunGeneratorAndGetCompilation(source, out var compilation);
 			var control      = RunGenerator(EmptyDottedSegmentSource.Replace("BAD_FILTER", "A.**.B.**"));
 			var diagnostic   = result.Diagnostics.SingleOrDefault(static d => d.Id == AspectDiagnosticID.InvalidAspectFilterDottedPattern);
 			var controlDiagnostic = control.Diagnostics.SingleOrDefault(static d => d.Id == AspectDiagnosticID.InvalidAspectFilterDottedPattern);
@@ -20,6 +21,13 @@ namespace AspectGenerator.Tests
 			StringAssert.Contains(diagnostic.GetMessage(), "empty segment");
 			Assert.IsNotNull(controlDiagnostic);
 			Assert.AreEqual(controlDiagnostic.Location.IsInSource, diagnostic.Location.IsInSource);
+
+			// Today the diagnostic sits on the attribute that carries the filter.
+			var attribute = "AspectGenerator.Tests.GeneratorDriver.BadFilterAspect(TargetFilter = \"Save.\\nmethod: Ping\")";
+			var start     = source.IndexOf(attribute, StringComparison.Ordinal);
+
+			Assert.IsTrue(start >= 0);
+			Assert.AreEqual(new Microsoft.CodeAnalysis.Text.TextSpan(start, attribute.Length), diagnostic.Location.SourceSpan, "Actual: " + diagnostic.Location.SourceTree?.GetText().ToString(diagnostic.Location.SourceSpan));
 			Assert.IsFalse(result.Results.Any(static r => r.Exception is not null), "The generator threw.");
 
 			Assert.IsFalse(
@@ -48,7 +56,10 @@ namespace AspectGenerator.Tests
 			{
 				public string? TargetFilter { get; set; }
 
-				public static void After(InterceptInfo<string> info) => info.ReturnValue += " bad";
+				public static void After(InterceptInfo<string> info)
+				{
+					info.ReturnValue += " bad";
+				}
 			}
 
 			[Aspect(OnAfterCall = nameof(After))]
@@ -57,7 +68,10 @@ namespace AspectGenerator.Tests
 			{
 				public string? TargetFilter { get; set; }
 
-				public static void After(InterceptInfo<string> info) => info.ReturnValue += " good";
+				public static void After(InterceptInfo<string> info)
+				{
+					info.ReturnValue += " good";
+				}
 			}
 
 			static class Target
@@ -69,9 +83,20 @@ namespace AspectGenerator.Tests
 					Other();
 				}
 
-				public static string Save() => "save";
-				public static string Ping() => "ping";
-				public static string Other() => "other";
+				public static string Save()
+				{
+					return "save";
+				}
+
+				public static string Ping()
+				{
+					return "ping";
+				}
+
+				public static string Other()
+				{
+					return "other";
+				}
 			}
 			""";
 	}

@@ -39,6 +39,15 @@ namespace AspectGenerator.Tests.TargetFilters
 		}
 
 		[TestMethod]
+		public void FrameworkTargetsComeFromTheExpectedFrameworkTest()
+		{
+			// The framework targets are taken from the host runtime's assemblies, so the baselines are only valid for
+			// the framework generation they were made with. If this fails, the runtime moved to another generation:
+			// check the framework targets, then regenerate the baselines.
+			Assert.AreEqual("System.Private.CoreLib 10.0.0.0, System.Linq 10.0.0.0", TargetFilterTargets.FrameworkIdentity);
+		}
+
+		[TestMethod]
 		public void TargetListHasNoDuplicateSignaturesTest()
 		{
 			var duplicates = TargetFilterTargets.Entries
@@ -129,6 +138,22 @@ namespace AspectGenerator.Tests.TargetFilters
 
 			Assert.IsTrue(baseline.IsSubsetOf(withMore), "Adding curated inputs changed the mutations of the others.");
 			Assert.IsTrue(withMore.Count > baseline.Count, "The added inputs produced no mutations.");
+
+			// An added input that equals a mutation of another input leaves the rest of that input's sample alone.
+			foreach (var pool in new[] { new[] { "Save" }, curated.Take(40).ToArray() })
+			{
+				var sample = TargetFilterCorpus.Mutations(pool, TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed);
+				var shared = sample[0];
+				var merged = TargetFilterCorpus.Mutations(pool.Append(shared).ToArray(), TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed).ToHashSet(StringComparer.Ordinal);
+
+				Assert.IsTrue(sample.Where(m => m != shared).All(merged.Contains), $"Adding '{TargetFilterProbe.Escape(shared)}' changed the sample it came from.");
+			}
+
+			var saveOnly   = TargetFilterCorpus.Mutations(["Save"], TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed);
+			var saveAndAmp = TargetFilterCorpus.Mutations(["Save", "&Save"], TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed).ToHashSet(StringComparer.Ordinal);
+
+			Assert.IsTrue(saveOnly.Count > 0);
+			Assert.IsTrue(saveOnly.Where(static m => m != "&Save").All(saveAndAmp.Contains), "Adding '&Save' changed the sample of 'Save'.");
 
 			var reversed = TargetFilterCorpus.Mutations(curated.Reverse().ToArray(), TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed).ToHashSet(StringComparer.Ordinal);
 
@@ -244,7 +269,7 @@ namespace AspectGenerator.Tests.TargetFilters
 			var lines = new List<string>
 			{
 				"# target-filter golden baseline: " + kind,
-				"# record: input TAB diagnostic ids TAB plan TAB decision per target (n none, i include, e exclude) TAB matched rule index per matched target",
+				"# record: input TAB diagnostics (id@rule line) TAB plan TAB rules (count: polarity and text of each compiled rule) TAB decision per target (n none, i include, e exclude) TAB matched rule index per matched target",
 			};
 
 			lines.AddRange(details.Select(static d => "# " + d));

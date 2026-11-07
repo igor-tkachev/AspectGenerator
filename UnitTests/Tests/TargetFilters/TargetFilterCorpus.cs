@@ -61,6 +61,7 @@ namespace AspectGenerator.Tests.TargetFilters
 
 				var random   = new SplitMix64(seed ^ Fnv1a64(text));
 				var produced = new HashSet<string>(StringComparer.Ordinal);
+				var ordered  = new List<string>();
 
 				for (var attempt = 0; produced.Count < perInput && attempt < perInput * 20; attempt++)
 				{
@@ -68,13 +69,15 @@ namespace AspectGenerator.Tests.TargetFilters
 					var token     = MutationTokens[random.Next(MutationTokens.Length)];
 					var mutated   = Mutate(text, mask, operation, token, random);
 
-					if (curatedSet.Contains(mutated) || !produced.Add(mutated))
-						continue;
-
-					// The same text can come from two inputs; the first in list order keeps it.
-					if (seen.Add(mutated))
-						result.Add((index, mutated));
+					if (produced.Add(mutated))
+						ordered.Add(mutated);
 				}
+
+				// The draw is complete before anything is dropped, so other inputs cannot change it: a mutation that equals
+				// a curated input is that input's own record, and one that two inputs share is kept by the first in list order.
+				foreach (var mutated in ordered)
+					if (!curatedSet.Contains(mutated) && seen.Add(mutated))
+						result.Add((index, mutated));
 			}
 
 			return result;

@@ -452,6 +452,43 @@ namespace AspectGenerator.Tests.TargetFilters
 			Assert.AreEqual("target-pattern|111010||Acme", TargetFilterProbe.FormatPlan(Probe("fulltype: Acme.Core.Service").Plan));
 		}
 
+		// ---- what a record keeps ----
+
+		[TestMethod]
+		public void PlanListElementsAreEncodedUnambiguouslyTest()
+		{
+			// One literal name containing a comma and two alternative names must not look alike.
+			var one = Probe("method: FromAsse,mbly");
+			var two = Probe("method: FromAsse | mbly");
+
+			Assert.AreNotEqual(TargetFilterProbe.FormatPlan(one.Plan), TargetFilterProbe.FormatPlan(two.Plan));
+			Assert.AreNotEqual(TargetFilterProbe.FormatRecord("x", one), TargetFilterProbe.FormatRecord("x", two));
+		}
+
+		[TestMethod]
+		public void UnmatchedRulesAreKeptInTheRecordTest()
+		{
+			// A rule that matches no target (here an exclude) still changes the record, so dropping it is noticed.
+			var plain = TargetFilterProbe.FormatRecord("x", Probe("Save"));
+			var more  = TargetFilterProbe.FormatRecord("x", Probe("Save\n-attributes: NoLog"));
+
+			Assert.AreNotEqual(plain, more);
+			CollectionAssert.AreEqual(new[] { "+ Save", "- attributes: NoLog" }, Probe("Save\n-attributes: NoLog").RuleTexts);
+		}
+
+		[TestMethod]
+		public void DiagnosticsAreAttributedToTheirRuleLinesTest()
+		{
+			var outcome = Probe("# comment\nfoo: bar\nSave\nbaz: x\n& method: y");
+
+			CollectionAssert.AreEqual(new[] { "AG0204", "AG0204", "AG0202" }, outcome.Ids);
+			CollectionAssert.AreEqual(new[] { 0, 2, 3 }, outcome.DiagnosticRuleLines);
+
+			// Two diagnostics of one id for two lines keep their order.
+			CollectionAssert.AreEqual(new[] { 0, 1 }, Probe("foo: a\nfoo: b").DiagnosticRuleLines);
+			CollectionAssert.AreEqual(new[] { 0, 1 }, Probe("bar: a\nbaz: b").DiagnosticRuleLines);
+		}
+
 		// ---- how the target factory describes a method, as far as the patterns can see it ----
 
 		[TestMethod]

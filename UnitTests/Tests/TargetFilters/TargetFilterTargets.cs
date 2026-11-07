@@ -42,10 +42,24 @@ namespace AspectGenerator.Tests.TargetFilters
 			}
 		}
 
+		/// <summary>
+		/// The framework the chosen framework methods come from. The test project has no reference pack of its own, so the
+		/// references are the host runtime's assemblies; their assembly versions identify the framework generation.
+		/// </summary>
+		public static string FrameworkIdentity
+		{
+			get
+			{
+				return string.Join(", ", new[] { typeof(object).Assembly, typeof(System.Linq.Enumerable).Assembly }.Select(static a => a.GetName().Name + " " + a.GetName().Version));
+			}
+		}
+
 		/// <summary>One line per target (index, label, canonical signature); the header of every baseline.</summary>
 		public static IEnumerable<string> HeaderLines()
 		{
 			var entries = Entries;
+
+			yield return "# framework " + FrameworkIdentity;
 
 			for (var i = 0; i < entries.Length; i++)
 				yield return $"# target {i}\t{entries[i].Label}\t{TargetFilterProbe.Escape(entries[i].Target.Signature)}";

@@ -26,6 +26,14 @@ namespace AspectGenerator.Tests.TargetFilters
 			}
 		}
 
+		/// <summary>Writes the lines with the line ending the file already has (LF for a new file, which is how the repository stores text).</summary>
+		public static void WriteLines(string path, IEnumerable<string> lines)
+		{
+			var eol = File.Exists(path) && File.ReadAllText(path).Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+
+			File.WriteAllText(path, string.Concat(lines.Select(l => l + eol)), new UTF8Encoding(false));
+		}
+
 		public static void Check(string name, IReadOnlyList<string> actual)
 		{
 			var path = TargetFilterCuratedInputs.BaselinePath(name);
@@ -33,7 +41,7 @@ namespace AspectGenerator.Tests.TargetFilters
 			if (Update)
 			{
 				Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-				File.WriteAllText(path, string.Concat(actual.Select(static l => l + "\n")), new UTF8Encoding(false));
+				WriteLines(path, actual);
 			}
 
 			Assert.IsTrue(File.Exists(path), $"Baseline {name} does not exist. Run the tests with AG_UPDATE_BASELINES=1 to create it.");
