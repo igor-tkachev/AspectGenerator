@@ -151,7 +151,10 @@ namespace AspectGenerator.Tests
 			if (c.LineBreaksCrLf)
 				source = source.Replace("\r\n", "\n", StringComparison.Ordinal).Replace("\n", "\r\n", StringComparison.Ordinal);
 
-			var expected = c.Text == AttributeText ? AttributeText.Replace("EXPRESSION", c.Expression, StringComparison.Ordinal) : c.Text;
+			// The attribute spans the line breaks of the template, which are this file's: CR LF in a Windows checkout.
+			var expected = c.Text == AttributeText
+				? AttributeText.Replace("\n", source.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n", StringComparison.Ordinal).Replace("EXPRESSION", c.Expression, StringComparison.Ordinal)
+				: c.Text;
 
 			if (c.LineBreaksCrLf)
 				expected = expected.Replace("\r\n", "\n", StringComparison.Ordinal).Replace("\n", "\r\n", StringComparison.Ordinal);
