@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 using Microsoft.CodeAnalysis.Text;
@@ -233,7 +234,10 @@ namespace AspectGenerator.Tests.TargetFilters
 		public void DeepNestingIsReadOnTheCallingThreadTest()
 		{
 			// Two thousand levels read on a thread with a 1 MB stack (the default of a Windows thread) and compile to what
-			// the splitter compiled, which counted the levels instead.
+			// the splitter compiled, which counted the levels instead. A generator built without optimization has frames
+			// too large for that, and reports the rule as too deep to read instead.
+			var optimized = typeof(AspectFilters).Assembly.GetCustomAttribute<System.Diagnostics.DebuggableAttribute>()?.IsJITOptimizerDisabled != true;
+
 			foreach (var input in DeepInputs(2_000))
 				OnThread(1024 * 1024, () =>
 				{
@@ -241,6 +245,10 @@ namespace AspectGenerator.Tests.TargetFilters
 					var gram   = TargetFilterProbe.Probe(input, TargetFilterProbe.Read);
 
 					Assert.IsNull(gram.Exception, $"{input[..20]}…: {gram.Exception}");
+
+					if (!optimized && gram.Messages.Any(static m => m.EndsWith("too deeply to be read.", StringComparison.Ordinal)))
+						return;
+
 					CollectionAssert.AreEqual(legacy.Ids, gram.Ids, input[..20]);
 					Assert.AreEqual(legacy.Kinds, gram.Kinds, input[..20]);
 				});
