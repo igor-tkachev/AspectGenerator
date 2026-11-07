@@ -235,39 +235,52 @@ namespace AspectGenerator.Tests.TargetFilters
 		public void DeepNestingIsReadOnTheCallingThreadTest()
 		{
 			// Nesting is read on the thread that asks, on a 1 MB stack (the default of a Windows thread), and compiles to
-			// what the splitter compiled, which counted the levels instead. Two hundred levels always fit.
-			foreach (var input in DeepInputs(200))
-				OnThread(1024 * 1024, () => AssertReadsAsTheSplitter(input, allowTooDeep: false));
+			// what the same rule nested a few levels deep compiles to, which the golden baselines pin. Two hundred levels
+			// always fit.
+			foreach (var (input, shallow) in DeepInputs(200).Zip(DeepInputs(ShallowDepth)))
+				OnThread(1024 * 1024, () => AssertReadsAsAShallowNesting(input, shallow, 200, allowTooDeep: false));
 
 			// Two thousand fit or are reported as too deep, depending on how large the frames of the platform's JIT and the
 			// build's optimization make them; nothing else may happen.
-			foreach (var input in DeepInputs(2_000))
-				OnThread(1024 * 1024, () => AssertReadsAsTheSplitter(input, allowTooDeep: true));
+			foreach (var (input, shallow) in DeepInputs(2_000).Zip(DeepInputs(ShallowDepth)))
+				OnThread(1024 * 1024, () => AssertReadsAsAShallowNesting(input, shallow, 2_000, allowTooDeep: true));
 
-			void AssertReadsAsTheSplitter(string input, bool allowTooDeep)
+			void AssertReadsAsAShallowNesting(string input, string shallow, int depth, bool allowTooDeep)
 			{
-				var legacy = TargetFilterProbe.Probe(input, TargetFilterProbe.ReadLegacy);
-				var gram   = TargetFilterProbe.Probe(input, TargetFilterProbe.Read);
+				var reference = TargetFilterProbe.Probe(shallow);
+				var deep      = TargetFilterProbe.Probe(input);
 
-				Assert.IsNull(gram.Exception, $"{input[..20]}…: {gram.Exception}");
+				Assert.IsNull(deep.Exception, $"{input[..20]}…: {deep.Exception}");
 
-				if (allowTooDeep && gram.Ids.Length == 1 && gram.Messages[0].EndsWith("': The rule nests '<' or '(' too deeply to be read.", StringComparison.Ordinal))
+				if (allowTooDeep && deep.Ids.Length == 1 && deep.Messages[0].EndsWith("': The rule nests '<' or '(' too deeply to be read.", StringComparison.Ordinal))
 				{
 					TestContext.WriteLine($"{input[..20]}… ({input.Length} characters): too deep");
 					return;
 				}
 
-				CollectionAssert.AreEqual(legacy.Ids, gram.Ids, input[..20]);
-				CollectionAssert.AreEqual(legacy.Messages, gram.Messages, input[..20]);
-				CollectionAssert.AreEqual(legacy.RuleTexts, gram.RuleTexts, input[..20]);
-				Assert.AreEqual(legacy.Kinds, gram.Kinds, input[..20]);
-				Assert.AreEqual(legacy.RuleCount, gram.RuleCount, input[..20]);
-				TestContext.WriteLine($"{input[..20]}… ({input.Length} characters): read, {gram.Kinds.Count(static k => k != 'n')} targets decided");
+				CollectionAssert.AreEqual(reference.Ids, deep.Ids, input[..20]);
+				CollectionAssert.AreEqual(reference.Messages, deep.Messages.Select(m => Shallow(m, depth)).ToArray(), input[..20]);
+				CollectionAssert.AreEqual(reference.RuleTexts, deep.RuleTexts.Select(t => Shallow(t, depth)).ToArray(), input[..20]);
+				Assert.AreEqual(reference.Kinds, deep.Kinds, input[..20]);
+				Assert.AreEqual(reference.RuleCount, deep.RuleCount, input[..20]);
+				TestContext.WriteLine($"{input[..20]}… ({input.Length} characters): read, {deep.Kinds.Count(static k => k != 'n')} targets decided");
 			}
 
 			// The deep rules are not all rules that decide nothing: some select targets of the corpus.
-			Assert.IsTrue(DeepInputs(200).Any(static i => TargetFilterProbe.Probe(i, TargetFilterProbe.ReadLegacy).Kinds.Contains('i')), "No deep input selects a target.");
+			Assert.IsTrue(DeepInputs(200).Any(static i => TargetFilterProbe.Probe(i).Kinds.Contains('i')), "No deep input selects a target.");
+
+			// A text that quotes a deep rule, as the same rule nested a few levels deep would be quoted.
+			static string Shallow(string text, int depth)
+			{
+				foreach (var bracket in "<()")
+					text = text.Replace(new string(bracket, depth), new string(bracket, ShallowDepth), StringComparison.Ordinal);
+
+				return text;
+			}
 		}
+
+		/// <summary>How deep the rules a deep rule is compared with are nested.</summary>
+		const int ShallowDepth = 8;
 
 		[TestMethod]
 		public void RuleTooDeepForOneThreadIsReadAgainOnAnotherTest()
@@ -299,7 +312,7 @@ namespace AspectGenerator.Tests.TargetFilters
 		{
 			// Deeper than the stack allows, a reading is not moved to a thread of its own: the rule is reported as one that
 			// cannot be read and left out, and the other rules stay. (Some readings keep their own stack on the heap and
-			// read any depth; those compile to what the splitter compiled.)
+			// read any depth; those compile to one rule each, as written.)
 			var reported = 0;
 
 			foreach (var input in DeepInputs(200_000))
@@ -311,9 +324,7 @@ namespace AspectGenerator.Tests.TargetFilters
 
 					if (diagnostics.Count == 0)
 					{
-						var legacy = AspectFilters.LegacyTargetFilterFront.GetFilters(filter);
-
-						CollectionAssert.AreEqual(legacy.Rules.Select(static r => r.RuleText).ToArray(), set.Rules.Select(static r => r.RuleText).ToArray(), input[..20]);
+						CollectionAssert.AreEqual(new[] { "Save", input, "Load" }, set.Rules.Select(static r => r.RuleText).ToArray(), input[..20]);
 						return;
 					}
 

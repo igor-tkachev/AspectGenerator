@@ -19,15 +19,10 @@ namespace AspectGenerator
 		/// It also tells which valid rules can match no method (<c>AG0210</c>: accessibility words no method can have all
 		/// of), and which require white space where no C# name has it (<c>AG0211</c>, a likely typo).
 		/// </remarks>
-		sealed class GramTargetFilterFront : ITargetFilterFront
+		static class GramTargetFilterFront
 		{
-			public static readonly GramTargetFilterFront Instance = new();
-
-			GramTargetFilterFront()
-			{
-			}
-
-			public bool TryReadRule(string text, List<TargetFilterDiagnostic> diagnostics, out FilterRule rule)
+			/// <summary>Reads one rule line; <see langword="false"/>, with a diagnostic, for a line without a body.</summary>
+			public static bool TryReadRule(string text, List<TargetFilterDiagnostic> diagnostics, out FilterRule rule)
 			{
 				rule = null!;
 
@@ -76,14 +71,18 @@ namespace AspectGenerator
 				return true;
 			}
 
-			public bool TryCompilePattern(FilterRule rule, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes)
+			/// <summary>
+			/// Compiles a <c>pattern:</c> rule or a native method pattern. <paramref name="notes"/> says what is worth telling
+			/// about it when it is valid.
+			/// </summary>
+			public static bool TryCompilePattern(FilterRule rule, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes)
 			{
 				pattern = null!;
 				notes   = default;
 
 				try
 				{
-					return rule.Syntax!.Body is ConditionLineSyntax
+					return rule.Syntax.Body is ConditionLineSyntax
 						? TryCompileConditionLines([(rule, false)], diagnostics, out pattern, out notes)
 						: TryCompileMethodPattern(rule.Text, (MethodPatternSyntax)rule.Syntax.Body, diagnostics, out pattern, out notes);
 				}
@@ -94,7 +93,8 @@ namespace AspectGenerator
 				}
 			}
 
-			public bool TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes)
+			/// <summary>Compiles the lines of one native condition group into one rule.</summary>
+			public static bool TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes)
 			{
 				pattern = null!;
 				notes   = default;
@@ -146,7 +146,7 @@ namespace AspectGenerator
 				{
 					var source = rule.Text;
 
-					foreach (var itemSpan in ((ConditionLineSyntax)rule.Syntax!.Body).Items)
+					foreach (var itemSpan in ((ConditionLineSyntax)rule.Syntax.Body).Items)
 					{
 						var span = Trim(source, itemSpan);
 

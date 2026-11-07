@@ -34,7 +34,7 @@ namespace AspectGenerator
 			if (_filterCache.Count > MaxCacheEntries)
 				_filterCache.Clear();
 
-			var set = _filterCache.GetOrAdd(key, static k => CreateFilterSet(k.Items, GramTargetFilterFront.Instance));
+			var set = _filterCache.GetOrAdd(key, static k => CreateFilterSet(k.Items));
 
 			// A reading that ran out of stack says nothing about the filter, only about the thread it ran on: the next
 			// read, on another thread, reads it again.
@@ -47,13 +47,13 @@ namespace AspectGenerator
 		/// <summary>The filters as <see cref="GetFilters(IEnumerable{string?}, Action{TargetFilterDiagnostic}?)"/> reads them, without the cache: for the tests that time the reader.</summary>
 		internal static TargetFilterSet ReadFiltersUncached(IEnumerable<string?> filters)
 		{
-			return CreateFilterSet(ReadRules(filters).ToArray(), GramTargetFilterFront.Instance);
+			return CreateFilterSet(ReadRules(filters).ToArray());
 		}
 
-		static TargetFilterSet CreateFilterSet(string[] rules, ITargetFilterFront front)
+		static TargetFilterSet CreateFilterSet(string[] rules)
 		{
 			var diagnostics = new List<TargetFilterDiagnostic>();
-			var filters     = Compile(rules, front, diagnostics);
+			var filters     = Compile(rules, diagnostics);
 
 			return TargetFilterSet.Create(filters, diagnostics.ToArray());
 		}
@@ -77,11 +77,12 @@ namespace AspectGenerator
 		}
 
 		/// <summary>
-		/// Groups the rule lines into compiled rules. How a line reads is the front's; how lines combine is the same for every
-		/// front: a native condition line joins the open condition group of the same action, a leading <c>&amp;</c> continues
-		/// it, a leading <c>|</c> starts an alternative group with the previous group's action, anything else ends it.
+		/// Groups the rule lines into compiled rules. How a line reads is <see cref="GramTargetFilterFront"/>'s; how lines
+		/// combine is decided here: a native condition line joins the open condition group of the same action, a leading
+		/// <c>&amp;</c> continues it, a leading <c>|</c> starts an alternative group with the previous group's action,
+		/// anything else ends it.
 		/// </summary>
-		static CompiledFilter[] Compile(string[] rules, ITargetFilterFront front, List<TargetFilterDiagnostic> diagnostics)
+		static CompiledFilter[] Compile(string[] rules, List<TargetFilterDiagnostic> diagnostics)
 		{
 			var result               = new List<CompiledFilter>();
 			var conditionGroup       = default(List<ConditionGroupLine>);
@@ -91,7 +92,7 @@ namespace AspectGenerator
 
 			foreach (var text in rules)
 			{
-				if (!front.TryReadRule(text, diagnostics, out var rule))
+				if (!GramTargetFilterFront.TryReadRule(text, diagnostics, out var rule))
 					continue;
 
 				var prefix  = rule.Prefix;
@@ -209,7 +210,7 @@ namespace AspectGenerator
 
 			void AddPattern(bool isNegative, FilterRule rule)
 			{
-				if (front.TryCompilePattern(rule, diagnostics, out var pattern, out var notes))
+				if (GramTargetFilterFront.TryCompilePattern(rule, diagnostics, out var pattern, out var notes))
 					Add(new PatternFilter(isNegative, FormatRule(isNegative ? RulePrefix.Exclude : RulePrefix.None, rule.Body), pattern), notes);
 			}
 
@@ -218,7 +219,7 @@ namespace AspectGenerator
 				if (conditionGroup is null)
 					return;
 
-				if (front.TryCompileConditionGroup(conditionGroup, diagnostics, out var pattern, out var notes))
+				if (GramTargetFilterFront.TryCompileConditionGroup(conditionGroup, diagnostics, out var pattern, out var notes))
 					Add(new PatternFilter(conditionGroupAction, FormatConditionGroup(conditionGroupAction, conditionGroup), pattern), notes);
 
 				previousWasConditionGroup = true;
@@ -627,10 +628,10 @@ namespace AspectGenerator
 			public bool       ForceAnd { get; }
 		}
 
-		/// <summary>One rule line as a front reads it.</summary>
+		/// <summary>One rule line as <see cref="GramTargetFilterFront"/> reads it.</summary>
 		sealed class FilterRule
 		{
-			public FilterRule(string text, RulePrefix prefix, FilterMatcher matcher, string body, string? unknownKey, bool isConditionLine, TargetFilterLineSyntax? syntax)
+			public FilterRule(string text, RulePrefix prefix, FilterMatcher matcher, string body, string? unknownKey, bool isConditionLine, TargetFilterLineSyntax syntax)
 			{
 				Text            = text;
 				Prefix          = prefix;
@@ -651,14 +652,10 @@ namespace AspectGenerator
 			public string?                 UnknownKey      { get; }
 			/// <summary>A native line that reads as a condition rule.</summary>
 			public bool                    IsConditionLine { get; }
-			/// <summary>The grammar's reading of the line; the legacy front has none.</summary>
-			public TargetFilterLineSyntax? Syntax          { get; }
+			/// <summary>The grammar's reading of the line.</summary>
+			public TargetFilterLineSyntax  Syntax          { get; }
 		}
 
-		/// <summary>
-		/// How rule lines are read and compiled. <see cref="GramTargetFilterFront"/> reads them with the generated parser and
-		/// is the one filters use; the hand-written splitter it replaced is kept only to compare the two in the tests.
-		/// </summary>
 		/// <summary>What is worth telling about a valid rule: why it can match no method, and a name segment with white space where no C# name has it.</summary>
 		readonly struct RuleNotes
 		{
@@ -670,21 +667,6 @@ namespace AspectGenerator
 
 			public string? MatchesNothing    { get; }
 			public string? WhiteSpaceSegment { get; }
-		}
-
-		interface ITargetFilterFront
-		{
-			/// <summary>Reads one rule line; <see langword="false"/>, with a diagnostic, for a line without a body.</summary>
-			bool TryReadRule(string text, List<TargetFilterDiagnostic> diagnostics, out FilterRule rule);
-
-			/// <summary>
-			/// Compiles a <c>pattern:</c> rule or a native method pattern. <paramref name="notes"/> says what is worth telling
-			/// about it when it is valid.
-			/// </summary>
-			bool TryCompilePattern(FilterRule rule, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes);
-
-			/// <summary>Compiles the lines of one native condition group into one rule.</summary>
-			bool TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out RuleNotes notes);
 		}
 
 		[Flags]

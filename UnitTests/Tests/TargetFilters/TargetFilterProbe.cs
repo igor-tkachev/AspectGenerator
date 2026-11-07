@@ -54,12 +54,6 @@ namespace AspectGenerator.Tests.TargetFilters
 			return AspectFilters.GetFilters(input, report);
 		}
 
-		/// <summary>Reads the filter with the hand-written splitter the generated parser replaced.</summary>
-		public static AspectFilters.TargetFilterSet ReadLegacy(string input, Action<AspectFilters.TargetFilterDiagnostic> report)
-		{
-			return AspectFilters.LegacyTargetFilterFront.GetFilters([input], report);
-		}
-
 		public static Outcome Probe(string input)
 		{
 			return Probe(input, Read);
