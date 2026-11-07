@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -58,7 +57,7 @@ namespace AspectGenerator
 		{
 			var builder = new Builder(compilation, value.Length, maxWork);
 
-			if (!builder.Append(expression, 0) || !string.Equals(builder.Text.ToString(), value, System.StringComparison.Ordinal))
+			if (!builder.Append(expression, 0) || !builder.WithinBudget || !string.Equals(new string(builder.Chars.ToArray()), value, System.StringComparison.Ordinal))
 				return null;
 
 			return new TargetFilterSourceMap(builder.Trees.ToArray(), builder.Spans.ToArray(), builder.Units.ToArray());
@@ -101,18 +100,30 @@ namespace AspectGenerator
 			int _work;
 			int _unit;
 
-			public StringBuilder    Text  { get; } = new();
+			// Lists, indexed directly: a copy reads what the trace wrote, character by character.
+			public List<char>       Chars { get; } = new();
 			public List<SyntaxTree> Trees { get; } = new();
 			public List<TextSpan>   Spans { get; } = new();
 
 			/// <summary>The source unit (a character, an escape sequence) each character was made from: equal only for the two halves of one escape.</summary>
 			public List<int>        Units { get; } = new();
 
+			/// <summary>The trace has done no more work and written no more characters than it may.</summary>
+			public bool WithinBudget => _work <= maxWork + length && Chars.Count <= length;
+
 			public bool Append(ExpressionSyntax expression, int depth)
 			{
-				if (depth > MaxDepth || ++_work > maxWork + length || Text.Length > length)
+				if (depth > MaxDepth)
 					return false;
 
+				_work++;
+
+				// Checked before and after: a literal writes all its characters before it returns.
+				return WithinBudget && AppendExpression(expression, depth) && WithinBudget;
+			}
+
+			bool AppendExpression(ExpressionSyntax expression, int depth)
+			{
 				switch (expression)
 				{
 					case ParenthesizedExpressionSyntax parenthesized:
@@ -163,10 +174,10 @@ namespace AspectGenerator
 					return false;
 				}
 
-				var start = Text.Length;
+				var start = Chars.Count;
 				var ok    = Append(initializer, depth + 1);
 
-				_constants[symbol] = ok ? (start, Text.Length - start) : (-1, 0);
+				_constants[symbol] = ok ? (start, Chars.Count - start) : (-1, 0);
 				return ok;
 			}
 
@@ -175,7 +186,7 @@ namespace AspectGenerator
 			{
 				_work += count;
 
-				if (_work > maxWork + length || Text.Length + count > length)
+				if (!WithinBudget || Chars.Count + count > length)
 					return false;
 
 				var units = new Dictionary<int,int>();
@@ -185,7 +196,7 @@ namespace AspectGenerator
 					if (!units.TryGetValue(Units[i], out var unit))
 						units[Units[i]] = unit = ++_unit;
 
-					Text.Append(Text[i]);
+					Chars.Add(Chars[i]);
 					Trees.Add(Trees[i]);
 					Spans.Add(Spans[i]);
 					Units.Add(unit);
@@ -280,7 +291,7 @@ namespace AspectGenerator
 								_                                                       => false
 							};
 
-							if (!ok)
+							if (!ok || !WithinBudget)
 								return false;
 
 							atLineStart = text.Length > 0 && IsLineBreak(text[text.Length - 1]);
@@ -452,7 +463,7 @@ namespace AspectGenerator
 				if (!sameUnit)
 					_unit++;
 
-				Text.Append(ch);
+				Chars.Add(ch);
 				Trees.Add(tree);
 				Spans.Add(TextSpan.FromBounds(start, end));
 				Units.Add(_unit);

@@ -147,6 +147,39 @@ namespace AspectGenerator.Tests.TargetFilters
 
 			Assert.IsNull(TargetFilterSourceMap.Create(expression, compilation, constant, maxWork: 1_000));
 			Assert.IsNotNull(TargetFilterSourceMap.Create(expression, compilation, constant, maxWork: 10_000));
+
+			// The text after the holes: 1,500 holes and 1,000 characters are 2,501 steps, over the 2,000 a budget of a
+			// thousand allows a filter of 1,000 characters, though the last hole is within it. The last literal's
+			// characters count, in an interpolated string and in a concatenation alike.
+			var text = new string('a', 1_000);
+
+			foreach (var declaration in new[]
+			{
+				"const string Value = $\"" + string.Concat(Enumerable.Repeat("{\"\"}", 1_500)) + text + "\";",
+				"const string Value = $\"" + string.Concat(Enumerable.Repeat("{\"\"}", 1_500)) + "\" + \"" + text + "\";",
+			})
+			{
+				var (after, afterCompilation, afterConstant) = Parse(declaration);
+
+				Assert.IsNull(TargetFilterSourceMap.Create(after, afterCompilation, afterConstant, maxWork: 1_000), declaration[..40]);
+				Assert.IsNotNull(TargetFilterSourceMap.Create(after, afterCompilation, afterConstant, maxWork: 2_000), declaration[..40]);
+			}
+		}
+
+		[TestMethod]
+		public void ALargeConstantUsedManyTimesIsCopiedInLinearTimeTest()
+		{
+			// Fifty thousand characters, used eight times: four hundred thousand characters copied, each in constant time.
+			var (expression, compilation, constant) = Parse("const string A = \"" + new string('x', 50_000) + "\"; const string Value = \"foo: \" + A + A + A + A + A + A + A + A;");
+			var watch = System.Diagnostics.Stopwatch.StartNew();
+			var map   = TargetFilterSourceMap.Create(expression, compilation, constant);
+
+			watch.Stop();
+
+			Assert.IsNotNull(map);
+			Assert.AreEqual(5 + 400_000, constant.Length);
+			Assert.AreEqual("x", expression.SyntaxTree.GetText().ToString(map.Locate(new TextSpan(constant.Length - 1, 1))!.SourceSpan));
+			Assert.IsTrue(watch.Elapsed < TimeSpan.FromSeconds(1), $"Traced in {watch.Elapsed}.");
 		}
 
 		static void AssertTraced(TargetFilterSourceMap map, SyntaxTree tree, string value, string kind, string literal)
