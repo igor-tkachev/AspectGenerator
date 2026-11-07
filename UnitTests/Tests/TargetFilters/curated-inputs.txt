@@ -10,6 +10,8 @@ source	& method: Save
 source	foo: bar
 source	Save(..., ...)
 source	A.**.B.**
+source	public private
+source	publik Invoke
 source	contains:
 source	regex:
 source	pattern:

@@ -53,6 +53,48 @@ namespace AspectGenerator.Tests.TargetFilters
 			Compare("generated", TargetFilterCorpus.Generate(TargetFilterCorpus.GeneratedCount));
 		}
 
+		[TestMethod]
+		public void EscapesAroundWordsReadTheSameByBothReadersTest()
+		{
+			Compare("escapes around words", EscapesAroundWords());
+		}
+
+		[TestMethod]
+		public void SpacedInputsReadTheSameByBothReadersTest()
+		{
+			Compare("spaced", TargetFilterSpacedInputs.Generate());
+		}
+
+		/// <summary>
+		/// Lines whose words are split at white space (modifier lines, method patterns, condition items of words), with an
+		/// escape before, after or in place of a word: the splitter drops an escape that begins a word together with what it
+		/// escapes, which the mutations seldom produce next to a modifier word.
+		/// </summary>
+		static IEnumerable<string> EscapesAroundWords()
+		{
+			string[] lines =
+			[
+				"public", "public static", "protected internal", "public static Save", "static Acme.Core.Service.Save(int) : void",
+				"public; method: Save", "method: Save; public static", "- public static", "pattern: public Save", "Save : void", "public Save*",
+			];
+			string[] escapes = ["\\x", "\\&", "\\ ", "\\\\", "\\", "\\:", "\\;", "\\x\\y", "\\<", "\\p"];
+
+			foreach (var line in lines)
+			{
+				var words = line.Split(' ');
+
+				foreach (var escape in escapes)
+					for (var at = 0; at <= words.Length; at++)
+					{
+						// Standing alone between two words, and glued to the front of the next word.
+						yield return string.Join(" ", words.Take(at).Append(escape).Concat(words.Skip(at)));
+
+						if (at < words.Length)
+							yield return string.Join(" ", words.Take(at).Append(escape + words[at]).Concat(words.Skip(at + 1)));
+					}
+			}
+		}
+
 		void Compare(string corpus, IEnumerable<string> inputs)
 		{
 			var counts       = Classes.ToDictionary(static c => c.Name, static _ => 0, StringComparer.Ordinal);

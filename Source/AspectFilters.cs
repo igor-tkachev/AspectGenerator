@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -33,9 +34,14 @@ namespace AspectGenerator
 			if (_filterCache.Count > MaxCacheEntries)
 				_filterCache.Clear();
 
-			return _filterCache
-				.GetOrAdd(key, static k => CreateFilterSet(k.Items, GramTargetFilterFront.Instance))
-				.ReportDiagnostics(reportDiagnostic);
+			var set = _filterCache.GetOrAdd(key, static k => CreateFilterSet(k.Items, GramTargetFilterFront.Instance));
+
+			// A reading that ran out of stack says nothing about the filter, only about the thread it ran on: the next
+			// read, on another thread, reads it again.
+			if (set.HasTransientDiagnostics)
+				_filterCache.TryRemove(key, out _);
+
+			return set.ReportDiagnostics(reportDiagnostic);
 		}
 
 		/// <summary>The filters as <see cref="GetFilters(IEnumerable{string?}, Action{TargetFilterDiagnostic}?)"/> reads them, without the cache: for the tests that time the reader.</summary>
@@ -298,6 +304,8 @@ namespace AspectGenerator
 
 			public bool IsEmpty => _filters.Length == 0;
 
+			internal bool HasTransientDiagnostics => _diagnostics.Any(static d => d.IsTransient);
+
 			// The compiled rules in evaluation order, for tests that need to know which rule decided.
 			internal IReadOnlyList<CompiledFilter> Rules => _filters;
 			public TargetFilterPlan Plan => _plan;
@@ -476,12 +484,13 @@ namespace AspectGenerator
 			{
 			}
 
-			TargetFilterDiagnostic(string id, string message, DiagnosticSeverity severity, int ruleIndex)
+			TargetFilterDiagnostic(string id, string message, DiagnosticSeverity severity, int ruleIndex, bool isTransient = false)
 			{
-				Id        = id;
-				Message   = message;
-				Severity  = severity;
-				RuleIndex = ruleIndex;
+				Id          = id;
+				Message     = message;
+				Severity    = severity;
+				RuleIndex   = ruleIndex;
+				IsTransient = isTransient;
 			}
 
 			public string             Id       { get; }
@@ -490,6 +499,14 @@ namespace AspectGenerator
 
 			/// <summary>The index of the compiled rule the diagnostic is about, or -1 where it is about no compiled rule.</summary>
 			internal int RuleIndex { get; }
+
+			/// <summary>The diagnostic is about the reading (it ran out of stack), not about the rule; it is not cached.</summary>
+			internal bool IsTransient { get; }
+
+			public static TargetFilterDiagnostic RuleTooDeep(string rule)
+			{
+				return new TargetFilterDiagnostic("AG0202", $"Invalid aspect filter rule '{rule}': The rule nests '<' or '(' too deeply to be read.", DiagnosticSeverity.Error, -1, isTransient: true);
+			}
 
 			public static TargetFilterDiagnostic InvalidRegex(string pattern, string error)
 			{

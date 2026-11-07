@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AspectGenerator.Tests.TargetFilters
@@ -25,11 +26,12 @@ namespace AspectGenerator.Tests.TargetFilters
 		/// </summary>
 		static readonly string[] CuratedReported =
 		[
-			// Written as rules that match nothing: contradictory accessibility, a misspelled or capitalized modifier word
+			// Written as rules that match nothing (here and in the design-time test): contradictory accessibility, a misspelled or capitalized modifier word
 			// that becomes part of the name, a second operator read as part of a method name, a word key with a space.
 			"public private",
 			"public protected **.*",
 			"publik Save",
+			"publik Invoke",
 			"PUBLIC Save",
 			"Public Static",
 			"- & method: Save",
@@ -66,9 +68,10 @@ namespace AspectGenerator.Tests.TargetFilters
 				("mutations", TargetFilterCorpus.Mutations(curated, TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed)),
 				("generated", TargetFilterCorpus.Generate(TargetFilterCorpus.GeneratedCount)),
 				("spaced",    TargetFilterSpacedInputs.Generate()),
+				("names with white space and wildcards", NamesWithWhiteSpace()),
 			};
 
-			var targets  = TargetFilterTargets.Entries;
+			var targets  = TargetFilterTargets.Entries.Select(static e => e.Target).Concat(FunctionPointerTargets.Value).ToArray();
 			var failures = new List<string>();
 
 			foreach (var (name, inputs) in sets)
@@ -104,7 +107,7 @@ namespace AspectGenerator.Tests.TargetFilters
 						Assert.IsTrue(diagnostic.RuleIndex >= 0 && diagnostic.RuleIndex < set.Rules.Count, $"AG0210 for '{TargetFilterProbe.Escape(input)}' names no compiled rule.");
 
 						var rule    = set.Rules[diagnostic.RuleIndex];
-						var matched = targets.Where(t => rule.IsMatch(t.Target)).Select(static t => t.Target.Signature).FirstOrDefault();
+						var matched = targets.Where(t => rule.IsMatch(t)).Select(static t => t.Signature).FirstOrDefault();
 
 						if (matched is not null && failures.Count < 20)
 							failures.Add($"{name}: '{TargetFilterProbe.Escape(input)}', rule '{rule.RuleText}' matches {matched}");
@@ -115,6 +118,85 @@ namespace AspectGenerator.Tests.TargetFilters
 			}
 
 			Assert.AreEqual(0, failures.Count, "AG0210 named rules that match a target:" + Environment.NewLine + string.Join(Environment.NewLine, failures));
+		}
+
+		/// <summary>
+		/// Methods whose names hold white space: a function pointer type argument formats as
+		/// <c>delegate* unmanaged&lt;System.Void&gt;</c>. The golden targets have none, so the soundness check adds these.
+		/// </summary>
+		static readonly Lazy<AspectFilters.MethodTarget[]> FunctionPointerTargets = new(static () =>
+		{
+			const string source =
+				"""
+				using System.Collections.Generic;
+
+				namespace Acme.Pointers
+				{
+					unsafe class Box<T>
+					{
+						public void Put(T value) { }
+						public static void Make<U>() { }
+					}
+
+					unsafe static class Calls
+					{
+						static void Run()
+						{
+							System.Array.Empty<delegate* unmanaged<void>[]>();
+							new List<delegate* unmanaged<void>[]>().Clear();
+							new Box<delegate*<int, string>[]>().Put(null!);
+							Box<int>.Make<delegate* managed<System.Collections.Generic.List<int>, void>[]>();
+						}
+					}
+				}
+				""";
+
+			var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create(
+				"FunctionPointerTargets",
+				[Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(source)],
+				TargetFilterTargets.Compilation.References,
+				new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+			var tree  = compilation.SyntaxTrees[0];
+			var model = compilation.GetSemanticModel(tree);
+
+			return tree.GetRoot().DescendantNodes()
+				.OfType<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()
+				.Select(i => (Microsoft.CodeAnalysis.IMethodSymbol)model.GetSymbolInfo(i).Symbol!)
+				.Select(static m => AspectTargetFactory.Create(m))
+				.ToArray();
+		});
+
+		/// <summary>Name segments with white space and wildcards in every arrangement, for each key that reads a name.</summary>
+		static IEnumerable<string> NamesWithWhiteSpace()
+		{
+			string[] pieces = ["*", "?", "Empty", "Put", "Clear", "Make", "delegate", "unmanaged", "<", ">", "[]", "Box", "List", "Acme", "\\<", "\\>"];
+			string[] keys   = ["method: ", "type: ", "fullmethod: **.", "fulltype: **.", "namespace: ", "Acme.Pointers.Box<*>.", ""];
+			var random      = new TargetFilterCorpus.SplitMix64(0x4147_5446_5753_0001UL);
+
+			for (var i = 0; i < 5_000; i++)
+			{
+				var count   = 2 + random.Next(4);
+				var segment = string.Join("", Enumerable.Range(0, count).Select(_ => pieces[random.Next(pieces.Length)] + (random.Next(3) == 0 ? " " : "")));
+
+				yield return keys[random.Next(keys.Length)] + segment.Trim();
+			}
+		}
+
+		[TestMethod]
+		public void FunctionPointerTypeArgumentsAreMatchedWithoutAG0210Test()
+		{
+			var targets = FunctionPointerTargets.Value;
+
+			Assert.AreEqual(4, targets.Length);
+
+			foreach (var filter in new[] { "method: * *", "type: * *", "method: Empty<delegate* unmanaged<System.Void>[]>", "type: List<delegate* unmanaged<*>[]>", "Put", "fulltype: **.Box<delegate* *>" })
+			{
+				var reported = false;
+				var set      = AspectFilters.GetFilters(filter, d => reported |= d.Id == AspectDiagnosticID.AspectFilterRuleMatchesNothing);
+
+				Assert.IsTrue(targets.Any(t => set.Evaluate(t).IsMatch), $"'{filter}' matches none of {string.Join(" | ", targets.Select(static t => t.Signature))}");
+				Assert.IsFalse(reported, $"AG0210 for '{filter}', which matches a method.");
+			}
 		}
 
 		[TestMethod]
@@ -175,14 +257,15 @@ namespace AspectGenerator.Tests.TargetFilters
 		{
 			foreach (var text in new[]
 			{
-				"publik Save", "Acme.Core Service.Save", "Sa ve*", "Save\\ Item", "* *", "method: Save Item", "type: My Service", "namespace: Acme Core.**",
+				"publik Save", "Acme.Core Service.Save", "Sa ve*", "Save\\ Item", "method: Save Item", "type: My Service", "namespace: Acme Core.**",
 				"fullmethod: Acme.Core.Save Item", "path: Acme.Core.My Service", "method: Save Item | Save Items", "method: Save* & Sa ve",
 			})
 				Assert.IsTrue(Reports(text), $"No AG0210 for '{text}'.");
 
 			foreach (var text in new[]
 			{
-				"method: Save Item | Save", "Load<string, int>", "Acme.Core.Pair< *, * >.Get", "type: Dictionary<string, int>", "public  static  Save",
+				"method: Save Item | Save", "Load<string, int>", "* *", "method: * *", "type: * *", "Sa*ve Item", "method: Empty<delegate* unmanaged<System.Void>[]>",
+				"method: *unmanaged<System.Void>[]>", "type: List<delegate* unmanaged<System.Void>[]>", "method: Sa?ve Item", @"method: Box\<x y\>", "Acme.Core.Pair< *, * >.Get", "type: Dictionary<string, int>", "public  static  Save",
 				"Save(ref readonly int, params string [])", "Save(int ?) : int ?", "returns: string []", "signature: public *", "Save( int , int )",
 				"contains: Save Item", "regex: Save Item",
 			})
@@ -208,7 +291,7 @@ namespace AspectGenerator.Tests.TargetFilters
 			Assert.AreEqual("publik Load",    set.Rules[1].RuleText);
 			Assert.AreEqual("public private", set.Rules[2].RuleText);
 			Assert.AreEqual(
-				"Target filter rule 'publik Load' can match no method: the name segment 'publik Load' contains white space, which no namespace, type or method name has",
+				"Target filter rule 'publik Load' can match no method: the name segment 'publik Load' contains white space outside '<...>', which no namespace, type or method name has",
 				diagnostics[0].Message);
 			Assert.AreEqual(
 				"Target filter rule 'public private' can match no method: no method is public and private at once; a method must have every accessibility word of a rule",

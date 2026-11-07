@@ -1791,177 +1791,177 @@ namespace AspectGenerator
 #line default
 
 		static TargetFilterBodySyntax New_DotGram_ConditionLine(SourceSpan parserSpan, TextSpan first, TextSpan[] more) =>
-#line 91 "../TargetFilter.gram"
+#line 97 "../TargetFilter.gram"
                                                  (new ConditionLineSyntax(Span(parserSpan), Spans(first, more)));
 #line default
 
 		static TextSpan New_DotGram_ItemText(SourceSpan parserSpan) =>
-#line 93 "../TargetFilter.gram"
+#line 99 "../TargetFilter.gram"
                                                                           (Span(parserSpan));
 #line default
 
 		static ConditionItemSyntax New_DotGram_ConditionItem(SourceSpan parserSpan, TextSpan key, TextSpan value) =>
-#line 97 "../TargetFilter.gram"
+#line 103 "../TargetFilter.gram"
                                                           (new KeyItemSyntax(Span(parserSpan), key, value));
 #line default
 
 		static ConditionItemSyntax New1_DotGram_ConditionItem(SourceSpan parserSpan, WordsSyntax words) =>
-#line 98 "../TargetFilter.gram"
+#line 104 "../TargetFilter.gram"
                                                         (new WordsItemSyntax(Span(parserSpan), words));
 #line default
 
 		static TextSpan New_DotGram_KeyName(SourceSpan parserSpan) =>
-#line 100 "../TargetFilter.gram"
+#line 106 "../TargetFilter.gram"
                                   (Span(parserSpan));
 #line default
 
 		static WordsSyntax New_DotGram_Words(ChunkSyntax? first, ChunkSyntax[] more) =>
-#line 104 "../TargetFilter.gram"
+#line 110 "../TargetFilter.gram"
                                                                                     (new WordsSyntax(Spans(first, more)));
 #line default
 
 		static ChunkSyntax New_DotGram_Chunk(TextSpan? word) =>
-#line 107 "../TargetFilter.gram"
+#line 113 "../TargetFilter.gram"
                                  (new ChunkSyntax(word));
 #line default
 
 		static ChunkSyntax New1_DotGram_Chunk(TextSpan word) =>
-#line 108 "../TargetFilter.gram"
+#line 114 "../TargetFilter.gram"
                                  (new ChunkSyntax(word));
 #line default
 
 		static TextSpan New_DotGram_Word(SourceSpan parserSpan) =>
-#line 110 "../TargetFilter.gram"
+#line 116 "../TargetFilter.gram"
                                                                                                                (Span(parserSpan));
 #line default
 
 		static ConditionValueSyntax New_DotGram_ConditionValue(ConditionAlternativeSyntax first, ConditionAlternativeSyntax[] more) =>
-#line 120 "../TargetFilter.gram"
+#line 126 "../TargetFilter.gram"
      (new ConditionValueSyntax(Alternatives(first, more)));
 #line default
 
 		static ConditionAlternativeSyntax New_DotGram_Alternative(SourceSpan parserSpan, TextSpan first, TextSpan[] more) =>
-#line 123 "../TargetFilter.gram"
+#line 129 "../TargetFilter.gram"
      (new ConditionAlternativeSyntax(Span(parserSpan), Spans(first, more)));
 #line default
 
 		static TextSpan New_DotGram_Operand(SourceSpan parserSpan) =>
-#line 125 "../TargetFilter.gram"
-                                                                                                                    (Span(parserSpan));
+#line 131 "../TargetFilter.gram"
+                                       (Span(parserSpan));
 #line default
 
 		static DottedSyntax New_DotGram_Dotted(TextSpan first, TextSpan[] more) =>
-#line 130 "../TargetFilter.gram"
+#line 136 "../TargetFilter.gram"
                                                                                  (new DottedSyntax(Spans(first, more)));
 #line default
 
 		static TextSpan New_DotGram_DottedPart(SourceSpan parserSpan) =>
-#line 132 "../TargetFilter.gram"
+#line 138 "../TargetFilter.gram"
                                                                             (Span(parserSpan));
 #line default
 
 		static TargetFilterBodySyntax New_DotGram_MethodPattern(SourceSpan parserSpan, TextSpan name, ParameterGroupSyntax? parameters, TextSpan? returns) =>
-#line 140 "../TargetFilter.gram"
+#line 146 "../TargetFilter.gram"
      (new MethodPatternSyntax(Span(parserSpan), name, parameters, returns));
 #line default
 
 		static TextSpan New_DotGram_ReturnText(TextSpan text) =>
-#line 142 "../TargetFilter.gram"
+#line 148 "../TargetFilter.gram"
                                               (text);
 #line default
 
 		static TextSpan New_DotGram_NameText(SourceSpan parserSpan) =>
-#line 144 "../TargetFilter.gram"
+#line 150 "../TargetFilter.gram"
                                                                                 (Span(parserSpan));
 #line default
 
 		static ParameterGroupSyntax New_DotGram_ParameterGroup(SourceSpan parserSpan, TextSpan inner) =>
-#line 147 "../TargetFilter.gram"
+#line 153 "../TargetFilter.gram"
                                                            (new ParameterGroupSyntax(Span(parserSpan), inner, true));
 #line default
 
 		static ParameterGroupSyntax New1_DotGram_ParameterGroup(SourceSpan parserSpan) =>
-#line 148 "../TargetFilter.gram"
+#line 154 "../TargetFilter.gram"
                                                                (new ParameterGroupSyntax(Span(parserSpan), default(TextSpan), false));
 #line default
 
 		static TextSpan New_DotGram_InnerText(SourceSpan parserSpan) =>
-#line 150 "../TargetFilter.gram"
+#line 156 "../TargetFilter.gram"
                                                                                  (Span(parserSpan));
 #line default
 
 		static ParameterListSyntax New_DotGram_ParameterList(TextSpan inner) =>
-#line 157 "../TargetFilter.gram"
+#line 163 "../TargetFilter.gram"
                                                   (new ParameterListSyntax(true, inner));
 #line default
 
 		static ParameterListSyntax New1_DotGram_ParameterList(TextSpan inner) =>
-#line 158 "../TargetFilter.gram"
+#line 164 "../TargetFilter.gram"
                                                   (new ParameterListSyntax(false, inner));
 #line default
 
 		static TextSpan New_DotGram_ParenthesizedText(SourceSpan parserSpan) =>
-#line 160 "../TargetFilter.gram"
+#line 166 "../TargetFilter.gram"
                                                                                                          (Span(parserSpan));
 #line default
 
 		static ParameterPartsSyntax New_DotGram_ParameterParts(TextSpan first, TextSpan[] more) =>
-#line 166 "../TargetFilter.gram"
+#line 172 "../TargetFilter.gram"
      (new ParameterPartsSyntax(Spans(first, more)));
 #line default
 
 		static TextSpan New_DotGram_ParameterPart(SourceSpan parserSpan) =>
-#line 168 "../TargetFilter.gram"
+#line 174 "../TargetFilter.gram"
                                                                                                (Span(parserSpan));
 #line default
 
 		static ParameterSyntax New_DotGram_Parameter(SourceSpan parserSpan) =>
-#line 172 "../TargetFilter.gram"
+#line 178 "../TargetFilter.gram"
                                                (new ParameterSyntax(ParameterSyntaxKind.Any, null, default(TextSpan), Span(parserSpan)));
 #line default
 
 		static ParameterSyntax New1_DotGram_Parameter(ModifierSyntax m, ParameterTypeSyntax type) =>
-#line 173 "../TargetFilter.gram"
+#line 179 "../TargetFilter.gram"
                                                   (Parameter(m, type));
 #line default
 
 		static ParameterSyntax New2_DotGram_Parameter(ParameterTypeSyntax type) =>
-#line 174 "../TargetFilter.gram"
+#line 180 "../TargetFilter.gram"
                                                (Parameter(null, type));
 #line default
 
 		static ModifierSyntax New_DotGram_ParameterModifier(SourceSpan parserSpan) =>
-#line 177 "../TargetFilter.gram"
+#line 183 "../TargetFilter.gram"
                                                   (new ModifierSyntax(AspectFilters.ParameterModifier.RefReadOnly, Span(parserSpan)));
 #line default
 
 		static ModifierSyntax New1_DotGram_ParameterModifier(SourceSpan parserSpan) =>
-#line 178 "../TargetFilter.gram"
+#line 184 "../TargetFilter.gram"
                                                    (new ModifierSyntax(AspectFilters.ParameterModifier.Ref,         Span(parserSpan)));
 #line default
 
 		static ModifierSyntax New2_DotGram_ParameterModifier(SourceSpan parserSpan) =>
-#line 179 "../TargetFilter.gram"
+#line 185 "../TargetFilter.gram"
                                                    (new ModifierSyntax(AspectFilters.ParameterModifier.Out,         Span(parserSpan)));
 #line default
 
 		static ModifierSyntax New3_DotGram_ParameterModifier(SourceSpan parserSpan) =>
-#line 180 "../TargetFilter.gram"
+#line 186 "../TargetFilter.gram"
                                                    (new ModifierSyntax(AspectFilters.ParameterModifier.In,          Span(parserSpan)));
 #line default
 
 		static ModifierSyntax New4_DotGram_ParameterModifier(SourceSpan parserSpan) =>
-#line 181 "../TargetFilter.gram"
+#line 187 "../TargetFilter.gram"
                                                    (new ModifierSyntax(AspectFilters.ParameterModifier.Params,      Span(parserSpan)));
 #line default
 
 		static ParameterTypeSyntax New_DotGram_ParameterType(SourceSpan parserSpan) =>
-#line 184 "../TargetFilter.gram"
+#line 190 "../TargetFilter.gram"
                       (new ParameterTypeSyntax(true,  Span(parserSpan)));
 #line default
 
 		static ParameterTypeSyntax New1_DotGram_ParameterType(SourceSpan parserSpan) =>
-#line 185 "../TargetFilter.gram"
+#line 191 "../TargetFilter.gram"
                       (new ParameterTypeSyntax(false, Span(parserSpan)));
 #line default
 
@@ -2026,48 +2026,60 @@ namespace AspectGenerator
 					case 106: goto S106;
 					case 108: goto S108;
 					case 110: goto S110;
-					case 118: goto S118;
-					case 124: goto S124;
-					case 125: goto S125;
-					case 128: goto S128;
-					case 139: goto S139;
-					case 147: goto S147;
-					case 148: goto S148;
-					case 156: goto S156;
-					case 162: goto S162;
+					case 120: goto S120;
+					case 126: goto S126;
+					case 127: goto S127;
+					case 130: goto S130;
+					case 143: goto S143;
+					case 158: goto S158;
+					case 159: goto S159;
+					case 161: goto S161;
 					case 168: goto S168;
-					case 170: goto S170;
+					case 169: goto S169;
 					case 171: goto S171;
-					case 180: goto S180;
-					case 181: goto S181;
-					case 190: goto S190;
-					case 196: goto S196;
-					case 198: goto S198;
+					case 172: goto S172;
+					case 187: goto S187;
+					case 188: goto S188;
 					case 199: goto S199;
-					case 208: goto S208;
-					case 209: goto S209;
+					case 200: goto S200;
+					case 206: goto S206;
 					case 210: goto S210;
-					case 215: goto S215;
-					case 221: goto S221;
-					case 223: goto S223;
+					case 211: goto S211;
+					case 212: goto S212;
+					case 218: goto S218;
 					case 224: goto S224;
-					case 225: goto S225;
+					case 226: goto S226;
 					case 227: goto S227;
-					case 229: goto S229;
-					case 231: goto S231;
-					case 235: goto S235;
 					case 236: goto S236;
-					case 238: goto S238;
-					case 240: goto S240;
-					case 244: goto S244;
-					case 245: goto S245;
-					case 247: goto S247;
-					case 248: goto S248;
-					case 249: goto S249;
-					case 251: goto S251;
-					case 253: goto S253;
-					case 256: goto S256;
-					case 257: goto S257;
+					case 237: goto S237;
+					case 246: goto S246;
+					case 252: goto S252;
+					case 254: goto S254;
+					case 255: goto S255;
+					case 264: goto S264;
+					case 265: goto S265;
+					case 266: goto S266;
+					case 271: goto S271;
+					case 277: goto S277;
+					case 279: goto S279;
+					case 280: goto S280;
+					case 281: goto S281;
+					case 283: goto S283;
+					case 285: goto S285;
+					case 287: goto S287;
+					case 291: goto S291;
+					case 292: goto S292;
+					case 294: goto S294;
+					case 296: goto S296;
+					case 300: goto S300;
+					case 301: goto S301;
+					case 303: goto S303;
+					case 304: goto S304;
+					case 305: goto S305;
+					case 307: goto S307;
+					case 309: goto S309;
+					case 312: goto S312;
+					case 313: goto S313;
 					default: expected = null; goto Fail;
 				}
 
@@ -2076,28 +2088,28 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if (!(c <= 255 && RecognizeClass0_DotGram_Line[c] != 0)) goto S256;
+						if (!(c <= 255 && RecognizeClass0_DotGram_Line[c] != 0)) goto S312;
 					}
-					entries.Add(new ParserEntry(ParserEntry.Choice, 256, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 312, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 12, p, call, atomic, repeat, lookahead, 0, 24));
+					entries.Add(new ParserEntry(ParserEntry.Call, 12, p, call, atomic, repeat, lookahead, 0, 26));
 					call = callIndex;
 				}
 
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(45);
+						expected = ExpectedSet_DotGram(46);
 						goto Fail;
 					}
 					c = text[p];
 					if (c == '-') goto S10;
 					if (c == '&') goto S8;
 					if (c == '|') goto S6;
-					expected = ExpectedSet_DotGram(45);
+					expected = ExpectedSet_DotGram(46);
 					goto Fail;
 				}
 
@@ -2105,7 +2117,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != '|')
 					{
-						expected = ExpectedSet_DotGram(44);
+						expected = ExpectedSet_DotGram(45);
 						goto Fail;
 					}
 					p += 1;
@@ -2120,7 +2132,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != '&')
 					{
-						expected = ExpectedSet_DotGram(43);
+						expected = ExpectedSet_DotGram(44);
 						goto Fail;
 					}
 					p += 1;
@@ -2135,7 +2147,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != '-')
 					{
-						expected = ExpectedSet_DotGram(42);
+						expected = ExpectedSet_DotGram(43);
 						goto Fail;
 					}
 					p += 1;
@@ -2150,7 +2162,7 @@ namespace AspectGenerator
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 24 && entries[capturedCall].Value == p);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 26 && entries[capturedCall].Value == p);
 					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 0, capturedCall, call, atomic, repeat, lookahead, p));
 				}
 
@@ -2170,7 +2182,7 @@ namespace AspectGenerator
 				S14:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 253, p, call, atomic, repeat, lookahead, 0, 2));
+					entries.Add(new ParserEntry(ParserEntry.Call, 309, p, call, atomic, repeat, lookahead, 0, 2));
 					call = callIndex;
 				}
 
@@ -2179,14 +2191,14 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if (!(RecognizeIn_DotGram_Line(RecognizeSet0_DotGram_Line, c))) goto S240;
+						if (!(RecognizeIn_DotGram_Line(RecognizeSet0_DotGram_Line, c))) goto S296;
 					}
-					entries.Add(new ParserEntry(ParserEntry.Choice, 240, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 296, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 25, p, call, atomic, repeat, lookahead, 0, 23));
+					entries.Add(new ParserEntry(ParserEntry.Call, 25, p, call, atomic, repeat, lookahead, 0, 25));
 					call = callIndex;
 				}
 
@@ -2198,13 +2210,13 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(41);
+						expected = ExpectedSet_DotGram(42);
 						goto Fail;
 					}
 					c = text[p];
 					if (!((c < 128 ? (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') : (Categories_DotGram_1F(c)))))
 					{
-						expected = ExpectedSet_DotGram(41);
+						expected = ExpectedSet_DotGram(42);
 						goto Fail;
 					}
 					p++;
@@ -2214,13 +2226,13 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(41);
+						expected = ExpectedSet_DotGram(42);
 						goto S20;
 					}
 					c = text[p];
 					if (!((c < 128 ? (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') : (Categories_DotGram_1F(c)))))
 					{
-						expected = ExpectedSet_DotGram(41);
+						expected = ExpectedSet_DotGram(42);
 						goto S20;
 					}
 					p++;
@@ -2297,7 +2309,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != ':')
 					{
-						expected = ExpectedSet_DotGram(27);
+						expected = ExpectedSet_DotGram(28);
 						goto Fail;
 					}
 					p += 1;
@@ -2308,12 +2320,12 @@ namespace AspectGenerator
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 23 && entries[capturedCall].Value == p);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 25 && entries[capturedCall].Value == p);
 					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 3, capturedCall, call, atomic, repeat, lookahead, p));
 				}
 
 				{
-					entries.Add(new ParserEntry(ParserEntry.Choice, 229, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 285, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
@@ -2368,7 +2380,7 @@ namespace AspectGenerator
 				S29:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 227, p, call, atomic, repeat, lookahead, 0, 4));
+					entries.Add(new ParserEntry(ParserEntry.Call, 283, p, call, atomic, repeat, lookahead, 0, 4));
 					call = callIndex;
 				}
 
@@ -2434,7 +2446,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != ';')
 					{
-						expected = ExpectedSet_DotGram(20);
+						expected = ExpectedSet_DotGram(23);
 						goto Fail;
 					}
 					p += 1;
@@ -2530,14 +2542,14 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(24);
+						expected = ExpectedSet_DotGram(25);
 						goto Fail;
 					}
 					c = text[p];
 					if (c == '<') goto S53;
 					if (c == '\\') goto S49;
 					if ((c >= '\0' && c <= ':') || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S48;
-					expected = ExpectedSet_DotGram(24);
+					expected = ExpectedSet_DotGram(25);
 					goto Fail;
 				}
 
@@ -2545,13 +2557,13 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(23);
+						expected = ExpectedSet_DotGram(24);
 						goto Fail;
 					}
 					c = text[p];
 					if (!(!((c >= ';' && c <= '<') || c == '\\')))
 					{
-						expected = ExpectedSet_DotGram(23);
+						expected = ExpectedSet_DotGram(24);
 						goto Fail;
 					}
 					p++;
@@ -2562,7 +2574,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != '\\')
 					{
-						expected = ExpectedSet_DotGram(22);
+						expected = ExpectedSet_DotGram(4);
 						goto Fail;
 					}
 					p += 1;
@@ -2582,7 +2594,7 @@ namespace AspectGenerator
 					if (scanned < 0)
 					{
 						p = -1 - scanned;
-						expected = ExpectedSet_DotGram(21);
+						expected = ExpectedSet_DotGram(3);
 						goto Fail;
 					}
 					p = scanned;
@@ -2613,7 +2625,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != '<')
 					{
-						expected = ExpectedSet_DotGram(35);
+						expected = ExpectedSet_DotGram(36);
 						goto Fail;
 					}
 					p += 1;
@@ -2658,7 +2670,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != '>')
 					{
-						expected = ExpectedSet_DotGram(32);
+						expected = ExpectedSet_DotGram(33);
 						goto Fail;
 					}
 					p += 1;
@@ -2712,14 +2724,14 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(34);
+						expected = ExpectedSet_DotGram(35);
 						goto Fail;
 					}
 					c = text[p];
 					if (c == '<') goto S69;
 					if (c == '\\') goto S65;
 					if ((c >= '\0' && c <= ';') || c == '=' || (c >= '?' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S64;
-					expected = ExpectedSet_DotGram(34);
+					expected = ExpectedSet_DotGram(35);
 					goto Fail;
 				}
 
@@ -2727,13 +2739,13 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(33);
+						expected = ExpectedSet_DotGram(34);
 						goto Fail;
 					}
 					c = text[p];
 					if (!(!(c == '<' || c == '>' || c == '\\')))
 					{
-						expected = ExpectedSet_DotGram(33);
+						expected = ExpectedSet_DotGram(34);
 						goto Fail;
 					}
 					p++;
@@ -2744,7 +2756,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != '\\')
 					{
-						expected = ExpectedSet_DotGram(22);
+						expected = ExpectedSet_DotGram(4);
 						goto Fail;
 					}
 					p += 1;
@@ -2764,7 +2776,7 @@ namespace AspectGenerator
 					if (scanned < 0)
 					{
 						p = -1 - scanned;
-						expected = ExpectedSet_DotGram(21);
+						expected = ExpectedSet_DotGram(3);
 						goto Fail;
 					}
 					p = scanned;
@@ -2863,7 +2875,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != ';')
 					{
-						expected = ExpectedSet_DotGram(20);
+						expected = ExpectedSet_DotGram(23);
 						goto Fail;
 					}
 					p += 1;
@@ -2948,14 +2960,14 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(24);
+						expected = ExpectedSet_DotGram(25);
 						goto Fail;
 					}
 					c = text[p];
 					if (c == '<') goto S90;
 					if (c == '\\') goto S86;
 					if ((c >= '\0' && c <= ':') || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S85;
-					expected = ExpectedSet_DotGram(24);
+					expected = ExpectedSet_DotGram(25);
 					goto Fail;
 				}
 
@@ -2963,13 +2975,13 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(23);
+						expected = ExpectedSet_DotGram(24);
 						goto Fail;
 					}
 					c = text[p];
 					if (!(!((c >= ';' && c <= '<') || c == '\\')))
 					{
-						expected = ExpectedSet_DotGram(23);
+						expected = ExpectedSet_DotGram(24);
 						goto Fail;
 					}
 					p++;
@@ -2980,7 +2992,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != '\\')
 					{
-						expected = ExpectedSet_DotGram(22);
+						expected = ExpectedSet_DotGram(4);
 						goto Fail;
 					}
 					p += 1;
@@ -3000,7 +3012,7 @@ namespace AspectGenerator
 					if (scanned < 0)
 					{
 						p = -1 - scanned;
-						expected = ExpectedSet_DotGram(21);
+						expected = ExpectedSet_DotGram(3);
 						goto Fail;
 					}
 					p = scanned;
@@ -3057,7 +3069,7 @@ namespace AspectGenerator
 
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 105, p, call, atomic, repeat, lookahead, 0, 19));
+					entries.Add(new ParserEntry(ParserEntry.Call, 105, p, call, atomic, repeat, lookahead, 0, 21));
 					call = callIndex;
 				}
 
@@ -3078,7 +3090,7 @@ namespace AspectGenerator
 					}
 					if (p < runStart + 1)
 					{
-						expected = ExpectedSet_DotGram(41);
+						expected = ExpectedSet_DotGram(42);
 						goto Fail;
 					}
 					if (p > runStart + 1)
@@ -3150,7 +3162,7 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != ':')
 					{
-						expected = ExpectedSet_DotGram(27);
+						expected = ExpectedSet_DotGram(28);
 						goto S104;
 					}
 					p += 1;
@@ -3175,7 +3187,7 @@ namespace AspectGenerator
 					var looked = entries[lookedAt];
 					global::System.Diagnostics.Debug.Assert(looked.Kind == ParserEntry.Lookahead);
 					var capturedCall = completedCall;
-					global::System.Diagnostics.Debug.Assert(capturedCall > lookedAt && entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].RuleIndex == 19 && entries[capturedCall].Value == seenTo);
+					global::System.Diagnostics.Debug.Assert(capturedCall > lookedAt && entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].RuleIndex == 21 && entries[capturedCall].Value == seenTo);
 					for (var back = entries.Count - 1; back >= lookedAt; back--)
 					{
 						var inside = entries[back];
@@ -3249,43 +3261,76 @@ namespace AspectGenerator
 
 				S110:
 				{
-					entries.Add(new ParserEntry(ParserEntry.Choice, 156, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 212, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
 					var lookaheadIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Lookahead, 124, p, call, atomic, repeat, lookahead, 1));
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 126, p, call, atomic, repeat, lookahead, 1));
 					lookahead = lookaheadIndex;
 				}
 
 				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (c == '\\') goto S190;
+					}
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S190;
+				}
+
+				S113:
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (c == '\\') goto S180;
+					}
+					if (lookahead < 0)
+					{
+						if (p > failure.Position)
+						{
+							failure.Position = p;
+							if (!failure.Quiet)
+							{
+								failure.Expected = ExpectedSet_DotGram(22);
+								failure.ExpectedMore?.Clear();
+							}
+						}
+						else if (!failure.Quiet && p == failure.Position)
+							Tie_DotGram(ref failure, ExpectedSet_DotGram(22));
+					}
+				}
+
+				S114:
+				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(19);
+						expected = ExpectedSet_DotGram(21);
 						goto Fail;
 					}
 					c = text[p];
 					switch (c)
 					{
-						case 'a': goto S155;
-						case 'e': goto S154;
-						case 'i': goto S153;
-						case 'o': goto S152;
-						case 'p': goto S151;
-						case 's': goto S150;
-						case 'u': goto S149;
-						case 'v': goto S113;
+						case 'a': goto S179;
+						case 'e': goto S178;
+						case 'i': goto S177;
+						case 'o': goto S176;
+						case 'p': goto S175;
+						case 's': goto S174;
+						case 'u': goto S173;
+						case 'v': goto S115;
 					}
-					expected = ExpectedSet_DotGram(19);
+					expected = ExpectedSet_DotGram(21);
 					goto Fail;
 				}
 
-				S113:
+				S115:
 				{
 					if (text.Length - p < 7)
 					{
 						p = RecognizeRanOut_DotGram_Line(text, p, "virtual", false, lookahead < 0, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(18);
+						expected = ExpectedSet_DotGram(20);
 						goto Fail;
 					}
 					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 7), global::System.MemoryExtensions.AsSpan("virtual")))
@@ -3308,16 +3353,16 @@ namespace AspectGenerator
 									p += 6;
 							}
 						}
-						expected = ExpectedSet_DotGram(18);
+						expected = ExpectedSet_DotGram(20);
 						goto Fail;
 					}
 					p += 7;
 				}
 
-				S114:
+				S116:
 				{
 					var lookaheadIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Lookahead, 118, p, call, atomic, repeat, lookahead, 1));
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 120, p, call, atomic, repeat, lookahead, 1));
 					lookahead = lookaheadIndex;
 				}
 
@@ -3325,9 +3370,9 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if (!(RecognizeIn_DotGram_Line(RecognizeSet1_DotGram_Line, c))) goto S148;
+						if (!(RecognizeIn_DotGram_Line(RecognizeSet1_DotGram_Line, c))) goto S172;
 					}
-					entries.Add(new ParserEntry(ParserEntry.Choice, 148, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 172, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
@@ -3341,7 +3386,7 @@ namespace AspectGenerator
 					p = scanned;
 				}
 
-				S117:
+				S119:
 				{
 					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
 					var looked = entries[lookahead];
@@ -3355,17 +3400,17 @@ namespace AspectGenerator
 					lookahead = looked.LookaheadIndex;
 				}
 
-				S118:
+				S120:
 				{
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if (RecognizeIn_DotGram_Line(RecognizeSet1_DotGram_Line, c)) goto S127;
+						if (RecognizeIn_DotGram_Line(RecognizeSet1_DotGram_Line, c)) goto S129;
 					}
-					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S127;
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S129;
 				}
 
-				S119:
+				S121:
 				{
 					turn0 = p;
 				}
@@ -3376,13 +3421,13 @@ namespace AspectGenerator
 					{
 						p = -1 - scanned;
 						expected = ExpectedSet_DotGram(2);
-						goto S121;
+						goto S123;
 					}
 					p = scanned;
-					goto S119;
+					goto S121;
 				}
 
-				S121:
+				S123:
 				{
 					if (p > turn0 && lookahead < 0 && p > failure.Position)
 					{
@@ -3420,15 +3465,15 @@ namespace AspectGenerator
 					lookahead = looked.LookaheadIndex;
 				}
 
-				S124:
+				S126:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 125, p, call, atomic, repeat, lookahead, 0, 15));
+					entries.Add(new ParserEntry(ParserEntry.Call, 127, p, call, atomic, repeat, lookahead, 0, 15));
 					call = callIndex;
 					goto S41;
 				}
 
-				S125:
+				S127:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -3441,16 +3486,16 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S127:
+				S129:
 				{
 					var repeatIndex = entries.Count;
 					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 					repeat = repeatIndex;
 				}
 
-				S128:
+				S130:
 				{
-					entries.Add(new ParserEntry(ParserEntry.Choice, 147, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 171, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
@@ -3464,7 +3509,7 @@ namespace AspectGenerator
 					p = scanned;
 				}
 
-				S130:
+				S132:
 				{
 					turn0 = p;
 				}
@@ -3475,13 +3520,13 @@ namespace AspectGenerator
 					{
 						p = -1 - scanned;
 						expected = ExpectedSet_DotGram(2);
-						goto S132;
+						goto S134;
 					}
 					p = scanned;
-					goto S130;
+					goto S132;
 				}
 
-				S132:
+				S134:
 				{
 					if (p > turn0 && lookahead < 0 && p > failure.Position)
 					{
@@ -3496,33 +3541,67 @@ namespace AspectGenerator
 				}
 
 				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!(c <= 255 && RecognizeClass1_DotGram_Line[c] != 0)) goto S161;
+						if (!(c == '\\')) goto S136;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 161, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				S136:
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (c == '\\') goto S151;
+					}
+					if (lookahead < 0)
+					{
+						if (p > failure.Position)
+						{
+							failure.Position = p;
+							if (!failure.Quiet)
+							{
+								failure.Expected = ExpectedSet_DotGram(22);
+								failure.ExpectedMore?.Clear();
+							}
+						}
+						else if (!failure.Quiet && p == failure.Position)
+							Tie_DotGram(ref failure, ExpectedSet_DotGram(22));
+					}
+				}
+
+				S137:
+				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(19);
+						expected = ExpectedSet_DotGram(21);
 						goto Fail;
 					}
 					c = text[p];
 					switch (c)
 					{
-						case 'a': goto S146;
-						case 'e': goto S145;
-						case 'i': goto S144;
-						case 'o': goto S143;
-						case 'p': goto S142;
-						case 's': goto S141;
-						case 'u': goto S140;
-						case 'v': goto S134;
+						case 'a': goto S150;
+						case 'e': goto S149;
+						case 'i': goto S148;
+						case 'o': goto S147;
+						case 'p': goto S146;
+						case 's': goto S145;
+						case 'u': goto S144;
+						case 'v': goto S138;
 					}
-					expected = ExpectedSet_DotGram(19);
+					expected = ExpectedSet_DotGram(21);
 					goto Fail;
 				}
 
-				S134:
+				S138:
 				{
 					if (text.Length - p < 7)
 					{
 						p = RecognizeRanOut_DotGram_Line(text, p, "virtual", false, lookahead < 0, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(18);
+						expected = ExpectedSet_DotGram(20);
 						goto Fail;
 					}
 					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 7), global::System.MemoryExtensions.AsSpan("virtual")))
@@ -3545,16 +3624,16 @@ namespace AspectGenerator
 									p += 6;
 							}
 						}
-						expected = ExpectedSet_DotGram(18);
+						expected = ExpectedSet_DotGram(20);
 						goto Fail;
 					}
 					p += 7;
 				}
 
-				S135:
+				S139:
 				{
 					var lookaheadIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Lookahead, 128, p, call, atomic, repeat, lookahead, 1));
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 130, p, call, atomic, repeat, lookahead, 1));
 					lookahead = lookaheadIndex;
 				}
 
@@ -3562,9 +3641,9 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if (!(RecognizeIn_DotGram_Line(RecognizeSet1_DotGram_Line, c))) goto S139;
+						if (!(RecognizeIn_DotGram_Line(RecognizeSet1_DotGram_Line, c))) goto S143;
 					}
-					entries.Add(new ParserEntry(ParserEntry.Choice, 139, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 143, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
@@ -3578,7 +3657,7 @@ namespace AspectGenerator
 					p = scanned;
 				}
 
-				S138:
+				S142:
 				{
 					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
 					var looked = entries[lookahead];
@@ -3590,10 +3669,10 @@ namespace AspectGenerator
 					atomic    = looked.AtomicIndex;
 					repeat    = looked.RepeatIndex;
 					lookahead = looked.LookaheadIndex;
-					goto S128;
+					goto S130;
 				}
 
-				S139:
+				S143:
 				{
 					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
 					if (scanned < 0)
@@ -3603,15 +3682,15 @@ namespace AspectGenerator
 						goto Fail;
 					}
 					p = scanned;
-					goto S138;
+					goto S142;
 				}
 
-				S140:
+				S144:
 				{
 					if (text.Length - p < 6)
 					{
 						p = RecognizeRanOut_DotGram_Line(text, p, "unsafe", false, lookahead < 0, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(17);
+						expected = ExpectedSet_DotGram(19);
 						goto Fail;
 					}
 					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 6), global::System.MemoryExtensions.AsSpan("unsafe")))
@@ -3632,68 +3711,68 @@ namespace AspectGenerator
 									p += 5;
 							}
 						}
-						expected = ExpectedSet_DotGram(17);
+						expected = ExpectedSet_DotGram(19);
 						goto Fail;
 					}
 					p += 6;
-					goto S135;
+					goto S139;
 				}
 
-				S141:
+				S145:
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != 's')
 					{
-						expected = ExpectedSet_DotGram(14);
+						expected = ExpectedSet_DotGram(16);
 						goto Fail;
 					}
 					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("tatic")))
 					{
 						p += 6;
-						goto S135;
+						goto S139;
 					}
 					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("ealed")))
 					{
 						p += 6;
-						goto S135;
+						goto S139;
 					}
-					expected = ExpectedSet_DotGram(14);
+					expected = ExpectedSet_DotGram(16);
 					p = RecognizeSharpen2_DotGram_Line(text, p, ref expected);
 					goto Fail;
 				}
 
-				S142:
+				S146:
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != 'p')
 					{
-						expected = ExpectedSet_DotGram(9);
+						expected = ExpectedSet_DotGram(11);
 						goto Fail;
 					}
 					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("ublic")))
 					{
 						p += 6;
-						goto S135;
+						goto S139;
 					}
 					if (text.Length - p >= 7 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 6), global::System.MemoryExtensions.AsSpan("rivate")))
 					{
 						p += 7;
-						goto S135;
+						goto S139;
 					}
 					if (text.Length - p >= 9 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 8), global::System.MemoryExtensions.AsSpan("rotected")))
 					{
 						p += 9;
-						goto S135;
+						goto S139;
 					}
-					expected = ExpectedSet_DotGram(9);
+					expected = ExpectedSet_DotGram(11);
 					p = RecognizeSharpen1_DotGram_Line(text, p, ref expected);
 					goto Fail;
 				}
 
-				S143:
+				S147:
 				{
 					if (text.Length - p < 8)
 					{
 						p = RecognizeRanOut_DotGram_Line(text, p, "override", false, lookahead < 0, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(8);
+						expected = ExpectedSet_DotGram(10);
 						goto Fail;
 					}
 					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 8), global::System.MemoryExtensions.AsSpan("override")))
@@ -3718,49 +3797,49 @@ namespace AspectGenerator
 									p += 7;
 							}
 						}
-						expected = ExpectedSet_DotGram(8);
+						expected = ExpectedSet_DotGram(10);
 						goto Fail;
 					}
 					p += 8;
-					goto S135;
+					goto S139;
 				}
 
-				S144:
+				S148:
 				{
 					if (text.Length - p < 2)
 					{
 						p = RecognizeRanOut_DotGram_Line(text, p, "in", false, true, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(5);
+						expected = ExpectedSet_DotGram(7);
 						goto Fail;
 					}
 					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 2), global::System.MemoryExtensions.AsSpan("in")))
 					{
 						if (text[p] == 'i')
 							p += 1;
-						expected = ExpectedSet_DotGram(5);
+						expected = ExpectedSet_DotGram(7);
 						goto Fail;
 					}
 					if (text.Length - p >= 8 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 2, 6), global::System.MemoryExtensions.AsSpan("ternal")))
 					{
 						p += 8;
-						goto S135;
+						goto S139;
 					}
 					if (text.Length - p >= 8 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 2, 6), global::System.MemoryExtensions.AsSpan("stance")))
 					{
 						p += 8;
-						goto S135;
+						goto S139;
 					}
-					expected = ExpectedSet_DotGram(5);
+					expected = ExpectedSet_DotGram(7);
 					p = RecognizeSharpen0_DotGram_Line(text, p, ref expected);
 					goto Fail;
 				}
 
-				S145:
+				S149:
 				{
 					if (text.Length - p < 6)
 					{
 						p = RecognizeRanOut_DotGram_Line(text, p, "extern", false, lookahead < 0, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(4);
+						expected = ExpectedSet_DotGram(6);
 						goto Fail;
 					}
 					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 6), global::System.MemoryExtensions.AsSpan("extern")))
@@ -3781,19 +3860,19 @@ namespace AspectGenerator
 									p += 5;
 							}
 						}
-						expected = ExpectedSet_DotGram(4);
+						expected = ExpectedSet_DotGram(6);
 						goto Fail;
 					}
 					p += 6;
-					goto S135;
+					goto S139;
 				}
 
-				S146:
+				S150:
 				{
 					if (text.Length - p < 8)
 					{
 						p = RecognizeRanOut_DotGram_Line(text, p, "abstract", false, lookahead < 0, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(3);
+						expected = ExpectedSet_DotGram(5);
 						goto Fail;
 					}
 					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 8), global::System.MemoryExtensions.AsSpan("abstract")))
@@ -3818,14 +3897,90 @@ namespace AspectGenerator
 									p += 7;
 							}
 						}
-						expected = ExpectedSet_DotGram(3);
+						expected = ExpectedSet_DotGram(5);
 						goto Fail;
 					}
 					p += 8;
-					goto S135;
+					goto S139;
 				}
 
-				S147:
+				S151:
+				{
+					var atomicIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
+					atomic = atomicIndex;
+				}
+
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S153:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeating = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					if (repeating.Value >= 1)
+					{
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 159, p, call, atomic, repeat, lookahead, 0));
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
+					}
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '\\')
+					{
+						expected = ExpectedSet_DotGram(4);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S158;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 158, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_any_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(3);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				S157:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeated = entries[repeat];
+					entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1, repeated.RuleIndex);
+					entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
+					goto S153;
+				}
+
+				S158:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S157;
+				}
+
+				S159:
 				{
 					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 					var finished = entries[repeat];
@@ -3838,270 +3993,8 @@ namespace AspectGenerator
 					}
 					repeat = previousRepeat;
 					lookahead = finished.LookaheadIndex;
-					goto S119;
 				}
 
-				S148:
-				{
-					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
-					if (scanned < 0)
-					{
-						p = -1 - scanned;
-						expected = ExpectedSet_DotGram(0);
-						goto Fail;
-					}
-					p = scanned;
-					goto S117;
-				}
-
-				S149:
-				{
-					if (text.Length - p < 6)
-					{
-						p = RecognizeRanOut_DotGram_Line(text, p, "unsafe", false, lookahead < 0, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(17);
-						goto Fail;
-					}
-					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 6), global::System.MemoryExtensions.AsSpan("unsafe")))
-					{
-						if (lookahead < 0)
-						{
-							if (text[p] == 'u')
-							{
-								if (text[p + 1] != 'n')
-									p += 1;
-								else if (text[p + 2] != 's')
-									p += 2;
-								else if (text[p + 3] != 'a')
-									p += 3;
-								else if (text[p + 4] != 'f')
-									p += 4;
-								else
-									p += 5;
-							}
-						}
-						expected = ExpectedSet_DotGram(17);
-						goto Fail;
-					}
-					p += 6;
-					goto S114;
-				}
-
-				S150:
-				{
-					if ((uint)p >= (uint)text.Length || text[p] != 's')
-					{
-						expected = ExpectedSet_DotGram(14);
-						goto Fail;
-					}
-					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("tatic")))
-					{
-						p += 6;
-						goto S114;
-					}
-					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("ealed")))
-					{
-						p += 6;
-						goto S114;
-					}
-					expected = ExpectedSet_DotGram(14);
-					p = RecognizeSharpen2_DotGram_Line(text, p, ref expected);
-					goto Fail;
-				}
-
-				S151:
-				{
-					if ((uint)p >= (uint)text.Length || text[p] != 'p')
-					{
-						expected = ExpectedSet_DotGram(9);
-						goto Fail;
-					}
-					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("ublic")))
-					{
-						p += 6;
-						goto S114;
-					}
-					if (text.Length - p >= 7 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 6), global::System.MemoryExtensions.AsSpan("rivate")))
-					{
-						p += 7;
-						goto S114;
-					}
-					if (text.Length - p >= 9 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 8), global::System.MemoryExtensions.AsSpan("rotected")))
-					{
-						p += 9;
-						goto S114;
-					}
-					expected = ExpectedSet_DotGram(9);
-					p = RecognizeSharpen1_DotGram_Line(text, p, ref expected);
-					goto Fail;
-				}
-
-				S152:
-				{
-					if (text.Length - p < 8)
-					{
-						p = RecognizeRanOut_DotGram_Line(text, p, "override", false, lookahead < 0, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(8);
-						goto Fail;
-					}
-					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 8), global::System.MemoryExtensions.AsSpan("override")))
-					{
-						if (lookahead < 0)
-						{
-							if (text[p] == 'o')
-							{
-								if (text[p + 1] != 'v')
-									p += 1;
-								else if (text[p + 2] != 'e')
-									p += 2;
-								else if (text[p + 3] != 'r')
-									p += 3;
-								else if (text[p + 4] != 'r')
-									p += 4;
-								else if (text[p + 5] != 'i')
-									p += 5;
-								else if (text[p + 6] != 'd')
-									p += 6;
-								else
-									p += 7;
-							}
-						}
-						expected = ExpectedSet_DotGram(8);
-						goto Fail;
-					}
-					p += 8;
-					goto S114;
-				}
-
-				S153:
-				{
-					if (text.Length - p < 2)
-					{
-						p = RecognizeRanOut_DotGram_Line(text, p, "in", false, true, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(5);
-						goto Fail;
-					}
-					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 2), global::System.MemoryExtensions.AsSpan("in")))
-					{
-						if (text[p] == 'i')
-							p += 1;
-						expected = ExpectedSet_DotGram(5);
-						goto Fail;
-					}
-					if (text.Length - p >= 8 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 2, 6), global::System.MemoryExtensions.AsSpan("ternal")))
-					{
-						p += 8;
-						goto S114;
-					}
-					if (text.Length - p >= 8 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 2, 6), global::System.MemoryExtensions.AsSpan("stance")))
-					{
-						p += 8;
-						goto S114;
-					}
-					expected = ExpectedSet_DotGram(5);
-					p = RecognizeSharpen0_DotGram_Line(text, p, ref expected);
-					goto Fail;
-				}
-
-				S154:
-				{
-					if (text.Length - p < 6)
-					{
-						p = RecognizeRanOut_DotGram_Line(text, p, "extern", false, lookahead < 0, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(4);
-						goto Fail;
-					}
-					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 6), global::System.MemoryExtensions.AsSpan("extern")))
-					{
-						if (lookahead < 0)
-						{
-							if (text[p] == 'e')
-							{
-								if (text[p + 1] != 'x')
-									p += 1;
-								else if (text[p + 2] != 't')
-									p += 2;
-								else if (text[p + 3] != 'e')
-									p += 3;
-								else if (text[p + 4] != 'r')
-									p += 4;
-								else
-									p += 5;
-							}
-						}
-						expected = ExpectedSet_DotGram(4);
-						goto Fail;
-					}
-					p += 6;
-					goto S114;
-				}
-
-				S155:
-				{
-					if (text.Length - p < 8)
-					{
-						p = RecognizeRanOut_DotGram_Line(text, p, "abstract", false, lookahead < 0, negating == 0, ref failure);
-						expected = ExpectedSet_DotGram(3);
-						goto Fail;
-					}
-					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 8), global::System.MemoryExtensions.AsSpan("abstract")))
-					{
-						if (lookahead < 0)
-						{
-							if (text[p] == 'a')
-							{
-								if (text[p + 1] != 'b')
-									p += 1;
-								else if (text[p + 2] != 's')
-									p += 2;
-								else if (text[p + 3] != 't')
-									p += 3;
-								else if (text[p + 4] != 'r')
-									p += 4;
-								else if (text[p + 5] != 'a')
-									p += 5;
-								else if (text[p + 6] != 'c')
-									p += 6;
-								else
-									p += 7;
-							}
-						}
-						expected = ExpectedSet_DotGram(3);
-						goto Fail;
-					}
-					p += 8;
-					goto S114;
-				}
-
-				S156:
-				{
-					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 225, p, call, atomic, repeat, lookahead, 0, 5));
-					call = callIndex;
-				}
-
-				{
-					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 171, p, call, atomic, repeat, lookahead, 0, 14));
-					call = callIndex;
-				}
-
-				{
-					var atomicIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
-					atomic = atomicIndex;
-				}
-
-				{
-					if ((uint)p < (uint)text.Length)
-					{
-						c = text[p];
-						if ((c >= '\0' && c <= '\'') || (c >= ')' && c <= '9') || (c >= ';' && c <= '\uFFFF')) goto S161;
-					}
-					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S161;
-				}
-
-				S160:
 				{
 					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 					var boundary = entries[atomic];
@@ -4111,76 +4004,38 @@ namespace AspectGenerator
 					atomic = boundary.AtomicIndex;
 					repeat = boundary.RepeatIndex;
 					lookahead = boundary.LookaheadIndex;
-					goto Return;
+					goto S137;
 				}
 
 				S161:
+				{
+					var atomicIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
+					atomic = atomicIndex;
+				}
+
 				{
 					var repeatIndex = entries.Count;
 					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 					repeat = repeatIndex;
 				}
 
-				S162:
+				S163:
 				{
-					if (failure.Quiet)
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(c == '(' || c == ':' || c == '<' || c == '\\'))
-							{
-								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), global::System.MemoryExtensions.AsSpan("(:<\\"));
-								var until = untilFound < 0 ? -1 : p + untilFound;
-								p = until < 0 ? text.Length : until;
-							}
-						}
-					}
 					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 					var repeating = entries[repeat];
 					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					if (repeating.Value >= 1)
 					{
-						entries.Add(new ParserEntry(ParserEntry.LoopExit, 170, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 169, p, call, atomic, repeat, lookahead, 0));
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 					}
 				}
 
 				{
-					if ((uint)p >= (uint)text.Length)
-					{
-						expected = ExpectedSet_DotGram(40);
-						goto Fail;
-					}
-					c = text[p];
-					if (c == '<') goto S169;
-					if (c == '\\') goto S165;
-					if ((c >= '\0' && c <= '\'') || (c >= ')' && c <= '9') || c == ';' || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S164;
-					expected = ExpectedSet_DotGram(40);
-					goto Fail;
-				}
-
-				S164:
-				{
-					if ((uint)p >= (uint)text.Length)
-					{
-						expected = ExpectedSet_DotGram(39);
-						goto Fail;
-					}
-					c = text[p];
-					if (!(!(c == '(' || c == ':' || c == '<' || c == '\\')))
-					{
-						expected = ExpectedSet_DotGram(39);
-						goto Fail;
-					}
-					p++;
-					goto S162;
-				}
-
-				S165:
-				{
 					if ((uint)p >= (uint)text.Length || text[p] != '\\')
 					{
-						expected = ExpectedSet_DotGram(22);
+						expected = ExpectedSet_DotGram(4);
 						goto Fail;
 					}
 					p += 1;
@@ -4200,11 +4055,19 @@ namespace AspectGenerator
 					if (scanned < 0)
 					{
 						p = -1 - scanned;
-						expected = ExpectedSet_DotGram(21);
+						expected = ExpectedSet_DotGram(3);
 						goto Fail;
 					}
 					p = scanned;
-					goto S162;
+				}
+
+				S167:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeated = entries[repeat];
+					entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1, repeated.RuleIndex);
+					entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
+					goto S163;
 				}
 
 				S168:
@@ -4217,18 +4080,10 @@ namespace AspectGenerator
 						goto Fail;
 					}
 					p = scanned;
-					goto S162;
+					goto S167;
 				}
 
 				S169:
-				{
-					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 162, p, call, atomic, repeat, lookahead, 0, -1));
-					call = callIndex;
-					goto S54;
-				}
-
-				S170:
 				{
 					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 					var finished = entries[repeat];
@@ -4241,10 +4096,769 @@ namespace AspectGenerator
 					}
 					repeat = previousRepeat;
 					lookahead = finished.LookaheadIndex;
-					goto S160;
+				}
+
+				{
+					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
+					var boundary = entries[atomic];
+					global::System.Diagnostics.Debug.Assert(boundary.Kind == ParserEntry.Atomic);
+					parser.Truncate(atomic, entries);
+					entries.RemoveRange(atomic, entries.Count - atomic);
+					atomic = boundary.AtomicIndex;
+					repeat = boundary.RepeatIndex;
+					lookahead = boundary.LookaheadIndex;
+					goto S139;
 				}
 
 				S171:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+					goto S121;
+				}
+
+				S172:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S119;
+				}
+
+				S173:
+				{
+					if (text.Length - p < 6)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "unsafe", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(19);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 6), global::System.MemoryExtensions.AsSpan("unsafe")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'u')
+							{
+								if (text[p + 1] != 'n')
+									p += 1;
+								else if (text[p + 2] != 's')
+									p += 2;
+								else if (text[p + 3] != 'a')
+									p += 3;
+								else if (text[p + 4] != 'f')
+									p += 4;
+								else
+									p += 5;
+							}
+						}
+						expected = ExpectedSet_DotGram(19);
+						goto Fail;
+					}
+					p += 6;
+					goto S116;
+				}
+
+				S174:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != 's')
+					{
+						expected = ExpectedSet_DotGram(16);
+						goto Fail;
+					}
+					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("tatic")))
+					{
+						p += 6;
+						goto S116;
+					}
+					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("ealed")))
+					{
+						p += 6;
+						goto S116;
+					}
+					expected = ExpectedSet_DotGram(16);
+					p = RecognizeSharpen2_DotGram_Line(text, p, ref expected);
+					goto Fail;
+				}
+
+				S175:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != 'p')
+					{
+						expected = ExpectedSet_DotGram(11);
+						goto Fail;
+					}
+					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("ublic")))
+					{
+						p += 6;
+						goto S116;
+					}
+					if (text.Length - p >= 7 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 6), global::System.MemoryExtensions.AsSpan("rivate")))
+					{
+						p += 7;
+						goto S116;
+					}
+					if (text.Length - p >= 9 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 8), global::System.MemoryExtensions.AsSpan("rotected")))
+					{
+						p += 9;
+						goto S116;
+					}
+					expected = ExpectedSet_DotGram(11);
+					p = RecognizeSharpen1_DotGram_Line(text, p, ref expected);
+					goto Fail;
+				}
+
+				S176:
+				{
+					if (text.Length - p < 8)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "override", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(10);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 8), global::System.MemoryExtensions.AsSpan("override")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'o')
+							{
+								if (text[p + 1] != 'v')
+									p += 1;
+								else if (text[p + 2] != 'e')
+									p += 2;
+								else if (text[p + 3] != 'r')
+									p += 3;
+								else if (text[p + 4] != 'r')
+									p += 4;
+								else if (text[p + 5] != 'i')
+									p += 5;
+								else if (text[p + 6] != 'd')
+									p += 6;
+								else
+									p += 7;
+							}
+						}
+						expected = ExpectedSet_DotGram(10);
+						goto Fail;
+					}
+					p += 8;
+					goto S116;
+				}
+
+				S177:
+				{
+					if (text.Length - p < 2)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "in", false, true, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(7);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 2), global::System.MemoryExtensions.AsSpan("in")))
+					{
+						if (text[p] == 'i')
+							p += 1;
+						expected = ExpectedSet_DotGram(7);
+						goto Fail;
+					}
+					if (text.Length - p >= 8 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 2, 6), global::System.MemoryExtensions.AsSpan("ternal")))
+					{
+						p += 8;
+						goto S116;
+					}
+					if (text.Length - p >= 8 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 2, 6), global::System.MemoryExtensions.AsSpan("stance")))
+					{
+						p += 8;
+						goto S116;
+					}
+					expected = ExpectedSet_DotGram(7);
+					p = RecognizeSharpen0_DotGram_Line(text, p, ref expected);
+					goto Fail;
+				}
+
+				S178:
+				{
+					if (text.Length - p < 6)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "extern", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(6);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 6), global::System.MemoryExtensions.AsSpan("extern")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'e')
+							{
+								if (text[p + 1] != 'x')
+									p += 1;
+								else if (text[p + 2] != 't')
+									p += 2;
+								else if (text[p + 3] != 'e')
+									p += 3;
+								else if (text[p + 4] != 'r')
+									p += 4;
+								else
+									p += 5;
+							}
+						}
+						expected = ExpectedSet_DotGram(6);
+						goto Fail;
+					}
+					p += 6;
+					goto S116;
+				}
+
+				S179:
+				{
+					if (text.Length - p < 8)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "abstract", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(5);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 8), global::System.MemoryExtensions.AsSpan("abstract")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'a')
+							{
+								if (text[p + 1] != 'b')
+									p += 1;
+								else if (text[p + 2] != 's')
+									p += 2;
+								else if (text[p + 3] != 't')
+									p += 3;
+								else if (text[p + 4] != 'r')
+									p += 4;
+								else if (text[p + 5] != 'a')
+									p += 5;
+								else if (text[p + 6] != 'c')
+									p += 6;
+								else
+									p += 7;
+							}
+						}
+						expected = ExpectedSet_DotGram(5);
+						goto Fail;
+					}
+					p += 8;
+					goto S116;
+				}
+
+				S180:
+				{
+					var atomicIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
+					atomic = atomicIndex;
+				}
+
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S182:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeating = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					if (repeating.Value >= 1)
+					{
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 188, p, call, atomic, repeat, lookahead, 0));
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
+					}
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '\\')
+					{
+						expected = ExpectedSet_DotGram(4);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S187;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 187, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_any_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(3);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				S186:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeated = entries[repeat];
+					entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1, repeated.RuleIndex);
+					entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
+					goto S182;
+				}
+
+				S187:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S186;
+				}
+
+				S188:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+				}
+
+				{
+					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
+					var boundary = entries[atomic];
+					global::System.Diagnostics.Debug.Assert(boundary.Kind == ParserEntry.Atomic);
+					parser.Truncate(atomic, entries);
+					entries.RemoveRange(atomic, entries.Count - atomic);
+					atomic = boundary.AtomicIndex;
+					repeat = boundary.RepeatIndex;
+					lookahead = boundary.LookaheadIndex;
+					goto S114;
+				}
+
+				S190:
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S191:
+				{
+					entries.Add(new ParserEntry(ParserEntry.Choice, 211, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var atomicIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
+					atomic = atomicIndex;
+				}
+
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S194:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeating = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					if (repeating.Value >= 1)
+					{
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 200, p, call, atomic, repeat, lookahead, 0));
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
+					}
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '\\')
+					{
+						expected = ExpectedSet_DotGram(4);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S199;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 199, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_any_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(3);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				S198:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeated = entries[repeat];
+					entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1, repeated.RuleIndex);
+					entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
+					goto S194;
+				}
+
+				S199:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S198;
+				}
+
+				S200:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+				}
+
+				{
+					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
+					var boundary = entries[atomic];
+					global::System.Diagnostics.Debug.Assert(boundary.Kind == ParserEntry.Atomic);
+					parser.Truncate(atomic, entries);
+					entries.RemoveRange(atomic, entries.Count - atomic);
+					atomic = boundary.AtomicIndex;
+					repeat = boundary.RepeatIndex;
+					lookahead = boundary.LookaheadIndex;
+				}
+
+				{
+					var lookaheadIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 206, p, call, atomic, repeat, lookahead, 1));
+					lookahead = lookaheadIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!(RecognizeIn_DotGram_Line(RecognizeSet1_DotGram_Line, c))) goto S210;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 210, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_Ws_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(2);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				S205:
+				{
+					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
+					var looked = entries[lookahead];
+					global::System.Diagnostics.Debug.Assert(looked.Kind == ParserEntry.Lookahead);
+					parser.Truncate(lookahead, entries);
+					entries.RemoveRange(lookahead, entries.Count - lookahead);
+					p         = looked.Position;
+					call      = looked.CallIndex;
+					atomic    = looked.AtomicIndex;
+					repeat    = looked.RepeatIndex;
+					lookahead = looked.LookaheadIndex;
+				}
+
+				S206:
+				{
+					var scanned = Scan_DotGram_Ws_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(2);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				S207:
+				{
+					turn0 = p;
+				}
+
+				{
+					var scanned = Scan_DotGram_Ws_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(2);
+						goto S209;
+					}
+					p = scanned;
+					goto S207;
+				}
+
+				S209:
+				{
+					if (p > turn0 && lookahead < 0 && p > failure.Position)
+					{
+						failure.Position = p;
+						if (!failure.Quiet)
+						{
+							failure.Expected = expected;
+							failure.ExpectedMore?.Clear();
+						}
+					}
+					p = turn0;
+					goto S191;
+				}
+
+				S210:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S205;
+				}
+
+				S211:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+					goto S113;
+				}
+
+				S212:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 281, p, call, atomic, repeat, lookahead, 0, 5));
+					call = callIndex;
+				}
+
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 227, p, call, atomic, repeat, lookahead, 0, 14));
+					call = callIndex;
+				}
+
+				{
+					var atomicIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
+					atomic = atomicIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if ((c >= '\0' && c <= '\'') || (c >= ')' && c <= '9') || (c >= ';' && c <= '\uFFFF')) goto S217;
+					}
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S217;
+				}
+
+				S216:
+				{
+					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
+					var boundary = entries[atomic];
+					global::System.Diagnostics.Debug.Assert(boundary.Kind == ParserEntry.Atomic);
+					parser.Truncate(atomic, entries);
+					entries.RemoveRange(atomic, entries.Count - atomic);
+					atomic = boundary.AtomicIndex;
+					repeat = boundary.RepeatIndex;
+					lookahead = boundary.LookaheadIndex;
+					goto Return;
+				}
+
+				S217:
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S218:
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == '(' || c == ':' || c == '<' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), global::System.MemoryExtensions.AsSpan("(:<\\"));
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeating = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					{
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 226, p, call, atomic, repeat, lookahead, 0));
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
+					}
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(41);
+						goto Fail;
+					}
+					c = text[p];
+					if (c == '<') goto S225;
+					if (c == '\\') goto S221;
+					if ((c >= '\0' && c <= '\'') || (c >= ')' && c <= '9') || c == ';' || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S220;
+					expected = ExpectedSet_DotGram(41);
+					goto Fail;
+				}
+
+				S220:
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(40);
+						goto Fail;
+					}
+					c = text[p];
+					if (!(!(c == '(' || c == ':' || c == '<' || c == '\\')))
+					{
+						expected = ExpectedSet_DotGram(40);
+						goto Fail;
+					}
+					p++;
+					goto S218;
+				}
+
+				S221:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '\\')
+					{
+						expected = ExpectedSet_DotGram(4);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S224;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 224, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_any_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(3);
+						goto Fail;
+					}
+					p = scanned;
+					goto S218;
+				}
+
+				S224:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S218;
+				}
+
+				S225:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 218, p, call, atomic, repeat, lookahead, 0, -1));
+					call = callIndex;
+					goto S54;
+				}
+
+				S226:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+					goto S216;
+				}
+
+				S227:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -4256,7 +4870,30 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if (c == '(') goto S182;
+						if (c == '(') goto S238;
+					}
+					if (lookahead < 0)
+					{
+						if (p > failure.Position)
+						{
+							failure.Position = p;
+							if (!failure.Quiet)
+							{
+								failure.Expected = ExpectedSet_DotGram(27);
+								failure.ExpectedMore?.Clear();
+							}
+						}
+						else if (!failure.Quiet && p == failure.Position)
+							Tie_DotGram(ref failure, ExpectedSet_DotGram(27));
+					}
+				}
+
+				S229:
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (c == ':') goto S230;
 					}
 					if (lookahead < 0)
 					{
@@ -4272,43 +4909,20 @@ namespace AspectGenerator
 						else if (!failure.Quiet && p == failure.Position)
 							Tie_DotGram(ref failure, ExpectedSet_DotGram(26));
 					}
-				}
-
-				S173:
-				{
-					if ((uint)p < (uint)text.Length)
-					{
-						c = text[p];
-						if (c == ':') goto S174;
-					}
-					if (lookahead < 0)
-					{
-						if (p > failure.Position)
-						{
-							failure.Position = p;
-							if (!failure.Quiet)
-							{
-								failure.Expected = ExpectedSet_DotGram(25);
-								failure.ExpectedMore?.Clear();
-							}
-						}
-						else if (!failure.Quiet && p == failure.Position)
-							Tie_DotGram(ref failure, ExpectedSet_DotGram(25));
-					}
 					goto S60;
 				}
 
-				S174:
+				S230:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 181, p, call, atomic, repeat, lookahead, 0, 6));
+					entries.Add(new ParserEntry(ParserEntry.Call, 237, p, call, atomic, repeat, lookahead, 0, 6));
 					call = callIndex;
 				}
 
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != ':')
 					{
-						expected = ExpectedSet_DotGram(27);
+						expected = ExpectedSet_DotGram(28);
 						goto Fail;
 					}
 					p += 1;
@@ -4316,11 +4930,11 @@ namespace AspectGenerator
 
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 180, p, call, atomic, repeat, lookahead, 0, 7));
+					entries.Add(new ParserEntry(ParserEntry.Call, 236, p, call, atomic, repeat, lookahead, 0, 7));
 					call = callIndex;
 				}
 
-				S177:
+				S233:
 				{
 					turn0 = p;
 				}
@@ -4330,14 +4944,14 @@ namespace AspectGenerator
 					if (scanned < 0)
 					{
 						p = -1 - scanned;
-						expected = ExpectedSet_DotGram(21);
-						goto S179;
+						expected = ExpectedSet_DotGram(3);
+						goto S235;
 					}
 					p = scanned;
-					goto S177;
+					goto S233;
 				}
 
-				S179:
+				S235:
 				{
 					if (p > turn0 && lookahead < 0 && p > failure.Position)
 					{
@@ -4352,7 +4966,7 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S180:
+				S236:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -4361,7 +4975,7 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S181:
+				S237:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -4370,17 +4984,17 @@ namespace AspectGenerator
 					goto S60;
 				}
 
-				S182:
+				S238:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 224, p, call, atomic, repeat, lookahead, 0, 9));
+					entries.Add(new ParserEntry(ParserEntry.Call, 280, p, call, atomic, repeat, lookahead, 0, 9));
 					call = callIndex;
 				}
 
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != '(')
 					{
-						expected = ExpectedSet_DotGram(31);
+						expected = ExpectedSet_DotGram(32);
 						goto Fail;
 					}
 					p += 1;
@@ -4390,14 +5004,14 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if (!((c >= '\0' && c <= '9') || (c >= ';' && c <= '\uFFFF'))) goto S210;
+						if (!((c >= '\0' && c <= '9') || (c >= ';' && c <= '\uFFFF'))) goto S266;
 					}
-					entries.Add(new ParserEntry(ParserEntry.Choice, 210, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 266, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 199, p, call, atomic, repeat, lookahead, 0, 13));
+					entries.Add(new ParserEntry(ParserEntry.Call, 255, p, call, atomic, repeat, lookahead, 0, 13));
 					call = callIndex;
 				}
 
@@ -4411,12 +5025,12 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if ((c >= '\0' && c <= '(') || (c >= '*' && c <= '9') || (c >= ';' && c <= '\uFFFF')) goto S189;
+						if ((c >= '\0' && c <= '(') || (c >= '*' && c <= '9') || (c >= ';' && c <= '\uFFFF')) goto S245;
 					}
-					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S189;
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S245;
 				}
 
-				S188:
+				S244:
 				{
 					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 					var boundary = entries[atomic];
@@ -4429,14 +5043,14 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S189:
+				S245:
 				{
 					var repeatIndex = entries.Count;
 					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 					repeat = repeatIndex;
 				}
 
-				S190:
+				S246:
 				{
 					if (failure.Quiet)
 					{
@@ -4455,7 +5069,7 @@ namespace AspectGenerator
 					var repeating = entries[repeat];
 					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 					{
-						entries.Add(new ParserEntry(ParserEntry.LoopExit, 198, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 254, p, call, atomic, repeat, lookahead, 0));
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 					}
 				}
@@ -4463,39 +5077,39 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(38);
+						expected = ExpectedSet_DotGram(39);
 						goto Fail;
 					}
 					c = text[p];
-					if (c == '<') goto S197;
-					if (c == '\\') goto S193;
-					if ((c >= '\0' && c <= '(') || (c >= '*' && c <= '9') || c == ';' || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S192;
-					expected = ExpectedSet_DotGram(38);
+					if (c == '<') goto S253;
+					if (c == '\\') goto S249;
+					if ((c >= '\0' && c <= '(') || (c >= '*' && c <= '9') || c == ';' || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S248;
+					expected = ExpectedSet_DotGram(39);
 					goto Fail;
 				}
 
-				S192:
+				S248:
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(37);
+						expected = ExpectedSet_DotGram(38);
 						goto Fail;
 					}
 					c = text[p];
 					if (!(!(c == ')' || c == ':' || c == '<' || c == '\\')))
 					{
-						expected = ExpectedSet_DotGram(37);
+						expected = ExpectedSet_DotGram(38);
 						goto Fail;
 					}
 					p++;
-					goto S190;
+					goto S246;
 				}
 
-				S193:
+				S249:
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != '\\')
 					{
-						expected = ExpectedSet_DotGram(22);
+						expected = ExpectedSet_DotGram(4);
 						goto Fail;
 					}
 					p += 1;
@@ -4505,9 +5119,9 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if (!((c >= '\0' && c <= '\uFFFF'))) goto S196;
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S252;
 					}
-					entries.Add(new ParserEntry(ParserEntry.Choice, 196, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 252, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
@@ -4515,14 +5129,14 @@ namespace AspectGenerator
 					if (scanned < 0)
 					{
 						p = -1 - scanned;
-						expected = ExpectedSet_DotGram(21);
+						expected = ExpectedSet_DotGram(3);
 						goto Fail;
 					}
 					p = scanned;
-					goto S190;
+					goto S246;
 				}
 
-				S196:
+				S252:
 				{
 					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
 					if (scanned < 0)
@@ -4532,18 +5146,18 @@ namespace AspectGenerator
 						goto Fail;
 					}
 					p = scanned;
-					goto S190;
+					goto S246;
 				}
 
-				S197:
+				S253:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 190, p, call, atomic, repeat, lookahead, 0, -1));
+					entries.Add(new ParserEntry(ParserEntry.Call, 246, p, call, atomic, repeat, lookahead, 0, -1));
 					call = callIndex;
 					goto S54;
 				}
 
-				S198:
+				S254:
 				{
 					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 					var finished = entries[repeat];
@@ -4556,10 +5170,10 @@ namespace AspectGenerator
 					}
 					repeat = previousRepeat;
 					lookahead = finished.LookaheadIndex;
-					goto S188;
+					goto S244;
 				}
 
-				S199:
+				S255:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -4570,13 +5184,13 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != ')')
 					{
-						expected = ExpectedSet_DotGram(30);
+						expected = ExpectedSet_DotGram(31);
 						goto Fail;
 					}
 					p += 1;
 				}
 
-				S201:
+				S257:
 				{
 					turn0 = p;
 				}
@@ -4587,13 +5201,13 @@ namespace AspectGenerator
 					{
 						p = -1 - scanned;
 						expected = ExpectedSet_DotGram(2);
-						goto S203;
+						goto S259;
 					}
 					p = scanned;
-					goto S201;
+					goto S257;
 				}
 
-				S203:
+				S259:
 				{
 					if (p > turn0 && lookahead < 0 && p > failure.Position)
 					{
@@ -4609,7 +5223,7 @@ namespace AspectGenerator
 
 				{
 					var lookaheadIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Lookahead, 208, p, call, atomic, repeat, lookahead, 1));
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 264, p, call, atomic, repeat, lookahead, 1));
 					lookahead = lookaheadIndex;
 				}
 
@@ -4617,21 +5231,21 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if (!(c == ':')) goto S209;
+						if (!(c == ':')) goto S265;
 					}
-					entries.Add(new ParserEntry(ParserEntry.Choice, 209, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 265, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != ':')
 					{
-						expected = ExpectedSet_DotGram(27);
+						expected = ExpectedSet_DotGram(28);
 						goto Fail;
 					}
 					p += 1;
 				}
 
-				S207:
+				S263:
 				{
 					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
 					var looked = entries[lookahead];
@@ -4645,13 +5259,13 @@ namespace AspectGenerator
 					lookahead = looked.LookaheadIndex;
 				}
 
-				S208:
+				S264:
 				{
 					entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
 					goto Return;
 				}
 
-				S209:
+				S265:
 				{
 					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
 					if (scanned < 0)
@@ -4661,10 +5275,10 @@ namespace AspectGenerator
 						goto Fail;
 					}
 					p = scanned;
-					goto S207;
+					goto S263;
 				}
 
-				S210:
+				S266:
 				{
 					var atomicIndex = entries.Count;
 					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -4675,12 +5289,12 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if ((c >= '\0' && c <= '9') || (c >= ';' && c <= '\uFFFF')) goto S214;
+						if ((c >= '\0' && c <= '9') || (c >= ';' && c <= '\uFFFF')) goto S270;
 					}
-					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S214;
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S270;
 				}
 
-				S212:
+				S268:
 				{
 					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 					var boundary = entries[atomic];
@@ -4697,14 +5311,14 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S214:
+				S270:
 				{
 					var repeatIndex = entries.Count;
 					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 					repeat = repeatIndex;
 				}
 
-				S215:
+				S271:
 				{
 					if (failure.Quiet)
 					{
@@ -4723,7 +5337,7 @@ namespace AspectGenerator
 					var repeating = entries[repeat];
 					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 					{
-						entries.Add(new ParserEntry(ParserEntry.LoopExit, 223, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 279, p, call, atomic, repeat, lookahead, 0));
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 					}
 				}
@@ -4731,39 +5345,39 @@ namespace AspectGenerator
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(29);
+						expected = ExpectedSet_DotGram(30);
 						goto Fail;
 					}
 					c = text[p];
-					if (c == '<') goto S222;
-					if (c == '\\') goto S218;
-					if ((c >= '\0' && c <= '9') || c == ';' || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S217;
-					expected = ExpectedSet_DotGram(29);
+					if (c == '<') goto S278;
+					if (c == '\\') goto S274;
+					if ((c >= '\0' && c <= '9') || c == ';' || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S273;
+					expected = ExpectedSet_DotGram(30);
 					goto Fail;
 				}
 
-				S217:
+				S273:
 				{
 					if ((uint)p >= (uint)text.Length)
 					{
-						expected = ExpectedSet_DotGram(28);
+						expected = ExpectedSet_DotGram(29);
 						goto Fail;
 					}
 					c = text[p];
 					if (!(!(c == ':' || c == '<' || c == '\\')))
 					{
-						expected = ExpectedSet_DotGram(28);
+						expected = ExpectedSet_DotGram(29);
 						goto Fail;
 					}
 					p++;
-					goto S215;
+					goto S271;
 				}
 
-				S218:
+				S274:
 				{
 					if ((uint)p >= (uint)text.Length || text[p] != '\\')
 					{
-						expected = ExpectedSet_DotGram(22);
+						expected = ExpectedSet_DotGram(4);
 						goto Fail;
 					}
 					p += 1;
@@ -4773,9 +5387,9 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length)
 					{
 						c = text[p];
-						if (!((c >= '\0' && c <= '\uFFFF'))) goto S221;
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S277;
 					}
-					entries.Add(new ParserEntry(ParserEntry.Choice, 221, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 277, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
@@ -4783,14 +5397,14 @@ namespace AspectGenerator
 					if (scanned < 0)
 					{
 						p = -1 - scanned;
-						expected = ExpectedSet_DotGram(21);
+						expected = ExpectedSet_DotGram(3);
 						goto Fail;
 					}
 					p = scanned;
-					goto S215;
+					goto S271;
 				}
 
-				S221:
+				S277:
 				{
 					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
 					if (scanned < 0)
@@ -4800,18 +5414,18 @@ namespace AspectGenerator
 						goto Fail;
 					}
 					p = scanned;
-					goto S215;
+					goto S271;
 				}
 
-				S222:
+				S278:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 215, p, call, atomic, repeat, lookahead, 0, -1));
+					entries.Add(new ParserEntry(ParserEntry.Call, 271, p, call, atomic, repeat, lookahead, 0, -1));
 					call = callIndex;
 					goto S54;
 				}
 
-				S223:
+				S279:
 				{
 					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 					var finished = entries[repeat];
@@ -4824,19 +5438,19 @@ namespace AspectGenerator
 					}
 					repeat = previousRepeat;
 					lookahead = finished.LookaheadIndex;
-					goto S212;
+					goto S268;
 				}
 
-				S224:
+				S280:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 9 && entries[capturedCall].Value == p);
 					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 15, capturedCall, call, atomic, repeat, lookahead, p));
-					goto S173;
+					goto S229;
 				}
 
-				S225:
+				S281:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -4849,7 +5463,7 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S227:
+				S283:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -4862,7 +5476,7 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S229:
+				S285:
 				{
 					global::System.Diagnostics.Debug.Assert(call >= 0 && call < entries.Count);
 					var ruleStart = entries[call].Position;
@@ -4909,18 +5523,18 @@ namespace AspectGenerator
 						p++;
 					}
 					if (p > runStart)
-						entries.Add(new ParserEntry(ParserEntry.Run, 231, runStart, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.Run, 287, runStart, call, atomic, repeat, lookahead, p));
 				}
 
-				S231:
+				S287:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 238, p, call, atomic, repeat, lookahead, 0, 22));
+					entries.Add(new ParserEntry(ParserEntry.Call, 294, p, call, atomic, repeat, lookahead, 0, 24));
 					call = callIndex;
 				}
 
 				{
-					entries.Add(new ParserEntry(ParserEntry.Choice, 235, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 291, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
@@ -4939,15 +5553,15 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S235:
+				S291:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 236, p, call, atomic, repeat, lookahead, 0, 7));
+					entries.Add(new ParserEntry(ParserEntry.Call, 292, p, call, atomic, repeat, lookahead, 0, 7));
 					call = callIndex;
-					goto S177;
+					goto S233;
 				}
 
-				S236:
+				S292:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -4960,11 +5574,11 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S238:
+				S294:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 22 && entries[capturedCall].Value == p);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 24 && entries[capturedCall].Value == p);
 					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 5, capturedCall, call, atomic, repeat, lookahead, p));
 				}
 
@@ -4973,31 +5587,31 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S240:
+				S296:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 251, p, call, atomic, repeat, lookahead, 0, 3));
+					entries.Add(new ParserEntry(ParserEntry.Call, 307, p, call, atomic, repeat, lookahead, 0, 3));
 					call = callIndex;
 				}
 
 				{
-					entries.Add(new ParserEntry(ParserEntry.Choice, 248, p, call, atomic, repeat, lookahead, 0));
+					entries.Add(new ParserEntry(ParserEntry.Choice, 304, p, call, atomic, repeat, lookahead, 0));
 				}
 
 				{
 					var lookaheadIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Lookahead, 245, p, call, atomic, repeat, lookahead, 1));
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 301, p, call, atomic, repeat, lookahead, 1));
 					lookahead = lookaheadIndex;
 				}
 
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 244, p, call, atomic, repeat, lookahead, 0, 19));
+					entries.Add(new ParserEntry(ParserEntry.Call, 300, p, call, atomic, repeat, lookahead, 0, 21));
 					call = callIndex;
 					goto S95;
 				}
 
-				S244:
+				S300:
 				{
 					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
 					var seenTo = p;
@@ -5005,7 +5619,7 @@ namespace AspectGenerator
 					var looked = entries[lookedAt];
 					global::System.Diagnostics.Debug.Assert(looked.Kind == ParserEntry.Lookahead);
 					var capturedCall = completedCall;
-					global::System.Diagnostics.Debug.Assert(capturedCall > lookedAt && entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].RuleIndex == 19 && entries[capturedCall].Value == seenTo);
+					global::System.Diagnostics.Debug.Assert(capturedCall > lookedAt && entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].RuleIndex == 21 && entries[capturedCall].Value == seenTo);
 					for (var back = entries.Count - 1; back >= lookedAt; back--)
 					{
 						var inside = entries[back];
@@ -5020,7 +5634,7 @@ namespace AspectGenerator
 					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 7, capturedCall, call, atomic, repeat, lookahead, p));
 				}
 
-				S245:
+				S301:
 				{
 					global::System.Diagnostics.Debug.Assert(call >= 0 && call < entries.Count);
 					var ruleStart = entries[call].Position;
@@ -5059,26 +5673,26 @@ namespace AspectGenerator
 
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 247, p, call, atomic, repeat, lookahead, 0, 7));
+					entries.Add(new ParserEntry(ParserEntry.Call, 303, p, call, atomic, repeat, lookahead, 0, 7));
 					call = callIndex;
-					goto S177;
+					goto S233;
 				}
 
-				S247:
+				S303:
 				{
 					entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
 					goto Return;
 				}
 
-				S248:
+				S304:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 249, p, call, atomic, repeat, lookahead, 0, 4));
+					entries.Add(new ParserEntry(ParserEntry.Call, 305, p, call, atomic, repeat, lookahead, 0, 4));
 					call = callIndex;
 					goto S30;
 				}
 
-				S249:
+				S305:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -5091,7 +5705,7 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S251:
+				S307:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -5104,7 +5718,7 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S253:
+				S309:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -5128,15 +5742,15 @@ namespace AspectGenerator
 					goto Return;
 				}
 
-				S256:
+				S312:
 				{
 					var callIndex = entries.Count;
-					entries.Add(new ParserEntry(ParserEntry.Call, 257, p, call, atomic, repeat, lookahead, 0, 2));
+					entries.Add(new ParserEntry(ParserEntry.Call, 313, p, call, atomic, repeat, lookahead, 0, 2));
 					call = callIndex;
 					goto S15;
 				}
 
-				S257:
+				S313:
 				{
 					var capturedCall = completedCall;
 					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -5238,16 +5852,16 @@ namespace AspectGenerator
 							case 16:
 								recognized = values3[0];
 								break;
-							case 19:
-								recognized = values5[0];
-								break;
-							case 22:
-								recognized = values2[0];
-								break;
-							case 23:
+							case 21:
 								recognized = values5[0];
 								break;
 							case 24:
+								recognized = values2[0];
+								break;
+							case 25:
+								recognized = values5[0];
+								break;
+							case 26:
 								recognized = values6[0];
 								break;
 							default:
@@ -5290,6 +5904,14 @@ namespace AspectGenerator
 						lookahead = entry.LookaheadIndex;
 						parser.Reopen(call, entries);
 						goto Dispatch;
+					}
+					if (entry.Kind == ParserEntry.TurnDone)
+					{
+						var counted = entries[entry.RepeatIndex];
+
+						global::System.Diagnostics.Debug.Assert(counted.Kind == ParserEntry.Repeat);
+						entries[entry.RepeatIndex] = new ParserEntry(ParserEntry.Repeat, 0, counted.Position, counted.CallIndex, counted.AtomicIndex, counted.RepeatIndex, counted.LookaheadIndex, counted.Value - 1, counted.RuleIndex);
+						continue;
 					}
 					if (entry.Kind == ParserEntry.LoopExit)
 					{
@@ -5763,7 +6385,7 @@ namespace AspectGenerator
 
 				if ((uint)p >= (uint)text.Length || text[p] != ':')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(27));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(28));
 					return -1;
 				}
 				p += 1;
@@ -5918,7 +6540,7 @@ namespace AspectGenerator
 
 				if (p < m0 + 1)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(41));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(42));
 					return -1;
 				}
 
@@ -5948,13 +6570,13 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(37));
 					return -1;
 				}
 				c = text[p];
 				if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(37));
 					return -1;
 				}
 				p++;
@@ -6359,7 +6981,7 @@ namespace AspectGenerator
 				TextSpan? r1 = default;
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(48));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(49));
 					return -1;
 				}
 				c = text[p];
@@ -6439,7 +7061,7 @@ namespace AspectGenerator
 					var q2 = Read_Word(p);
 					if (q2 < 0)
 					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(48));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(49));
 						return -1;
 					}
 					p = q2;
@@ -6468,7 +7090,7 @@ namespace AspectGenerator
 					{
 						if (t0 < 1)
 						{
-							if (!failure.Quiet) Refuse_DotGram(ref failure, p, ExpectedSet_DotGram(76));
+							if (!failure.Quiet) Refuse_DotGram(ref failure, p, ExpectedSet_DotGram(74));
 							return -1;
 						}
 
@@ -6512,7 +7134,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '\\')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(22));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(4));
 					return -1;
 				}
 				p += 1;
@@ -6615,7 +7237,7 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(52));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(53));
 					return -1;
 				}
 				c = text[p];
@@ -6636,7 +7258,7 @@ namespace AspectGenerator
 					var q2 = Read_WordCharacter(p);
 					if (q2 < 0)
 					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(52));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(53));
 						return -1;
 					}
 					p = q2;
@@ -6706,7 +7328,7 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(51));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(52));
 					return -1;
 				}
 				c = text[p];
@@ -6733,7 +7355,7 @@ namespace AspectGenerator
 					var q3 = Read_WordCharacter(p);
 					if (q3 < 0)
 					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(51));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(52));
 						return -1;
 					}
 					p = q3;
@@ -6794,7 +7416,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '[')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(56));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(57));
 					return -1;
 				}
 				p += 1;
@@ -6862,7 +7484,7 @@ namespace AspectGenerator
 
 				if ((uint)p >= (uint)text.Length || text[p] != ']')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(54));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(55));
 					return -1;
 				}
 				p += 1;
@@ -6883,7 +7505,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '<')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
 					return -1;
 				}
 				p += 1;
@@ -6961,7 +7583,7 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
 					return -1;
 				}
 				c = text[p];
@@ -6981,7 +7603,7 @@ namespace AspectGenerator
 				{
 					if (!((c >= '\0' && c <= ';') || c == '=' || (c >= '?' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
 					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
 						return -1;
 					}
 					p++;
@@ -6994,7 +7616,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '>')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(32));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(33));
 					return -1;
 				}
 				p += 1;
@@ -7008,13 +7630,13 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(53));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(54));
 					return -1;
 				}
 				c = text[p];
 				if (!((c < 128 ? c <= 255 && RecognizeClass0_DotGram_ConditionItem[c] != 0 : !((c >= '\t' && c <= '\r') || c == '<' || (c >= '[' && c <= '\\') || c == '\u0085' || Categories_DotGram_3800(c)))))
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(53));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(54));
 					return -1;
 				}
 				p++;
@@ -7707,7 +8329,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '|')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(44));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(45));
 					return -1;
 				}
 				p += 1;
@@ -7770,7 +8392,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '&')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(43));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(44));
 					return -1;
 				}
 				p += 1;
@@ -7784,133 +8406,12 @@ namespace AspectGenerator
 			public int Read_Operand(int pos)
 			{
 				var p = pos;
-				var q0 = ReadPart0_Operand(p, pos);
-				if (q0 < 0)
+				if (!Host0_DotGram_ReadOperand(text, ref p))
+				{
+					Refused_DotGram(ref failure, p, null);
 					return -1;
-				p = q0;
+				}
 				if (unbuilt == 0) last3 = New_DotGram_Operand(new SourceSpan(pos, p - pos));
-				return p;
-			}
-
-			public int ReadPart0_Operand(int pos, int start)
-			{
-				var p = pos;
-				var c = '\0';
-				while (true)
-				{
-					var o1 = (uint)p < (uint)text.Length;
-
-					if (o1)
-					{
-						c = text[p];
-						o1 = (c >= '\0' && c <= '\uFFFF');
-					}
-
-					if (!o1)
-					{
-						break;
-					}
-
-					var q0 = -1;
-
-					q0 = ReadPart1_Operand(p, start);
-
-					if (q0 < 0)
-					{
-					}
-
-					if (q0 < 0)
-					{
-
-						break;
-					}
-
-					p = q0;
-				}
-				return p;
-			}
-
-			public int ReadPart1_Operand(int pos, int start)
-			{
-				var p = pos;
-				var c = '\0';
-				if ((uint)p >= (uint)text.Length)
-				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(59));
-					return -1;
-				}
-				c = text[p];
-				if (c == '\\')
-				{
-					var q0 = Read_Escape(p);
-					if (q0 < 0) return -1;
-					p = q0;
-				}
-				else if (c == '&' || c == '|')
-				{
-					if (!RecognizeGuard2_DotGram_ConditionValue(text.Slice(start, p - start).ToString()))
-					{
-						Refused_DotGram(ref failure, p, null);
-						return -1;
-					}
-					if ((uint)p >= (uint)text.Length)
-					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(58));
-						return -1;
-					}
-					c = text[p];
-					if (!((c == '&' || c == '|')))
-					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(58));
-						return -1;
-					}
-					p++;
-				}
-				else
-				{
-					if (!((c >= '\0' && c <= '%') || (c >= '\'' && c <= '[') || (c >= ']' && c <= '{') || (c >= '}' && c <= '\uFFFF')))
-					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(59));
-						return -1;
-					}
-					p++;
-				}
-				return p;
-			}
-
-			public int Read_Escape(int pos)
-			{
-				var p = pos;
-				if ((uint)p >= (uint)text.Length || text[p] != '\\')
-				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(22));
-					return -1;
-				}
-				p += 1;
-				var q0 = Read_any(p);
-				if (q0 < 0)
-				{
-					var q1 = Read_eof(p);
-					if (q1 < 0) return -1;
-					p = q1;
-					q0 = p;
-				}
-				p = q0;
-				return p;
-			}
-
-			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-			public int Read_any(int pos)
-			{
-				var p = pos;
-				var c = '\0';
-				if ((uint)p >= (uint)text.Length)
-				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
-					return -1;
-				}
-				c = text[p];
-				p++;
 				return p;
 			}
 
@@ -8179,7 +8680,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '.')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(60));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(58));
 					return -1;
 				}
 				p += 1;
@@ -8259,7 +8760,7 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(62));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(60));
 					return -1;
 				}
 				c = text[p];
@@ -8279,7 +8780,7 @@ namespace AspectGenerator
 				{
 					if (!((c >= '\0' && c <= '-') || (c >= '/' && c <= ';') || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
 					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(62));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(60));
 						return -1;
 					}
 					p++;
@@ -8295,7 +8796,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '<')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
 					return -1;
 				}
 				p += 1;
@@ -8373,7 +8874,7 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
 					return -1;
 				}
 				c = text[p];
@@ -8393,7 +8894,7 @@ namespace AspectGenerator
 				{
 					if (!((c >= '\0' && c <= ';') || c == '=' || (c >= '?' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
 					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
 						return -1;
 					}
 					p++;
@@ -8406,7 +8907,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '>')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(32));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(33));
 					return -1;
 				}
 				p += 1;
@@ -8418,7 +8919,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '\\')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(22));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(4));
 					return -1;
 				}
 				p += 1;
@@ -9072,7 +9573,7 @@ namespace AspectGenerator
 				TextSpan r0 = default!;
 				if ((uint)p >= (uint)text.Length || text[p] != '(')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(31));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(32));
 					return -1;
 				}
 				p += 1;
@@ -9082,7 +9583,7 @@ namespace AspectGenerator
 				r0 = last3;
 				if ((uint)p >= (uint)text.Length || text[p] != ')')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(30));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(31));
 					return -1;
 				}
 				p += 1;
@@ -9177,7 +9678,7 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(64));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(62));
 					return -1;
 				}
 				c = text[p];
@@ -9203,7 +9704,7 @@ namespace AspectGenerator
 				{
 					if (!((c >= '\0' && c <= '\'') || (c >= '*' && c <= ';') || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
 					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(64));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(62));
 						return -1;
 					}
 					p++;
@@ -9219,7 +9720,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '<')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
 					return -1;
 				}
 				p += 1;
@@ -9297,7 +9798,7 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
 					return -1;
 				}
 				c = text[p];
@@ -9317,7 +9818,7 @@ namespace AspectGenerator
 				{
 					if (!((c >= '\0' && c <= ';') || c == '=' || (c >= '?' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
 					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
 						return -1;
 					}
 					p++;
@@ -9330,7 +9831,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '>')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(32));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(33));
 					return -1;
 				}
 				p += 1;
@@ -9342,7 +9843,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '\\')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(22));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(4));
 					return -1;
 				}
 				p += 1;
@@ -9411,7 +9912,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '(')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(31));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(32));
 					return -1;
 				}
 				p += 1;
@@ -9421,7 +9922,7 @@ namespace AspectGenerator
 				p = q0;
 				if ((uint)p >= (uint)text.Length || text[p] != ')')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(30));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(31));
 					return -1;
 				}
 				p += 1;
@@ -9486,7 +9987,7 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(64));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(62));
 					return -1;
 				}
 				c = text[p];
@@ -9512,7 +10013,7 @@ namespace AspectGenerator
 				{
 					if (!((c >= '\0' && c <= '\'') || (c >= '*' && c <= ';') || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
 					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(64));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(62));
 						return -1;
 					}
 					p++;
@@ -10242,7 +10743,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != ',')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(65));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(63));
 					return -1;
 				}
 				p += 1;
@@ -10417,7 +10918,7 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(67));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(65));
 					return -1;
 				}
 				c = text[p];
@@ -10443,7 +10944,7 @@ namespace AspectGenerator
 				{
 					if (!((c >= '\0' && c <= '+') || (c >= '-' && c <= ';') || (c >= '=' && c <= 'Z') || (c >= ']' && c <= '\uFFFF')))
 					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(67));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(65));
 						return -1;
 					}
 					p++;
@@ -10504,7 +11005,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '[')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(56));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(57));
 					return -1;
 				}
 				p += 1;
@@ -10572,7 +11073,7 @@ namespace AspectGenerator
 
 				if ((uint)p >= (uint)text.Length || text[p] != ']')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(54));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(55));
 					return -1;
 				}
 				p += 1;
@@ -10593,7 +11094,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '<')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
 					return -1;
 				}
 				p += 1;
@@ -10671,7 +11172,7 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
 					return -1;
 				}
 				c = text[p];
@@ -10691,7 +11192,7 @@ namespace AspectGenerator
 				{
 					if (!((c >= '\0' && c <= ';') || c == '=' || (c >= '?' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
 					{
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
 						return -1;
 					}
 					p++;
@@ -10704,7 +11205,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '>')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(32));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(33));
 					return -1;
 				}
 				p += 1;
@@ -10716,7 +11217,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '\\')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(22));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(4));
 					return -1;
 				}
 				p += 1;
@@ -11444,7 +11945,7 @@ namespace AspectGenerator
 				var p = pos;
 				if ((uint)p >= (uint)text.Length || text[p] != '_')
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(68));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(66));
 					return -1;
 				}
 				p += 1;
@@ -11556,7 +12057,7 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(77));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(75));
 					return -1;
 				}
 				c = text[p];
@@ -11567,14 +12068,14 @@ namespace AspectGenerator
 							if ((uint)(p + 3) > (uint)text.Length)
 							{
 								p = RecognizeRanOut_DotGram_Parameter(text, p, "in ", false, !failure.Quiet, true, ref failure);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(70));
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(68));
 								return -1;
 							}
 							if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 3), global::System.MemoryExtensions.AsSpan("in ")))
 							{
 								if (!failure.Quiet)
 									p = RecognizeAgreeing_DotGram_Parameter(text, p, "in ", false);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(70));
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(68));
 								return -1;
 							}
 							p += 3;
@@ -11622,14 +12123,14 @@ namespace AspectGenerator
 							if ((uint)(p + 4) > (uint)text.Length)
 							{
 								p = RecognizeRanOut_DotGram_Parameter(text, p, "out ", false, !failure.Quiet, true, ref failure);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(71));
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(69));
 								return -1;
 							}
 							if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 4), global::System.MemoryExtensions.AsSpan("out ")))
 							{
 								if (!failure.Quiet)
 									p = RecognizeAgreeing_DotGram_Parameter(text, p, "out ", false);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(71));
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(69));
 								return -1;
 							}
 							p += 4;
@@ -11677,14 +12178,14 @@ namespace AspectGenerator
 							if ((uint)(p + 7) > (uint)text.Length)
 							{
 								p = RecognizeRanOut_DotGram_Parameter(text, p, "params ", false, !failure.Quiet, true, ref failure);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(72));
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(70));
 								return -1;
 							}
 							if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 7), global::System.MemoryExtensions.AsSpan("params ")))
 							{
 								if (!failure.Quiet)
 									p = RecognizeAgreeing_DotGram_Parameter(text, p, "params ", false);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(72));
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(70));
 								return -1;
 							}
 							p += 7;
@@ -11732,14 +12233,14 @@ namespace AspectGenerator
 							if ((uint)(p + 4) > (uint)text.Length)
 							{
 								p = RecognizeRanOut_DotGram_Parameter(text, p, "ref ", false, !failure.Quiet, true, ref failure);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(74));
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(72));
 								return -1;
 							}
 							if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 4), global::System.MemoryExtensions.AsSpan("ref ")))
 							{
 								if (!failure.Quiet)
 									p = RecognizeAgreeing_DotGram_Parameter(text, p, "ref ", false);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(74));
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(72));
 								return -1;
 							}
 							p += 4;
@@ -11836,7 +12337,7 @@ namespace AspectGenerator
 							break;
 						}
 					default:
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(77));
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(75));
 						return -1;
 				}
 				return p;
@@ -11862,14 +12363,14 @@ namespace AspectGenerator
 				if ((uint)(p + 9) > (uint)text.Length)
 				{
 					p = RecognizeRanOut_DotGram_Parameter(text, p, "readonly ", false, !failure.Quiet, true, ref failure);
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(73));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(71));
 					return -1;
 				}
 				if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 9), global::System.MemoryExtensions.AsSpan("readonly ")))
 				{
 					if (!failure.Quiet)
 						p = RecognizeAgreeing_DotGram_Parameter(text, p, "readonly ", false);
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(73));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(71));
 					return -1;
 				}
 				p += 9;
@@ -11964,13 +12465,13 @@ namespace AspectGenerator
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(37));
 					return -1;
 				}
 				c = text[p];
 				if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(37));
 					return -1;
 				}
 				p++;
@@ -12068,14 +12569,14 @@ namespace AspectGenerator
 				if ((uint)(p + 5) > (uint)text.Length)
 				{
 					p = RecognizeRanOut_DotGram_Parameter(text, p, "this ", false, !failure.Quiet, true, ref failure);
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(69));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(67));
 					return -1;
 				}
 				if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 5), global::System.MemoryExtensions.AsSpan("this ")))
 				{
 					if (!failure.Quiet)
 						p = RecognizeAgreeing_DotGram_Parameter(text, p, "this ", false);
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(69));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(67));
 					return -1;
 				}
 				p += 5;
@@ -12335,7 +12836,7 @@ namespace AspectGenerator
 					if ((uint)p < (uint)text.Length && text[p] == 't')
 					{
 						p += 1;
-						expected = ExpectedSet_DotGram(6);
+						expected = ExpectedSet_DotGram(8);
 						if ((uint)p < (uint)text.Length && text[p] == 'e')
 						{
 							p += 1;
@@ -12360,7 +12861,7 @@ namespace AspectGenerator
 					else if ((uint)p < (uint)text.Length && text[p] == 's')
 					{
 						p += 1;
-						expected = ExpectedSet_DotGram(7);
+						expected = ExpectedSet_DotGram(9);
 						if ((uint)p < (uint)text.Length && text[p] == 't')
 						{
 							p += 1;
@@ -12395,7 +12896,7 @@ namespace AspectGenerator
 				if ((uint)p < (uint)text.Length && text[p] == 'u')
 				{
 					p += 1;
-					expected = ExpectedSet_DotGram(10);
+					expected = ExpectedSet_DotGram(12);
 					if ((uint)p < (uint)text.Length && text[p] == 'b')
 					{
 						p += 1;
@@ -12416,11 +12917,11 @@ namespace AspectGenerator
 				else if ((uint)p < (uint)text.Length && text[p] == 'r')
 				{
 					p += 1;
-					expected = ExpectedSet_DotGram(11);
+					expected = ExpectedSet_DotGram(13);
 					if ((uint)p < (uint)text.Length && text[p] == 'i')
 					{
 						p += 1;
-						expected = ExpectedSet_DotGram(12);
+						expected = ExpectedSet_DotGram(14);
 						if ((uint)p < (uint)text.Length && text[p] == 'v')
 						{
 							p += 1;
@@ -12441,7 +12942,7 @@ namespace AspectGenerator
 					else if ((uint)p < (uint)text.Length && text[p] == 'o')
 					{
 						p += 1;
-						expected = ExpectedSet_DotGram(13);
+						expected = ExpectedSet_DotGram(15);
 						if ((uint)p < (uint)text.Length && text[p] == 't')
 						{
 							p += 1;
@@ -12480,7 +12981,7 @@ namespace AspectGenerator
 				if ((uint)p < (uint)text.Length && text[p] == 't')
 				{
 					p += 1;
-					expected = ExpectedSet_DotGram(15);
+					expected = ExpectedSet_DotGram(17);
 					if ((uint)p < (uint)text.Length && text[p] == 'a')
 					{
 						p += 1;
@@ -12501,7 +13002,7 @@ namespace AspectGenerator
 				else if ((uint)p < (uint)text.Length && text[p] == 'e')
 				{
 					p += 1;
-					expected = ExpectedSet_DotGram(16);
+					expected = ExpectedSet_DotGram(18);
 					if ((uint)p < (uint)text.Length && text[p] == 'a')
 					{
 						p += 1;
@@ -12941,7 +13442,7 @@ namespace AspectGenerator
 						values3[completedAt] = New_DotGram_ItemText(new SourceSpan(completed.Position, completed.Value - completed.Position));
 						break;
 					}
-					case 19:
+					case 21:
 					{
 						var captured0From = -1;
 						var captured0To   = -1;
@@ -12971,7 +13472,7 @@ namespace AspectGenerator
 						values5[completedAt] = New_DotGram_KeyHead(new SourceSpan(completed.Position, completed.Value - completed.Position), captured0!);
 						break;
 					}
-					case 22:
+					case 24:
 					{
 						var captured0At = -1;
 						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
@@ -13011,7 +13512,7 @@ namespace AspectGenerator
 						}
 						break;
 					}
-					case 23:
+					case 25:
 					{
 						var captured0From = -1;
 						var captured0To   = -1;
@@ -13041,7 +13542,7 @@ namespace AspectGenerator
 						values5[completedAt] = New_DotGram_MatcherName(new SourceSpan(completed.Position, completed.Value - completed.Position), captured0!);
 						break;
 					}
-					case 24:
+					case 26:
 					{
 						var chosen = -1;
 						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
@@ -13099,6 +13600,8 @@ namespace AspectGenerator
 
 		static readonly char[] RecognizeSet1_DotGram_Line = { '\t', '\r', ' ', ' ', '\u0085', '\u0085', '\u00A0', '\u00A0', '\u1680', '\u1680', '\u2000', '\u200A', '\u2028', '\u2029', '\u202F', '\u202F', '\u205F', '\u205F', '\u3000', '\u3000' };
 
+		static readonly byte[] RecognizeClass1_DotGram_Line = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+
 		static readonly char[] RecognizeSet0_DotGram_ConditionItem = { 'A', 'Z', 'a', 'z', '\u00AA', '\u00AA', '\u00B5', '\u00B5', '\u00BA', '\u00BA', '\u00C0', '\u00D6', '\u00D8', '\u00F6', '\u00F8', '\u02C1', '\u02C6', '\u02D1', '\u02E0', '\u02E4', '\u02EC', '\u02EC', '\u02EE', '\u02EE', '\u0370', '\u0374', '\u0376', '\u0377', '\u037A', '\u037D', '\u037F', '\u037F', '\u0386', '\u0386', '\u0388', '\u038A', '\u038C', '\u038C', '\u038E', '\u03A1', '\u03A3', '\u03F5', '\u03F7', '\u0481', '\u048A', '\u052F', '\u0531', '\u0556', '\u0559', '\u0559', '\u0560', '\u0588', '\u05D0', '\u05EA', '\u05EF', '\u05F2', '\u0620', '\u064A', '\u066E', '\u066F', '\u0671', '\u06D3', '\u06D5', '\u06D5', '\u06E5', '\u06E6', '\u06EE', '\u06EF', '\u06FA', '\u06FC', '\u06FF', '\u06FF', '\u0710', '\u0710', '\u0712', '\u072F', '\u074D', '\u07A5', '\u07B1', '\u07B1', '\u07CA', '\u07EA', '\u07F4', '\u07F5', '\u07FA', '\u07FA', '\u0800', '\u0815', '\u081A', '\u081A', '\u0824', '\u0824', '\u0828', '\u0828', '\u0840', '\u0858', '\u0860', '\u086A', '\u0870', '\u0887', '\u0889', '\u088E', '\u08A0', '\u08C9', '\u0904', '\u0939', '\u093D', '\u093D', '\u0950', '\u0950', '\u0958', '\u0961', '\u0971', '\u0980', '\u0985', '\u098C', '\u098F', '\u0990', '\u0993', '\u09A8', '\u09AA', '\u09B0', '\u09B2', '\u09B2', '\u09B6', '\u09B9', '\u09BD', '\u09BD', '\u09CE', '\u09CE', '\u09DC', '\u09DD', '\u09DF', '\u09E1', '\u09F0', '\u09F1', '\u09FC', '\u09FC', '\u0A05', '\u0A0A', '\u0A0F', '\u0A10', '\u0A13', '\u0A28', '\u0A2A', '\u0A30', '\u0A32', '\u0A33', '\u0A35', '\u0A36', '\u0A38', '\u0A39', '\u0A59', '\u0A5C', '\u0A5E', '\u0A5E', '\u0A72', '\u0A74', '\u0A85', '\u0A8D', '\u0A8F', '\u0A91', '\u0A93', '\u0AA8', '\u0AAA', '\u0AB0', '\u0AB2', '\u0AB3', '\u0AB5', '\u0AB9', '\u0ABD', '\u0ABD', '\u0AD0', '\u0AD0', '\u0AE0', '\u0AE1', '\u0AF9', '\u0AF9', '\u0B05', '\u0B0C', '\u0B0F', '\u0B10', '\u0B13', '\u0B28', '\u0B2A', '\u0B30', '\u0B32', '\u0B33', '\u0B35', '\u0B39', '\u0B3D', '\u0B3D', '\u0B5C', '\u0B5D', '\u0B5F', '\u0B61', '\u0B71', '\u0B71', '\u0B83', '\u0B83', '\u0B85', '\u0B8A', '\u0B8E', '\u0B90', '\u0B92', '\u0B95', '\u0B99', '\u0B9A', '\u0B9C', '\u0B9C', '\u0B9E', '\u0B9F', '\u0BA3', '\u0BA4', '\u0BA8', '\u0BAA', '\u0BAE', '\u0BB9', '\u0BD0', '\u0BD0', '\u0C05', '\u0C0C', '\u0C0E', '\u0C10', '\u0C12', '\u0C28', '\u0C2A', '\u0C39', '\u0C3D', '\u0C3D', '\u0C58', '\u0C5A', '\u0C5D', '\u0C5D', '\u0C60', '\u0C61', '\u0C80', '\u0C80', '\u0C85', '\u0C8C', '\u0C8E', '\u0C90', '\u0C92', '\u0CA8', '\u0CAA', '\u0CB3', '\u0CB5', '\u0CB9', '\u0CBD', '\u0CBD', '\u0CDD', '\u0CDE', '\u0CE0', '\u0CE1', '\u0CF1', '\u0CF2', '\u0D04', '\u0D0C', '\u0D0E', '\u0D10', '\u0D12', '\u0D3A', '\u0D3D', '\u0D3D', '\u0D4E', '\u0D4E', '\u0D54', '\u0D56', '\u0D5F', '\u0D61', '\u0D7A', '\u0D7F', '\u0D85', '\u0D96', '\u0D9A', '\u0DB1', '\u0DB3', '\u0DBB', '\u0DBD', '\u0DBD', '\u0DC0', '\u0DC6', '\u0E01', '\u0E30', '\u0E32', '\u0E33', '\u0E40', '\u0E46', '\u0E81', '\u0E82', '\u0E84', '\u0E84', '\u0E86', '\u0E8A', '\u0E8C', '\u0EA3', '\u0EA5', '\u0EA5', '\u0EA7', '\u0EB0', '\u0EB2', '\u0EB3', '\u0EBD', '\u0EBD', '\u0EC0', '\u0EC4', '\u0EC6', '\u0EC6', '\u0EDC', '\u0EDF', '\u0F00', '\u0F00', '\u0F40', '\u0F47', '\u0F49', '\u0F6C', '\u0F88', '\u0F8C', '\u1000', '\u102A', '\u103F', '\u103F', '\u1050', '\u1055', '\u105A', '\u105D', '\u1061', '\u1061', '\u1065', '\u1066', '\u106E', '\u1070', '\u1075', '\u1081', '\u108E', '\u108E', '\u10A0', '\u10C5', '\u10C7', '\u10C7', '\u10CD', '\u10CD', '\u10D0', '\u10FA', '\u10FC', '\u1248', '\u124A', '\u124D', '\u1250', '\u1256', '\u1258', '\u1258', '\u125A', '\u125D', '\u1260', '\u1288', '\u128A', '\u128D', '\u1290', '\u12B0', '\u12B2', '\u12B5', '\u12B8', '\u12BE', '\u12C0', '\u12C0', '\u12C2', '\u12C5', '\u12C8', '\u12D6', '\u12D8', '\u1310', '\u1312', '\u1315', '\u1318', '\u135A', '\u1380', '\u138F', '\u13A0', '\u13F5', '\u13F8', '\u13FD', '\u1401', '\u166C', '\u166F', '\u167F', '\u1681', '\u169A', '\u16A0', '\u16EA', '\u16F1', '\u16F8', '\u1700', '\u1711', '\u171F', '\u1731', '\u1740', '\u1751', '\u1760', '\u176C', '\u176E', '\u1770', '\u1780', '\u17B3', '\u17D7', '\u17D7', '\u17DC', '\u17DC', '\u1820', '\u1878', '\u1880', '\u1884', '\u1887', '\u18A8', '\u18AA', '\u18AA', '\u18B0', '\u18F5', '\u1900', '\u191E', '\u1950', '\u196D', '\u1970', '\u1974', '\u1980', '\u19AB', '\u19B0', '\u19C9', '\u1A00', '\u1A16', '\u1A20', '\u1A54', '\u1AA7', '\u1AA7', '\u1B05', '\u1B33', '\u1B45', '\u1B4C', '\u1B83', '\u1BA0', '\u1BAE', '\u1BAF', '\u1BBA', '\u1BE5', '\u1C00', '\u1C23', '\u1C4D', '\u1C4F', '\u1C5A', '\u1C7D', '\u1C80', '\u1C8A', '\u1C90', '\u1CBA', '\u1CBD', '\u1CBF', '\u1CE9', '\u1CEC', '\u1CEE', '\u1CF3', '\u1CF5', '\u1CF6', '\u1CFA', '\u1CFA', '\u1D00', '\u1DBF', '\u1E00', '\u1F15', '\u1F18', '\u1F1D', '\u1F20', '\u1F45', '\u1F48', '\u1F4D', '\u1F50', '\u1F57', '\u1F59', '\u1F59', '\u1F5B', '\u1F5B', '\u1F5D', '\u1F5D', '\u1F5F', '\u1F7D', '\u1F80', '\u1FB4', '\u1FB6', '\u1FBC', '\u1FBE', '\u1FBE', '\u1FC2', '\u1FC4', '\u1FC6', '\u1FCC', '\u1FD0', '\u1FD3', '\u1FD6', '\u1FDB', '\u1FE0', '\u1FEC', '\u1FF2', '\u1FF4', '\u1FF6', '\u1FFC', '\u2071', '\u2071', '\u207F', '\u207F', '\u2090', '\u209C', '\u2102', '\u2102', '\u2107', '\u2107', '\u210A', '\u2113', '\u2115', '\u2115', '\u2119', '\u211D', '\u2124', '\u2124', '\u2126', '\u2126', '\u2128', '\u2128', '\u212A', '\u212D', '\u212F', '\u2139', '\u213C', '\u213F', '\u2145', '\u2149', '\u214E', '\u214E', '\u2183', '\u2184', '\u2C00', '\u2CE4', '\u2CEB', '\u2CEE', '\u2CF2', '\u2CF3', '\u2D00', '\u2D25', '\u2D27', '\u2D27', '\u2D2D', '\u2D2D', '\u2D30', '\u2D67', '\u2D6F', '\u2D6F', '\u2D80', '\u2D96', '\u2DA0', '\u2DA6', '\u2DA8', '\u2DAE', '\u2DB0', '\u2DB6', '\u2DB8', '\u2DBE', '\u2DC0', '\u2DC6', '\u2DC8', '\u2DCE', '\u2DD0', '\u2DD6', '\u2DD8', '\u2DDE', '\u2E2F', '\u2E2F', '\u3005', '\u3006', '\u3031', '\u3035', '\u303B', '\u303C', '\u3041', '\u3096', '\u309D', '\u309F', '\u30A1', '\u30FA', '\u30FC', '\u30FF', '\u3105', '\u312F', '\u3131', '\u318E', '\u31A0', '\u31BF', '\u31F0', '\u31FF', '\u3400', '\u4DBF', '\u4E00', '\uA48C', '\uA4D0', '\uA4FD', '\uA500', '\uA60C', '\uA610', '\uA61F', '\uA62A', '\uA62B', '\uA640', '\uA66E', '\uA67F', '\uA69D', '\uA6A0', '\uA6E5', '\uA717', '\uA71F', '\uA722', '\uA788', '\uA78B', '\uA7CD', '\uA7D0', '\uA7D1', '\uA7D3', '\uA7D3', '\uA7D5', '\uA7DC', '\uA7F2', '\uA801', '\uA803', '\uA805', '\uA807', '\uA80A', '\uA80C', '\uA822', '\uA840', '\uA873', '\uA882', '\uA8B3', '\uA8F2', '\uA8F7', '\uA8FB', '\uA8FB', '\uA8FD', '\uA8FE', '\uA90A', '\uA925', '\uA930', '\uA946', '\uA960', '\uA97C', '\uA984', '\uA9B2', '\uA9CF', '\uA9CF', '\uA9E0', '\uA9E4', '\uA9E6', '\uA9EF', '\uA9FA', '\uA9FE', '\uAA00', '\uAA28', '\uAA40', '\uAA42', '\uAA44', '\uAA4B', '\uAA60', '\uAA76', '\uAA7A', '\uAA7A', '\uAA7E', '\uAAAF', '\uAAB1', '\uAAB1', '\uAAB5', '\uAAB6', '\uAAB9', '\uAABD', '\uAAC0', '\uAAC0', '\uAAC2', '\uAAC2', '\uAADB', '\uAADD', '\uAAE0', '\uAAEA', '\uAAF2', '\uAAF4', '\uAB01', '\uAB06', '\uAB09', '\uAB0E', '\uAB11', '\uAB16', '\uAB20', '\uAB26', '\uAB28', '\uAB2E', '\uAB30', '\uAB5A', '\uAB5C', '\uAB69', '\uAB70', '\uABE2', '\uAC00', '\uD7A3', '\uD7B0', '\uD7C6', '\uD7CB', '\uD7FB', '\uF900', '\uFA6D', '\uFA70', '\uFAD9', '\uFB00', '\uFB06', '\uFB13', '\uFB17', '\uFB1D', '\uFB1D', '\uFB1F', '\uFB28', '\uFB2A', '\uFB36', '\uFB38', '\uFB3C', '\uFB3E', '\uFB3E', '\uFB40', '\uFB41', '\uFB43', '\uFB44', '\uFB46', '\uFBB1', '\uFBD3', '\uFD3D', '\uFD50', '\uFD8F', '\uFD92', '\uFDC7', '\uFDF0', '\uFDFB', '\uFE70', '\uFE74', '\uFE76', '\uFEFC', '\uFF21', '\uFF3A', '\uFF41', '\uFF5A', '\uFF66', '\uFFBE', '\uFFC2', '\uFFC7', '\uFFCA', '\uFFCF', '\uFFD2', '\uFFD7', '\uFFDA', '\uFFDC' };
 
 		static bool RecognizeIn_DotGram_ConditionItem(char[] set, char c)
@@ -13132,21 +13635,6 @@ namespace AspectGenerator
 		static readonly byte[] RecognizeClass0_DotGram_ConditionItem = { 1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
 		static readonly byte[] RecognizeClass1_DotGram_ConditionItem = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-
-		static bool RecognizeGuard0_DotGram_ConditionValue(string parserText) =>
-#line 125 "../TargetFilter.gram"
-                                                               (IsInsideBrackets(parserText));
-#line default
-
-		static bool RecognizeGuard1_DotGram_ConditionValue(string parserText) =>
-#line 125 "../TargetFilter.gram"
-                                                               (IsInsideBrackets(parserText));
-#line default
-
-		static bool RecognizeGuard2_DotGram_ConditionValue(string parserText) =>
-#line 125 "../TargetFilter.gram"
-                                                               (IsInsideBrackets(parserText));
-#line default
 
 		static readonly byte[] RecognizeClass0_DotGram_ParameterParts = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
@@ -13230,10 +13718,10 @@ namespace AspectGenerator
 		{
 			switch (alternative)
 			{
-				case 0: return 74;
-				case 1: return 71;
-				case 2: return 70;
-				case 3: return 72;
+				case 0: return 72;
+				case 1: return 69;
+				case 2: return 68;
+				case 3: return 70;
 			}
 			return -1;
 		}
@@ -14843,6 +15331,12 @@ namespace AspectGenerator
 		};
 
 
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			static bool Host0_DotGram_ReadOperand(global::System.ReadOnlySpan<char> argument0_DotGram, ref int argument1_DotGram)
+			{
+				return ReadOperand(argument0_DotGram, ref argument1_DotGram);
+			}
+
 		// The sets a refusal names, by number: built the first time a refusal asks for one, never in the
 		// type's initializer, and then the same array for as long as the process lives, because refusals
 		// tell sets apart by reference.
@@ -14867,13 +15361,15 @@ namespace AspectGenerator
 
 		static string[] ExpectedDecoded_DotGram(int id)
 		{
-			var data = "ACEGIKNPRTXZ\u005D\u005FaAaDaFaHaJaLaYa\u005Ba\u005Da\u005FbAbCbEbGbIbKbMbObQbSbUbWbYb\u005Cb\u005FcBcEcHcKcNcQcTcWcZc\u005Dd@dCdFdIdLdOdRdUdXd\u005Bd\u005EeAeDeGeJeMePeSeVeYe\u005Ce\u005FfBfEfHfKfNfWfZBABBBCBDBECFGBFBGBHDIJKBICJKBJBKCLMBLBMBNBOMIJKFLGDOHMENBPBQBRBSBTBUBVBWBXBYBZB\u005BB\u005CB\u005DB\u005EB\u005FBa@BaABaBBaCBaDBaEBaFBaGBaHBaIBaJBaKBaLBaMBaNBaOBaPBaQBaRBaSBaTBaUBaVBaWBaXBaYBaZBa\u005BBa\u005CBa\u005DBa\u005EBa\u005FBb@BbABbBBbCBbDBbEBbFEbFbCbBbDBbGBbH"u8;
-			var built = ExpectedBuilt_DotGram ?? global::System.Threading.Interlocked.CompareExchange(ref ExpectedBuilt_DotGram, new string[]?[78], null) ?? ExpectedBuilt_DotGram!;
+			var data = "ACEGIKMORTVX\u005C\u005EaAaCaEaHaJaLaNaPa\u005Da\u005FbAbCbEbGbIbKbMbObQbSbUbWbYb\u005Cb\u005FcBcEcHcKcNcQcTcWcZc\u005Dd@dCdFdIdLdOdRdUdXd\u005Bd\u005EeAeDeGeJeMePeSeVeYe\u005Ce\u005FfBfEfHfQfTBABBBCBDBEBFBGCHIBHBIBJDKLMBKCLMBLBMCNOBNBOBPBQMKLMHNIFQJOGPBRBSBTBUBVBWBXBYBZB\u005BB\u005CB\u005DB\u005EB\u005FBa@BaABaBBaCBaDBaEBaFBaGBaHBaIBaJBaKBaLBaMBaNBaOBaPBaQBaRBaSBaTBaUBaVBaWBaXBaYBaZBa\u005BBa\u005CBa\u005DBa\u005EBa\u005FBb@BbABbBBbCBbDEbDbAb@bBBbEBbF"u8;
+			var built = ExpectedBuilt_DotGram ?? global::System.Threading.Interlocked.CompareExchange(ref ExpectedBuilt_DotGram, new string[]?[76], null) ?? ExpectedBuilt_DotGram!;
 			var items = ExpectedItems_DotGram ?? global::System.Threading.Interlocked.CompareExchange(ref ExpectedItems_DotGram, new string[]
 				{
 					"end of input",
 					"[^ ]",
 					"Ws",
+					"any",
+					"'\\\\'",
 					"\"abstract\"",
 					"\"extern\"",
 					"\"internal\"",
@@ -14886,9 +15382,8 @@ namespace AspectGenerator
 					"\"sealed\"",
 					"\"unsafe\"",
 					"\"virtual\"",
+					"['\\\\']",
 					"';'",
-					"any",
-					"'\\\\'",
 					"[^ ';'..'<' | '\\\\']",
 					"['<' | '\\\\' | '\\u0000'..':' | '='..'[' | ']'..'\uFFFF']",
 					"[':']",
@@ -14923,9 +15418,6 @@ namespace AspectGenerator
 					"']'",
 					"[' ' | ',']",
 					"'['",
-					"[^ '&' | '\\\\' | '|']",
-					"['&' | '|']",
-					"['\\\\' | '\\u0000'..'%' | '\\''..'[' | ']'..'{' | '}'..'\uFFFF' | '&' | '|']",
 					"'.'",
 					"[^ '.' | '<' | '\\\\']",
 					"['<' | '\\\\' | '\\u0000'..'-' | '/'..';' | '='..'[' | ']'..'\uFFFF']",
@@ -14950,7 +15442,7 @@ namespace AspectGenerator
 
 			if (starts == null)
 			{
-				starts = new int[78];
+				starts = new int[76];
 
 				for (var i = 0; i < starts.Length; i++)
 				{

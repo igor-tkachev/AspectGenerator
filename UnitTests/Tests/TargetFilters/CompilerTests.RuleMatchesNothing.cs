@@ -17,7 +17,7 @@ namespace AspectGenerator.Tests
 			Assert.IsNotNull(diagnostic, string.Join(", ", result.Diagnostics.Select(static d => $"{d.Id}: {d.GetMessage()}")));
 			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
 			Assert.AreEqual(
-				"Target filter rule 'publik Save' can match no method: the name segment 'publik Save' contains white space, which no namespace, type or method name has",
+				"Target filter rule 'publik Save' can match no method: the name segment 'publik Save' contains white space outside '<...>', which no namespace, type or method name has",
 				diagnostic.GetMessage());
 			Assert.IsTrue(diagnostic.Location.IsInSource);
 			Assert.IsFalse(result.Results.Any(static r => r.Exception is not null), "The generator threw.");

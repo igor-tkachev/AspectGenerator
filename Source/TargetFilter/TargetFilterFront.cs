@@ -120,7 +120,7 @@ namespace AspectGenerator
 			{
 				return exception switch
 				{
-					InsufficientExecutionStackException => TargetFilterDiagnostic.InvalidRule(rule, "The rule nests '<' or '(' too deeply to be read."),
+					InsufficientExecutionStackException => TargetFilterDiagnostic.RuleTooDeep(rule),
 					RefusedException                    => TargetFilterDiagnostic.InvalidRule(rule, "The rule cannot be read."),
 					_                                   => null
 				};
@@ -632,8 +632,12 @@ namespace AspectGenerator
 			}
 
 			/// <summary>
-			/// Why a name segment (of a namespace, a type or a method) can match nothing: white space outside <c>&lt;…&gt;</c>
-			/// and outside an array rank, which no such name has. Or <see langword="null"/>.
+			/// Why a name segment (of a namespace, a type or a method) can match nothing, or <see langword="null"/>. A name
+			/// holds white space only inside <c>&lt;…&gt;</c>, between the type arguments of a function pointer
+			/// (<c>Empty&lt;delegate* unmanaged&lt;System.Void&gt;[]&gt;</c>). So a segment can match nothing when white space
+			/// stands outside <c>&lt;…&gt;</c> in the part of it that is compared character for character with the start of a
+			/// name: before its first wildcard, which could stand for a <c>&lt;</c> of the name. An escaped bracket counts as
+			/// a bracket, since it matches the name's own; an array rank is passed over.
 			/// </summary>
 			static string? NameMatchesNothing(string segment)
 			{
@@ -644,42 +648,35 @@ namespace AspectGenerator
 				{
 					var ch = segment[i];
 
-					if (escaped)
+					if (!escaped)
 					{
-						escaped = false;
+						if (ch == '\\')
+						{
+							escaped = true;
+							continue;
+						}
 
-						if (depth == 0 && char.IsWhiteSpace(ch))
-							return NameWithWhiteSpace(segment);
+						if (ch is '*' or '?')
+							return null;
 
-						continue;
+						if (ch == '[' && TryReadRankSpecifier(segment, i, out var rankEnd))
+						{
+							i = rankEnd;
+							continue;
+						}
 					}
 
-					if (ch == '\\')
-					{
-						escaped = true;
-						continue;
-					}
-
-					if (ch == '[' && TryReadRankSpecifier(segment, i, out var rankEnd))
-					{
-						i = rankEnd;
-						continue;
-					}
+					escaped = false;
 
 					if (ch == '<')
 						depth++;
 					else if (ch == '>' && depth > 0)
 						depth--;
 					else if (depth == 0 && char.IsWhiteSpace(ch))
-						return NameWithWhiteSpace(segment);
+						return $"the name segment '{segment}' contains white space outside '<...>', which no namespace, type or method name has";
 				}
 
 				return null;
-
-				static string NameWithWhiteSpace(string segment)
-				{
-					return $"the name segment '{segment}' contains white space, which no namespace, type or method name has";
-				}
 			}
 
 			// ---- reading ----

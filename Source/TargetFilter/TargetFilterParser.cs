@@ -48,23 +48,29 @@ namespace AspectGenerator
 		}
 
 		/// <summary>
-		/// Whether a <c>&lt;…&gt;</c> or a <c>(…)</c> is still open at the end of <paramref name="text"/>: the two counts of a
-		/// condition value, each kept apart, a closing bracket with nothing open being an ordinary character, an escaped
-		/// character counting for nothing.
+		/// Reads one operand of a condition value: up to the first <c>|</c> or <c>&amp;</c> outside any <c>&lt;…&gt;</c> and
+		/// <c>(…)</c>, or to the end. The two kinds of bracket are counted apart, a closing bracket with nothing open is an
+		/// ordinary character, and an escaped character counts for nothing. One pass, whatever the operand holds.
 		/// </summary>
-		static bool IsInsideBrackets(string text)
+		static bool ReadOperand(ReadOnlySpan<char> input, ref int position)
 		{
 			var angles  = 0;
 			var parens  = 0;
 			var escaped = false;
+			var i       = position;
 
-			foreach (var ch in text)
+			for (; i < input.Length; i++)
 			{
+				var ch = input[i];
+
 				if (escaped)
 				{
 					escaped = false;
 					continue;
 				}
+
+				if (ch is '|' or '&' && angles == 0 && parens == 0)
+					break;
 
 				switch (ch)
 				{
@@ -76,7 +82,8 @@ namespace AspectGenerator
 				}
 			}
 
-			return angles > 0 || parens > 0;
+			position = i;
+			return true;
 		}
 
 		static TextSpan Span(SourceSpan span)

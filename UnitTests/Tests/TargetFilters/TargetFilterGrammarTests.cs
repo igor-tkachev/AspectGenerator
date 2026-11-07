@@ -258,9 +258,40 @@ namespace AspectGenerator.Tests.TargetFilters
 				}
 
 				CollectionAssert.AreEqual(legacy.Ids, gram.Ids, input[..20]);
+				CollectionAssert.AreEqual(legacy.Messages, gram.Messages, input[..20]);
+				CollectionAssert.AreEqual(legacy.RuleTexts, gram.RuleTexts, input[..20]);
 				Assert.AreEqual(legacy.Kinds, gram.Kinds, input[..20]);
-				TestContext.WriteLine($"{input[..20]}… ({input.Length} characters): read");
+				Assert.AreEqual(legacy.RuleCount, gram.RuleCount, input[..20]);
+				TestContext.WriteLine($"{input[..20]}… ({input.Length} characters): read, {gram.Kinds.Count(static k => k != 'n')} targets decided");
 			}
+
+			// The deep rules are not all rules that decide nothing: some select targets of the corpus.
+			Assert.IsTrue(DeepInputs(200).Any(static i => TargetFilterProbe.Probe(i, TargetFilterProbe.ReadLegacy).Kinds.Contains('i')), "No deep input selects a target.");
+		}
+
+		[TestMethod]
+		public void RuleTooDeepForOneThreadIsReadAgainOnAnotherTest()
+		{
+			// Running out of stack is the thread's, not the filter's: it is not cached, and a thread with a stack large
+			// enough reads the same filter.
+			var input = "Save" + new string('<', 200_000);
+
+			OnThread(256 * 1024, () =>
+			{
+				var ids = new List<string>();
+
+				var set = AspectFilters.GetFilters(input, d => ids.Add(d.Id));
+				CollectionAssert.AreEqual(new[] { AspectDiagnosticID.InvalidAspectFilterRule }, ids, $"rules: {set.Rules.Count}");
+			});
+
+			OnThread(1024 * 1024 * 1024, () =>
+			{
+				var ids = new List<string>();
+				var set = AspectFilters.GetFilters(input, d => ids.Add(d.Id));
+
+				Assert.AreEqual(0, ids.Count, string.Join(", ", ids));
+				Assert.AreEqual(1, set.Rules.Count);
+			});
 		}
 
 		[TestMethod]
@@ -301,6 +332,8 @@ namespace AspectGenerator.Tests.TargetFilters
 			var angles = new string('<', depth);
 			var parens = new string('(', depth);
 
+			yield return "method: Save | Load" + angles;
+			yield return "returns: System.Void | List" + angles;
 			yield return "Save" + angles;
 			yield return "Save" + angles + "(int) : void";
 			yield return "returns: List" + angles;

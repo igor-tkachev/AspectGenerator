@@ -80,7 +80,13 @@ PatternBody : @TargetFilterBodySyntax
 
 TopLevelSemicolon = { (Generic | Escape | [^ ';' | '<' | '\\'])* } & ';'
 
-ModifierWords = ModifierWord & (Ws+ & ModifierWord)* & Ws* & eof
+// The words of the rule (read as Words reads them: escapes in front of a word are dropped, and escapes alone are no
+// word) are all accessibility or modifier words, and there is at least one.
+ModifierWords = (EscapesOnly & Ws+)* & ModifierChunk & (Ws+ & (ModifierChunk | EscapesOnly))* & Ws* & eof
+
+ModifierChunk = { Escape+ }? & ModifierWord
+
+EscapesOnly = { Escape+ } & ?=(Ws | eof)
 
 ModifierWord = ("public" | "private" | "protected" | "internal"
 	| "static" | "instance" | "abstract" | "virtual" | "override" | "sealed" | "extern" | "unsafe") & ?=(Ws | eof)
@@ -115,14 +121,14 @@ WordCharacter = [^ \p{Zs} | \p{Zl} | \p{Zp} | '\t'..'\r' | '\u0085' | '[' | '<' 
 //
 // A value's operators are top-level when no `<…>` and no `(…)` is open before them, counted apart: `<` and `>` keep
 // one count, `(` and `)` another, and a closing bracket with nothing open is an ordinary character. Two counts that
-// interleave freely are more than a grammar can say; the guard counts them.
+// interleave freely are more than a grammar can say; an operand is read by a recognizer that keeps them, in one pass.
 ConditionValue : @ConditionValueSyntax = first: Alternative & ('|' & more: Alternative)* & eof
 	=> @(new ConditionValueSyntax(Alternatives(first, more)))
 
 Alternative : @ConditionAlternativeSyntax = first: Operand & ('&' & more: Operand)*
 	=> @(new ConditionAlternativeSyntax(Span(parserSpan), Spans(first, more)))
 
-Operand : @TextSpan = { (Escape | [^ '|' | '&' | '\\'] | when @(IsInsideBrackets(parserText)) & ['|' | '&'])* } => @(Span(parserSpan))
+Operand : @TextSpan = @ReadOperand => @(Span(parserSpan))
 
 // ---- dotted patterns ---------------------------------------------------------------------------------------------
 
