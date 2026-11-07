@@ -86,7 +86,11 @@ namespace AspectGenerator
 
 			if (method.ReducedFrom is not null || method.IsExtensionMethod || sourceMethod.IsExtensionMethod)
 			{
-				var receiverType = method.ReceiverType ?? sourceMethod.Parameters.FirstOrDefault()?.Type;
+				// A reduced call carries the receiver's constructed type. An unreduced symbol reports its containing
+				// static class as the receiver, so its receiver is the type of its first parameter.
+				var receiverType = method.ReducedFrom is not null
+					? method.ReceiverType ?? sourceMethod.Parameters.FirstOrDefault()?.Type
+					: sourceMethod.Parameters.FirstOrDefault()?.Type;
 
 				if (receiverType is not null)
 					parameters.Add($"this {FormatType(receiverType)}");
@@ -104,10 +108,11 @@ namespace AspectGenerator
 
 				parameterText.Append(parameter.RefKind switch
 				{
-					RefKind.Ref => "ref ",
-					RefKind.Out => "out ",
-					RefKind.In  => "in ",
-					_           => ""
+					RefKind.Ref                  => "ref ",
+					RefKind.Out                  => "out ",
+					RefKind.In                   => "in ",
+					RefKind.RefReadOnlyParameter => "ref readonly ",
+					_                            => ""
 				});
 
 				parameterText.Append(FormatType(parameter.Type));
@@ -188,10 +193,11 @@ namespace AspectGenerator
 
 			return parameter.RefKind switch
 			{
-				RefKind.Ref => AspectFilters.ParameterModifier.Ref,
-				RefKind.Out => AspectFilters.ParameterModifier.Out,
-				RefKind.In  => AspectFilters.ParameterModifier.In,
-				_           => AspectFilters.ParameterModifier.None
+				RefKind.Ref                  => AspectFilters.ParameterModifier.Ref,
+				RefKind.Out                  => AspectFilters.ParameterModifier.Out,
+				RefKind.In                   => AspectFilters.ParameterModifier.In,
+				RefKind.RefReadOnlyParameter => AspectFilters.ParameterModifier.RefReadOnly,
+				_                            => AspectFilters.ParameterModifier.None
 			};
 		}
 
@@ -250,7 +256,7 @@ namespace AspectGenerator
 		static string FormatType(ITypeSymbol type)
 		{
 			if (type is IArrayTypeSymbol arrayType)
-				return $"{FormatType(arrayType.ElementType)}[]";
+				return FormatArrayType(arrayType);
 
 			if (type is ITypeParameterSymbol typeParameter)
 				return typeParameter.Name;
@@ -263,6 +269,21 @@ namespace AspectGenerator
 					typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
 					genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
 					miscellaneousOptions: SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers));
+		}
+
+		// The rank specifiers follow the element type in C# order: an array of int[,] is int[][,].
+		static string FormatArrayType(IArrayTypeSymbol arrayType)
+		{
+			var specifiers = new StringBuilder();
+			ITypeSymbol current = arrayType;
+
+			while (current is IArrayTypeSymbol array)
+			{
+				specifiers.Append('[').Append(',', array.Rank - 1).Append(']');
+				current = array.ElementType;
+			}
+
+			return FormatType(current) + specifiers;
 		}
 
 		static string FormatNamedType(INamedTypeSymbol type, bool includeNamespace)

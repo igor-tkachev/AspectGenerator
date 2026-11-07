@@ -53,14 +53,14 @@
 # target 46	source	public System.Void Acme.Core.Service.Swap(ref System.Int32,ref System.Int32)
 # target 47	source	public System.Boolean Acme.Core.Service.TryParse(System.String,out System.Int32)
 # target 48	source	public System.Int32 Acme.Core.Service.Sum(in Acme.Core.Big)
-# target 49	source	public System.Int32 Acme.Core.Service.Peek(System.Int32)
+# target 49	source	public System.Int32 Acme.Core.Service.Peek(ref readonly System.Int32)
 # target 50	source	public System.String Acme.Core.Service.Join(params System.String[])
 # target 51	source	public System.String Acme.Core.Service.Join(System.String,params System.Object[])
 # target 52	source	public System.Int32 Acme.Core.Service.Total(params System.ReadOnlySpan<System.Int32>)
 # target 53	source	public System.Void Acme.Core.Service.Mixed(ref System.String,out System.Int32,in Acme.Core.Big,params System.Int32[])
 # target 54	source	public System.Int32[] Acme.Core.Service.ToArray()
 # target 55	source	public System.String[][] Acme.Core.Service.Split(System.String)
-# target 56	source	public System.Int32[] Acme.Core.Service.Matrix()
+# target 56	source	public System.Int32[,] Acme.Core.Service.Matrix()
 # target 57	source	public System.Void Acme.Core.Service.Fill(System.Int32[],System.String[])
 # target 58	source	public System.ValueTuple<System.Int32,System.String> Acme.Core.Service.Pair()
 # target 59	source	public System.ValueTuple<System.Int32,System.String> Acme.Core.Service.Named()
@@ -123,14 +123,14 @@
 # target 116	source	public System.Void Acme.Core.Outer.Shared.Run()
 # target 117	source	public System.Void Acme.Core.Outer<T>.Inner<U>.Run(T,U)
 # target 118	source	public System.Collections.Generic.List<T> Acme.Core.Outer<T>.Inner<U>.Run<V>(U,V)
-# target 119	source	public static System.String Acme.Core.Extensions.Shout(this Acme.Core.Extensions)
-# target 120	source	public static System.String Acme.Core.Extensions.Repeat(this Acme.Core.Extensions,System.Int32)
-# target 121	source	public static System.Collections.Generic.IEnumerable<T> Acme.Core.Extensions.Take<T>(this Acme.Core.Extensions,System.Int32)
-# target 122	source	public static System.Int32 Acme.Core.Extensions.Total(this Acme.Core.Extensions,in Acme.Core.Big)
-# target 123	source	public static System.Void Acme.Core.Extensions.Reset(this Acme.Core.Extensions)
-# target 124	source	public static System.Boolean Acme.Core.Extensions.IsEven(this Acme.Core.Extensions)
-# target 125	source	public static System.Void Acme.Core.Extensions.Deconstruct(this Acme.Core.Extensions,out System.Char,out System.String)
-# target 126	source	private static System.Void Acme.Core.Extensions.Hidden(this Acme.Core.Extensions)
+# target 119	source	public static System.String Acme.Core.Extensions.Shout(this System.String)
+# target 120	source	public static System.String Acme.Core.Extensions.Repeat(this System.String,System.Int32)
+# target 121	source	public static System.Collections.Generic.IEnumerable<T> Acme.Core.Extensions.Take<T>(this System.Collections.Generic.IEnumerable<T>,System.Int32)
+# target 122	source	public static System.Int32 Acme.Core.Extensions.Total(this System.Collections.Generic.List<System.Int32>,in Acme.Core.Big)
+# target 123	source	public static System.Void Acme.Core.Extensions.Reset(this System.Int32)
+# target 124	source	public static System.Boolean Acme.Core.Extensions.IsEven(this System.Int32)
+# target 125	source	public static System.Void Acme.Core.Extensions.Deconstruct(this System.String,out System.Char,out System.String)
+# target 126	source	private static System.Void Acme.Core.Extensions.Hidden(this System.String)
 # target 127	source	public System.String Acme.Core.Person.Greet()
 # target 128	source	public override System.String Acme.Core.Person.ToString()
 # target 129	source	protected virtual System.Boolean Acme.Core.Person.PrintMembers(System.Text.StringBuilder)
@@ -201,8 +201,8 @@
 # target 194	framework	public static System.Boolean System.Linq.Enumerable.Any<TSource>(this System.Collections.Generic.IEnumerable<System.Int32>)
 # target 195	framework	public static System.Collections.Generic.List<TSource> System.Linq.Enumerable.ToList<TSource>(this System.Collections.Generic.IEnumerable<System.String>)
 # target 196	framework	public static TSource[] System.Linq.Enumerable.ToArray<TSource>(this System.Collections.Generic.IEnumerable<System.Int32>)
-# target 197	framework	public static System.Collections.Generic.IEnumerable<TResult> System.Linq.Enumerable.Select<TSource,TResult>(this System.Linq.Enumerable,System.Func<TSource,TResult>)
-# target 198	framework	public static System.Collections.Generic.IEnumerable<TSource> System.Linq.Enumerable.Where<TSource>(this System.Linq.Enumerable,System.Func<TSource,System.Boolean>)
+# target 197	framework	public static System.Collections.Generic.IEnumerable<TResult> System.Linq.Enumerable.Select<TSource,TResult>(this System.Collections.Generic.IEnumerable<TSource>,System.Func<TSource,TResult>)
+# target 198	framework	public static System.Collections.Generic.IEnumerable<TSource> System.Linq.Enumerable.Where<TSource>(this System.Collections.Generic.IEnumerable<TSource>,System.Func<TSource,System.Boolean>)
 # target 199	framework	public static System.Collections.Generic.IEnumerable<System.Int32> System.Linq.Enumerable.Range(System.Int32,System.Int32)
 # target 200	framework	public static System.String System.String.Format(System.String,System.Object)
 # target 201	framework	public static System.String System.String.Format(System.String,params System.Object[])
@@ -236,56 +236,56 @@
 # target 229	framework	public static System.String System.IO.File.ReadAllText(System.String)
 # target 230	framework	public static System.String System.IO.Path.Combine(System.String,System.String)
 # target 231	framework	public static System.Text.StringBuilder System.Activator.CreateInstance<System.Text.StringBuilder>()
-# target 232	framework	public static System.Void* System.Runtime.CompilerServices.Unsafe.AsPointer<System.Int32>(System.Int32)
-# target 233	framework	public static System.ReadOnlySpan<System.Char> System.MemoryExtensions.AsSpan(this System.MemoryExtensions)
+# target 232	framework	public static System.Void* System.Runtime.CompilerServices.Unsafe.AsPointer<System.Int32>(ref readonly System.Int32)
+# target 233	framework	public static System.ReadOnlySpan<System.Char> System.MemoryExtensions.AsSpan(this System.String)
 # target 234	framework	public abstract T[] System.Buffers.ArrayPool<T>.Rent(System.Int32)
-records 0..999	b62e4e77837c4cd8f1402c13c40813763b8dd0930a6fd48c9bc5d6eee2556548
-records 1000..1999	7a96787db3dcede6be63bc843f640662f8517bc313c612a3ae957b252b050c5d
-records 2000..2999	ec523e5a9b54bb10925b1349d1e362bfb67a0e449fb6126110c9411a9064e989
-records 3000..3999	29813cf6a541650b4fa7de5bf9e8955e3ce566d3f622f3d586ea5bc789a7ae38
-records 4000..4999	9ec377785387464ccb0897c83944f277a9adba586eca0c06424c886ca15a94ed
-records 5000..5999	e0a0b7e702dbdba22f5e74a6d6355310848950b68144d81dc16f5997fc4aabcc
-records 6000..6999	a8695c205d3b7a1cd4030293974771ae072e33f09793d9e6a50001df0a62696f
-records 7000..7999	1bc62d1155388ae87057f9b5b2204171ef7135fe4cdfd23bfc3727fa642fff1b
-records 8000..8999	9b8a4272d55493d580eef287ca8b10b2879a98b39e2b07bdfa25aafc61618996
-records 9000..9999	182db97b9eb59a4ab928a42b1103763a52d6902b44bdb21deaa713a38fa2f4d6
-records 10000..10999	1935f947e4826cc6a87fec1b27ded1a3bbb0cbcd2aac55a2a41dcb7a44d947e5
-records 11000..11999	36ec0704a90c9742267906a62195a6f3e52916538c1d17c257520995df7f084b
-records 12000..12999	3af742bca2813e6c52933775b592271534a653362a2f6646eed9bd7414185c1d
-records 13000..13999	6035b0eaa552fe319febcfbb9429bf0648848d1ee73fec39b36df915f7bc71a8
-records 14000..14999	33f69f84f4039b31277fd2497e527b3228ebb72b86934a63e5ac43d58bc8020b
-records 15000..15999	d118a5bd6134d0c6c41c14209ce17a8e88d1370e84f13585e209d525d2b00ffc
-records 16000..16999	2aff20e6257656f517762595eb5ed1d0aa84a602a15443f5dbdee64c8be00917
-records 17000..17999	608b8d8d135f3e63e55e593319b524b97ebb0684620a64ca23d6d5cdceb00bf2
-records 18000..18999	566aa8e8ea42b706275e5df2ba73cd1e288223c743a5a0490eab4a1bd7c4def7
-records 19000..19999	eba8dbde1374172c83a9fb5a022dd676c385a47d9dbbc78d239095a8bd1c26bd
-records 20000..20999	6b43f2c7fb659a485c75866a3d16e344dad2445f90892afb01207095cfd8dd90
-records 21000..21999	a15595a5c7addb01ba89ce2f58beaa29253eb516ca0cf66ff9303405db4a4163
-records 22000..22999	4504c99789d5ea123e11d6c6eba68d6f092c012f8764b008f925d76bec490b20
-records 23000..23999	31883c38b6d424d1fb7b5eeed2c268ea152c0ea25818b880f86e11a0f475976f
-records 24000..24999	0d5933f7bd0021ca3a5516336d38c6989545c7195b088207cb2fdf2eeb640538
-records 25000..25999	9efe9587469e64109e5beb0f7d072b37cfb0b086a9f3c9e6148ce4335c8fff11
-records 26000..26999	8bb11e5ae9bfdf5c37a4e38381c18e47cead5d7f757c371c28768de681564c18
-records 27000..27999	a2736c9ba87e6e68af21f236e0878835ceb289f519dbbb59b35166bfd4880fd4
-records 28000..28999	8bb5cd7b69148a86be2db2eb61e6c005cfc346f50f4cc3affe94f5493b489355
-records 29000..29999	1a3060388a072c221f5f28dddeea4c9d78b10925c8231e2f0cc5965637c28fc1
-records 30000..30999	ca72405afdffe2931fabf6fb62f306ed4c365b38b5960d158b6e148a0901b410
-records 31000..31999	8f51f8b9ef9bf5015d9a3eb9e6fe50b1f36484a6dd883369f10455a369c98ab4
-records 32000..32999	a20465e5da59efc846ce8fe215af964052a08b11242cb3e8f750c3cfc154cb29
-records 33000..33999	98591761b6b7dad1c21ba7c2957c4dde9a8088447a1af5b4d923bedeab483bf7
-records 34000..34999	41a89466932cca36a381a82275ffb89e8c38118a5e543efdbfe971c0cc149042
-records 35000..35999	47f49f443f9dbb5c1ddf2adcbe04b46ea30e98e8b13889659de2360c263896be
-records 36000..36999	7dfa7ee8b2410957db50a23e2b23f0242caf60a590394d36cd05ec6c644e8cd2
-records 37000..37999	a8c3bba38bd8cad1353e71450a0bf866cdc6f522abbdaa27abb902db204776de
-records 38000..38999	c7ef52e49662729abd78053fd3d8f6bd4752c307b74221f6c2f18e459d5f81c7
-records 39000..39999	2b63c3793716d81471def859d68ea9f8f88bc7dde53b6c6d9106d76e6c818315
-records 40000..40999	52bafb2d91a50081620126d767b57dee46a9e9356709c2cdc11ce1447e7ef5ad
-records 41000..41999	2f94d068173540961efd521332a3280126c0800b5a44c8ff351268c3c1fbb996
-records 42000..42999	b4a5ef4d51d6329152de74d69b0f05c4626d45ec45b108cc75d2c4b311ee2d0a
-records 43000..43999	5cf0bf4550ec0968c1604dd339e53d2e93bd7ec65f935bac955e02555d11fa36
-records 44000..44999	259f024fcd13658f1799266315f9c2d5414f53a3d85a9a6105161e915bc2a342
-records 45000..45999	b528b3618512a04a148cb633f1b377cc65118b2c1a0092d1485d6c8a267d6fde
-records 46000..46999	ff1abf908e9fe097ef4939320ca2c70348ae4cf7ac81658dbd3fff5034b9866f
-records 47000..47999	099db142d9aadbc13aae49472f0b075cfa1eab8a9e0365faab146e0a85dd8fa8
-records 48000..48999	259125344df320445248c38455393883899ceb3aa56a0f6f058c2fc2c5eb5fbb
-records 49000..49999	e55301505816766e55118d9157abbd000bc72be2ec6e9ef6011c9daef62a4ec3
+records 0..999	101acf8d58651e78ca3f471898d6c7c48621cda6830e5497d70970d3c4fa5594
+records 1000..1999	0069ba1fb0068fd311d291ed6cfbce84e52161fe4f9d740f064402e13d6e5cce
+records 2000..2999	10de37b1c0322ef4a3dc881b2acc05aeb8b695aa31039c62fb82392c80b1c77c
+records 3000..3999	0a5fcac04d7bddbc160741bf9cfb24e14ad5e08be7aafc844813915572061a3b
+records 4000..4999	3fcace9727f84bb12935ae37042534d193b9210cd2b69561f8e70f5cfd94f25b
+records 5000..5999	6cac2b1e494c04038803020ce82b018718611b494e6cd98e4f008411029c544d
+records 6000..6999	746c2b9f6eae7936972a1ca755ecb9755ed0ff9621491ec0bddb4dc0fe48ad38
+records 7000..7999	1dc1fc5b42a6307cb64da7e9c7d706781b5014319f276485e7e6bfbf317c6094
+records 8000..8999	7bb59b1d6c41a7519a5b40b6739b657e1813e8d56136f2a16cb7ec77b689de66
+records 9000..9999	3346d19bd2884d5bcdcb947f9780a181072f7ea50ed9d0ee749bd787e9ded87d
+records 10000..10999	0c33c60a62830056e92b2d94b9730383cd941d0d72e7e7dd3da6e5d001767311
+records 11000..11999	53f7f79df2057cc295d9ff815768e1ba5160981ed0d7187251e4f144cb597cb9
+records 12000..12999	b90d861436df2e36e812b5153de7ad4a200ca3dcd2328b616be26ae05c877d53
+records 13000..13999	8ed3e74c2eb5474f7e614c92e8270fd91b13164fa9859fddee3ad8f6c0963f30
+records 14000..14999	dcbf9ee61bfc5556680a7b0b588ddc640a19208801b8e36d967349f16d674b65
+records 15000..15999	f3f44d41435f0de036fb1dc7afa3b40e46299fa5ba6f8d3e773a1966dcfafc22
+records 16000..16999	7e4959e837816ed1ff32c0b334cbe6d58180a2678bea5306fe3f2749bda3e0da
+records 17000..17999	af6279f19e388f7f036e4cff22888508748e9385eeeb4f350a6fb7c1a061aa68
+records 18000..18999	4c03b7e213e7b660d2c8c341557924d9be1eb451f97fd40fa6b68eae884ecc1c
+records 19000..19999	ee48b2e238034927afb15fd5f2babf6bc0eda4f75f77c0c3b19564191b8bf5a2
+records 20000..20999	e97a21859dbd07a3ee609744e1592006ac8ee96c9d53f58b6bef5293637b1a05
+records 21000..21999	3425262342d3324eace15f40a647b448fcfa2ecab02eb10c8f13f132770709d0
+records 22000..22999	1abc08b8db3187414bc762350cce0a2012764190295951d168948533157026b5
+records 23000..23999	c7501f625ab04c6cb33a19e147eb0062b53c76a39b4c1497783b9ebfa7bbd80c
+records 24000..24999	ad363ca02ca5e330abf950fa12943fed58c7c5a63c46fe55abfda4bcb5daf516
+records 25000..25999	f89d678e679582a83493bcd99ff07fc214f650707df89ee61fe3469b55abcc37
+records 26000..26999	b1eef86043ab67494c0c57879d6eae9132c9ce475dda3c029689eadf5deb4f01
+records 27000..27999	e8ecb57816458f159600a658b936b5ac1796d8677c89233c458161b7220d231e
+records 28000..28999	d8392360f271624783207f94c05915ddc4198a9db1e09a01968513c6cb77ec70
+records 29000..29999	f9cb9bdcf9eb4b7a276221e35fd5d5e817649f79df1e82704ffa4dfbc078594e
+records 30000..30999	cb69705d47c7bf5b9d5b4c7cb9ae67f5e871795e375262fd8955b76203d03c22
+records 31000..31999	001aec1208883134a5fecf6bb18b8aeb51b1a0a3c038a53935f2e4789924ab66
+records 32000..32999	f8490811f93429006d3f85dd18c5299b571411af157c0dd94d5f2b330402eff6
+records 33000..33999	6675022ffea6fee006d45c675823563b483e311db3ae56d875af85017297b0c0
+records 34000..34999	aa6e4e2260c24741322762fb8ed95d3c207f375f6323bc0d55ff1b92d3c530fa
+records 35000..35999	074801691d332b103bc4456341c9bf4b27b62d801880d4fbca68db70dffee478
+records 36000..36999	1232bdbf54da060b7eeaabd04b5a89f772d469fc74248683014204da1b43d9a1
+records 37000..37999	8c6f99cd0325154938dac538b7162efd75f5befcf5e0f50dee3ff9b1672aee43
+records 38000..38999	76a5fe2c194cacded8867555f48f138181c764c7e591fd3f5ddd096aa0d99d2b
+records 39000..39999	a982c0728f80cc15a45688e44e3191c4030caea34b212ee76c94d23196e34305
+records 40000..40999	61fd2989fe29ac0291a372721c10b804b4ab2ce14ff0b0842dfb9f2be0968685
+records 41000..41999	1c52e98dff9b63404c011333aafa5c0169a807b63be026ee297591f1c115d1ae
+records 42000..42999	8f072d83a1884fa5a059c1e96f3d970f4b58342357bd487f8fc57dd7193f87c2
+records 43000..43999	8eb080add8205f9694cb4cf12aaa3c028e6fce25fe199cab96a335b570168761
+records 44000..44999	09c098e58ed4ff32bcd9e07647f3f9fc33e8c0297efef34e6f98ee019aef6e3c
+records 45000..45999	e9fbdfed4945c89dd920d10e35e57b16a546690806e334cf7bb74ee068b21181
+records 46000..46999	e3dfc61895fc704dfb76af2009ff17a31bef06ec4acef4c67d4542792dd49431
+records 47000..47999	90753428e3bf84a80e08290ed706df3098922ea1016fa598b36ffd4550c209d5
+records 48000..48999	349958df14c62415b13cf85d7fc5b62c99222d5898039551d0317c1f8d0bc0c2
+records 49000..49999	8f1cf3c5ea8553b9fbb6dbcceb4eedb3504e537994fb5ae137916a481d84c0bd

@@ -635,7 +635,8 @@ namespace AspectGenerator
 			Ref,
 			Out,
 			In,
-			Params
+			Params,
+			RefReadOnly
 		}
 
 		internal abstract class CompiledFilter(bool isNegative, string ruleText)

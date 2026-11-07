@@ -50,7 +50,11 @@ namespace AspectGenerator.Tests.TargetFilters
 		[TestMethod]
 		public void TargetListHasNoDuplicateSignaturesTest()
 		{
+			// A non-generic extension method is on the list twice, as declared (unreduced) and as a call sees it
+			// (reduced). Both name the receiver by its type, so the two forms describe the method alike; that is the
+			// only duplicate allowed.
 			var duplicates = TargetFilterTargets.Entries
+				.Where(static e => e.Label != "reduced extension" || !TargetFilterTargets.Entries.Any(o => o.Label == "source" && o.Target.Signature == e.Target.Signature))
 				.GroupBy(static e => e.Target.Signature, StringComparer.Ordinal)
 				.Where(static g => g.Count() > 1)
 				.Select(static g => g.Key)

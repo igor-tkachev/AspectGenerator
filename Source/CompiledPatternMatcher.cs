@@ -30,9 +30,9 @@ namespace AspectGenerator
 					continue;
 				}
 
-				if (ch == '<')
+				if (ch == '<' || ch == '[')
 					depth++;
-				else if (ch == '>' && depth > 0)
+				else if ((ch == '>' || ch == ']') && depth > 0)
 					depth--;
 				else if (depth == 0 && ch == value)
 					return i;
@@ -64,9 +64,9 @@ namespace AspectGenerator
 					continue;
 				}
 
-				if (ch == '<')
+				if (ch == '<' || ch == '[')
 					depth++;
-				else if (ch == '>' && depth > 0)
+				else if ((ch == '>' || ch == ']') && depth > 0)
 					depth--;
 				else if (depth == 0 && ch == separator)
 				{
@@ -102,9 +102,9 @@ namespace AspectGenerator
 					continue;
 				}
 
-				if (ch == '<')
+				if (ch == '<' || ch == '[')
 					depth++;
-				else if (ch == '>' && depth > 0)
+				else if ((ch == '>' || ch == ']') && depth > 0)
 					depth--;
 
 				if (depth == 0 && char.IsWhiteSpace(ch))
@@ -1098,6 +1098,14 @@ namespace AspectGenerator
 						_        => ParameterModifier.None
 					};
 					text = text[(candidate.Length + 1)..].Trim();
+
+					// "ref readonly" is one modifier, distinct from "ref".
+					if (modifier == ParameterModifier.Ref && text.StartsWith("readonly ", StringComparison.Ordinal))
+					{
+						modifier = ParameterModifier.RefReadOnly;
+						text     = text["readonly ".Length..].Trim();
+					}
+
 					break;
 				}
 

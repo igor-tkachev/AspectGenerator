@@ -492,30 +492,84 @@ namespace AspectGenerator.Tests.TargetFilters
 		// ---- how the target factory describes a method, as far as the patterns can see it ----
 
 		[TestMethod]
-		public void RefReadOnlyParameterIsDescribedAsAByValueParameterTest()
+		public void RefReadOnlyParameterIsDescribedAsRefReadOnlyTest()
 		{
-			// Possible defect: "ref readonly" is not mapped, so the parameter looks like an ordinary one in the
-			// signature and in the parameter patterns.
-			var peek = TargetFilterTargets.Entries[Index("public System.Int32 Acme.Core.Service.Peek(System.Int32)")];
+			const string peekSignature = "public System.Int32 Acme.Core.Service.Peek(ref readonly System.Int32)";
 
-			Assert.AreEqual(AspectFilters.ParameterModifier.None, peek.Target.Parameters[0].Modifier);
+			var peek = TargetFilterTargets.Entries[Index(peekSignature)];
+
+			Assert.AreEqual(AspectFilters.ParameterModifier.RefReadOnly, peek.Target.Parameters[0].Modifier);
 			Assert.AreEqual(Microsoft.CodeAnalysis.RefKind.RefReadOnlyParameter, RefKindOf(peek));
+
+			// A modifier written in the pattern is exact, like in and ref: it matches only itself.
+			Assert.AreEqual('i', Kind(Probe("Peek(ref readonly int)"), peekSignature));
+			Assert.AreEqual('i', Kind(Probe("Peek(ref  readonly System.Int32)"), peekSignature));
+			Assert.AreEqual('i', Kind(Probe("Peek(int)"), peekSignature), "A pattern without a modifier accepts a parameter with any modifier.");
+			Assert.AreEqual('n', Kind(Probe("Peek(in int)"), peekSignature));
+			Assert.AreEqual('n', Kind(Probe("Peek(ref int)"), peekSignature));
+			Assert.AreEqual('i', Kind(Probe("contains: Peek(ref readonly System.Int32)"), peekSignature));
+			Assert.AreEqual(0, Probe("Peek(ref readonly int)").Ids.Length);
 		}
 
 		[TestMethod]
-		public void MultiDimensionalArrayIsDescribedAsAnArrayTest()
+		public void MultiDimensionalArrayIsDescribedWithItsRankTest()
 		{
-			// Possible defect: the rank is dropped, so int[,] and int[] print alike.
-			Assert.IsTrue(TargetFilterTargets.Entries.Any(static e => e.Target.Signature == "public System.Int32[] Acme.Core.Service.Matrix()"));
-			Assert.AreEqual('i', Kind(Probe("returns: int[]"), "public System.Int32[] Acme.Core.Service.Matrix()"));
+			const string matrix = "public System.Int32[,] Acme.Core.Service.Matrix()";
+
+			Assert.IsTrue(TargetFilterTargets.Entries.Any(static e => e.Target.Signature == matrix));
+			Assert.AreEqual('n', Kind(Probe("returns: int[]"), matrix));
+			Assert.AreEqual('i', Kind(Probe("returns: int[,]"), matrix));
+			Assert.AreEqual('i', Kind(Probe("returns: System.Int32[,]"), matrix));
+			Assert.AreEqual('i', Kind(Probe("returns: *[,]"), matrix));
+			Assert.AreEqual('n', Kind(Probe("returns: int[,,]"), matrix));
+			Assert.AreEqual('i', Kind(Probe("returns: int[]"), "public System.Int32[] Acme.Core.Service.ToArray()"));
 		}
 
 		[TestMethod]
-		public void UnreducedExtensionMethodReceiverIsTheContainingTypeTest()
+		public void CommaInsideArrayBracketsDoesNotSplitTheParameterListTest()
 		{
-			// The generator sees the reduced form; for the unreduced symbol the receiver prints as the static class.
-			Assert.IsTrue(TargetFilterTargets.Entries.Any(static e => e.Target.Signature == "public static System.String Acme.Core.Extensions.Shout(this Acme.Core.Extensions)"));
-			Assert.IsTrue(TargetFilterTargets.Entries.Any(static e => e.Target.Signature == "public static System.String Acme.Core.Extensions.Shout(this System.String)"));
+			// The rank of an array type is written with commas; they belong to the type, not to the parameter list.
+			const string fill = "public System.Void Acme.Core.Service.Fill(System.Int32[],System.String[])";
+
+			AssertDiagnostics("Fill(int[,], string[])");
+			AssertDiagnostics("Fill(int[,,], string[,])");
+			Assert.AreEqual('n', Kind(Probe("Fill(int[,], string[])"), fill));
+			Assert.AreEqual('n', Kind(Probe("Fill(int[], string[,])"), fill));
+			Assert.AreEqual('i', Kind(Probe("Fill(int[], string[])"), fill));
+		}
+
+		[TestMethod]
+		public void ArrayOfMultiDimensionalArraysKeepsTheOrderOfRankSpecifiersTest()
+		{
+			// An array of int[,] is int[][,] in C#; the rank specifier of the outer array comes first.
+			var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create(
+				"RankOrder",
+				[Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText("class C { public int[][,] A() { return null!; } public int[,][] B() { return null!; } public int[,,] D() { return null!; } }")],
+				[Microsoft.CodeAnalysis.MetadataReference.CreateFromFile(typeof(object).Assembly.Location)]);
+
+			var methods = compilation.GetTypeByMetadataName("C")!.GetMembers().OfType<Microsoft.CodeAnalysis.IMethodSymbol>().Where(static m => m.Name is "A" or "B" or "D").ToDictionary(static m => m.Name);
+
+			Assert.AreEqual("System.Int32[][,]", AspectTargetFactory.Create(methods["A"]).ReturnType);
+			Assert.AreEqual("System.Int32[,][]", AspectTargetFactory.Create(methods["B"]).ReturnType);
+			Assert.AreEqual("System.Int32[,,]", AspectTargetFactory.Create(methods["D"]).ReturnType);
+		}
+
+		[TestMethod]
+		public void UnreducedExtensionMethodReceiverIsTheFirstParameterTypeTest()
+		{
+			// The receiver of a declared extension method is its first parameter's type, as in a reduced call.
+			var shout = TargetFilterTargets.Entries.Where(static e => e.Target.Signature == "public static System.String Acme.Core.Extensions.Shout(this System.String)").ToArray();
+
+			Assert.AreEqual(2, shout.Length);
+			Assert.IsNotNull(shout.Single(static e => e.Symbol.ReducedFrom is null));
+			Assert.IsNotNull(shout.Single(static e => e.Symbol.ReducedFrom is not null));
+			Assert.IsFalse(TargetFilterTargets.Entries.Any(static e => e.Label == "source" && e.Target.Signature.Contains("(this Acme.Core.Extensions", StringComparison.Ordinal)));
+
+			var outcome = Probe("contains: Shout(this System.String)");
+
+			Assert.AreEqual(2, outcome.Kinds.Count(static k => k == 'i'));
+			Assert.AreEqual(0, Probe("contains: Shout(this Acme.Core.Extensions)").Kinds.Count(static k => k == 'i'));
+			Assert.AreEqual(1, Probe("contains: Take<T>(this System.Collections.Generic.IEnumerable<T>,System.Int32)").Kinds.Count(static k => k == 'i'));
 		}
 
 		[TestMethod]

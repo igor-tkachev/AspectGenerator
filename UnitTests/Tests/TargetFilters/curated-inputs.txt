@@ -171,11 +171,14 @@ doc-line	  -attributes: NoLogAttribute
 doc-line	TargetFilter:
 doc-line	  public **.*(...)
 doc-line	EffectiveTargetFilter:
-doc-block	public System.String MyApp.Services.UserService.GetName(System.Int32)\npublic static System.Void MyApp.Services.Cache.Clear()\npublic virtual System.Threading.Tasks.Task<System.String> MyApp.Services.UserService.GetNameAsync(System.Int32,System.Threading.CancellationToken)\npublic System.Boolean MyApp.Services.UserService.TryGet(System.String,out System.Int32)\npublic System.Void MyApp.Services.UserService.Update(ref MyApp.Models.User)\npublic static System.String MyApp.Extensions.UserExtensions.Format(this MyApp.Models.User,System.Int32)\npublic MyApp.Models.User MyApp.Data.Repository<MyApp.Models.User>.Get<System.Int32>(System.Int32)
+doc-block	public System.String MyApp.Services.UserService.GetName(System.Int32)\npublic static System.Void MyApp.Services.Cache.Clear()\npublic virtual System.Threading.Tasks.Task<System.String> MyApp.Services.UserService.GetNameAsync(System.Int32,System.Threading.CancellationToken)\npublic System.Boolean MyApp.Services.UserService.TryGet(System.String,out System.Int32)\npublic System.Void MyApp.Services.UserService.Update(ref MyApp.Models.User)\npublic System.Int32 MyApp.Services.UserService.Peek(ref readonly System.Int32)\npublic System.Int32[,] MyApp.Services.UserService.Matrix(System.Int32[][,])\npublic static System.String MyApp.Extensions.UserExtensions.Format(this MyApp.Models.User,System.Int32)\npublic MyApp.Models.User MyApp.Data.Repository<TEntity>.Get<TKey>(TKey)\npublic static System.Void System.Collections.Generic.List<System.Int32>.Add(System.Int32)
 doc-line	public System.String MyApp.Services.UserService.GetName(System.Int32)
 doc-line	public static System.Void MyApp.Services.Cache.Clear()
 doc-line	public virtual System.Threading.Tasks.Task<System.String> MyApp.Services.UserService.GetNameAsync(System.Int32,System.Threading.CancellationToken)
 doc-line	public System.Boolean MyApp.Services.UserService.TryGet(System.String,out System.Int32)
 doc-line	public System.Void MyApp.Services.UserService.Update(ref MyApp.Models.User)
+doc-line	public System.Int32 MyApp.Services.UserService.Peek(ref readonly System.Int32)
+doc-line	public System.Int32[,] MyApp.Services.UserService.Matrix(System.Int32[][,])
 doc-line	public static System.String MyApp.Extensions.UserExtensions.Format(this MyApp.Models.User,System.Int32)
-doc-line	public MyApp.Models.User MyApp.Data.Repository<MyApp.Models.User>.Get<System.Int32>(System.Int32)
+doc-line	public MyApp.Models.User MyApp.Data.Repository<TEntity>.Get<TKey>(TKey)
+doc-line	public static System.Void System.Collections.Generic.List<System.Int32>.Add(System.Int32)
