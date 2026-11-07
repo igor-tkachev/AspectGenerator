@@ -32,10 +32,19 @@
 
 	  -p:DotGramLocal=true builds the parser from the grammar instead, with the DotGram sources in $(DotGramRoot) as the
 	  generator, and leaves the committed folder out; compare its output with the folder to try a DotGram change.
+	  That output is not pinned, so this mode never packs: automatic packaging is off and an explicit pack fails.
 	-->
 	<ItemGroup>
 		<AdditionalFiles Include="TargetFilter\TargetFilter.gram" />
 	</ItemGroup>
+
+	<PropertyGroup Condition="'$(DotGramLocal)' == 'true'">
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<Target Name="DotGramLocalNeverPacks" BeforeTargets="GenerateNuspec;_IntermediatePack;Pack" Condition="'$(DotGramLocal)' == 'true'">
+		<Error Text="DotGramLocal=true generates the target filter parser from the grammar with an unpinned DotGram, so the package must not be packed in this mode. Pack without it, from the committed parser." />
+	</Target>
 
 	<ItemGroup Condition="'$(DotGramLocal)' == 'true'">
 		<Compile Remove="TargetFilter\Generated\**" />

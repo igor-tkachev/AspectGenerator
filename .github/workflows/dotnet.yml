@@ -120,7 +120,8 @@ jobs:
             public static void OnBeforeCall(InterceptInfo info) { Calls++; }
         }
 
-        // Applied to a type with a TargetFilter, so that the filter parser runs inside the packed generator on the oldest toolchain.
+        // Applied to a type with a TargetFilter, so that a filter is selected by the packed generator on the oldest toolchain.
+        // Filters are parsed by the hand-written parser for now; this covers the generated one once filters are parsed by it.
         [Aspect(OnBeforeCall = nameof(OnBeforeCall))]
         [AttributeUsage(AttributeTargets.Class)]
         sealed class FilteredAttribute : Attribute
@@ -201,5 +202,18 @@ jobs:
           echo "Source/TargetFilter differs after regeneration; run Source/TargetFilter/regenerate.sh and commit the result:" >&2
           echo "$status" >&2
           git --no-pager diff --stat -- Source/TargetFilter >&2
+          exit 1
+        fi
+    - name: The local DotGram mode refuses to pack
+      if: runner.os == 'Linux'
+      shell: bash
+      # -p:DotGramLocal=true builds an unpinned parser, so a package must never come out of it. The scratch checkout the
+      # script just made is the DotGram checkout.
+      run: |
+        set -euo pipefail
+        commit="$(sed -n 's/^commit=//p' Source/TargetFilter/dotgram.pin | tr -d '\r')"
+        root="${TMPDIR:-/tmp}/aspectgenerator-dotgram-${commit:0:12}/dotgram"
+        if dotnet pack Source/AspectGenerator.csproj --configuration Release -p:DotGramLocal=true -p:DotGramRoot="$root" -nodeReuse:false; then
+          echo "Packing succeeded with DotGramLocal=true; it must fail." >&2
           exit 1
         fi

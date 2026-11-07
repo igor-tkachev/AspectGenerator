@@ -61,6 +61,14 @@ if [ "$(git -C "$tree" rev-parse HEAD 2> /dev/null || true)" != "$commit" ]; the
 	[ "$(git -C "$tree" rev-parse HEAD)" = "$commit" ] || { echo "regenerate.sh: fetched $(git -C "$tree" rev-parse HEAD), not $commit" >&2; exit 1; }
 fi
 
+# The checkout has a global.json of its own that rolls forward to any newer feature band: pin the exact SDK there too.
+printf '{ "sdk": { "version": "%s", "rollForward": "disable" } }\n' "$sdk" > "$tree/global.json"
+treesdk="$(cd "$tree" && dotnet --version)"
+if [ "$treesdk" != "$sdk" ]; then
+	echo "regenerate.sh: building DotGram.Cli would use .NET SDK $treesdk, not the pinned $sdk." >&2
+	exit 1
+fi
+
 cli="$tree/.build/bin/DotGram.Cli/release/dotnet-dotgram.dll"
 stamp="$scratch/cli-$commit-sdk-$sdk.built"
 if [ ! -e "$stamp" ] || [ ! -e "$cli" ]; then
@@ -74,3 +82,15 @@ fi
 dotnet restore Source/AspectGenerator.csproj --verbosity quiet
 
 dotnet "$(native "$cli")" generate Source/AspectGenerator.csproj --output Source/TargetFilter/Generated
+
+# DotGram deletes only what the manifest lists and keeps every other file: a stray committed file would compile into the
+# parser and leave git status clean. The folder must hold exactly the manifest's files and the manifest.
+out=Source/TargetFilter/Generated
+expected="$( { sed -n 's/.*"name": *"\([^"]*\)".*/\1/p' "$out/.dotgram.json" | tr -d '\r'; echo .dotgram.json; } | LC_ALL=C sort)"
+actual="$(cd "$out" && find . -type f | sed 's|^\./||' | LC_ALL=C sort)"
+if [ "$expected" != "$actual" ]; then
+	echo "regenerate.sh: $out does not hold exactly the files of its manifest .dotgram.json." >&2
+	echo "  only in the folder: $(LC_ALL=C comm -13 <(printf '%s\n' "$expected") <(printf '%s\n' "$actual") | tr '\n' ' ')" >&2
+	echo "  only in the manifest: $(LC_ALL=C comm -23 <(printf '%s\n' "$expected") <(printf '%s\n' "$actual") | tr '\n' ' ')" >&2
+	exit 1
+fi
