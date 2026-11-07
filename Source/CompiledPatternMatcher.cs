@@ -1326,10 +1326,18 @@ namespace AspectGenerator
 			/// <summary>Only a ** after another one can try a way again, so a pattern with one ** has nothing to remember.</summary>
 			readonly bool _rememberWays;
 
+			readonly int   _recursiveCount;
+			readonly int[] _recursiveOrdinals;
+
 			DottedPattern(ImmutableArray<SegmentMatcher> segments)
 			{
 				_segments     = segments;
-				_rememberWays = segments.Count(static s => s.Kind == SegmentMatcherKind.Recursive) > 1;
+				_recursiveCount    = segments.Count(static s => s.Kind == SegmentMatcherKind.Recursive);
+				_rememberWays      = _recursiveCount > 1;
+				_recursiveOrdinals = new int[segments.Length];
+
+				for (int i = 0, ordinal = 0; i < segments.Length; i++)
+					_recursiveOrdinals[i] = segments[i].Kind == SegmentMatcherKind.Recursive ? ordinal++ : -1;
 			}
 
 			public ImmutableArray<SegmentMatcher> Segments => _segments;
@@ -1392,19 +1400,20 @@ namespace AspectGenerator
 			/// <remarks>
 			/// Each <c>**</c> tries the number of values it takes in turn, fewest first, and the first way that matches is the
 			/// answer, so a segment is compared with a value only when a way being tried reaches that pair. A way that fails is
-			/// remembered by where it starts (the segment after a <c>**</c> and the value it is tried at), and is not tried
-			/// again from another <c>**</c>: without that, k of them try a power of the name's length in ways. The comparisons
-			/// made are the ones an exhaustive search would make, in its order, less the repeats, so the answer is the same
-			/// whatever a segment's comparison answers, a regular expression that times out included.
+			/// remembered by where it starts (the <c>**</c> it is tried from and the value it starts at), and is not tried again
+			/// when that <c>**</c> is reached once more from an earlier one: without that, k of them try a power of the name's
+			/// length in ways. The comparisons keep the order an exhaustive search makes them in, less those of the ways
+			/// already known to fail, and the answer is the search's. A way whose failure came from a regular expression that
+			/// timed out is not remembered, since tried again it may match, as the search would try it.
 			/// </remarks>
 			public bool IsMatch(List<string> values)
 			{
-				var failed = default(ulong[]);
+				var ways = default(Ways);
 
-				return IsMatch(values, 0, 0, ref failed);
+				return IsMatch(values, 0, 0, ref ways);
 			}
 
-			bool IsMatch(List<string> values, int patternIndex, int valueIndex, ref ulong[]? failed)
+			bool IsMatch(List<string> values, int patternIndex, int valueIndex, ref Ways ways)
 			{
 				while (patternIndex < _segments.Length)
 				{
@@ -1415,28 +1424,30 @@ namespace AspectGenerator
 						if (patternIndex == _segments.Length - 1)
 							return true;
 
+						var row = _rememberWays ? _recursiveOrdinals[patternIndex] : -1;
+
 						for (var i = valueIndex; i <= values.Count; i++)
 						{
-							// The ways that start at the next segment, one per value index.
-							var way = (patternIndex + 1) * (values.Count + 1) + i;
-
-							if (failed is not null && (failed[way >> 6] & 1UL << (way & 63)) != 0)
+							if (row >= 0 && ways.HasFailed(row, i))
 								continue;
 
-							if (IsMatch(values, patternIndex + 1, i, ref failed))
+							var timedOutBefore = ways.TimedOut;
+
+							ways.TimedOut = false;
+
+							if (IsMatch(values, patternIndex + 1, i, ref ways))
 								return true;
 
-							if (_rememberWays)
-							{
-								failed ??= new ulong[((_segments.Length + 1) * (values.Count + 1) + 63) >> 6];
-								failed[way >> 6] |= 1UL << (way & 63);
-							}
+							if (row >= 0 && !ways.TimedOut)
+								ways.Fail(row, i, _recursiveCount, values.Count);
+
+							ways.TimedOut |= timedOutBefore;
 						}
 
 						return false;
 					}
 
-					if (valueIndex >= values.Count || !segment.IsMatch(values[valueIndex]))
+					if (valueIndex >= values.Count || !segment.IsMatch(values[valueIndex], ref ways.TimedOut))
 						return false;
 
 					patternIndex++;
@@ -1445,6 +1456,44 @@ namespace AspectGenerator
 
 				return valueIndex == values.Count;
 			}
+
+			/// <summary>
+			/// The ways known to fail, one row of value indexes per <c>**</c>, each allocated when that <c>**</c> first records
+			/// a failure; and whether a comparison timed out in the way being tried.
+			/// </summary>
+			struct Ways
+			{
+				ulong[]?[]? _rows;
+
+				public bool TimedOut;
+
+				public readonly bool HasFailed(int row, int value)
+				{
+					return _rows?[row] is {} bits && (bits[value >> 6] & 1UL << (value & 63)) != 0;
+				}
+
+				public void Fail(int row, int value, int rowCount, int valueCount)
+				{
+					_rows ??= new ulong[]?[rowCount];
+
+					// One bit for each of valueCount + 1 starts, counted in long so that no length overflows.
+					var bits = _rows[row] ??= new ulong[(int)(((long)valueCount + 64) >> 6)];
+
+					bits[value >> 6] |= 1UL << (value & 63);
+				}
+			}
+		}
+
+		/// <summary>
+		/// For the tests: the segment comparison by regular expression of this thread that is to time out, counted from 1
+		/// (0: none), and how many have been made since it was set. A real timeout cannot be made to happen when wanted.
+		/// </summary>
+		[ThreadStatic] internal static int ForcedRegexTimeoutAt;
+		[ThreadStatic] internal static int RegexComparisons;
+
+		static bool TimeoutForcedForTests()
+		{
+			return ForcedRegexTimeoutAt != 0 && ++RegexComparisons == ForcedRegexTimeoutAt;
 		}
 
 		enum SegmentMatcherKind
@@ -1521,6 +1570,14 @@ namespace AspectGenerator
 
 			public bool IsMatch(string value)
 			{
+				var timedOut = false;
+
+				return IsMatch(value, ref timedOut);
+			}
+
+			/// <summary>As <see cref="IsMatch(string)"/>; <paramref name="timedOut"/> is set when a regular expression timed out.</summary>
+			public bool IsMatch(string value, ref bool timedOut)
+			{
 				return Kind switch
 				{
 					SegmentMatcherKind.Any       => true,
@@ -1528,20 +1585,24 @@ namespace AspectGenerator
 					SegmentMatcherKind.Prefix    => value.StartsWith(_text!, StringComparison.Ordinal),
 					SegmentMatcherKind.Suffix    => value.EndsWith(_text!, StringComparison.Ordinal),
 					SegmentMatcherKind.Contains  => value.Contains(_text!, StringComparison.Ordinal),
-					SegmentMatcherKind.Regex     => IsRegexMatch(value),
+					SegmentMatcherKind.Regex     => IsRegexMatch(value, ref timedOut),
 					SegmentMatcherKind.Recursive => true,
 					_                            => false
 				};
 			}
 
-			bool IsRegexMatch(string value)
+			bool IsRegexMatch(string value, ref bool timedOut)
 			{
 				try
 				{
+					if (TimeoutForcedForTests())
+						throw new RegexMatchTimeoutException(value, _regex!.ToString(), _regex.MatchTimeout);
+
 					return _regex!.IsMatch(value);
 				}
 				catch (RegexMatchTimeoutException)
 				{
+					timedOut = true;
 					return false;
 				}
 			}

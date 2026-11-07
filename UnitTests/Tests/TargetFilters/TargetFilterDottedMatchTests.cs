@@ -104,6 +104,60 @@ namespace AspectGenerator.Tests.TargetFilters
 			AssertTime("fullmethod: " + string.Join(".", literal.Take(15_000)) + ".Nope.**", Target(literal), expected: false);
 		}
 
+		[TestMethod]
+		public void WayThatFailedOnATimeoutIsTriedAgainTest()
+		{
+			// The second regular expression comparison times out: aab against a*a*b, tried from the inner ** at the second
+			// value. Tried again from the outer ** it matches, as the exhaustive search finds; had the failure been
+			// remembered, the name would not match.
+			var set    = AspectFilters.GetFilters("fullmethod: **.**.a*a*b");
+			var target = Target(["X", "aab"]);
+
+			Assert.AreEqual(1, set.Rules.Count);
+			Assert.IsTrue(set.Evaluate(target).IsMatch);
+
+			try
+			{
+				AspectFilters.RegexComparisons     = 0;
+				AspectFilters.ForcedRegexTimeoutAt = 2;
+
+				Assert.IsTrue(set.Evaluate(target).IsMatch);
+				Assert.AreEqual(3, AspectFilters.RegexComparisons, "X, then aab timing out, then aab again.");
+
+				// A failure without a timeout is remembered: X and aab from the inner **, then nothing new from the outer.
+				AspectFilters.RegexComparisons     = 0;
+				AspectFilters.ForcedRegexTimeoutAt = int.MaxValue;
+
+				Assert.IsFalse(AspectFilters.GetFilters("fullmethod: **.**.a*a*c").Evaluate(target).IsMatch);
+				Assert.AreEqual(2, AspectFilters.RegexComparisons);
+			}
+			finally
+			{
+				AspectFilters.ForcedRegexTimeoutAt = 0;
+			}
+		}
+
+		[TestMethod]
+		public void RememberingFailedWaysCostsARowPerRecursiveWildcardTest()
+		{
+			// A row of value indexes for each ** that records a failure, and none for a ** never reached: a few kilobytes, where
+			// a table of every segment by every value took 30 MB.
+			var values  = Enumerable.Range(0, 16_000).Select(static _ => "A").ToList();
+			var unused  = AspectFilters.GetFilters("fullmethod: **.Nope.**" + string.Concat(Enumerable.Repeat(".A", 15_000)));
+			var before  = GC.GetAllocatedBytesForCurrentThread();
+
+			Assert.IsFalse(unused.Evaluate(Target(values)).IsMatch);
+			Assert.IsTrue(GC.GetAllocatedBytesForCurrentThread() - before < 1024 * 1024, $"{GC.GetAllocatedBytesForCurrentThread() - before} bytes");
+
+			// Long names do not overflow the sizes.
+			var many = Enumerable.Range(0, 50_000).Select(static i => "S" + i).ToList();
+
+			before = GC.GetAllocatedBytesForCurrentThread();
+
+			Assert.IsFalse(AspectFilters.GetFilters("fullmethod: **.**.Nope").Evaluate(Target(many)).IsMatch);
+			Assert.IsTrue(GC.GetAllocatedBytesForCurrentThread() - before < 1024 * 1024, $"{GC.GetAllocatedBytesForCurrentThread() - before} bytes");
+		}
+
 		void AssertTime(string filter, AspectFilters.MethodTarget target, bool expected)
 		{
 			// The filter must compile to one rule, or the time measured is of nothing.
