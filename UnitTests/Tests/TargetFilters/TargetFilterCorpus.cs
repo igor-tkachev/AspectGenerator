@@ -427,6 +427,38 @@ namespace AspectGenerator.Tests.TargetFilters
 			return random.Next(3) == 0 ? values[random.Next(values.Length)] : values[random.Next(likely)];
 		}
 
+		// ---- escapes around words ----
+
+		/// <summary>
+		/// Lines whose words are split at white space (modifier lines, method patterns, condition items of words), with an
+		/// escape before, after or in place of a word: an escape that begins a word is easy to drop together with what it
+		/// escapes, and the mutations seldom produce one next to a modifier word.
+		/// </summary>
+		public static IEnumerable<string> EscapesAroundWords()
+		{
+			string[] lines =
+			[
+				"public", "public static", "protected internal", "public static Save", "static Acme.Core.Service.Save(int) : void",
+				"public; method: Save", "method: Save; public static", "- public static", "pattern: public Save", "Save : void", "public Save*",
+			];
+			string[] escapes = ["\\x", "\\&", "\\ ", "\\\\", "\\", "\\:", "\\;", "\\x\\y", "\\<", "\\p"];
+
+			foreach (var line in lines)
+			{
+				var words = line.Split(' ');
+
+				foreach (var escape in escapes)
+					for (var at = 0; at <= words.Length; at++)
+					{
+						// Standing alone between two words, and glued to the front of the next word.
+						yield return string.Join(" ", words.Take(at).Append(escape).Concat(words.Skip(at)));
+
+						if (at < words.Length)
+							yield return string.Join(" ", words.Take(at).Append(escape + words[at]).Concat(words.Skip(at + 1)));
+					}
+			}
+		}
+
 		// ---- records and hashes ----
 
 		public static string Sha256(IEnumerable<string> records)

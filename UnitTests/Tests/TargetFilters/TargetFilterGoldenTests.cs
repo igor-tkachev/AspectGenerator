@@ -181,6 +181,33 @@ namespace AspectGenerator.Tests.TargetFilters
 		}
 
 		[TestMethod]
+		public void EscapesAroundWordsBaselineTest()
+		{
+			var inputs = TargetFilterCorpus.EscapesAroundWords().ToArray();
+			var lines  = Header("escapes around words", $"count {inputs.Length}");
+
+			lines.AddRange(inputs.Select(static i => TargetFilterProbe.FormatRecord(i)));
+
+			TargetFilterBaseline.Check("escapes.txt", lines);
+		}
+
+		[TestMethod]
+		public void SpacedBaselineTest()
+		{
+			var inputs = TargetFilterSpacedInputs.Generate().ToArray();
+			var lines  = Header("spaced", $"seed {TargetFilterSpacedInputs.Seed:x16}", $"count {inputs.Length}", $"chunk {GeneratedChunk}");
+
+			for (var start = 0; start < inputs.Length; start += GeneratedChunk)
+			{
+				var records = inputs.Skip(start).Take(GeneratedChunk).Select(static i => TargetFilterProbe.FormatRecord(i));
+
+				lines.Add($"records {start}..{Math.Min(start + GeneratedChunk, inputs.Length) - 1}\t{TargetFilterCorpus.Sha256(records)}");
+			}
+
+			TargetFilterBaseline.Check("spaced.txt", lines);
+		}
+
+		[TestMethod]
 		public void GeneratedInputsAreDeterministicTest()
 		{
 			var first  = TargetFilterCorpus.Generate(5_000).ToArray();
