@@ -21,4 +21,4 @@ The skill is available at `<global-packages>/aspectgenerator/<version>/skills/as
 - [Library mode and PrivateAssets](docs/library-mode.md) — package references and generated API ownership across projects.
 - [Configuration](docs/configuration.md) — MSBuild properties and assembly-level overrides.
 - [Generator hosts and Hot Reload](docs/generator-host.md) — build versus design-time behavior and editor diagnostics.
-- [Troubleshooting](docs/troubleshooting.md) — missing interception, supported targets, build reports, Debug trace and review checks.
+- [Troubleshooting](docs/troubleshooting.md) — missing interception, supported targets, build reports, trace and review checks.

@@ -14,7 +14,6 @@ namespace AspectGenerator
 	{
 		static readonly GeneratorTraceReport _disabled = new(false, AspectTraceLevel.Normal);
 
-#if DEBUG
 		readonly Dictionary<string,string?> _options = new(StringComparer.Ordinal);
 		readonly Dictionary<string,long>    _counters = new(StringComparer.Ordinal);
 		readonly List<TracePhase>           _phases = new();
@@ -23,7 +22,6 @@ namespace AspectGenerator
 		readonly List<TargetFilterTrace>    _targetFilters = new();
 		readonly long                       _start = Stopwatch.GetTimestamp();
 		bool                                _finalized;
-#endif
 
 		GeneratorTraceReport(bool isEnabled, AspectTraceLevel level)
 		{
@@ -33,90 +31,65 @@ namespace AspectGenerator
 
 		public static GeneratorTraceReport Create(GeneratorExecutionOptions options)
 		{
-#if DEBUG
 			return options.Trace
 				? new GeneratorTraceReport(true, options.TraceLevel)
 				: _disabled;
-#else
-			return _disabled;
-#endif
 		}
 
 		public bool             IsEnabled { get; }
 		public AspectTraceLevel Level     { get; }
 
-		[Conditional("DEBUG")]
 		public void SetOption(string name, string? value)
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
 			_options[name] = value;
-#endif
 		}
 
-		[Conditional("DEBUG")]
 		public void SetCounter(string name, long value)
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
 			_counters[name] = value;
-#endif
 		}
 
-		[Conditional("DEBUG")]
 		public void IncrementCounter(string name, long delta = 1)
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
 			_counters.TryGetValue(name, out var value);
 			var newValue = value + delta;
 			_counters[name] = newValue;
-#endif
 		}
 
 		public TracePhaseScope TimePhase(string name)
 		{
-#if DEBUG
 			return IsEnabled ? new TracePhaseScope(this, name) : default;
-#else
-			return default;
-#endif
 		}
 
-		[Conditional("DEBUG")]
 		public void SkipPhase(string name)
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
 			_phases.Add(new TracePhase(name, null));
 			AddEvent("phase", $"{ToTraceKey(name)}: skipped");
-#endif
 		}
 
-		[Conditional("DEBUG")]
 		public void AddDecision(string text)
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
 			_decisions.Add(text);
 			AddEvent("decision", text);
-#endif
 		}
 
-		[Conditional("DEBUG")]
 		public void AddCompilation(Compilation compilation, GeneratorExecutionOptions options)
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
@@ -132,13 +105,10 @@ namespace AspectGenerator
 				? parseOptions.LanguageVersion.ToString()
 				: "");
 			AddEvent("start", $"assembly={compilation.AssemblyName ?? compilation.Assembly.Identity.Name}, targetFramework={options.TargetFramework ?? ""}");
-#endif
 		}
 
-		[Conditional("DEBUG")]
 		public void AddOptions(GeneratorExecutionOptions options)
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
@@ -149,16 +119,15 @@ namespace AspectGenerator
 			SetOption("AspectGeneratorInterceptorsNamespace", options.InterceptorsNamespace);
 			SetOption("InterceptorsNamespaces", options.InterceptorsNamespaces);
 			SetOption("AspectGeneratorReportFile", options.ReportFile);
+			SetOption("AspectGeneratorReportSizeLimit", options.ReportSizeLimit.ToString(CultureInfo.InvariantCulture));
 			SetOption("AspectGeneratorTrace", options.Trace.ToString());
 			SetOption("AspectGeneratorTraceLevel", options.TraceLevel.ToString());
 			AddEvent("options", $"generateApi={options.GenerateApi.ToString()}, trace={options.Trace.ToString()}, diagnosticSeverity={options.AspectDiagnosticSeverity}");
 
 			if (!string.IsNullOrWhiteSpace(options.InvalidTraceLevelValue))
 				AddWarning($"unknown AspectGeneratorTraceLevel '{options.InvalidTraceLevelValue}'; using Normal");
-#endif
 		}
 
-		[Conditional("DEBUG")]
 		public void AddTargetFilter(
 			int    index,
 			string classification,
@@ -168,7 +137,6 @@ namespace AspectGenerator
 			bool   callsiteSemanticFilter,
 			bool   mayTargetExternalMethods)
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
@@ -183,34 +151,26 @@ namespace AspectGenerator
 			AddEvent(
 				"target-filter",
 				$"index={index.ToString(CultureInfo.InvariantCulture)}, classification={classification}, declarationFilter={declarationFilter.ToString()}, callsitePrefilter={callsitePrefilter.ToString()}, semanticFilter={semanticFilter.ToString()}, callsiteSemanticFilter={callsiteSemanticFilter.ToString()}, mayTargetExternal={mayTargetExternalMethods.ToString()}");
-#endif
 		}
 
-		[Conditional("DEBUG")]
 		public void AddResult(string text)
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
 			AddEvent("result", text);
-#endif
 		}
 
-		[Conditional("DEBUG")]
 		public void AddWarning(string text)
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
 			AddEvent("warning", text);
-#endif
 		}
 
 		public string ToMarkdown()
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return "";
 
@@ -290,27 +250,19 @@ namespace AspectGenerator
 				sb.Append("- `").Append(FormatMarkdownCode(item)).AppendLine("`");
 
 			return sb.ToString();
-#else
-			return "";
-#endif
 		}
 
-		[Conditional("DEBUG")]
 		void AddElapsed(string name, TimeSpan elapsed)
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
 			_phases.Add(new TracePhase(name, elapsed));
 			AddEvent("phase", $"{ToTraceKey(name)}: end elapsedMs={elapsed.TotalMilliseconds.ToString("0.###", CultureInfo.InvariantCulture)}");
-#endif
 		}
 
-		[Conditional("DEBUG")]
 		void AddFinalResults()
 		{
-#if DEBUG
 			if (!IsEnabled)
 				return;
 
@@ -336,10 +288,8 @@ namespace AspectGenerator
 
 			if (slowestPhase.Name is not null)
 				AddResult($"slowestPhase={ToTraceKey(slowestPhase.Name)}");
-#endif
 		}
 
-#if DEBUG
 		void AddEvent(string category, string text)
 		{
 			_events.Add($"AGTRACE {category}: {text}");
@@ -430,11 +380,9 @@ namespace AspectGenerator
 			public bool   CallsiteSemanticFilter   { get; }
 			public bool   MayTargetExternalMethods { get; }
 		}
-#endif
 
 		public readonly struct TracePhaseScope : IDisposable
 		{
-#if DEBUG
 			readonly GeneratorTraceReport? _trace;
 			readonly string?               _name;
 			readonly long                  _start;
@@ -445,11 +393,9 @@ namespace AspectGenerator
 				_name  = name;
 				_start = Stopwatch.GetTimestamp();
 			}
-#endif
 
 			public void Dispose()
 			{
-#if DEBUG
 				if (_trace is null || _name is null)
 					return;
 
@@ -457,7 +403,6 @@ namespace AspectGenerator
 				var elapsed = TimeSpan.FromSeconds((double)elapsedTicks / Stopwatch.Frequency);
 
 				_trace.AddElapsed(_name, elapsed);
-#endif
 			}
 		}
 	}

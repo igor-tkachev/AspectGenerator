@@ -49,6 +49,7 @@ The recommended way to configure multiple projects consistently is to use MSBuil
     <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
     <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
     <AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
+    <AspectGeneratorReportSizeLimit>1024</AspectGeneratorReportSizeLimit>
     <AspectGeneratorAspectDiagnosticSeverity>Info</AspectGeneratorAspectDiagnosticSeverity>
     <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
   </PropertyGroup>
@@ -148,6 +149,8 @@ AspectGenerator analyzes code during design-time builds so IDE diagnostics and o
 
 The report can be used by developers and AI coding agents to inspect selected target methods, intercepted call sites, applied aspects, generated interceptor methods, generated source references, source locations, and aspect lifetime information. It is not printed to the console by default. Diagnostics are reserved for errors, warnings, optional call-site markers, and actionable misconfiguration.
 
+`AspectGeneratorReportSizeLimit` limits the size of the report, in kilobytes; the default is `1024`. A broad target filter on a large project selects tens of thousands of calls, and a report that lists each of them reaches tens of megabytes. The summary and the generated sources are always complete. When the lists of target methods and call sites do not fit, the report lists their first rows (the target methods take at most half of the space left) and says under each list how many rows it left out. Set `AspectGeneratorReportSizeLimit` to `0` to list everything, or to a larger size; a value that is not a whole number of kilobytes uses the default.
+
 `AspectGeneratorTrace` enables an opt-in diagnostic trace section in the existing build report. It is disabled by default.
 
 ```xml
@@ -159,7 +162,7 @@ The report can be used by developers and AI coding agents to inspect selected ta
 
 Supported trace levels are `Normal` and `Verbose`; unknown values fall back to `Normal`. Trace output is written to `AspectGeneratorBuildReport.md` and includes generator-visible options, `AGTRACE`-prefixed events, counters, phase timings, and fast-path decisions. It is not emitted as compiler diagnostics and does not generate runtime tracing/logging code.
 
-Trace implementation is compiled into Debug-built AspectGenerator packages only. Release-built packages accept `AspectGeneratorTrace=true` but do not write an `AspectGenerator trace` section. For local AGTRACE diagnostics, pack AspectGenerator with `-c Debug` and consume that package with `PrivateAssets="all"`.
+Trace works in the published (Release-built) package; there is no need to build AspectGenerator from source for it. A build with trace off does not collect it.
 
 `AspectGeneratorInterceptorsNamespace` controls the namespace used for generated interceptors. The AspectGenerator NuGet package appends this namespace to `InterceptorsNamespaces` automatically for projects that reference the package directly. Manual `InterceptorsNamespaces` configuration should only be needed for unusual or custom build setups.
 

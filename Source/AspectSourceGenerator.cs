@@ -613,8 +613,12 @@ namespace AspectGenerator
 			aspectedMethods = [..aspectedMethods.Select(static m => m with { Attributes = InterceptorNamingService.GetOrderedAttributes(m.Attributes) })];
 
 			trace.SetCounter("Intercepted call sites", aspectedMethods.Length);
-			trace.SetCounter("Matched target methods", aspectedMethods.Select(static m => m.Method).Distinct(SymbolEqualityComparer.Default).Count());
-			trace.SetCounter("Generated interceptor methods", aspectedMethods.GroupBy(static m => m, InterceptorGroupComparer.Instance).Count());
+
+			if (trace.IsEnabled)
+			{
+				trace.SetCounter("Matched target methods", aspectedMethods.Select(static m => m.Method).Distinct(SymbolEqualityComparer.Default).Count());
+				trace.SetCounter("Generated interceptor methods", aspectedMethods.GroupBy(static m => m, InterceptorGroupComparer.Instance).Count());
+			}
 
 			if (!cancellationToken.IsCancellationRequested)
 				using (trace.TimePhase("Validate method hooks"))

@@ -27,13 +27,6 @@ dotnet pack Source/AspectGenerator.csproj --no-build -c Release -warnaserror -no
 dotnet test UnitTests/Tests/AspectGenerator.Tests.csproj --no-build -c Release --filter NuGetPackageContainsMsBuildAssetsTest
 ```
 
-For local AGTRACE diagnostics, pack a Debug generator and add the output folder as a local NuGet source:
-
-```sh
-export MSBUILDDISABLENODEREUSE=1
-dotnet pack Source/AspectGenerator.csproj -c Debug -o local-nuget -p:PackageVersion=2.0.0-dev.trace.1 -warnaserror -nodeReuse:false
-```
-
 ## Dependency guidance
 
 Do not add new NuGet packages, template engines, formatters, source-generation helper libraries, or build tools unless the maintainer explicitly asks for that dependency.

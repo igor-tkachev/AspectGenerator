@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 
 using Microsoft.CodeAnalysis;
@@ -23,6 +24,7 @@ namespace AspectGenerator
 				PublicApi                            = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.PublicApi}"),
 				DebuggerStepThrough                  = GetBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.DebuggerStepThrough}"),
 				ReportFile                           = options.TryGetValue($"build_property.AspectGenerator{AspectOptionName.ReportFile}",            out var reportFile) ? reportFile : null,
+				ReportSizeLimit                      = options.TryGetValue($"build_property.AspectGenerator{AspectOptionName.ReportSizeLimit}",       out var reportSizeLimit) ? reportSizeLimit : null,
 				AspectDiagnosticSeverity             = aspectDiagnosticSeverity.Value,
 				InvalidAspectDiagnosticSeverityValue = aspectDiagnosticSeverity.InvalidValue,
 				Trace                                = GetTraceBoolProperty(options, $"build_property.AspectGenerator{AspectOptionName.Trace}"),
@@ -53,6 +55,7 @@ namespace AspectGenerator
 				PublicApi              = msBuildOptions.PublicApi,
 				DebuggerStepThrough    = msBuildOptions.DebuggerStepThrough,
 				ReportFile             = msBuildOptions.ReportFile,
+				ReportSizeLimit        = msBuildOptions.ReportSizeLimit,
 				AspectDiagnosticSeverity = msBuildOptions.AspectDiagnosticSeverity,
 				InvalidAspectDiagnosticSeverityValue = msBuildOptions.InvalidAspectDiagnosticSeverityValue,
 				Trace                  = msBuildOptions.Trace,
@@ -154,6 +157,7 @@ namespace AspectGenerator
 				options.PublicApi is true,
 				options.DebuggerStepThrough is true,
 				options.ReportFile,
+				GetReportSizeLimit(options.ReportSizeLimit),
 				options.AspectDiagnosticSeverity ?? AspectDiagnosticSeverity.Info,
 				options.Trace is true,
 				GetTraceLevel(options.TraceLevel, out var invalidTraceLevelValue),
@@ -181,6 +185,26 @@ namespace AspectGenerator
 			return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) ||
 				string.Equals(value, "1", StringComparison.OrdinalIgnoreCase) ||
 				string.Equals(value, "yes", StringComparison.OrdinalIgnoreCase);
+		}
+
+		/// <summary>
+		/// The default size limit of the build report, in kilobytes. A broad target filter on a large project selects tens of
+		/// thousands of calls, and a report that lists every one of them reaches tens of megabytes.
+		/// </summary>
+		public const int DefaultReportSizeLimitKilobytes = 1024;
+
+		/// <summary>
+		/// The size limit of the build report in bytes, from a value in kilobytes; <c>0</c> means no limit. A value that is not
+		/// a non-negative integer uses the default: the report is informational, so a typo does not fail the build.
+		/// </summary>
+		static long GetReportSizeLimit(string? value)
+		{
+			if (string.IsNullOrWhiteSpace(value) ||
+				!long.TryParse(value!.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var kilobytes) ||
+				kilobytes > long.MaxValue / 1024)
+				return DefaultReportSizeLimitKilobytes * 1024L;
+
+			return kilobytes * 1024;
 		}
 
 		static AspectTraceLevel GetTraceLevel(string? value, out string? invalidValue)

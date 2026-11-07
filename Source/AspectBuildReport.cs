@@ -109,6 +109,14 @@ namespace AspectGenerator
 			if (analysis.Options.EmitInterceptors && analysis.AspectedMethods.Length > 0)
 				AppendGeneratedSourceRow(sb, analysis.Options, "Interceptors.g.cs", "Generated interceptor methods for marked calls.");
 
+			var trace = analysis.Trace.IsEnabled ? analysis.Trace.ToMarkdown() : "";
+
+			// The summary and the sources above are always complete; the two lists share what the size limit leaves, the
+			// target methods up to half of it. The headings and the notes on omitted rows fit in the reserve.
+			var remaining = analysis.Options.ReportSizeLimit <= 0
+				? long.MaxValue
+				: analysis.Options.ReportSizeLimit - Encoding.UTF8.GetByteCount(sb.ToString()) - Encoding.UTF8.GetByteCount(trace) - ListReserve;
+
 			sb
 				.AppendLine()
 				.AppendLine("## Target Methods")
@@ -124,15 +132,17 @@ namespace AspectGenerator
 					.AppendLine("| Target method | Generated interceptor | Aspect(s) | Call sites |")
 					.AppendLine("| --- | --- | --- | ---: |");
 
-				foreach (var interceptor in interceptors)
-				{
-					AppendTableRow(
-						sb,
+				var listed = AppendLimitedRows(
+					sb,
+					interceptors.Select(static interceptor => FormatTableRow(
 						$"`{FormatMarkdownCode(interceptor.Method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat))}`",
 						$"`{interceptor.Name}`",
 						FormatAspectList(interceptor.Attributes),
-						interceptor.Invocations.Count.ToString(CultureInfo.InvariantCulture));
-				}
+						interceptor.Invocations.Count.ToString(CultureInfo.InvariantCulture))),
+					remaining == long.MaxValue ? long.MaxValue : remaining / 2,
+					ref remaining);
+
+				AppendOmittedNote(sb, analysis.Options, interceptors.Count - listed, interceptors.Count, "target methods");
 			}
 
 			sb
@@ -150,28 +160,82 @@ namespace AspectGenerator
 					.AppendLine("| # | Source | Replaced call | Target method | Aspect(s) | Generated interceptor |")
 					.AppendLine("| ---: | --- | --- | --- | --- | --- |");
 
-				var index = 0;
-
-				foreach (var interceptor in interceptors)
-				{
-					foreach (var invocation in interceptor.Invocations.OrderBy(static i => GetLocationSortKey(i.Inv.GetLocation()), StringComparer.Ordinal))
-					{
-						AppendTableRow(
-							sb,
+				var index  = 0;
+				var listed = AppendLimitedRows(
+					sb,
+					interceptors.SelectMany(static interceptor => interceptor.Invocations
+						.OrderBy(static i => GetLocationSortKey(i.Inv.GetLocation()), StringComparer.Ordinal)
+						.Select(invocation => (Interceptor: interceptor, Invocation: invocation)))
+						.Select(item => FormatTableRow(
 							(++index).ToString(CultureInfo.InvariantCulture),
-							FormatMarkdownLocation(invocation.Inv.GetLocation()),
-							$"`{FormatMarkdownCode(invocation.Inv.ToString())}`",
-							$"`{FormatMarkdownCode(invocation.Method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat))}`",
-							FormatAspectList(invocation.Attributes),
-							$"`{interceptor.Name}`");
-					}
-				}
+							FormatMarkdownLocation(item.Invocation.Inv.GetLocation()),
+							$"`{FormatMarkdownCode(item.Invocation.Inv.ToString())}`",
+							$"`{FormatMarkdownCode(item.Invocation.Method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat))}`",
+							FormatAspectList(item.Invocation.Attributes),
+							$"`{item.Interceptor.Name}`")),
+					remaining,
+					ref remaining);
+
+				var callSiteCount = interceptors.Sum(static interceptor => interceptor.Invocations.Count);
+
+				AppendOmittedNote(sb, analysis.Options, callSiteCount - listed, callSiteCount, "call sites");
 			}
 
-			if (analysis.Trace.IsEnabled)
-				sb.AppendLine().Append(analysis.Trace.ToMarkdown());
+			if (trace.Length > 0)
+				sb.AppendLine().Append(trace);
 
 			return sb.ToString();
+		}
+
+		/// <summary>
+		/// Bytes kept free under the size limit for the list headings and the notes on omitted rows.
+		/// </summary>
+		const int ListReserve = 2048;
+
+		/// <summary>
+		/// Appends rows while their UTF-8 size fits in <paramref name="budget"/> and in <paramref name="remaining"/>, which it
+		/// reduces by what it appends; the rows after the first one that does not fit are not formatted. Returns the number
+		/// of rows appended.
+		/// </summary>
+		static int AppendLimitedRows(StringBuilder sb, IEnumerable<string> rows, long budget, ref long remaining)
+		{
+			var listed = 0;
+
+			foreach (var row in rows)
+			{
+				var size = Encoding.UTF8.GetByteCount(row);
+
+				if (size > budget || size > remaining)
+					break;
+
+				sb.Append(row);
+				budget    -= size;
+				remaining -= size;
+				listed++;
+			}
+
+			return listed;
+		}
+
+		static void AppendOmittedNote(StringBuilder sb, GeneratorExecutionOptions options, int omitted, int total, string what)
+		{
+			if (omitted <= 0)
+				return;
+
+			var limit = (options.ReportSizeLimit / 1024).ToString("N0", CultureInfo.InvariantCulture);
+
+			sb
+				.AppendLine()
+				.Append("> ")
+				.Append(omitted.ToString("N0", CultureInfo.InvariantCulture))
+				.Append(" of ")
+				.Append(total.ToString("N0", CultureInfo.InvariantCulture))
+				.Append(' ')
+				.Append(what)
+				.Append(" are not listed: the report is limited to ")
+				.Append(limit)
+				.Append(" KB. Set `AspectGeneratorReportSizeLimit` to `0` to list them all, or to a larger size in kilobytes.")
+				.AppendLine();
 		}
 
 		static void AppendGeneratedSourceRow(StringBuilder sb, GeneratorExecutionOptions options, string hintName, string details)
@@ -199,7 +263,12 @@ namespace AspectGenerator
 
 		static void AppendTableRow(StringBuilder sb, params string?[] values)
 		{
-			sb
+			sb.Append(FormatTableRow(values));
+		}
+
+		static string FormatTableRow(params string?[] values)
+		{
+			return new StringBuilder()
 				.Append("| ")
 				.Append(string.Join(" | ",
 					values.Select(static value => (value ?? "")
@@ -207,7 +276,8 @@ namespace AspectGenerator
 						.Replace("|",  "\\|")
 						.Replace("\r", "")
 						.Replace("\n", "<br />"))))
-				.AppendLine(" |");
+				.AppendLine(" |")
+				.ToString();
 		}
 
 		static string FormatAspectList(IEnumerable<AttributeInfo> attributes)

@@ -74,6 +74,8 @@ The report is not a compiler diagnostic stream and is not printed to the console
 
 The report is intentionally human-friendly and agent-friendly, not a minimal deterministic baseline format. Absolute file links, line/column locations, generated source references, Markdown tables, and detailed call-site rows are useful and should not be removed merely because they are not golden-file friendly.
 
+The report is limited to 1,024 KB by default. The summary is always complete; when the lists of target methods and call sites do not fit, the report says under each list how many rows it left out. Set `AspectGeneratorReportSizeLimit` (kilobytes) to `0` to list everything, for example `-p:AspectGeneratorReportSizeLimit=0` on the command line.
+
 Design-time builds do not write the report, and a known editor never does, also after a build. The report's `Generator host` row names the process that wrote it; an IDE the generator does not know shows there as `unknown (<process>)` after editing in it — report that row, with the IDE's name and version, to have the IDE recognized.
 
 ### Trace mode
@@ -89,11 +91,9 @@ Use opt-in trace mode when investigating generator performance or no-op behavior
 
 Trace mode appends an `AspectGenerator trace` section to `AspectGeneratorBuildReport.md`. It records visible options, `AGTRACE`-prefixed events, counters, timings, and fast-path decisions. It does not emit compiler diagnostics and does not generate runtime tracing/logging code.
 
-Trace implementation is compiled into Debug-built AspectGenerator packages only. Release-built packages accept `AspectGeneratorTrace=true` but do not write an `AspectGenerator trace` section.
+Trace works in the published package; no Debug build of AspectGenerator is needed.
 
-For AGTRACE diagnostics use a local Debug-built AspectGenerator package from a source clone, and consume it with `PrivateAssets="all"`.
-
-Then build a single consuming project and target framework:
+Build a single consuming project and target framework:
 
 ```bat
 dotnet build MyProject.csproj -f net10.0 -p:AspectGeneratorTrace=true /clp:PerformanceSummary /bl

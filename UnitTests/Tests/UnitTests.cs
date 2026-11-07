@@ -104,6 +104,8 @@ namespace AspectGenerator.Tests
 			StringAssert.Contains(props, "<AspectGeneratorTraceLevel Condition=\"'$(AspectGeneratorTraceLevel)' == ''\">Normal</AspectGeneratorTraceLevel>");
 			Assert.IsFalse(props.Contains("AspectGeneratorPrintReport", StringComparison.Ordinal));
 			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorReportFile\" />");
+			StringAssert.Contains(props, "<AspectGeneratorReportSizeLimit Condition=\"'$(AspectGeneratorReportSizeLimit)' == ''\">1024</AspectGeneratorReportSizeLimit>");
+			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorReportSizeLimit\" />");
 			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorAspectDiagnosticSeverity\" />");
 			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorTrace\" />");
 			StringAssert.Contains(props, "<CompilerVisibleProperty Include=\"AspectGeneratorTraceLevel\" />");

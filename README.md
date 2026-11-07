@@ -112,6 +112,7 @@ AspectGenerator can be configured with MSBuild properties:
   <AspectGeneratorPublicApi>false</AspectGeneratorPublicApi>
   <AspectGeneratorDebuggerStepThrough>false</AspectGeneratorDebuggerStepThrough>
   <AspectGeneratorReportFile>$(BaseIntermediateOutputPath)\GeneratedFiles\AspectGenerator\AspectGeneratorBuildReport.md</AspectGeneratorReportFile>
+  <AspectGeneratorReportSizeLimit>1024</AspectGeneratorReportSizeLimit>
   <AspectGeneratorAspectDiagnosticSeverity>Info</AspectGeneratorAspectDiagnosticSeverity>
   <AspectGeneratorInterceptorsNamespace>AspectGenerator</AspectGeneratorInterceptorsNamespace>
 </PropertyGroup>
@@ -313,6 +314,14 @@ To change the report path or file name, set `AspectGeneratorReportFile`:
 </PropertyGroup>
 ```
 
+The report is limited to 1,024 KB by default (`AspectGeneratorReportSizeLimit`, in kilobytes): a broad target filter on a large project selects tens of thousands of calls, and a report that lists each of them reaches tens of megabytes. The summary and the generated sources are always complete. When the lists of target methods and call sites do not fit, the report lists their first rows (the target methods take at most half of the space left) and says under each list how many rows it left out. Set `AspectGeneratorReportSizeLimit` to `0` to list everything, or to a larger size; a value that is not a whole number of kilobytes uses the default.
+
+```xml
+<PropertyGroup>
+  <AspectGeneratorReportSizeLimit>0</AspectGeneratorReportSizeLimit>
+</PropertyGroup>
+```
+
 Diagnostics are reserved for errors, warnings, and actionable misconfiguration. The build report is informational, stored as a build artifact, and is not emitted as compiler diagnostics.
 
 ### Build Report Trace
@@ -328,16 +337,9 @@ For source-generator performance and behavior diagnostics, enable opt-in trace o
 
 Trace output is appended to `AspectGeneratorBuildReport.md` as an `AspectGenerator trace` section. It includes generator-visible options, `AGTRACE`-prefixed events, counters, phase timings, and fast-path decisions. Supported trace levels are `Normal` and `Verbose`; unknown values fall back to `Normal`.
 
-Trace is disabled by default and does not emit compiler diagnostics or runtime tracing/logging code. The implementation is compiled into Debug-built AspectGenerator packages only. Release-built packages accept `AspectGeneratorTrace=true` but do not write an `AspectGenerator trace` section.
+Trace is disabled by default and does not emit compiler diagnostics or runtime tracing/logging code. Trace works in the published (Release-built) package; there is no need to build AspectGenerator from source for it. A build with trace off does not collect it.
 
-To produce AGTRACE output from a local package, pack AspectGenerator in Debug configuration:
-
-```shell
-# From the root of an AspectGenerator clone; add the output folder as a local NuGet package source.
-dotnet pack Source/AspectGenerator.csproj -c Debug -o local-nuget -p:PackageVersion=2.0.0-dev.trace.1
-```
-
-Then build one consuming project and one target framework, and combine the report with normal MSBuild tools:
+To investigate a build, build one consuming project and one target framework, and combine the report with normal MSBuild tools:
 
 ```bat
 dotnet build MyProject.csproj -f net10.0 -p:AspectGeneratorTrace=true /clp:PerformanceSummary /bl

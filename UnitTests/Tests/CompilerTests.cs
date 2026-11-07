@@ -1342,7 +1342,6 @@ namespace AspectGenerator.Tests
 
 				var report = File.ReadAllText(reportFile);
 
-#if DEBUG
 				StringAssert.Contains(report, "## AspectGenerator trace");
 				StringAssert.Contains(report, "| AspectGeneratorTrace | True |");
 				StringAssert.Contains(report, "| AspectGeneratorTraceLevel | Normal |");
@@ -1367,10 +1366,6 @@ namespace AspectGenerator.Tests
 				StringAssert.Contains(report, "AGTRACE counter: generated-interceptors=1");
 				StringAssert.Contains(report, "AGTRACE result: totalElapsedMs=");
 				StringAssert.Contains(report, "AGTRACE result: slowestPhase=");
-#else
-				Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
-				Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
-#endif
 			}
 			finally
 			{
@@ -1398,14 +1393,9 @@ namespace AspectGenerator.Tests
 
 					var report = File.ReadAllText(reportFile);
 
-#if DEBUG
 					StringAssert.Contains(report, "## AspectGenerator trace");
 					StringAssert.Contains(report, "| AspectGeneratorTraceLevel | Normal |");
 					StringAssert.Contains(report, "AGTRACE warning: unknown AspectGeneratorTraceLevel 'NotALevel'; using Normal");
-#else
-					Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
-					Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
-#endif
 				}
 				finally
 				{
@@ -1431,7 +1421,6 @@ namespace AspectGenerator.Tests
 
 				var report = File.ReadAllText(reportFile);
 
-#if DEBUG
 				StringAssert.Contains(report, "## AspectGenerator trace");
 				StringAssert.Contains(report, "| Aspect definitions | 0 |");
 				StringAssert.Contains(report, "| Intercepted call sites | 0 |");
@@ -1443,10 +1432,6 @@ namespace AspectGenerator.Tests
 				StringAssert.Contains(report, "AGTRACE decision: Fast path: no AspectAttribute definitions found.");
 				StringAssert.Contains(report, "AGTRACE phase: scan-call-sites: skipped");
 				StringAssert.Contains(report, "AGTRACE decision: ag0004: skipped reason=no-generated-interceptors");
-#else
-				Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
-				Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
-#endif
 			}
 			finally
 			{
@@ -1471,7 +1456,6 @@ namespace AspectGenerator.Tests
 
 				var report = File.ReadAllText(reportFile);
 
-#if DEBUG
 				StringAssert.Contains(report, "## AspectGenerator trace");
 				StringAssert.Contains(report, "| Aspect definitions | 1 |");
 				StringAssert.Contains(report, "| Applied aspect attributes | 0 |");
@@ -1483,10 +1467,6 @@ namespace AspectGenerator.Tests
 				StringAssert.Contains(report, "AGTRACE counter: applied-aspects=0");
 				StringAssert.Contains(report, "AGTRACE phase: scan-call-sites: skipped");
 				StringAssert.Contains(report, "AGTRACE decision: scan-call-sites: skipped reason=no-applied-aspects");
-#else
-				Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
-				Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
-#endif
 			}
 			finally
 			{
@@ -1511,7 +1491,6 @@ namespace AspectGenerator.Tests
 
 				var report = File.ReadAllText(reportFile);
 
-#if DEBUG
 				AssertNotGenerated(result, "Interceptors.g.cs");
 				StringAssert.Contains(report, "## AspectGenerator trace");
 				StringAssert.Contains(report, "| Applied aspect attributes | 1 |");
@@ -1526,10 +1505,6 @@ namespace AspectGenerator.Tests
 				StringAssert.Contains(report, "scan-call-sites: skipped reason=no-selected-target-methods");
 				StringAssert.Contains(report, "resolve-call-symbols: skipped reason=no-selected-target-methods");
 				StringAssert.Contains(report, "AGTRACE counter: symbol-resolution-attempts=0");
-#else
-				Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
-				Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
-#endif
 			}
 			finally
 			{
@@ -1554,7 +1529,6 @@ namespace AspectGenerator.Tests
 
 				var report = File.ReadAllText(reportFile);
 
-#if DEBUG
 				StringAssert.Contains(report, "| Invocation candidates before prefilter | 7 |");
 				StringAssert.Contains(report, "| Invocation candidates after prefilter | 2 |");
 				StringAssert.Contains(report, "| Symbol resolution attempts | 2 |");
@@ -1566,10 +1540,6 @@ namespace AspectGenerator.Tests
 				StringAssert.Contains(report, "AGTRACE counter: call-site-prefilter-rejected-generic-arity=1");
 				StringAssert.Contains(report, "AGTRACE counter: call-site-prefilter-rejected-argument-count=1");
 				StringAssert.Contains(report, "AGTRACE counter: call-site-prefilter-rejected-receiver-type=1");
-#else
-				Assert.IsFalse(report.Contains("## AspectGenerator trace", StringComparison.Ordinal));
-				Assert.IsFalse(report.Contains("AGTRACE", StringComparison.Ordinal));
-#endif
 			}
 			finally
 			{

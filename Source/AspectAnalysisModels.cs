@@ -15,6 +15,7 @@ namespace AspectGenerator
 		public bool?                     PublicApi;
 		public bool?                     DebuggerStepThrough;
 		public string?                   ReportFile;
+		public string?                   ReportSizeLimit;
 		public AspectDiagnosticSeverity? AspectDiagnosticSeverity;
 		public string?                   InvalidAspectDiagnosticSeverityValue;
 		public bool?                     Trace;
@@ -36,6 +37,7 @@ namespace AspectGenerator
 		bool                     PublicApi,
 		bool                     DebuggerStepThrough,
 		string?                  ReportFile,
+		long                     ReportSizeLimit,
 		AspectDiagnosticSeverity AspectDiagnosticSeverity,
 		bool                     Trace,
 		AspectTraceLevel         TraceLevel,

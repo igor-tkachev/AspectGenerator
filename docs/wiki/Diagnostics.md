@@ -82,6 +82,14 @@ obj/GeneratedFiles/AspectGenerator/AspectGeneratorBuildReport.md
 
 The report is not printed to the console. Users who need it can inspect the report file directly. Design-time builds do not write the report, and a known editor never does, also when it builds after a real build (its report would describe an edit in progress); the `Generator host` row of the summary names the process that wrote it.
 
+The report is limited to 1,024 KB by default (`AspectGeneratorReportSizeLimit`, in kilobytes): a broad target filter on a large project selects tens of thousands of calls, and a report that lists each of them reaches tens of megabytes. The summary and the generated sources are always complete. When the lists of target methods and call sites do not fit, the report lists their first rows (the target methods take at most half of the space left) and says under each list how many rows it left out. Set `AspectGeneratorReportSizeLimit` to `0` to list everything, or to a larger size; a value that is not a whole number of kilobytes uses the default.
+
+```xml
+<PropertyGroup>
+  <AspectGeneratorReportSizeLimit>0</AspectGeneratorReportSizeLimit>
+</PropertyGroup>
+```
+
 ## Build Report Trace
 
 `AspectGeneratorTrace` adds internal generator diagnostics to the existing build report file:
@@ -95,16 +103,9 @@ The report is not printed to the console. Users who need it can inspect the repo
 
 The trace section contains generator-visible options, `AGTRACE`-prefixed events, counters, timings, and fast-path decisions such as skipped interceptor generation or skipped namespace validation. Supported trace levels are `Normal` and `Verbose`. Trace is disabled by default, does not create a second file, and does not emit compiler diagnostics.
 
-Trace implementation is compiled into Debug-built AspectGenerator packages only. Release-built packages accept `AspectGeneratorTrace=true` but do not write an `AspectGenerator trace` section.
+Trace works in the published (Release-built) package; there is no need to build AspectGenerator from source for it. A build with trace off does not collect it. The trace section is always written in full; it counts towards `AspectGeneratorReportSizeLimit`, and the lists get what is left.
 
-For local AGTRACE package debugging, pack AspectGenerator in Debug configuration:
-
-```shell
-# From the root of an AspectGenerator clone; add the output folder as a local NuGet package source.
-dotnet pack Source/AspectGenerator.csproj -c Debug -o local-nuget -p:PackageVersion=2.0.0-dev.trace.1
-```
-
-For local package debugging, build one project and one target framework:
+To investigate a build, build one project and one target framework:
 
 ```bat
 dotnet build MyProject.csproj -f net10.0 -p:AspectGeneratorTrace=true /clp:PerformanceSummary /bl

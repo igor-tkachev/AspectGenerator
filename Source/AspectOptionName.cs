@@ -9,6 +9,7 @@ namespace AspectGenerator
 		public const string PublicApi                = "PublicApi";
 		public const string DebuggerStepThrough      = "DebuggerStepThrough";
 		public const string ReportFile               = "ReportFile";
+		public const string ReportSizeLimit          = "ReportSizeLimit";
 		public const string AspectDiagnosticSeverity = "AspectDiagnosticSeverity";
 		public const string Trace                    = "Trace";
 		public const string TraceLevel               = "TraceLevel";
