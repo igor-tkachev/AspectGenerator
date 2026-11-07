@@ -722,7 +722,7 @@ namespace AspectGenerator
 				filterAttribute,
 				semanticModel,
 				"TargetFilter");
-			var filters = CompileAspectFilters(definition.DefaultTargetFilter, targetFilter, filterAttribute.GetLocation());
+			var filters = CompileAspectFilters(definition, targetFilter, GetNamedArgumentExpression(filterAttribute, "TargetFilter"), filterAttribute.GetLocation());
 
 			if (filters.IsEmpty)
 				return null;
@@ -751,7 +751,8 @@ namespace AspectGenerator
 				? Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span)
 				: null;
 			var targetFilter = GetNamedFilterValue(filterAttribute, "TargetFilter");
-			var filters      = CompileAspectFilters(definition.DefaultTargetFilter, targetFilter, location);
+			var expression   = GetNamedArgumentExpression(filterAttribute.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax, "TargetFilter");
+			var filters      = CompileAspectFilters(definition, targetFilter, expression, location);
 
 			if (filters.IsEmpty)
 				return null;
@@ -799,19 +800,45 @@ namespace AspectGenerator
 			return null;
 		}
 
-		AspectFilters.TargetFilterSet CompileAspectFilters(string? defaultTargetFilter, object? targetFilter, Location? location)
+		/// <summary>
+		/// Compiles the filters of an aspect application: the aspect's <c>DefaultTargetFilter</c> and the application's
+		/// <c>TargetFilter</c> (a string or an array of them), read as one list of lines. A diagnostic points at the characters
+		/// of the filter it is about where they can be found in the source (<see cref="TargetFilterSourceMap"/>): the
+		/// <c>TargetFilter</c> argument of the application, or the <c>DefaultTargetFilter</c> argument of an aspect declared in
+		/// the compilation. Otherwise, as for an aspect of a referenced assembly, it points at <paramref name="location"/>,
+		/// the application.
+		/// </summary>
+		AspectFilters.TargetFilterSet CompileAspectFilters(AttributeInfo definition, object? targetFilter, ExpressionSyntax? targetFilterExpression, Location? location)
 		{
 			var filters = new List<string?>();
+			var sources = new List<ExpressionSyntax?>();
 
 			if (targetFilter is null)
+			{
 				filters.Add("method: *");
+				sources.Add(null);
+			}
 
-			filters.Add(defaultTargetFilter);
+			filters.Add(definition.DefaultTargetFilter);
+			sources.Add(GetNamedArgumentExpression(definition.AspectDefinitionSyntax, "DefaultTargetFilter"));
 
 			if (targetFilter is object?[] values)
-				filters.AddRange(values.Select(static value => value as string));
+			{
+				var elements = GetArrayElements(targetFilterExpression);
+
+				for (var i = 0; i < values.Length; i++)
+				{
+					filters.Add(values[i] as string);
+					sources.Add(elements is not null && elements.Count == values.Length ? elements[i] : null);
+				}
+			}
 			else
+			{
 				filters.Add(targetFilter as string);
+				sources.Add(targetFilterExpression);
+			}
+
+			var maps = default(Dictionary<int,TargetFilterSourceMap?>);
 
 			return AspectFilters.GetFilters(filters, ReportFilterDiagnostic);
 
@@ -820,9 +847,46 @@ namespace AspectGenerator
 				_diagnostics.Report(
 					diagnostic.Id,
 					diagnostic.Message,
-					location,
+					Locate(diagnostic) ?? location,
 					diagnostic.Severity);
 			}
+
+			Location? Locate(AspectFilters.TargetFilterDiagnostic diagnostic)
+			{
+				var index = diagnostic.FilterIndex;
+
+				if (index < 0 || sources[index] is not {} expression || filters[index] is not {} text)
+					return null;
+
+				maps ??= new Dictionary<int,TargetFilterSourceMap?>();
+
+				if (!maps.TryGetValue(index, out var map))
+					maps[index] = map = TargetFilterSourceMap.Create(expression, _compilation, text);
+
+				return map?.Locate(diagnostic.FilterSpan);
+			}
+		}
+
+		/// <summary>The expression of the named argument <paramref name="name"/> of <paramref name="attribute"/>, or <see langword="null"/>.</summary>
+		static ExpressionSyntax? GetNamedArgumentExpression(AttributeSyntax? attribute, string name)
+		{
+			foreach (var arg in attribute?.ArgumentList?.Arguments ?? default)
+				if (arg.NameEquals?.Name.Identifier.ValueText == name)
+					return arg.Expression;
+
+			return null;
+		}
+
+		/// <summary>The elements of an array argument, in the order <see cref="AspectSymbols.GetAttributeArgumentValue"/> reads them.</summary>
+		static IReadOnlyList<ExpressionSyntax>? GetArrayElements(ExpressionSyntax? expression)
+		{
+			return expression switch
+			{
+				ImplicitArrayCreationExpressionSyntax { Initializer.Expressions: var values } => values,
+				ArrayCreationExpressionSyntax { Initializer.Expressions: var values }         => values,
+				CollectionExpressionSyntax { Elements: var elements }                         => elements.OfType<ExpressionElementSyntax>().Select(static e => e.Expression).ToArray(),
+				_                                                                             => null
+			};
 		}
 
 		void AddMatchedFilterAttributes(

@@ -22,12 +22,13 @@ namespace AspectGenerator.Tests
 			Assert.IsNotNull(controlDiagnostic);
 			Assert.AreEqual(controlDiagnostic.Location.IsInSource, diagnostic.Location.IsInSource);
 
-			// Today the diagnostic sits on the attribute that carries the filter.
-			var attribute = "AspectGenerator.Tests.GeneratorDriver.BadFilterAspect(TargetFilter = \"Save.\\nmethod: Ping\")";
-			var start     = source.IndexOf(attribute, StringComparison.Ordinal);
+			// The diagnostic points at the rule inside the string literal.
+			var literal = "TargetFilter = \"Save.\\nmethod: Ping\"";
+			var at      = source.IndexOf(literal, StringComparison.Ordinal);
+			var start   = at + "TargetFilter = \"".Length;
 
-			Assert.IsTrue(start >= 0);
-			Assert.AreEqual(new Microsoft.CodeAnalysis.Text.TextSpan(start, attribute.Length), diagnostic.Location.SourceSpan, "Actual: " + diagnostic.Location.SourceTree?.GetText().ToString(diagnostic.Location.SourceSpan));
+			Assert.IsTrue(at >= 0);
+			Assert.AreEqual(new Microsoft.CodeAnalysis.Text.TextSpan(start, "Save.".Length), diagnostic.Location.SourceSpan, "Actual: " + diagnostic.Location.SourceTree?.GetText().ToString(diagnostic.Location.SourceSpan));
 			Assert.IsFalse(result.Results.Any(static r => r.Exception is not null), "The generator threw.");
 
 			Assert.IsFalse(

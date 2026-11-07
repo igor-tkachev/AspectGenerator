@@ -2759,6 +2759,11 @@ namespace AspectGenerator.Tests
 			{
 				public static void After(InterceptInfo<string> info) => info.ReturnValue += " logged";
 			}
+
+			public static class LibraryFilters
+			{
+				public const string Bad = "foo: bar";
+			}
 			""";
 
 		const string LibraryHookDiagnosticsSource =

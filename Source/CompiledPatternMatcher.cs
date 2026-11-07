@@ -94,12 +94,13 @@ namespace AspectGenerator
 		/// <summary>One <c>key: value</c> item of a condition group, with the text its value is read from.</summary>
 		readonly struct ConditionItem
 		{
-			public ConditionItem(string key, string value, bool forceAnd, string source, TextSpan valueSpan)
+			public ConditionItem(string key, string value, bool forceAnd, string source, int line, TextSpan valueSpan)
 			{
 				Key       = key;
 				Value     = value;
 				ForceAnd  = forceAnd;
 				Source    = source;
+				Line      = line;
 				ValueSpan = valueSpan;
 			}
 
@@ -109,6 +110,8 @@ namespace AspectGenerator
 			public bool     ForceAnd  { get; }
 			/// <summary>The text <see cref="ValueSpan"/> is a span of.</summary>
 			public string   Source    { get; }
+			/// <summary>The index of the rule line <see cref="Source"/> is.</summary>
+			public int      Line      { get; }
 			public TextSpan ValueSpan { get; }
 		}
 

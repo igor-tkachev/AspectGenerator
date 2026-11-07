@@ -22,15 +22,15 @@ namespace AspectGenerator
 		static class GramTargetFilterFront
 		{
 			/// <summary>Reads one rule line; <see langword="false"/>, with a diagnostic, for a line without a body.</summary>
-			public static bool TryReadRule(string text, List<TargetFilterDiagnostic> diagnostics, out FilterRule rule)
+			public static bool TryReadRule(string text, int line, List<TargetFilterDiagnostic> diagnostics, out FilterRule rule)
 			{
 				rule = null!;
 
-				TargetFilterLineSyntax line;
+				TargetFilterLineSyntax syntax;
 
 				try
 				{
-					line = Read(TargetFilterParser.TryParseLine(text), text);
+					syntax = Read(TargetFilterParser.TryParseLine(text), text);
 				}
 				catch (Exception ex) when (Unreadable(ex, text) is {} diagnostic)
 				{
@@ -38,8 +38,8 @@ namespace AspectGenerator
 					return false;
 				}
 
-				var body    = line.Body;
-				var matcher = line.Matcher switch
+				var body    = syntax.Body;
+				var matcher = syntax.Matcher switch
 				{
 					TargetFilterMatcher.Pattern  => FilterMatcher.ExplicitPattern,
 					TargetFilterMatcher.Contains => FilterMatcher.Contains,
@@ -50,13 +50,13 @@ namespace AspectGenerator
 				if (body is EmptyBodySyntax)
 				{
 					// What follows the operator, as the rule says it: "contains:", or nothing at all.
-					var afterOperator = line.Matcher == TargetFilterMatcher.Native ? body.Span.Start : line.MatcherSpan.Start;
+					var afterOperator = syntax.Matcher == TargetFilterMatcher.Native ? body.Span.Start : syntax.MatcherSpan.Start;
 
 					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text[afterOperator..], "Target filter rule body cannot be empty."));
 					return false;
 				}
 
-				var prefix = line.Prefix switch
+				var prefix = syntax.Prefix switch
 				{
 					TargetFilterLinePrefix.Exclude => RulePrefix.Exclude,
 					TargetFilterLinePrefix.And     => RulePrefix.And,
@@ -64,10 +64,10 @@ namespace AspectGenerator
 					_                              => RulePrefix.None
 				};
 
-				var isNative   = line.Matcher == TargetFilterMatcher.Native;
+				var isNative   = syntax.Matcher == TargetFilterMatcher.Native;
 				var unknownKey = isNative && body is UnknownKeyBodySyntax unknown ? Text(text, unknown.Key) : null;
 
-				rule = new FilterRule(text, prefix, matcher, Text(text, body.Span), unknownKey, isNative && body is ConditionLineSyntax, line);
+				rule = new FilterRule(text, line, prefix, matcher, Text(text, body.Span), unknownKey, isNative && body is ConditionLineSyntax, syntax);
 				return true;
 			}
 
@@ -153,46 +153,10 @@ namespace AspectGenerator
 						if (span.IsEmpty)
 							continue;
 
-						switch (Read(TargetFilterParser.TryParseConditionItem(source, span.Start, span.Length), source))
-						{
-							case KeyItemSyntax keyItem:
-							{
-								var key = Text(source, keyItem.Key);
+						var mark = diagnostics.Count;
 
-								if (!IsConditionKey(key))
-								{
-									diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(key));
-									valid = false;
-									continue;
-								}
-
-								items.Add(new ConditionItem(key, Text(source, keyItem.Value), forceAnd, source, keyItem.Value));
-								break;
-							}
-
-							case WordsItemSyntax wordsItem:
-								foreach (var word in wordsItem.Words.Words)
-								{
-									var token = Text(source, word);
-
-									if (TryReadAccessibility(token, out var accessibilityMask))
-									{
-										accessibility |= accessibilityMask;
-										continue;
-									}
-
-									if (TryReadModifier(token, out var modifierMask))
-									{
-										modifiers |= modifierMask;
-										continue;
-									}
-
-									diagnostics.Add(TargetFilterDiagnostic.InvalidRule(Text(source, span), "Condition item must contain only modifier/accessibility tokens or 'key: value'."));
-									valid = false;
-								}
-
-								break;
-						}
+						ReadItem(rule, forceAnd, span);
+						Place(diagnostics, mark, rule.Line, span);
 					}
 				}
 
@@ -202,30 +166,88 @@ namespace AspectGenerator
 				foreach (var bucket in GroupConditionItems(items))
 				{
 					// One value is read where it stands; the values of one key are alternatives, and are read as the text
-					// they make when joined, as that is what the language has always read.
-					var value  = bucket.Items.Count == 1 ? bucket.Items[0].Value     : bucket.Value;
-					var source = bucket.Items.Count == 1 ? bucket.Items[0].Source    : value;
-					var span   = bucket.Items.Count == 1 ? bucket.Items[0].ValueSpan : new TextSpan(0, value.Length);
+					// they make when joined, as that is what the language has always read. That text stands nowhere in the
+					// lines: what it reports points at the values it was joined from.
+					var single = bucket.Items.Count == 1;
+					var value  = single ? bucket.Items[0].Value     : bucket.Value;
+					var source = single ? bucket.Items[0].Source    : value;
+					var span   = single ? bucket.Items[0].ValueSpan : new TextSpan(0, value.Length);
 					var syntax = Read(TargetFilterParser.TryParseConditionValue(source, span.Start, span.Length), source);
+					var mark   = diagnostics.Count;
 
-					if (TryCompileCondition(bucket.Key, source, value, syntax, diagnostics, out var condition, out var conditionWhiteSpace))
+					if (TryCompileCondition(bucket.Key, source, value, span, syntax, diagnostics, out var condition, out var conditionWhiteSpace))
 					{
 						conditions.Add(condition);
 						whiteSpace ??= conditionWhiteSpace;
 					}
 					else
 						valid = false;
+
+					var first = bucket.Items[0];
+					var last  = bucket.Items[^1];
+
+					if (single)
+						Place(diagnostics, mark, first.Line, first.ValueSpan);
+					else
+						Place(diagnostics, mark, new RuleLinesSpan(first.Line, first.ValueSpan.Start, last.Line, last.ValueSpan.End));
 				}
 
 				compiledPattern = CompiledPatternMatcher.Create(accessibility, modifiers, conditions.ToImmutable(), null, null, null);
 				notes           = valid ? new RuleNotes(MatchesNothing(accessibility), whiteSpace) : default;
 				return valid;
+
+				void ReadItem(FilterRule rule, bool forceAnd, TextSpan span)
+				{
+					var source = rule.Text;
+
+					switch (Read(TargetFilterParser.TryParseConditionItem(source, span.Start, span.Length), source))
+					{
+						case KeyItemSyntax keyItem:
+						{
+							var key = Text(source, keyItem.Key);
+
+							if (!IsConditionKey(key))
+							{
+								diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(key).At(keyItem.Key));
+								valid = false;
+								return;
+							}
+
+							items.Add(new ConditionItem(key, Text(source, keyItem.Value), forceAnd, source, rule.Line, keyItem.Value));
+							break;
+						}
+
+						case WordsItemSyntax wordsItem:
+							foreach (var word in wordsItem.Words.Words)
+							{
+								var token = Text(source, word);
+
+								if (TryReadAccessibility(token, out var accessibilityMask))
+								{
+									accessibility |= accessibilityMask;
+									continue;
+								}
+
+								if (TryReadModifier(token, out var modifierMask))
+								{
+									modifiers |= modifierMask;
+									continue;
+								}
+
+								diagnostics.Add(TargetFilterDiagnostic.InvalidRule(Text(source, span), "Condition item must contain only modifier/accessibility tokens or 'key: value'.").At(word));
+								valid = false;
+							}
+
+							break;
+					}
+				}
 			}
 
 			static bool TryCompileCondition(
 				string                       key,
 				string                       source,
 				string                       value,
+				TextSpan                     span,
 				ConditionValueSyntax         syntax,
 				List<TargetFilterDiagnostic> diagnostics,
 				out Condition                condition,
@@ -240,9 +262,9 @@ namespace AspectGenerator
 
 				var alternatives = syntax.Alternatives;
 
-				if (alternatives.Any(a => Trim(source, a.Span).IsEmpty))
+				if (alternatives.FirstOrDefault(a => Trim(source, a.Span).IsEmpty) is {} empty)
 				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(value, "Condition value has an empty operand around '|'."));
+					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(value, "Condition value has an empty operand around '|'.").At(OperatorNextTo(source, empty.Span, '|', span)));
 					return false;
 				}
 
@@ -285,10 +307,13 @@ namespace AspectGenerator
 				whiteSpace = null;
 
 				var operands = alternative.Operands.Select(o => Trim(source, o)).ToArray();
+				var empty    = Array.FindIndex(operands, static o => o.IsEmpty);
 
-				if (operands.Any(static o => o.IsEmpty))
+				if (empty >= 0)
 				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(Text(source, Trim(source, alternative.Span)), "Condition value has an empty operand around '&'."));
+					var quoted = Trim(source, alternative.Span);
+
+					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(Text(source, quoted), "Condition value has an empty operand around '&'.").At(OperatorNextTo(source, alternative.Operands[empty], '&', quoted)));
 					return false;
 				}
 
@@ -313,7 +338,23 @@ namespace AspectGenerator
 				return valid;
 			}
 
+			/// <summary>One operand of a condition value, over a trimmed span; what it reports points into the operand.</summary>
 			static bool TryCompileSingle(
+				string                       key,
+				string                       source,
+				TextSpan                     span,
+				List<TargetFilterDiagnostic> diagnostics,
+				out Condition                condition,
+				out string?                  whiteSpace)
+			{
+				var mark  = diagnostics.Count;
+				var valid = TryCompileOperand(key, source, span, diagnostics, out condition, out whiteSpace);
+
+				Fill(diagnostics, mark, span);
+				return valid;
+			}
+
+			static bool TryCompileOperand(
 				string                       key,
 				string                       source,
 				TextSpan                     span,
@@ -414,11 +455,18 @@ namespace AspectGenerator
 						// What comes before the return type, as the message has always quoted it.
 						var before = TextSpan.FromBounds(syntax.Span.Start, syntax.Returns is {} r ? r.Start - 1 : syntax.Span.End);
 
-						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(Text(source, Trim(source, before)), "Parameter list must end the method pattern before an optional return pattern."));
+						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(Text(source, Trim(source, before)), "Parameter list must end the method pattern before an optional return pattern.").At(Trim(source, before)));
 						valid = false;
 					}
-					else if (!TryCompileParameterList(source, group.Inner, diagnostics, out parameters))
-						valid = false;
+					else
+					{
+						var mark = diagnostics.Count;
+
+						if (!TryCompileParameterList(source, group.Inner, diagnostics, out parameters))
+							valid = false;
+
+						Fill(diagnostics, mark, Trim(source, group.Inner));
+					}
 				}
 
 				var name  = Trim(source, syntax.Name);
@@ -451,12 +499,18 @@ namespace AspectGenerator
 
 				if (patternText.Length == 0)
 				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(Text(source, name), "Method pattern is missing."));
+					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(Text(source, name), "Method pattern is missing.").At(name));
 					matcher = CompiledPatternMatcher.Create(accessibility, modifiers, [], null, parameters, returnType);
 					return false;
 				}
 
-				if (!TryCompileDotted(patternText, Read(TargetFilterParser.TryParseDotted(patternText), patternText), patternText, allowRecursiveFinalSegment: false, diagnostics, out var methodPattern, out var nameWhiteSpace))
+				// The name is read as the words make it; what it reports points at the words in the line.
+				var nameMark = diagnostics.Count;
+				var compiled = TryCompileDotted(patternText, Read(TargetFilterParser.TryParseDotted(patternText), patternText), patternText, allowRecursiveFinalSegment: false, diagnostics, out var methodPattern, out var nameWhiteSpace);
+
+				Reanchor(diagnostics, nameMark, TextSpan.FromBounds(words[index].Start, words[^1].End));
+
+				if (!compiled)
 				{
 					valid = false;
 
@@ -506,11 +560,21 @@ namespace AspectGenerator
 
 				if (text.Length == 0)
 				{
-					diagnostics.Add(TypePattern.Empty(text));
+					diagnostics.Add(TypePattern.Empty(text).At(span));
 					return false;
 				}
 
-				text = TypePattern.ExpandTypeAliases(text);
+				// The aliases are expanded into a text of its own; what it reports points at the type as written.
+				var mark  = diagnostics.Count;
+				var valid = TryCompileExpandedType(TypePattern.ExpandTypeAliases(text), diagnostics, out pattern);
+
+				Reanchor(diagnostics, mark, span);
+				return valid;
+			}
+
+			static bool TryCompileExpandedType(string text, List<TargetFilterDiagnostic> diagnostics, out TypePattern pattern)
+			{
+				pattern = null!;
 
 				var dotted = Read(TargetFilterParser.TryParseDotted(text), text);
 
@@ -565,7 +629,7 @@ namespace AspectGenerator
 					{
 						if (ellipsisIndex >= 0)
 						{
-							diagnostics.Add(TargetFilterDiagnostic.InvalidParameterPattern(text, "Parameter wildcard '...' can appear at most once."));
+							diagnostics.Add(TargetFilterDiagnostic.InvalidParameterPattern(text, "Parameter wildcard '...' can appear at most once.").At(part));
 							valid = false;
 						}
 
@@ -574,8 +638,11 @@ namespace AspectGenerator
 						continue;
 					}
 
+					var mark = diagnostics.Count;
+
 					if (!TryCompileParameter(source, part, diagnostics, out var parameterPattern))
 					{
+						Fill(diagnostics, mark, part);
 						valid = false;
 						continue;
 					}
@@ -601,7 +668,7 @@ namespace AspectGenerator
 						return true;
 
 					case ParameterSyntaxKind.This:
-						diagnostics.Add(TargetFilterDiagnostic.InvalidParameterPattern(Text(source, parameter.Type), "'this' is not supported in parameter patterns."));
+						diagnostics.Add(TargetFilterDiagnostic.InvalidParameterPattern(Text(source, parameter.Type), "'this' is not supported in parameter patterns.").At(span));
 						return false;
 
 					default:
@@ -681,6 +748,21 @@ namespace AspectGenerator
 			}
 
 			// ---- reading ----
+
+			/// <summary>
+			/// The operator <paramref name="op"/> next to the empty operand at <paramref name="operand"/>: the one after it, or
+			/// the one before it for the last operand; <paramref name="fallback"/> where neither stands there.
+			/// </summary>
+			static TextSpan OperatorNextTo(string source, TextSpan operand, char op, TextSpan fallback)
+			{
+				if (operand.End < source.Length && source[operand.End] == op)
+					return new TextSpan(operand.End, 1);
+
+				if (operand.Start > 0 && source[operand.Start - 1] == op)
+					return new TextSpan(operand.Start - 1, 1);
+
+				return fallback;
+			}
 
 			static T Read<T>(TargetFilterParser.Match<T> match, string source)
 			{

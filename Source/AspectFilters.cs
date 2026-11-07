@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 
 namespace AspectGenerator
 {
@@ -25,11 +26,17 @@ namespace AspectGenerator
 			return GetFilters([filter], reportDiagnostic);
 		}
 
+		/// <summary>
+		/// Reads the filters as one list of rule lines. A diagnostic reported names, where it can be told, the filter it
+		/// points into (<see cref="TargetFilterDiagnostic.FilterIndex"/>, the index in <paramref name="filters"/>) and the
+		/// characters of that filter (<see cref="TargetFilterDiagnostic.FilterSpan"/>).
+		/// </summary>
 		public static TargetFilterSet GetFilters(
 			IEnumerable<string?>            filters,
 			Action<TargetFilterDiagnostic>? reportDiagnostic = null)
 		{
-			var key = new TargetFilterKey(ReadRules(filters));
+			var origins = reportDiagnostic is null ? null : new List<RuleOrigin>();
+			var key     = new TargetFilterKey(ReadRules(filters, origins));
 
 			if (_filterCache.Count > MaxCacheEntries)
 				_filterCache.Clear();
@@ -41,13 +48,13 @@ namespace AspectGenerator
 			if (set.HasTransientDiagnostics)
 				_filterCache.TryRemove(key, out _);
 
-			return set.ReportDiagnostics(reportDiagnostic);
+			return set.ReportDiagnostics(reportDiagnostic, origins);
 		}
 
 		/// <summary>The filters as <see cref="GetFilters(IEnumerable{string?}, Action{TargetFilterDiagnostic}?)"/> reads them, without the cache: for the tests that time the reader.</summary>
 		internal static TargetFilterSet ReadFiltersUncached(IEnumerable<string?> filters)
 		{
-			return CreateFilterSet(ReadRules(filters).ToArray());
+			return CreateFilterSet(ReadRules(filters, null).ToArray());
 		}
 
 		static TargetFilterSet CreateFilterSet(string[] rules)
@@ -58,22 +65,64 @@ namespace AspectGenerator
 			return TargetFilterSet.Create(filters, diagnostics.ToArray());
 		}
 
-		/// <summary>The rule lines of the filters: every line break ends a line, every line is trimmed, blank lines and comments are dropped.</summary>
-		static List<string> ReadRules(IEnumerable<string?> filters)
+		/// <summary>
+		/// The rule lines of the filters: every line break (CR LF, CR or LF) ends a line, every line is trimmed, blank lines
+		/// and comments are dropped. <paramref name="origins"/>, when given, receives where each rule line stands.
+		/// </summary>
+		static List<string> ReadRules(IEnumerable<string?> filters, List<RuleOrigin>? origins)
 		{
 			var rules = new List<string>();
+			var index = -1;
 
 			foreach (var item in filters)
-				if (item is not null)
-					foreach (var line in item.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
-					{
-						var rule = line.Trim();
+			{
+				index++;
 
-						if (rule.Length > 0 && !rule.StartsWith("#", StringComparison.Ordinal))
-							rules.Add(rule);
+				if (item is null)
+					continue;
+
+				var start = 0;
+
+				while (start <= item.Length)
+				{
+					var end = start;
+
+					while (end < item.Length && item[end] is not ('\r' or '\n'))
+						end++;
+
+					var first = start;
+					var last  = end;
+
+					while (first < last && char.IsWhiteSpace(item[first]))
+						first++;
+
+					while (last > first && char.IsWhiteSpace(item[last - 1]))
+						last--;
+
+					if (last > first && item[first] != '#')
+					{
+						rules.Add(item.Substring(first, last - first));
+						origins?.Add(new RuleOrigin(index, first));
 					}
 
+					start = end < item.Length && item[end] == '\r' && end + 1 < item.Length && item[end + 1] == '\n' ? end + 2 : end + 1;
+				}
+			}
+
 			return rules;
+		}
+
+		/// <summary>Where a rule line stands: the index of its filter, and where the trimmed line begins in it.</summary>
+		internal readonly struct RuleOrigin
+		{
+			public RuleOrigin(int filter, int start)
+			{
+				Filter = filter;
+				Start  = start;
+			}
+
+			public int Filter { get; }
+			public int Start  { get; }
 		}
 
 		/// <summary>
@@ -90,10 +139,22 @@ namespace AspectGenerator
 			var previousGroupAction  = default(bool?);
 			var previousWasConditionGroup = false;
 
-			foreach (var text in rules)
+			for (var line = 0; line < rules.Length; line++)
 			{
-				if (!GramTargetFilterFront.TryReadRule(text, diagnostics, out var rule))
-					continue;
+				var mark = diagnostics.Count;
+
+				// What a line reports points into it; where a step tells no closer place, at the whole line.
+				ReadLine(rules[line], line);
+				Place(diagnostics, mark, line, new TextSpan(0, rules[line].Length));
+			}
+
+			FlushConditionGroup();
+			return result.ToArray();
+
+			void ReadLine(string text, int index)
+			{
+				if (!GramTargetFilterFront.TryReadRule(text, index, diagnostics, out var rule))
+					return;
 
 				var prefix  = rule.Prefix;
 				var matcher = rule.Matcher;
@@ -101,8 +162,8 @@ namespace AspectGenerator
 
 				if (prefix is RulePrefix.And or RulePrefix.Or && matcher != FilterMatcher.Pattern)
 				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, $"Line prefix '{(prefix == RulePrefix.And ? "&" : "|")}' can only be used with native condition rules."));
-					continue;
+					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, $"Line prefix '{(prefix == RulePrefix.And ? "&" : "|")}' can only be used with native condition rules.").At(rule.Syntax.PrefixSpan));
+					return;
 				}
 
 				if (matcher == FilterMatcher.Contains)
@@ -110,7 +171,7 @@ namespace AspectGenerator
 					FlushConditionGroup();
 					result.Add(new ContainsFilter(prefix == RulePrefix.Exclude, FormatRule(prefix, body), body));
 					previousWasConditionGroup = false;
-					continue;
+					return;
 				}
 
 				if (matcher == FilterMatcher.Regex)
@@ -120,12 +181,12 @@ namespace AspectGenerator
 					var regex = GetRegex(body);
 
 					if (regex.Regex is null)
-						diagnostics.Add(TargetFilterDiagnostic.InvalidRegex(body, regex.ErrorMessage ?? "Invalid regex pattern."));
+						diagnostics.Add(TargetFilterDiagnostic.InvalidRegex(body, regex.ErrorMessage ?? "Invalid regex pattern.").At(rule.Syntax.Body.Span));
 					else
 						result.Add(new RegexFilter(prefix == RulePrefix.Exclude, FormatRule(prefix, body), regex.Regex));
 
 					previousWasConditionGroup = false;
-					continue;
+					return;
 				}
 
 				if (matcher == FilterMatcher.ExplicitPattern)
@@ -133,23 +194,23 @@ namespace AspectGenerator
 					FlushConditionGroup();
 					AddPattern(prefix == RulePrefix.Exclude, rule);
 					previousWasConditionGroup = false;
-					continue;
+					return;
 				}
 
 				if (rule.UnknownKey is {} unknownKey)
 				{
 					FlushConditionGroup();
-					diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(unknownKey));
+					diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(unknownKey).At(((UnknownKeyBodySyntax)rule.Syntax.Body).Key));
 					previousWasConditionGroup = false;
-					continue;
+					return;
 				}
 
 				var isConditionLine = rule.IsConditionLine;
 
 				if (prefix is RulePrefix.And or RulePrefix.Or && !isConditionLine)
 				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, $"Line prefix '{(prefix == RulePrefix.And ? "&" : "|")}' can only be used with native condition rules."));
-					continue;
+					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, $"Line prefix '{(prefix == RulePrefix.And ? "&" : "|")}' can only be used with native condition rules.").At(rule.Syntax.PrefixSpan));
+					return;
 				}
 
 				if (!isConditionLine)
@@ -157,27 +218,27 @@ namespace AspectGenerator
 					FlushConditionGroup();
 					AddPattern(prefix == RulePrefix.Exclude, rule);
 					previousWasConditionGroup = false;
-					continue;
+					return;
 				}
 
 				if (prefix == RulePrefix.And)
 				{
 					if (conditionGroup is null)
 					{
-						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, "Leading '&' requires an active condition group."));
-						continue;
+						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, "Leading '&' requires an active condition group.").At(rule.Syntax.PrefixSpan));
+						return;
 					}
 
 					conditionGroup.Add(new ConditionGroupLine(rule, forceAnd: true));
-					continue;
+					return;
 				}
 
 				if (prefix == RulePrefix.Or)
 				{
 					if (conditionGroup is null && !previousWasConditionGroup)
 					{
-						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, "Leading '|' requires a previous native condition group."));
-						continue;
+						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, "Leading '|' requires a previous native condition group.").At(rule.Syntax.PrefixSpan));
+						return;
 					}
 
 					var action = conditionGroup is null ? previousGroupAction!.Value : conditionGroupAction;
@@ -186,7 +247,7 @@ namespace AspectGenerator
 					conditionGroup       = new List<ConditionGroupLine> { new(rule, forceAnd: false) };
 					conditionGroupAction = action;
 					previousGroupAction  = action;
-					continue;
+					return;
 				}
 
 				var isNegative = prefix == RulePrefix.Exclude;
@@ -205,13 +266,15 @@ namespace AspectGenerator
 				previousWasConditionGroup = false;
 			}
 
-			FlushConditionGroup();
-			return result.ToArray();
-
 			void AddPattern(bool isNegative, FilterRule rule)
 			{
+				var span = RuleLinesSpan.InLine(rule.Line, new TextSpan(0, rule.Text.Length));
+				var mark = diagnostics.Count;
+
 				if (GramTargetFilterFront.TryCompilePattern(rule, diagnostics, out var pattern, out var notes))
-					Add(new PatternFilter(isNegative, FormatRule(isNegative ? RulePrefix.Exclude : RulePrefix.None, rule.Body), pattern), notes);
+					Add(new PatternFilter(isNegative, FormatRule(isNegative ? RulePrefix.Exclude : RulePrefix.None, rule.Body), pattern), notes, span);
+
+				Place(diagnostics, mark, rule.Line, span.Span);
 			}
 
 			void FlushConditionGroup()
@@ -219,21 +282,29 @@ namespace AspectGenerator
 				if (conditionGroup is null)
 					return;
 
+				// A group is about all of its lines.
+				var first = conditionGroup[0].Rule;
+				var last  = conditionGroup[^1].Rule;
+				var span  = new RuleLinesSpan(first.Line, 0, last.Line, last.Text.Length);
+				var mark  = diagnostics.Count;
+
 				if (GramTargetFilterFront.TryCompileConditionGroup(conditionGroup, diagnostics, out var pattern, out var notes))
-					Add(new PatternFilter(conditionGroupAction, FormatConditionGroup(conditionGroupAction, conditionGroup), pattern), notes);
+					Add(new PatternFilter(conditionGroupAction, FormatConditionGroup(conditionGroupAction, conditionGroup), pattern), notes, span);
+
+				Place(diagnostics, mark, span);
 
 				previousWasConditionGroup = true;
 				previousGroupAction       = conditionGroupAction;
 				conditionGroup = null;
 			}
 
-			void Add(CompiledFilter filter, RuleNotes notes)
+			void Add(CompiledFilter filter, RuleNotes notes, RuleLinesSpan span)
 			{
 				if (notes.MatchesNothing is {} reason)
-					diagnostics.Add(TargetFilterDiagnostic.RuleMatchesNothing(filter.RuleText, reason, result.Count));
+					diagnostics.Add(TargetFilterDiagnostic.RuleMatchesNothing(filter.RuleText, reason, result.Count).InLines(span));
 
 				if (notes.WhiteSpaceSegment is {} segment)
-					diagnostics.Add(TargetFilterDiagnostic.NameWithWhiteSpace(filter.RuleText, segment, result.Count));
+					diagnostics.Add(TargetFilterDiagnostic.NameWithWhiteSpace(filter.RuleText, segment, result.Count).InLines(span));
 
 				result.Add(filter);
 			}
@@ -269,6 +340,71 @@ namespace AspectGenerator
 
 				return sb.ToString();
 			}
+		}
+
+		// ---- where a diagnostic points ----
+		//
+		// A diagnostic is made where the text it is about is read, often a piece of a line, a value or a pattern read on
+		// its own. It is given a span in that text (At); each step that read the text as a piece of a larger one widens or
+		// moves it into that one, until the line is known and it is placed in the rule lines (Place). A text made up for
+		// the reading, which stands nowhere in the line (an expanded type alias, the words of a method name joined), moves
+		// what it reported to the span it was made from.
+
+		/// <summary>Gives the diagnostics from <paramref name="from"/> on that have no span, or an empty one, <paramref name="span"/>, a span of the same text.</summary>
+		static void Fill(List<TargetFilterDiagnostic> diagnostics, int from, TextSpan span)
+		{
+			for (var i = from; i < diagnostics.Count; i++)
+				if (diagnostics[i].Lines is null && diagnostics[i].Span is not { IsEmpty: false })
+					diagnostics[i] = diagnostics[i].At(span);
+		}
+
+		/// <summary>Moves the diagnostics from <paramref name="from"/> on, made over a text that stands nowhere in the line, to <paramref name="span"/>, the span it was made from.</summary>
+		static void Reanchor(List<TargetFilterDiagnostic> diagnostics, int from, TextSpan span)
+		{
+			for (var i = from; i < diagnostics.Count; i++)
+				if (diagnostics[i].Lines is null)
+					diagnostics[i] = diagnostics[i].At(span);
+		}
+
+		/// <summary>Places the diagnostics from <paramref name="from"/> on, made over rule line <paramref name="line"/>, in it; those with no span, or an empty one, at <paramref name="span"/>.</summary>
+		static void Place(List<TargetFilterDiagnostic> diagnostics, int from, int line, TextSpan span)
+		{
+			for (var i = from; i < diagnostics.Count; i++)
+				if (diagnostics[i].Lines is null)
+					diagnostics[i] = diagnostics[i].InLines(RuleLinesSpan.InLine(line, diagnostics[i].Span is { IsEmpty: false } own ? own : span));
+		}
+
+		/// <summary>Places the diagnostics from <paramref name="from"/> on that are not placed yet at <paramref name="span"/>, whatever text they were made over.</summary>
+		static void Place(List<TargetFilterDiagnostic> diagnostics, int from, RuleLinesSpan span)
+		{
+			for (var i = from; i < diagnostics.Count; i++)
+				if (diagnostics[i].Lines is null)
+					diagnostics[i] = diagnostics[i].InLines(span);
+		}
+
+		/// <summary>A span of the rule lines of a filter set: from a position in one line to a position in it or a later one.</summary>
+		internal readonly struct RuleLinesSpan
+		{
+			public RuleLinesSpan(int startLine, int start, int endLine, int end)
+			{
+				StartLine = startLine;
+				Start     = start;
+				EndLine   = endLine;
+				End       = end;
+			}
+
+			public static RuleLinesSpan InLine(int line, TextSpan span)
+			{
+				return new RuleLinesSpan(line, span.Start, line, span.End);
+			}
+
+			public int StartLine { get; }
+			public int Start     { get; }
+			public int EndLine   { get; }
+			public int End       { get; }
+
+			/// <summary>The span in its line, for a span within one line.</summary>
+			public TextSpan Span => TextSpan.FromBounds(Start, End);
 		}
 
 		static RegexCacheEntry GetRegex(string pattern)
@@ -338,13 +474,25 @@ namespace AspectGenerator
 				return new TargetFilterEvaluation(included, matchedRule is not null && !included, matchedRule);
 			}
 
-			public TargetFilterSet ReportDiagnostics(Action<TargetFilterDiagnostic>? reportDiagnostic)
+			/// <summary>Reports the diagnostics, each told the filter and the characters it points at from where the rule lines stand.</summary>
+			internal TargetFilterSet ReportDiagnostics(Action<TargetFilterDiagnostic>? reportDiagnostic, List<RuleOrigin>? origins)
 			{
 				if (reportDiagnostic is null)
 					return this;
 
 				foreach (var diagnostic in _diagnostics)
-					reportDiagnostic(diagnostic);
+				{
+					// A span that runs from one filter into another (a condition group continued in the next one) points
+					// into none of them.
+					if (origins is not null &&
+						diagnostic.Lines is {} lines &&
+						origins[lines.StartLine] is var start &&
+						origins[lines.EndLine] is var end &&
+						start.Filter == end.Filter)
+						reportDiagnostic(diagnostic.InFilter(start.Filter, TextSpan.FromBounds(start.Start + lines.Start, end.Start + lines.End)));
+					else
+						reportDiagnostic(diagnostic);
+				}
 
 				return this;
 			}
@@ -489,17 +637,66 @@ namespace AspectGenerator
 			}
 
 			TargetFilterDiagnostic(string id, string message, DiagnosticSeverity severity, int ruleIndex, bool isTransient = false)
+				: this(id, message, severity, ruleIndex, isTransient, null, null, -1, default)
+			{
+			}
+
+			TargetFilterDiagnostic(
+				string             id,
+				string             message,
+				DiagnosticSeverity severity,
+				int                ruleIndex,
+				bool               isTransient,
+				TextSpan?          span,
+				RuleLinesSpan?     lines,
+				int                filterIndex,
+				TextSpan           filterSpan)
 			{
 				Id          = id;
 				Message     = message;
 				Severity    = severity;
 				RuleIndex   = ruleIndex;
 				IsTransient = isTransient;
+				Span        = span;
+				Lines       = lines;
+				FilterIndex = filterIndex;
+				FilterSpan  = filterSpan;
 			}
 
 			public string             Id       { get; }
 			public string             Message  { get; }
 			public DiagnosticSeverity Severity { get; }
+
+			/// <summary>
+			/// The index, among the filters read, of the filter the diagnostic points into, or -1 where it cannot be told (a
+			/// rule that runs from one filter into the next, or no reader that tells it).
+			/// </summary>
+			public int FilterIndex { get; }
+
+			/// <summary>The characters of that filter the diagnostic points at; meaningful only where <see cref="FilterIndex"/> is not -1.</summary>
+			public TextSpan FilterSpan { get; }
+
+			/// <summary>While the diagnostic is made: a span in the text being read, which is not placed in a rule line yet.</summary>
+			internal TextSpan? Span { get; }
+
+			/// <summary>Where in the rule lines of its filter set the diagnostic points.</summary>
+			internal RuleLinesSpan? Lines { get; }
+
+			/// <summary>The diagnostic pointing at <paramref name="span"/> of the text being read.</summary>
+			internal TargetFilterDiagnostic At(TextSpan span)
+			{
+				return new TargetFilterDiagnostic(Id, Message, Severity, RuleIndex, IsTransient, span, Lines, FilterIndex, FilterSpan);
+			}
+
+			internal TargetFilterDiagnostic InLines(RuleLinesSpan lines)
+			{
+				return new TargetFilterDiagnostic(Id, Message, Severity, RuleIndex, IsTransient, null, lines, FilterIndex, FilterSpan);
+			}
+
+			internal TargetFilterDiagnostic InFilter(int filterIndex, TextSpan filterSpan)
+			{
+				return new TargetFilterDiagnostic(Id, Message, Severity, RuleIndex, IsTransient, Span, Lines, filterIndex, filterSpan);
+			}
 
 			/// <summary>The index of the compiled rule the diagnostic is about, or -1 where it is about no compiled rule.</summary>
 			internal int RuleIndex { get; }
@@ -631,9 +828,10 @@ namespace AspectGenerator
 		/// <summary>One rule line as <see cref="GramTargetFilterFront"/> reads it.</summary>
 		sealed class FilterRule
 		{
-			public FilterRule(string text, RulePrefix prefix, FilterMatcher matcher, string body, string? unknownKey, bool isConditionLine, TargetFilterLineSyntax syntax)
+			public FilterRule(string text, int line, RulePrefix prefix, FilterMatcher matcher, string body, string? unknownKey, bool isConditionLine, TargetFilterLineSyntax syntax)
 			{
 				Text            = text;
+				Line            = line;
 				Prefix          = prefix;
 				Matcher         = matcher;
 				Body            = body;
@@ -644,6 +842,8 @@ namespace AspectGenerator
 
 			/// <summary>The line as the filter reader passed it.</summary>
 			public string                  Text            { get; }
+			/// <summary>The index of the line among the rule lines of the filter set.</summary>
+			public int                     Line            { get; }
 			public RulePrefix              Prefix          { get; }
 			public FilterMatcher           Matcher         { get; }
 			/// <summary>The text after the operator and the matcher prefix: what a compiled rule's text shows.</summary>
