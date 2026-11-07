@@ -7,7 +7,7 @@
 
 Operator : @string = t: ('-' | '&' | '|') => @(t)
 
-MatcherPrefix : @string = t: ("pattern:" | "contains:" | "regex:") => @(t)
+MatcherPrefix : @string = t: ("pattern:" | "contains:" | "regex:" | "attributes:") => @(t)
 
 Rest : @string = t: [^ '\r' | '\n']* => @(t)
 
