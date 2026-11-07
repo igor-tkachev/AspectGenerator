@@ -218,7 +218,7 @@ namespace AspectGenerator.Tests.TargetFilters
 				}
 				catch (NullReferenceException)
 				{
-					// A known parser defect (an empty dotted segment); the time is counted all the same.
+					// Not expected any more; the time is counted all the same.
 				}
 			}
 

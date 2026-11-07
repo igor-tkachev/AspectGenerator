@@ -303,12 +303,28 @@ namespace AspectGenerator.Tests.TargetFilters
 		}
 
 		[TestMethod]
-		public void EmptyDottedSegmentInCompactPatternThrowsTest()
+		public void EmptyDottedSegmentInCompactPatternIsReportedTest()
 		{
-			// Known defect: a compact pattern with an empty dotted segment ("Save.", ".Save", "A..B") ends in a
-			// NullReferenceException instead of the dotted-pattern diagnostic. Update this test when it is fixed.
+			// An empty segment ("Save.", ".Save", "A..B") is an invalid dotted pattern; it used to end in a
+			// NullReferenceException.
 			foreach (var input in new[] { "Save.", ".Save", "..", "Acme..Save" })
-				Assert.AreEqual("NullReferenceException", Probe(input).Exception, input);
+			{
+				var outcome = Probe(input);
+
+				Assert.IsNull(outcome.Exception, input);
+				CollectionAssert.AreEqual(new[] { "AG0206" }, outcome.Ids, input);
+				AssertMatchesNothing(outcome);
+			}
+		}
+
+		[TestMethod]
+		public void InvalidDottedPatternDoesNotDisableOtherRulesTest()
+		{
+			var outcome = Probe("Save.\nPing");
+
+			CollectionAssert.AreEqual(new[] { "AG0206" }, outcome.Ids);
+			Assert.AreEqual('i', Kind(outcome, Ping));
+			Assert.AreEqual('n', Kind(outcome, SaveVoid));
 		}
 
 		// ---- contains: and regex: ----

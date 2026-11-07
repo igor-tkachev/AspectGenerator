@@ -436,7 +436,16 @@ namespace AspectGenerator
 				}
 
 				if (!DottedPattern.TryParse(patternText, diagnostics, allowRecursiveFinalSegment: false, out var methodPattern))
+				{
 					valid = false;
+
+					// An empty segment ("Save.", "A..B") yields no pattern at all; the diagnostic is already reported.
+					if (methodPattern is null)
+					{
+						matcher = new CompiledPatternMatcher(accessibility, modifiers, [], null, parameters, returnType);
+						return false;
+					}
+				}
 
 				if (methodPattern.Segments.Length == 1)
 					methodPattern = DottedPattern.FromSegments([SegmentMatcher.Recursive, methodPattern.Segments[0]]);

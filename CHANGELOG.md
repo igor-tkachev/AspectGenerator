@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.3 — Unreleased
+
+- Fixed a `TargetFilter` rule with an empty dotted segment (`Save.`, `.Save`, `A..B`) crashing the generator with a `NullReferenceException`. The rule is now reported as `AG0206` (invalid dotted pattern) and skipped, like any other invalid rule; the other rules of the filter and the other aspects still apply.
+
 ## 1.1.2 — 2026-11-06
 
 - Fixed generated interceptors with multiple aspects and async hooks emitting duplicate `async` modifiers; non-generic `Task` and `ValueTask` targets are now awaited before running completion hooks.
