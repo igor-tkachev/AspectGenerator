@@ -12,7 +12,7 @@ namespace AspectGenerator.Tests.TargetFilters
 	static class TargetFilterCorpus
 	{
 		public const ulong MutationSeed  = 0x4147_5446_4D55_0001UL;
-		public const int   MutationCount = 5_000;
+		public const int   MutationsPerInput = 10;
 
 		public const ulong GeneratedSeed = 0x4147_5446_4745_0001UL;
 		public const int   GeneratedCount = 50_000;
@@ -35,38 +35,60 @@ namespace AspectGenerator.Tests.TargetFilters
 
 		// ---- mutations ----
 
-		public static List<string> Mutations(IReadOnlyList<string> curated, int count, ulong seed)
+		public static List<string> Mutations(IReadOnlyList<string> curated, int perInput, ulong seed)
 		{
-			return MutationsWithSources(curated, count, seed).Select(static m => m.Text).ToList();
+			return MutationsWithSources(curated, perInput, seed).Select(static m => m.Text).ToList();
 		}
 
-		/// <summary>The mutations together with the index of the curated input each one was made from.</summary>
-		public static List<(int Source, string Text)> MutationsWithSources(IReadOnlyList<string> curated, int count, ulong seed)
+		/// <summary>
+		/// Up to <paramref name="perInput"/> mutations of every curated input that has a position to mutate, together with
+		/// the index of the input each one was made from. The stream of an input is seeded from its text, so adding,
+		/// removing or reordering other inputs never changes the mutations of this one.
+		/// </summary>
+		public static List<(int Source, string Text)> MutationsWithSources(IReadOnlyList<string> curated, int perInput, ulong seed)
 		{
-			var random   = new SplitMix64(seed);
-			var result   = new List<(int, string)>(count);
-			var seen     = new HashSet<string>(curated, StringComparer.Ordinal);
-			var forbid   = curated.Select(ForbiddenPositions).ToArray();
-			var eligible = Enumerable.Range(0, curated.Count).Where(i => HasEligiblePosition(curated[i], forbid[i])).ToArray();
-			var attempts = 0;
+			var result  = new List<(int, string)>(curated.Count * perInput);
+			var curatedSet = new HashSet<string>(curated, StringComparer.Ordinal);
+			var seen    = new HashSet<string>(StringComparer.Ordinal);
 
-			while (result.Count < count)
+			for (var index = 0; index < curated.Count; index++)
 			{
-				if (++attempts > count * 100)
-					throw new InvalidOperationException("The mutation sample cannot be filled.");
+				var text = curated[index];
+				var mask = ForbiddenPositions(text);
 
-				var index  = eligible[random.Next(eligible.Length)];
-				var text   = curated[index];
-				var mask   = forbid[index];
-				var operation = random.Next(3);
-				var token     = MutationTokens[random.Next(MutationTokens.Length)];
-				var mutated   = Mutate(text, mask, operation, token, random);
+				if (!HasEligiblePosition(text, mask))
+					continue;
 
-				if (seen.Add(mutated))
-					result.Add((index, mutated));
+				var random   = new SplitMix64(seed ^ Fnv1a64(text));
+				var produced = new HashSet<string>(StringComparer.Ordinal);
+
+				for (var attempt = 0; produced.Count < perInput && attempt < perInput * 20; attempt++)
+				{
+					var operation = random.Next(3);
+					var token     = MutationTokens[random.Next(MutationTokens.Length)];
+					var mutated   = Mutate(text, mask, operation, token, random);
+
+					if (curatedSet.Contains(mutated) || !produced.Add(mutated))
+						continue;
+
+					// The same text can come from two inputs; the first in list order keeps it.
+					if (seen.Add(mutated))
+						result.Add((index, mutated));
+				}
 			}
 
 			return result;
+		}
+
+		/// <summary>A fixed hash of the UTF-8 text (FNV-1a, 64 bits); <see cref="string.GetHashCode()"/> is randomised per process.</summary>
+		static ulong Fnv1a64(string text)
+		{
+			var hash = 0xCBF29CE484222325UL;
+
+			foreach (var b in Encoding.UTF8.GetBytes(text))
+				hash = unchecked((hash ^ b) * 0x100000001B3UL);
+
+			return hash;
 		}
 
 		static string Mutate(string text, bool[] forbidden, int operation, string token, SplitMix64 random)

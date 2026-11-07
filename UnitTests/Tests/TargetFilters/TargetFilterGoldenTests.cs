@@ -87,8 +87,8 @@ namespace AspectGenerator.Tests.TargetFilters
 		public void MutationBaselineTest()
 		{
 			var curated   = TargetFilterCorpus.Curated().Select(static i => i.Text).ToArray();
-			var mutations = TargetFilterCorpus.Mutations(curated, TargetFilterCorpus.MutationCount, TargetFilterCorpus.MutationSeed);
-			var lines     = Header("mutations", $"seed {TargetFilterCorpus.MutationSeed:x16}", $"count {mutations.Count}", $"over {curated.Length} curated inputs");
+			var mutations = TargetFilterCorpus.Mutations(curated, TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed);
+			var lines     = Header("mutations", $"seed {TargetFilterCorpus.MutationSeed:x16}", $"per input {TargetFilterCorpus.MutationsPerInput}", $"count {mutations.Count}", $"over {curated.Length} curated inputs");
 
 			lines.AddRange(mutations.Select(static m => TargetFilterProbe.FormatRecord(m)));
 
@@ -99,10 +99,10 @@ namespace AspectGenerator.Tests.TargetFilters
 		public void MutationsAreDeterministicAndLeaveRegexBodiesAloneTest()
 		{
 			var curated = TargetFilterCorpus.Curated().Select(static i => i.Text).ToArray();
-			var first   = TargetFilterCorpus.MutationsWithSources(curated, TargetFilterCorpus.MutationCount, TargetFilterCorpus.MutationSeed);
-			var second  = TargetFilterCorpus.MutationsWithSources(curated, TargetFilterCorpus.MutationCount, TargetFilterCorpus.MutationSeed);
+			var first   = TargetFilterCorpus.MutationsWithSources(curated, TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed);
+			var second  = TargetFilterCorpus.MutationsWithSources(curated, TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed);
 
-			Assert.AreEqual(TargetFilterCorpus.MutationCount, first.Count);
+			Assert.IsTrue(first.Count > curated.Length * 5, "The mutation sample is unexpectedly small.");
 			CollectionAssert.AreEqual(first.Select(static m => m.Text).ToArray(), second.Select(static m => m.Text).ToArray());
 			Assert.AreEqual(first.Count, first.Select(static m => m.Text).Distinct(StringComparer.Ordinal).Count(), "Mutations repeat.");
 
@@ -116,6 +116,23 @@ namespace AspectGenerator.Tests.TargetFilters
 				}
 
 			TestContext.WriteLine($"mutations of inputs with a regex: rule: {regexSources}");
+		}
+
+		[TestMethod]
+		public void MutationsOfAnInputDoNotDependOnOtherInputsTest()
+		{
+			var curated  = TargetFilterCorpus.Curated().Select(static i => i.Text).ToArray();
+			var baseline = TargetFilterCorpus.Mutations(curated, TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed).ToHashSet(StringComparer.Ordinal);
+
+			var added    = curated.Prepend("dummy: Added; entry").Append("Another.Dummy(...)").ToArray();
+			var withMore = TargetFilterCorpus.Mutations(added, TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed).ToHashSet(StringComparer.Ordinal);
+
+			Assert.IsTrue(baseline.IsSubsetOf(withMore), "Adding curated inputs changed the mutations of the others.");
+			Assert.IsTrue(withMore.Count > baseline.Count, "The added inputs produced no mutations.");
+
+			var reversed = TargetFilterCorpus.Mutations(curated.Reverse().ToArray(), TargetFilterCorpus.MutationsPerInput, TargetFilterCorpus.MutationSeed).ToHashSet(StringComparer.Ordinal);
+
+			Assert.IsTrue(baseline.SetEquals(reversed), "Reordering the curated inputs changed the mutations.");
 		}
 
 		[TestMethod]
