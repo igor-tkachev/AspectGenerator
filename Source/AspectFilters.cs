@@ -5,6 +5,8 @@ using System.Collections.Immutable;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using Microsoft.CodeAnalysis;
+
 namespace AspectGenerator
 {
 	static partial class AspectFilters
@@ -26,6 +28,27 @@ namespace AspectGenerator
 			IEnumerable<string?>            filters,
 			Action<TargetFilterDiagnostic>? reportDiagnostic = null)
 		{
+			var key = new TargetFilterKey(ReadRules(filters));
+
+			if (_filterCache.Count > MaxCacheEntries)
+				_filterCache.Clear();
+
+			return _filterCache
+				.GetOrAdd(key, static k => CreateFilterSet(k.Items, GramTargetFilterFront.Instance))
+				.ReportDiagnostics(reportDiagnostic);
+		}
+
+		static TargetFilterSet CreateFilterSet(string[] rules, ITargetFilterFront front)
+		{
+			var diagnostics = new List<TargetFilterDiagnostic>();
+			var filters     = Compile(rules, front, diagnostics);
+
+			return TargetFilterSet.Create(filters, diagnostics.ToArray());
+		}
+
+		/// <summary>The rule lines of the filters: every line break ends a line, every line is trimmed, blank lines and comments are dropped.</summary>
+		static List<string> ReadRules(IEnumerable<string?> filters)
+		{
 			var rules = new List<string>();
 
 			foreach (var item in filters)
@@ -38,17 +61,15 @@ namespace AspectGenerator
 							rules.Add(rule);
 					}
 
-			var key = new TargetFilterKey(rules);
-
-			if (_filterCache.Count > MaxCacheEntries)
-				_filterCache.Clear();
-
-			return _filterCache
-				.GetOrAdd(key, static k => TargetFilterSet.Create(k.Items))
-				.ReportDiagnostics(reportDiagnostic);
+			return rules;
 		}
 
-		static CompiledFilter[] Compile(string[] rules, List<TargetFilterDiagnostic> diagnostics)
+		/// <summary>
+		/// Groups the rule lines into compiled rules. How a line reads is the front's; how lines combine is the same for every
+		/// front: a native condition line joins the open condition group of the same action, a leading <c>&amp;</c> continues
+		/// it, a leading <c>|</c> starts an alternative group with the previous group's action, anything else ends it.
+		/// </summary>
+		static CompiledFilter[] Compile(string[] rules, ITargetFilterFront front, List<TargetFilterDiagnostic> diagnostics)
 		{
 			var result               = new List<CompiledFilter>();
 			var conditionGroup       = default(List<ConditionGroupLine>);
@@ -56,14 +77,18 @@ namespace AspectGenerator
 			var previousGroupAction  = default(bool?);
 			var previousWasConditionGroup = false;
 
-			foreach (var rule in rules)
+			foreach (var text in rules)
 			{
-				if (!TryParseRule(rule, out var prefix, out var matcher, out var body))
+				if (!front.TryReadRule(text, diagnostics, out var rule))
 					continue;
+
+				var prefix  = rule.Prefix;
+				var matcher = rule.Matcher;
+				var body    = rule.Body;
 
 				if (prefix is RulePrefix.And or RulePrefix.Or && matcher != FilterMatcher.Pattern)
 				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(rule, $"Line prefix '{(prefix == RulePrefix.And ? "&" : "|")}' can only be used with native condition rules."));
+					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, $"Line prefix '{(prefix == RulePrefix.And ? "&" : "|")}' can only be used with native condition rules."));
 					continue;
 				}
 
@@ -93,12 +118,12 @@ namespace AspectGenerator
 				if (matcher == FilterMatcher.ExplicitPattern)
 				{
 					FlushConditionGroup();
-					AddPattern(prefix == RulePrefix.Exclude, body);
+					AddPattern(prefix == RulePrefix.Exclude, rule);
 					previousWasConditionGroup = false;
 					continue;
 				}
 
-				if (CompiledPatternMatcher.TryGetUnknownSimpleConditionKey(body, out var unknownKey))
+				if (rule.UnknownKey is {} unknownKey)
 				{
 					FlushConditionGroup();
 					diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(unknownKey));
@@ -106,18 +131,18 @@ namespace AspectGenerator
 					continue;
 				}
 
-				var isConditionLine = CompiledPatternMatcher.IsConditionRule(body);
+				var isConditionLine = rule.IsConditionLine;
 
 				if (prefix is RulePrefix.And or RulePrefix.Or && !isConditionLine)
 				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(rule, $"Line prefix '{(prefix == RulePrefix.And ? "&" : "|")}' can only be used with native condition rules."));
+					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, $"Line prefix '{(prefix == RulePrefix.And ? "&" : "|")}' can only be used with native condition rules."));
 					continue;
 				}
 
 				if (!isConditionLine)
 				{
 					FlushConditionGroup();
-					AddPattern(prefix == RulePrefix.Exclude, body);
+					AddPattern(prefix == RulePrefix.Exclude, rule);
 					previousWasConditionGroup = false;
 					continue;
 				}
@@ -126,11 +151,11 @@ namespace AspectGenerator
 				{
 					if (conditionGroup is null)
 					{
-						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(rule, "Leading '&' requires an active condition group."));
+						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, "Leading '&' requires an active condition group."));
 						continue;
 					}
 
-					conditionGroup.Add(new ConditionGroupLine(body, forceAnd: true));
+					conditionGroup.Add(new ConditionGroupLine(rule, forceAnd: true));
 					continue;
 				}
 
@@ -138,14 +163,14 @@ namespace AspectGenerator
 				{
 					if (conditionGroup is null && !previousWasConditionGroup)
 					{
-						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(rule, "Leading '|' requires a previous native condition group."));
+						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, "Leading '|' requires a previous native condition group."));
 						continue;
 					}
 
 					var action = conditionGroup is null ? previousGroupAction!.Value : conditionGroupAction;
 					FlushConditionGroup();
 
-					conditionGroup       = new List<ConditionGroupLine> { new(body, forceAnd: false) };
+					conditionGroup       = new List<ConditionGroupLine> { new(rule, forceAnd: false) };
 					conditionGroupAction = action;
 					previousGroupAction  = action;
 					continue;
@@ -163,17 +188,17 @@ namespace AspectGenerator
 					previousGroupAction  = isNegative;
 				}
 
-				conditionGroup.Add(new ConditionGroupLine(body, forceAnd: false));
+				conditionGroup.Add(new ConditionGroupLine(rule, forceAnd: false));
 				previousWasConditionGroup = false;
 			}
 
 			FlushConditionGroup();
 			return result.ToArray();
 
-			void AddPattern(bool isNegative, string text)
+			void AddPattern(bool isNegative, FilterRule rule)
 			{
-				if (CompiledPatternMatcher.TryCompile(text, diagnostics, out var pattern))
-					result.Add(new PatternFilter(isNegative, FormatRule(isNegative ? RulePrefix.Exclude : RulePrefix.None, text), pattern));
+				if (front.TryCompilePattern(rule, diagnostics, out var pattern, out var matchesNothing))
+					Add(new PatternFilter(isNegative, FormatRule(isNegative ? RulePrefix.Exclude : RulePrefix.None, rule.Body), pattern), matchesNothing);
 			}
 
 			void FlushConditionGroup()
@@ -181,71 +206,20 @@ namespace AspectGenerator
 				if (conditionGroup is null)
 					return;
 
-				if (CompiledPatternMatcher.TryCompileConditionGroup(conditionGroup, diagnostics, out var pattern))
-					result.Add(new PatternFilter(conditionGroupAction, FormatConditionGroup(conditionGroupAction, conditionGroup), pattern));
+				if (front.TryCompileConditionGroup(conditionGroup, diagnostics, out var pattern, out var matchesNothing))
+					Add(new PatternFilter(conditionGroupAction, FormatConditionGroup(conditionGroupAction, conditionGroup), pattern), matchesNothing);
 
 				previousWasConditionGroup = true;
 				previousGroupAction       = conditionGroupAction;
 				conditionGroup = null;
 			}
 
-			bool TryParseRule(string rule, out RulePrefix prefix, out FilterMatcher matcher, out string body)
+			void Add(CompiledFilter filter, string? matchesNothing)
 			{
-				prefix  = RulePrefix.None;
-				matcher = FilterMatcher.Pattern;
-				body    = "";
+				if (matchesNothing is not null)
+					diagnostics.Add(TargetFilterDiagnostic.RuleMatchesNothing(filter.RuleText, matchesNothing, result.Count));
 
-				rule = rule.Trim();
-
-				if (rule.Length == 0 || rule.StartsWith("#", StringComparison.Ordinal))
-					return false;
-
-				if (rule[0] == '-')
-				{
-					prefix = RulePrefix.Exclude;
-					rule   = rule[1..].TrimStart();
-				}
-				else if (rule[0] == '&')
-				{
-					prefix = RulePrefix.And;
-					rule   = rule[1..].TrimStart();
-				}
-				else if (rule[0] == '|')
-				{
-					prefix = RulePrefix.Or;
-					rule   = rule[1..].TrimStart();
-				}
-
-				if (TryReadMatcherPrefix(rule, out var matcherName, out var matcherBody))
-				{
-					if (string.Equals(matcherName, "pattern", StringComparison.OrdinalIgnoreCase))
-					{
-						matcher = FilterMatcher.ExplicitPattern;
-						body    = matcherBody;
-					}
-					else if (string.Equals(matcherName, "regex", StringComparison.OrdinalIgnoreCase))
-					{
-						matcher = FilterMatcher.Regex;
-						body    = matcherBody;
-					}
-					else if (string.Equals(matcherName, "contains", StringComparison.OrdinalIgnoreCase))
-					{
-						matcher = FilterMatcher.Contains;
-						body    = matcherBody;
-					}
-					else
-					{
-						body = rule;
-					}
-				}
-				else
-					body = rule;
-
-				if (body.Length > 0)
-					return true;
-
-				diagnostics.Add(TargetFilterDiagnostic.InvalidRule(rule, "Target filter rule body cannot be empty."));
-				return false;
+				result.Add(filter);
 			}
 
 			static string FormatRule(RulePrefix prefix, string body)
@@ -322,13 +296,9 @@ namespace AspectGenerator
 			internal IReadOnlyList<CompiledFilter> Rules => _filters;
 			public TargetFilterPlan Plan => _plan;
 
-			public static TargetFilterSet Create(string[] rules)
+			internal static TargetFilterSet Create(CompiledFilter[] filters, TargetFilterDiagnostic[] diagnostics)
 			{
-				var diagnostics = new List<TargetFilterDiagnostic>();
-
-				var filters     = Compile(rules, diagnostics);
-
-				return new TargetFilterSet(filters, diagnostics.ToArray(), TargetFilterPlan.Create(filters));
+				return new TargetFilterSet(filters, diagnostics, TargetFilterPlan.Create(filters));
 			}
 
 			public TargetFilterEvaluation Evaluate(in MethodTarget target)
@@ -496,13 +466,24 @@ namespace AspectGenerator
 		public readonly struct TargetFilterDiagnostic
 		{
 			public TargetFilterDiagnostic(string id, string message)
+				: this(id, message, DiagnosticSeverity.Error, -1)
 			{
-				Id      = id;
-				Message = message;
 			}
 
-			public string Id      { get; }
-			public string Message { get; }
+			TargetFilterDiagnostic(string id, string message, DiagnosticSeverity severity, int ruleIndex)
+			{
+				Id        = id;
+				Message   = message;
+				Severity  = severity;
+				RuleIndex = ruleIndex;
+			}
+
+			public string             Id       { get; }
+			public string             Message  { get; }
+			public DiagnosticSeverity Severity { get; }
+
+			/// <summary>The index of the compiled rule the diagnostic is about, or -1 where it is about no compiled rule.</summary>
+			internal int RuleIndex { get; }
 
 			public static TargetFilterDiagnostic InvalidRegex(string pattern, string error)
 			{
@@ -527,6 +508,11 @@ namespace AspectGenerator
 			public static TargetFilterDiagnostic InvalidDottedPattern(string pattern, string message)
 			{
 				return new TargetFilterDiagnostic(AspectDiagnosticID.InvalidAspectFilterDottedPattern, $"Invalid target filter dotted pattern '{pattern}': {message}");
+			}
+
+			public static TargetFilterDiagnostic RuleMatchesNothing(string rule, string reason, int ruleIndex)
+			{
+				return new TargetFilterDiagnostic(AspectDiagnosticID.AspectFilterRuleMatchesNothing, $"Target filter rule '{rule}' can match no method: {reason}", DiagnosticSeverity.Warning, ruleIndex);
 			}
 		}
 
@@ -595,14 +581,62 @@ namespace AspectGenerator
 
 		readonly struct ConditionGroupLine
 		{
-			public ConditionGroupLine(string text, bool forceAnd)
+			public ConditionGroupLine(FilterRule rule, bool forceAnd)
 			{
-				Text     = text;
+				Rule     = rule;
 				ForceAnd = forceAnd;
 			}
 
-			public string Text     { get; }
-			public bool   ForceAnd { get; }
+			public FilterRule Rule     { get; }
+			public string     Text     => Rule.Body;
+			public bool       ForceAnd { get; }
+		}
+
+		/// <summary>One rule line as a front reads it.</summary>
+		sealed class FilterRule
+		{
+			public FilterRule(string text, RulePrefix prefix, FilterMatcher matcher, string body, string? unknownKey, bool isConditionLine, TargetFilterLineSyntax? syntax)
+			{
+				Text            = text;
+				Prefix          = prefix;
+				Matcher         = matcher;
+				Body            = body;
+				UnknownKey      = unknownKey;
+				IsConditionLine = isConditionLine;
+				Syntax          = syntax;
+			}
+
+			/// <summary>The line as the filter reader passed it.</summary>
+			public string                  Text            { get; }
+			public RulePrefix              Prefix          { get; }
+			public FilterMatcher           Matcher         { get; }
+			/// <summary>The text after the operator and the matcher prefix: what a compiled rule's text shows.</summary>
+			public string                  Body            { get; }
+			/// <summary>For a native line that begins with a word and a colon that is not a condition key, that word.</summary>
+			public string?                 UnknownKey      { get; }
+			/// <summary>A native line that reads as a condition rule.</summary>
+			public bool                    IsConditionLine { get; }
+			/// <summary>The grammar's reading of the line; the legacy front has none.</summary>
+			public TargetFilterLineSyntax? Syntax          { get; }
+		}
+
+		/// <summary>
+		/// How rule lines are read and compiled. <see cref="GramTargetFilterFront"/> reads them with the generated parser and
+		/// is the one filters use; the hand-written splitter it replaced is kept only to compare the two in the tests.
+		/// </summary>
+		interface ITargetFilterFront
+		{
+			/// <summary>Reads one rule line; <see langword="false"/>, with a diagnostic, for a line without a body.</summary>
+			bool TryReadRule(string text, List<TargetFilterDiagnostic> diagnostics, out FilterRule rule);
+
+			/// <summary>
+			/// Compiles a <c>pattern:</c> rule or a native method pattern. <paramref name="matchesNothing"/> is the reason a valid
+			/// rule can match no method, or <see langword="null"/>.
+			/// </summary>
+			bool TryCompilePattern(FilterRule rule, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out string? matchesNothing);
+
+			/// <summary>Compiles the lines of one native condition group into one rule.</summary>
+			bool TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher pattern, out string? matchesNothing);
 		}
 
 		[Flags]

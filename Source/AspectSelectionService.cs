@@ -820,7 +820,8 @@ namespace AspectGenerator
 				_diagnostics.Report(
 					diagnostic.Id,
 					diagnostic.Message,
-					location);
+					location,
+					diagnostic.Severity);
 			}
 		}
 

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using Microsoft.CodeAnalysis.Text;
+
 namespace AspectGenerator
 {
 	static partial class AspectFilters
@@ -22,44 +24,6 @@ namespace AspectGenerator
 				end++;
 
 			return end < text.Length && text[end] == ']';
-		}
-
-		static int IndexOfTopLevel(string text, char value)
-		{
-			var depth   = 0;
-			var escaped = false;
-
-			for (var i = 0; i < text.Length; i++)
-			{
-				var ch = text[i];
-
-				if (escaped)
-				{
-					escaped = false;
-					continue;
-				}
-
-				if (ch == '\\')
-				{
-					escaped = true;
-					continue;
-				}
-
-				if (ch == '[' && TryReadRankSpecifier(text, i, out var rankEnd))
-				{
-					i = rankEnd;
-					continue;
-				}
-
-				if (ch == '<')
-					depth++;
-				else if (ch == '>' && depth > 0)
-					depth--;
-				else if (depth == 0 && ch == value)
-					return i;
-			}
-
-			return -1;
 		}
 
 		static List<string> SplitTopLevel(string text, char separator)
@@ -106,101 +70,115 @@ namespace AspectGenerator
 			return result;
 		}
 
-		static List<string> SplitWhitespace(string text)
+		static readonly HashSet<string> _conditionKeys = new(StringComparer.OrdinalIgnoreCase)
 		{
-			var result  = new List<string>();
-			var start   = -1;
-			var depth   = 0;
-			var escaped = false;
+			"namespace",
+			"path",
+			"type",
+			"fulltype",
+			"method",
+			"fullmethod",
+			"returns",
+			"param",
+			"params",
+			"attributes",
+			"signature"
+		};
 
-			for (var i = 0; i < text.Length; i++)
-			{
-				var ch = text[i];
-
-				if (escaped)
-				{
-					escaped = false;
-					continue;
-				}
-
-				if (ch == '\\')
-				{
-					escaped = true;
-					continue;
-				}
-
-				if (ch == '[' && TryReadRankSpecifier(text, i, out var rankEnd))
-				{
-					if (start < 0)
-						start = i;
-
-					i = rankEnd;
-					continue;
-				}
-
-				if (ch == '<')
-					depth++;
-				else if (ch == '>' && depth > 0)
-					depth--;
-
-				if (depth == 0 && char.IsWhiteSpace(ch))
-				{
-					if (start >= 0)
-					{
-						result.Add(text[start..i]);
-						start = -1;
-					}
-
-					continue;
-				}
-
-				if (start < 0)
-					start = i;
-			}
-
-			if (start >= 0)
-				result.Add(text[start..]);
-
-			return result;
+		/// <summary>A condition key, compared ordinally and ignoring case.</summary>
+		internal static bool IsConditionKey(string key)
+		{
+			return _conditionKeys.Contains(key);
 		}
 
-		static bool TryReadMatcherPrefix(string rule, out string name, out string body)
+		/// <summary>One <c>key: value</c> item of a condition group, with the text its value is read from.</summary>
+		readonly struct ConditionItem
 		{
-			name = "";
-			body = "";
+			public ConditionItem(string key, string value, bool forceAnd, string source, TextSpan valueSpan)
+			{
+				Key       = key;
+				Value     = value;
+				ForceAnd  = forceAnd;
+				Source    = source;
+				ValueSpan = valueSpan;
+			}
 
-			var colonIndex = IndexOfTopLevel(rule, ':');
+			public string   Key       { get; }
+			/// <summary>The value, trimmed.</summary>
+			public string   Value     { get; }
+			public bool     ForceAnd  { get; }
+			/// <summary>The text <see cref="ValueSpan"/> is a span of.</summary>
+			public string   Source    { get; }
+			public TextSpan ValueSpan { get; }
+		}
 
-			if (colonIndex <= 0)
-				return false;
+		sealed class ConditionBucket
+		{
+			public ConditionBucket(string key)
+			{
+				Key = key;
+			}
 
-			var candidate = rule[..colonIndex].Trim();
+			public string              Key    { get; }
+			public List<ConditionItem> Items  { get; } = new();
 
-			if (candidate.Length == 0 || candidate.Any(static c => !char.IsLetter(c)))
-				return false;
+			/// <summary>The values of the bucket as one value: they are alternatives of one another.</summary>
+			public string Value => string.Join(" | ", Items.Select(static i => i.Value));
+		}
 
-			name = candidate;
-			body = rule[(colonIndex + 1)..].Trim();
-			return true;
+		/// <summary>
+		/// The items of a condition group by key: a key's values are alternatives, items of different keys must all hold, and
+		/// an item from a line that began with <c>&amp;</c> starts a condition of its own.
+		/// </summary>
+		static List<ConditionBucket> GroupConditionItems(List<ConditionItem> items)
+		{
+			var buckets = new List<ConditionBucket>();
+
+			foreach (var item in items)
+			{
+				var bucketIndex = -1;
+
+				if (!item.ForceAnd)
+					for (var i = buckets.Count - 1; i >= 0; i--)
+						if (string.Equals(buckets[i].Key, item.Key, StringComparison.OrdinalIgnoreCase))
+						{
+							bucketIndex = i;
+							break;
+						}
+
+				if (bucketIndex < 0)
+				{
+					var bucket = new ConditionBucket(item.Key);
+					bucket.Items.Add(item);
+					buckets.Add(bucket);
+				}
+				else
+					buckets[bucketIndex].Items.Add(item);
+			}
+
+			return buckets;
+		}
+
+		/// <summary>The accessibility masks a method can have: the matcher requires every bit of a rule's mask.</summary>
+		static bool IsAchievableAccessibility(AccessibilityMask mask)
+		{
+			foreach (var achievable in new[]
+			{
+				AccessibilityMask.Public,
+				AccessibilityMask.Protected,
+				AccessibilityMask.Internal,
+				AccessibilityMask.Private,
+				AccessibilityMask.Protected | AccessibilityMask.Internal,
+				AccessibilityMask.Private   | AccessibilityMask.Protected
+			})
+				if ((mask & achievable) == mask)
+					return true;
+
+			return false;
 		}
 
 		sealed class CompiledPatternMatcher
 		{
-			static readonly HashSet<string> _conditionKeys = new(StringComparer.OrdinalIgnoreCase)
-			{
-				"namespace",
-				"path",
-				"type",
-				"fulltype",
-				"method",
-				"fullmethod",
-				"returns",
-				"param",
-				"params",
-				"attributes",
-				"signature"
-			};
-
 			readonly AccessibilityMask         _accessibility;
 			readonly ModifierMask              _modifiers;
 			readonly ImmutableArray<Condition> _conditions;
@@ -224,271 +202,18 @@ namespace AspectGenerator
 				_returnType        = returnType;
 			}
 
-			static bool IsKnownConditionKey(string key)
+			public static CompiledPatternMatcher Create(
+				AccessibilityMask         accessibility,
+				ModifierMask              modifiers,
+				ImmutableArray<Condition> conditions,
+				DottedPattern?            fullMethodPattern,
+				ParameterListPattern?     parameters,
+				TypePattern?              returnType)
 			{
-				return _conditionKeys.Contains(key);
+				return new CompiledPatternMatcher(accessibility, modifiers, conditions, fullMethodPattern, parameters, returnType);
 			}
 
-			public static bool TryGetUnknownSimpleConditionKey(string text, out string key)
-			{
-				key = "";
-
-				if (!TryReadMatcherPrefix(text, out var candidate, out _))
-					return false;
-
-				if (string.Equals(candidate, "pattern", StringComparison.OrdinalIgnoreCase) ||
-					string.Equals(candidate, "contains", StringComparison.OrdinalIgnoreCase) ||
-					string.Equals(candidate, "regex", StringComparison.OrdinalIgnoreCase) ||
-					IsKnownConditionKey(candidate))
-					return false;
-
-				key = candidate;
-				return true;
-			}
-
-			public static bool TryCompile(string text, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher compiledPattern)
-			{
-				if (IsConditionRule(text))
-					return TryParseConditionRule(text, diagnostics, out compiledPattern);
-
-				return TryParseMethodPattern(text, diagnostics, out compiledPattern);
-			}
-
-			public static bool IsConditionRule(string text)
-			{
-				if (IndexOfTopLevel(text, ';') >= 0)
-					return true;
-
-				if (!TryReadMatcherPrefix(text, out var key, out _))
-					return IsModifierOrAccessibilityRule(text);
-
-				return IsKnownConditionKey(key);
-			}
-
-			public static bool TryCompileConditionGroup(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher compiledPattern)
-			{
-				return TryParseConditionRule(lines, diagnostics, out compiledPattern);
-			}
-
-			static bool TryParseConditionRule(string text, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher compiledPattern)
-			{
-				return TryParseConditionRule([new ConditionGroupLine(text, forceAnd: false)], diagnostics, out compiledPattern);
-			}
-
-			static bool TryParseConditionRule(List<ConditionGroupLine> lines, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher compiledPattern)
-			{
-				var accessibility = AccessibilityMask.None;
-				var modifiers     = ModifierMask.None;
-				var items         = new List<ConditionItem>();
-				var valid         = true;
-
-				foreach (var line in lines)
-				{
-					foreach (var item in SplitTopLevel(line.Text, ';'))
-					{
-						if (item.Length == 0)
-							continue;
-
-						if (!TryReadMatcherPrefix(item, out var key, out var value))
-						{
-							foreach (var token in SplitWhitespace(item))
-							{
-								if (TryReadAccessibility(token, out var accessibilityMask))
-								{
-									accessibility |= accessibilityMask;
-									continue;
-								}
-
-								if (TryReadModifier(token, out var modifierMask))
-								{
-									modifiers |= modifierMask;
-									continue;
-								}
-
-								diagnostics.Add(TargetFilterDiagnostic.InvalidRule(item, "Condition item must contain only modifier/accessibility tokens or 'key: value'."));
-								valid = false;
-							}
-
-							continue;
-						}
-
-						if (!IsKnownConditionKey(key))
-						{
-							diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(key));
-							valid = false;
-							continue;
-						}
-
-						items.Add(new ConditionItem(key, value, line.ForceAnd));
-					}
-				}
-
-				var buckets = new List<ConditionBucket>();
-
-				foreach (var item in items)
-				{
-					var bucketIndex = -1;
-
-					if (!item.ForceAnd)
-						for (var i = buckets.Count - 1; i >= 0; i--)
-							if (string.Equals(buckets[i].Key, item.Key, StringComparison.OrdinalIgnoreCase))
-							{
-								bucketIndex = i;
-								break;
-							}
-
-					if (bucketIndex < 0)
-					{
-						var bucket = new ConditionBucket(item.Key);
-						bucket.Values.Add(item.Value);
-						buckets.Add(bucket);
-					}
-					else
-						buckets[bucketIndex].Values.Add(item.Value);
-				}
-
-				var conditions = ImmutableArray.CreateBuilder<Condition>();
-
-				foreach (var bucket in buckets)
-				{
-					var value = string.Join(" | ", bucket.Values);
-
-					if (Condition.TryParse(bucket.Key, value, diagnostics, out var condition))
-						conditions.Add(condition);
-					else
-						valid = false;
-				}
-
-				compiledPattern = new CompiledPatternMatcher(accessibility, modifiers, conditions.ToImmutable(), null, null, null);
-				return valid;
-			}
-
-			static bool IsModifierOrAccessibilityRule(string text)
-			{
-				var tokens = SplitWhitespace(text);
-
-				if (tokens.Count == 0)
-					return false;
-
-				foreach (var token in tokens)
-					if (!TryReadAccessibility(token, out _) && !TryReadModifier(token, out _))
-						return false;
-
-				return true;
-			}
-
-			readonly struct ConditionItem
-			{
-				public ConditionItem(string key, string value, bool forceAnd)
-				{
-					Key      = key;
-					Value    = value;
-					ForceAnd = forceAnd;
-				}
-
-				public string Key      { get; }
-				public string Value    { get; }
-				public bool   ForceAnd { get; }
-			}
-
-			sealed class ConditionBucket
-			{
-				public ConditionBucket(string key)
-				{
-					Key = key;
-				}
-
-				public string       Key    { get; }
-				public List<string> Values { get; } = new();
-			}
-
-			static bool TryParseMethodPattern(string text, List<TargetFilterDiagnostic> diagnostics, out CompiledPatternMatcher matcher)
-			{
-				var accessibility = AccessibilityMask.None;
-				var modifiers     = ModifierMask.None;
-				var returnType    = default(TypePattern?);
-				var parameters    = default(ParameterListPattern?);
-				var valid         = true;
-
-				var returnIndex = IndexOfTopLevel(text, ':');
-
-				if (returnIndex >= 0)
-				{
-					var returnText = text[(returnIndex + 1)..].Trim();
-					text = text[..returnIndex].Trim();
-
-					if (!TypePattern.TryParse(returnText, diagnostics, out returnType))
-						valid = false;
-				}
-
-				var openParen = IndexOfTopLevel(text, '(');
-
-				if (openParen >= 0)
-				{
-					var closeParen = FindMatchingCloseParen(text, openParen);
-
-					if (closeParen < 0 || closeParen != text.Length - 1)
-					{
-						diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, "Parameter list must end the method pattern before an optional return pattern."));
-						valid = false;
-					}
-					else if (!ParameterListPattern.TryParse(text[(openParen + 1)..closeParen], diagnostics, out parameters))
-						valid = false;
-
-					text = text[..openParen].Trim();
-				}
-
-				var tokens = SplitWhitespace(text);
-				var index  = 0;
-
-				while (index < tokens.Count)
-				{
-					var token = tokens[index];
-
-					if (TryReadAccessibility(token, out var accessibilityMask))
-					{
-						accessibility |= accessibilityMask;
-						index++;
-						continue;
-					}
-
-					if (TryReadModifier(token, out var modifierMask))
-					{
-						modifiers |= modifierMask;
-						index++;
-						continue;
-					}
-
-					break;
-				}
-
-				var patternText = string.Join(" ", tokens.Skip(index));
-
-				if (patternText.Length == 0)
-				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, "Method pattern is missing."));
-					matcher = new CompiledPatternMatcher(accessibility, modifiers, [], null, parameters, returnType);
-					return false;
-				}
-
-				if (!DottedPattern.TryParse(patternText, diagnostics, allowRecursiveFinalSegment: false, out var methodPattern))
-				{
-					valid = false;
-
-					// An empty segment ("Save.", "A..B") yields no pattern at all; the diagnostic is already reported.
-					if (methodPattern is null)
-					{
-						matcher = new CompiledPatternMatcher(accessibility, modifiers, [], null, parameters, returnType);
-						return false;
-					}
-				}
-
-				if (methodPattern.Segments.Length == 1)
-					methodPattern = DottedPattern.FromSegments([SegmentMatcher.Recursive, methodPattern.Segments[0]]);
-
-				matcher = new CompiledPatternMatcher(accessibility, modifiers, [], methodPattern, parameters, returnType);
-				return valid;
-			}
+			public AccessibilityMask Accessibility => _accessibility;
 
 			/// <summary>
 			/// Adds the method names this rule can match when every match must have one of a known set of literal names.
@@ -572,38 +297,6 @@ namespace AspectGenerator
 
 				return true;
 			}
-
-			static int FindMatchingCloseParen(string text, int openParen)
-			{
-				var depth   = 0;
-				var escaped = false;
-
-				for (var i = openParen; i < text.Length; i++)
-				{
-					var ch = text[i];
-
-					if (escaped)
-					{
-						escaped = false;
-						continue;
-					}
-
-					if (ch == '\\')
-					{
-						escaped = true;
-						continue;
-					}
-
-					if (ch == '<')
-						depth++;
-					else if (ch == '>' && depth > 0)
-						depth--;
-					else if (depth == 0 && ch == ')')
-						return i;
-				}
-
-				return -1;
-			}
 		}
 
 		sealed class Condition
@@ -655,132 +348,23 @@ namespace AspectGenerator
 				_signaturePattern      = null;
 			}
 
-			public static bool TryParse(string key, string value, List<TargetFilterDiagnostic> diagnostics, out Condition condition)
+			public static Condition Leaf(
+				string                key,
+				DottedPattern?        dottedPattern,
+				SegmentMatcher?       segmentPattern,
+				TypePattern?          typePattern,
+				ParameterPattern?     parameterPattern,
+				ParameterListPattern? parameterListPattern,
+				TypePattern?          attributePattern,
+				SegmentMatcher?       signaturePattern)
 			{
-				condition = null!;
-				key       = key.ToLowerInvariant();
-
-				if (key == "path")
-					key = "fulltype";
-
-				if (!TryParseOrExpression(key, value, diagnostics, out condition))
-					return false;
-
-				return true;
+				return new Condition(key, dottedPattern, segmentPattern, typePattern, parameterPattern, parameterListPattern, attributePattern, signaturePattern);
 			}
 
-			static bool TryParseOrExpression(string key, string value, List<TargetFilterDiagnostic> diagnostics, out Condition condition)
+			/// <summary>Any of <paramref name="children"/> (<see cref="ConditionOperator.Any"/>) or all of them.</summary>
+			public static Condition Combine(ConditionOperator @operator, Condition[] children)
 			{
-				condition = null!;
-
-				if (!TrySplitConditionValues(value, '|', diagnostics, out var alternatives))
-					return false;
-
-				if (alternatives.Count == 1)
-					return TryParseAndExpression(key, alternatives[0], diagnostics, out condition);
-
-				var conditions = new List<Condition>(alternatives.Count);
-				var valid      = true;
-
-				foreach (var alternative in alternatives)
-				{
-					if (TryParseAndExpression(key, alternative, diagnostics, out var alternativeCondition))
-						conditions.Add(alternativeCondition);
-					else
-						valid = false;
-				}
-
-				condition = new Condition(ConditionOperator.Any, conditions.ToArray());
-				return valid;
-			}
-
-			static bool TryParseAndExpression(string key, string value, List<TargetFilterDiagnostic> diagnostics, out Condition condition)
-			{
-				condition = null!;
-
-				if (!TrySplitConditionValues(value, '&', diagnostics, out var items))
-					return false;
-
-				if (items.Count == 1)
-					return TryParseSingle(key, items[0], diagnostics, out condition);
-
-				var conditions = new List<Condition>(items.Count);
-				var valid      = true;
-
-				foreach (var item in items)
-				{
-					if (TryParseSingle(key, item, diagnostics, out var itemCondition))
-						conditions.Add(itemCondition);
-					else
-						valid = false;
-				}
-
-				condition = new Condition(ConditionOperator.All, conditions.ToArray());
-				return valid;
-			}
-
-			static bool TryParseSingle(string key, string value, List<TargetFilterDiagnostic> diagnostics, out Condition condition)
-			{
-				condition = null!;
-
-				switch (key)
-				{
-					case "namespace":
-					case "fulltype":
-					case "fullmethod":
-						if (!DottedPattern.TryParse(value, diagnostics, allowRecursiveFinalSegment: true, out var dottedPattern))
-							return false;
-
-						condition = new Condition(key, dottedPattern, null, null, null, null, null, null);
-						return true;
-
-					case "type":
-					case "method":
-						if (!SegmentMatcher.TryParse(value, diagnostics, out var segmentPattern))
-							return false;
-
-						condition = new Condition(key, null, segmentPattern, null, null, null, null, null);
-						return true;
-
-					case "returns":
-						if (!TypePattern.TryParse(value, diagnostics, out var typePattern))
-							return false;
-
-						condition = new Condition(key, null, null, typePattern, null, null, null, null);
-						return true;
-
-					case "param":
-						if (!ParameterPattern.TryParse(value, diagnostics, out var parameterPattern))
-							return false;
-
-						condition = new Condition(key, null, null, null, parameterPattern, null, null, null);
-						return true;
-
-					case "params":
-						if (!ParameterListPattern.TryParse(value, diagnostics, out var parameterListPattern))
-							return false;
-
-						condition = new Condition(key, null, null, null, null, parameterListPattern, null, null);
-						return true;
-
-					case "attributes":
-						if (!TypePattern.TryParse(value, diagnostics, out var attributePattern))
-							return false;
-
-						condition = new Condition(key, null, null, null, null, null, attributePattern, null);
-						return true;
-
-					case "signature":
-						if (!SegmentMatcher.TryParse(value, diagnostics, out var signaturePattern))
-							return false;
-
-						condition = new Condition(key, null, null, null, null, null, null, signaturePattern);
-						return true;
-
-					default:
-						diagnostics.Add(TargetFilterDiagnostic.UnknownConditionKey(key));
-						return false;
-				}
+				return new Condition(@operator, children);
 			}
 
 			public bool TryGetLiteralMethodNames(HashSet<string> names)
@@ -871,65 +455,6 @@ namespace AspectGenerator
 					_            => false
 				};
 			}
-
-			static bool TrySplitConditionValues(string text, char separator, List<TargetFilterDiagnostic> diagnostics, out List<string> result)
-			{
-				result              = new List<string>();
-				var start           = 0;
-				var genericDepth    = 0;
-				var parenthesisDepth = 0;
-				var escaped         = false;
-
-				for (var i = 0; i < text.Length; i++)
-				{
-					var ch = text[i];
-
-					if (escaped)
-					{
-						escaped = false;
-						continue;
-					}
-
-					if (ch == '\\')
-					{
-						escaped = true;
-						continue;
-					}
-
-					if (ch == '<')
-						genericDepth++;
-					else if (ch == '>' && genericDepth > 0)
-						genericDepth--;
-					else if (ch == '(')
-						parenthesisDepth++;
-					else if (ch == ')' && parenthesisDepth > 0)
-						parenthesisDepth--;
-					else if (ch == separator && genericDepth == 0 && parenthesisDepth == 0)
-					{
-						var value = text[start..i].Trim();
-
-						if (value.Length == 0)
-						{
-							diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, $"Condition value has an empty operand around '{separator}'."));
-							return false;
-						}
-
-						result.Add(value);
-						start = i + 1;
-					}
-				}
-
-				var last = text[start..].Trim();
-
-				if (last.Length == 0)
-				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, $"Condition value has an empty operand around '{separator}'."));
-					return false;
-				}
-
-				result.Add(last);
-				return true;
-			}
 		}
 
 		enum ConditionOperator
@@ -952,106 +477,22 @@ namespace AspectGenerator
 				_ellipsisIndex = ellipsisIndex;
 			}
 
-			public static bool TryParse(string text, List<TargetFilterDiagnostic> diagnostics, out ParameterListPattern pattern)
+			/// <summary>No parameters: <c>()</c>.</summary>
+			public static ParameterListPattern Empty()
 			{
-				pattern = null!;
-				text    = text.Trim();
-
-				if (TryStripParentheses(text, out var parenthesizedText))
-					text = parenthesizedText;
-
-				if (text.Length == 0)
-				{
-					pattern = new ParameterListPattern(false, [], -1);
-					return true;
-				}
-
-				if (text == "...")
-				{
-					pattern = new ParameterListPattern(true, [], -1);
-					return true;
-				}
-
-				var parts         = SplitTopLevel(text, ',');
-				var items         = ImmutableArray.CreateBuilder<ParameterPattern?>();
-				var ellipsisIndex = -1;
-				var valid         = true;
-
-				foreach (var part in parts)
-				{
-					if (part == "...")
-					{
-						if (ellipsisIndex >= 0)
-						{
-							diagnostics.Add(TargetFilterDiagnostic.InvalidParameterPattern(text, "Parameter wildcard '...' can appear at most once."));
-							valid = false;
-						}
-
-						ellipsisIndex = items.Count;
-						items.Add(null);
-						continue;
-					}
-
-					if (!ParameterPattern.TryParse(part, diagnostics, out var parameterPattern))
-					{
-						valid = false;
-						continue;
-					}
-
-					items.Add(parameterPattern);
-				}
-
-				pattern = new ParameterListPattern(false, items.ToImmutable(), ellipsisIndex);
-				return valid;
+				return new ParameterListPattern(false, [], -1);
 			}
 
-			static bool TryStripParentheses(string text, out string result)
+			/// <summary>Any parameters: <c>(...)</c>.</summary>
+			public static ParameterListPattern Ignore()
 			{
-				result = "";
+				return new ParameterListPattern(true, [], -1);
+			}
 
-				if (text.Length < 2 || text[0] != '(' || text[^1] != ')')
-					return false;
-
-				var depth        = 0;
-				var genericDepth = 0;
-				var escaped      = false;
-
-				for (var i = 0; i < text.Length; i++)
-				{
-					var ch = text[i];
-
-					if (escaped)
-					{
-						escaped = false;
-						continue;
-					}
-
-					if (ch == '\\')
-					{
-						escaped = true;
-						continue;
-					}
-
-					if (ch == '<')
-						genericDepth++;
-					else if (ch == '>' && genericDepth > 0)
-						genericDepth--;
-					else if (genericDepth == 0 && ch == '(')
-						depth++;
-					else if (genericDepth == 0 && ch == ')')
-					{
-						depth--;
-
-						if (depth == 0 && i != text.Length - 1)
-							return false;
-					}
-				}
-
-				if (depth != 0)
-					return false;
-
-				result = text[1..^1].Trim();
-				return true;
+			/// <summary>The parameters in order; the one at <paramref name="ellipsisIndex"/> (if not -1) is <c>...</c> and is null.</summary>
+			public static ParameterListPattern Create(ImmutableArray<ParameterPattern?> parameters, int ellipsisIndex)
+			{
+				return new ParameterListPattern(false, parameters, ellipsisIndex);
 			}
 
 			public bool IsMatch(List<ParameterTarget> parameters)
@@ -1107,55 +548,15 @@ namespace AspectGenerator
 				_typePattern = typePattern;
 			}
 
-			public static bool TryParse(string text, List<TargetFilterDiagnostic> diagnostics, out ParameterPattern pattern)
+			/// <summary><c>_</c>: any one parameter.</summary>
+			public static ParameterPattern Any()
 			{
-				pattern = null!;
-				text    = text.Trim();
+				return new ParameterPattern(true, null, null);
+			}
 
-				if (text == "_")
-				{
-					pattern = new ParameterPattern(true, null, null);
-					return true;
-				}
-
-				var modifier = default(ParameterModifier?);
-
-				foreach (var candidate in new[] { "ref", "out", "in", "params" })
-				{
-					if (!text.StartsWith(candidate + " ", StringComparison.Ordinal))
-						continue;
-
-					modifier = candidate switch
-					{
-						"ref"    => ParameterModifier.Ref,
-						"out"    => ParameterModifier.Out,
-						"in"     => ParameterModifier.In,
-						"params" => ParameterModifier.Params,
-						_        => ParameterModifier.None
-					};
-					text = text[(candidate.Length + 1)..].Trim();
-
-					// "ref readonly" is one modifier, distinct from "ref".
-					if (modifier == ParameterModifier.Ref && text.StartsWith("readonly ", StringComparison.Ordinal))
-					{
-						modifier = ParameterModifier.RefReadOnly;
-						text     = text["readonly ".Length..].Trim();
-					}
-
-					break;
-				}
-
-				if (text.StartsWith("this ", StringComparison.Ordinal))
-				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidParameterPattern(text, "'this' is not supported in parameter patterns."));
-					return false;
-				}
-
-				if (!TypePattern.TryParse(text, diagnostics, out var typePattern))
-					return false;
-
-				pattern = new ParameterPattern(false, modifier, typePattern);
-				return true;
+			public static ParameterPattern Create(ParameterModifier? modifier, TypePattern typePattern)
+			{
+				return new ParameterPattern(false, modifier, typePattern);
 			}
 
 			public bool IsMatch(ParameterTarget parameter)
@@ -1203,33 +604,20 @@ namespace AspectGenerator
 				_segmentPattern = segmentPattern;
 			}
 
-			public static bool TryParse(string text, List<TargetFilterDiagnostic> diagnostics, out TypePattern pattern)
+			public static TypePattern FromDotted(DottedPattern dottedPattern)
 			{
-				pattern = null!;
-				text    = text.Trim();
+				return new TypePattern(dottedPattern, null);
+			}
 
-				if (text.Length == 0)
-				{
-					diagnostics.Add(TargetFilterDiagnostic.InvalidRule(text, "Type pattern cannot be empty."));
-					return false;
-				}
+			public static TypePattern FromSegment(SegmentMatcher segmentPattern)
+			{
+				return new TypePattern(null, segmentPattern);
+			}
 
-				text = ExpandTypeAliases(text);
-
-				if (IndexOfTopLevel(text, '.') >= 0)
-				{
-					if (!DottedPattern.TryParse(text, diagnostics, allowRecursiveFinalSegment: true, out var dottedPattern))
-						return false;
-
-					pattern = new TypePattern(dottedPattern, null);
-					return true;
-				}
-
-				if (!SegmentMatcher.TryParse(text, diagnostics, out var segmentPattern))
-					return false;
-
-				pattern = new TypePattern(null, segmentPattern);
-				return true;
+			/// <summary>The diagnostic of an empty type pattern.</summary>
+			public static TargetFilterDiagnostic Empty(string text)
+			{
+				return TargetFilterDiagnostic.InvalidRule(text, "Type pattern cannot be empty.");
 			}
 
 			public bool IsMatch(string typeName)
@@ -1246,7 +634,12 @@ namespace AspectGenerator
 				return segments.Count == 0 ? typeName : segments[^1];
 			}
 
-			static string ExpandTypeAliases(string text)
+			/// <summary>
+			/// Replaces each C# alias written as an identifier (<c>int</c>, <c>string</c>, …) with its full name and drops a
+			/// <c>?</c> that follows an identifier, since the canonical signature omits nullable annotations. Escapes are not
+			/// looked at: the text is read as identifiers and other characters.
+			/// </summary>
+			public static string ExpandTypeAliases(string text)
 			{
 				var sb = new StringBuilder(text.Length);
 
@@ -1347,11 +740,13 @@ namespace AspectGenerator
 				return new DottedPattern(segments);
 			}
 
-			public static bool TryParse(string text, List<TargetFilterDiagnostic> diagnostics, bool allowRecursiveFinalSegment, out DottedPattern pattern)
+			/// <summary>
+			/// Compiles the trimmed parts of the dotted pattern <paramref name="text"/>. <paramref name="pattern"/> is null when a
+			/// part is empty; it holds the valid segments when another part is invalid.
+			/// </summary>
+			public static bool TryCreate(string text, IReadOnlyList<string> parts, List<TargetFilterDiagnostic> diagnostics, bool allowRecursiveFinalSegment, out DottedPattern pattern)
 			{
 				pattern = null!;
-
-				var parts = SplitTopLevel(text.Trim(), '.');
 
 				if (parts.Count == 0 || parts.Any(static p => p.Length == 0))
 				{
@@ -1632,18 +1027,50 @@ namespace AspectGenerator
 				return false;
 			}
 
+			/// <summary>
+			/// A pattern whose only wildcards are a <c>*</c> at its start, at its end, or both, is a suffix, prefix or contains
+			/// test. Only unescaped wildcards count: <c>*a\*</c> ends with <c>a*</c>.
+			/// </summary>
 			static bool IsSimpleWildcard(string pattern, out SegmentMatcherKind kind, out string text)
 			{
 				kind = SegmentMatcherKind.Regex;
 				text = "";
 
-				if (pattern.Count(static c => c == '?') > 0)
-					return false;
+				var first   = -1;
+				var last    = -1;
+				var stars   = 0;
+				var escaped = false;
 
-				var first = pattern.IndexOf('*');
-				var last  = pattern.LastIndexOf('*');
+				for (var i = 0; i < pattern.Length; i++)
+				{
+					var ch = pattern[i];
 
-				if (first != last && !(first == 0 && last == pattern.Length - 1 && pattern[1..^1].IndexOf('*') < 0))
+					if (escaped)
+					{
+						escaped = false;
+						continue;
+					}
+
+					if (ch == '\\')
+					{
+						escaped = true;
+						continue;
+					}
+
+					if (ch == '?')
+						return false;
+
+					if (ch == '*')
+					{
+						if (first < 0)
+							first = i;
+
+						last = i;
+						stars++;
+					}
+				}
+
+				if (stars == 0 || stars > 2 || stars == 2 && !(first == 0 && last == pattern.Length - 1))
 					return false;
 
 				if (first == 0 && last == pattern.Length - 1)

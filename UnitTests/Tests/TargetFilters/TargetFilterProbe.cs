@@ -22,6 +22,8 @@ namespace AspectGenerator.Tests.TargetFilters
 		public sealed class Outcome
 		{
 			public required string[]                     Ids       { get; init; }
+			public required string[]                     Messages  { get; init; }
+			public required string[]                     Severities { get; init; }
 			public required AspectFilters.TargetFilterPlan? Plan   { get; init; }
 			public required string?                      Exception { get; init; }
 			public required int                          RuleCount { get; init; }
@@ -46,21 +48,40 @@ namespace AspectGenerator.Tests.TargetFilters
 			}
 		}
 
+		/// <summary>Reads the filter as filters are read, through <see cref="AspectFilters.GetFilters(string?, Action{AspectFilters.TargetFilterDiagnostic}?)"/>.</summary>
+		public static AspectFilters.TargetFilterSet Read(string input, Action<AspectFilters.TargetFilterDiagnostic> report)
+		{
+			return AspectFilters.GetFilters(input, report);
+		}
+
+		/// <summary>Reads the filter with the hand-written splitter the generated parser replaced.</summary>
+		public static AspectFilters.TargetFilterSet ReadLegacy(string input, Action<AspectFilters.TargetFilterDiagnostic> report)
+		{
+			return AspectFilters.LegacyTargetFilterFront.GetFilters([input], report);
+		}
+
 		public static Outcome Probe(string input)
 		{
-			var targets   = TargetFilterTargets.Entries;
-			var ids       = new List<string>();
-			var messages  = new List<string>();
-			var decisions = new Decision[targets.Length];
+			return Probe(input, Read);
+		}
+
+		public static Outcome Probe(string input, Func<string, Action<AspectFilters.TargetFilterDiagnostic>, AspectFilters.TargetFilterSet> read)
+		{
+			var targets    = TargetFilterTargets.Entries;
+			var ids        = new List<string>();
+			var messages   = new List<string>();
+			var severities = new List<string>();
+			var decisions  = new Decision[targets.Length];
 
 			AspectFilters.TargetFilterSet set;
 
 			try
 			{
-				set = AspectFilters.GetFilters(input, d =>
+				set = read(input, d =>
 				{
 					ids.Add(d.Id);
 					messages.Add(d.Message);
+					severities.Add(d.Severity.ToString());
 				});
 			}
 			catch (Exception ex)
@@ -68,7 +89,7 @@ namespace AspectGenerator.Tests.TargetFilters
 				for (var i = 0; i < decisions.Length; i++)
 					decisions[i] = new Decision { Kind = 'n', RuleIndex = -1 };
 
-				return new Outcome { Ids = ids.ToArray(), Plan = null, Exception = ex.GetType().Name, RuleCount = 0, DiagnosticRuleLines = [], RuleTexts = [], Decisions = decisions };
+				return new Outcome { Ids = ids.ToArray(), Messages = messages.ToArray(), Severities = severities.ToArray(), Plan = null, Exception = ex.GetType().Name, RuleCount = 0, DiagnosticRuleLines = [], RuleTexts = [], Decisions = decisions };
 			}
 
 			var filters = set.Rules;
@@ -98,6 +119,8 @@ namespace AspectGenerator.Tests.TargetFilters
 			return new Outcome
 			{
 				Ids                 = ids.ToArray(),
+				Messages            = messages.ToArray(),
+				Severities          = severities.ToArray(),
 				Plan                = set.Plan,
 				Exception           = null,
 				RuleCount           = filters.Count,

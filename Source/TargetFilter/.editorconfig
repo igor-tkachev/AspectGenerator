@@ -1,0 +1,7 @@
+# The generated parser can carry a deep reading over to a thread of its own, and that thread takes the caller's
+# cultures with it (CultureInfo.CurrentCulture and CurrentUICulture), which RS1035 bans in analyzers. The parser reads
+# them only to hand them over and formats nothing with them, and the generator never lets a reading move to another
+# thread (TargetFilterParser.OnHandingOff refuses it), so that code does not run. Remove this once the generated
+# parser no longer reads the cultures there.
+[Generated/AspectGenerator.TargetFilterParser.g.cs]
+dotnet_diagnostic.RS1035.severity = none

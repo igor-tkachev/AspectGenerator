@@ -4,6 +4,7 @@
 namespace AspectGenerator
 {
 	using System;
+	using Microsoft.CodeAnalysis.Text;
 
 	partial class TargetFilterParser
 	{
@@ -11,7 +12,7 @@ namespace AspectGenerator
 		/// <exception cref="global::System.FormatException">
 		/// The input is not <c>Line</c>. <c>TryParseLine</c> answers instead.
 		/// </exception>
-		public static TargetFilterLine ParseLine(string input)
+		public static TargetFilterLineSyntax ParseLine(string input)
 		{
 			var match = TryParseLine(input);
 
@@ -26,7 +27,7 @@ namespace AspectGenerator
 		}
 
 		/// <summary>Parses the whole input as <c>Line</c>, answering rather than throwing.</summary>
-		public static Match<TargetFilterLine> TryParseLine(string input)
+		public static Match<TargetFilterLineSyntax> TryParseLine(string input)
 		{
 			var text    = global::System.MemoryExtensions.AsSpan(input);
 			var failure = new Failure { Quiet = true };
@@ -47,17 +48,17 @@ namespace AspectGenerator
 					? "Expected more input."
 					: "Input does not match 'Line'.";
 
-				return Match<TargetFilterLine>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+				return Match<TargetFilterLineSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
 			}
 
-			return Match<TargetFilterLine>.Success(recognized, 0, end);
+			return Match<TargetFilterLineSyntax>.Success(recognized, 0, end);
 		}
 
 		/// <summary>Parses the whole input as <c>Line</c>, answering only whether it is one.</summary>
 		/// <remarks>
 		/// Nothing is said about a refusal: <c>TryParseLine</c> returning a match says where and why.
 		/// </remarks>
-		public static bool TryParseLine(string input, out TargetFilterLine value)
+		public static bool TryParseLine(string input, out TargetFilterLineSyntax value)
 		{
 			var text    = global::System.MemoryExtensions.AsSpan(input);
 			var failure = new Failure { Quiet = true };
@@ -81,11 +82,11 @@ namespace AspectGenerator
 		/// reading began and how far it got, so a caller may go on from it. A position
 		/// is an offset into the text.
 		/// </remarks>
-		public static Match<TargetFilterLine> TryParseLine(string input, int at)
+		public static Match<TargetFilterLineSyntax> TryParseLine(string input, int at)
 		{
 			if (at < 0 || at > input.Length)
 			{
-				return Match<TargetFilterLine>.Failed(Outcome.NoMatch, "Position " + at.ToString() + " is outside the input.", at, null, null);
+				return Match<TargetFilterLineSyntax>.Failed(Outcome.NoMatch, "Position " + at.ToString() + " is outside the input.", at, null, null);
 			}
 
 			var text    = global::System.MemoryExtensions.AsSpan(input);
@@ -110,10 +111,10 @@ namespace AspectGenerator
 					? "Expected more input."
 					: "Input does not match 'Line'.";
 
-				return Match<TargetFilterLine>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+				return Match<TargetFilterLineSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
 			}
 
-			return Match<TargetFilterLine>.Success(recognized, at, end - at);
+			return Match<TargetFilterLineSyntax>.Success(recognized, at, end - at);
 		}
 
 		/// <summary>Reads a <c>Line</c> at <paramref name="at"/>, answering only whether one is there.</summary>
@@ -122,7 +123,7 @@ namespace AspectGenerator
 		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
 		/// refusal it stays where it was.
 		/// </remarks>
-		public static bool TryParseLine(string input, ref int at, out TargetFilterLine value)
+		public static bool TryParseLine(string input, ref int at, out TargetFilterLineSyntax value)
 		{
 			if (at < 0 || at > input.Length)
 				throw new global::System.ArgumentOutOfRangeException(nameof(at));
@@ -150,11 +151,11 @@ namespace AspectGenerator
 		/// <c>at + length</c> on; it is not required to reach that far, and what comes back
 		/// says how far it got. Positions are offsets into the whole input.
 		/// </remarks>
-		public static Match<TargetFilterLine> TryParseLine(string input, int at, int length)
+		public static Match<TargetFilterLineSyntax> TryParseLine(string input, int at, int length)
 		{
 			if (at < 0 || length < 0 || at > input.Length - length)
 			{
-				return Match<TargetFilterLine>.Failed(Outcome.NoMatch, "The window " + at.ToString() + ".." + (at + length).ToString() + " is outside the input.", at, null, null);
+				return Match<TargetFilterLineSyntax>.Failed(Outcome.NoMatch, "The window " + at.ToString() + ".." + (at + length).ToString() + " is outside the input.", at, null, null);
 			}
 
 			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
@@ -179,10 +180,10 @@ namespace AspectGenerator
 					? "Expected more input."
 					: "Input does not match 'Line'.";
 
-				return Match<TargetFilterLine>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+				return Match<TargetFilterLineSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
 			}
 
-			return Match<TargetFilterLine>.Success(recognized, at, end - at);
+			return Match<TargetFilterLineSyntax>.Success(recognized, at, end - at);
 		}
 
 		/// <summary>Reads a <c>Line</c> at <paramref name="at"/>, answering only whether one is there.</summary>
@@ -191,7 +192,7 @@ namespace AspectGenerator
 		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
 		/// refusal it stays where it was.
 		/// </remarks>
-		public static bool TryParseLine(string input, ref int at, int length, out TargetFilterLine value)
+		public static bool TryParseLine(string input, ref int at, int length, out TargetFilterLineSyntax value)
 		{
 			if (at < 0 || length < 0 || at > input.Length - length)
 				throw new global::System.ArgumentOutOfRangeException(nameof(at));
@@ -213,44 +214,11030 @@ namespace AspectGenerator
 			return true;
 		}
 
-		static string New_DotGram_Operator(string t) =>
-#line 8 "../TargetFilter.gram"
-                                              (t);
+		/// <summary>Parses the whole input as <c>ConditionItem</c>.</summary>
+		/// <exception cref="global::System.FormatException">
+		/// The input is not <c>ConditionItem</c>. <c>TryParseConditionItem</c> answers instead.
+		/// </exception>
+		public static ConditionItemSyntax ParseConditionItem(string input)
+		{
+			var match = TryParseConditionItem(input);
+
+			if (match.IsSuccess)
+				return match.Value;
+
+			var error = match.Error!;
+
+			throw new global::System.FormatException(
+				(error.EndsWith(".", global::System.StringComparison.Ordinal) ? error.Substring(0, error.Length - 1) : error) +
+				" at " + match.Position.ToString(global::System.Globalization.CultureInfo.InvariantCulture) + ".");
+		}
+
+		/// <summary>Parses the whole input as <c>ConditionItem</c>, answering rather than throwing.</summary>
+		public static Match<ConditionItemSyntax> TryParseConditionItem(string input)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_ConditionItem(text, 0, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = RecWhole_DotGram_ConditionItem(text, 0, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ConditionItem'.";
+
+				return Match<ConditionItemSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ConditionItemSyntax>.Success(recognized, 0, end);
+		}
+
+		/// <summary>Parses the whole input as <c>ConditionItem</c>, answering only whether it is one.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseConditionItem</c> returning a match says where and why.
+		/// </remarks>
+		public static bool TryParseConditionItem(string input, out ConditionItemSyntax value)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_ConditionItem(text, 0, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>ConditionItem</c> beginning at <paramref name="at"/>.</summary>
+		/// <remarks>
+		/// The input is not required to end there: what comes back says where the
+		/// reading began and how far it got, so a caller may go on from it. A position
+		/// is an offset into the text.
+		/// </remarks>
+		public static Match<ConditionItemSyntax> TryParseConditionItem(string input, int at)
+		{
+			if (at < 0 || at > input.Length)
+			{
+				return Match<ConditionItemSyntax>.Failed(Outcome.NoMatch, "Position " + at.ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ConditionItem(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_ConditionItem(text, at, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ConditionItem'.";
+
+				return Match<ConditionItemSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ConditionItemSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>ConditionItem</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseConditionItem</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseConditionItem(string input, ref int at, out ConditionItemSyntax value)
+		{
+			if (at < 0 || at > input.Length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ConditionItem(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>ConditionItem</c> inside a window of the input.</summary>
+		/// <remarks>
+		/// The reading begins at <paramref name="at"/> and sees no character from
+		/// <c>at + length</c> on; it is not required to reach that far, and what comes back
+		/// says how far it got. Positions are offsets into the whole input.
+		/// </remarks>
+		public static Match<ConditionItemSyntax> TryParseConditionItem(string input, int at, int length)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+			{
+				return Match<ConditionItemSyntax>.Failed(Outcome.NoMatch, "The window " + at.ToString() + ".." + (at + length).ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ConditionItem(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_ConditionItem(text, at, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ConditionItem'.";
+
+				return Match<ConditionItemSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ConditionItemSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>ConditionItem</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseConditionItem</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseConditionItem(string input, ref int at, int length, out ConditionItemSyntax value)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ConditionItem(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Parses the whole input as <c>Words</c>.</summary>
+		/// <exception cref="global::System.FormatException">
+		/// The input is not <c>Words</c>. <c>TryParseWords</c> answers instead.
+		/// </exception>
+		public static WordsSyntax ParseWords(string input)
+		{
+			var match = TryParseWords(input);
+
+			if (match.IsSuccess)
+				return match.Value;
+
+			var error = match.Error!;
+
+			throw new global::System.FormatException(
+				(error.EndsWith(".", global::System.StringComparison.Ordinal) ? error.Substring(0, error.Length - 1) : error) +
+				" at " + match.Position.ToString(global::System.Globalization.CultureInfo.InvariantCulture) + ".");
+		}
+
+		/// <summary>Parses the whole input as <c>Words</c>, answering rather than throwing.</summary>
+		public static Match<WordsSyntax> TryParseWords(string input)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_Words(text, 0, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = RecWhole_DotGram_Words(text, 0, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'Words'.";
+
+				return Match<WordsSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<WordsSyntax>.Success(recognized, 0, end);
+		}
+
+		/// <summary>Parses the whole input as <c>Words</c>, answering only whether it is one.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseWords</c> returning a match says where and why.
+		/// </remarks>
+		public static bool TryParseWords(string input, out WordsSyntax value)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_Words(text, 0, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>Words</c> beginning at <paramref name="at"/>.</summary>
+		/// <remarks>
+		/// The input is not required to end there: what comes back says where the
+		/// reading began and how far it got, so a caller may go on from it. A position
+		/// is an offset into the text.
+		/// </remarks>
+		public static Match<WordsSyntax> TryParseWords(string input, int at)
+		{
+			if (at < 0 || at > input.Length)
+			{
+				return Match<WordsSyntax>.Failed(Outcome.NoMatch, "Position " + at.ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Words(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_Words(text, at, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'Words'.";
+
+				return Match<WordsSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<WordsSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>Words</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseWords</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseWords(string input, ref int at, out WordsSyntax value)
+		{
+			if (at < 0 || at > input.Length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Words(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>Words</c> inside a window of the input.</summary>
+		/// <remarks>
+		/// The reading begins at <paramref name="at"/> and sees no character from
+		/// <c>at + length</c> on; it is not required to reach that far, and what comes back
+		/// says how far it got. Positions are offsets into the whole input.
+		/// </remarks>
+		public static Match<WordsSyntax> TryParseWords(string input, int at, int length)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+			{
+				return Match<WordsSyntax>.Failed(Outcome.NoMatch, "The window " + at.ToString() + ".." + (at + length).ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Words(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_Words(text, at, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'Words'.";
+
+				return Match<WordsSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<WordsSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>Words</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseWords</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseWords(string input, ref int at, int length, out WordsSyntax value)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Words(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Parses the whole input as <c>ConditionValue</c>.</summary>
+		/// <exception cref="global::System.FormatException">
+		/// The input is not <c>ConditionValue</c>. <c>TryParseConditionValue</c> answers instead.
+		/// </exception>
+		public static ConditionValueSyntax ParseConditionValue(string input)
+		{
+			var match = TryParseConditionValue(input);
+
+			if (match.IsSuccess)
+				return match.Value;
+
+			var error = match.Error!;
+
+			throw new global::System.FormatException(
+				(error.EndsWith(".", global::System.StringComparison.Ordinal) ? error.Substring(0, error.Length - 1) : error) +
+				" at " + match.Position.ToString(global::System.Globalization.CultureInfo.InvariantCulture) + ".");
+		}
+
+		/// <summary>Parses the whole input as <c>ConditionValue</c>, answering rather than throwing.</summary>
+		public static Match<ConditionValueSyntax> TryParseConditionValue(string input)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_ConditionValue(text, 0, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = RecWhole_DotGram_ConditionValue(text, 0, ref failure, out recognized);
+			}
+
+			if (end < 0)
+			{
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ConditionValue'.";
+
+				return Match<ConditionValueSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ConditionValueSyntax>.Success(recognized, 0, end);
+		}
+
+		/// <summary>Parses the whole input as <c>ConditionValue</c>, answering only whether it is one.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseConditionValue</c> returning a match says where and why.
+		/// </remarks>
+		public static bool TryParseConditionValue(string input, out ConditionValueSyntax value)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_ConditionValue(text, 0, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>ConditionValue</c> beginning at <paramref name="at"/>.</summary>
+		/// <remarks>
+		/// The input is not required to end there: what comes back says where the
+		/// reading began and how far it got, so a caller may go on from it. A position
+		/// is an offset into the text.
+		/// </remarks>
+		public static Match<ConditionValueSyntax> TryParseConditionValue(string input, int at)
+		{
+			if (at < 0 || at > input.Length)
+			{
+				return Match<ConditionValueSyntax>.Failed(Outcome.NoMatch, "Position " + at.ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ConditionValue(text, at, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_ConditionValue(text, at, ref failure, out recognized);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ConditionValue'.";
+
+				return Match<ConditionValueSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ConditionValueSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>ConditionValue</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseConditionValue</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseConditionValue(string input, ref int at, out ConditionValueSyntax value)
+		{
+			if (at < 0 || at > input.Length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ConditionValue(text, at, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>ConditionValue</c> inside a window of the input.</summary>
+		/// <remarks>
+		/// The reading begins at <paramref name="at"/> and sees no character from
+		/// <c>at + length</c> on; it is not required to reach that far, and what comes back
+		/// says how far it got. Positions are offsets into the whole input.
+		/// </remarks>
+		public static Match<ConditionValueSyntax> TryParseConditionValue(string input, int at, int length)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+			{
+				return Match<ConditionValueSyntax>.Failed(Outcome.NoMatch, "The window " + at.ToString() + ".." + (at + length).ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ConditionValue(text, at, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_ConditionValue(text, at, ref failure, out recognized);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ConditionValue'.";
+
+				return Match<ConditionValueSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ConditionValueSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>ConditionValue</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseConditionValue</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseConditionValue(string input, ref int at, int length, out ConditionValueSyntax value)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ConditionValue(text, at, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Parses the whole input as <c>Dotted</c>.</summary>
+		/// <exception cref="global::System.FormatException">
+		/// The input is not <c>Dotted</c>. <c>TryParseDotted</c> answers instead.
+		/// </exception>
+		public static DottedSyntax ParseDotted(string input)
+		{
+			var match = TryParseDotted(input);
+
+			if (match.IsSuccess)
+				return match.Value;
+
+			var error = match.Error!;
+
+			throw new global::System.FormatException(
+				(error.EndsWith(".", global::System.StringComparison.Ordinal) ? error.Substring(0, error.Length - 1) : error) +
+				" at " + match.Position.ToString(global::System.Globalization.CultureInfo.InvariantCulture) + ".");
+		}
+
+		/// <summary>Parses the whole input as <c>Dotted</c>, answering rather than throwing.</summary>
+		public static Match<DottedSyntax> TryParseDotted(string input)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_Dotted(text, 0, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = RecWhole_DotGram_Dotted(text, 0, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'Dotted'.";
+
+				return Match<DottedSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<DottedSyntax>.Success(recognized, 0, end);
+		}
+
+		/// <summary>Parses the whole input as <c>Dotted</c>, answering only whether it is one.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseDotted</c> returning a match says where and why.
+		/// </remarks>
+		public static bool TryParseDotted(string input, out DottedSyntax value)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_Dotted(text, 0, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>Dotted</c> beginning at <paramref name="at"/>.</summary>
+		/// <remarks>
+		/// The input is not required to end there: what comes back says where the
+		/// reading began and how far it got, so a caller may go on from it. A position
+		/// is an offset into the text.
+		/// </remarks>
+		public static Match<DottedSyntax> TryParseDotted(string input, int at)
+		{
+			if (at < 0 || at > input.Length)
+			{
+				return Match<DottedSyntax>.Failed(Outcome.NoMatch, "Position " + at.ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Dotted(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_Dotted(text, at, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'Dotted'.";
+
+				return Match<DottedSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<DottedSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>Dotted</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseDotted</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseDotted(string input, ref int at, out DottedSyntax value)
+		{
+			if (at < 0 || at > input.Length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Dotted(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>Dotted</c> inside a window of the input.</summary>
+		/// <remarks>
+		/// The reading begins at <paramref name="at"/> and sees no character from
+		/// <c>at + length</c> on; it is not required to reach that far, and what comes back
+		/// says how far it got. Positions are offsets into the whole input.
+		/// </remarks>
+		public static Match<DottedSyntax> TryParseDotted(string input, int at, int length)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+			{
+				return Match<DottedSyntax>.Failed(Outcome.NoMatch, "The window " + at.ToString() + ".." + (at + length).ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Dotted(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_Dotted(text, at, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'Dotted'.";
+
+				return Match<DottedSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<DottedSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>Dotted</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseDotted</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseDotted(string input, ref int at, int length, out DottedSyntax value)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Dotted(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Parses the whole input as <c>ParameterList</c>.</summary>
+		/// <exception cref="global::System.FormatException">
+		/// The input is not <c>ParameterList</c>. <c>TryParseParameterList</c> answers instead.
+		/// </exception>
+		public static ParameterListSyntax ParseParameterList(string input)
+		{
+			var match = TryParseParameterList(input);
+
+			if (match.IsSuccess)
+				return match.Value;
+
+			var error = match.Error!;
+
+			throw new global::System.FormatException(
+				(error.EndsWith(".", global::System.StringComparison.Ordinal) ? error.Substring(0, error.Length - 1) : error) +
+				" at " + match.Position.ToString(global::System.Globalization.CultureInfo.InvariantCulture) + ".");
+		}
+
+		/// <summary>Parses the whole input as <c>ParameterList</c>, answering rather than throwing.</summary>
+		public static Match<ParameterListSyntax> TryParseParameterList(string input)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_ParameterList(text, 0, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = RecWhole_DotGram_ParameterList(text, 0, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ParameterList'.";
+
+				return Match<ParameterListSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ParameterListSyntax>.Success(recognized, 0, end);
+		}
+
+		/// <summary>Parses the whole input as <c>ParameterList</c>, answering only whether it is one.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseParameterList</c> returning a match says where and why.
+		/// </remarks>
+		public static bool TryParseParameterList(string input, out ParameterListSyntax value)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_ParameterList(text, 0, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>ParameterList</c> beginning at <paramref name="at"/>.</summary>
+		/// <remarks>
+		/// The input is not required to end there: what comes back says where the
+		/// reading began and how far it got, so a caller may go on from it. A position
+		/// is an offset into the text.
+		/// </remarks>
+		public static Match<ParameterListSyntax> TryParseParameterList(string input, int at)
+		{
+			if (at < 0 || at > input.Length)
+			{
+				return Match<ParameterListSyntax>.Failed(Outcome.NoMatch, "Position " + at.ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ParameterList(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_ParameterList(text, at, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ParameterList'.";
+
+				return Match<ParameterListSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ParameterListSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>ParameterList</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseParameterList</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseParameterList(string input, ref int at, out ParameterListSyntax value)
+		{
+			if (at < 0 || at > input.Length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ParameterList(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>ParameterList</c> inside a window of the input.</summary>
+		/// <remarks>
+		/// The reading begins at <paramref name="at"/> and sees no character from
+		/// <c>at + length</c> on; it is not required to reach that far, and what comes back
+		/// says how far it got. Positions are offsets into the whole input.
+		/// </remarks>
+		public static Match<ParameterListSyntax> TryParseParameterList(string input, int at, int length)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+			{
+				return Match<ParameterListSyntax>.Failed(Outcome.NoMatch, "The window " + at.ToString() + ".." + (at + length).ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ParameterList(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_ParameterList(text, at, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ParameterList'.";
+
+				return Match<ParameterListSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ParameterListSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>ParameterList</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseParameterList</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseParameterList(string input, ref int at, int length, out ParameterListSyntax value)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ParameterList(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Parses the whole input as <c>ParameterParts</c>.</summary>
+		/// <exception cref="global::System.FormatException">
+		/// The input is not <c>ParameterParts</c>. <c>TryParseParameterParts</c> answers instead.
+		/// </exception>
+		public static ParameterPartsSyntax ParseParameterParts(string input)
+		{
+			var match = TryParseParameterParts(input);
+
+			if (match.IsSuccess)
+				return match.Value;
+
+			var error = match.Error!;
+
+			throw new global::System.FormatException(
+				(error.EndsWith(".", global::System.StringComparison.Ordinal) ? error.Substring(0, error.Length - 1) : error) +
+				" at " + match.Position.ToString(global::System.Globalization.CultureInfo.InvariantCulture) + ".");
+		}
+
+		/// <summary>Parses the whole input as <c>ParameterParts</c>, answering rather than throwing.</summary>
+		public static Match<ParameterPartsSyntax> TryParseParameterParts(string input)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_ParameterParts(text, 0, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = RecWhole_DotGram_ParameterParts(text, 0, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ParameterParts'.";
+
+				return Match<ParameterPartsSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ParameterPartsSyntax>.Success(recognized, 0, end);
+		}
+
+		/// <summary>Parses the whole input as <c>ParameterParts</c>, answering only whether it is one.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseParameterParts</c> returning a match says where and why.
+		/// </remarks>
+		public static bool TryParseParameterParts(string input, out ParameterPartsSyntax value)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_ParameterParts(text, 0, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>ParameterParts</c> beginning at <paramref name="at"/>.</summary>
+		/// <remarks>
+		/// The input is not required to end there: what comes back says where the
+		/// reading began and how far it got, so a caller may go on from it. A position
+		/// is an offset into the text.
+		/// </remarks>
+		public static Match<ParameterPartsSyntax> TryParseParameterParts(string input, int at)
+		{
+			if (at < 0 || at > input.Length)
+			{
+				return Match<ParameterPartsSyntax>.Failed(Outcome.NoMatch, "Position " + at.ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ParameterParts(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_ParameterParts(text, at, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ParameterParts'.";
+
+				return Match<ParameterPartsSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ParameterPartsSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>ParameterParts</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseParameterParts</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseParameterParts(string input, ref int at, out ParameterPartsSyntax value)
+		{
+			if (at < 0 || at > input.Length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ParameterParts(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>ParameterParts</c> inside a window of the input.</summary>
+		/// <remarks>
+		/// The reading begins at <paramref name="at"/> and sees no character from
+		/// <c>at + length</c> on; it is not required to reach that far, and what comes back
+		/// says how far it got. Positions are offsets into the whole input.
+		/// </remarks>
+		public static Match<ParameterPartsSyntax> TryParseParameterParts(string input, int at, int length)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+			{
+				return Match<ParameterPartsSyntax>.Failed(Outcome.NoMatch, "The window " + at.ToString() + ".." + (at + length).ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ParameterParts(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_ParameterParts(text, at, ref failure, out recognized, parserWhole);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'ParameterParts'.";
+
+				return Match<ParameterPartsSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ParameterPartsSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>ParameterParts</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseParameterParts</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseParameterParts(string input, ref int at, int length, out ParameterPartsSyntax value)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var parserWhole = global::System.MemoryExtensions.AsMemory(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_ParameterParts(text, at, ref failure, out var recognized, parserWhole);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Parses the whole input as <c>Parameter</c>.</summary>
+		/// <exception cref="global::System.FormatException">
+		/// The input is not <c>Parameter</c>. <c>TryParseParameter</c> answers instead.
+		/// </exception>
+		public static ParameterSyntax ParseParameter(string input)
+		{
+			var match = TryParseParameter(input);
+
+			if (match.IsSuccess)
+				return match.Value;
+
+			var error = match.Error!;
+
+			throw new global::System.FormatException(
+				(error.EndsWith(".", global::System.StringComparison.Ordinal) ? error.Substring(0, error.Length - 1) : error) +
+				" at " + match.Position.ToString(global::System.Globalization.CultureInfo.InvariantCulture) + ".");
+		}
+
+		/// <summary>Parses the whole input as <c>Parameter</c>, answering rather than throwing.</summary>
+		public static Match<ParameterSyntax> TryParseParameter(string input)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_Parameter(text, 0, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = RecWhole_DotGram_Parameter(text, 0, ref failure, out recognized);
+			}
+
+			if (end < 0)
+			{
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'Parameter'.";
+
+				return Match<ParameterSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ParameterSyntax>.Success(recognized, 0, end);
+		}
+
+		/// <summary>Parses the whole input as <c>Parameter</c>, answering only whether it is one.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseParameter</c> returning a match says where and why.
+		/// </remarks>
+		public static bool TryParseParameter(string input, out ParameterSyntax value)
+		{
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = RecWhole_DotGram_Parameter(text, 0, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>Parameter</c> beginning at <paramref name="at"/>.</summary>
+		/// <remarks>
+		/// The input is not required to end there: what comes back says where the
+		/// reading began and how far it got, so a caller may go on from it. A position
+		/// is an offset into the text.
+		/// </remarks>
+		public static Match<ParameterSyntax> TryParseParameter(string input, int at)
+		{
+			if (at < 0 || at > input.Length)
+			{
+				return Match<ParameterSyntax>.Failed(Outcome.NoMatch, "Position " + at.ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Parameter(text, at, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_Parameter(text, at, ref failure, out recognized);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'Parameter'.";
+
+				return Match<ParameterSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ParameterSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>Parameter</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseParameter</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseParameter(string input, ref int at, out ParameterSyntax value)
+		{
+			if (at < 0 || at > input.Length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Parameter(text, at, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		/// <summary>Reads a <c>Parameter</c> inside a window of the input.</summary>
+		/// <remarks>
+		/// The reading begins at <paramref name="at"/> and sees no character from
+		/// <c>at + length</c> on; it is not required to reach that far, and what comes back
+		/// says how far it got. Positions are offsets into the whole input.
+		/// </remarks>
+		public static Match<ParameterSyntax> TryParseParameter(string input, int at, int length)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+			{
+				return Match<ParameterSyntax>.Failed(Outcome.NoMatch, "The window " + at.ToString() + ".." + (at + length).ToString() + " is outside the input.", at, null, null);
+			}
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Parameter(text, at, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				failure = new Failure { Unasked = true, Doors = failure.Position };
+				end     = Rec_DotGram_Parameter(text, at, ref failure, out recognized);
+			}
+
+			if (end < 0)
+			{
+				if (failure.Position < at)
+					failure.Position = at;
+
+				var starved = failure.OutOfInput == failure.Position + 1 || failure.Position >= text.Length;
+
+				var otherwise = starved
+					? "Expected more input."
+					: "Input does not match 'Parameter'.";
+
+				return Match<ParameterSyntax>.Failed(starved ? Outcome.Starved : Outcome.NoMatch, otherwise, failure.Position, failure.Expected, Handed_DotGram(failure.ExpectedMore));
+			}
+
+			return Match<ParameterSyntax>.Success(recognized, at, end - at);
+		}
+
+		/// <summary>Reads a <c>Parameter</c> at <paramref name="at"/>, answering only whether one is there.</summary>
+		/// <remarks>
+		/// Nothing is said about a refusal: <c>TryParseParameter</c> returning a match says where and why.
+		/// On a reading, <paramref name="at"/> moves to the end of what was read; on a
+		/// refusal it stays where it was.
+		/// </remarks>
+		public static bool TryParseParameter(string input, ref int at, int length, out ParameterSyntax value)
+		{
+			if (at < 0 || length < 0 || at > input.Length - length)
+				throw new global::System.ArgumentOutOfRangeException(nameof(at));
+
+			var text    = global::System.MemoryExtensions.AsSpan(input, 0, at + length);
+			var failure = new Failure { Quiet = true };
+
+			var end = Rec_DotGram_Parameter(text, at, ref failure, out var recognized);
+
+			if (end < 0)
+			{
+				value = default!;
+				return false;
+			}
+
+			value = recognized;
+			at = end;
+
+			return true;
+		}
+
+		static partial void OnHandingOff(ref object? state);
+
+		static partial void OnTakingOver(ref object? state);
+
+		static TextSpan New_DotGram_Rest(SourceSpan parserSpan) =>
+#line 38 "../TargetFilter.gram"
+                            (Span(parserSpan));
 #line default
 
-		static string New_DotGram_MatcherPrefix(string t) =>
-#line 10 "../TargetFilter.gram"
-                                                                       (t);
+		static TargetFilterLineSyntax New_DotGram_Line(OperatorSyntax op, BodySyntax body) =>
+#line 43 "../TargetFilter.gram"
+                                             (Line(op, body));
 #line default
 
-		static string New_DotGram_Rest(string t) =>
-#line 12 "../TargetFilter.gram"
-                                         (t);
+		static TargetFilterLineSyntax New1_DotGram_Line(BodySyntax body) =>
+#line 44 "../TargetFilter.gram"
+                                              (Line(null, body));
 #line default
 
-		static TargetFilterLine New_DotGram_Line(string? op, string? matcher, string rest) =>
-#line 15 "../TargetFilter.gram"
-     (new TargetFilterLine(op, matcher, rest));
+		static OperatorSyntax New_DotGram_Operator(SourceSpan parserSpan) =>
+#line 47 "../TargetFilter.gram"
+           (new OperatorSyntax(TargetFilterLinePrefix.Exclude, Span(parserSpan)));
 #line default
 
-		private ref struct Reader_DotGram
+		static OperatorSyntax New1_DotGram_Operator(SourceSpan parserSpan) =>
+#line 48 "../TargetFilter.gram"
+           (new OperatorSyntax(TargetFilterLinePrefix.And,     Span(parserSpan)));
+#line default
+
+		static OperatorSyntax New2_DotGram_Operator(SourceSpan parserSpan) =>
+#line 49 "../TargetFilter.gram"
+           (new OperatorSyntax(TargetFilterLinePrefix.Or,      Span(parserSpan)));
+#line default
+
+		static BodySyntax New_DotGram_Body(NameSyntax m, TargetFilterBodySyntax body) =>
+#line 54 "../TargetFilter.gram"
+                                                                                   (new BodySyntax(TargetFilterMatcher.Pattern, m.Span, body));
+#line default
+
+		static BodySyntax New1_DotGram_Body(NameSyntax m, TargetFilterBodySyntax body) =>
+#line 55 "../TargetFilter.gram"
+                                                                                   (new BodySyntax(TextMatcher(m.Text), m.Span, body));
+#line default
+
+		static BodySyntax New2_DotGram_Body(TargetFilterBodySyntax body) =>
+#line 56 "../TargetFilter.gram"
+                                                                                   (new BodySyntax(TargetFilterMatcher.Native, default(TextSpan), body));
+#line default
+
+		static NameSyntax New_DotGram_MatcherName(SourceSpan parserSpan, string name) =>
+#line 58 "../TargetFilter.gram"
+                                                          (new NameSyntax(name, Span(parserSpan)));
+#line default
+
+		static TargetFilterBodySyntax New_DotGram_TextBody(SourceSpan parserSpan) =>
+#line 61 "../TargetFilter.gram"
+                    (new EmptyBodySyntax(Span(parserSpan)));
+#line default
+
+		static TargetFilterBodySyntax New1_DotGram_TextBody(TextSpan text) =>
+#line 62 "../TargetFilter.gram"
+                    (new TextBodySyntax(text));
+#line default
+
+		static TargetFilterBodySyntax New_DotGram_NativeBody(SourceSpan parserSpan, NameSyntax key) =>
+#line 67 "../TargetFilter.gram"
+                                                                 (new UnknownKeyBodySyntax(Span(parserSpan), key.Span));
+#line default
+
+		static TargetFilterBodySyntax New1_DotGram_NativeBody(TargetFilterBodySyntax body) =>
+#line 68 "../TargetFilter.gram"
+                                                                 (body);
+#line default
+
+		static NameSyntax New_DotGram_KeyHead(SourceSpan parserSpan, string name) =>
+#line 70 "../TargetFilter.gram"
+                                                          (new NameSyntax(name, Span(parserSpan)));
+#line default
+
+		static TargetFilterBodySyntax New_DotGram_PatternBody(SourceSpan parserSpan) =>
+#line 75 "../TargetFilter.gram"
+                                                                     (new EmptyBodySyntax(Span(parserSpan)));
+#line default
+
+		static TargetFilterBodySyntax New1_DotGram_PatternBody(TargetFilterBodySyntax rule) =>
+#line 76 "../TargetFilter.gram"
+                                                                     (rule);
+#line default
+
+		static TargetFilterBodySyntax New2_DotGram_PatternBody(TargetFilterBodySyntax rule, NameSyntax key) =>
+#line 77 "../TargetFilter.gram"
+                                                                               (rule);
+#line default
+
+		static TargetFilterBodySyntax New3_DotGram_PatternBody(TargetFilterBodySyntax rule) =>
+#line 78 "../TargetFilter.gram"
+                                                                     (rule);
+#line default
+
+		static TargetFilterBodySyntax New4_DotGram_PatternBody(TargetFilterBodySyntax pattern) =>
+#line 79 "../TargetFilter.gram"
+                                                                     (pattern);
+#line default
+
+		static TargetFilterBodySyntax New_DotGram_ConditionLine(SourceSpan parserSpan, TextSpan first, TextSpan[] more) =>
+#line 91 "../TargetFilter.gram"
+                                                 (new ConditionLineSyntax(Span(parserSpan), Spans(first, more)));
+#line default
+
+		static TextSpan New_DotGram_ItemText(SourceSpan parserSpan) =>
+#line 93 "../TargetFilter.gram"
+                                                                          (Span(parserSpan));
+#line default
+
+		static ConditionItemSyntax New_DotGram_ConditionItem(SourceSpan parserSpan, TextSpan key, TextSpan value) =>
+#line 97 "../TargetFilter.gram"
+                                                          (new KeyItemSyntax(Span(parserSpan), key, value));
+#line default
+
+		static ConditionItemSyntax New1_DotGram_ConditionItem(SourceSpan parserSpan, WordsSyntax words) =>
+#line 98 "../TargetFilter.gram"
+                                                        (new WordsItemSyntax(Span(parserSpan), words));
+#line default
+
+		static TextSpan New_DotGram_KeyName(SourceSpan parserSpan) =>
+#line 100 "../TargetFilter.gram"
+                                  (Span(parserSpan));
+#line default
+
+		static WordsSyntax New_DotGram_Words(ChunkSyntax? first, ChunkSyntax[] more) =>
+#line 104 "../TargetFilter.gram"
+                                                                                    (new WordsSyntax(Spans(first, more)));
+#line default
+
+		static ChunkSyntax New_DotGram_Chunk(TextSpan? word) =>
+#line 107 "../TargetFilter.gram"
+                                 (new ChunkSyntax(word));
+#line default
+
+		static ChunkSyntax New1_DotGram_Chunk(TextSpan word) =>
+#line 108 "../TargetFilter.gram"
+                                 (new ChunkSyntax(word));
+#line default
+
+		static TextSpan New_DotGram_Word(SourceSpan parserSpan) =>
+#line 110 "../TargetFilter.gram"
+                                                                                                               (Span(parserSpan));
+#line default
+
+		static ConditionValueSyntax New_DotGram_ConditionValue(ConditionAlternativeSyntax first, ConditionAlternativeSyntax[] more) =>
+#line 120 "../TargetFilter.gram"
+     (new ConditionValueSyntax(Alternatives(first, more)));
+#line default
+
+		static ConditionAlternativeSyntax New_DotGram_Alternative(SourceSpan parserSpan, TextSpan first, TextSpan[] more) =>
+#line 123 "../TargetFilter.gram"
+     (new ConditionAlternativeSyntax(Span(parserSpan), Spans(first, more)));
+#line default
+
+		static TextSpan New_DotGram_Operand(SourceSpan parserSpan) =>
+#line 125 "../TargetFilter.gram"
+                                                                                                                    (Span(parserSpan));
+#line default
+
+		static DottedSyntax New_DotGram_Dotted(TextSpan first, TextSpan[] more) =>
+#line 130 "../TargetFilter.gram"
+                                                                                 (new DottedSyntax(Spans(first, more)));
+#line default
+
+		static TextSpan New_DotGram_DottedPart(SourceSpan parserSpan) =>
+#line 132 "../TargetFilter.gram"
+                                                                            (Span(parserSpan));
+#line default
+
+		static TargetFilterBodySyntax New_DotGram_MethodPattern(SourceSpan parserSpan, TextSpan name, ParameterGroupSyntax? parameters, TextSpan? returns) =>
+#line 140 "../TargetFilter.gram"
+     (new MethodPatternSyntax(Span(parserSpan), name, parameters, returns));
+#line default
+
+		static TextSpan New_DotGram_ReturnText(TextSpan text) =>
+#line 142 "../TargetFilter.gram"
+                                              (text);
+#line default
+
+		static TextSpan New_DotGram_NameText(SourceSpan parserSpan) =>
+#line 144 "../TargetFilter.gram"
+                                                                                (Span(parserSpan));
+#line default
+
+		static ParameterGroupSyntax New_DotGram_ParameterGroup(SourceSpan parserSpan, TextSpan inner) =>
+#line 147 "../TargetFilter.gram"
+                                                           (new ParameterGroupSyntax(Span(parserSpan), inner, true));
+#line default
+
+		static ParameterGroupSyntax New1_DotGram_ParameterGroup(SourceSpan parserSpan) =>
+#line 148 "../TargetFilter.gram"
+                                                               (new ParameterGroupSyntax(Span(parserSpan), default(TextSpan), false));
+#line default
+
+		static TextSpan New_DotGram_InnerText(SourceSpan parserSpan) =>
+#line 150 "../TargetFilter.gram"
+                                                                                 (Span(parserSpan));
+#line default
+
+		static ParameterListSyntax New_DotGram_ParameterList(TextSpan inner) =>
+#line 157 "../TargetFilter.gram"
+                                                  (new ParameterListSyntax(true, inner));
+#line default
+
+		static ParameterListSyntax New1_DotGram_ParameterList(TextSpan inner) =>
+#line 158 "../TargetFilter.gram"
+                                                  (new ParameterListSyntax(false, inner));
+#line default
+
+		static TextSpan New_DotGram_ParenthesizedText(SourceSpan parserSpan) =>
+#line 160 "../TargetFilter.gram"
+                                                                                                         (Span(parserSpan));
+#line default
+
+		static ParameterPartsSyntax New_DotGram_ParameterParts(TextSpan first, TextSpan[] more) =>
+#line 166 "../TargetFilter.gram"
+     (new ParameterPartsSyntax(Spans(first, more)));
+#line default
+
+		static TextSpan New_DotGram_ParameterPart(SourceSpan parserSpan) =>
+#line 168 "../TargetFilter.gram"
+                                                                                               (Span(parserSpan));
+#line default
+
+		static ParameterSyntax New_DotGram_Parameter(SourceSpan parserSpan) =>
+#line 172 "../TargetFilter.gram"
+                                               (new ParameterSyntax(ParameterSyntaxKind.Any, null, default(TextSpan), Span(parserSpan)));
+#line default
+
+		static ParameterSyntax New1_DotGram_Parameter(ModifierSyntax m, ParameterTypeSyntax type) =>
+#line 173 "../TargetFilter.gram"
+                                                  (Parameter(m, type));
+#line default
+
+		static ParameterSyntax New2_DotGram_Parameter(ParameterTypeSyntax type) =>
+#line 174 "../TargetFilter.gram"
+                                               (Parameter(null, type));
+#line default
+
+		static ModifierSyntax New_DotGram_ParameterModifier(SourceSpan parserSpan) =>
+#line 177 "../TargetFilter.gram"
+                                                  (new ModifierSyntax(AspectFilters.ParameterModifier.RefReadOnly, Span(parserSpan)));
+#line default
+
+		static ModifierSyntax New1_DotGram_ParameterModifier(SourceSpan parserSpan) =>
+#line 178 "../TargetFilter.gram"
+                                                   (new ModifierSyntax(AspectFilters.ParameterModifier.Ref,         Span(parserSpan)));
+#line default
+
+		static ModifierSyntax New2_DotGram_ParameterModifier(SourceSpan parserSpan) =>
+#line 179 "../TargetFilter.gram"
+                                                   (new ModifierSyntax(AspectFilters.ParameterModifier.Out,         Span(parserSpan)));
+#line default
+
+		static ModifierSyntax New3_DotGram_ParameterModifier(SourceSpan parserSpan) =>
+#line 180 "../TargetFilter.gram"
+                                                   (new ModifierSyntax(AspectFilters.ParameterModifier.In,          Span(parserSpan)));
+#line default
+
+		static ModifierSyntax New4_DotGram_ParameterModifier(SourceSpan parserSpan) =>
+#line 181 "../TargetFilter.gram"
+                                                   (new ModifierSyntax(AspectFilters.ParameterModifier.Params,      Span(parserSpan)));
+#line default
+
+		static ParameterTypeSyntax New_DotGram_ParameterType(SourceSpan parserSpan) =>
+#line 184 "../TargetFilter.gram"
+                      (new ParameterTypeSyntax(true,  Span(parserSpan)));
+#line default
+
+		static ParameterTypeSyntax New1_DotGram_ParameterType(SourceSpan parserSpan) =>
+#line 185 "../TargetFilter.gram"
+                      (new ParameterTypeSyntax(false, Span(parserSpan)));
+#line default
+
+		static int Recognize_DotGram_Line(global::System.ReadOnlySpan<char> text, int pos, int state, int rootRule, bool whole, bool materialize, ref Failure failure, out object? recognized)
+		{
+			recognized = null;
+
+			Parser_DotGram parser = null!;
+			RentParser_DotGram(ref parser);
+			var lent = parser != null;
+			parser ??= Recycled_DotGram();
+
+			try
+			{
+				var entries = parser.Entries;
+				var p       = pos;
+				var call    = -1;
+				var atomic  = -1;
+				var repeat  = -1;
+				var lookahead = -1;
+				var negating = 0;
+				var c       = '\0';
+				string[]? expected = null;
+				var turn0 = 0;
+				var turn1 = 0;
+				var completedCall = -1;
+				var opened21 = -1;
+				var opened23 = -1;
+
+				entries.Add(new ParserEntry(ParserEntry.Call, 1, pos, -1, -1, -1, -1, 0, rootRule));
+				call = 0;
+				Dispatch:
+				switch (state)
+				{
+					case 0: goto Return;
+					case 1: goto Accept;
+					case 2:   expected = null; goto Fail;
+					case 3: goto S3;
+					case 12: goto S12;
+					case 14: goto S14;
+					case 25: goto S25;
+					case 29: goto S29;
+					case 33: goto S33;
+					case 40: goto S40;
+					case 46: goto S46;
+					case 52: goto S52;
+					case 60: goto S60;
+					case 62: goto S62;
+					case 68: goto S68;
+					case 70: goto S70;
+					case 71: goto S71;
+					case 72: goto S72;
+					case 78: goto S78;
+					case 79: goto S79;
+					case 80: goto S80;
+					case 83: goto S83;
+					case 89: goto S89;
+					case 91: goto S91;
+					case 92: goto S92;
+					case 97: goto S97;
+					case 105: goto S105;
+					case 106: goto S106;
+					case 108: goto S108;
+					case 110: goto S110;
+					case 118: goto S118;
+					case 124: goto S124;
+					case 125: goto S125;
+					case 128: goto S128;
+					case 139: goto S139;
+					case 147: goto S147;
+					case 148: goto S148;
+					case 156: goto S156;
+					case 162: goto S162;
+					case 168: goto S168;
+					case 170: goto S170;
+					case 171: goto S171;
+					case 180: goto S180;
+					case 181: goto S181;
+					case 190: goto S190;
+					case 196: goto S196;
+					case 198: goto S198;
+					case 199: goto S199;
+					case 208: goto S208;
+					case 209: goto S209;
+					case 210: goto S210;
+					case 215: goto S215;
+					case 221: goto S221;
+					case 223: goto S223;
+					case 224: goto S224;
+					case 225: goto S225;
+					case 227: goto S227;
+					case 229: goto S229;
+					case 231: goto S231;
+					case 235: goto S235;
+					case 236: goto S236;
+					case 238: goto S238;
+					case 240: goto S240;
+					case 244: goto S244;
+					case 245: goto S245;
+					case 247: goto S247;
+					case 248: goto S248;
+					case 249: goto S249;
+					case 251: goto S251;
+					case 253: goto S253;
+					case 256: goto S256;
+					case 257: goto S257;
+					default: expected = null; goto Fail;
+				}
+
+				S3:
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!(c <= 255 && RecognizeClass0_DotGram_Line[c] != 0)) goto S256;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 256, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 12, p, call, atomic, repeat, lookahead, 0, 24));
+					call = callIndex;
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(45);
+						goto Fail;
+					}
+					c = text[p];
+					if (c == '-') goto S10;
+					if (c == '&') goto S8;
+					if (c == '|') goto S6;
+					expected = ExpectedSet_DotGram(45);
+					goto Fail;
+				}
+
+				S6:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '|')
+					{
+						expected = ExpectedSet_DotGram(44);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 2, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S8:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '&')
+					{
+						expected = ExpectedSet_DotGram(43);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S10:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '-')
+					{
+						expected = ExpectedSet_DotGram(42);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S12:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 24 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 0, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					var runStart = p;
+					while (true)
+					{
+						if ((uint)p >= (uint)text.Length) break;
+						c = text[p];
+						if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c))))) break;
+						p++;
+					}
+					if (p > runStart)
+						entries.Add(new ParserEntry(ParserEntry.Run, 14, runStart, call, atomic, repeat, lookahead, p));
+				}
+
+				S14:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 253, p, call, atomic, repeat, lookahead, 0, 2));
+					call = callIndex;
+				}
+
+				S15:
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!(RecognizeIn_DotGram_Line(RecognizeSet0_DotGram_Line, c))) goto S240;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 240, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 25, p, call, atomic, repeat, lookahead, 0, 23));
+					call = callIndex;
+				}
+
+				{
+					opened23 = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 23, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(41);
+						goto Fail;
+					}
+					c = text[p];
+					if (!((c < 128 ? (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') : (Categories_DotGram_1F(c)))))
+					{
+						expected = ExpectedSet_DotGram(41);
+						goto Fail;
+					}
+					p++;
+				}
+
+				S19:
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(41);
+						goto S20;
+					}
+					c = text[p];
+					if (!((c < 128 ? (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') : (Categories_DotGram_1F(c)))))
+					{
+						expected = ExpectedSet_DotGram(41);
+						goto S20;
+					}
+					p++;
+					goto S19;
+				}
+
+				S20:
+				{
+					var openedAt = opened23;
+
+					if ((uint)openedAt >= (uint)entries.Count || entries[openedAt].Kind != ParserEntry.CaptureOpen || entries[openedAt].State != 23 || entries[openedAt].CallIndex != call)
+					{
+						var closed = 0;
+
+						for (openedAt = entries.Count - 1; openedAt >= 0; openedAt--)
+						{
+							var opened = entries[openedAt];
+
+							if (opened.State != 23) continue;
+
+							if (opened.Kind == ParserEntry.Capture)
+							{
+								closed++;
+								continue;
+							}
+
+							if (opened.Kind != ParserEntry.CaptureOpen)
+								continue;
+
+							if (closed == 0)
+								break;
+
+							closed--;
+						}
+
+						opened23 = openedAt;
+					}
+
+					global::System.Diagnostics.Debug.Assert(openedAt >= 0);
+					entries.Add(new ParserEntry(ParserEntry.Capture, 23, entries[openedAt].Position, call, atomic, repeat, lookahead, p));
+				}
+
+				S21:
+				{
+					turn0 = p;
+				}
+
+				{
+					var scanned = Scan_DotGram_Ws_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(2);
+						goto S23;
+					}
+					p = scanned;
+					goto S21;
+				}
+
+				S23:
+				{
+					if (p > turn0 && lookahead < 0 && p > failure.Position)
+					{
+						failure.Position = p;
+						if (!failure.Quiet)
+						{
+							failure.Expected = expected;
+							failure.ExpectedMore?.Clear();
+						}
+					}
+					p = turn0;
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != ':')
+					{
+						expected = ExpectedSet_DotGram(27);
+						goto Fail;
+					}
+					p += 1;
+					goto Return;
+				}
+
+				S25:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 23 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 3, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Choice, 229, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					global::System.Diagnostics.Debug.Assert(call >= 0 && call < entries.Count);
+					var ruleStart = entries[call].Position;
+					var guardValues = parser.Materialization(entries.Count);
+					var values0 = parser.Materialization0();
+					var values1 = parser.Materialization1();
+					var values2 = parser.Materialization2();
+					var values3 = parser.Materialization3();
+					var values4 = parser.Materialization4();
+					var values5 = parser.Materialization5();
+					var values6 = parser.Materialization6();
+					var guardBuilt  = parser.Materialized();
+					var guardNeedsMaterialization = false;
+					var guardFrom = entries.Count;
+					var guardCaptured0At = -1;
+					for (var candidateAt = entries.Count - 1; candidateAt > call; candidateAt--)
+					{
+						var candidate = entries[candidateAt];
+						if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == call && (candidate.State == 3))
+						{
+							guardCaptured0At = candidate.Position;
+							break;
+						}
+					}
+					if (guardCaptured0At >= 0 && !guardBuilt[guardCaptured0At])
+					{
+						guardValues[guardCaptured0At] = parser;
+						guardFrom = global::System.Math.Min(guardFrom, guardCaptured0At);
+						guardNeedsMaterialization = true;
+					}
+					if (guardNeedsMaterialization) Materialize_DotGram_Line(text, parser, entries, guardFrom);
+					global::System.Diagnostics.Debug.Assert(guardCaptured0At >= 0);
+					var guardCaptured0 = values5[guardCaptured0At];
+					if (!RecognizeGuard1_DotGram_Line(guardCaptured0)) { expected = null; goto Fail; }
+				}
+
+				{
+					var runStart = p;
+					while (true)
+					{
+						if ((uint)p >= (uint)text.Length) break;
+						c = text[p];
+						if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c))))) break;
+						p++;
+					}
+					if (p > runStart)
+						entries.Add(new ParserEntry(ParserEntry.Run, 29, runStart, call, atomic, repeat, lookahead, p));
+				}
+
+				S29:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 227, p, call, atomic, repeat, lookahead, 0, 4));
+					call = callIndex;
+				}
+
+				S30:
+				{
+					entries.Add(new ParserEntry(ParserEntry.Choice, 33, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S33:
+				{
+					entries.Add(new ParserEntry(ParserEntry.Choice, 92, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var lookaheadIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 40, p, call, atomic, repeat, lookahead, 1));
+					lookahead = lookaheadIndex;
+				}
+
+				{
+					var atomicIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
+					atomic = atomicIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if ((c >= '\0' && c <= ':') || (c >= '<' && c <= '\uFFFF')) goto S82;
+					}
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S82;
+				}
+
+				S37:
+				{
+					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
+					var boundary = entries[atomic];
+					global::System.Diagnostics.Debug.Assert(boundary.Kind == ParserEntry.Atomic);
+					parser.Truncate(atomic, entries);
+					entries.RemoveRange(atomic, entries.Count - atomic);
+					atomic = boundary.AtomicIndex;
+					repeat = boundary.RepeatIndex;
+					lookahead = boundary.LookaheadIndex;
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != ';')
+					{
+						expected = ExpectedSet_DotGram(20);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
+					var looked = entries[lookahead];
+					global::System.Diagnostics.Debug.Assert(looked.Kind == ParserEntry.Lookahead);
+					parser.Truncate(lookahead, entries);
+					entries.RemoveRange(lookahead, entries.Count - lookahead);
+					p         = looked.Position;
+					call      = looked.CallIndex;
+					atomic    = looked.AtomicIndex;
+					repeat    = looked.RepeatIndex;
+					lookahead = looked.LookaheadIndex;
+				}
+
+				S40:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 80, p, call, atomic, repeat, lookahead, 0, 15));
+					call = callIndex;
+				}
+
+				S41:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 72, p, call, atomic, repeat, lookahead, 0, 16));
+					call = callIndex;
+				}
+
+				S42:
+				{
+					var atomicIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
+					atomic = atomicIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if ((c >= '\0' && c <= ':') || (c >= '<' && c <= '\uFFFF')) goto S45;
+					}
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S45;
+				}
+
+				S44:
+				{
+					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
+					var boundary = entries[atomic];
+					global::System.Diagnostics.Debug.Assert(boundary.Kind == ParserEntry.Atomic);
+					parser.Truncate(atomic, entries);
+					entries.RemoveRange(atomic, entries.Count - atomic);
+					atomic = boundary.AtomicIndex;
+					repeat = boundary.RepeatIndex;
+					lookahead = boundary.LookaheadIndex;
+					goto Return;
+				}
+
+				S45:
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S46:
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == ';' || c == '<' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), ';', '<', '\\');
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeating = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					{
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 71, p, call, atomic, repeat, lookahead, 0));
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
+					}
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(24);
+						goto Fail;
+					}
+					c = text[p];
+					if (c == '<') goto S53;
+					if (c == '\\') goto S49;
+					if ((c >= '\0' && c <= ':') || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S48;
+					expected = ExpectedSet_DotGram(24);
+					goto Fail;
+				}
+
+				S48:
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(23);
+						goto Fail;
+					}
+					c = text[p];
+					if (!(!((c >= ';' && c <= '<') || c == '\\')))
+					{
+						expected = ExpectedSet_DotGram(23);
+						goto Fail;
+					}
+					p++;
+					goto S46;
+				}
+
+				S49:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '\\')
+					{
+						expected = ExpectedSet_DotGram(22);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S52;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 52, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_any_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(21);
+						goto Fail;
+					}
+					p = scanned;
+					goto S46;
+				}
+
+				S52:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S46;
+				}
+
+				S53:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 46, p, call, atomic, repeat, lookahead, 0, -1));
+					call = callIndex;
+				}
+
+				S54:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '<')
+					{
+						expected = ExpectedSet_DotGram(35);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					var atomicIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
+					atomic = atomicIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if ((c >= '\0' && c <= '=') || (c >= '?' && c <= '\uFFFF')) goto S61;
+					}
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S61;
+				}
+
+				S57:
+				{
+					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
+					var boundary = entries[atomic];
+					global::System.Diagnostics.Debug.Assert(boundary.Kind == ParserEntry.Atomic);
+					parser.Truncate(atomic, entries);
+					entries.RemoveRange(atomic, entries.Count - atomic);
+					atomic = boundary.AtomicIndex;
+					repeat = boundary.RepeatIndex;
+					lookahead = boundary.LookaheadIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!(c == '>')) goto S60;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 60, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '>')
+					{
+						expected = ExpectedSet_DotGram(32);
+						goto Fail;
+					}
+					p += 1;
+					goto Return;
+				}
+
+				S60:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto Return;
+				}
+
+				S61:
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S62:
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == '<' || c == '>' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), '<', '>', '\\');
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeating = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					{
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 70, p, call, atomic, repeat, lookahead, 0));
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
+					}
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(34);
+						goto Fail;
+					}
+					c = text[p];
+					if (c == '<') goto S69;
+					if (c == '\\') goto S65;
+					if ((c >= '\0' && c <= ';') || c == '=' || (c >= '?' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S64;
+					expected = ExpectedSet_DotGram(34);
+					goto Fail;
+				}
+
+				S64:
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(33);
+						goto Fail;
+					}
+					c = text[p];
+					if (!(!(c == '<' || c == '>' || c == '\\')))
+					{
+						expected = ExpectedSet_DotGram(33);
+						goto Fail;
+					}
+					p++;
+					goto S62;
+				}
+
+				S65:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '\\')
+					{
+						expected = ExpectedSet_DotGram(22);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S68;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 68, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_any_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(21);
+						goto Fail;
+					}
+					p = scanned;
+					goto S62;
+				}
+
+				S68:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S62;
+				}
+
+				S69:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 62, p, call, atomic, repeat, lookahead, 0, -1));
+					call = callIndex;
+					goto S54;
+				}
+
+				S70:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+					goto S57;
+				}
+
+				S71:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+					goto S44;
+				}
+
+				S72:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 16 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 19, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (c == ';') goto S74;
+					}
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S74;
+					goto Return;
+				}
+
+				S74:
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S75:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeating = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					{
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 79, p, call, atomic, repeat, lookahead, 0));
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
+					}
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != ';')
+					{
+						expected = ExpectedSet_DotGram(20);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 78, p, call, atomic, repeat, lookahead, 0, 16));
+					call = callIndex;
+					goto S42;
+				}
+
+				S78:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 16 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 20, capturedCall, call, atomic, repeat, lookahead, p));
+					goto S75;
+				}
+
+				S79:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+					goto Return;
+				}
+
+				S80:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 15 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 9, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S82:
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S83:
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == ';' || c == '<' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), ';', '<', '\\');
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeating = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					{
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 91, p, call, atomic, repeat, lookahead, 0));
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
+					}
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(24);
+						goto Fail;
+					}
+					c = text[p];
+					if (c == '<') goto S90;
+					if (c == '\\') goto S86;
+					if ((c >= '\0' && c <= ':') || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S85;
+					expected = ExpectedSet_DotGram(24);
+					goto Fail;
+				}
+
+				S85:
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(23);
+						goto Fail;
+					}
+					c = text[p];
+					if (!(!((c >= ';' && c <= '<') || c == '\\')))
+					{
+						expected = ExpectedSet_DotGram(23);
+						goto Fail;
+					}
+					p++;
+					goto S83;
+				}
+
+				S86:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '\\')
+					{
+						expected = ExpectedSet_DotGram(22);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S89;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 89, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_any_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(21);
+						goto Fail;
+					}
+					p = scanned;
+					goto S83;
+				}
+
+				S89:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S83;
+				}
+
+				S90:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 83, p, call, atomic, repeat, lookahead, 0, -1));
+					call = callIndex;
+					goto S54;
+				}
+
+				S91:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+					goto S37;
+				}
+
+				S92:
+				{
+					entries.Add(new ParserEntry(ParserEntry.Choice, 110, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var lookaheadIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 106, p, call, atomic, repeat, lookahead, 1));
+					lookahead = lookaheadIndex;
+				}
+
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 105, p, call, atomic, repeat, lookahead, 0, 19));
+					call = callIndex;
+				}
+
+				S95:
+				{
+					opened21 = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 21, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var runStart = p;
+					while (true)
+					{
+						if ((uint)p >= (uint)text.Length) break;
+						c = text[p];
+						if (!((c < 128 ? (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') : (Categories_DotGram_1F(c))))) break;
+						p++;
+					}
+					if (p < runStart + 1)
+					{
+						expected = ExpectedSet_DotGram(41);
+						goto Fail;
+					}
+					if (p > runStart + 1)
+						entries.Add(new ParserEntry(ParserEntry.Run, 97, runStart + 1, call, atomic, repeat, lookahead, p));
+				}
+
+				S97:
+				{
+					var openedAt = opened21;
+
+					if ((uint)openedAt >= (uint)entries.Count || entries[openedAt].Kind != ParserEntry.CaptureOpen || entries[openedAt].State != 21 || entries[openedAt].CallIndex != call)
+					{
+						var closed = 0;
+
+						for (openedAt = entries.Count - 1; openedAt >= 0; openedAt--)
+						{
+							var opened = entries[openedAt];
+
+							if (opened.State != 21) continue;
+
+							if (opened.Kind == ParserEntry.Capture)
+							{
+								closed++;
+								continue;
+							}
+
+							if (opened.Kind != ParserEntry.CaptureOpen)
+								continue;
+
+							if (closed == 0)
+								break;
+
+							closed--;
+						}
+
+						opened21 = openedAt;
+					}
+
+					global::System.Diagnostics.Debug.Assert(openedAt >= 0);
+					entries.Add(new ParserEntry(ParserEntry.Capture, 21, entries[openedAt].Position, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					turn0 = p;
+				}
+
+				S99:
+				{
+					turn1 = p;
+				}
+
+				{
+					var scanned = Scan_DotGram_Ws_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(2);
+						goto S101;
+					}
+					p = scanned;
+					goto S99;
+				}
+
+				S101:
+				{
+					p = turn1;
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != ':')
+					{
+						expected = ExpectedSet_DotGram(27);
+						goto S104;
+					}
+					p += 1;
+				}
+
+				{
+					p = turn0;
+					goto Return;
+				}
+
+				S104:
+				{
+					p = turn0;
+					goto Fail;
+				}
+
+				S105:
+				{
+					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
+					var seenTo = p;
+					var lookedAt = lookahead;
+					var looked = entries[lookedAt];
+					global::System.Diagnostics.Debug.Assert(looked.Kind == ParserEntry.Lookahead);
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall > lookedAt && entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].RuleIndex == 19 && entries[capturedCall].Value == seenTo);
+					for (var back = entries.Count - 1; back >= lookedAt; back--)
+					{
+						var inside = entries[back];
+						if (inside.Kind != ParserEntry.Choice && inside.Kind != ParserEntry.Run && inside.Kind != ParserEntry.Lookahead) continue;
+						entries[back] = new ParserEntry(ParserEntry.Dead, inside.State, inside.Position, inside.CallIndex, inside.AtomicIndex, inside.RepeatIndex, inside.LookaheadIndex, inside.Value);
+					}
+					p         = looked.Position;
+					call      = looked.CallIndex;
+					atomic    = looked.AtomicIndex;
+					repeat    = looked.RepeatIndex;
+					lookahead = looked.LookaheadIndex;
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 10, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				S106:
+				{
+					global::System.Diagnostics.Debug.Assert(call >= 0 && call < entries.Count);
+					var ruleStart = entries[call].Position;
+					var guardValues = parser.Materialization(entries.Count);
+					var values0 = parser.Materialization0();
+					var values1 = parser.Materialization1();
+					var values2 = parser.Materialization2();
+					var values3 = parser.Materialization3();
+					var values4 = parser.Materialization4();
+					var values5 = parser.Materialization5();
+					var values6 = parser.Materialization6();
+					var guardBuilt  = parser.Materialized();
+					var guardNeedsMaterialization = false;
+					var guardFrom = entries.Count;
+					var guardCaptured0At = -1;
+					for (var candidateAt = entries.Count - 1; candidateAt > call; candidateAt--)
+					{
+						var candidate = entries[candidateAt];
+						if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == call && (candidate.State == 10))
+						{
+							guardCaptured0At = candidate.Position;
+							break;
+						}
+					}
+					if (guardCaptured0At >= 0 && !guardBuilt[guardCaptured0At])
+					{
+						guardValues[guardCaptured0At] = parser;
+						guardFrom = global::System.Math.Min(guardFrom, guardCaptured0At);
+						guardNeedsMaterialization = true;
+					}
+					if (guardNeedsMaterialization) Materialize_DotGram_Line(text, parser, entries, guardFrom);
+					global::System.Diagnostics.Debug.Assert(guardCaptured0At >= 0);
+					var guardCaptured0 = values5[guardCaptured0At];
+					if (!RecognizeGuard3_DotGram_Line(guardCaptured0)) { expected = null; goto Fail; }
+				}
+
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 108, p, call, atomic, repeat, lookahead, 0, 15));
+					call = callIndex;
+					goto S41;
+				}
+
+				S108:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 15 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 11, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 2, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S110:
+				{
+					entries.Add(new ParserEntry(ParserEntry.Choice, 156, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var lookaheadIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 124, p, call, atomic, repeat, lookahead, 1));
+					lookahead = lookaheadIndex;
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(19);
+						goto Fail;
+					}
+					c = text[p];
+					switch (c)
+					{
+						case 'a': goto S155;
+						case 'e': goto S154;
+						case 'i': goto S153;
+						case 'o': goto S152;
+						case 'p': goto S151;
+						case 's': goto S150;
+						case 'u': goto S149;
+						case 'v': goto S113;
+					}
+					expected = ExpectedSet_DotGram(19);
+					goto Fail;
+				}
+
+				S113:
+				{
+					if (text.Length - p < 7)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "virtual", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(18);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 7), global::System.MemoryExtensions.AsSpan("virtual")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'v')
+							{
+								if (text[p + 1] != 'i')
+									p += 1;
+								else if (text[p + 2] != 'r')
+									p += 2;
+								else if (text[p + 3] != 't')
+									p += 3;
+								else if (text[p + 4] != 'u')
+									p += 4;
+								else if (text[p + 5] != 'a')
+									p += 5;
+								else
+									p += 6;
+							}
+						}
+						expected = ExpectedSet_DotGram(18);
+						goto Fail;
+					}
+					p += 7;
+				}
+
+				S114:
+				{
+					var lookaheadIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 118, p, call, atomic, repeat, lookahead, 1));
+					lookahead = lookaheadIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!(RecognizeIn_DotGram_Line(RecognizeSet1_DotGram_Line, c))) goto S148;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 148, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_Ws_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(2);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				S117:
+				{
+					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
+					var looked = entries[lookahead];
+					global::System.Diagnostics.Debug.Assert(looked.Kind == ParserEntry.Lookahead);
+					parser.Truncate(lookahead, entries);
+					entries.RemoveRange(lookahead, entries.Count - lookahead);
+					p         = looked.Position;
+					call      = looked.CallIndex;
+					atomic    = looked.AtomicIndex;
+					repeat    = looked.RepeatIndex;
+					lookahead = looked.LookaheadIndex;
+				}
+
+				S118:
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (RecognizeIn_DotGram_Line(RecognizeSet1_DotGram_Line, c)) goto S127;
+					}
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S127;
+				}
+
+				S119:
+				{
+					turn0 = p;
+				}
+
+				{
+					var scanned = Scan_DotGram_Ws_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(2);
+						goto S121;
+					}
+					p = scanned;
+					goto S119;
+				}
+
+				S121:
+				{
+					if (p > turn0 && lookahead < 0 && p > failure.Position)
+					{
+						failure.Position = p;
+						if (!failure.Quiet)
+						{
+							failure.Expected = expected;
+							failure.ExpectedMore?.Clear();
+						}
+					}
+					p = turn0;
+				}
+
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				{
+					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
+					var looked = entries[lookahead];
+					global::System.Diagnostics.Debug.Assert(looked.Kind == ParserEntry.Lookahead);
+					parser.Truncate(lookahead, entries);
+					entries.RemoveRange(lookahead, entries.Count - lookahead);
+					p         = looked.Position;
+					call      = looked.CallIndex;
+					atomic    = looked.AtomicIndex;
+					repeat    = looked.RepeatIndex;
+					lookahead = looked.LookaheadIndex;
+				}
+
+				S124:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 125, p, call, atomic, repeat, lookahead, 0, 15));
+					call = callIndex;
+					goto S41;
+				}
+
+				S125:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 15 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 12, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 3, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S127:
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S128:
+				{
+					entries.Add(new ParserEntry(ParserEntry.Choice, 147, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_Ws_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(2);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				S130:
+				{
+					turn0 = p;
+				}
+
+				{
+					var scanned = Scan_DotGram_Ws_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(2);
+						goto S132;
+					}
+					p = scanned;
+					goto S130;
+				}
+
+				S132:
+				{
+					if (p > turn0 && lookahead < 0 && p > failure.Position)
+					{
+						failure.Position = p;
+						if (!failure.Quiet)
+						{
+							failure.Expected = expected;
+							failure.ExpectedMore?.Clear();
+						}
+					}
+					p = turn0;
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(19);
+						goto Fail;
+					}
+					c = text[p];
+					switch (c)
+					{
+						case 'a': goto S146;
+						case 'e': goto S145;
+						case 'i': goto S144;
+						case 'o': goto S143;
+						case 'p': goto S142;
+						case 's': goto S141;
+						case 'u': goto S140;
+						case 'v': goto S134;
+					}
+					expected = ExpectedSet_DotGram(19);
+					goto Fail;
+				}
+
+				S134:
+				{
+					if (text.Length - p < 7)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "virtual", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(18);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 7), global::System.MemoryExtensions.AsSpan("virtual")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'v')
+							{
+								if (text[p + 1] != 'i')
+									p += 1;
+								else if (text[p + 2] != 'r')
+									p += 2;
+								else if (text[p + 3] != 't')
+									p += 3;
+								else if (text[p + 4] != 'u')
+									p += 4;
+								else if (text[p + 5] != 'a')
+									p += 5;
+								else
+									p += 6;
+							}
+						}
+						expected = ExpectedSet_DotGram(18);
+						goto Fail;
+					}
+					p += 7;
+				}
+
+				S135:
+				{
+					var lookaheadIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 128, p, call, atomic, repeat, lookahead, 1));
+					lookahead = lookaheadIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!(RecognizeIn_DotGram_Line(RecognizeSet1_DotGram_Line, c))) goto S139;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 139, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_Ws_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(2);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				S138:
+				{
+					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
+					var looked = entries[lookahead];
+					global::System.Diagnostics.Debug.Assert(looked.Kind == ParserEntry.Lookahead);
+					parser.Truncate(lookahead, entries);
+					entries.RemoveRange(lookahead, entries.Count - lookahead);
+					p         = looked.Position;
+					call      = looked.CallIndex;
+					atomic    = looked.AtomicIndex;
+					repeat    = looked.RepeatIndex;
+					lookahead = looked.LookaheadIndex;
+					goto S128;
+				}
+
+				S139:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S138;
+				}
+
+				S140:
+				{
+					if (text.Length - p < 6)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "unsafe", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(17);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 6), global::System.MemoryExtensions.AsSpan("unsafe")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'u')
+							{
+								if (text[p + 1] != 'n')
+									p += 1;
+								else if (text[p + 2] != 's')
+									p += 2;
+								else if (text[p + 3] != 'a')
+									p += 3;
+								else if (text[p + 4] != 'f')
+									p += 4;
+								else
+									p += 5;
+							}
+						}
+						expected = ExpectedSet_DotGram(17);
+						goto Fail;
+					}
+					p += 6;
+					goto S135;
+				}
+
+				S141:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != 's')
+					{
+						expected = ExpectedSet_DotGram(14);
+						goto Fail;
+					}
+					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("tatic")))
+					{
+						p += 6;
+						goto S135;
+					}
+					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("ealed")))
+					{
+						p += 6;
+						goto S135;
+					}
+					expected = ExpectedSet_DotGram(14);
+					p = RecognizeSharpen2_DotGram_Line(text, p, ref expected);
+					goto Fail;
+				}
+
+				S142:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != 'p')
+					{
+						expected = ExpectedSet_DotGram(9);
+						goto Fail;
+					}
+					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("ublic")))
+					{
+						p += 6;
+						goto S135;
+					}
+					if (text.Length - p >= 7 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 6), global::System.MemoryExtensions.AsSpan("rivate")))
+					{
+						p += 7;
+						goto S135;
+					}
+					if (text.Length - p >= 9 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 8), global::System.MemoryExtensions.AsSpan("rotected")))
+					{
+						p += 9;
+						goto S135;
+					}
+					expected = ExpectedSet_DotGram(9);
+					p = RecognizeSharpen1_DotGram_Line(text, p, ref expected);
+					goto Fail;
+				}
+
+				S143:
+				{
+					if (text.Length - p < 8)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "override", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(8);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 8), global::System.MemoryExtensions.AsSpan("override")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'o')
+							{
+								if (text[p + 1] != 'v')
+									p += 1;
+								else if (text[p + 2] != 'e')
+									p += 2;
+								else if (text[p + 3] != 'r')
+									p += 3;
+								else if (text[p + 4] != 'r')
+									p += 4;
+								else if (text[p + 5] != 'i')
+									p += 5;
+								else if (text[p + 6] != 'd')
+									p += 6;
+								else
+									p += 7;
+							}
+						}
+						expected = ExpectedSet_DotGram(8);
+						goto Fail;
+					}
+					p += 8;
+					goto S135;
+				}
+
+				S144:
+				{
+					if (text.Length - p < 2)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "in", false, true, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(5);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 2), global::System.MemoryExtensions.AsSpan("in")))
+					{
+						if (text[p] == 'i')
+							p += 1;
+						expected = ExpectedSet_DotGram(5);
+						goto Fail;
+					}
+					if (text.Length - p >= 8 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 2, 6), global::System.MemoryExtensions.AsSpan("ternal")))
+					{
+						p += 8;
+						goto S135;
+					}
+					if (text.Length - p >= 8 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 2, 6), global::System.MemoryExtensions.AsSpan("stance")))
+					{
+						p += 8;
+						goto S135;
+					}
+					expected = ExpectedSet_DotGram(5);
+					p = RecognizeSharpen0_DotGram_Line(text, p, ref expected);
+					goto Fail;
+				}
+
+				S145:
+				{
+					if (text.Length - p < 6)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "extern", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(4);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 6), global::System.MemoryExtensions.AsSpan("extern")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'e')
+							{
+								if (text[p + 1] != 'x')
+									p += 1;
+								else if (text[p + 2] != 't')
+									p += 2;
+								else if (text[p + 3] != 'e')
+									p += 3;
+								else if (text[p + 4] != 'r')
+									p += 4;
+								else
+									p += 5;
+							}
+						}
+						expected = ExpectedSet_DotGram(4);
+						goto Fail;
+					}
+					p += 6;
+					goto S135;
+				}
+
+				S146:
+				{
+					if (text.Length - p < 8)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "abstract", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(3);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 8), global::System.MemoryExtensions.AsSpan("abstract")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'a')
+							{
+								if (text[p + 1] != 'b')
+									p += 1;
+								else if (text[p + 2] != 's')
+									p += 2;
+								else if (text[p + 3] != 't')
+									p += 3;
+								else if (text[p + 4] != 'r')
+									p += 4;
+								else if (text[p + 5] != 'a')
+									p += 5;
+								else if (text[p + 6] != 'c')
+									p += 6;
+								else
+									p += 7;
+							}
+						}
+						expected = ExpectedSet_DotGram(3);
+						goto Fail;
+					}
+					p += 8;
+					goto S135;
+				}
+
+				S147:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+					goto S119;
+				}
+
+				S148:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S117;
+				}
+
+				S149:
+				{
+					if (text.Length - p < 6)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "unsafe", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(17);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 6), global::System.MemoryExtensions.AsSpan("unsafe")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'u')
+							{
+								if (text[p + 1] != 'n')
+									p += 1;
+								else if (text[p + 2] != 's')
+									p += 2;
+								else if (text[p + 3] != 'a')
+									p += 3;
+								else if (text[p + 4] != 'f')
+									p += 4;
+								else
+									p += 5;
+							}
+						}
+						expected = ExpectedSet_DotGram(17);
+						goto Fail;
+					}
+					p += 6;
+					goto S114;
+				}
+
+				S150:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != 's')
+					{
+						expected = ExpectedSet_DotGram(14);
+						goto Fail;
+					}
+					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("tatic")))
+					{
+						p += 6;
+						goto S114;
+					}
+					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("ealed")))
+					{
+						p += 6;
+						goto S114;
+					}
+					expected = ExpectedSet_DotGram(14);
+					p = RecognizeSharpen2_DotGram_Line(text, p, ref expected);
+					goto Fail;
+				}
+
+				S151:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != 'p')
+					{
+						expected = ExpectedSet_DotGram(9);
+						goto Fail;
+					}
+					if (text.Length - p >= 6 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 5), global::System.MemoryExtensions.AsSpan("ublic")))
+					{
+						p += 6;
+						goto S114;
+					}
+					if (text.Length - p >= 7 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 6), global::System.MemoryExtensions.AsSpan("rivate")))
+					{
+						p += 7;
+						goto S114;
+					}
+					if (text.Length - p >= 9 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 1, 8), global::System.MemoryExtensions.AsSpan("rotected")))
+					{
+						p += 9;
+						goto S114;
+					}
+					expected = ExpectedSet_DotGram(9);
+					p = RecognizeSharpen1_DotGram_Line(text, p, ref expected);
+					goto Fail;
+				}
+
+				S152:
+				{
+					if (text.Length - p < 8)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "override", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(8);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 8), global::System.MemoryExtensions.AsSpan("override")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'o')
+							{
+								if (text[p + 1] != 'v')
+									p += 1;
+								else if (text[p + 2] != 'e')
+									p += 2;
+								else if (text[p + 3] != 'r')
+									p += 3;
+								else if (text[p + 4] != 'r')
+									p += 4;
+								else if (text[p + 5] != 'i')
+									p += 5;
+								else if (text[p + 6] != 'd')
+									p += 6;
+								else
+									p += 7;
+							}
+						}
+						expected = ExpectedSet_DotGram(8);
+						goto Fail;
+					}
+					p += 8;
+					goto S114;
+				}
+
+				S153:
+				{
+					if (text.Length - p < 2)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "in", false, true, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(5);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 2), global::System.MemoryExtensions.AsSpan("in")))
+					{
+						if (text[p] == 'i')
+							p += 1;
+						expected = ExpectedSet_DotGram(5);
+						goto Fail;
+					}
+					if (text.Length - p >= 8 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 2, 6), global::System.MemoryExtensions.AsSpan("ternal")))
+					{
+						p += 8;
+						goto S114;
+					}
+					if (text.Length - p >= 8 && global::System.MemoryExtensions.SequenceEqual(text.Slice(p + 2, 6), global::System.MemoryExtensions.AsSpan("stance")))
+					{
+						p += 8;
+						goto S114;
+					}
+					expected = ExpectedSet_DotGram(5);
+					p = RecognizeSharpen0_DotGram_Line(text, p, ref expected);
+					goto Fail;
+				}
+
+				S154:
+				{
+					if (text.Length - p < 6)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "extern", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(4);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 6), global::System.MemoryExtensions.AsSpan("extern")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'e')
+							{
+								if (text[p + 1] != 'x')
+									p += 1;
+								else if (text[p + 2] != 't')
+									p += 2;
+								else if (text[p + 3] != 'e')
+									p += 3;
+								else if (text[p + 4] != 'r')
+									p += 4;
+								else
+									p += 5;
+							}
+						}
+						expected = ExpectedSet_DotGram(4);
+						goto Fail;
+					}
+					p += 6;
+					goto S114;
+				}
+
+				S155:
+				{
+					if (text.Length - p < 8)
+					{
+						p = RecognizeRanOut_DotGram_Line(text, p, "abstract", false, lookahead < 0, negating == 0, ref failure);
+						expected = ExpectedSet_DotGram(3);
+						goto Fail;
+					}
+					if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 8), global::System.MemoryExtensions.AsSpan("abstract")))
+					{
+						if (lookahead < 0)
+						{
+							if (text[p] == 'a')
+							{
+								if (text[p + 1] != 'b')
+									p += 1;
+								else if (text[p + 2] != 's')
+									p += 2;
+								else if (text[p + 3] != 't')
+									p += 3;
+								else if (text[p + 4] != 'r')
+									p += 4;
+								else if (text[p + 5] != 'a')
+									p += 5;
+								else if (text[p + 6] != 'c')
+									p += 6;
+								else
+									p += 7;
+							}
+						}
+						expected = ExpectedSet_DotGram(3);
+						goto Fail;
+					}
+					p += 8;
+					goto S114;
+				}
+
+				S156:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 225, p, call, atomic, repeat, lookahead, 0, 5));
+					call = callIndex;
+				}
+
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 171, p, call, atomic, repeat, lookahead, 0, 14));
+					call = callIndex;
+				}
+
+				{
+					var atomicIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
+					atomic = atomicIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if ((c >= '\0' && c <= '\'') || (c >= ')' && c <= '9') || (c >= ';' && c <= '\uFFFF')) goto S161;
+					}
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S161;
+				}
+
+				S160:
+				{
+					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
+					var boundary = entries[atomic];
+					global::System.Diagnostics.Debug.Assert(boundary.Kind == ParserEntry.Atomic);
+					parser.Truncate(atomic, entries);
+					entries.RemoveRange(atomic, entries.Count - atomic);
+					atomic = boundary.AtomicIndex;
+					repeat = boundary.RepeatIndex;
+					lookahead = boundary.LookaheadIndex;
+					goto Return;
+				}
+
+				S161:
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S162:
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == '(' || c == ':' || c == '<' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), global::System.MemoryExtensions.AsSpan("(:<\\"));
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeating = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					{
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 170, p, call, atomic, repeat, lookahead, 0));
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
+					}
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(40);
+						goto Fail;
+					}
+					c = text[p];
+					if (c == '<') goto S169;
+					if (c == '\\') goto S165;
+					if ((c >= '\0' && c <= '\'') || (c >= ')' && c <= '9') || c == ';' || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S164;
+					expected = ExpectedSet_DotGram(40);
+					goto Fail;
+				}
+
+				S164:
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(39);
+						goto Fail;
+					}
+					c = text[p];
+					if (!(!(c == '(' || c == ':' || c == '<' || c == '\\')))
+					{
+						expected = ExpectedSet_DotGram(39);
+						goto Fail;
+					}
+					p++;
+					goto S162;
+				}
+
+				S165:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '\\')
+					{
+						expected = ExpectedSet_DotGram(22);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S168;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 168, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_any_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(21);
+						goto Fail;
+					}
+					p = scanned;
+					goto S162;
+				}
+
+				S168:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S162;
+				}
+
+				S169:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 162, p, call, atomic, repeat, lookahead, 0, -1));
+					call = callIndex;
+					goto S54;
+				}
+
+				S170:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+					goto S160;
+				}
+
+				S171:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 14 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 14, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (c == '(') goto S182;
+					}
+					if (lookahead < 0)
+					{
+						if (p > failure.Position)
+						{
+							failure.Position = p;
+							if (!failure.Quiet)
+							{
+								failure.Expected = ExpectedSet_DotGram(26);
+								failure.ExpectedMore?.Clear();
+							}
+						}
+						else if (!failure.Quiet && p == failure.Position)
+							Tie_DotGram(ref failure, ExpectedSet_DotGram(26));
+					}
+				}
+
+				S173:
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (c == ':') goto S174;
+					}
+					if (lookahead < 0)
+					{
+						if (p > failure.Position)
+						{
+							failure.Position = p;
+							if (!failure.Quiet)
+							{
+								failure.Expected = ExpectedSet_DotGram(25);
+								failure.ExpectedMore?.Clear();
+							}
+						}
+						else if (!failure.Quiet && p == failure.Position)
+							Tie_DotGram(ref failure, ExpectedSet_DotGram(25));
+					}
+					goto S60;
+				}
+
+				S174:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 181, p, call, atomic, repeat, lookahead, 0, 6));
+					call = callIndex;
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != ':')
+					{
+						expected = ExpectedSet_DotGram(27);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 180, p, call, atomic, repeat, lookahead, 0, 7));
+					call = callIndex;
+				}
+
+				S177:
+				{
+					turn0 = p;
+				}
+
+				{
+					var scanned = Scan_DotGram_any_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(21);
+						goto S179;
+					}
+					p = scanned;
+					goto S177;
+				}
+
+				S179:
+				{
+					if (p > turn0 && lookahead < 0 && p > failure.Position)
+					{
+						failure.Position = p;
+						if (!failure.Quiet)
+						{
+							failure.Expected = expected;
+							failure.ExpectedMore?.Clear();
+						}
+					}
+					p = turn0;
+					goto Return;
+				}
+
+				S180:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 7 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 17, capturedCall, call, atomic, repeat, lookahead, p));
+					goto Return;
+				}
+
+				S181:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 6 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 16, capturedCall, call, atomic, repeat, lookahead, p));
+					goto S60;
+				}
+
+				S182:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 224, p, call, atomic, repeat, lookahead, 0, 9));
+					call = callIndex;
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '(')
+					{
+						expected = ExpectedSet_DotGram(31);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!((c >= '\0' && c <= '9') || (c >= ';' && c <= '\uFFFF'))) goto S210;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 210, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 199, p, call, atomic, repeat, lookahead, 0, 13));
+					call = callIndex;
+				}
+
+				{
+					var atomicIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
+					atomic = atomicIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if ((c >= '\0' && c <= '(') || (c >= '*' && c <= '9') || (c >= ';' && c <= '\uFFFF')) goto S189;
+					}
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S189;
+				}
+
+				S188:
+				{
+					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
+					var boundary = entries[atomic];
+					global::System.Diagnostics.Debug.Assert(boundary.Kind == ParserEntry.Atomic);
+					parser.Truncate(atomic, entries);
+					entries.RemoveRange(atomic, entries.Count - atomic);
+					atomic = boundary.AtomicIndex;
+					repeat = boundary.RepeatIndex;
+					lookahead = boundary.LookaheadIndex;
+					goto Return;
+				}
+
+				S189:
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S190:
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == ')' || c == ':' || c == '<' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), global::System.MemoryExtensions.AsSpan("):<\\"));
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeating = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					{
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 198, p, call, atomic, repeat, lookahead, 0));
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
+					}
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(38);
+						goto Fail;
+					}
+					c = text[p];
+					if (c == '<') goto S197;
+					if (c == '\\') goto S193;
+					if ((c >= '\0' && c <= '(') || (c >= '*' && c <= '9') || c == ';' || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S192;
+					expected = ExpectedSet_DotGram(38);
+					goto Fail;
+				}
+
+				S192:
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(37);
+						goto Fail;
+					}
+					c = text[p];
+					if (!(!(c == ')' || c == ':' || c == '<' || c == '\\')))
+					{
+						expected = ExpectedSet_DotGram(37);
+						goto Fail;
+					}
+					p++;
+					goto S190;
+				}
+
+				S193:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '\\')
+					{
+						expected = ExpectedSet_DotGram(22);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S196;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 196, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_any_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(21);
+						goto Fail;
+					}
+					p = scanned;
+					goto S190;
+				}
+
+				S196:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S190;
+				}
+
+				S197:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 190, p, call, atomic, repeat, lookahead, 0, -1));
+					call = callIndex;
+					goto S54;
+				}
+
+				S198:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+					goto S188;
+				}
+
+				S199:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 13 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 18, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != ')')
+					{
+						expected = ExpectedSet_DotGram(30);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				S201:
+				{
+					turn0 = p;
+				}
+
+				{
+					var scanned = Scan_DotGram_Ws_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(2);
+						goto S203;
+					}
+					p = scanned;
+					goto S201;
+				}
+
+				S203:
+				{
+					if (p > turn0 && lookahead < 0 && p > failure.Position)
+					{
+						failure.Position = p;
+						if (!failure.Quiet)
+						{
+							failure.Expected = expected;
+							failure.ExpectedMore?.Clear();
+						}
+					}
+					p = turn0;
+				}
+
+				{
+					var lookaheadIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 208, p, call, atomic, repeat, lookahead, 1));
+					lookahead = lookaheadIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!(c == ':')) goto S209;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 209, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != ':')
+					{
+						expected = ExpectedSet_DotGram(27);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				S207:
+				{
+					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
+					var looked = entries[lookahead];
+					global::System.Diagnostics.Debug.Assert(looked.Kind == ParserEntry.Lookahead);
+					parser.Truncate(lookahead, entries);
+					entries.RemoveRange(lookahead, entries.Count - lookahead);
+					p         = looked.Position;
+					call      = looked.CallIndex;
+					atomic    = looked.AtomicIndex;
+					repeat    = looked.RepeatIndex;
+					lookahead = looked.LookaheadIndex;
+				}
+
+				S208:
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S209:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S207;
+				}
+
+				S210:
+				{
+					var atomicIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
+					atomic = atomicIndex;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if ((c >= '\0' && c <= '9') || (c >= ';' && c <= '\uFFFF')) goto S214;
+					}
+					if (lookahead < 0 && !failure.Quiet && p >= failure.Doors) goto S214;
+				}
+
+				S212:
+				{
+					global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
+					var boundary = entries[atomic];
+					global::System.Diagnostics.Debug.Assert(boundary.Kind == ParserEntry.Atomic);
+					parser.Truncate(atomic, entries);
+					entries.RemoveRange(atomic, entries.Count - atomic);
+					atomic = boundary.AtomicIndex;
+					repeat = boundary.RepeatIndex;
+					lookahead = boundary.LookaheadIndex;
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S214:
+				{
+					var repeatIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+					repeat = repeatIndex;
+				}
+
+				S215:
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == ':' || c == '<' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), ':', '<', '\\');
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var repeating = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+					{
+						entries.Add(new ParserEntry(ParserEntry.LoopExit, 223, p, call, atomic, repeat, lookahead, 0));
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
+					}
+				}
+
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(29);
+						goto Fail;
+					}
+					c = text[p];
+					if (c == '<') goto S222;
+					if (c == '\\') goto S218;
+					if ((c >= '\0' && c <= '9') || c == ';' || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S217;
+					expected = ExpectedSet_DotGram(29);
+					goto Fail;
+				}
+
+				S217:
+				{
+					if ((uint)p >= (uint)text.Length)
+					{
+						expected = ExpectedSet_DotGram(28);
+						goto Fail;
+					}
+					c = text[p];
+					if (!(!(c == ':' || c == '<' || c == '\\')))
+					{
+						expected = ExpectedSet_DotGram(28);
+						goto Fail;
+					}
+					p++;
+					goto S215;
+				}
+
+				S218:
+				{
+					if ((uint)p >= (uint)text.Length || text[p] != '\\')
+					{
+						expected = ExpectedSet_DotGram(22);
+						goto Fail;
+					}
+					p += 1;
+				}
+
+				{
+					if ((uint)p < (uint)text.Length)
+					{
+						c = text[p];
+						if (!((c >= '\0' && c <= '\uFFFF'))) goto S221;
+					}
+					entries.Add(new ParserEntry(ParserEntry.Choice, 221, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_any_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(21);
+						goto Fail;
+					}
+					p = scanned;
+					goto S215;
+				}
+
+				S221:
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+					goto S215;
+				}
+
+				S222:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 215, p, call, atomic, repeat, lookahead, 0, -1));
+					call = callIndex;
+					goto S54;
+				}
+
+				S223:
+				{
+					global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+					var finished = entries[repeat];
+					global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+					var previousRepeat = finished.RepeatIndex;
+					if (entries.Count == repeat + 1)
+					{
+						parser.Truncate(repeat, entries);
+						entries.RemoveAt(repeat);
+					}
+					repeat = previousRepeat;
+					lookahead = finished.LookaheadIndex;
+					goto S212;
+				}
+
+				S224:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 9 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 15, capturedCall, call, atomic, repeat, lookahead, p));
+					goto S173;
+				}
+
+				S225:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 5 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 13, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 4, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S227:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 4 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 4, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S229:
+				{
+					global::System.Diagnostics.Debug.Assert(call >= 0 && call < entries.Count);
+					var ruleStart = entries[call].Position;
+					var guardValues = parser.Materialization(entries.Count);
+					var values0 = parser.Materialization0();
+					var values1 = parser.Materialization1();
+					var values2 = parser.Materialization2();
+					var values3 = parser.Materialization3();
+					var values4 = parser.Materialization4();
+					var values5 = parser.Materialization5();
+					var values6 = parser.Materialization6();
+					var guardBuilt  = parser.Materialized();
+					var guardNeedsMaterialization = false;
+					var guardFrom = entries.Count;
+					var guardCaptured0At = -1;
+					for (var candidateAt = entries.Count - 1; candidateAt > call; candidateAt--)
+					{
+						var candidate = entries[candidateAt];
+						if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == call && (candidate.State == 3))
+						{
+							guardCaptured0At = candidate.Position;
+							break;
+						}
+					}
+					if (guardCaptured0At >= 0 && !guardBuilt[guardCaptured0At])
+					{
+						guardValues[guardCaptured0At] = parser;
+						guardFrom = global::System.Math.Min(guardFrom, guardCaptured0At);
+						guardNeedsMaterialization = true;
+					}
+					if (guardNeedsMaterialization) Materialize_DotGram_Line(text, parser, entries, guardFrom);
+					global::System.Diagnostics.Debug.Assert(guardCaptured0At >= 0);
+					var guardCaptured0 = values5[guardCaptured0At];
+					if (!RecognizeGuard0_DotGram_Line(guardCaptured0)) { expected = null; goto Fail; }
+				}
+
+				{
+					var runStart = p;
+					while (true)
+					{
+						if ((uint)p >= (uint)text.Length) break;
+						c = text[p];
+						if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c))))) break;
+						p++;
+					}
+					if (p > runStart)
+						entries.Add(new ParserEntry(ParserEntry.Run, 231, runStart, call, atomic, repeat, lookahead, p));
+				}
+
+				S231:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 238, p, call, atomic, repeat, lookahead, 0, 22));
+					call = callIndex;
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Choice, 235, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S235:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 236, p, call, atomic, repeat, lookahead, 0, 7));
+					call = callIndex;
+					goto S177;
+				}
+
+				S236:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 7 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 22, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S238:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 22 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 5, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S240:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 251, p, call, atomic, repeat, lookahead, 0, 3));
+					call = callIndex;
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Choice, 248, p, call, atomic, repeat, lookahead, 0));
+				}
+
+				{
+					var lookaheadIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Lookahead, 245, p, call, atomic, repeat, lookahead, 1));
+					lookahead = lookaheadIndex;
+				}
+
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 244, p, call, atomic, repeat, lookahead, 0, 19));
+					call = callIndex;
+					goto S95;
+				}
+
+				S244:
+				{
+					global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
+					var seenTo = p;
+					var lookedAt = lookahead;
+					var looked = entries[lookedAt];
+					global::System.Diagnostics.Debug.Assert(looked.Kind == ParserEntry.Lookahead);
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall > lookedAt && entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].RuleIndex == 19 && entries[capturedCall].Value == seenTo);
+					for (var back = entries.Count - 1; back >= lookedAt; back--)
+					{
+						var inside = entries[back];
+						if (inside.Kind != ParserEntry.Choice && inside.Kind != ParserEntry.Run && inside.Kind != ParserEntry.Lookahead) continue;
+						entries[back] = new ParserEntry(ParserEntry.Dead, inside.State, inside.Position, inside.CallIndex, inside.AtomicIndex, inside.RepeatIndex, inside.LookaheadIndex, inside.Value);
+					}
+					p         = looked.Position;
+					call      = looked.CallIndex;
+					atomic    = looked.AtomicIndex;
+					repeat    = looked.RepeatIndex;
+					lookahead = looked.LookaheadIndex;
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 7, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				S245:
+				{
+					global::System.Diagnostics.Debug.Assert(call >= 0 && call < entries.Count);
+					var ruleStart = entries[call].Position;
+					var guardValues = parser.Materialization(entries.Count);
+					var values0 = parser.Materialization0();
+					var values1 = parser.Materialization1();
+					var values2 = parser.Materialization2();
+					var values3 = parser.Materialization3();
+					var values4 = parser.Materialization4();
+					var values5 = parser.Materialization5();
+					var values6 = parser.Materialization6();
+					var guardBuilt  = parser.Materialized();
+					var guardNeedsMaterialization = false;
+					var guardFrom = entries.Count;
+					var guardCaptured0At = -1;
+					for (var candidateAt = entries.Count - 1; candidateAt > call; candidateAt--)
+					{
+						var candidate = entries[candidateAt];
+						if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == call && (candidate.State == 7))
+						{
+							guardCaptured0At = candidate.Position;
+							break;
+						}
+					}
+					if (guardCaptured0At >= 0 && !guardBuilt[guardCaptured0At])
+					{
+						guardValues[guardCaptured0At] = parser;
+						guardFrom = global::System.Math.Min(guardFrom, guardCaptured0At);
+						guardNeedsMaterialization = true;
+					}
+					if (guardNeedsMaterialization) Materialize_DotGram_Line(text, parser, entries, guardFrom);
+					global::System.Diagnostics.Debug.Assert(guardCaptured0At >= 0);
+					var guardCaptured0 = values5[guardCaptured0At];
+					if (!RecognizeGuard2_DotGram_Line(guardCaptured0)) { expected = null; goto Fail; }
+				}
+
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 247, p, call, atomic, repeat, lookahead, 0, 7));
+					call = callIndex;
+					goto S177;
+				}
+
+				S247:
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S248:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 249, p, call, atomic, repeat, lookahead, 0, 4));
+					call = callIndex;
+					goto S30;
+				}
+
+				S249:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 4 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 8, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S251:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 3 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 6, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 2, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S253:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 2 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 1, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				S256:
+				{
+					var callIndex = entries.Count;
+					entries.Add(new ParserEntry(ParserEntry.Call, 257, p, call, atomic, repeat, lookahead, 0, 2));
+					call = callIndex;
+					goto S15;
+				}
+
+				S257:
+				{
+					var capturedCall = completedCall;
+					global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+					global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 2 && entries[capturedCall].Value == p);
+					entries.Add(new ParserEntry(ParserEntry.RuleCapture, 2, capturedCall, call, atomic, repeat, lookahead, p));
+				}
+
+				{
+					var scanned = Scan_DotGram_eof_DotGram_Line(text, p);
+					if (scanned < 0)
+					{
+						p = -1 - scanned;
+						expected = ExpectedSet_DotGram(0);
+						goto Fail;
+					}
+					p = scanned;
+				}
+
+				{
+					entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
+					goto Return;
+				}
+
+				Return:
+				global::System.Diagnostics.Debug.Assert(call >= 0 && call < entries.Count);
+				var returned = entries[call];
+				global::System.Diagnostics.Debug.Assert(returned.Kind == ParserEntry.Call || returned.Kind == ParserEntry.Completed);
+				state = returned.State;
+				var previousCall = returned.CallIndex;
+				completedCall = call;
+				repeat = returned.RepeatIndex;
+				lookahead = returned.LookaheadIndex;
+
+				if (returned.RuleIndex >= 0)
+				{
+					entries[call] = new ParserEntry(ParserEntry.Completed, returned.State, returned.Position, returned.CallIndex, returned.AtomicIndex, returned.RepeatIndex, returned.LookaheadIndex, p, returned.RuleIndex);
+				}
+				else if (entries.Count == call + 1)
+				{
+					parser.Truncate(call, entries);
+					entries.RemoveAt(call);
+				}
+
+				call = previousCall;
+				goto Dispatch;
+
+				Accept:
+				if (whole && p != text.Length) { expected = ExpectedSet_DotGram(0); goto Fail; }
+				if (materialize)
+				{
+					if (rootRule >= 0)
+					{
+						var values = parser.Materialization(entries.Count);
+						var values0 = parser.Materialization0();
+						var values1 = parser.Materialization1();
+						var values2 = parser.Materialization2();
+						var values3 = parser.Materialization3();
+						var values4 = parser.Materialization4();
+						var values5 = parser.Materialization5();
+						var values6 = parser.Materialization6();
+						var built  = parser.Materialized();
+						if (!built[0]) values[0] = parser;
+						Materialize_DotGram_Line(text, parser, entries);
+						switch (rootRule)
+						{
+							case 0:
+								recognized = values0[0];
+								break;
+							case 2:
+								recognized = values1[0];
+								break;
+							case 3:
+								recognized = values2[0];
+								break;
+							case 4:
+								recognized = values2[0];
+								break;
+							case 5:
+								recognized = values2[0];
+								break;
+							case 6:
+								recognized = values3[0];
+								break;
+							case 7:
+								recognized = values3[0];
+								break;
+							case 9:
+								recognized = values4[0];
+								break;
+							case 13:
+								recognized = values3[0];
+								break;
+							case 14:
+								recognized = values3[0];
+								break;
+							case 15:
+								recognized = values2[0];
+								break;
+							case 16:
+								recognized = values3[0];
+								break;
+							case 19:
+								recognized = values5[0];
+								break;
+							case 22:
+								recognized = values2[0];
+								break;
+							case 23:
+								recognized = values5[0];
+								break;
+							case 24:
+								recognized = values6[0];
+								break;
+							default:
+								recognized = values[0];
+								break;
+						}
+					}
+				}
+				return p;
+
+				Fail:
+				if (lookahead < 0 && p > failure.Position)
+				{
+					failure.Position = p;
+					if (!failure.Quiet)
+					{
+						failure.Expected = expected;
+						failure.ExpectedMore?.Clear();
+					}
+				}
+				else if (lookahead < 0 && !failure.Quiet && p == failure.Position && expected != null)
+				{
+					Tie_DotGram(ref failure, expected);
+				}
+
+				while (entries.Count > 0)
+				{
+					var last = entries.Count - 1;
+					var entry = entries[last];
+					parser.Truncate(last, entries);
+					entries.RemoveAt(last);
+
+					if (entry.Kind == ParserEntry.Choice)
+					{
+						state  = entry.State;
+						p      = entry.Position;
+						call   = entry.CallIndex;
+						atomic = entry.AtomicIndex;
+						repeat = entry.RepeatIndex;
+						lookahead = entry.LookaheadIndex;
+						parser.Reopen(call, entries);
+						goto Dispatch;
+					}
+					if (entry.Kind == ParserEntry.LoopExit)
+					{
+						if (entry.RepeatIndex < 0 || entries[entry.RepeatIndex].Kind != ParserEntry.Repeat || entries[entry.RepeatIndex].RuleIndex != entry.Position)
+							continue;
+
+						state  = entry.State;
+						p      = entry.Position;
+						call   = entry.CallIndex;
+						atomic = entry.AtomicIndex;
+						repeat = entry.RepeatIndex;
+						lookahead = entry.LookaheadIndex;
+						parser.Reopen(call, entries);
+						goto Dispatch;
+					}
+					if (entry.Kind == ParserEntry.Run)
+					{
+						if (entry.Value <= entry.Position) continue;
+
+						state  = entry.State;
+						p      = entry.Value - 1;
+						call   = entry.CallIndex;
+						atomic = entry.AtomicIndex;
+						repeat = entry.RepeatIndex;
+						lookahead = entry.LookaheadIndex;
+						entries.Add(new ParserEntry(ParserEntry.Run, entry.State, entry.Position, entry.CallIndex, entry.AtomicIndex, entry.RepeatIndex, entry.LookaheadIndex, p));
+						parser.Reopen(call, entries);
+						goto Dispatch;
+					}
+
+					if (entry.Kind == ParserEntry.Capture || entry.Kind == ParserEntry.Construct || entry.Kind == ParserEntry.RuleCapture || entry.Kind == ParserEntry.CaptureOpen || entry.Kind == ParserEntry.Dead)
+						continue;
+
+					if (entry.Kind == ParserEntry.Call || entry.Kind == ParserEntry.Completed)
+					{
+						call   = entry.CallIndex;
+						atomic = entry.AtomicIndex;
+						repeat = entry.RepeatIndex;
+						lookahead = entry.LookaheadIndex;
+						p      = entry.Position;
+					}
+					else if (entry.Kind == ParserEntry.Atomic)
+					{
+						atomic = entry.AtomicIndex;
+						repeat = entry.RepeatIndex;
+						lookahead = entry.LookaheadIndex;
+					}
+					else if (entry.Kind == ParserEntry.Repeat)
+					{
+						p      = entry.Position;
+						call   = entry.CallIndex;
+						atomic = entry.AtomicIndex;
+						repeat = entry.RepeatIndex;
+						lookahead = entry.LookaheadIndex;
+					}
+					else
+					{
+						global::System.Diagnostics.Debug.Assert(entry.Kind == ParserEntry.Lookahead);
+						p         = entry.Position;
+						call      = entry.CallIndex;
+						atomic    = entry.AtomicIndex;
+						repeat    = entry.RepeatIndex;
+						lookahead = entry.LookaheadIndex;
+
+						if (entry.Value == 0)
+						{
+							state = entry.State;
+							negating--;
+							if (entry.RuleIndex >= 0)
+							{
+								entries.Add(new ParserEntry(ParserEntry.Capture, entry.RuleIndex, p, call, atomic, repeat, lookahead, p));
+							}
+							goto Dispatch;
+						}
+
+						if (lookahead < 0 && p > failure.Position)
+						{
+							failure.Position = p;
+							if (!failure.Quiet)
+							{
+								failure.Expected = null;
+								failure.ExpectedMore?.Clear();
+							}
+						}
+					}
+				}
+
+				return -1;
+			}
+			finally
+			{
+				parser.Reset();
+				if (lent) ReturnParser_DotGram(parser); else Recycle_DotGram(parser);
+			}
+		}
+
+		static int Scan_DotGram_eof_DotGram_Line(global::System.ReadOnlySpan<char> text, int pos)
+		{
+			var p = pos;
+			var mark0 = 0;
+
+			mark0 = p;
+			if ((uint)p >= (uint)text.Length) goto L0_absent;
+			p++;
+			p = mark0;
+			goto Refuse;
+			L0_absent: ;
+
+			return p;
+
+			Refuse:
+			return -1 - p;
+		}
+
+		static int Scan_DotGram_Ws_DotGram_Line(global::System.ReadOnlySpan<char> text, int pos)
+		{
+			var p = pos;
+			var c = '\0';
+
+			if ((uint)p >= (uint)text.Length) goto Refuse;
+			c = text[p];
+			if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c))))) goto Refuse;
+			p++;
+
+			return p;
+
+			Refuse:
+			return -1 - p;
+		}
+
+		static int Scan_DotGram_any_DotGram_Line(global::System.ReadOnlySpan<char> text, int pos)
+		{
+			var p = pos;
+
+			if ((uint)p >= (uint)text.Length) goto Refuse;
+			p++;
+
+			return p;
+
+			Refuse:
+			return -1 - p;
+		}
+
+		static int RecWhole_DotGram_Line(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out TargetFilterLineSyntax value)
+		{
+			object? recognized;
+			var end = Recognize_DotGram_Line(text, pos, 3, 0, true, true, ref failure, out recognized);
+			value = end < 0 ? default! : (TargetFilterLineSyntax)recognized!;
+			return end;
+		}
+
+		static int Rec_DotGram_Line(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out TargetFilterLineSyntax value)
+		{
+			object? recognized;
+			var end = Recognize_DotGram_Line(text, pos, 3, 0, false, true, ref failure, out recognized);
+			value = end < 0 ? default! : (TargetFilterLineSyntax)recognized!;
+			return end;
+		}
+
+		private ref struct Reader_DotGram_ConditionItem
 		{
 			readonly global::System.ReadOnlySpan<char> text;
 			internal Failure failure;
+			internal int probes;
 			readonly Ways_DotGram ways;
-			internal string last0;
-			internal TargetFilterLine last1;
+			readonly global::System.ReadOnlyMemory<char> whole;
+			readonly ImmediateValues_DotGram values;
+			internal ConditionItemSyntax last7;
+			internal WordsSyntax last8;
+			internal ChunkSyntax last9;
+			internal TextSpan last3;
 			internal int unbuilt;
 			internal Failure replayed;
 			internal int replayedMore;
 
-			internal Reader_DotGram(global::System.ReadOnlySpan<char> text, Ways_DotGram ways)
+			internal Reader_DotGram_ConditionItem(global::System.ReadOnlySpan<char> text, Ways_DotGram ways, ImmediateValues_DotGram values, global::System.ReadOnlyMemory<char> parserWhole)
 			{
 				this.text    = text;
 				this.failure = default;
 				this.ways    = ways;
-				this.last0 = default!;
-				this.last1 = default!;
+				this.probes  = 0;
+				this.values = values;
+				this.last7 = default!;
+				this.last8 = default!;
+				this.last9 = default!;
+				this.last3 = default!;
+				this.unbuilt = default!;
+				this.replayed = default!;
+				this.replayedMore = default!;
+				this.whole   = parserWhole;
+			}
+
+			static bool EnoughStack_DotGram()
+			{
+				#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+				return global::System.Runtime.CompilerServices.RuntimeHelpers.TryEnsureSufficientExecutionStack();
+				#else
+				try
+				{
+					global::System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
+
+					return true;
+				}
+				catch (global::System.InsufficientExecutionStackException)
+				{
+					return false;
+				}
+				#endif
+			}
+
+			internal int Deepen_DotGram(int pos, int which, int power)
+			{
+				// Nothing to carry it onto: a reading over a window has no whole input.
+				if (this.whole.IsEmpty)
+					throw new global::System.InsufficientExecutionStackException();
+
+				object? handed = null;
+
+				OnHandingOff(ref handed);
+
+				var deep = Deep_DotGram_ConditionItem.Take();
+
+				deep.whole  = this.whole;
+				deep.ways   = this.ways;
+				deep.values = this.values;
+				deep.failure = this.failure;
+				deep.last7 = this.last7;
+				deep.last8 = this.last8;
+				deep.last9 = this.last9;
+				deep.last3 = this.last3;
+				deep.unbuilt = this.unbuilt;
+				deep.replayed = this.replayed;
+				deep.replayedMore = this.replayedMore;
+				deep.probes = this.probes;
+				deep.pos    = pos;
+				deep.which  = which;
+				deep.power  = power;
+
+				deep.handed = handed;
+
+				deep.Go();
+
+				this.failure = deep.failure;
+				this.last7 = deep.last7;
+				this.last8 = deep.last8;
+				this.last9 = deep.last9;
+				this.last3 = deep.last3;
+				this.unbuilt = deep.unbuilt;
+				this.replayed = deep.replayed;
+				this.replayedMore = deep.replayedMore;
+				// Still on the stack that ran low: the next entry probes it again.
+				this.probes = 0;
+
+				var thrown = deep.thrown;
+				var end    = deep.end;
+
+				// It lingers for the next hand-off: what it holds of this reading goes now.
+				deep.Clear();
+
+				if (thrown != null)
+					global::System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(thrown).Throw();
+
+				return end;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			int Stood_DotGram(int u, int s)
+			{
+				if (u == 2)
+				{
+					replayed     = failure;
+					replayedMore = failure.ExpectedMore == null ? 0 : failure.ExpectedMore.Count;
+					unbuilt      = 0;
+					ways.Cursor  = s;
+
+					return 3;
+				}
+
+				Replayed_DotGram();
+
+				return 0;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			void Replayed_DotGram()
+			{
+				var more = failure.ExpectedMore;
+
+				failure = replayed;
+
+				if (more != null && more.Count > replayedMore)
+					more.RemoveRange(replayedMore, more.Count - replayedMore);
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			int Retried_DotGram(int u)
+			{
+				if (u == 1)
+				{
+					unbuilt = 1;
+
+					return 2;
+				}
+
+				return u == 0 && unbuilt == 0 ? 1 : u;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			void Undeferred_DotGram(int u)
+			{
+				if (u == 2)
+					unbuilt = 0;
+				else if (u == 3)
+					Replayed_DotGram();
+			}
+
+			public int Read_ConditionItem(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = ReadBody_ConditionItem(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_ConditionItem(int pos)
+			{
+				var p = pos;
+				var w0  = -1;
+				var d0 = 0;
+				if (ways.Cursor < ways.Count)
+				{
+					w0  = ways.Cursor;
+					d0 = ways.Items[w0 * 2];
+					ways.Cursor++;
+				}
+				else
+				{
+					w0 = ways.Open(0, 1);
+				}
+
+				var q0 = -1;
+				if (q0 < 0 && d0 <= 0)
+				{
+					var s1  = ways.Cursor;
+
+					var u1  = 0;
+					while (true)
+					{
+						q0 = ReadPart0_ConditionItem(p, pos);
+
+						if (q0 >= 0)
+						{
+							if (u1 > 1)
+							{
+								u1 = Stood_DotGram(u1, s1);
+
+								if (u1 > 0)
+									continue;
+							}
+
+							break;
+						}
+
+						if (ways.Cursor > s1 && ways.Retry(s1))
+						{
+							u1 = Retried_DotGram(u1);
+
+							continue;
+						}
+
+						Undeferred_DotGram(u1);
+
+						break;
+					}
+
+					if (q0 < 0)
+						ways.Next(w0, 1, 1);
+				}
+				if (q0 < 0 && d0 <= 1)
+				{
+					var s2  = ways.Cursor;
+
+					var u2  = 0;
+					while (true)
+					{
+						q0 = ReadPart1_ConditionItem(p, pos);
+
+						if (q0 >= 0)
+						{
+							if (u2 > 1)
+							{
+								u2 = Stood_DotGram(u2, s2);
+
+								if (u2 > 0)
+									continue;
+							}
+
+							break;
+						}
+
+						if (ways.Cursor > s2 && ways.Retry(s2))
+						{
+							u2 = Retried_DotGram(u2);
+
+							continue;
+						}
+
+						Undeferred_DotGram(u2);
+
+						break;
+					}
+				}
+
+				if (q0 < 0)
+					return -1;
+
+				p = q0;
+				return p;
+			}
+
+			public int ReadPart0_ConditionItem(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				TextSpan? r0 = default;
+				TextSpan? r1 = default;
+				var q0 = Read_KeyName(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				r0 = last3;
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+						break;
+
+					p++;
+				}
+
+				if ((uint)p >= (uint)text.Length || text[p] != ':')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(27));
+					return -1;
+				}
+				p += 1;
+				var m1 = p;
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+						break;
+
+					p++;
+
+					if (p == m1 + 1 && ways.Cursor < ways.Count)
+					{
+						p = ways.Places[ways.Cursor * 2];
+						break;
+					}
+				}
+
+				if (p > m1)
+				{
+					var d0 = 0;
+
+					if (ways.Cursor < ways.Count)
+					{
+						d0 = ways.Items[ways.Cursor * 2];
+						ways.Cursor++;
+					}
+					else
+					{
+						ways.Open(0, p - m1, p);
+					}
+
+					p -= d0;
+				}
+				var q1 = Read_Rest(p);
+				if (q1 < 0) return -1;
+				p = q1;
+				r1 = last3;
+				var q2 = Read_eof(p);
+				if (q2 < 0) return -1;
+				p = q2;
+				if (unbuilt == 0) last7 = New_DotGram_ConditionItem(new SourceSpan(start, p - start), (TextSpan)r0!, (TextSpan)r1!);
+				return p;
+			}
+
+			public int ReadPart1_ConditionItem(int pos, int start)
+			{
+				var p = pos;
+				WordsSyntax? r2 = default;
+				var q0 = Read_Words(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				r2 = last8;
+				if (unbuilt == 0) last7 = New1_DotGram_ConditionItem(new SourceSpan(start, p - start), r2!);
+				return p;
+			}
+
+			public int Read_KeyName(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = ReadBody_KeyName(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_KeyName(int pos)
+			{
+				var p = pos;
+				var q0 = Read_Letters(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				if (unbuilt == 0) last3 = New_DotGram_KeyName(new SourceSpan(pos, p - pos));
+				return p;
+			}
+
+			public int Read_Letters(int pos)
+			{
+				var s  = ways.Cursor;
+
+				while (true)
+				{
+					var q = ReadBody_Letters(pos);
+
+					if (q >= 0)
+						return q;
+
+
+					if (ways.Cursor > s && ways.Retry(s))
+						continue;
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_Letters(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				var m0 = p;
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					if (!((c < 128 ? (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') : (Categories_DotGram_1F(c)))))
+						break;
+
+					p++;
+
+					if (p == m0 + 2 && ways.Cursor < ways.Count)
+					{
+						p = ways.Places[ways.Cursor * 2];
+						break;
+					}
+				}
+
+				if (p < m0 + 1)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(41));
+					return -1;
+				}
+
+				if (p > (m0 + 1))
+				{
+					var d0 = 0;
+
+					if (ways.Cursor < ways.Count)
+					{
+						d0 = ways.Items[ways.Cursor * 2];
+						ways.Cursor++;
+					}
+					else
+					{
+						ways.Open(0, p - (m0 + 1), p);
+					}
+
+					p -= d0;
+				}
+				return p;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int Read_Ws(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
+					return -1;
+				}
+				c = text[p];
+				if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
+					return -1;
+				}
+				p++;
+				return p;
+			}
+
+			public int Read_Rest(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					p++;
+				}
+
+				if (unbuilt == 0) last3 = New_DotGram_Rest(new SourceSpan(pos, p - pos));
+				return p;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int Read_any(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
+					return -1;
+				}
+				c = text[p];
+				p++;
+				return p;
+			}
+
+			public int Read_eof(int pos)
+			{
+				var p = pos;
+				failure.Looking++;
+				var q0 = ReadPart0_eof(p, pos);
+				failure.Looking--;
+
+
+				if (q0 >= 0)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
+					return -1;
+				}
+				return p;
+			}
+
+			public int ReadPart0_eof(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
+					return -1;
+				}
+				c = text[p];
+				p++;
+				return p;
+			}
+
+			public int Read_Words(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = ReadBody_Words(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_Words(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				var rb_9 = values.Count9;
+				ChunkSyntax? r0 = default;
+				var m0 = p;
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+						break;
+
+					p++;
+
+					if (p == m0 + 1 && ways.Cursor < ways.Count)
+					{
+						p = ways.Places[ways.Cursor * 2];
+						break;
+					}
+				}
+
+				if (p > m0)
+				{
+					var d0 = 0;
+
+					if (ways.Cursor < ways.Count)
+					{
+						d0 = ways.Items[ways.Cursor * 2];
+						ways.Cursor++;
+					}
+					else
+					{
+						ways.Open(0, p - m0, p);
+					}
+
+					p -= d0;
+				}
+				var t0 = 0;
+				while (true)
+				{
+					if (t0 >= 1)
+						break;
+
+					var o2 = (uint)p < (uint)text.Length;
+
+					if (o2)
+					{
+						c = text[p];
+						o2 = RecognizeIn_DotGram_ConditionItem(RecognizeSet2_DotGram_ConditionItem, c);
+					}
+
+					if (!o2 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var s3  = ways.Cursor;
+					var u3  = 0;
+					var rr3_9 = values.Count9;
+					var q0 = -1;
+
+					while (true)
+					{
+						q0 = ReadPart0_Words(p, pos, rb_9, ref r0);
+
+						if (q0 >= 0)
+						{
+							if (u3 > 1)
+							{
+								u3 = Stood_DotGram(u3, s3);
+
+								if (u3 > 0)
+								{
+									values.Count9 = rr3_9;
+
+									continue;
+								}
+							}
+
+							break;
+						}
+
+						values.Count9 = rr3_9;
+
+						if (ways.Cursor > s3 && ways.Retry(s3))
+						{
+							u3 = Retried_DotGram(u3);
+
+							continue;
+						}
+
+						Undeferred_DotGram(u3);
+
+						break;
+					}
+
+					if (q0 < 0)
+					{
+						r0 = default;
+
+
+						break;
+					}
+
+					p = q0;
+					t0++;
+				}
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+						break;
+
+					p++;
+				}
+
+				var q1 = Read_eof(p);
+				if (q1 < 0) { values.Count9 = rb_9; return -1; }
+				p = q1;
+				if (unbuilt == 0) last8 = New_DotGram_Words(r0, values.Take9(rb_9)); else { values.Count9 = rb_9; }
+				return p;
+			}
+
+			public int ReadPart0_Words(int pos, int start, int refs_9, ref ChunkSyntax? r0)
+			{
+				var p = pos;
+				var c = '\0';
+				var q0 = Read_Chunk(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				r0 = last9;
+				while (true)
+				{
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = RecognizeIn_DotGram_ConditionItem(RecognizeSet1_DotGram_ConditionItem, c);
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var w0 = -1;
+					var d0 = 0;
+
+					if (ways.Cursor < ways.Count)
+					{
+						w0 = ways.Cursor;
+						d0 = ways.Items[w0 * 2];
+						ways.Cursor++;
+					}
+					else
+					{
+						w0 = ways.Open(1);
+					}
+
+					if (d0 == 1)
+						break;
+
+					var s2  = ways.Cursor;
+					var u2  = 0;
+					var rr2_9 = values.Count9;
+					var q1 = -1;
+
+					while (true)
+					{
+						q1 = ReadPart1_Words(p, start, refs_9);
+
+						if (q1 >= 0)
+						{
+							if (u2 > 1)
+							{
+								u2 = Stood_DotGram(u2, s2);
+
+								if (u2 > 0)
+								{
+									values.Count9 = rr2_9;
+
+									continue;
+								}
+							}
+
+							break;
+						}
+
+						values.Count9 = rr2_9;
+
+						if (ways.Cursor > s2 && ways.Retry(s2))
+						{
+							u2 = Retried_DotGram(u2);
+
+							continue;
+						}
+
+						Undeferred_DotGram(u2);
+
+						break;
+					}
+
+					if (q1 < 0)
+					{
+						ways.Next(w0, 1);
+
+						break;
+					}
+
+					p = q1;
+				}
+				return p;
+			}
+
+			public int ReadPart1_Words(int pos, int start, int refs_9)
+			{
+				var p = pos;
+				var c = '\0';
+				var m0 = p;
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+						break;
+
+					p++;
+				}
+
+				if (p < m0 + 1)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(2));
+					return -1;
+				}
+
+				var q0 = Read_Chunk(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				values.Push9(last9);
+				return p;
+			}
+
+			public int Read_Chunk(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = ReadBody_Chunk(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_Chunk(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				TextSpan? r0 = default;
+				TextSpan? r1 = default;
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(48));
+					return -1;
+				}
+				c = text[p];
+				if (c == '\\')
+				{
+					var q0 = ReadPart0_Chunk(p, pos);
+					if (q0 < 0)
+						return -1;
+					p = q0;
+					var t0 = 0;
+					while (true)
+					{
+						if (t0 >= 1)
+							break;
+
+						var o2 = (uint)p < (uint)text.Length;
+
+						if (o2)
+						{
+							c = text[p];
+							o2 = RecognizeIn_DotGram_ConditionItem(RecognizeSet3_DotGram_ConditionItem, c);
+						}
+
+						if (!o2 && (failure.Quiet || p < failure.Doors))
+						{
+							break;
+						}
+
+						var s3  = ways.Cursor;
+						var u3  = 0;
+						var q1 = -1;
+
+						while (true)
+						{
+							q1 = ReadPart1_Chunk(p, pos, ref r0);
+
+							if (q1 >= 0)
+							{
+								if (u3 > 1)
+								{
+									u3 = Stood_DotGram(u3, s3);
+
+									if (u3 > 0)
+										continue;
+								}
+
+								break;
+							}
+
+							if (ways.Cursor > s3 && ways.Retry(s3))
+							{
+								u3 = Retried_DotGram(u3);
+
+								continue;
+							}
+
+							Undeferred_DotGram(u3);
+
+							break;
+						}
+
+						if (q1 < 0)
+						{
+							r0 = default;
+
+
+							break;
+						}
+
+						p = q1;
+						t0++;
+					}
+					if (unbuilt == 0) last9 = New_DotGram_Chunk(r0);
+				}
+				else
+				{
+					var q2 = Read_Word(p);
+					if (q2 < 0)
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(48));
+						return -1;
+					}
+					p = q2;
+					r1 = last3;
+					if (unbuilt == 0) last9 = New1_DotGram_Chunk((TextSpan)r1!);
+				}
+				return p;
+			}
+
+			public int ReadPart0_Chunk(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				var t0 = 0;
+				while (true)
+				{
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = c == '\\';
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						if (t0 < 1)
+						{
+							if (!failure.Quiet) Refuse_DotGram(ref failure, p, ExpectedSet_DotGram(76));
+							return -1;
+						}
+
+						break;
+					}
+
+					var q0 = -1;
+
+					q0 = Read_Escape(p);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+					{
+						if (t0 < 1)
+							return -1;
+
+						break;
+					}
+
+					p = q0;
+					t0++;
+				}
+				return p;
+			}
+
+			public int ReadPart1_Chunk(int pos, int start, ref TextSpan? r0)
+			{
+				var p = pos;
+				var q0 = Read_Word(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				r0 = last3;
+				return p;
+			}
+
+			public int Read_Escape(int pos)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '\\')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(22));
+					return -1;
+				}
+				p += 1;
+				var q0 = Read_any(p);
+				if (q0 < 0)
+				{
+					var q1 = Read_eof(p);
+					if (q1 < 0) return -1;
+					p = q1;
+					q0 = p;
+				}
+				p = q0;
+				return p;
+			}
+
+			public int Read_Word(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = ReadBody_Word(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_Word(int pos)
+			{
+				var p = pos;
+				var s0  = ways.Cursor;
+				var u0  = 0;
+				var q0 = -1;
+
+				while (true)
+				{
+					q0 = ReadPart0_Word(p, pos);
+
+					if (q0 >= 0)
+					{
+						if (u0 > 1)
+						{
+							u0 = Stood_DotGram(u0, s0);
+
+							if (u0 > 0)
+								continue;
+						}
+
+						break;
+					}
+
+					if (ways.Cursor > s0 && ways.Retry(s0))
+					{
+						u0 = Retried_DotGram(u0);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u0);
+
+					break;
+				}
+
+				if (q0 < 0)
+					return -1;
+
+				ways.Seal(s0);
+				p = q0;
+				if (unbuilt == 0) last3 = New_DotGram_Word(new SourceSpan(pos, p - pos));
+				return p;
+			}
+
+			public int ReadPart0_Word(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(52));
+					return -1;
+				}
+				c = text[p];
+				if (c == '[')
+				{
+					var q0 = Read_Bracket(p);
+					if (q0 < 0) return -1;
+					p = q0;
+				}
+				else if (c == '<')
+				{
+					var q1 = Read_Generic(p);
+					if (q1 < 0) return -1;
+					p = q1;
+				}
+				else
+				{
+					var q2 = Read_WordCharacter(p);
+					if (q2 < 0)
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(52));
+						return -1;
+					}
+					p = q2;
+				}
+				while (true)
+				{
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = RecognizeIn_DotGram_ConditionItem(RecognizeSet2_DotGram_ConditionItem, c);
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var s2  = ways.Cursor;
+					var u2  = 0;
+					var q3 = -1;
+
+					while (true)
+					{
+						q3 = ReadPart1_Word(p, start);
+
+						if (q3 >= 0)
+						{
+							if (u2 > 1)
+							{
+								u2 = Stood_DotGram(u2, s2);
+
+								if (u2 > 0)
+									continue;
+							}
+
+							break;
+						}
+
+						if (ways.Cursor > s2 && ways.Retry(s2))
+						{
+							u2 = Retried_DotGram(u2);
+
+							continue;
+						}
+
+						Undeferred_DotGram(u2);
+
+						break;
+					}
+
+					if (q3 < 0)
+					{
+
+						break;
+					}
+
+					p = q3;
+				}
+				return p;
+			}
+
+			public int ReadPart1_Word(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(51));
+					return -1;
+				}
+				c = text[p];
+				if (c == '[')
+				{
+					var q0 = Read_Bracket(p);
+					if (q0 < 0) return -1;
+					p = q0;
+				}
+				else if (c == '<')
+				{
+					var q1 = Read_Generic(p);
+					if (q1 < 0) return -1;
+					p = q1;
+				}
+				else if (c == '\\')
+				{
+					var q2 = Read_Escape(p);
+					if (q2 < 0) return -1;
+					p = q2;
+				}
+				else
+				{
+					var q3 = Read_WordCharacter(p);
+					if (q3 < 0)
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(51));
+						return -1;
+					}
+					p = q3;
+				}
+				return p;
+			}
+
+			public int Read_Bracket(int pos)
+			{
+				var s  = ways.Cursor;
+
+				while (true)
+				{
+					var q = ReadBody_Bracket(pos);
+
+					if (q >= 0)
+						return q;
+
+
+					if (ways.Cursor > s && ways.Retry(s))
+						continue;
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_Bracket(int pos)
+			{
+				var p = pos;
+				var s0  = ways.Cursor;
+				var q0 = -1;
+
+				while (true)
+				{
+					q0 = ReadPart0_Bracket(p, pos);
+
+					if (q0 >= 0)
+						break;
+
+
+					if (ways.Cursor > s0 && ways.Retry(s0))
+						continue;
+
+					break;
+				}
+
+				if (q0 < 0)
+					return -1;
+
+				ways.Seal(s0);
+				p = q0;
+				return p;
+			}
+
+			public int ReadPart0_Bracket(int pos, int start)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '[')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(56));
+					return -1;
+				}
+				p += 1;
+				var w0  = -1;
+				var d0 = 0;
+				if (ways.Cursor < ways.Count)
+				{
+					w0  = ways.Cursor;
+					d0 = ways.Items[w0 * 2];
+					ways.Cursor++;
+				}
+				else
+				{
+					w0 = ways.Open(0, 1);
+				}
+
+				var q0 = -1;
+				if (q0 < 0 && d0 <= 0)
+				{
+					var s1  = ways.Cursor;
+
+					q0 = ReadPart1_Bracket(p, start);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+						ways.Next(w0, 1, 1);
+				}
+				if (q0 < 0 && d0 <= 1)
+				{
+					var s2  = ways.Cursor;
+
+					q0 = ReadPart2_Bracket(p, start);
+
+					if (q0 < 0)
+					{
+					}
+				}
+
+				if (q0 < 0)
+					return -1;
+
+				p = q0;
+				return p;
+			}
+
+			public int ReadPart1_Bracket(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					if (!((c == ' ' || c == ',')))
+						break;
+
+					p++;
+				}
+
+				if ((uint)p >= (uint)text.Length || text[p] != ']')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(54));
+					return -1;
+				}
+				p += 1;
+				return p;
+			}
+
+			public int ReadPart2_Bracket(int pos, int start)
+			{
+				var p = pos;
+				return p;
+			}
+
+			public int Read_Generic(int pos)
+			{
+				if ((probes++ & 3) == 0 && !EnoughStack_DotGram())
+					return Deepen_DotGram(pos, 0, 0);
+
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '<')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
+					return -1;
+				}
+				p += 1;
+				var q0 = ReadPart0_Generic(p, pos);
+				if (q0 < 0)
+					return -1;
+				p = q0;
+				var q1 = ReadPart2_Generic(p, pos);
+				if (q1 < 0)
+				{
+					var q2 = Read_eof(p);
+					if (q2 < 0) return -1;
+					p = q2;
+					q1 = p;
+				}
+				p = q1;
+				return p;
+			}
+
+			public int ReadPart0_Generic(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == '<' || c == '>' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), '<', '>', '\\');
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = (c >= '\0' && c <= '=') || (c >= '?' && c <= '\uFFFF');
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var q0 = -1;
+
+					q0 = ReadPart1_Generic(p, start);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+					{
+
+						break;
+					}
+
+					p = q0;
+				}
+				return p;
+			}
+
+			public int ReadPart1_Generic(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+					return -1;
+				}
+				c = text[p];
+				if (c == '<')
+				{
+					var q0 = Read_Generic(p);
+					if (q0 < 0) return -1;
+					p = q0;
+				}
+				else if (c == '\\')
+				{
+					var q1 = Read_Escape(p);
+					if (q1 < 0) return -1;
+					p = q1;
+				}
+				else
+				{
+					if (!((c >= '\0' && c <= ';') || c == '=' || (c >= '?' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+						return -1;
+					}
+					p++;
+				}
+				return p;
+			}
+
+			public int ReadPart2_Generic(int pos, int start)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '>')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(32));
+					return -1;
+				}
+				p += 1;
+				return p;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int Read_WordCharacter(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(53));
+					return -1;
+				}
+				c = text[p];
+				if (!((c < 128 ? c <= 255 && RecognizeClass0_DotGram_ConditionItem[c] != 0 : !((c >= '\t' && c <= '\r') || c == '<' || (c >= '[' && c <= '\\') || c == '\u0085' || Categories_DotGram_3800(c)))))
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(53));
+					return -1;
+				}
+				p++;
+				return p;
+			}
+
+			public int RecWholeRead_ConditionItem(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = RecWholeReadBody_ConditionItem(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			public int RecWholeReadBody_ConditionItem(int pos)
+			{
+				var p = pos;
+				var q0 = Read_ConditionItem(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				if (p != text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
+					return -1;
+				}
+				return p;
+			}
+
+			public int RecRead_ConditionItem(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = RecReadBody_ConditionItem(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			public int RecReadBody_ConditionItem(int pos)
+			{
+				var p = pos;
+				var q0 = Read_ConditionItem(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				return p;
+			}
+
+			public int RecWholeRead_Words(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = RecWholeReadBody_Words(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			public int RecWholeReadBody_Words(int pos)
+			{
+				var p = pos;
+				var rb_9 = values.Count9;
+				var q0 = Read_Words(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				if (p != text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
+					return -1;
+				}
+				return p;
+			}
+
+			public int RecRead_Words(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = RecReadBody_Words(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			public int RecReadBody_Words(int pos)
+			{
+				var p = pos;
+				var rb_9 = values.Count9;
+				var q0 = Read_Words(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				return p;
+			}
+
+		}
+
+		private sealed class Deep_DotGram_ConditionItem
+		{
+			internal global::System.ReadOnlyMemory<char> whole;
+			internal Ways_DotGram ways = default!;
+			internal ImmediateValues_DotGram values = default!;
+			internal Failure failure = default!;
+			internal ConditionItemSyntax last7 = default!;
+			internal WordsSyntax last8 = default!;
+			internal ChunkSyntax last9 = default!;
+			internal TextSpan last3 = default!;
+			internal int unbuilt = default!;
+			internal Failure replayed = default!;
+			internal int replayedMore = default!;
+			internal int probes;
+			internal int pos;
+			internal int which;
+			internal int power;
+			internal int end;
+			internal global::System.Exception? thrown;
+			internal object? handed;
+
+			[global::System.ThreadStatic]
+			static Deep_DotGram_ConditionItem? deepLingering;
+
+			static readonly global::System.Threading.ContextCallback deepReadIn = ReadIn;
+
+			readonly global::System.Threading.SemaphoreSlim deepGo   = new global::System.Threading.SemaphoreSlim(0, 1);
+			readonly global::System.Threading.SemaphoreSlim deepDone = new global::System.Threading.SemaphoreSlim(0, 1);
+
+			int deepState = 1;
+			volatile bool deepRetired;
+			global::System.Threading.ExecutionContext? deepContext;
+			global::System.Globalization.CultureInfo? deepCulture;
+			global::System.Globalization.CultureInfo? deepUiCulture;
+
+			internal static Deep_DotGram_ConditionItem Take()
+			{
+				var deep = deepLingering;
+
+				if (deep != null && !deep.deepRetired && global::System.Threading.Interlocked.CompareExchange(ref deep.deepState, 1, 0) == 0)
+					return deep;
+
+				deep       = new Deep_DotGram_ConditionItem();
+				deepLingering = deep;
+
+				var thread = new global::System.Threading.Thread(deep.Loop, 16 * 1024 * 1024) { IsBackground = true };
+
+				thread.Start();
+
+				return deep;
+			}
+
+			internal void Go()
+			{
+				deepContext   = global::System.Threading.ExecutionContext.Capture();
+				deepCulture   = global::System.Globalization.CultureInfo.CurrentCulture;
+				deepUiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+
+				global::System.Threading.ThreadInterruptedException? interrupted = null;
+
+				// A release waits for the semaphore's lock when another thread holds it, and that wait can be
+				// interrupted before the reading is handed over: the interrupt is held like one in the wait below.
+				while (true)
+				{
+					try
+					{
+						deepGo.Release();
+
+						break;
+					}
+					catch (global::System.Threading.ThreadInterruptedException caught)
+					{
+						interrupted = caught;
+					}
+				}
+
+				while (true)
+				{
+					try
+					{
+						deepDone.Wait();
+
+						break;
+					}
+					catch (global::System.Threading.ThreadInterruptedException caught)
+					{
+						interrupted = caught;
+					}
+					catch
+					{
+						deepRetired = true;
+
+						throw;
+					}
+				}
+
+				if (interrupted != null)
+				{
+					// An interrupt that meets the release leaves deepDone unable to wake its next waiter.
+					deepRetired = true;
+
+					Clear();
+
+					global::System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(interrupted).Throw();
+				}
+			}
+
+			internal void Clear()
+			{
+				whole  = default;
+				ways   = default!;
+				values = default!;
+				failure = default!;
+				last7 = default!;
+				last8 = default!;
+				last9 = default!;
+				last3 = default!;
+				unbuilt = default!;
+				replayed = default!;
+				replayedMore = default!;
+				thrown = null;
+				handed = null;
+			}
+
+			void Loop()
+			{
+				while (true)
+				{
+					try
+					{
+						if (!deepGo.Wait(100))
+						{
+							if (global::System.Threading.Interlocked.CompareExchange(ref deepState, 2, 0) == 0)
+								return;
+
+							// Taken in the moment before it could go: the reading is on its way.
+							deepGo.Wait();
+						}
+					}
+					catch (global::System.Threading.ThreadInterruptedException)
+					{
+						// Nobody outside holds this thread, but the grammar's own code can interrupt it.
+						continue;
+					}
+
+					var handed = deepContext;
+					var read   = false;
+
+					deepContext = null;
+
+					try
+					{
+						if (handed == null)
+							ReadIn(this);
+						else
+							global::System.Threading.ExecutionContext.Run(handed, deepReadIn, this);
+
+						read = true;
+					}
+					finally
+					{
+						deepCulture   = null;
+						deepUiCulture = null;
+
+						if (!read)
+							deepRetired = true;
+
+						global::System.Threading.Volatile.Write(ref deepState, 0);
+
+						// An interrupt the grammar's own code left pending here is dropped, as the wait above drops it,
+						// rather than thrown by a release that waits for the semaphore's lock, where nothing would catch it.
+						while (true)
+						{
+							try
+							{
+								deepDone.Release();
+
+								break;
+							}
+							catch (global::System.Threading.ThreadInterruptedException)
+							{
+							}
+						}
+					}
+
+					// Retired by the reading it just answered: no hand-off is given it again, so it ends now.
+					if (deepRetired)
+						return;
+				}
+			}
+
+			static void ReadIn(object? state)
+			{
+				var deep      = (Deep_DotGram_ConditionItem)state!;
+				var culture   = global::System.Globalization.CultureInfo.CurrentCulture;
+				var uiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+
+				try
+				{
+					global::System.Globalization.CultureInfo.CurrentCulture   = deep.deepCulture!;
+					global::System.Globalization.CultureInfo.CurrentUICulture = deep.deepUiCulture!;
+
+					deep.Run();
+				}
+				finally
+				{
+					global::System.Globalization.CultureInfo.CurrentCulture   = culture;
+					global::System.Globalization.CultureInfo.CurrentUICulture = uiCulture;
+				}
+			}
+
+			internal void Run()
+			{
+				var taken = false;
+
+				try
+				{
+					try
+					{
+						OnTakingOver(ref this.handed);
+
+						taken = true;
+
+						var reader = new Reader_DotGram_ConditionItem(this.whole.Span, this.ways, this.values, this.whole);
+
+						reader.failure = this.failure;
+						reader.last7 = this.last7;
+						reader.last8 = this.last8;
+						reader.last9 = this.last9;
+						reader.last3 = this.last3;
+						reader.unbuilt = this.unbuilt;
+						reader.replayed = this.replayed;
+						reader.replayedMore = this.replayedMore;
+						reader.probes = this.probes;
+
+						switch (this.which)
+						{
+							case 0: this.end = reader.Read_Generic(this.pos); break;
+						}
+
+						this.failure = reader.failure;
+						this.last7 = reader.last7;
+						this.last8 = reader.last8;
+						this.last9 = reader.last9;
+						this.last3 = reader.last3;
+						this.unbuilt = reader.unbuilt;
+						this.replayed = reader.replayed;
+						this.replayedMore = reader.replayedMore;
+						this.probes = reader.probes;
+					}
+					catch (global::System.Exception caught)
+					{
+						this.thrown = caught;
+
+						// A host whose hook failed may have half its state on this thread: it is handed no more.
+						if (!taken)
+							this.deepRetired = true;
+					}
+				}
+				finally
+				{
+					// This thread's own state back, where the host's went in, whatever the reading did; a hook that throws
+					// here is carried back too, unless the reading threw first, and retires the thread, which may still
+					// hold the host's state.
+					if (taken)
+					{
+						try
+						{
+							OnTakingOver(ref this.handed);
+						}
+						catch (global::System.Exception caught)
+						{
+							this.deepRetired = true;
+
+							if (this.thrown == null)
+								this.thrown = caught;
+						}
+					}
+				}
+			}
+		}
+
+		static int RecWhole_DotGram_ConditionItem(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out ConditionItemSyntax value, global::System.ReadOnlyMemory<char> parserWhole)
+		{
+			var ways = Ways_DotGram.Rent();
+			var values = ImmediateValues_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_ConditionItem(text, ways, values, parserWhole);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecWholeRead_ConditionItem(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last7;
+
+				return end;
+			}
+			finally
+			{
+				Ways_DotGram.Return(ways);
+				ImmediateValues_DotGram.Return(values);
+			}
+		}
+
+		static int Rec_DotGram_ConditionItem(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out ConditionItemSyntax value, global::System.ReadOnlyMemory<char> parserWhole)
+		{
+			var ways = Ways_DotGram.Rent();
+			var values = ImmediateValues_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_ConditionItem(text, ways, values, parserWhole);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecRead_ConditionItem(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last7;
+
+				return end;
+			}
+			finally
+			{
+				Ways_DotGram.Return(ways);
+				ImmediateValues_DotGram.Return(values);
+			}
+		}
+
+		static int RecWhole_DotGram_Words(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out WordsSyntax value, global::System.ReadOnlyMemory<char> parserWhole)
+		{
+			var ways = Ways_DotGram.Rent();
+			var values = ImmediateValues_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_ConditionItem(text, ways, values, parserWhole);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecWholeRead_Words(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last8;
+
+				return end;
+			}
+			finally
+			{
+				Ways_DotGram.Return(ways);
+				ImmediateValues_DotGram.Return(values);
+			}
+		}
+
+		static int Rec_DotGram_Words(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out WordsSyntax value, global::System.ReadOnlyMemory<char> parserWhole)
+		{
+			var ways = Ways_DotGram.Rent();
+			var values = ImmediateValues_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_ConditionItem(text, ways, values, parserWhole);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecRead_Words(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last8;
+
+				return end;
+			}
+			finally
+			{
+				Ways_DotGram.Return(ways);
+				ImmediateValues_DotGram.Return(values);
+			}
+		}
+
+
+
+		private ref struct Reader_DotGram_ConditionValue
+		{
+			readonly global::System.ReadOnlySpan<char> text;
+			internal Failure failure;
+			readonly ImmediateValues_DotGram values;
+			internal ConditionValueSyntax last10;
+			internal ConditionAlternativeSyntax last11;
+			internal TextSpan last3;
+			internal int unbuilt;
+
+			internal Reader_DotGram_ConditionValue(global::System.ReadOnlySpan<char> text, ImmediateValues_DotGram values)
+			{
+				this.text    = text;
+				this.failure = default;
+				this.values = values;
+				this.last10 = default!;
+				this.last11 = default!;
+				this.last3 = default!;
+				this.unbuilt = default!;
+			}
+
+			public int Read_ConditionValue(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				var rb_11 = values.Count11;
+				ConditionAlternativeSyntax r0 = default!;
+				var q0 = Read_Alternative(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				r0 = last11;
+				while (true)
+				{
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = c == '|';
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var rr2_11 = values.Count11;
+					var q1 = -1;
+
+					q1 = ReadPart0_ConditionValue(p, pos, rb_11);
+
+					if (q1 < 0)
+					{
+						values.Count11 = rr2_11;
+					}
+
+					if (q1 < 0)
+					{
+
+						break;
+					}
+
+					p = q1;
+				}
+				var q2 = Read_eof(p);
+				if (q2 < 0) { values.Count11 = rb_11; return -1; }
+				p = q2;
+				if (unbuilt == 0) last10 = New_DotGram_ConditionValue(r0!, values.Take11(rb_11)!); else { values.Count11 = rb_11; }
+				return p;
+			}
+
+			public int ReadPart0_ConditionValue(int pos, int start, int refs_11)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '|')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(44));
+					return -1;
+				}
+				p += 1;
+				var q0 = Read_Alternative(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				values.Push11(last11);
+				return p;
+			}
+
+			public int Read_Alternative(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				var rb_3 = values.Count3;
+				TextSpan r0 = default!;
+				var q0 = Read_Operand(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				r0 = last3;
+				while (true)
+				{
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = c == '&';
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var rr2_3 = values.Count3;
+					var q1 = -1;
+
+					q1 = ReadPart0_Alternative(p, pos, rb_3);
+
+					if (q1 < 0)
+					{
+						values.Count3 = rr2_3;
+					}
+
+					if (q1 < 0)
+					{
+
+						break;
+					}
+
+					p = q1;
+				}
+				if (unbuilt == 0) last11 = New_DotGram_Alternative(new SourceSpan(pos, p - pos), r0!, values.Take3(rb_3)!); else { values.Count3 = rb_3; }
+				return p;
+			}
+
+			public int ReadPart0_Alternative(int pos, int start, int refs_3)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '&')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(43));
+					return -1;
+				}
+				p += 1;
+				var q0 = Read_Operand(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				values.Push3(last3);
+				return p;
+			}
+
+			public int Read_Operand(int pos)
+			{
+				var p = pos;
+				var q0 = ReadPart0_Operand(p, pos);
+				if (q0 < 0)
+					return -1;
+				p = q0;
+				if (unbuilt == 0) last3 = New_DotGram_Operand(new SourceSpan(pos, p - pos));
+				return p;
+			}
+
+			public int ReadPart0_Operand(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = (c >= '\0' && c <= '\uFFFF');
+					}
+
+					if (!o1)
+					{
+						break;
+					}
+
+					var q0 = -1;
+
+					q0 = ReadPart1_Operand(p, start);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+					{
+
+						break;
+					}
+
+					p = q0;
+				}
+				return p;
+			}
+
+			public int ReadPart1_Operand(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(59));
+					return -1;
+				}
+				c = text[p];
+				if (c == '\\')
+				{
+					var q0 = Read_Escape(p);
+					if (q0 < 0) return -1;
+					p = q0;
+				}
+				else if (c == '&' || c == '|')
+				{
+					if (!RecognizeGuard2_DotGram_ConditionValue(text.Slice(start, p - start).ToString()))
+					{
+						Refused_DotGram(ref failure, p, null);
+						return -1;
+					}
+					if ((uint)p >= (uint)text.Length)
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(58));
+						return -1;
+					}
+					c = text[p];
+					if (!((c == '&' || c == '|')))
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(58));
+						return -1;
+					}
+					p++;
+				}
+				else
+				{
+					if (!((c >= '\0' && c <= '%') || (c >= '\'' && c <= '[') || (c >= ']' && c <= '{') || (c >= '}' && c <= '\uFFFF')))
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(59));
+						return -1;
+					}
+					p++;
+				}
+				return p;
+			}
+
+			public int Read_Escape(int pos)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '\\')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(22));
+					return -1;
+				}
+				p += 1;
+				var q0 = Read_any(p);
+				if (q0 < 0)
+				{
+					var q1 = Read_eof(p);
+					if (q1 < 0) return -1;
+					p = q1;
+					q0 = p;
+				}
+				p = q0;
+				return p;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int Read_any(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
+					return -1;
+				}
+				c = text[p];
+				p++;
+				return p;
+			}
+
+			public int Read_eof(int pos)
+			{
+				var p = pos;
+				failure.Looking++;
+				var q0 = ReadPart0_eof(p, pos);
+				failure.Looking--;
+
+
+				if (q0 >= 0)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
+					return -1;
+				}
+				return p;
+			}
+
+			public int ReadPart0_eof(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
+					return -1;
+				}
+				c = text[p];
+				p++;
+				return p;
+			}
+
+			public int RecWholeRead_ConditionValue(int pos)
+			{
+				var p = pos;
+				var rb_11 = values.Count11;
+				var q0 = Read_ConditionValue(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				if (p != text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
+					return -1;
+				}
+				return p;
+			}
+
+			public int RecRead_ConditionValue(int pos)
+			{
+				var p = pos;
+				var rb_11 = values.Count11;
+				var q0 = Read_ConditionValue(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				return p;
+			}
+
+		}
+
+		static int RecWhole_DotGram_ConditionValue(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out ConditionValueSyntax value)
+		{
+			var values = ImmediateValues_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_ConditionValue(text, values);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecWholeRead_ConditionValue(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last10;
+
+				return end;
+			}
+			finally
+			{
+				ImmediateValues_DotGram.Return(values);
+			}
+		}
+
+		static int Rec_DotGram_ConditionValue(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out ConditionValueSyntax value)
+		{
+			var values = ImmediateValues_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_ConditionValue(text, values);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecRead_ConditionValue(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last10;
+
+				return end;
+			}
+			finally
+			{
+				ImmediateValues_DotGram.Return(values);
+			}
+		}
+
+
+
+		private ref struct Reader_DotGram_Dotted
+		{
+			readonly global::System.ReadOnlySpan<char> text;
+			internal Failure failure;
+			internal int probes;
+			readonly global::System.ReadOnlyMemory<char> whole;
+			readonly ImmediateValues_DotGram values;
+			internal DottedSyntax last12;
+			internal TextSpan last3;
+			internal int unbuilt;
+
+			internal Reader_DotGram_Dotted(global::System.ReadOnlySpan<char> text, ImmediateValues_DotGram values, global::System.ReadOnlyMemory<char> parserWhole)
+			{
+				this.text    = text;
+				this.failure = default;
+				this.probes  = 0;
+				this.values = values;
+				this.last12 = default!;
+				this.last3 = default!;
+				this.unbuilt = default!;
+				this.whole   = parserWhole;
+			}
+
+			static bool EnoughStack_DotGram()
+			{
+				#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+				return global::System.Runtime.CompilerServices.RuntimeHelpers.TryEnsureSufficientExecutionStack();
+				#else
+				try
+				{
+					global::System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
+
+					return true;
+				}
+				catch (global::System.InsufficientExecutionStackException)
+				{
+					return false;
+				}
+				#endif
+			}
+
+			internal int Deepen_DotGram(int pos, int which, int power)
+			{
+				// Nothing to carry it onto: a reading over a window has no whole input.
+				if (this.whole.IsEmpty)
+					throw new global::System.InsufficientExecutionStackException();
+
+				object? handed = null;
+
+				OnHandingOff(ref handed);
+
+				var deep = Deep_DotGram_Dotted.Take();
+
+				deep.whole  = this.whole;
+				deep.values = this.values;
+				deep.failure = this.failure;
+				deep.last12 = this.last12;
+				deep.last3 = this.last3;
+				deep.unbuilt = this.unbuilt;
+				deep.probes = this.probes;
+				deep.pos    = pos;
+				deep.which  = which;
+				deep.power  = power;
+
+				deep.handed = handed;
+
+				deep.Go();
+
+				this.failure = deep.failure;
+				this.last12 = deep.last12;
+				this.last3 = deep.last3;
+				this.unbuilt = deep.unbuilt;
+				// Still on the stack that ran low: the next entry probes it again.
+				this.probes = 0;
+
+				var thrown = deep.thrown;
+				var end    = deep.end;
+
+				// It lingers for the next hand-off: what it holds of this reading goes now.
+				deep.Clear();
+
+				if (thrown != null)
+					global::System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(thrown).Throw();
+
+				return end;
+			}
+
+			public int Read_Dotted(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				var rb_3 = values.Count3;
+				TextSpan r0 = default!;
+				var q0 = Read_DottedPart(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				r0 = last3;
+				while (true)
+				{
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = c == '.';
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var rr2_3 = values.Count3;
+					var q1 = -1;
+
+					q1 = ReadPart0_Dotted(p, pos, rb_3);
+
+					if (q1 < 0)
+					{
+						values.Count3 = rr2_3;
+					}
+
+					if (q1 < 0)
+					{
+
+						break;
+					}
+
+					p = q1;
+				}
+				var q2 = Read_eof(p);
+				if (q2 < 0) { values.Count3 = rb_3; return -1; }
+				p = q2;
+				if (unbuilt == 0) last12 = New_DotGram_Dotted(r0!, values.Take3(rb_3)!); else { values.Count3 = rb_3; }
+				return p;
+			}
+
+			public int ReadPart0_Dotted(int pos, int start, int refs_3)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '.')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(60));
+					return -1;
+				}
+				p += 1;
+				var q0 = Read_DottedPart(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				values.Push3(last3);
+				return p;
+			}
+
+			public int Read_DottedPart(int pos)
+			{
+				var p = pos;
+				var q0 = ReadPart0_DottedPart(p, pos);
+				if (q0 < 0)
+					return -1;
+				p = q0;
+				if (unbuilt == 0) last3 = New_DotGram_DottedPart(new SourceSpan(pos, p - pos));
+				return p;
+			}
+
+			public int ReadPart0_DottedPart(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == '.' || c == '<' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), '.', '<', '\\');
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = (c >= '\0' && c <= '-') || (c >= '/' && c <= '\uFFFF');
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var q0 = -1;
+
+					q0 = ReadPart1_DottedPart(p, start);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+					{
+
+						break;
+					}
+
+					p = q0;
+				}
+				return p;
+			}
+
+			public int ReadPart1_DottedPart(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(62));
+					return -1;
+				}
+				c = text[p];
+				if (c == '<')
+				{
+					var q0 = Read_Generic(p);
+					if (q0 < 0) return -1;
+					p = q0;
+				}
+				else if (c == '\\')
+				{
+					var q1 = Read_Escape(p);
+					if (q1 < 0) return -1;
+					p = q1;
+				}
+				else
+				{
+					if (!((c >= '\0' && c <= '-') || (c >= '/' && c <= ';') || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(62));
+						return -1;
+					}
+					p++;
+				}
+				return p;
+			}
+
+			public int Read_Generic(int pos)
+			{
+				if ((probes++ & 3) == 0 && !EnoughStack_DotGram())
+					return Deepen_DotGram(pos, 0, 0);
+
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '<')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
+					return -1;
+				}
+				p += 1;
+				var q0 = ReadPart0_Generic(p, pos);
+				if (q0 < 0)
+					return -1;
+				p = q0;
+				var q1 = ReadPart2_Generic(p, pos);
+				if (q1 < 0)
+				{
+					var q2 = Read_eof(p);
+					if (q2 < 0) return -1;
+					p = q2;
+					q1 = p;
+				}
+				p = q1;
+				return p;
+			}
+
+			public int ReadPart0_Generic(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == '<' || c == '>' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), '<', '>', '\\');
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = (c >= '\0' && c <= '=') || (c >= '?' && c <= '\uFFFF');
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var q0 = -1;
+
+					q0 = ReadPart1_Generic(p, start);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+					{
+
+						break;
+					}
+
+					p = q0;
+				}
+				return p;
+			}
+
+			public int ReadPart1_Generic(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+					return -1;
+				}
+				c = text[p];
+				if (c == '<')
+				{
+					var q0 = Read_Generic(p);
+					if (q0 < 0) return -1;
+					p = q0;
+				}
+				else if (c == '\\')
+				{
+					var q1 = Read_Escape(p);
+					if (q1 < 0) return -1;
+					p = q1;
+				}
+				else
+				{
+					if (!((c >= '\0' && c <= ';') || c == '=' || (c >= '?' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+						return -1;
+					}
+					p++;
+				}
+				return p;
+			}
+
+			public int ReadPart2_Generic(int pos, int start)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '>')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(32));
+					return -1;
+				}
+				p += 1;
+				return p;
+			}
+
+			public int Read_Escape(int pos)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '\\')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(22));
+					return -1;
+				}
+				p += 1;
+				var q0 = Read_any(p);
+				if (q0 < 0)
+				{
+					var q1 = Read_eof(p);
+					if (q1 < 0) return -1;
+					p = q1;
+					q0 = p;
+				}
+				p = q0;
+				return p;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int Read_any(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
+					return -1;
+				}
+				c = text[p];
+				p++;
+				return p;
+			}
+
+			public int Read_eof(int pos)
+			{
+				var p = pos;
+				failure.Looking++;
+				var q0 = ReadPart0_eof(p, pos);
+				failure.Looking--;
+
+
+				if (q0 >= 0)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
+					return -1;
+				}
+				return p;
+			}
+
+			public int ReadPart0_eof(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
+					return -1;
+				}
+				c = text[p];
+				p++;
+				return p;
+			}
+
+			public int RecWholeRead_Dotted(int pos)
+			{
+				var p = pos;
+				var rb_3 = values.Count3;
+				var q0 = Read_Dotted(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				if (p != text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
+					return -1;
+				}
+				return p;
+			}
+
+			public int RecRead_Dotted(int pos)
+			{
+				var p = pos;
+				var rb_3 = values.Count3;
+				var q0 = Read_Dotted(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				return p;
+			}
+
+		}
+
+		private sealed class Deep_DotGram_Dotted
+		{
+			internal global::System.ReadOnlyMemory<char> whole;
+			internal ImmediateValues_DotGram values = default!;
+			internal Failure failure = default!;
+			internal DottedSyntax last12 = default!;
+			internal TextSpan last3 = default!;
+			internal int unbuilt = default!;
+			internal int probes;
+			internal int pos;
+			internal int which;
+			internal int power;
+			internal int end;
+			internal global::System.Exception? thrown;
+			internal object? handed;
+
+			[global::System.ThreadStatic]
+			static Deep_DotGram_Dotted? deepLingering;
+
+			static readonly global::System.Threading.ContextCallback deepReadIn = ReadIn;
+
+			readonly global::System.Threading.SemaphoreSlim deepGo   = new global::System.Threading.SemaphoreSlim(0, 1);
+			readonly global::System.Threading.SemaphoreSlim deepDone = new global::System.Threading.SemaphoreSlim(0, 1);
+
+			int deepState = 1;
+			volatile bool deepRetired;
+			global::System.Threading.ExecutionContext? deepContext;
+			global::System.Globalization.CultureInfo? deepCulture;
+			global::System.Globalization.CultureInfo? deepUiCulture;
+
+			internal static Deep_DotGram_Dotted Take()
+			{
+				var deep = deepLingering;
+
+				if (deep != null && !deep.deepRetired && global::System.Threading.Interlocked.CompareExchange(ref deep.deepState, 1, 0) == 0)
+					return deep;
+
+				deep       = new Deep_DotGram_Dotted();
+				deepLingering = deep;
+
+				var thread = new global::System.Threading.Thread(deep.Loop, 16 * 1024 * 1024) { IsBackground = true };
+
+				thread.Start();
+
+				return deep;
+			}
+
+			internal void Go()
+			{
+				deepContext   = global::System.Threading.ExecutionContext.Capture();
+				deepCulture   = global::System.Globalization.CultureInfo.CurrentCulture;
+				deepUiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+
+				global::System.Threading.ThreadInterruptedException? interrupted = null;
+
+				// A release waits for the semaphore's lock when another thread holds it, and that wait can be
+				// interrupted before the reading is handed over: the interrupt is held like one in the wait below.
+				while (true)
+				{
+					try
+					{
+						deepGo.Release();
+
+						break;
+					}
+					catch (global::System.Threading.ThreadInterruptedException caught)
+					{
+						interrupted = caught;
+					}
+				}
+
+				while (true)
+				{
+					try
+					{
+						deepDone.Wait();
+
+						break;
+					}
+					catch (global::System.Threading.ThreadInterruptedException caught)
+					{
+						interrupted = caught;
+					}
+					catch
+					{
+						deepRetired = true;
+
+						throw;
+					}
+				}
+
+				if (interrupted != null)
+				{
+					// An interrupt that meets the release leaves deepDone unable to wake its next waiter.
+					deepRetired = true;
+
+					Clear();
+
+					global::System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(interrupted).Throw();
+				}
+			}
+
+			internal void Clear()
+			{
+				whole  = default;
+				values = default!;
+				failure = default!;
+				last12 = default!;
+				last3 = default!;
+				unbuilt = default!;
+				thrown = null;
+				handed = null;
+			}
+
+			void Loop()
+			{
+				while (true)
+				{
+					try
+					{
+						if (!deepGo.Wait(100))
+						{
+							if (global::System.Threading.Interlocked.CompareExchange(ref deepState, 2, 0) == 0)
+								return;
+
+							// Taken in the moment before it could go: the reading is on its way.
+							deepGo.Wait();
+						}
+					}
+					catch (global::System.Threading.ThreadInterruptedException)
+					{
+						// Nobody outside holds this thread, but the grammar's own code can interrupt it.
+						continue;
+					}
+
+					var handed = deepContext;
+					var read   = false;
+
+					deepContext = null;
+
+					try
+					{
+						if (handed == null)
+							ReadIn(this);
+						else
+							global::System.Threading.ExecutionContext.Run(handed, deepReadIn, this);
+
+						read = true;
+					}
+					finally
+					{
+						deepCulture   = null;
+						deepUiCulture = null;
+
+						if (!read)
+							deepRetired = true;
+
+						global::System.Threading.Volatile.Write(ref deepState, 0);
+
+						// An interrupt the grammar's own code left pending here is dropped, as the wait above drops it,
+						// rather than thrown by a release that waits for the semaphore's lock, where nothing would catch it.
+						while (true)
+						{
+							try
+							{
+								deepDone.Release();
+
+								break;
+							}
+							catch (global::System.Threading.ThreadInterruptedException)
+							{
+							}
+						}
+					}
+
+					// Retired by the reading it just answered: no hand-off is given it again, so it ends now.
+					if (deepRetired)
+						return;
+				}
+			}
+
+			static void ReadIn(object? state)
+			{
+				var deep      = (Deep_DotGram_Dotted)state!;
+				var culture   = global::System.Globalization.CultureInfo.CurrentCulture;
+				var uiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+
+				try
+				{
+					global::System.Globalization.CultureInfo.CurrentCulture   = deep.deepCulture!;
+					global::System.Globalization.CultureInfo.CurrentUICulture = deep.deepUiCulture!;
+
+					deep.Run();
+				}
+				finally
+				{
+					global::System.Globalization.CultureInfo.CurrentCulture   = culture;
+					global::System.Globalization.CultureInfo.CurrentUICulture = uiCulture;
+				}
+			}
+
+			internal void Run()
+			{
+				var taken = false;
+
+				try
+				{
+					try
+					{
+						OnTakingOver(ref this.handed);
+
+						taken = true;
+
+						var reader = new Reader_DotGram_Dotted(this.whole.Span, this.values, this.whole);
+
+						reader.failure = this.failure;
+						reader.last12 = this.last12;
+						reader.last3 = this.last3;
+						reader.unbuilt = this.unbuilt;
+						reader.probes = this.probes;
+
+						switch (this.which)
+						{
+							case 0: this.end = reader.Read_Generic(this.pos); break;
+						}
+
+						this.failure = reader.failure;
+						this.last12 = reader.last12;
+						this.last3 = reader.last3;
+						this.unbuilt = reader.unbuilt;
+						this.probes = reader.probes;
+					}
+					catch (global::System.Exception caught)
+					{
+						this.thrown = caught;
+
+						// A host whose hook failed may have half its state on this thread: it is handed no more.
+						if (!taken)
+							this.deepRetired = true;
+					}
+				}
+				finally
+				{
+					// This thread's own state back, where the host's went in, whatever the reading did; a hook that throws
+					// here is carried back too, unless the reading threw first, and retires the thread, which may still
+					// hold the host's state.
+					if (taken)
+					{
+						try
+						{
+							OnTakingOver(ref this.handed);
+						}
+						catch (global::System.Exception caught)
+						{
+							this.deepRetired = true;
+
+							if (this.thrown == null)
+								this.thrown = caught;
+						}
+					}
+				}
+			}
+		}
+
+		static int RecWhole_DotGram_Dotted(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out DottedSyntax value, global::System.ReadOnlyMemory<char> parserWhole)
+		{
+			var values = ImmediateValues_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_Dotted(text, values, parserWhole);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecWholeRead_Dotted(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last12;
+
+				return end;
+			}
+			finally
+			{
+				ImmediateValues_DotGram.Return(values);
+			}
+		}
+
+		static int Rec_DotGram_Dotted(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out DottedSyntax value, global::System.ReadOnlyMemory<char> parserWhole)
+		{
+			var values = ImmediateValues_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_Dotted(text, values, parserWhole);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecRead_Dotted(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last12;
+
+				return end;
+			}
+			finally
+			{
+				ImmediateValues_DotGram.Return(values);
+			}
+		}
+
+
+
+		private ref struct Reader_DotGram_ParameterList
+		{
+			readonly global::System.ReadOnlySpan<char> text;
+			internal Failure failure;
+			internal int probes;
+			readonly Ways_DotGram ways;
+			readonly global::System.ReadOnlyMemory<char> whole;
+			internal ParameterListSyntax last13;
+			internal TextSpan last3;
+			internal int unbuilt;
+			internal Failure replayed;
+			internal int replayedMore;
+
+			internal Reader_DotGram_ParameterList(global::System.ReadOnlySpan<char> text, Ways_DotGram ways, global::System.ReadOnlyMemory<char> parserWhole)
+			{
+				this.text    = text;
+				this.failure = default;
+				this.ways    = ways;
+				this.probes  = 0;
+				this.last13 = default!;
+				this.last3 = default!;
+				this.unbuilt = default!;
+				this.replayed = default!;
+				this.replayedMore = default!;
+				this.whole   = parserWhole;
+			}
+
+			static bool EnoughStack_DotGram()
+			{
+				#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+				return global::System.Runtime.CompilerServices.RuntimeHelpers.TryEnsureSufficientExecutionStack();
+				#else
+				try
+				{
+					global::System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
+
+					return true;
+				}
+				catch (global::System.InsufficientExecutionStackException)
+				{
+					return false;
+				}
+				#endif
+			}
+
+			internal int Deepen_DotGram(int pos, int which, int power)
+			{
+				// Nothing to carry it onto: a reading over a window has no whole input.
+				if (this.whole.IsEmpty)
+					throw new global::System.InsufficientExecutionStackException();
+
+				object? handed = null;
+
+				OnHandingOff(ref handed);
+
+				var deep = Deep_DotGram_ParameterList.Take();
+
+				deep.whole  = this.whole;
+				deep.ways   = this.ways;
+				deep.failure = this.failure;
+				deep.last13 = this.last13;
+				deep.last3 = this.last3;
+				deep.unbuilt = this.unbuilt;
+				deep.replayed = this.replayed;
+				deep.replayedMore = this.replayedMore;
+				deep.probes = this.probes;
+				deep.pos    = pos;
+				deep.which  = which;
+				deep.power  = power;
+
+				deep.handed = handed;
+
+				deep.Go();
+
+				this.failure = deep.failure;
+				this.last13 = deep.last13;
+				this.last3 = deep.last3;
+				this.unbuilt = deep.unbuilt;
+				this.replayed = deep.replayed;
+				this.replayedMore = deep.replayedMore;
+				// Still on the stack that ran low: the next entry probes it again.
+				this.probes = 0;
+
+				var thrown = deep.thrown;
+				var end    = deep.end;
+
+				// It lingers for the next hand-off: what it holds of this reading goes now.
+				deep.Clear();
+
+				if (thrown != null)
+					global::System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(thrown).Throw();
+
+				return end;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			int Stood_DotGram(int u, int s)
+			{
+				if (u == 2)
+				{
+					replayed     = failure;
+					replayedMore = failure.ExpectedMore == null ? 0 : failure.ExpectedMore.Count;
+					unbuilt      = 0;
+					ways.Cursor  = s;
+
+					return 3;
+				}
+
+				Replayed_DotGram();
+
+				return 0;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			void Replayed_DotGram()
+			{
+				var more = failure.ExpectedMore;
+
+				failure = replayed;
+
+				if (more != null && more.Count > replayedMore)
+					more.RemoveRange(replayedMore, more.Count - replayedMore);
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			int Retried_DotGram(int u)
+			{
+				if (u == 1)
+				{
+					unbuilt = 1;
+
+					return 2;
+				}
+
+				return u == 0 && unbuilt == 0 ? 1 : u;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			void Undeferred_DotGram(int u)
+			{
+				if (u == 2)
+					unbuilt = 0;
+				else if (u == 3)
+					Replayed_DotGram();
+			}
+
+			public int Read_ParameterList(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = ReadBody_ParameterList(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_ParameterList(int pos)
+			{
+				var p = pos;
+				var w0  = -1;
+				var d0 = 0;
+				if (ways.Cursor < ways.Count)
+				{
+					w0  = ways.Cursor;
+					d0 = ways.Items[w0 * 2];
+					ways.Cursor++;
+				}
+				else
+				{
+					w0 = ways.Open(0, 1);
+				}
+
+				var q0 = -1;
+				if (q0 < 0 && d0 <= 0)
+				{
+					var s1  = ways.Cursor;
+
+					q0 = ReadPart0_ParameterList(p, pos);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+						ways.Next(w0, 1, 1);
+				}
+				if (q0 < 0 && d0 <= 1)
+				{
+					var s2  = ways.Cursor;
+
+					q0 = ReadPart1_ParameterList(p, pos);
+
+					if (q0 < 0)
+					{
+					}
+				}
+
+				if (q0 < 0)
+					return -1;
+
+				p = q0;
+				return p;
+			}
+
+			public int ReadPart0_ParameterList(int pos, int start)
+			{
+				var p = pos;
+				TextSpan r0 = default!;
+				if ((uint)p >= (uint)text.Length || text[p] != '(')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(31));
+					return -1;
+				}
+				p += 1;
+				var q0 = Read_ParenthesizedText(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				r0 = last3;
+				if ((uint)p >= (uint)text.Length || text[p] != ')')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(30));
+					return -1;
+				}
+				p += 1;
+				var q1 = Read_eof(p);
+				if (q1 < 0) return -1;
+				p = q1;
+				if (unbuilt == 0) last13 = New_DotGram_ParameterList(r0!);
+				return p;
+			}
+
+			public int ReadPart1_ParameterList(int pos, int start)
+			{
+				var p = pos;
+				TextSpan r1 = default!;
+				var q0 = Read_Rest(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				r1 = last3;
+				var q1 = Read_eof(p);
+				if (q1 < 0) return -1;
+				p = q1;
+				if (unbuilt == 0) last13 = New1_DotGram_ParameterList(r1!);
+				return p;
+			}
+
+			public int Read_ParenthesizedText(int pos)
+			{
+				var p = pos;
+				var q0 = ReadPart0_ParenthesizedText(p, pos);
+				if (q0 < 0)
+					return -1;
+				p = q0;
+				if (unbuilt == 0) last3 = New_DotGram_ParenthesizedText(new SourceSpan(pos, p - pos));
+				return p;
+			}
+
+			public int ReadPart0_ParenthesizedText(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == '(' || c == ')' || c == '<' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), global::System.MemoryExtensions.AsSpan("()<\\"));
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = (c >= '\0' && c <= '(') || (c >= '*' && c <= '\uFFFF');
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var q0 = -1;
+
+					q0 = ReadPart1_ParenthesizedText(p, start);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+					{
+
+						break;
+					}
+
+					p = q0;
+				}
+				return p;
+			}
+
+			public int ReadPart1_ParenthesizedText(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(64));
+					return -1;
+				}
+				c = text[p];
+				if (c == '<')
+				{
+					var q0 = Read_Generic(p);
+					if (q0 < 0) return -1;
+					p = q0;
+				}
+				else if (c == '\\')
+				{
+					var q1 = Read_Escape(p);
+					if (q1 < 0) return -1;
+					p = q1;
+				}
+				else if (c == '(')
+				{
+					var q2 = Read_Parenthesized(p);
+					if (q2 < 0) return -1;
+					p = q2;
+				}
+				else
+				{
+					if (!((c >= '\0' && c <= '\'') || (c >= '*' && c <= ';') || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(64));
+						return -1;
+					}
+					p++;
+				}
+				return p;
+			}
+
+			public int Read_Generic(int pos)
+			{
+				if ((probes++ & 3) == 0 && !EnoughStack_DotGram())
+					return Deepen_DotGram(pos, 0, 0);
+
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '<')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
+					return -1;
+				}
+				p += 1;
+				var q0 = ReadPart0_Generic(p, pos);
+				if (q0 < 0)
+					return -1;
+				p = q0;
+				var q1 = ReadPart2_Generic(p, pos);
+				if (q1 < 0)
+				{
+					var q2 = Read_eof(p);
+					if (q2 < 0) return -1;
+					p = q2;
+					q1 = p;
+				}
+				p = q1;
+				return p;
+			}
+
+			public int ReadPart0_Generic(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == '<' || c == '>' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), '<', '>', '\\');
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = (c >= '\0' && c <= '=') || (c >= '?' && c <= '\uFFFF');
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var q0 = -1;
+
+					q0 = ReadPart1_Generic(p, start);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+					{
+
+						break;
+					}
+
+					p = q0;
+				}
+				return p;
+			}
+
+			public int ReadPart1_Generic(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+					return -1;
+				}
+				c = text[p];
+				if (c == '<')
+				{
+					var q0 = Read_Generic(p);
+					if (q0 < 0) return -1;
+					p = q0;
+				}
+				else if (c == '\\')
+				{
+					var q1 = Read_Escape(p);
+					if (q1 < 0) return -1;
+					p = q1;
+				}
+				else
+				{
+					if (!((c >= '\0' && c <= ';') || c == '=' || (c >= '?' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+						return -1;
+					}
+					p++;
+				}
+				return p;
+			}
+
+			public int ReadPart2_Generic(int pos, int start)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '>')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(32));
+					return -1;
+				}
+				p += 1;
+				return p;
+			}
+
+			public int Read_Escape(int pos)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '\\')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(22));
+					return -1;
+				}
+				p += 1;
+				var q0 = Read_any(p);
+				if (q0 < 0)
+				{
+					var q1 = Read_eof(p);
+					if (q1 < 0) return -1;
+					p = q1;
+					q0 = p;
+				}
+				p = q0;
+				return p;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int Read_any(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
+					return -1;
+				}
+				c = text[p];
+				p++;
+				return p;
+			}
+
+			public int Read_eof(int pos)
+			{
+				var p = pos;
+				failure.Looking++;
+				var q0 = ReadPart0_eof(p, pos);
+				failure.Looking--;
+
+
+				if (q0 >= 0)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
+					return -1;
+				}
+				return p;
+			}
+
+			public int ReadPart0_eof(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
+					return -1;
+				}
+				c = text[p];
+				p++;
+				return p;
+			}
+
+			public int Read_Parenthesized(int pos)
+			{
+				if ((probes++ & 3) == 0 && !EnoughStack_DotGram())
+					return Deepen_DotGram(pos, 1, 0);
+
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '(')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(31));
+					return -1;
+				}
+				p += 1;
+				var q0 = ReadPart0_Parenthesized(p, pos);
+				if (q0 < 0)
+					return -1;
+				p = q0;
+				if ((uint)p >= (uint)text.Length || text[p] != ')')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(30));
+					return -1;
+				}
+				p += 1;
+				return p;
+			}
+
+			public int ReadPart0_Parenthesized(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == '(' || c == ')' || c == '<' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), global::System.MemoryExtensions.AsSpan("()<\\"));
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = (c >= '\0' && c <= '(') || (c >= '*' && c <= '\uFFFF');
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var q0 = -1;
+
+					q0 = ReadPart1_Parenthesized(p, start);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+					{
+
+						break;
+					}
+
+					p = q0;
+				}
+				return p;
+			}
+
+			public int ReadPart1_Parenthesized(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(64));
+					return -1;
+				}
+				c = text[p];
+				if (c == '<')
+				{
+					var q0 = Read_Generic(p);
+					if (q0 < 0) return -1;
+					p = q0;
+				}
+				else if (c == '\\')
+				{
+					var q1 = Read_Escape(p);
+					if (q1 < 0) return -1;
+					p = q1;
+				}
+				else if (c == '(')
+				{
+					var q2 = Read_Parenthesized(p);
+					if (q2 < 0) return -1;
+					p = q2;
+				}
+				else
+				{
+					if (!((c >= '\0' && c <= '\'') || (c >= '*' && c <= ';') || (c >= '=' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(64));
+						return -1;
+					}
+					p++;
+				}
+				return p;
+			}
+
+			public int Read_Rest(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					p++;
+				}
+
+				if (unbuilt == 0) last3 = New_DotGram_Rest(new SourceSpan(pos, p - pos));
+				return p;
+			}
+
+			public int RecWholeRead_ParameterList(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = RecWholeReadBody_ParameterList(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			public int RecWholeReadBody_ParameterList(int pos)
+			{
+				var p = pos;
+				var q0 = Read_ParameterList(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				if (p != text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
+					return -1;
+				}
+				return p;
+			}
+
+			public int RecRead_ParameterList(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = RecReadBody_ParameterList(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			public int RecReadBody_ParameterList(int pos)
+			{
+				var p = pos;
+				var q0 = Read_ParameterList(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				return p;
+			}
+
+		}
+
+		private sealed class Deep_DotGram_ParameterList
+		{
+			internal global::System.ReadOnlyMemory<char> whole;
+			internal Ways_DotGram ways = default!;
+			internal Failure failure = default!;
+			internal ParameterListSyntax last13 = default!;
+			internal TextSpan last3 = default!;
+			internal int unbuilt = default!;
+			internal Failure replayed = default!;
+			internal int replayedMore = default!;
+			internal int probes;
+			internal int pos;
+			internal int which;
+			internal int power;
+			internal int end;
+			internal global::System.Exception? thrown;
+			internal object? handed;
+
+			[global::System.ThreadStatic]
+			static Deep_DotGram_ParameterList? deepLingering;
+
+			static readonly global::System.Threading.ContextCallback deepReadIn = ReadIn;
+
+			readonly global::System.Threading.SemaphoreSlim deepGo   = new global::System.Threading.SemaphoreSlim(0, 1);
+			readonly global::System.Threading.SemaphoreSlim deepDone = new global::System.Threading.SemaphoreSlim(0, 1);
+
+			int deepState = 1;
+			volatile bool deepRetired;
+			global::System.Threading.ExecutionContext? deepContext;
+			global::System.Globalization.CultureInfo? deepCulture;
+			global::System.Globalization.CultureInfo? deepUiCulture;
+
+			internal static Deep_DotGram_ParameterList Take()
+			{
+				var deep = deepLingering;
+
+				if (deep != null && !deep.deepRetired && global::System.Threading.Interlocked.CompareExchange(ref deep.deepState, 1, 0) == 0)
+					return deep;
+
+				deep       = new Deep_DotGram_ParameterList();
+				deepLingering = deep;
+
+				var thread = new global::System.Threading.Thread(deep.Loop, 16 * 1024 * 1024) { IsBackground = true };
+
+				thread.Start();
+
+				return deep;
+			}
+
+			internal void Go()
+			{
+				deepContext   = global::System.Threading.ExecutionContext.Capture();
+				deepCulture   = global::System.Globalization.CultureInfo.CurrentCulture;
+				deepUiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+
+				global::System.Threading.ThreadInterruptedException? interrupted = null;
+
+				// A release waits for the semaphore's lock when another thread holds it, and that wait can be
+				// interrupted before the reading is handed over: the interrupt is held like one in the wait below.
+				while (true)
+				{
+					try
+					{
+						deepGo.Release();
+
+						break;
+					}
+					catch (global::System.Threading.ThreadInterruptedException caught)
+					{
+						interrupted = caught;
+					}
+				}
+
+				while (true)
+				{
+					try
+					{
+						deepDone.Wait();
+
+						break;
+					}
+					catch (global::System.Threading.ThreadInterruptedException caught)
+					{
+						interrupted = caught;
+					}
+					catch
+					{
+						deepRetired = true;
+
+						throw;
+					}
+				}
+
+				if (interrupted != null)
+				{
+					// An interrupt that meets the release leaves deepDone unable to wake its next waiter.
+					deepRetired = true;
+
+					Clear();
+
+					global::System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(interrupted).Throw();
+				}
+			}
+
+			internal void Clear()
+			{
+				whole  = default;
+				ways   = default!;
+				failure = default!;
+				last13 = default!;
+				last3 = default!;
+				unbuilt = default!;
+				replayed = default!;
+				replayedMore = default!;
+				thrown = null;
+				handed = null;
+			}
+
+			void Loop()
+			{
+				while (true)
+				{
+					try
+					{
+						if (!deepGo.Wait(100))
+						{
+							if (global::System.Threading.Interlocked.CompareExchange(ref deepState, 2, 0) == 0)
+								return;
+
+							// Taken in the moment before it could go: the reading is on its way.
+							deepGo.Wait();
+						}
+					}
+					catch (global::System.Threading.ThreadInterruptedException)
+					{
+						// Nobody outside holds this thread, but the grammar's own code can interrupt it.
+						continue;
+					}
+
+					var handed = deepContext;
+					var read   = false;
+
+					deepContext = null;
+
+					try
+					{
+						if (handed == null)
+							ReadIn(this);
+						else
+							global::System.Threading.ExecutionContext.Run(handed, deepReadIn, this);
+
+						read = true;
+					}
+					finally
+					{
+						deepCulture   = null;
+						deepUiCulture = null;
+
+						if (!read)
+							deepRetired = true;
+
+						global::System.Threading.Volatile.Write(ref deepState, 0);
+
+						// An interrupt the grammar's own code left pending here is dropped, as the wait above drops it,
+						// rather than thrown by a release that waits for the semaphore's lock, where nothing would catch it.
+						while (true)
+						{
+							try
+							{
+								deepDone.Release();
+
+								break;
+							}
+							catch (global::System.Threading.ThreadInterruptedException)
+							{
+							}
+						}
+					}
+
+					// Retired by the reading it just answered: no hand-off is given it again, so it ends now.
+					if (deepRetired)
+						return;
+				}
+			}
+
+			static void ReadIn(object? state)
+			{
+				var deep      = (Deep_DotGram_ParameterList)state!;
+				var culture   = global::System.Globalization.CultureInfo.CurrentCulture;
+				var uiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+
+				try
+				{
+					global::System.Globalization.CultureInfo.CurrentCulture   = deep.deepCulture!;
+					global::System.Globalization.CultureInfo.CurrentUICulture = deep.deepUiCulture!;
+
+					deep.Run();
+				}
+				finally
+				{
+					global::System.Globalization.CultureInfo.CurrentCulture   = culture;
+					global::System.Globalization.CultureInfo.CurrentUICulture = uiCulture;
+				}
+			}
+
+			internal void Run()
+			{
+				var taken = false;
+
+				try
+				{
+					try
+					{
+						OnTakingOver(ref this.handed);
+
+						taken = true;
+
+						var reader = new Reader_DotGram_ParameterList(this.whole.Span, this.ways, this.whole);
+
+						reader.failure = this.failure;
+						reader.last13 = this.last13;
+						reader.last3 = this.last3;
+						reader.unbuilt = this.unbuilt;
+						reader.replayed = this.replayed;
+						reader.replayedMore = this.replayedMore;
+						reader.probes = this.probes;
+
+						switch (this.which)
+						{
+							case 0: this.end = reader.Read_Generic(this.pos); break;
+							case 1: this.end = reader.Read_Parenthesized(this.pos); break;
+						}
+
+						this.failure = reader.failure;
+						this.last13 = reader.last13;
+						this.last3 = reader.last3;
+						this.unbuilt = reader.unbuilt;
+						this.replayed = reader.replayed;
+						this.replayedMore = reader.replayedMore;
+						this.probes = reader.probes;
+					}
+					catch (global::System.Exception caught)
+					{
+						this.thrown = caught;
+
+						// A host whose hook failed may have half its state on this thread: it is handed no more.
+						if (!taken)
+							this.deepRetired = true;
+					}
+				}
+				finally
+				{
+					// This thread's own state back, where the host's went in, whatever the reading did; a hook that throws
+					// here is carried back too, unless the reading threw first, and retires the thread, which may still
+					// hold the host's state.
+					if (taken)
+					{
+						try
+						{
+							OnTakingOver(ref this.handed);
+						}
+						catch (global::System.Exception caught)
+						{
+							this.deepRetired = true;
+
+							if (this.thrown == null)
+								this.thrown = caught;
+						}
+					}
+				}
+			}
+		}
+
+		static int RecWhole_DotGram_ParameterList(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out ParameterListSyntax value, global::System.ReadOnlyMemory<char> parserWhole)
+		{
+			var ways = Ways_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_ParameterList(text, ways, parserWhole);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecWholeRead_ParameterList(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last13;
+
+				return end;
+			}
+			finally
+			{
+				Ways_DotGram.Return(ways);
+			}
+		}
+
+		static int Rec_DotGram_ParameterList(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out ParameterListSyntax value, global::System.ReadOnlyMemory<char> parserWhole)
+		{
+			var ways = Ways_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_ParameterList(text, ways, parserWhole);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecRead_ParameterList(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last13;
+
+				return end;
+			}
+			finally
+			{
+				Ways_DotGram.Return(ways);
+			}
+		}
+
+
+
+		private ref struct Reader_DotGram_ParameterParts
+		{
+			readonly global::System.ReadOnlySpan<char> text;
+			internal Failure failure;
+			internal int probes;
+			readonly Ways_DotGram ways;
+			readonly global::System.ReadOnlyMemory<char> whole;
+			readonly ImmediateValues_DotGram values;
+			internal ParameterPartsSyntax last14;
+			internal TextSpan last3;
+			internal int unbuilt;
+			internal Failure replayed;
+			internal int replayedMore;
+
+			internal Reader_DotGram_ParameterParts(global::System.ReadOnlySpan<char> text, Ways_DotGram ways, ImmediateValues_DotGram values, global::System.ReadOnlyMemory<char> parserWhole)
+			{
+				this.text    = text;
+				this.failure = default;
+				this.ways    = ways;
+				this.probes  = 0;
+				this.values = values;
+				this.last14 = default!;
+				this.last3 = default!;
+				this.unbuilt = default!;
+				this.replayed = default!;
+				this.replayedMore = default!;
+				this.whole   = parserWhole;
+			}
+
+			static bool EnoughStack_DotGram()
+			{
+				#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+				return global::System.Runtime.CompilerServices.RuntimeHelpers.TryEnsureSufficientExecutionStack();
+				#else
+				try
+				{
+					global::System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
+
+					return true;
+				}
+				catch (global::System.InsufficientExecutionStackException)
+				{
+					return false;
+				}
+				#endif
+			}
+
+			internal int Deepen_DotGram(int pos, int which, int power)
+			{
+				// Nothing to carry it onto: a reading over a window has no whole input.
+				if (this.whole.IsEmpty)
+					throw new global::System.InsufficientExecutionStackException();
+
+				object? handed = null;
+
+				OnHandingOff(ref handed);
+
+				var deep = Deep_DotGram_ParameterParts.Take();
+
+				deep.whole  = this.whole;
+				deep.ways   = this.ways;
+				deep.values = this.values;
+				deep.failure = this.failure;
+				deep.last14 = this.last14;
+				deep.last3 = this.last3;
+				deep.unbuilt = this.unbuilt;
+				deep.replayed = this.replayed;
+				deep.replayedMore = this.replayedMore;
+				deep.probes = this.probes;
+				deep.pos    = pos;
+				deep.which  = which;
+				deep.power  = power;
+
+				deep.handed = handed;
+
+				deep.Go();
+
+				this.failure = deep.failure;
+				this.last14 = deep.last14;
+				this.last3 = deep.last3;
+				this.unbuilt = deep.unbuilt;
+				this.replayed = deep.replayed;
+				this.replayedMore = deep.replayedMore;
+				// Still on the stack that ran low: the next entry probes it again.
+				this.probes = 0;
+
+				var thrown = deep.thrown;
+				var end    = deep.end;
+
+				// It lingers for the next hand-off: what it holds of this reading goes now.
+				deep.Clear();
+
+				if (thrown != null)
+					global::System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(thrown).Throw();
+
+				return end;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			int Stood_DotGram(int u, int s)
+			{
+				if (u == 2)
+				{
+					replayed     = failure;
+					replayedMore = failure.ExpectedMore == null ? 0 : failure.ExpectedMore.Count;
+					unbuilt      = 0;
+					ways.Cursor  = s;
+
+					return 3;
+				}
+
+				Replayed_DotGram();
+
+				return 0;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			void Replayed_DotGram()
+			{
+				var more = failure.ExpectedMore;
+
+				failure = replayed;
+
+				if (more != null && more.Count > replayedMore)
+					more.RemoveRange(replayedMore, more.Count - replayedMore);
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			int Retried_DotGram(int u)
+			{
+				if (u == 1)
+				{
+					unbuilt = 1;
+
+					return 2;
+				}
+
+				return u == 0 && unbuilt == 0 ? 1 : u;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+			void Undeferred_DotGram(int u)
+			{
+				if (u == 2)
+					unbuilt = 0;
+				else if (u == 3)
+					Replayed_DotGram();
+			}
+
+			public int Read_ParameterParts(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = ReadBody_ParameterParts(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_ParameterParts(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				var rb_3 = values.Count3;
+				TextSpan r0 = default!;
+				var q0 = Read_ParameterPart(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				r0 = last3;
+				while (true)
+				{
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = c == ',';
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var s2  = ways.Cursor;
+					var u2  = 0;
+					var rr2_3 = values.Count3;
+					var q1 = -1;
+
+					while (true)
+					{
+						q1 = ReadPart0_ParameterParts(p, pos, rb_3);
+
+						if (q1 >= 0)
+						{
+							if (u2 > 1)
+							{
+								u2 = Stood_DotGram(u2, s2);
+
+								if (u2 > 0)
+								{
+									values.Count3 = rr2_3;
+
+									continue;
+								}
+							}
+
+							break;
+						}
+
+						values.Count3 = rr2_3;
+
+						if (ways.Cursor > s2 && ways.Retry(s2))
+						{
+							u2 = Retried_DotGram(u2);
+
+							continue;
+						}
+
+						Undeferred_DotGram(u2);
+
+						break;
+					}
+
+					if (q1 < 0)
+					{
+
+						break;
+					}
+
+					p = q1;
+				}
+				var q2 = Read_eof(p);
+				if (q2 < 0) { values.Count3 = rb_3; return -1; }
+				p = q2;
+				if (unbuilt == 0) last14 = New_DotGram_ParameterParts(r0!, values.Take3(rb_3)!); else { values.Count3 = rb_3; }
+				return p;
+			}
+
+			public int ReadPart0_ParameterParts(int pos, int start, int refs_3)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != ',')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(65));
+					return -1;
+				}
+				p += 1;
+				var q0 = Read_ParameterPart(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				values.Push3(last3);
+				return p;
+			}
+
+			public int Read_ParameterPart(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = ReadBody_ParameterPart(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_ParameterPart(int pos)
+			{
+				var p = pos;
+				var s0  = ways.Cursor;
+				var u0  = 0;
+				var q0 = -1;
+
+				while (true)
+				{
+					q0 = ReadPart0_ParameterPart(p, pos);
+
+					if (q0 >= 0)
+					{
+						if (u0 > 1)
+						{
+							u0 = Stood_DotGram(u0, s0);
+
+							if (u0 > 0)
+								continue;
+						}
+
+						break;
+					}
+
+					if (ways.Cursor > s0 && ways.Retry(s0))
+					{
+						u0 = Retried_DotGram(u0);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u0);
+
+					break;
+				}
+
+				if (q0 < 0)
+					return -1;
+
+				ways.Seal(s0);
+				p = q0;
+				if (unbuilt == 0) last3 = New_DotGram_ParameterPart(new SourceSpan(pos, p - pos));
+				return p;
+			}
+
+			public int ReadPart0_ParameterPart(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == ',' || c == '<' || c == '[' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), global::System.MemoryExtensions.AsSpan(",<[\\"));
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = (c >= '\0' && c <= '+') || (c >= '-' && c <= '\uFFFF');
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var s2  = ways.Cursor;
+					var u2  = 0;
+					var q0 = -1;
+
+					while (true)
+					{
+						q0 = ReadPart1_ParameterPart(p, start);
+
+						if (q0 >= 0)
+						{
+							if (u2 > 1)
+							{
+								u2 = Stood_DotGram(u2, s2);
+
+								if (u2 > 0)
+									continue;
+							}
+
+							break;
+						}
+
+						if (ways.Cursor > s2 && ways.Retry(s2))
+						{
+							u2 = Retried_DotGram(u2);
+
+							continue;
+						}
+
+						Undeferred_DotGram(u2);
+
+						break;
+					}
+
+					if (q0 < 0)
+					{
+
+						break;
+					}
+
+					p = q0;
+				}
+				return p;
+			}
+
+			public int ReadPart1_ParameterPart(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(67));
+					return -1;
+				}
+				c = text[p];
+				if (c == '[')
+				{
+					var q0 = Read_Bracket(p);
+					if (q0 < 0) return -1;
+					p = q0;
+				}
+				else if (c == '<')
+				{
+					var q1 = Read_Generic(p);
+					if (q1 < 0) return -1;
+					p = q1;
+				}
+				else if (c == '\\')
+				{
+					var q2 = Read_Escape(p);
+					if (q2 < 0) return -1;
+					p = q2;
+				}
+				else
+				{
+					if (!((c >= '\0' && c <= '+') || (c >= '-' && c <= ';') || (c >= '=' && c <= 'Z') || (c >= ']' && c <= '\uFFFF')))
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(67));
+						return -1;
+					}
+					p++;
+				}
+				return p;
+			}
+
+			public int Read_Bracket(int pos)
+			{
+				var s  = ways.Cursor;
+
+				while (true)
+				{
+					var q = ReadBody_Bracket(pos);
+
+					if (q >= 0)
+						return q;
+
+
+					if (ways.Cursor > s && ways.Retry(s))
+						continue;
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_Bracket(int pos)
+			{
+				var p = pos;
+				var s0  = ways.Cursor;
+				var q0 = -1;
+
+				while (true)
+				{
+					q0 = ReadPart0_Bracket(p, pos);
+
+					if (q0 >= 0)
+						break;
+
+
+					if (ways.Cursor > s0 && ways.Retry(s0))
+						continue;
+
+					break;
+				}
+
+				if (q0 < 0)
+					return -1;
+
+				ways.Seal(s0);
+				p = q0;
+				return p;
+			}
+
+			public int ReadPart0_Bracket(int pos, int start)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '[')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(56));
+					return -1;
+				}
+				p += 1;
+				var w0  = -1;
+				var d0 = 0;
+				if (ways.Cursor < ways.Count)
+				{
+					w0  = ways.Cursor;
+					d0 = ways.Items[w0 * 2];
+					ways.Cursor++;
+				}
+				else
+				{
+					w0 = ways.Open(0, 1);
+				}
+
+				var q0 = -1;
+				if (q0 < 0 && d0 <= 0)
+				{
+					var s1  = ways.Cursor;
+
+					q0 = ReadPart1_Bracket(p, start);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+						ways.Next(w0, 1, 1);
+				}
+				if (q0 < 0 && d0 <= 1)
+				{
+					var s2  = ways.Cursor;
+
+					q0 = ReadPart2_Bracket(p, start);
+
+					if (q0 < 0)
+					{
+					}
+				}
+
+				if (q0 < 0)
+					return -1;
+
+				p = q0;
+				return p;
+			}
+
+			public int ReadPart1_Bracket(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					if (!((c == ' ' || c == ',')))
+						break;
+
+					p++;
+				}
+
+				if ((uint)p >= (uint)text.Length || text[p] != ']')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(54));
+					return -1;
+				}
+				p += 1;
+				return p;
+			}
+
+			public int ReadPart2_Bracket(int pos, int start)
+			{
+				var p = pos;
+				return p;
+			}
+
+			public int Read_Generic(int pos)
+			{
+				if ((probes++ & 3) == 0 && !EnoughStack_DotGram())
+					return Deepen_DotGram(pos, 0, 0);
+
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '<')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(35));
+					return -1;
+				}
+				p += 1;
+				var q0 = ReadPart0_Generic(p, pos);
+				if (q0 < 0)
+					return -1;
+				p = q0;
+				var q1 = ReadPart2_Generic(p, pos);
+				if (q1 < 0)
+				{
+					var q2 = Read_eof(p);
+					if (q2 < 0) return -1;
+					p = q2;
+					q1 = p;
+				}
+				p = q1;
+				return p;
+			}
+
+			public int ReadPart0_Generic(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if (failure.Quiet)
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == '<' || c == '>' || c == '\\'))
+							{
+								var untilFound = global::System.MemoryExtensions.IndexOfAny(text.Slice(p), '<', '>', '\\');
+								var until = untilFound < 0 ? -1 : p + untilFound;
+								p = until < 0 ? text.Length : until;
+							}
+						}
+					}
+
+					var o1 = (uint)p < (uint)text.Length;
+
+					if (o1)
+					{
+						c = text[p];
+						o1 = (c >= '\0' && c <= '=') || (c >= '?' && c <= '\uFFFF');
+					}
+
+					if (!o1 && (failure.Quiet || p < failure.Doors))
+					{
+						break;
+					}
+
+					var q0 = -1;
+
+					q0 = ReadPart1_Generic(p, start);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+					{
+
+						break;
+					}
+
+					p = q0;
+				}
+				return p;
+			}
+
+			public int ReadPart1_Generic(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+					return -1;
+				}
+				c = text[p];
+				if (c == '<')
+				{
+					var q0 = Read_Generic(p);
+					if (q0 < 0) return -1;
+					p = q0;
+				}
+				else if (c == '\\')
+				{
+					var q1 = Read_Escape(p);
+					if (q1 < 0) return -1;
+					p = q1;
+				}
+				else
+				{
+					if (!((c >= '\0' && c <= ';') || c == '=' || (c >= '?' && c <= '[') || (c >= ']' && c <= '\uFFFF')))
+					{
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(34));
+						return -1;
+					}
+					p++;
+				}
+				return p;
+			}
+
+			public int ReadPart2_Generic(int pos, int start)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '>')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(32));
+					return -1;
+				}
+				p += 1;
+				return p;
+			}
+
+			public int Read_Escape(int pos)
+			{
+				var p = pos;
+				if ((uint)p >= (uint)text.Length || text[p] != '\\')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(22));
+					return -1;
+				}
+				p += 1;
+				var q0 = Read_any(p);
+				if (q0 < 0)
+				{
+					var q1 = Read_eof(p);
+					if (q1 < 0) return -1;
+					p = q1;
+					q0 = p;
+				}
+				p = q0;
+				return p;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int Read_any(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
+					return -1;
+				}
+				c = text[p];
+				p++;
+				return p;
+			}
+
+			public int Read_eof(int pos)
+			{
+				var p = pos;
+				failure.Looking++;
+				var q0 = ReadPart0_eof(p, pos);
+				failure.Looking--;
+
+
+				if (q0 >= 0)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
+					return -1;
+				}
+				return p;
+			}
+
+			public int ReadPart0_eof(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
+					return -1;
+				}
+				c = text[p];
+				p++;
+				return p;
+			}
+
+			public int RecWholeRead_ParameterParts(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = RecWholeReadBody_ParameterParts(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			public int RecWholeReadBody_ParameterParts(int pos)
+			{
+				var p = pos;
+				var rb_3 = values.Count3;
+				var q0 = Read_ParameterParts(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				if (p != text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
+					return -1;
+				}
+				return p;
+			}
+
+			public int RecRead_ParameterParts(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = RecReadBody_ParameterParts(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			public int RecReadBody_ParameterParts(int pos)
+			{
+				var p = pos;
+				var rb_3 = values.Count3;
+				var q0 = Read_ParameterParts(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				return p;
+			}
+
+		}
+
+		private sealed class Deep_DotGram_ParameterParts
+		{
+			internal global::System.ReadOnlyMemory<char> whole;
+			internal Ways_DotGram ways = default!;
+			internal ImmediateValues_DotGram values = default!;
+			internal Failure failure = default!;
+			internal ParameterPartsSyntax last14 = default!;
+			internal TextSpan last3 = default!;
+			internal int unbuilt = default!;
+			internal Failure replayed = default!;
+			internal int replayedMore = default!;
+			internal int probes;
+			internal int pos;
+			internal int which;
+			internal int power;
+			internal int end;
+			internal global::System.Exception? thrown;
+			internal object? handed;
+
+			[global::System.ThreadStatic]
+			static Deep_DotGram_ParameterParts? deepLingering;
+
+			static readonly global::System.Threading.ContextCallback deepReadIn = ReadIn;
+
+			readonly global::System.Threading.SemaphoreSlim deepGo   = new global::System.Threading.SemaphoreSlim(0, 1);
+			readonly global::System.Threading.SemaphoreSlim deepDone = new global::System.Threading.SemaphoreSlim(0, 1);
+
+			int deepState = 1;
+			volatile bool deepRetired;
+			global::System.Threading.ExecutionContext? deepContext;
+			global::System.Globalization.CultureInfo? deepCulture;
+			global::System.Globalization.CultureInfo? deepUiCulture;
+
+			internal static Deep_DotGram_ParameterParts Take()
+			{
+				var deep = deepLingering;
+
+				if (deep != null && !deep.deepRetired && global::System.Threading.Interlocked.CompareExchange(ref deep.deepState, 1, 0) == 0)
+					return deep;
+
+				deep       = new Deep_DotGram_ParameterParts();
+				deepLingering = deep;
+
+				var thread = new global::System.Threading.Thread(deep.Loop, 16 * 1024 * 1024) { IsBackground = true };
+
+				thread.Start();
+
+				return deep;
+			}
+
+			internal void Go()
+			{
+				deepContext   = global::System.Threading.ExecutionContext.Capture();
+				deepCulture   = global::System.Globalization.CultureInfo.CurrentCulture;
+				deepUiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+
+				global::System.Threading.ThreadInterruptedException? interrupted = null;
+
+				// A release waits for the semaphore's lock when another thread holds it, and that wait can be
+				// interrupted before the reading is handed over: the interrupt is held like one in the wait below.
+				while (true)
+				{
+					try
+					{
+						deepGo.Release();
+
+						break;
+					}
+					catch (global::System.Threading.ThreadInterruptedException caught)
+					{
+						interrupted = caught;
+					}
+				}
+
+				while (true)
+				{
+					try
+					{
+						deepDone.Wait();
+
+						break;
+					}
+					catch (global::System.Threading.ThreadInterruptedException caught)
+					{
+						interrupted = caught;
+					}
+					catch
+					{
+						deepRetired = true;
+
+						throw;
+					}
+				}
+
+				if (interrupted != null)
+				{
+					// An interrupt that meets the release leaves deepDone unable to wake its next waiter.
+					deepRetired = true;
+
+					Clear();
+
+					global::System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(interrupted).Throw();
+				}
+			}
+
+			internal void Clear()
+			{
+				whole  = default;
+				ways   = default!;
+				values = default!;
+				failure = default!;
+				last14 = default!;
+				last3 = default!;
+				unbuilt = default!;
+				replayed = default!;
+				replayedMore = default!;
+				thrown = null;
+				handed = null;
+			}
+
+			void Loop()
+			{
+				while (true)
+				{
+					try
+					{
+						if (!deepGo.Wait(100))
+						{
+							if (global::System.Threading.Interlocked.CompareExchange(ref deepState, 2, 0) == 0)
+								return;
+
+							// Taken in the moment before it could go: the reading is on its way.
+							deepGo.Wait();
+						}
+					}
+					catch (global::System.Threading.ThreadInterruptedException)
+					{
+						// Nobody outside holds this thread, but the grammar's own code can interrupt it.
+						continue;
+					}
+
+					var handed = deepContext;
+					var read   = false;
+
+					deepContext = null;
+
+					try
+					{
+						if (handed == null)
+							ReadIn(this);
+						else
+							global::System.Threading.ExecutionContext.Run(handed, deepReadIn, this);
+
+						read = true;
+					}
+					finally
+					{
+						deepCulture   = null;
+						deepUiCulture = null;
+
+						if (!read)
+							deepRetired = true;
+
+						global::System.Threading.Volatile.Write(ref deepState, 0);
+
+						// An interrupt the grammar's own code left pending here is dropped, as the wait above drops it,
+						// rather than thrown by a release that waits for the semaphore's lock, where nothing would catch it.
+						while (true)
+						{
+							try
+							{
+								deepDone.Release();
+
+								break;
+							}
+							catch (global::System.Threading.ThreadInterruptedException)
+							{
+							}
+						}
+					}
+
+					// Retired by the reading it just answered: no hand-off is given it again, so it ends now.
+					if (deepRetired)
+						return;
+				}
+			}
+
+			static void ReadIn(object? state)
+			{
+				var deep      = (Deep_DotGram_ParameterParts)state!;
+				var culture   = global::System.Globalization.CultureInfo.CurrentCulture;
+				var uiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+
+				try
+				{
+					global::System.Globalization.CultureInfo.CurrentCulture   = deep.deepCulture!;
+					global::System.Globalization.CultureInfo.CurrentUICulture = deep.deepUiCulture!;
+
+					deep.Run();
+				}
+				finally
+				{
+					global::System.Globalization.CultureInfo.CurrentCulture   = culture;
+					global::System.Globalization.CultureInfo.CurrentUICulture = uiCulture;
+				}
+			}
+
+			internal void Run()
+			{
+				var taken = false;
+
+				try
+				{
+					try
+					{
+						OnTakingOver(ref this.handed);
+
+						taken = true;
+
+						var reader = new Reader_DotGram_ParameterParts(this.whole.Span, this.ways, this.values, this.whole);
+
+						reader.failure = this.failure;
+						reader.last14 = this.last14;
+						reader.last3 = this.last3;
+						reader.unbuilt = this.unbuilt;
+						reader.replayed = this.replayed;
+						reader.replayedMore = this.replayedMore;
+						reader.probes = this.probes;
+
+						switch (this.which)
+						{
+							case 0: this.end = reader.Read_Generic(this.pos); break;
+						}
+
+						this.failure = reader.failure;
+						this.last14 = reader.last14;
+						this.last3 = reader.last3;
+						this.unbuilt = reader.unbuilt;
+						this.replayed = reader.replayed;
+						this.replayedMore = reader.replayedMore;
+						this.probes = reader.probes;
+					}
+					catch (global::System.Exception caught)
+					{
+						this.thrown = caught;
+
+						// A host whose hook failed may have half its state on this thread: it is handed no more.
+						if (!taken)
+							this.deepRetired = true;
+					}
+				}
+				finally
+				{
+					// This thread's own state back, where the host's went in, whatever the reading did; a hook that throws
+					// here is carried back too, unless the reading threw first, and retires the thread, which may still
+					// hold the host's state.
+					if (taken)
+					{
+						try
+						{
+							OnTakingOver(ref this.handed);
+						}
+						catch (global::System.Exception caught)
+						{
+							this.deepRetired = true;
+
+							if (this.thrown == null)
+								this.thrown = caught;
+						}
+					}
+				}
+			}
+		}
+
+		static int RecWhole_DotGram_ParameterParts(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out ParameterPartsSyntax value, global::System.ReadOnlyMemory<char> parserWhole)
+		{
+			var ways = Ways_DotGram.Rent();
+			var values = ImmediateValues_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_ParameterParts(text, ways, values, parserWhole);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecWholeRead_ParameterParts(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last14;
+
+				return end;
+			}
+			finally
+			{
+				Ways_DotGram.Return(ways);
+				ImmediateValues_DotGram.Return(values);
+			}
+		}
+
+		static int Rec_DotGram_ParameterParts(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out ParameterPartsSyntax value, global::System.ReadOnlyMemory<char> parserWhole)
+		{
+			var ways = Ways_DotGram.Rent();
+			var values = ImmediateValues_DotGram.Rent();
+
+			try
+			{
+				var reader = new Reader_DotGram_ParameterParts(text, ways, values, parserWhole);
+
+				reader.failure = failure;
+				if (failure.Unasked) reader.unbuilt = 1;
+
+				var end = reader.RecRead_ParameterParts(pos);
+
+				failure = reader.failure;
+
+				if (end < 0)
+				{
+					value = default!;
+
+					return end;
+				}
+
+				value = reader.last14;
+
+				return end;
+			}
+			finally
+			{
+				Ways_DotGram.Return(ways);
+				ImmediateValues_DotGram.Return(values);
+			}
+		}
+
+
+
+		private ref struct Reader_DotGram_Parameter
+		{
+			readonly global::System.ReadOnlySpan<char> text;
+			internal Failure failure;
+			readonly Ways_DotGram ways;
+			internal ParameterSyntax last15;
+			internal ParameterTypeSyntax last16;
+			internal ModifierSyntax last17;
+			internal int unbuilt;
+			internal Failure replayed;
+			internal int replayedMore;
+
+			internal Reader_DotGram_Parameter(global::System.ReadOnlySpan<char> text, Ways_DotGram ways)
+			{
+				this.text    = text;
+				this.failure = default;
+				this.ways    = ways;
+				this.last15 = default!;
+				this.last16 = default!;
+				this.last17 = default!;
 				this.unbuilt = default!;
 				this.replayed = default!;
 				this.replayedMore = default!;
@@ -307,14 +11294,14 @@ namespace AspectGenerator
 					Replayed_DotGram();
 			}
 
-			public int Read_Line(int pos)
+			public int Read_Parameter(int pos)
 			{
 				var s  = ways.Cursor;
 				var u  = 0;
 
 				while (true)
 				{
-					var q = ReadBody_Line(pos);
+					var q = ReadBody_Parameter(pos);
 
 					if (q >= 0)
 					{
@@ -343,282 +11330,157 @@ namespace AspectGenerator
 			}
 
 			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-			public int ReadBody_Line(int pos)
+			public int ReadBody_Parameter(int pos)
 			{
 				var p = pos;
-				var c = '\0';
-				string? r0 = default;
-				string? r1 = default;
-				string r2 = default!;
-				var t0 = 0;
-				while (true)
+				var w0  = -1;
+				var d0 = 0;
+				if (ways.Cursor < ways.Count)
 				{
-					if (t0 >= 1)
-						break;
+					w0  = ways.Cursor;
+					d0 = ways.Items[w0 * 2];
+					ways.Cursor++;
+				}
+				else
+				{
+					w0 = ways.Open(0, 2);
+				}
 
-					var o1 = (uint)p < (uint)text.Length;
+				var q0 = -1;
+				if (q0 < 0 && d0 <= 0)
+				{
+					var s1  = ways.Cursor;
 
-					if (o1)
-					{
-						c = text[p];
-						o1 = c <= 255 && RecognizeClass0_DotGram[c] != 0;
-					}
-
-					if (!o1 && (failure.Quiet || p < failure.Doors))
-					{
-						break;
-					}
-
-					var w0 = -1;
-					var d0 = 0;
-
-					if (ways.Cursor < ways.Count)
-					{
-						w0 = ways.Cursor;
-						d0 = ways.Items[w0 * 2];
-						ways.Cursor++;
-					}
-					else
-					{
-						w0 = ways.Open(1);
-					}
-
-					if (d0 == 1)
-						break;
-
-					var q0 = -1;
-
-					q0 = ReadPart0_Line(p, ref r0);
+					q0 = ReadPart0_Parameter(p, pos);
 
 					if (q0 < 0)
 					{
 					}
 
 					if (q0 < 0)
-					{
-						r0 = default;
-
-						ways.Next(w0, 1);
-
-						break;
-					}
-
-					p = q0;
-					t0++;
+						ways.Next(w0, 1, 2);
 				}
-				var t1 = 0;
-				while (true)
+				if (q0 < 0 && d0 <= 1)
 				{
-					if (t1 >= 1)
-						break;
+					var s2  = ways.Cursor;
 
-					var o4 = (uint)p < (uint)text.Length;
-
-					if (o4)
+					var u2  = 0;
+					while (true)
 					{
-						c = text[p];
-						o4 = c <= 255 && RecognizeClass1_DotGram[c] != 0;
-					}
+						q0 = ReadPart1_Parameter(p, pos);
 
-					if (!o4 && (failure.Quiet || p < failure.Doors))
-					{
-						break;
-					}
+						if (q0 >= 0)
+						{
+							if (u2 > 1)
+							{
+								u2 = Stood_DotGram(u2, s2);
 
-					var w3 = -1;
-					var d3 = 0;
+								if (u2 > 0)
+									continue;
+							}
 
-					if (ways.Cursor < ways.Count)
-					{
-						w3 = ways.Cursor;
-						d3 = ways.Items[w3 * 2];
-						ways.Cursor++;
-					}
-					else
-					{
-						w3 = ways.Open(1);
-					}
+							break;
+						}
 
-					if (d3 == 1)
-						break;
+						if (ways.Cursor > s2 && ways.Retry(s2))
+						{
+							u2 = Retried_DotGram(u2);
 
-					var q1 = -1;
+							continue;
+						}
 
-					q1 = ReadPart1_Line(p, ref r1);
-
-					if (q1 < 0)
-					{
-					}
-
-					if (q1 < 0)
-					{
-						r1 = default;
-
-						ways.Next(w3, 1);
+						Undeferred_DotGram(u2);
 
 						break;
 					}
 
-					p = q1;
-					t1++;
+					if (q0 < 0)
+						ways.Next(w0, 2, 2);
 				}
-				var q2 = Read_Rest(p);
-				if (q2 < 0) return -1;
-				p = q2;
-				r2 = last0;
-				var q3 = Read_eof(p);
-				if (q3 < 0) return -1;
-				p = q3;
-				if (unbuilt == 0) last1 = New_DotGram_Line(r0, r1, r2!);
+				if (q0 < 0 && d0 <= 2)
+				{
+					var s3  = ways.Cursor;
+
+					var u3  = 0;
+					while (true)
+					{
+						q0 = ReadPart2_Parameter(p, pos);
+
+						if (q0 >= 0)
+						{
+							if (u3 > 1)
+							{
+								u3 = Stood_DotGram(u3, s3);
+
+								if (u3 > 0)
+									continue;
+							}
+
+							break;
+						}
+
+						if (ways.Cursor > s3 && ways.Retry(s3))
+						{
+							u3 = Retried_DotGram(u3);
+
+							continue;
+						}
+
+						Undeferred_DotGram(u3);
+
+						break;
+					}
+				}
+
+				if (q0 < 0)
+					return -1;
+
+				p = q0;
 				return p;
 			}
 
-			public int ReadPart0_Line(int pos, ref string? r0)
+			public int ReadPart0_Parameter(int pos, int start)
 			{
 				var p = pos;
-				var q0 = Read_Operator(p);
+				if ((uint)p >= (uint)text.Length || text[p] != '_')
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(68));
+					return -1;
+				}
+				p += 1;
+				var q0 = Read_eof(p);
 				if (q0 < 0) return -1;
 				p = q0;
-				r0 = last0;
+				if (unbuilt == 0) last15 = New_DotGram_Parameter(new SourceSpan(start, p - start));
 				return p;
 			}
 
-			public int ReadPart1_Line(int pos, ref string? r1)
+			public int ReadPart1_Parameter(int pos, int start)
 			{
 				var p = pos;
-				var q0 = Read_MatcherPrefix(p);
+				ModifierSyntax? r0 = default;
+				ParameterTypeSyntax? r1 = default;
+				var q0 = Read_ParameterModifier(p);
 				if (q0 < 0) return -1;
 				p = q0;
-				r1 = last0;
+				r0 = last17;
+				var q1 = Read_ParameterType(p);
+				if (q1 < 0) return -1;
+				p = q1;
+				r1 = last16;
+				if (unbuilt == 0) last15 = New1_DotGram_Parameter(r0!, r1!);
 				return p;
 			}
 
-			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-			public int Read_Operator(int pos)
+			public int ReadPart2_Parameter(int pos, int start)
 			{
 				var p = pos;
-				var c = '\0';
-				var a0 = -1;
-				var b0 = -1;
-				a0 = p;
-				if ((uint)p >= (uint)text.Length)
-				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
-					return -1;
-				}
-				c = text[p];
-				if (!(c <= 255 && RecognizeClass0_DotGram[c] != 0))
-				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
-					return -1;
-				}
-				p++;
-				b0 = p;
-				if (unbuilt == 0) last0 = New_DotGram_Operator((a0 < 0 ? string.Empty : text.Slice(a0, b0 - a0).ToString())!);
-				return p;
-			}
-
-			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-			public int Read_MatcherPrefix(int pos)
-			{
-				var p = pos;
-				var c = '\0';
-				var a0 = -1;
-				var b0 = -1;
-				a0 = p;
-				if ((uint)p >= (uint)text.Length)
-				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(4));
-					return -1;
-				}
-				c = text[p];
-				switch (c)
-				{
-					case 'c':
-						{
-							if ((uint)(p + 9) > (uint)text.Length)
-							{
-								p = RecognizeRanOut_DotGram(text, p, "contains:", false, !failure.Quiet, true, ref failure);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(2));
-								return -1;
-							}
-							if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 9), global::System.MemoryExtensions.AsSpan("contains:")))
-							{
-								if (!failure.Quiet)
-									p = RecognizeAgreeing_DotGram(text, p, "contains:", false);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(2));
-								return -1;
-							}
-							p += 9;
-							break;
-						}
-					case 'p':
-						{
-							if ((uint)(p + 8) > (uint)text.Length)
-							{
-								p = RecognizeRanOut_DotGram(text, p, "pattern:", false, !failure.Quiet, true, ref failure);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
-								return -1;
-							}
-							if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 8), global::System.MemoryExtensions.AsSpan("pattern:")))
-							{
-								if (!failure.Quiet)
-									p = RecognizeAgreeing_DotGram(text, p, "pattern:", false);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
-								return -1;
-							}
-							p += 8;
-							break;
-						}
-					case 'r':
-						{
-							if ((uint)(p + 6) > (uint)text.Length)
-							{
-								p = RecognizeRanOut_DotGram(text, p, "regex:", false, !failure.Quiet, true, ref failure);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(3));
-								return -1;
-							}
-							if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 6), global::System.MemoryExtensions.AsSpan("regex:")))
-							{
-								if (!failure.Quiet)
-									p = RecognizeAgreeing_DotGram(text, p, "regex:", false);
-								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(3));
-								return -1;
-							}
-							p += 6;
-							break;
-						}
-					default:
-						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(4));
-						return -1;
-				}
-				b0 = p;
-				if (unbuilt == 0) last0 = New_DotGram_MatcherPrefix((a0 < 0 ? string.Empty : text.Slice(a0, b0 - a0).ToString())!);
-				return p;
-			}
-
-			public int Read_Rest(int pos)
-			{
-				var p = pos;
-				var c = '\0';
-				var a0 = -1;
-				var b0 = -1;
-				a0 = p;
-				while (true)
-				{
-					if ((uint)p >= (uint)text.Length)
-						break;
-
-					c = text[p];
-
-					if (!(!(c == '\n' || c == '\r')))
-						break;
-
-					p++;
-				}
-
-				b0 = p;
-				if (unbuilt == 0) last0 = New_DotGram_Rest((a0 < 0 ? string.Empty : text.Slice(a0, b0 - a0).ToString())!);
+				ParameterTypeSyntax? r2 = default;
+				var q0 = Read_ParameterType(p);
+				if (q0 < 0) return -1;
+				p = q0;
+				r2 = last16;
+				if (unbuilt == 0) last15 = New2_DotGram_Parameter(r2!);
 				return p;
 			}
 
@@ -626,25 +11488,25 @@ namespace AspectGenerator
 			{
 				var p = pos;
 				failure.Looking++;
-				var q0 = ReadPart0_eof(p);
+				var q0 = ReadPart0_eof(p, pos);
 				failure.Looking--;
 
 
 				if (q0 >= 0)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(6));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
 					return -1;
 				}
 				return p;
 			}
 
-			public int ReadPart0_eof(int pos)
+			public int ReadPart0_eof(int pos, int start)
 			{
 				var p = pos;
 				var c = '\0';
 				if ((uint)p >= (uint)text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(7));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
 					return -1;
 				}
 				c = text[p];
@@ -652,14 +11514,14 @@ namespace AspectGenerator
 				return p;
 			}
 
-			public int RecWholeRead_Line(int pos)
+			public int Read_ParameterModifier(int pos)
 			{
 				var s  = ways.Cursor;
 				var u  = 0;
 
 				while (true)
 				{
-					var q = RecWholeReadBody_Line(pos);
+					var q = ReadBody_ParameterModifier(pos);
 
 					if (q >= 0)
 					{
@@ -687,28 +11549,640 @@ namespace AspectGenerator
 				}
 			}
 
-			public int RecWholeReadBody_Line(int pos)
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_ParameterModifier(int pos)
 			{
 				var p = pos;
-				var q0 = Read_Line(p);
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(77));
+					return -1;
+				}
+				c = text[p];
+				switch (c)
+				{
+					case 'i':
+						{
+							if ((uint)(p + 3) > (uint)text.Length)
+							{
+								p = RecognizeRanOut_DotGram_Parameter(text, p, "in ", false, !failure.Quiet, true, ref failure);
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(70));
+								return -1;
+							}
+							if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 3), global::System.MemoryExtensions.AsSpan("in ")))
+							{
+								if (!failure.Quiet)
+									p = RecognizeAgreeing_DotGram_Parameter(text, p, "in ", false);
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(70));
+								return -1;
+							}
+							p += 3;
+							var m0 = p;
+							while (true)
+							{
+								if ((uint)p >= (uint)text.Length)
+									break;
+
+								c = text[p];
+
+								if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+									break;
+
+								p++;
+
+								if (p == m0 + 1 && ways.Cursor < ways.Count)
+								{
+									p = ways.Places[ways.Cursor * 2];
+									break;
+								}
+							}
+
+							if (p > m0)
+							{
+								var d0 = 0;
+
+								if (ways.Cursor < ways.Count)
+								{
+									d0 = ways.Items[ways.Cursor * 2];
+									ways.Cursor++;
+								}
+								else
+								{
+									ways.Open(0, p - m0, p);
+								}
+
+								p -= d0;
+							}
+							if (unbuilt == 0) last17 = New3_DotGram_ParameterModifier(new SourceSpan(pos, p - pos));
+							break;
+						}
+					case 'o':
+						{
+							if ((uint)(p + 4) > (uint)text.Length)
+							{
+								p = RecognizeRanOut_DotGram_Parameter(text, p, "out ", false, !failure.Quiet, true, ref failure);
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(71));
+								return -1;
+							}
+							if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 4), global::System.MemoryExtensions.AsSpan("out ")))
+							{
+								if (!failure.Quiet)
+									p = RecognizeAgreeing_DotGram_Parameter(text, p, "out ", false);
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(71));
+								return -1;
+							}
+							p += 4;
+							var m1 = p;
+							while (true)
+							{
+								if ((uint)p >= (uint)text.Length)
+									break;
+
+								c = text[p];
+
+								if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+									break;
+
+								p++;
+
+								if (p == m1 + 1 && ways.Cursor < ways.Count)
+								{
+									p = ways.Places[ways.Cursor * 2];
+									break;
+								}
+							}
+
+							if (p > m1)
+							{
+								var d1 = 0;
+
+								if (ways.Cursor < ways.Count)
+								{
+									d1 = ways.Items[ways.Cursor * 2];
+									ways.Cursor++;
+								}
+								else
+								{
+									ways.Open(0, p - m1, p);
+								}
+
+								p -= d1;
+							}
+							if (unbuilt == 0) last17 = New2_DotGram_ParameterModifier(new SourceSpan(pos, p - pos));
+							break;
+						}
+					case 'p':
+						{
+							if ((uint)(p + 7) > (uint)text.Length)
+							{
+								p = RecognizeRanOut_DotGram_Parameter(text, p, "params ", false, !failure.Quiet, true, ref failure);
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(72));
+								return -1;
+							}
+							if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 7), global::System.MemoryExtensions.AsSpan("params ")))
+							{
+								if (!failure.Quiet)
+									p = RecognizeAgreeing_DotGram_Parameter(text, p, "params ", false);
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(72));
+								return -1;
+							}
+							p += 7;
+							var m2 = p;
+							while (true)
+							{
+								if ((uint)p >= (uint)text.Length)
+									break;
+
+								c = text[p];
+
+								if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+									break;
+
+								p++;
+
+								if (p == m2 + 1 && ways.Cursor < ways.Count)
+								{
+									p = ways.Places[ways.Cursor * 2];
+									break;
+								}
+							}
+
+							if (p > m2)
+							{
+								var d2 = 0;
+
+								if (ways.Cursor < ways.Count)
+								{
+									d2 = ways.Items[ways.Cursor * 2];
+									ways.Cursor++;
+								}
+								else
+								{
+									ways.Open(0, p - m2, p);
+								}
+
+								p -= d2;
+							}
+							if (unbuilt == 0) last17 = New4_DotGram_ParameterModifier(new SourceSpan(pos, p - pos));
+							break;
+						}
+					case 'r':
+						{
+							if ((uint)(p + 4) > (uint)text.Length)
+							{
+								p = RecognizeRanOut_DotGram_Parameter(text, p, "ref ", false, !failure.Quiet, true, ref failure);
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(74));
+								return -1;
+							}
+							if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 4), global::System.MemoryExtensions.AsSpan("ref ")))
+							{
+								if (!failure.Quiet)
+									p = RecognizeAgreeing_DotGram_Parameter(text, p, "ref ", false);
+								Refused_DotGram(ref failure, p, ExpectedSet_DotGram(74));
+								return -1;
+							}
+							p += 4;
+							var w3  = -1;
+							var d3 = 0;
+							if (ways.Cursor < ways.Count)
+							{
+								w3  = ways.Cursor;
+								d3 = ways.Items[w3 * 2];
+								ways.Cursor++;
+							}
+							else
+							{
+								w3 = ways.Open(0, 1);
+							}
+
+							var q0 = -1;
+							if (q0 < 0 && d3 <= 0)
+							{
+								var s4  = ways.Cursor;
+
+								var u4  = 0;
+								while (true)
+								{
+									q0 = ReadPart0_ParameterModifier(p, pos);
+
+									if (q0 >= 0)
+									{
+										if (u4 > 1)
+										{
+											u4 = Stood_DotGram(u4, s4);
+
+											if (u4 > 0)
+												continue;
+										}
+
+										break;
+									}
+
+									if (ways.Cursor > s4 && ways.Retry(s4))
+									{
+										u4 = Retried_DotGram(u4);
+
+										continue;
+									}
+
+									Undeferred_DotGram(u4);
+
+									break;
+								}
+
+								if (q0 < 0)
+									ways.Next(w3, 1, 1);
+							}
+							if (q0 < 0 && d3 <= 1)
+							{
+								var s5  = ways.Cursor;
+
+								var u5  = 0;
+								while (true)
+								{
+									q0 = ReadPart1_ParameterModifier(p, pos);
+
+									if (q0 >= 0)
+									{
+										if (u5 > 1)
+										{
+											u5 = Stood_DotGram(u5, s5);
+
+											if (u5 > 0)
+												continue;
+										}
+
+										break;
+									}
+
+									if (ways.Cursor > s5 && ways.Retry(s5))
+									{
+										u5 = Retried_DotGram(u5);
+
+										continue;
+									}
+
+									Undeferred_DotGram(u5);
+
+									break;
+								}
+							}
+
+							if (q0 < 0)
+								return -1;
+
+							p = q0;
+							break;
+						}
+					default:
+						Refused_DotGram(ref failure, p, ExpectedSet_DotGram(77));
+						return -1;
+				}
+				return p;
+			}
+
+			public int ReadPart0_ParameterModifier(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+						break;
+
+					p++;
+				}
+
+				if ((uint)(p + 9) > (uint)text.Length)
+				{
+					p = RecognizeRanOut_DotGram_Parameter(text, p, "readonly ", false, !failure.Quiet, true, ref failure);
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(73));
+					return -1;
+				}
+				if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 9), global::System.MemoryExtensions.AsSpan("readonly ")))
+				{
+					if (!failure.Quiet)
+						p = RecognizeAgreeing_DotGram_Parameter(text, p, "readonly ", false);
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(73));
+					return -1;
+				}
+				p += 9;
+				var m1 = p;
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+						break;
+
+					p++;
+
+					if (p == m1 + 1 && ways.Cursor < ways.Count)
+					{
+						p = ways.Places[ways.Cursor * 2];
+						break;
+					}
+				}
+
+				if (p > m1)
+				{
+					var d0 = 0;
+
+					if (ways.Cursor < ways.Count)
+					{
+						d0 = ways.Items[ways.Cursor * 2];
+						ways.Cursor++;
+					}
+					else
+					{
+						ways.Open(0, p - m1, p);
+					}
+
+					p -= d0;
+				}
+				if (unbuilt == 0) last17 = New_DotGram_ParameterModifier(new SourceSpan(start, p - start));
+				return p;
+			}
+
+			public int ReadPart1_ParameterModifier(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				var m0 = p;
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+						break;
+
+					p++;
+
+					if (p == m0 + 1 && ways.Cursor < ways.Count)
+					{
+						p = ways.Places[ways.Cursor * 2];
+						break;
+					}
+				}
+
+				if (p > m0)
+				{
+					var d0 = 0;
+
+					if (ways.Cursor < ways.Count)
+					{
+						d0 = ways.Items[ways.Cursor * 2];
+						ways.Cursor++;
+					}
+					else
+					{
+						ways.Open(0, p - m0, p);
+					}
+
+					p -= d0;
+				}
+				if (unbuilt == 0) last17 = New1_DotGram_ParameterModifier(new SourceSpan(start, p - start));
+				return p;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int Read_Ws(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
+					return -1;
+				}
+				c = text[p];
+				if (!((c < 128 ? (c >= '\t' && c <= '\r') || c == ' ' : ((c >= '\t' && c <= '\r') || c == '\u0085' || Categories_DotGram_3800(c)))))
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(36));
+					return -1;
+				}
+				p++;
+				return p;
+			}
+
+			public int Read_ParameterType(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = ReadBody_ParameterType(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int ReadBody_ParameterType(int pos)
+			{
+				var p = pos;
+				var w0  = -1;
+				var d0 = 0;
+				if (ways.Cursor < ways.Count)
+				{
+					w0  = ways.Cursor;
+					d0 = ways.Items[w0 * 2];
+					ways.Cursor++;
+				}
+				else
+				{
+					w0 = ways.Open(0, 1);
+				}
+
+				var q0 = -1;
+				if (q0 < 0 && d0 <= 0)
+				{
+					var s1  = ways.Cursor;
+
+					q0 = ReadPart0_ParameterType(p, pos);
+
+					if (q0 < 0)
+					{
+					}
+
+					if (q0 < 0)
+						ways.Next(w0, 1, 1);
+				}
+				if (q0 < 0 && d0 <= 1)
+				{
+					var s2  = ways.Cursor;
+
+					q0 = ReadPart1_ParameterType(p, pos);
+
+					if (q0 < 0)
+					{
+					}
+				}
+
+				if (q0 < 0)
+					return -1;
+
+				p = q0;
+				return p;
+			}
+
+			public int ReadPart0_ParameterType(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)(p + 5) > (uint)text.Length)
+				{
+					p = RecognizeRanOut_DotGram_Parameter(text, p, "this ", false, !failure.Quiet, true, ref failure);
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(69));
+					return -1;
+				}
+				if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 5), global::System.MemoryExtensions.AsSpan("this ")))
+				{
+					if (!failure.Quiet)
+						p = RecognizeAgreeing_DotGram_Parameter(text, p, "this ", false);
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(69));
+					return -1;
+				}
+				p += 5;
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					p++;
+				}
+
+				if (unbuilt == 0) last16 = New_DotGram_ParameterType(new SourceSpan(start, p - start));
+				return p;
+			}
+
+			public int ReadPart1_ParameterType(int pos, int start)
+			{
+				var p = pos;
+				var c = '\0';
+				while (true)
+				{
+					if ((uint)p >= (uint)text.Length)
+						break;
+
+					c = text[p];
+
+					p++;
+				}
+
+				if (unbuilt == 0) last16 = New1_DotGram_ParameterType(new SourceSpan(start, p - start));
+				return p;
+			}
+
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			public int Read_any(int pos)
+			{
+				var p = pos;
+				var c = '\0';
+				if ((uint)p >= (uint)text.Length)
+				{
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(1));
+					return -1;
+				}
+				c = text[p];
+				p++;
+				return p;
+			}
+
+			public int RecWholeRead_Parameter(int pos)
+			{
+				var s  = ways.Cursor;
+				var u  = 0;
+
+				while (true)
+				{
+					var q = RecWholeReadBody_Parameter(pos);
+
+					if (q >= 0)
+					{
+						if (u > 1)
+						{
+							u = Stood_DotGram(u, s);
+
+							if (u > 0)
+								continue;
+						}
+
+						return q;
+					}
+
+					if (ways.Cursor > s && ways.Retry(s))
+					{
+						u = Retried_DotGram(u);
+
+						continue;
+					}
+
+					Undeferred_DotGram(u);
+
+					return -1;
+				}
+			}
+
+			public int RecWholeReadBody_Parameter(int pos)
+			{
+				var p = pos;
+				var q0 = Read_Parameter(p);
 				if (q0 < 0) return -1;
 				p = q0;
 				if (p != text.Length)
 				{
-					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(6));
+					Refused_DotGram(ref failure, p, ExpectedSet_DotGram(0));
 					return -1;
 				}
 				return p;
 			}
 
-			public int RecRead_Line(int pos)
+			public int RecRead_Parameter(int pos)
 			{
 				var s  = ways.Cursor;
 				var u  = 0;
 
 				while (true)
 				{
-					var q = RecReadBody_Line(pos);
+					var q = RecReadBody_Parameter(pos);
 
 					if (q >= 0)
 					{
@@ -736,10 +12210,10 @@ namespace AspectGenerator
 				}
 			}
 
-			public int RecReadBody_Line(int pos)
+			public int RecReadBody_Parameter(int pos)
 			{
 				var p = pos;
-				var q0 = Read_Line(p);
+				var q0 = Read_Parameter(p);
 				if (q0 < 0) return -1;
 				p = q0;
 				return p;
@@ -747,18 +12221,18 @@ namespace AspectGenerator
 
 		}
 
-		static int RecWhole_DotGram_Line(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out TargetFilterLine value)
+		static int RecWhole_DotGram_Parameter(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out ParameterSyntax value)
 		{
 			var ways = Ways_DotGram.Rent();
 
 			try
 			{
-				var reader = new Reader_DotGram(text, ways);
+				var reader = new Reader_DotGram_Parameter(text, ways);
 
 				reader.failure = failure;
 				if (failure.Unasked) reader.unbuilt = 1;
 
-				var end = reader.RecWholeRead_Line(pos);
+				var end = reader.RecWholeRead_Parameter(pos);
 
 				failure = reader.failure;
 
@@ -769,7 +12243,7 @@ namespace AspectGenerator
 					return end;
 				}
 
-				value = reader.last1;
+				value = reader.last15;
 
 				return end;
 			}
@@ -779,18 +12253,18 @@ namespace AspectGenerator
 			}
 		}
 
-		static int Rec_DotGram_Line(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out TargetFilterLine value)
+		static int Rec_DotGram_Parameter(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out ParameterSyntax value)
 		{
 			var ways = Ways_DotGram.Rent();
 
 			try
 			{
-				var reader = new Reader_DotGram(text, ways);
+				var reader = new Reader_DotGram_Parameter(text, ways);
 
 				reader.failure = failure;
 				if (failure.Unasked) reader.unbuilt = 1;
 
-				var end = reader.RecRead_Line(pos);
+				var end = reader.RecRead_Parameter(pos);
 
 				failure = reader.failure;
 
@@ -801,7 +12275,7 @@ namespace AspectGenerator
 					return end;
 				}
 
-				value = reader.last1;
+				value = reader.last15;
 
 				return end;
 			}
@@ -813,7 +12287,22 @@ namespace AspectGenerator
 
 
 
-		static int RecognizeAgreeing_DotGram(global::System.ReadOnlySpan<char> text, int p, string value, bool fold)
+		static bool RecognizeGuard0_DotGram_Line(NameSyntax m) =>
+#line 55 "../TargetFilter.gram"
+                          (IsTextMatcher(m.Text));
+#line default
+
+		static bool RecognizeGuard1_DotGram_Line(NameSyntax m) =>
+#line 54 "../TargetFilter.gram"
+                          (IsPatternMatcher(m.Text));
+#line default
+
+		static bool RecognizeGuard2_DotGram_Line(NameSyntax key) =>
+#line 67 "../TargetFilter.gram"
+                          (!IsConditionKey(key.Text));
+#line default
+
+		static int RecognizeAgreeing_DotGram_Line(global::System.ReadOnlySpan<char> text, int p, string value, bool fold)
 		{
 			var i = 0;
 
@@ -823,9 +12312,9 @@ namespace AspectGenerator
 			return p + i;
 		}
 
-		static int RecognizeRanOut_DotGram(global::System.ReadOnlySpan<char> text, int p, string value, bool fold, bool moves, bool marks, ref Failure failure)
+		static int RecognizeRanOut_DotGram_Line(global::System.ReadOnlySpan<char> text, int p, string value, bool fold, bool moves, bool marks, ref Failure failure)
 		{
-			var reach = RecognizeAgreeing_DotGram(text, p, value, fold);
+			var reach = RecognizeAgreeing_DotGram_Line(text, p, value, fold);
 
 			if ((uint)reach >= (uint)text.Length)
 			{
@@ -835,9 +12324,1019 @@ namespace AspectGenerator
 			return moves ? reach : p;
 		}
 
-		static readonly byte[] RecognizeClass0_DotGram = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+		static int RecognizeSharpen0_DotGram_Line(global::System.ReadOnlySpan<char> text, int p, ref string[]? expected)
+		{
+			if ((uint)p < (uint)text.Length && text[p] == 'i')
+			{
+				p += 1;
+				if ((uint)p < (uint)text.Length && text[p] == 'n')
+				{
+					p += 1;
+					if ((uint)p < (uint)text.Length && text[p] == 't')
+					{
+						p += 1;
+						expected = ExpectedSet_DotGram(6);
+						if ((uint)p < (uint)text.Length && text[p] == 'e')
+						{
+							p += 1;
+							if ((uint)p < (uint)text.Length && text[p] == 'r')
+							{
+								p += 1;
+								if ((uint)p < (uint)text.Length && text[p] == 'n')
+								{
+									p += 1;
+									if ((uint)p < (uint)text.Length && text[p] == 'a')
+									{
+										p += 1;
+										if ((uint)p < (uint)text.Length && text[p] == 'l')
+										{
+											p += 1;
+										}
+									}
+								}
+							}
+						}
+					}
+					else if ((uint)p < (uint)text.Length && text[p] == 's')
+					{
+						p += 1;
+						expected = ExpectedSet_DotGram(7);
+						if ((uint)p < (uint)text.Length && text[p] == 't')
+						{
+							p += 1;
+							if ((uint)p < (uint)text.Length && text[p] == 'a')
+							{
+								p += 1;
+								if ((uint)p < (uint)text.Length && text[p] == 'n')
+								{
+									p += 1;
+									if ((uint)p < (uint)text.Length && text[p] == 'c')
+									{
+										p += 1;
+										if ((uint)p < (uint)text.Length && text[p] == 'e')
+										{
+											p += 1;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			return p;
+		}
 
-		static readonly byte[] RecognizeClass1_DotGram = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+		static int RecognizeSharpen1_DotGram_Line(global::System.ReadOnlySpan<char> text, int p, ref string[]? expected)
+		{
+			if ((uint)p < (uint)text.Length && text[p] == 'p')
+			{
+				p += 1;
+				if ((uint)p < (uint)text.Length && text[p] == 'u')
+				{
+					p += 1;
+					expected = ExpectedSet_DotGram(10);
+					if ((uint)p < (uint)text.Length && text[p] == 'b')
+					{
+						p += 1;
+						if ((uint)p < (uint)text.Length && text[p] == 'l')
+						{
+							p += 1;
+							if ((uint)p < (uint)text.Length && text[p] == 'i')
+							{
+								p += 1;
+								if ((uint)p < (uint)text.Length && text[p] == 'c')
+								{
+									p += 1;
+								}
+							}
+						}
+					}
+				}
+				else if ((uint)p < (uint)text.Length && text[p] == 'r')
+				{
+					p += 1;
+					expected = ExpectedSet_DotGram(11);
+					if ((uint)p < (uint)text.Length && text[p] == 'i')
+					{
+						p += 1;
+						expected = ExpectedSet_DotGram(12);
+						if ((uint)p < (uint)text.Length && text[p] == 'v')
+						{
+							p += 1;
+							if ((uint)p < (uint)text.Length && text[p] == 'a')
+							{
+								p += 1;
+								if ((uint)p < (uint)text.Length && text[p] == 't')
+								{
+									p += 1;
+									if ((uint)p < (uint)text.Length && text[p] == 'e')
+									{
+										p += 1;
+									}
+								}
+							}
+						}
+					}
+					else if ((uint)p < (uint)text.Length && text[p] == 'o')
+					{
+						p += 1;
+						expected = ExpectedSet_DotGram(13);
+						if ((uint)p < (uint)text.Length && text[p] == 't')
+						{
+							p += 1;
+							if ((uint)p < (uint)text.Length && text[p] == 'e')
+							{
+								p += 1;
+								if ((uint)p < (uint)text.Length && text[p] == 'c')
+								{
+									p += 1;
+									if ((uint)p < (uint)text.Length && text[p] == 't')
+									{
+										p += 1;
+										if ((uint)p < (uint)text.Length && text[p] == 'e')
+										{
+											p += 1;
+											if ((uint)p < (uint)text.Length && text[p] == 'd')
+											{
+												p += 1;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			return p;
+		}
+
+		static int RecognizeSharpen2_DotGram_Line(global::System.ReadOnlySpan<char> text, int p, ref string[]? expected)
+		{
+			if ((uint)p < (uint)text.Length && text[p] == 's')
+			{
+				p += 1;
+				if ((uint)p < (uint)text.Length && text[p] == 't')
+				{
+					p += 1;
+					expected = ExpectedSet_DotGram(15);
+					if ((uint)p < (uint)text.Length && text[p] == 'a')
+					{
+						p += 1;
+						if ((uint)p < (uint)text.Length && text[p] == 't')
+						{
+							p += 1;
+							if ((uint)p < (uint)text.Length && text[p] == 'i')
+							{
+								p += 1;
+								if ((uint)p < (uint)text.Length && text[p] == 'c')
+								{
+									p += 1;
+								}
+							}
+						}
+					}
+				}
+				else if ((uint)p < (uint)text.Length && text[p] == 'e')
+				{
+					p += 1;
+					expected = ExpectedSet_DotGram(16);
+					if ((uint)p < (uint)text.Length && text[p] == 'a')
+					{
+						p += 1;
+						if ((uint)p < (uint)text.Length && text[p] == 'l')
+						{
+							p += 1;
+							if ((uint)p < (uint)text.Length && text[p] == 'e')
+							{
+								p += 1;
+								if ((uint)p < (uint)text.Length && text[p] == 'd')
+								{
+									p += 1;
+								}
+							}
+						}
+					}
+				}
+			}
+			return p;
+		}
+
+		static bool RecognizeGuard3_DotGram_Line(NameSyntax key) =>
+#line 77 "../TargetFilter.gram"
+                          (IsConditionKey(key.Text));
+#line default
+
+		static void Materialize_DotGram_Line(global::System.ReadOnlySpan<char> text, Parser_DotGram parser, ParserArena_DotGram entries, int materializeFrom = 0)
+		{
+			var values = parser.Materialization(entries.Count);
+			var values0 = parser.Materialization0();
+			var values1 = parser.Materialization1();
+			var values2 = parser.Materialization2();
+			var values3 = parser.Materialization3();
+			var values4 = parser.Materialization4();
+			var values5 = parser.Materialization5();
+			var values6 = parser.Materialization6();
+			var built  = parser.Materialized();
+			var linkHeads = parser.MaterializationHeads();
+			var linkNexts = parser.MaterializationNexts();
+
+			for (var derivationAt = parser.LinkedUpTo; derivationAt < entries.Count; derivationAt++)
+			{
+				var derivation = entries[derivationAt];
+				if (derivation.CallIndex >= 0 && (derivation.Kind == ParserEntry.Capture || derivation.Kind == ParserEntry.RuleCapture || derivation.Kind == ParserEntry.Construct))
+				{
+					linkNexts[derivationAt] = linkHeads[derivation.CallIndex];
+					linkHeads[derivation.CallIndex] = derivationAt;
+				}
+			}
+			parser.LinkedUpTo = entries.Count;
+
+			for (var ownerAt = materializeFrom; ownerAt < entries.Count; ownerAt++)
+			{
+				if (!global::System.Object.ReferenceEquals(values[ownerAt], parser)) continue;
+				for (var capturedAt = linkHeads[ownerAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+				{
+					var candidate = entries[capturedAt];
+					if (candidate.Kind == ParserEntry.RuleCapture && !built[candidate.Position])
+						values[candidate.Position] = parser;
+				}
+			}
+
+			for (var completedAt = entries.Count - 1; completedAt >= materializeFrom; completedAt--)
+			{
+				var completed = entries[completedAt];
+				if (completed.Kind != ParserEntry.Completed || built[completedAt] || !global::System.Object.ReferenceEquals(values[completedAt], parser)) continue;
+				switch (completed.RuleIndex)
+				{
+					case 0:
+					{
+						var captured0At = -1;
+						var captured1At = -1;
+						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+						{
+							var candidate = entries[capturedAt];
+
+							switch (candidate.State)
+							{
+								case 0:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
+										captured0At = candidate.Position;
+									break;
+								case 1:
+								case 2:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
+										captured1At = candidate.Position;
+									break;
+							}
+						}
+
+						OperatorSyntax? captured0 = captured0At < 0 ? default(OperatorSyntax?) : values6[captured0At];
+
+						global::System.Diagnostics.Debug.Assert(captured1At >= 0);
+						var captured1 = values1[captured1At];
+
+						var chosen = -1;
+						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
+						{
+							var candidate = entries[chosenAt];
+							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
+							{
+								chosen = candidate.State;
+								break;
+							}
+						}
+						global::System.Diagnostics.Debug.Assert(chosen >= 0);
+						switch (chosen)
+						{
+							case 0:
+								values0[completedAt] = New_DotGram_Line((OperatorSyntax)captured0!, captured1!);
+								break;
+							case 1:
+								values0[completedAt] = New1_DotGram_Line(captured1!);
+								break;
+						}
+						break;
+					}
+					case 2:
+					{
+						var captured0At = -1;
+						var captured1At = -1;
+						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+						{
+							var candidate = entries[capturedAt];
+
+							switch (candidate.State)
+							{
+								case 3:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
+										captured0At = candidate.Position;
+									break;
+								case 4:
+								case 5:
+								case 6:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
+										captured1At = candidate.Position;
+									break;
+							}
+						}
+
+						NameSyntax? captured0 = captured0At < 0 ? default(NameSyntax?) : values5[captured0At];
+
+						global::System.Diagnostics.Debug.Assert(captured1At >= 0);
+						var captured1 = values2[captured1At];
+
+						var chosen = -1;
+						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
+						{
+							var candidate = entries[chosenAt];
+							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
+							{
+								chosen = candidate.State;
+								break;
+							}
+						}
+						global::System.Diagnostics.Debug.Assert(chosen >= 0);
+						switch (chosen)
+						{
+							case 0:
+								values1[completedAt] = New_DotGram_Body((NameSyntax)captured0!, captured1!);
+								break;
+							case 1:
+								values1[completedAt] = New1_DotGram_Body((NameSyntax)captured0!, captured1!);
+								break;
+							case 2:
+								values1[completedAt] = New2_DotGram_Body(captured1!);
+								break;
+						}
+						break;
+					}
+					case 3:
+					{
+						var captured0At = -1;
+						var captured1At = -1;
+						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+						{
+							var candidate = entries[capturedAt];
+
+							switch (candidate.State)
+							{
+								case 7:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
+										captured0At = candidate.Position;
+									break;
+								case 8:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
+										captured1At = candidate.Position;
+									break;
+							}
+						}
+
+						NameSyntax? captured0 = captured0At < 0 ? default(NameSyntax?) : values5[captured0At];
+
+						TargetFilterBodySyntax? captured1 = captured1At < 0 ? default(TargetFilterBodySyntax?) : values2[captured1At];
+
+						var chosen = -1;
+						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
+						{
+							var candidate = entries[chosenAt];
+							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
+							{
+								chosen = candidate.State;
+								break;
+							}
+						}
+						global::System.Diagnostics.Debug.Assert(chosen >= 0);
+						switch (chosen)
+						{
+							case 0:
+								values2[completedAt] = New_DotGram_NativeBody(new SourceSpan(completed.Position, completed.Value - completed.Position), (NameSyntax)captured0!);
+								break;
+							case 1:
+								values2[completedAt] = New1_DotGram_NativeBody((TargetFilterBodySyntax)captured1!);
+								break;
+						}
+						break;
+					}
+					case 4:
+					{
+						var captured0At = -1;
+						var captured1At = -1;
+						var captured2At = -1;
+						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+						{
+							var candidate = entries[capturedAt];
+
+							switch (candidate.State)
+							{
+								case 9:
+								case 11:
+								case 12:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
+										captured0At = candidate.Position;
+									break;
+								case 10:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
+										captured1At = candidate.Position;
+									break;
+								case 13:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured2At < 0)
+										captured2At = candidate.Position;
+									break;
+							}
+						}
+
+						TargetFilterBodySyntax? captured0 = captured0At < 0 ? default(TargetFilterBodySyntax?) : values2[captured0At];
+
+						NameSyntax? captured1 = captured1At < 0 ? default(NameSyntax?) : values5[captured1At];
+
+						TargetFilterBodySyntax? captured2 = captured2At < 0 ? default(TargetFilterBodySyntax?) : values2[captured2At];
+
+						var chosen = -1;
+						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
+						{
+							var candidate = entries[chosenAt];
+							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
+							{
+								chosen = candidate.State;
+								break;
+							}
+						}
+						global::System.Diagnostics.Debug.Assert(chosen >= 0);
+						switch (chosen)
+						{
+							case 0:
+								values2[completedAt] = New_DotGram_PatternBody(new SourceSpan(completed.Position, completed.Value - completed.Position));
+								break;
+							case 1:
+								values2[completedAt] = New1_DotGram_PatternBody((TargetFilterBodySyntax)captured0!);
+								break;
+							case 2:
+								values2[completedAt] = New2_DotGram_PatternBody((TargetFilterBodySyntax)captured0!, (NameSyntax)captured1!);
+								break;
+							case 3:
+								values2[completedAt] = New3_DotGram_PatternBody((TargetFilterBodySyntax)captured0!);
+								break;
+							case 4:
+								values2[completedAt] = New4_DotGram_PatternBody((TargetFilterBodySyntax)captured2!);
+								break;
+						}
+						break;
+					}
+					case 5:
+					{
+						var captured0At = -1;
+						var captured1At = -1;
+						var captured2At = -1;
+						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+						{
+							var candidate = entries[capturedAt];
+
+							switch (candidate.State)
+							{
+								case 14:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
+										captured0At = candidate.Position;
+									break;
+								case 15:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
+										captured1At = candidate.Position;
+									break;
+								case 16:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured2At < 0)
+										captured2At = candidate.Position;
+									break;
+							}
+						}
+
+						global::System.Diagnostics.Debug.Assert(captured0At >= 0);
+						var captured0 = values3[captured0At];
+
+						ParameterGroupSyntax? captured1 = captured1At < 0 ? default(ParameterGroupSyntax?) : values4[captured1At];
+
+						TextSpan? captured2 = captured2At < 0 ? default(TextSpan?) : values3[captured2At];
+
+						values2[completedAt] = New_DotGram_MethodPattern(new SourceSpan(completed.Position, completed.Value - completed.Position), captured0!, captured1, captured2);
+						break;
+					}
+					case 6:
+					{
+						var captured0At = -1;
+						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+						{
+							var candidate = entries[capturedAt];
+
+							switch (candidate.State)
+							{
+								case 17:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
+										captured0At = candidate.Position;
+									break;
+							}
+						}
+
+						global::System.Diagnostics.Debug.Assert(captured0At >= 0);
+						var captured0 = values3[captured0At];
+
+						values3[completedAt] = New_DotGram_ReturnText(captured0!);
+						break;
+					}
+					case 7:
+					{
+						values3[completedAt] = New_DotGram_Rest(new SourceSpan(completed.Position, completed.Value - completed.Position));
+						break;
+					}
+					case 9:
+					{
+						var captured0At = -1;
+						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+						{
+							var candidate = entries[capturedAt];
+
+							switch (candidate.State)
+							{
+								case 18:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
+										captured0At = candidate.Position;
+									break;
+							}
+						}
+
+						TextSpan? captured0 = captured0At < 0 ? default(TextSpan?) : values3[captured0At];
+
+						var chosen = -1;
+						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
+						{
+							var candidate = entries[chosenAt];
+							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
+							{
+								chosen = candidate.State;
+								break;
+							}
+						}
+						global::System.Diagnostics.Debug.Assert(chosen >= 0);
+						switch (chosen)
+						{
+							case 0:
+								values4[completedAt] = New_DotGram_ParameterGroup(new SourceSpan(completed.Position, completed.Value - completed.Position), (TextSpan)captured0!);
+								break;
+							case 1:
+								values4[completedAt] = New1_DotGram_ParameterGroup(new SourceSpan(completed.Position, completed.Value - completed.Position));
+								break;
+						}
+						break;
+					}
+					case 13:
+					{
+						values3[completedAt] = New_DotGram_InnerText(new SourceSpan(completed.Position, completed.Value - completed.Position));
+						break;
+					}
+					case 14:
+					{
+						values3[completedAt] = New_DotGram_NameText(new SourceSpan(completed.Position, completed.Value - completed.Position));
+						break;
+					}
+					case 15:
+					{
+						var captured0At = -1;
+						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+						{
+							var candidate = entries[capturedAt];
+
+							switch (candidate.State)
+							{
+								case 19:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
+										captured0At = candidate.Position;
+									break;
+							}
+						}
+
+						global::System.Diagnostics.Debug.Assert(captured0At >= 0);
+						var captured0 = values3[captured0At];
+
+						var captured1Count = 0;
+						for (var capturedAt1 = linkHeads[completedAt]; capturedAt1 >= 0; capturedAt1 = linkNexts[capturedAt1])
+						{
+							var candidate = entries[capturedAt1];
+							if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && (candidate.State == 20)) captured1Count++;
+						}
+						var captured1 = (captured1Count == 0 ? global::System.Array.Empty<TextSpan>() : new TextSpan[captured1Count]);
+						var captured1Item = captured1Count;
+						for (var capturedAt1 = linkHeads[completedAt]; capturedAt1 >= 0; capturedAt1 = linkNexts[capturedAt1])
+						{
+							var candidate = entries[capturedAt1];
+							if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && (candidate.State == 20))
+							{
+								captured1[--captured1Item] = values3[candidate.Position];
+							}
+						}
+
+						values2[completedAt] = New_DotGram_ConditionLine(new SourceSpan(completed.Position, completed.Value - completed.Position), captured0!, captured1!);
+						break;
+					}
+					case 16:
+					{
+						values3[completedAt] = New_DotGram_ItemText(new SourceSpan(completed.Position, completed.Value - completed.Position));
+						break;
+					}
+					case 19:
+					{
+						var captured0From = -1;
+						var captured0To   = -1;
+						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+						{
+							var candidate = entries[capturedAt];
+
+							switch (candidate.State)
+							{
+								case 21:
+									if (candidate.Kind == ParserEntry.Capture && candidate.CallIndex == completedAt)
+									{
+										if (captured0To < 0)
+											captured0To = candidate.Value;
+										captured0From = candidate.Position;
+									}
+									break;
+							}
+						}
+
+						#if DEBUG
+						if (captured0From >= 0 && captured0To < captured0From)
+							throw new global::System.InvalidOperationException("DotGram invariant: capture 'name' of rule 'KeyHead' has its end before its start (" + captured0From.ToString() + ".." + captured0To.ToString() + "). This is a generator defect; please report the grammar.");
+						#endif
+						var captured0 = captured0From < 0 ? string.Empty : text.Slice(captured0From, captured0To - captured0From).ToString();
+
+						values5[completedAt] = New_DotGram_KeyHead(new SourceSpan(completed.Position, completed.Value - completed.Position), captured0!);
+						break;
+					}
+					case 22:
+					{
+						var captured0At = -1;
+						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+						{
+							var candidate = entries[capturedAt];
+
+							switch (candidate.State)
+							{
+								case 22:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
+										captured0At = candidate.Position;
+									break;
+							}
+						}
+
+						TextSpan? captured0 = captured0At < 0 ? default(TextSpan?) : values3[captured0At];
+
+						var chosen = -1;
+						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
+						{
+							var candidate = entries[chosenAt];
+							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
+							{
+								chosen = candidate.State;
+								break;
+							}
+						}
+						global::System.Diagnostics.Debug.Assert(chosen >= 0);
+						switch (chosen)
+						{
+							case 0:
+								values2[completedAt] = New_DotGram_TextBody(new SourceSpan(completed.Position, completed.Value - completed.Position));
+								break;
+							case 1:
+								values2[completedAt] = New1_DotGram_TextBody((TextSpan)captured0!);
+								break;
+						}
+						break;
+					}
+					case 23:
+					{
+						var captured0From = -1;
+						var captured0To   = -1;
+						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
+						{
+							var candidate = entries[capturedAt];
+
+							switch (candidate.State)
+							{
+								case 23:
+									if (candidate.Kind == ParserEntry.Capture && candidate.CallIndex == completedAt)
+									{
+										if (captured0To < 0)
+											captured0To = candidate.Value;
+										captured0From = candidate.Position;
+									}
+									break;
+							}
+						}
+
+						#if DEBUG
+						if (captured0From >= 0 && captured0To < captured0From)
+							throw new global::System.InvalidOperationException("DotGram invariant: capture 'name' of rule 'MatcherName' has its end before its start (" + captured0From.ToString() + ".." + captured0To.ToString() + "). This is a generator defect; please report the grammar.");
+						#endif
+						var captured0 = captured0From < 0 ? string.Empty : text.Slice(captured0From, captured0To - captured0From).ToString();
+
+						values5[completedAt] = New_DotGram_MatcherName(new SourceSpan(completed.Position, completed.Value - completed.Position), captured0!);
+						break;
+					}
+					case 24:
+					{
+						var chosen = -1;
+						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
+						{
+							var candidate = entries[chosenAt];
+							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
+							{
+								chosen = candidate.State;
+								break;
+							}
+						}
+						global::System.Diagnostics.Debug.Assert(chosen >= 0);
+						switch (chosen)
+						{
+							case 0:
+								values6[completedAt] = New_DotGram_Operator(new SourceSpan(completed.Position, completed.Value - completed.Position));
+								break;
+							case 1:
+								values6[completedAt] = New1_DotGram_Operator(new SourceSpan(completed.Position, completed.Value - completed.Position));
+								break;
+							case 2:
+								values6[completedAt] = New2_DotGram_Operator(new SourceSpan(completed.Position, completed.Value - completed.Position));
+								break;
+						}
+						break;
+					}
+				}
+				built[completedAt] = true;
+			}
+		}
+
+		static readonly byte[] RecognizeClass0_DotGram_Line = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+
+		static readonly char[] RecognizeSet0_DotGram_Line = { 'A', 'Z', 'a', 'z', '\u00AA', '\u00AA', '\u00B5', '\u00B5', '\u00BA', '\u00BA', '\u00C0', '\u00D6', '\u00D8', '\u00F6', '\u00F8', '\u02C1', '\u02C6', '\u02D1', '\u02E0', '\u02E4', '\u02EC', '\u02EC', '\u02EE', '\u02EE', '\u0370', '\u0374', '\u0376', '\u0377', '\u037A', '\u037D', '\u037F', '\u037F', '\u0386', '\u0386', '\u0388', '\u038A', '\u038C', '\u038C', '\u038E', '\u03A1', '\u03A3', '\u03F5', '\u03F7', '\u0481', '\u048A', '\u052F', '\u0531', '\u0556', '\u0559', '\u0559', '\u0560', '\u0588', '\u05D0', '\u05EA', '\u05EF', '\u05F2', '\u0620', '\u064A', '\u066E', '\u066F', '\u0671', '\u06D3', '\u06D5', '\u06D5', '\u06E5', '\u06E6', '\u06EE', '\u06EF', '\u06FA', '\u06FC', '\u06FF', '\u06FF', '\u0710', '\u0710', '\u0712', '\u072F', '\u074D', '\u07A5', '\u07B1', '\u07B1', '\u07CA', '\u07EA', '\u07F4', '\u07F5', '\u07FA', '\u07FA', '\u0800', '\u0815', '\u081A', '\u081A', '\u0824', '\u0824', '\u0828', '\u0828', '\u0840', '\u0858', '\u0860', '\u086A', '\u0870', '\u0887', '\u0889', '\u088E', '\u08A0', '\u08C9', '\u0904', '\u0939', '\u093D', '\u093D', '\u0950', '\u0950', '\u0958', '\u0961', '\u0971', '\u0980', '\u0985', '\u098C', '\u098F', '\u0990', '\u0993', '\u09A8', '\u09AA', '\u09B0', '\u09B2', '\u09B2', '\u09B6', '\u09B9', '\u09BD', '\u09BD', '\u09CE', '\u09CE', '\u09DC', '\u09DD', '\u09DF', '\u09E1', '\u09F0', '\u09F1', '\u09FC', '\u09FC', '\u0A05', '\u0A0A', '\u0A0F', '\u0A10', '\u0A13', '\u0A28', '\u0A2A', '\u0A30', '\u0A32', '\u0A33', '\u0A35', '\u0A36', '\u0A38', '\u0A39', '\u0A59', '\u0A5C', '\u0A5E', '\u0A5E', '\u0A72', '\u0A74', '\u0A85', '\u0A8D', '\u0A8F', '\u0A91', '\u0A93', '\u0AA8', '\u0AAA', '\u0AB0', '\u0AB2', '\u0AB3', '\u0AB5', '\u0AB9', '\u0ABD', '\u0ABD', '\u0AD0', '\u0AD0', '\u0AE0', '\u0AE1', '\u0AF9', '\u0AF9', '\u0B05', '\u0B0C', '\u0B0F', '\u0B10', '\u0B13', '\u0B28', '\u0B2A', '\u0B30', '\u0B32', '\u0B33', '\u0B35', '\u0B39', '\u0B3D', '\u0B3D', '\u0B5C', '\u0B5D', '\u0B5F', '\u0B61', '\u0B71', '\u0B71', '\u0B83', '\u0B83', '\u0B85', '\u0B8A', '\u0B8E', '\u0B90', '\u0B92', '\u0B95', '\u0B99', '\u0B9A', '\u0B9C', '\u0B9C', '\u0B9E', '\u0B9F', '\u0BA3', '\u0BA4', '\u0BA8', '\u0BAA', '\u0BAE', '\u0BB9', '\u0BD0', '\u0BD0', '\u0C05', '\u0C0C', '\u0C0E', '\u0C10', '\u0C12', '\u0C28', '\u0C2A', '\u0C39', '\u0C3D', '\u0C3D', '\u0C58', '\u0C5A', '\u0C5D', '\u0C5D', '\u0C60', '\u0C61', '\u0C80', '\u0C80', '\u0C85', '\u0C8C', '\u0C8E', '\u0C90', '\u0C92', '\u0CA8', '\u0CAA', '\u0CB3', '\u0CB5', '\u0CB9', '\u0CBD', '\u0CBD', '\u0CDD', '\u0CDE', '\u0CE0', '\u0CE1', '\u0CF1', '\u0CF2', '\u0D04', '\u0D0C', '\u0D0E', '\u0D10', '\u0D12', '\u0D3A', '\u0D3D', '\u0D3D', '\u0D4E', '\u0D4E', '\u0D54', '\u0D56', '\u0D5F', '\u0D61', '\u0D7A', '\u0D7F', '\u0D85', '\u0D96', '\u0D9A', '\u0DB1', '\u0DB3', '\u0DBB', '\u0DBD', '\u0DBD', '\u0DC0', '\u0DC6', '\u0E01', '\u0E30', '\u0E32', '\u0E33', '\u0E40', '\u0E46', '\u0E81', '\u0E82', '\u0E84', '\u0E84', '\u0E86', '\u0E8A', '\u0E8C', '\u0EA3', '\u0EA5', '\u0EA5', '\u0EA7', '\u0EB0', '\u0EB2', '\u0EB3', '\u0EBD', '\u0EBD', '\u0EC0', '\u0EC4', '\u0EC6', '\u0EC6', '\u0EDC', '\u0EDF', '\u0F00', '\u0F00', '\u0F40', '\u0F47', '\u0F49', '\u0F6C', '\u0F88', '\u0F8C', '\u1000', '\u102A', '\u103F', '\u103F', '\u1050', '\u1055', '\u105A', '\u105D', '\u1061', '\u1061', '\u1065', '\u1066', '\u106E', '\u1070', '\u1075', '\u1081', '\u108E', '\u108E', '\u10A0', '\u10C5', '\u10C7', '\u10C7', '\u10CD', '\u10CD', '\u10D0', '\u10FA', '\u10FC', '\u1248', '\u124A', '\u124D', '\u1250', '\u1256', '\u1258', '\u1258', '\u125A', '\u125D', '\u1260', '\u1288', '\u128A', '\u128D', '\u1290', '\u12B0', '\u12B2', '\u12B5', '\u12B8', '\u12BE', '\u12C0', '\u12C0', '\u12C2', '\u12C5', '\u12C8', '\u12D6', '\u12D8', '\u1310', '\u1312', '\u1315', '\u1318', '\u135A', '\u1380', '\u138F', '\u13A0', '\u13F5', '\u13F8', '\u13FD', '\u1401', '\u166C', '\u166F', '\u167F', '\u1681', '\u169A', '\u16A0', '\u16EA', '\u16F1', '\u16F8', '\u1700', '\u1711', '\u171F', '\u1731', '\u1740', '\u1751', '\u1760', '\u176C', '\u176E', '\u1770', '\u1780', '\u17B3', '\u17D7', '\u17D7', '\u17DC', '\u17DC', '\u1820', '\u1878', '\u1880', '\u1884', '\u1887', '\u18A8', '\u18AA', '\u18AA', '\u18B0', '\u18F5', '\u1900', '\u191E', '\u1950', '\u196D', '\u1970', '\u1974', '\u1980', '\u19AB', '\u19B0', '\u19C9', '\u1A00', '\u1A16', '\u1A20', '\u1A54', '\u1AA7', '\u1AA7', '\u1B05', '\u1B33', '\u1B45', '\u1B4C', '\u1B83', '\u1BA0', '\u1BAE', '\u1BAF', '\u1BBA', '\u1BE5', '\u1C00', '\u1C23', '\u1C4D', '\u1C4F', '\u1C5A', '\u1C7D', '\u1C80', '\u1C8A', '\u1C90', '\u1CBA', '\u1CBD', '\u1CBF', '\u1CE9', '\u1CEC', '\u1CEE', '\u1CF3', '\u1CF5', '\u1CF6', '\u1CFA', '\u1CFA', '\u1D00', '\u1DBF', '\u1E00', '\u1F15', '\u1F18', '\u1F1D', '\u1F20', '\u1F45', '\u1F48', '\u1F4D', '\u1F50', '\u1F57', '\u1F59', '\u1F59', '\u1F5B', '\u1F5B', '\u1F5D', '\u1F5D', '\u1F5F', '\u1F7D', '\u1F80', '\u1FB4', '\u1FB6', '\u1FBC', '\u1FBE', '\u1FBE', '\u1FC2', '\u1FC4', '\u1FC6', '\u1FCC', '\u1FD0', '\u1FD3', '\u1FD6', '\u1FDB', '\u1FE0', '\u1FEC', '\u1FF2', '\u1FF4', '\u1FF6', '\u1FFC', '\u2071', '\u2071', '\u207F', '\u207F', '\u2090', '\u209C', '\u2102', '\u2102', '\u2107', '\u2107', '\u210A', '\u2113', '\u2115', '\u2115', '\u2119', '\u211D', '\u2124', '\u2124', '\u2126', '\u2126', '\u2128', '\u2128', '\u212A', '\u212D', '\u212F', '\u2139', '\u213C', '\u213F', '\u2145', '\u2149', '\u214E', '\u214E', '\u2183', '\u2184', '\u2C00', '\u2CE4', '\u2CEB', '\u2CEE', '\u2CF2', '\u2CF3', '\u2D00', '\u2D25', '\u2D27', '\u2D27', '\u2D2D', '\u2D2D', '\u2D30', '\u2D67', '\u2D6F', '\u2D6F', '\u2D80', '\u2D96', '\u2DA0', '\u2DA6', '\u2DA8', '\u2DAE', '\u2DB0', '\u2DB6', '\u2DB8', '\u2DBE', '\u2DC0', '\u2DC6', '\u2DC8', '\u2DCE', '\u2DD0', '\u2DD6', '\u2DD8', '\u2DDE', '\u2E2F', '\u2E2F', '\u3005', '\u3006', '\u3031', '\u3035', '\u303B', '\u303C', '\u3041', '\u3096', '\u309D', '\u309F', '\u30A1', '\u30FA', '\u30FC', '\u30FF', '\u3105', '\u312F', '\u3131', '\u318E', '\u31A0', '\u31BF', '\u31F0', '\u31FF', '\u3400', '\u4DBF', '\u4E00', '\uA48C', '\uA4D0', '\uA4FD', '\uA500', '\uA60C', '\uA610', '\uA61F', '\uA62A', '\uA62B', '\uA640', '\uA66E', '\uA67F', '\uA69D', '\uA6A0', '\uA6E5', '\uA717', '\uA71F', '\uA722', '\uA788', '\uA78B', '\uA7CD', '\uA7D0', '\uA7D1', '\uA7D3', '\uA7D3', '\uA7D5', '\uA7DC', '\uA7F2', '\uA801', '\uA803', '\uA805', '\uA807', '\uA80A', '\uA80C', '\uA822', '\uA840', '\uA873', '\uA882', '\uA8B3', '\uA8F2', '\uA8F7', '\uA8FB', '\uA8FB', '\uA8FD', '\uA8FE', '\uA90A', '\uA925', '\uA930', '\uA946', '\uA960', '\uA97C', '\uA984', '\uA9B2', '\uA9CF', '\uA9CF', '\uA9E0', '\uA9E4', '\uA9E6', '\uA9EF', '\uA9FA', '\uA9FE', '\uAA00', '\uAA28', '\uAA40', '\uAA42', '\uAA44', '\uAA4B', '\uAA60', '\uAA76', '\uAA7A', '\uAA7A', '\uAA7E', '\uAAAF', '\uAAB1', '\uAAB1', '\uAAB5', '\uAAB6', '\uAAB9', '\uAABD', '\uAAC0', '\uAAC0', '\uAAC2', '\uAAC2', '\uAADB', '\uAADD', '\uAAE0', '\uAAEA', '\uAAF2', '\uAAF4', '\uAB01', '\uAB06', '\uAB09', '\uAB0E', '\uAB11', '\uAB16', '\uAB20', '\uAB26', '\uAB28', '\uAB2E', '\uAB30', '\uAB5A', '\uAB5C', '\uAB69', '\uAB70', '\uABE2', '\uAC00', '\uD7A3', '\uD7B0', '\uD7C6', '\uD7CB', '\uD7FB', '\uF900', '\uFA6D', '\uFA70', '\uFAD9', '\uFB00', '\uFB06', '\uFB13', '\uFB17', '\uFB1D', '\uFB1D', '\uFB1F', '\uFB28', '\uFB2A', '\uFB36', '\uFB38', '\uFB3C', '\uFB3E', '\uFB3E', '\uFB40', '\uFB41', '\uFB43', '\uFB44', '\uFB46', '\uFBB1', '\uFBD3', '\uFD3D', '\uFD50', '\uFD8F', '\uFD92', '\uFDC7', '\uFDF0', '\uFDFB', '\uFE70', '\uFE74', '\uFE76', '\uFEFC', '\uFF21', '\uFF3A', '\uFF41', '\uFF5A', '\uFF66', '\uFFBE', '\uFFC2', '\uFFC7', '\uFFCA', '\uFFCF', '\uFFD2', '\uFFD7', '\uFFDA', '\uFFDC' };
+
+		static bool RecognizeIn_DotGram_Line(char[] set, char c)
+		{
+			var low  = 0;
+			var high = set.Length / 2 - 1;
+
+			while (low <= high)
+			{
+				var mid = (low + high) / 2;
+
+				if (c < set[mid * 2])
+					high = mid - 1;
+				else if (c > set[mid * 2 + 1])
+					low = mid + 1;
+				else
+					return true;
+			}
+
+			return false;
+		}
+
+		static readonly char[] RecognizeSet1_DotGram_Line = { '\t', '\r', ' ', ' ', '\u0085', '\u0085', '\u00A0', '\u00A0', '\u1680', '\u1680', '\u2000', '\u200A', '\u2028', '\u2029', '\u202F', '\u202F', '\u205F', '\u205F', '\u3000', '\u3000' };
+
+		static readonly char[] RecognizeSet0_DotGram_ConditionItem = { 'A', 'Z', 'a', 'z', '\u00AA', '\u00AA', '\u00B5', '\u00B5', '\u00BA', '\u00BA', '\u00C0', '\u00D6', '\u00D8', '\u00F6', '\u00F8', '\u02C1', '\u02C6', '\u02D1', '\u02E0', '\u02E4', '\u02EC', '\u02EC', '\u02EE', '\u02EE', '\u0370', '\u0374', '\u0376', '\u0377', '\u037A', '\u037D', '\u037F', '\u037F', '\u0386', '\u0386', '\u0388', '\u038A', '\u038C', '\u038C', '\u038E', '\u03A1', '\u03A3', '\u03F5', '\u03F7', '\u0481', '\u048A', '\u052F', '\u0531', '\u0556', '\u0559', '\u0559', '\u0560', '\u0588', '\u05D0', '\u05EA', '\u05EF', '\u05F2', '\u0620', '\u064A', '\u066E', '\u066F', '\u0671', '\u06D3', '\u06D5', '\u06D5', '\u06E5', '\u06E6', '\u06EE', '\u06EF', '\u06FA', '\u06FC', '\u06FF', '\u06FF', '\u0710', '\u0710', '\u0712', '\u072F', '\u074D', '\u07A5', '\u07B1', '\u07B1', '\u07CA', '\u07EA', '\u07F4', '\u07F5', '\u07FA', '\u07FA', '\u0800', '\u0815', '\u081A', '\u081A', '\u0824', '\u0824', '\u0828', '\u0828', '\u0840', '\u0858', '\u0860', '\u086A', '\u0870', '\u0887', '\u0889', '\u088E', '\u08A0', '\u08C9', '\u0904', '\u0939', '\u093D', '\u093D', '\u0950', '\u0950', '\u0958', '\u0961', '\u0971', '\u0980', '\u0985', '\u098C', '\u098F', '\u0990', '\u0993', '\u09A8', '\u09AA', '\u09B0', '\u09B2', '\u09B2', '\u09B6', '\u09B9', '\u09BD', '\u09BD', '\u09CE', '\u09CE', '\u09DC', '\u09DD', '\u09DF', '\u09E1', '\u09F0', '\u09F1', '\u09FC', '\u09FC', '\u0A05', '\u0A0A', '\u0A0F', '\u0A10', '\u0A13', '\u0A28', '\u0A2A', '\u0A30', '\u0A32', '\u0A33', '\u0A35', '\u0A36', '\u0A38', '\u0A39', '\u0A59', '\u0A5C', '\u0A5E', '\u0A5E', '\u0A72', '\u0A74', '\u0A85', '\u0A8D', '\u0A8F', '\u0A91', '\u0A93', '\u0AA8', '\u0AAA', '\u0AB0', '\u0AB2', '\u0AB3', '\u0AB5', '\u0AB9', '\u0ABD', '\u0ABD', '\u0AD0', '\u0AD0', '\u0AE0', '\u0AE1', '\u0AF9', '\u0AF9', '\u0B05', '\u0B0C', '\u0B0F', '\u0B10', '\u0B13', '\u0B28', '\u0B2A', '\u0B30', '\u0B32', '\u0B33', '\u0B35', '\u0B39', '\u0B3D', '\u0B3D', '\u0B5C', '\u0B5D', '\u0B5F', '\u0B61', '\u0B71', '\u0B71', '\u0B83', '\u0B83', '\u0B85', '\u0B8A', '\u0B8E', '\u0B90', '\u0B92', '\u0B95', '\u0B99', '\u0B9A', '\u0B9C', '\u0B9C', '\u0B9E', '\u0B9F', '\u0BA3', '\u0BA4', '\u0BA8', '\u0BAA', '\u0BAE', '\u0BB9', '\u0BD0', '\u0BD0', '\u0C05', '\u0C0C', '\u0C0E', '\u0C10', '\u0C12', '\u0C28', '\u0C2A', '\u0C39', '\u0C3D', '\u0C3D', '\u0C58', '\u0C5A', '\u0C5D', '\u0C5D', '\u0C60', '\u0C61', '\u0C80', '\u0C80', '\u0C85', '\u0C8C', '\u0C8E', '\u0C90', '\u0C92', '\u0CA8', '\u0CAA', '\u0CB3', '\u0CB5', '\u0CB9', '\u0CBD', '\u0CBD', '\u0CDD', '\u0CDE', '\u0CE0', '\u0CE1', '\u0CF1', '\u0CF2', '\u0D04', '\u0D0C', '\u0D0E', '\u0D10', '\u0D12', '\u0D3A', '\u0D3D', '\u0D3D', '\u0D4E', '\u0D4E', '\u0D54', '\u0D56', '\u0D5F', '\u0D61', '\u0D7A', '\u0D7F', '\u0D85', '\u0D96', '\u0D9A', '\u0DB1', '\u0DB3', '\u0DBB', '\u0DBD', '\u0DBD', '\u0DC0', '\u0DC6', '\u0E01', '\u0E30', '\u0E32', '\u0E33', '\u0E40', '\u0E46', '\u0E81', '\u0E82', '\u0E84', '\u0E84', '\u0E86', '\u0E8A', '\u0E8C', '\u0EA3', '\u0EA5', '\u0EA5', '\u0EA7', '\u0EB0', '\u0EB2', '\u0EB3', '\u0EBD', '\u0EBD', '\u0EC0', '\u0EC4', '\u0EC6', '\u0EC6', '\u0EDC', '\u0EDF', '\u0F00', '\u0F00', '\u0F40', '\u0F47', '\u0F49', '\u0F6C', '\u0F88', '\u0F8C', '\u1000', '\u102A', '\u103F', '\u103F', '\u1050', '\u1055', '\u105A', '\u105D', '\u1061', '\u1061', '\u1065', '\u1066', '\u106E', '\u1070', '\u1075', '\u1081', '\u108E', '\u108E', '\u10A0', '\u10C5', '\u10C7', '\u10C7', '\u10CD', '\u10CD', '\u10D0', '\u10FA', '\u10FC', '\u1248', '\u124A', '\u124D', '\u1250', '\u1256', '\u1258', '\u1258', '\u125A', '\u125D', '\u1260', '\u1288', '\u128A', '\u128D', '\u1290', '\u12B0', '\u12B2', '\u12B5', '\u12B8', '\u12BE', '\u12C0', '\u12C0', '\u12C2', '\u12C5', '\u12C8', '\u12D6', '\u12D8', '\u1310', '\u1312', '\u1315', '\u1318', '\u135A', '\u1380', '\u138F', '\u13A0', '\u13F5', '\u13F8', '\u13FD', '\u1401', '\u166C', '\u166F', '\u167F', '\u1681', '\u169A', '\u16A0', '\u16EA', '\u16F1', '\u16F8', '\u1700', '\u1711', '\u171F', '\u1731', '\u1740', '\u1751', '\u1760', '\u176C', '\u176E', '\u1770', '\u1780', '\u17B3', '\u17D7', '\u17D7', '\u17DC', '\u17DC', '\u1820', '\u1878', '\u1880', '\u1884', '\u1887', '\u18A8', '\u18AA', '\u18AA', '\u18B0', '\u18F5', '\u1900', '\u191E', '\u1950', '\u196D', '\u1970', '\u1974', '\u1980', '\u19AB', '\u19B0', '\u19C9', '\u1A00', '\u1A16', '\u1A20', '\u1A54', '\u1AA7', '\u1AA7', '\u1B05', '\u1B33', '\u1B45', '\u1B4C', '\u1B83', '\u1BA0', '\u1BAE', '\u1BAF', '\u1BBA', '\u1BE5', '\u1C00', '\u1C23', '\u1C4D', '\u1C4F', '\u1C5A', '\u1C7D', '\u1C80', '\u1C8A', '\u1C90', '\u1CBA', '\u1CBD', '\u1CBF', '\u1CE9', '\u1CEC', '\u1CEE', '\u1CF3', '\u1CF5', '\u1CF6', '\u1CFA', '\u1CFA', '\u1D00', '\u1DBF', '\u1E00', '\u1F15', '\u1F18', '\u1F1D', '\u1F20', '\u1F45', '\u1F48', '\u1F4D', '\u1F50', '\u1F57', '\u1F59', '\u1F59', '\u1F5B', '\u1F5B', '\u1F5D', '\u1F5D', '\u1F5F', '\u1F7D', '\u1F80', '\u1FB4', '\u1FB6', '\u1FBC', '\u1FBE', '\u1FBE', '\u1FC2', '\u1FC4', '\u1FC6', '\u1FCC', '\u1FD0', '\u1FD3', '\u1FD6', '\u1FDB', '\u1FE0', '\u1FEC', '\u1FF2', '\u1FF4', '\u1FF6', '\u1FFC', '\u2071', '\u2071', '\u207F', '\u207F', '\u2090', '\u209C', '\u2102', '\u2102', '\u2107', '\u2107', '\u210A', '\u2113', '\u2115', '\u2115', '\u2119', '\u211D', '\u2124', '\u2124', '\u2126', '\u2126', '\u2128', '\u2128', '\u212A', '\u212D', '\u212F', '\u2139', '\u213C', '\u213F', '\u2145', '\u2149', '\u214E', '\u214E', '\u2183', '\u2184', '\u2C00', '\u2CE4', '\u2CEB', '\u2CEE', '\u2CF2', '\u2CF3', '\u2D00', '\u2D25', '\u2D27', '\u2D27', '\u2D2D', '\u2D2D', '\u2D30', '\u2D67', '\u2D6F', '\u2D6F', '\u2D80', '\u2D96', '\u2DA0', '\u2DA6', '\u2DA8', '\u2DAE', '\u2DB0', '\u2DB6', '\u2DB8', '\u2DBE', '\u2DC0', '\u2DC6', '\u2DC8', '\u2DCE', '\u2DD0', '\u2DD6', '\u2DD8', '\u2DDE', '\u2E2F', '\u2E2F', '\u3005', '\u3006', '\u3031', '\u3035', '\u303B', '\u303C', '\u3041', '\u3096', '\u309D', '\u309F', '\u30A1', '\u30FA', '\u30FC', '\u30FF', '\u3105', '\u312F', '\u3131', '\u318E', '\u31A0', '\u31BF', '\u31F0', '\u31FF', '\u3400', '\u4DBF', '\u4E00', '\uA48C', '\uA4D0', '\uA4FD', '\uA500', '\uA60C', '\uA610', '\uA61F', '\uA62A', '\uA62B', '\uA640', '\uA66E', '\uA67F', '\uA69D', '\uA6A0', '\uA6E5', '\uA717', '\uA71F', '\uA722', '\uA788', '\uA78B', '\uA7CD', '\uA7D0', '\uA7D1', '\uA7D3', '\uA7D3', '\uA7D5', '\uA7DC', '\uA7F2', '\uA801', '\uA803', '\uA805', '\uA807', '\uA80A', '\uA80C', '\uA822', '\uA840', '\uA873', '\uA882', '\uA8B3', '\uA8F2', '\uA8F7', '\uA8FB', '\uA8FB', '\uA8FD', '\uA8FE', '\uA90A', '\uA925', '\uA930', '\uA946', '\uA960', '\uA97C', '\uA984', '\uA9B2', '\uA9CF', '\uA9CF', '\uA9E0', '\uA9E4', '\uA9E6', '\uA9EF', '\uA9FA', '\uA9FE', '\uAA00', '\uAA28', '\uAA40', '\uAA42', '\uAA44', '\uAA4B', '\uAA60', '\uAA76', '\uAA7A', '\uAA7A', '\uAA7E', '\uAAAF', '\uAAB1', '\uAAB1', '\uAAB5', '\uAAB6', '\uAAB9', '\uAABD', '\uAAC0', '\uAAC0', '\uAAC2', '\uAAC2', '\uAADB', '\uAADD', '\uAAE0', '\uAAEA', '\uAAF2', '\uAAF4', '\uAB01', '\uAB06', '\uAB09', '\uAB0E', '\uAB11', '\uAB16', '\uAB20', '\uAB26', '\uAB28', '\uAB2E', '\uAB30', '\uAB5A', '\uAB5C', '\uAB69', '\uAB70', '\uABE2', '\uAC00', '\uD7A3', '\uD7B0', '\uD7C6', '\uD7CB', '\uD7FB', '\uF900', '\uFA6D', '\uFA70', '\uFAD9', '\uFB00', '\uFB06', '\uFB13', '\uFB17', '\uFB1D', '\uFB1D', '\uFB1F', '\uFB28', '\uFB2A', '\uFB36', '\uFB38', '\uFB3C', '\uFB3E', '\uFB3E', '\uFB40', '\uFB41', '\uFB43', '\uFB44', '\uFB46', '\uFBB1', '\uFBD3', '\uFD3D', '\uFD50', '\uFD8F', '\uFD92', '\uFDC7', '\uFDF0', '\uFDFB', '\uFE70', '\uFE74', '\uFE76', '\uFEFC', '\uFF21', '\uFF3A', '\uFF41', '\uFF5A', '\uFF66', '\uFFBE', '\uFFC2', '\uFFC7', '\uFFCA', '\uFFCF', '\uFFD2', '\uFFD7', '\uFFDA', '\uFFDC' };
+
+		static bool RecognizeIn_DotGram_ConditionItem(char[] set, char c)
+		{
+			var low  = 0;
+			var high = set.Length / 2 - 1;
+
+			while (low <= high)
+			{
+				var mid = (low + high) / 2;
+
+				if (c < set[mid * 2])
+					high = mid - 1;
+				else if (c > set[mid * 2 + 1])
+					low = mid + 1;
+				else
+					return true;
+			}
+
+			return false;
+		}
+
+		static readonly char[] RecognizeSet1_DotGram_ConditionItem = { '\t', '\r', ' ', ' ', '\u0085', '\u0085', '\u00A0', '\u00A0', '\u1680', '\u1680', '\u2000', '\u200A', '\u2028', '\u2029', '\u202F', '\u202F', '\u205F', '\u205F', '\u3000', '\u3000' };
+
+		static readonly char[] RecognizeSet2_DotGram_ConditionItem = { '\0', '\b', '\u000E', '\u001F', '!', '\u0084', '\u0086', '\u009F', '\u00A1', '\u167F', '\u1681', '\u1FFF', '\u200B', '\u2027', '\u202A', '\u202E', '\u2030', '\u205E', '\u2060', '\u2FFF', '\u3001', '\uFFFF' };
+
+		static readonly char[] RecognizeSet3_DotGram_ConditionItem = { '\0', '\b', '\u000E', '\u001F', '!', '[', ']', '\u0084', '\u0086', '\u009F', '\u00A1', '\u167F', '\u1681', '\u1FFF', '\u200B', '\u2027', '\u202A', '\u202E', '\u2030', '\u205E', '\u2060', '\u2FFF', '\u3001', '\uFFFF' };
+
+		static readonly char[] RecognizeSet4_DotGram_ConditionItem = { '\0', '\b', '\u000E', '\u001F', '!', ';', '=', 'Z', ']', '\u0084', '\u0086', '\u009F', '\u00A1', '\u167F', '\u1681', '\u1FFF', '\u200B', '\u2027', '\u202A', '\u202E', '\u2030', '\u205E', '\u2060', '\u2FFF', '\u3001', '\uFFFF' };
+
+		static readonly byte[] RecognizeClass0_DotGram_ConditionItem = { 1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+
+		static readonly byte[] RecognizeClass1_DotGram_ConditionItem = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+
+		static bool RecognizeGuard0_DotGram_ConditionValue(string parserText) =>
+#line 125 "../TargetFilter.gram"
+                                                               (IsInsideBrackets(parserText));
+#line default
+
+		static bool RecognizeGuard1_DotGram_ConditionValue(string parserText) =>
+#line 125 "../TargetFilter.gram"
+                                                               (IsInsideBrackets(parserText));
+#line default
+
+		static bool RecognizeGuard2_DotGram_ConditionValue(string parserText) =>
+#line 125 "../TargetFilter.gram"
+                                                               (IsInsideBrackets(parserText));
+#line default
+
+		static readonly byte[] RecognizeClass0_DotGram_ParameterParts = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+
+		static int RecognizeAgreeing_DotGram_Parameter(global::System.ReadOnlySpan<char> text, int p, string value, bool fold)
+		{
+			var i = 0;
+
+			while (i < value.Length - 1 && (uint)(p + i) < (uint)text.Length && (text[p + i] == value[i] || fold && (uint)((value[i] | 0x20) - 'a') <= 'z' - 'a' && (text[p + i] | 0x20) == (value[i] | 0x20)))
+				i++;
+
+			return p + i;
+		}
+
+		static int RecognizeRanOut_DotGram_Parameter(global::System.ReadOnlySpan<char> text, int p, string value, bool fold, bool moves, bool marks, ref Failure failure)
+		{
+			var reach = RecognizeAgreeing_DotGram_Parameter(text, p, value, fold);
+
+			if ((uint)reach >= (uint)text.Length)
+			{
+				if (marks && p + 1 > failure.OutOfInput) failure.OutOfInput = p + 1;
+			}
+
+			return moves ? reach : p;
+		}
+
+		private static readonly int[] PrefixNext0_DotGram_Parameter = new int[]
+		{
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 7, -1, -1, -1, -1, -1, 4, 9, -1, 1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 5,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 6, -1,
+			-3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, -1, -1, -1, -1, -1, -1, -1,
+			-4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 11, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 13, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 14, -1, -1,
+			-5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		}
+		;
+		private static int Prefix0_DotGram_Parameter(global::System.ReadOnlySpan<char> text, int p)
+		{
+			var state = 0;
+			while ((uint)p < (uint)text.Length)
+			{
+				var column = (int)text[p] - 32;
+				if ((uint)column >= 86u) return state == 0 ? -1 : -1 - state;
+				var next = PrefixNext0_DotGram_Parameter[state * 86 + column];
+				if (next < 0) return next == -1 ? (state == 0 ? -1 : -1 - state) : -next - 2;
+				state = next;
+				p++;
+			}
+			return -1;
+		}
+		private static readonly int[] PrefixDepth0_DotGram_Parameter = new int[] { 0, 1, 2, 3, 1, 2, 3, 1, 2, 1, 2, 3, 4, 5, 6 };
+		private static readonly int[] PrefixLongest0_DotGram_Parameter = new int[] { 0, 4, 4, 4, 4, 4, 4, 3, 3, 7, 7, 7, 7, 7, 7 };
+		private static readonly int[][] PrefixMembers0_DotGram_Parameter = new int[][]
+		{
+			new int[] {  },
+			new int[] { 0 },
+			new int[] { 0 },
+			new int[] { 0 },
+			new int[] { 1 },
+			new int[] { 1 },
+			new int[] { 1 },
+			new int[] { 2 },
+			new int[] { 2 },
+			new int[] { 3 },
+			new int[] { 3 },
+			new int[] { 3 },
+			new int[] { 3 },
+			new int[] { 3 },
+			new int[] { 3 },
+		}
+		;
+		private static int PrefixExpected0_DotGram_Parameter(int alternative)
+		{
+			switch (alternative)
+			{
+				case 0: return 74;
+				case 1: return 71;
+				case 2: return 70;
+				case 3: return 72;
+			}
+			return -1;
+		}
+		private static bool PrefixMiss0_DotGram_Parameter(global::System.ReadOnlySpan<char> text, ref int p, int row, int lookahead, ref Failure failure, out string[] expected)
+		{
+			expected = null!;
+			if (text.Length - p < PrefixLongest0_DotGram_Parameter[row]) return false;
+			var missed = PrefixMembers0_DotGram_Parameter[row];
+			if (lookahead < 0)
+			{
+				p += PrefixDepth0_DotGram_Parameter[row];
+				for (var tie = 0; tie < missed.Length - 1; tie++)
+				{
+					var said = ExpectedSet_DotGram(PrefixExpected0_DotGram_Parameter(missed[tie]));
+					if (p > failure.Position)
+					{
+						failure.Position = p;
+						failure.Expected = said;
+						failure.ExpectedMore?.Clear();
+					}
+					else if (p == failure.Position)
+						Tie_DotGram(ref failure, said);
+				}
+			}
+			expected = ExpectedSet_DotGram(PrefixExpected0_DotGram_Parameter(missed[missed.Length - 1]));
+			return true;
+		}
+
+		static readonly byte[] RecognizeClass0_DotGram_Parameter = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+
+		static readonly char[] RecognizeSet0_DotGram_Parameter = { '\t', '\r', ' ', ' ', 'r', 'r', '\u0085', '\u0085', '\u00A0', '\u00A0', '\u1680', '\u1680', '\u2000', '\u200A', '\u2028', '\u2029', '\u202F', '\u202F', '\u205F', '\u205F', '\u3000', '\u3000' };
+
+		static bool RecognizeIn_DotGram_Parameter(char[] set, char c)
+		{
+			var low  = 0;
+			var high = set.Length / 2 - 1;
+
+			while (low <= high)
+			{
+				var mid = (low + high) / 2;
+
+				if (c < set[mid * 2])
+					high = mid - 1;
+				else if (c > set[mid * 2 + 1])
+					low = mid + 1;
+				else
+					return true;
+			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// Half-open range of the input: [Start, End).
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// What a capture of type <c>SourceSpan</c> comes back as, and what a
+		/// <c>recover</c> factory asking for <c>parserSpan</c> is handed (docs/syntax.md
+		/// §8.2). Two integers rather than the text between them: the text is already in the
+		/// caller's hands, and cutting a string out of it is the one allocation a parse
+		/// cannot avoid on the caller's behalf.
+		/// </para>
+		/// <para>
+		/// Ours rather than <c>System.Range</c>, because a consumer building for an older
+		/// framework very likely polyfills that one and two definitions of it in a
+		/// compilation is an error. Nested in the host class rather than put in a namespace,
+		/// because a type in a namespace has to be internal for two assemblies not to
+		/// collide over it — and internal is what a public method may not return. Here the
+		/// name belongs to the host, so neither is a problem.
+		/// </para>
+		/// <para>
+		/// It says where, not when. A span outlives nothing: read it against the same text
+		/// that was parsed, and against nothing else.
+		/// </para>
+		/// </remarks>
+		public readonly struct SourceSpan
+		{
+			/// <summary>A span of <paramref name="length"/> items beginning at <paramref name="start"/>.</summary>
+			public SourceSpan(int start, int length)
+			{
+				Start  = start;
+				Length = length;
+			}
+
+			/// <summary>Where it begins.</summary>
+			public int Start { get; }
+
+			/// <summary>How much of the input it covers.</summary>
+			public int Length { get; }
+
+			/// <summary>One past the last item, so an empty span has End equal to Start.</summary>
+			public int End { get { return Start + Length; } }
+
+			/// <summary>The text it covers, taken from the text it was measured against.</summary>
+			public global::System.ReadOnlySpan<char> On(global::System.ReadOnlySpan<char> text)
+			{
+				return text.Slice(Start, Length);
+			}
+
+			/// <summary>Where it begins and one past where it ends, as <c>[start..end)</c>.</summary>
+			public override string ToString() { return "[" + Start + ".." + End + ")"; }
+		}
 
 		/// <summary>What kind of answer a publication gave (docs/syntax.md §7.5).</summary>
 		public enum Outcome
@@ -1233,15 +13732,15 @@ namespace AspectGenerator
 				// pool's largest kept array is 2^20 elements, the very number this bound is
 				// written in, so it would decline exactly these arrays and "pool it" would mean
 				// "drop it" in more words.
-				if ((long)ways.Items.Length + ways.Log.Length + ways.Refs.Length > 1048576)
+				if ((long)ways.Items.Length + ways.Log.Length + ways.Refs.Length + ways.Places.Length > 1048576)
 				{
 					if (_large != null && !ReferenceEquals(_large, ways))
 						(_largeLetGo ??= new global::System.WeakReference<Ways_DotGram>(_large)).SetTarget(_large);
 
 					// The same question the ordinary slot asks below: is the room far larger than the
 					// use. The bound decides which slot holds the tape, not whether to keep it.
-					if (!((long)ways.Items.Length + ways.Log.Length + ways.Refs.Length
-						> 4L * (ways.Count * 2L + ways.LogCount + ways.RefsCount)))
+					if (!((long)ways.Items.Length + ways.Log.Length + ways.Refs.Length + ways.Places.Length
+						> 4L * (ways.Count * 4L + ways.LogCount + ways.RefsCount)))
 						_largeIdle = 0;
 					else if (++_largeIdle >= LargeIdle)
 					{
@@ -1263,8 +13762,8 @@ namespace AspectGenerator
 				// release's counts are the same quantity twice. Four times and not twice because a
 				// table grows to at least double: one doubling is the slack a steady workload leaves,
 				// and two is a workload that has shrunk.
-				if (!((long)ways.Items.Length + ways.Log.Length + ways.Refs.Length
-					> 4L * (ways.Count * 2L + ways.LogCount + ways.RefsCount)))
+				if (!((long)ways.Items.Length + ways.Log.Length + ways.Refs.Length + ways.Places.Length
+					> 4L * (ways.Count * 4L + ways.LogCount + ways.RefsCount)))
 					_spareIdle = 0;
 				else if (++_spareIdle >= SpareIdle)
 				{
@@ -1331,6 +13830,20 @@ namespace AspectGenerator
 			{
 				for (var way = segment; way < Cursor; way++)
 					Items[way * 2 + 1] = Items[way * 2];
+			}
+
+			internal int[] Places = new int[32];
+
+			internal int Open(int at, int last, int place)
+			{
+				var way = Open(at, last);
+
+				if (Places.Length < Items.Length)
+					global::System.Array.Resize(ref Places, Items.Length);
+
+				Places[way * 2] = place;
+
+				return way;
 			}
 
 			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1528,8 +14041,806 @@ namespace AspectGenerator
 
 		sealed class ImmediateValues_DotGram
 		{
+			internal TextSpan[] Stack3 = new TextSpan[8];
+			internal int Count3;
+			internal int High3;
+
+			internal void Push3(TextSpan item)
+			{
+				if (Count3 == Stack3.Length)
+					global::System.Array.Resize(ref Stack3, Count3 * 2);
+
+				Stack3[Count3++] = item;
+
+				if (Count3 > High3) High3 = Count3;
+			}
+
+			internal TextSpan[] Take3(int from)
+			{
+				var taken = Peek3(from);
+
+				Count3 = from;
+
+				return taken;
+			}
+
+			internal TextSpan[] Peek3(int from)
+			{
+				var count = Count3 - from;
+
+				if (count == 0)
+					return global::System.Array.Empty<TextSpan>();
+
+				var taken = new TextSpan[count];
+
+				global::System.Array.Copy(Stack3, from, taken, 0, count);
+
+				return taken;
+			}
+
+			internal ChunkSyntax[] Stack9 = new ChunkSyntax[8];
+			internal int Count9;
+			internal int High9;
+
+			internal void Push9(ChunkSyntax item)
+			{
+				if (Count9 == Stack9.Length)
+					global::System.Array.Resize(ref Stack9, Count9 * 2);
+
+				// Through a span and not the array: the array's store checks the item against the
+				// array's runtime element type on every write, the span once, at its construction.
+				new global::System.Span<ChunkSyntax>(Stack9)[Count9++] = item;
+
+				if (Count9 > High9) High9 = Count9;
+			}
+
+			internal ChunkSyntax[] Take9(int from)
+			{
+				var taken = Peek9(from);
+
+				Count9 = from;
+
+				return taken;
+			}
+
+			internal ChunkSyntax[] Peek9(int from)
+			{
+				var count = Count9 - from;
+
+				if (count == 0)
+					return global::System.Array.Empty<ChunkSyntax>();
+
+				var taken = new ChunkSyntax[count];
+
+				global::System.Array.Copy(Stack9, from, taken, 0, count);
+
+				return taken;
+			}
+
+			internal ConditionAlternativeSyntax[] Stack11 = new ConditionAlternativeSyntax[8];
+			internal int Count11;
+			internal int High11;
+
+			internal void Push11(ConditionAlternativeSyntax item)
+			{
+				if (Count11 == Stack11.Length)
+					global::System.Array.Resize(ref Stack11, Count11 * 2);
+
+				// Through a span and not the array: the array's store checks the item against the
+				// array's runtime element type on every write, the span once, at its construction.
+				new global::System.Span<ConditionAlternativeSyntax>(Stack11)[Count11++] = item;
+
+				if (Count11 > High11) High11 = Count11;
+			}
+
+			internal ConditionAlternativeSyntax[] Take11(int from)
+			{
+				var taken = Peek11(from);
+
+				Count11 = from;
+
+				return taken;
+			}
+
+			internal ConditionAlternativeSyntax[] Peek11(int from)
+			{
+				var count = Count11 - from;
+
+				if (count == 0)
+					return global::System.Array.Empty<ConditionAlternativeSyntax>();
+
+				var taken = new ConditionAlternativeSyntax[count];
+
+				global::System.Array.Copy(Stack11, from, taken, 0, count);
+
+				return taken;
+			}
+
+
+			[global::System.ThreadStatic]
+			static ImmediateValues_DotGram? _spare;
+
+			[global::System.ThreadStatic]
+			static ImmediateValues_DotGram?[]? _deeper;
+
+			[global::System.ThreadStatic]
+			static int _deeperCount;
+
+			[global::System.ThreadStatic]
+			static ImmediateValues_DotGram? _large;
+
+			[global::System.ThreadStatic]
+			static int _largeIdle;
+
+			[global::System.ThreadStatic]
+			static global::System.WeakReference<ImmediateValues_DotGram>? _largeLetGo;
+
+			[global::System.ThreadStatic]
+			static int _spareIdle;
+
+			[global::System.ThreadStatic]
+			static global::System.WeakReference<ImmediateValues_DotGram>? _spareLetGo;
+
+			const int LargeIdle = 8;
+
+			const int SpareIdle = 8;
+
+			internal static ImmediateValues_DotGram Rent()
+			{
+				var spare = _spare;
+
+				if (spare != null)
+					_spare = null;
+				else if (_deeperCount > 0)
+				{
+					spare = _deeper![--_deeperCount]!;
+					_deeper![_deeperCount] = null;
+				}
+				else if (_large != null)
+				{
+					spare = _large;
+					_large = null;
+				}
+				else if (_largeLetGo != null && _largeLetGo.TryGetTarget(out var letGo))
+				{
+					spare = letGo;
+					_largeLetGo.SetTarget(null!);
+				}
+				else if (_spareLetGo != null && _spareLetGo.TryGetTarget(out var letGoSpare))
+				{
+					spare = letGoSpare;
+					_spareLetGo.SetTarget(null!);
+				}
+				else
+					return new ImmediateValues_DotGram();
+
+				return spare;
+			}
+
+			internal static void Return(ImmediateValues_DotGram values)
+			{
+				var used = 0L + values.High9 + values.High11 + values.High3;
+
+				if (values.High3 > 0)
+				{
+					global::System.Array.Clear(values.Stack3, 0, values.High3);
+					values.Count3 = values.High3 = 0;
+				}
+
+				if (values.High9 > 0)
+				{
+					global::System.Array.Clear(values.Stack9, 0, values.High9);
+					values.Count9 = values.High9 = 0;
+				}
+
+				if (values.High11 > 0)
+				{
+					global::System.Array.Clear(values.Stack11, 0, values.High11);
+					values.Count11 = values.High11 = 0;
+				}
+
+
+				// Past the bound the store is not thrown away - that was a cliff
+				// and not a bound - it is kept while the work keeps wanting it, and handed
+				// to the collector once it stops (CSharpEmitter.Outsized). It is emptied
+				// first, above: what is kept is the room, never what was built in it.
+				if (0L + values.Stack9.Length + values.Stack11.Length + values.Stack3.Length > 1048576)
+				{
+					// The same question the ordinary slot asks below: is the room far larger than
+					// the use. The bound decides WHICH slot holds the store; it does not decide
+					// whether to keep it. This read the parse's use against the BOUND until
+					// 2026-09-21, and for a dense store the two are not the same quantity: the
+					// room counts three hundred value tables and the use counted only records, so
+					// a parse that had just filled a seventeen-megabyte store read as idle and the
+					// eighth STEADY parse of the same document threw the store away and rebuilt it.
+					if (!(0L + values.Stack9.Length + values.Stack11.Length + values.Stack3.Length > 4L * used))
+						_largeIdle = 0;
+					else if (++_largeIdle >= LargeIdle)
+					{
+						(_largeLetGo ??= new global::System.WeakReference<ImmediateValues_DotGram>(values)).SetTarget(values);
+						_large = null;
+						_largeIdle = 0;
+
+						return;
+					}
+
+					if (_large != null && !ReferenceEquals(_large, values))
+						(_largeLetGo ??= new global::System.WeakReference<ImmediateValues_DotGram>(_large)).SetTarget(_large);
+
+					_large = values;
+
+					return;
+				}
+
+				// The ordinary slot lets go by the same rule as the parked one: counted where a
+				// parse ENDS, against what that parse USED. At the rental it could not arrive,
+				// for the reason written above LargeIdle. And it is let go of WEAKLY, so a thread that
+				// wants the room straight back still gets it, while one that does not has stopped
+				// holding it against everybody else.
+				if (!(0L + values.Stack9.Length + values.Stack11.Length + values.Stack3.Length > 4L * used))
+					_spareIdle = 0;
+				else if (++_spareIdle >= SpareIdle)
+				{
+					(_spareLetGo ??= new global::System.WeakReference<ImmediateValues_DotGram>(values)).SetTarget(values);
+					_spareIdle = 0;
+
+					return;
+				}
+
+				if (_spare == null)
+					_spare = values;
+				else if (_deeperCount < 3)
+					(_deeper ??= new ImmediateValues_DotGram?[3])[_deeperCount++] = values;
+			}
+
 			internal static bool IsDefault<T>(T value) => global::System.Collections.Generic.EqualityComparer<T>.Default.Equals(value, default!);
 		}
+
+		private sealed class Parser_DotGram
+		{
+			internal readonly ParserArena_DotGram Entries = new ParserArena_DotGram();
+			object?[] _values = global::System.Array.Empty<object?>();
+			TargetFilterLineSyntax[] _values0 = global::System.Array.Empty<TargetFilterLineSyntax>();
+			BodySyntax[] _values1 = global::System.Array.Empty<BodySyntax>();
+			TargetFilterBodySyntax[] _values2 = global::System.Array.Empty<TargetFilterBodySyntax>();
+			TextSpan[] _values3 = global::System.Array.Empty<TextSpan>();
+			ParameterGroupSyntax[] _values4 = global::System.Array.Empty<ParameterGroupSyntax>();
+			NameSyntax[] _values5 = global::System.Array.Empty<NameSyntax>();
+			OperatorSyntax[] _values6 = global::System.Array.Empty<OperatorSyntax>();
+			ConditionItemSyntax[] _values7 = global::System.Array.Empty<ConditionItemSyntax>();
+			WordsSyntax[] _values8 = global::System.Array.Empty<WordsSyntax>();
+			ChunkSyntax[] _values9 = global::System.Array.Empty<ChunkSyntax>();
+			ConditionValueSyntax[] _values10 = global::System.Array.Empty<ConditionValueSyntax>();
+			ConditionAlternativeSyntax[] _values11 = global::System.Array.Empty<ConditionAlternativeSyntax>();
+			DottedSyntax[] _values12 = global::System.Array.Empty<DottedSyntax>();
+			ParameterListSyntax[] _values13 = global::System.Array.Empty<ParameterListSyntax>();
+			ParameterPartsSyntax[] _values14 = global::System.Array.Empty<ParameterPartsSyntax>();
+			ParameterSyntax[] _values15 = global::System.Array.Empty<ParameterSyntax>();
+			ParameterTypeSyntax[] _values16 = global::System.Array.Empty<ParameterTypeSyntax>();
+			ModifierSyntax[] _values17 = global::System.Array.Empty<ModifierSyntax>();
+			bool[] _built = global::System.Array.Empty<bool>();
+			int[] _linkHeads = global::System.Array.Empty<int>();
+			int[] _linkNexts = global::System.Array.Empty<int>();
+
+			int[] _owners = global::System.Array.Empty<int>();
+			internal int LinkedUpTo;
+			int _valuesUsed;
+
+			internal object?[] Materialization(int count)
+			{
+				// Doubled, not sized to fit exactly: a `when` guard calls this once per
+				// evaluation, and a repeated record with a guard inside the repeat would
+				// otherwise pay for a fresh copy of the whole table on every turn, turning
+				// an O(n) parse back into the O(n^2) the incremental materializer exists to
+				// avoid.
+				if (_values.Length < count)
+					global::System.Array.Resize(ref _values, global::System.Math.Max(count, _values.Length * 2));
+				if (_values0.Length < count)
+					global::System.Array.Resize(ref _values0, global::System.Math.Max(count, _values0.Length * 2));
+				if (_values1.Length < count)
+					global::System.Array.Resize(ref _values1, global::System.Math.Max(count, _values1.Length * 2));
+				if (_values2.Length < count)
+					global::System.Array.Resize(ref _values2, global::System.Math.Max(count, _values2.Length * 2));
+				if (_values3.Length < count)
+					global::System.Array.Resize(ref _values3, global::System.Math.Max(count, _values3.Length * 2));
+				if (_values4.Length < count)
+					global::System.Array.Resize(ref _values4, global::System.Math.Max(count, _values4.Length * 2));
+				if (_values5.Length < count)
+					global::System.Array.Resize(ref _values5, global::System.Math.Max(count, _values5.Length * 2));
+				if (_values6.Length < count)
+					global::System.Array.Resize(ref _values6, global::System.Math.Max(count, _values6.Length * 2));
+				if (_values7.Length < count)
+					global::System.Array.Resize(ref _values7, global::System.Math.Max(count, _values7.Length * 2));
+				if (_values8.Length < count)
+					global::System.Array.Resize(ref _values8, global::System.Math.Max(count, _values8.Length * 2));
+				if (_values9.Length < count)
+					global::System.Array.Resize(ref _values9, global::System.Math.Max(count, _values9.Length * 2));
+				if (_values10.Length < count)
+					global::System.Array.Resize(ref _values10, global::System.Math.Max(count, _values10.Length * 2));
+				if (_values11.Length < count)
+					global::System.Array.Resize(ref _values11, global::System.Math.Max(count, _values11.Length * 2));
+				if (_values12.Length < count)
+					global::System.Array.Resize(ref _values12, global::System.Math.Max(count, _values12.Length * 2));
+				if (_values13.Length < count)
+					global::System.Array.Resize(ref _values13, global::System.Math.Max(count, _values13.Length * 2));
+				if (_values14.Length < count)
+					global::System.Array.Resize(ref _values14, global::System.Math.Max(count, _values14.Length * 2));
+				if (_values15.Length < count)
+					global::System.Array.Resize(ref _values15, global::System.Math.Max(count, _values15.Length * 2));
+				if (_values16.Length < count)
+					global::System.Array.Resize(ref _values16, global::System.Math.Max(count, _values16.Length * 2));
+				if (_values17.Length < count)
+					global::System.Array.Resize(ref _values17, global::System.Math.Max(count, _values17.Length * 2));
+				if (_built.Length < count)
+					global::System.Array.Resize(ref _built, global::System.Math.Max(count, _built.Length * 2));
+
+				// Grown here, alongside the value table, rather than where the links are
+				// read — a guard that finds everything it needs already built calls this
+				// and nothing else, and a link table sized only where it is read would fall
+				// out of step with `_valuesUsed`, which is exactly what Reset and Truncate
+				// walk off the end of.
+				Grow(ref _linkHeads, count);
+				Grow(ref _linkNexts, count);
+
+				// No `Grow`: nothing here is carried between calls, so a plain resize is
+				// what it needs and the -1 fill would be work for nobody.
+				if (_owners.Length < count)
+					global::System.Array.Resize(ref _owners, global::System.Math.Max(count, _owners.Length * 2));
+
+				_valuesUsed = count;
+
+				return _values;
+			}
+
+			internal TargetFilterLineSyntax[] Materialization0() { return _values0; }
+			internal BodySyntax[] Materialization1() { return _values1; }
+			internal TargetFilterBodySyntax[] Materialization2() { return _values2; }
+			internal TextSpan[] Materialization3() { return _values3; }
+			internal ParameterGroupSyntax[] Materialization4() { return _values4; }
+			internal NameSyntax[] Materialization5() { return _values5; }
+			internal OperatorSyntax[] Materialization6() { return _values6; }
+			internal ConditionItemSyntax[] Materialization7() { return _values7; }
+			internal WordsSyntax[] Materialization8() { return _values8; }
+			internal ChunkSyntax[] Materialization9() { return _values9; }
+			internal ConditionValueSyntax[] Materialization10() { return _values10; }
+			internal ConditionAlternativeSyntax[] Materialization11() { return _values11; }
+			internal DottedSyntax[] Materialization12() { return _values12; }
+			internal ParameterListSyntax[] Materialization13() { return _values13; }
+			internal ParameterPartsSyntax[] Materialization14() { return _values14; }
+			internal ParameterSyntax[] Materialization15() { return _values15; }
+			internal ParameterTypeSyntax[] Materialization16() { return _values16; }
+			internal ModifierSyntax[] Materialization17() { return _values17; }
+
+			internal bool[] Materialized() => _built;
+
+			internal int[] MaterializationHeads() => _linkHeads;
+			internal int[] MaterializationNexts() => _linkNexts;
+			internal int[] MaterializationOwners() => _owners;
+
+			// Grown, not rebuilt: a link written for an index below `count` on an earlier,
+			// smaller call is still the answer for that index, and re-zeroing it would erase
+			// it. Only the newly reachable slots need a fresh -1.
+			static void Grow(ref int[] links, int count)
+			{
+				if (links.Length < count)
+				{
+					var from = links.Length;
+
+					global::System.Array.Resize(ref links, global::System.Math.Max(count, from * 2));
+
+					for (var i = from; i < links.Length; i++)
+						links[i] = -1;
+				}
+			}
+
+			internal void Truncate(int count, ParserArena_DotGram entries)
+			{
+				if (count < _valuesUsed)
+				{
+					// Descending, and checked against the arena rather than assumed: a link
+					// prepended by the derivation being discarded may still be the head for
+					// its call, and popping it here — the same order it was pushed in — is
+					// what stops that call's chain from pointing at a slot the next
+					// derivation through it is about to reuse for something else entirely.
+					for (var i = _valuesUsed - 1; i >= count; i--)
+					{
+						var callIndex = entries[i].CallIndex;
+
+						if (callIndex >= 0 && _linkHeads[callIndex] == i)
+							_linkHeads[callIndex] = _linkNexts[i];
+
+						_linkHeads[i] = -1;
+						_linkNexts[i] = -1;
+					}
+
+					global::System.Array.Clear(_values, count, _valuesUsed - count);
+					global::System.Array.Clear(_built, count, _valuesUsed - count);
+
+					_valuesUsed = count;
+				}
+
+				if (count < LinkedUpTo)
+					LinkedUpTo = count;
+			}
+			internal void Reopen(int call, ParserArena_DotGram entries)
+			{
+				// A choice resumed inside a call that had returned opens that call again, and every
+				// call it returned into: a value a guard built for one of them was built for the
+				// reading being given up. An open call's callers are open too, so the walk stops there.
+				while (call >= 0 && entries[call].Kind == ParserEntry.Completed)
+				{
+					if (call < _built.Length)
+						_built[call] = false;
+
+					call = entries[call].CallIndex;
+				}
+			}
+
+			internal void Reset()
+			{
+				Entries.Clear();
+				global::System.Array.Clear(_values, 0, _valuesUsed);
+				global::System.Array.Clear(_values0, 0, global::System.Math.Min(_valuesUsed, _values0.Length));
+				global::System.Array.Clear(_values1, 0, global::System.Math.Min(_valuesUsed, _values1.Length));
+				global::System.Array.Clear(_values2, 0, global::System.Math.Min(_valuesUsed, _values2.Length));
+				global::System.Array.Clear(_values3, 0, global::System.Math.Min(_valuesUsed, _values3.Length));
+				global::System.Array.Clear(_values4, 0, global::System.Math.Min(_valuesUsed, _values4.Length));
+				global::System.Array.Clear(_values5, 0, global::System.Math.Min(_valuesUsed, _values5.Length));
+				global::System.Array.Clear(_values6, 0, global::System.Math.Min(_valuesUsed, _values6.Length));
+				global::System.Array.Clear(_values7, 0, global::System.Math.Min(_valuesUsed, _values7.Length));
+				global::System.Array.Clear(_values8, 0, global::System.Math.Min(_valuesUsed, _values8.Length));
+				global::System.Array.Clear(_values9, 0, global::System.Math.Min(_valuesUsed, _values9.Length));
+				global::System.Array.Clear(_values10, 0, global::System.Math.Min(_valuesUsed, _values10.Length));
+				global::System.Array.Clear(_values11, 0, global::System.Math.Min(_valuesUsed, _values11.Length));
+				global::System.Array.Clear(_values12, 0, global::System.Math.Min(_valuesUsed, _values12.Length));
+				global::System.Array.Clear(_values13, 0, global::System.Math.Min(_valuesUsed, _values13.Length));
+				global::System.Array.Clear(_values14, 0, global::System.Math.Min(_valuesUsed, _values14.Length));
+				global::System.Array.Clear(_values15, 0, global::System.Math.Min(_valuesUsed, _values15.Length));
+				global::System.Array.Clear(_values16, 0, global::System.Math.Min(_valuesUsed, _values16.Length));
+				global::System.Array.Clear(_values17, 0, global::System.Math.Min(_valuesUsed, _values17.Length));
+				global::System.Array.Clear(_built, 0, _valuesUsed);
+
+				// A rule call that captures nothing this parse never writes its own head, so
+				// whatever a previous parse through the same pooled slot left there has to be
+				// cleared here instead — otherwise a lookup falls through to a stale chain from
+				// an earlier parse, one that can splice into a cycle once enough reuse has
+				// pointed two heads at each other.
+				for (var i = 0; i < _valuesUsed; i++)
+				{
+					_linkHeads[i] = -1;
+					_linkNexts[i] = -1;
+				}
+
+				_valuesUsed = 0;
+				LinkedUpTo = 0;
+			}
+		}
+
+		private sealed class ParserArena_DotGram
+		{
+			ParserEntry[] _items = global::System.Array.Empty<ParserEntry>();
+
+			internal int Count { get; private set; }
+
+			internal int Capacity { get { return _items.Length; } }
+
+			internal ParserEntry this[int index]
+			{
+				get => _items[index];
+				set => _items[index] = value;
+			}
+
+			internal void Add(ParserEntry entry)
+			{
+				if (Count == _items.Length)
+					global::System.Array.Resize(ref _items, Count == 0 ? 16 : Count * 2);
+
+				_items[Count++] = entry;
+			}
+
+			internal void RemoveAt(int index)
+			{
+				var after = Count - index - 1;
+
+				if (after > 0)
+					global::System.Array.Copy(_items, index + 1, _items, index, after);
+
+				Count--;
+			}
+
+			internal void RemoveRange(int index, int count)
+			{
+				if (count == 0)
+					return;
+
+				var after = Count - index - count;
+
+				if (after > 0)
+					global::System.Array.Copy(_items, index + count, _items, index, after);
+
+				Count -= count;
+			}
+
+			internal void Clear()
+			{
+				Count = 0;
+			}
+		}
+
+		private readonly struct ParserEntry
+		{
+			internal const int Choice = 1;
+			internal const int Call   = 2;
+			internal const int Atomic = 3;
+			internal const int Repeat = 4;
+			internal const int Lookahead = 5;
+			internal const int Capture = 6;
+			internal const int Construct = 7;
+			internal const int Completed = 8;
+			internal const int RuleCapture = 9;
+			internal const int Dead = 10;
+			internal const int Recovery = 11;
+			internal const int PendingRecovery = 12;
+			internal const int Run = 13;
+
+			internal const int LoopExit = 14;
+
+			internal const int TurnDone = 15;
+
+			internal const int CaptureOpen = 16;
+
+			internal const int StateSet = 17;
+
+			internal const int StateEnd = 18;
+
+			internal ParserEntry(
+				int kind, int state, int position, int callIndex, int atomicIndex,
+				int repeatIndex, int lookaheadIndex, int value, int ruleIndex = -1)
+			{
+				Kind        = kind;
+				State       = state;
+				Position    = position;
+				CallIndex   = callIndex;
+				AtomicIndex = atomicIndex;
+				RepeatIndex = repeatIndex;
+				LookaheadIndex = lookaheadIndex;
+				Value       = value;
+				RuleIndex   = ruleIndex;
+			}
+
+			internal int Kind        { get; }
+			internal int State       { get; }
+			internal int Position    { get; }
+			internal int CallIndex   { get; }
+			internal int AtomicIndex { get; }
+			internal int RepeatIndex { get; }
+			internal int LookaheadIndex { get; }
+			internal int Value       { get; }
+			internal int RuleIndex   { get; }
+		}
+
+		static partial void RentParser_DotGram(ref Parser_DotGram parser);
+		static partial void ReturnParser_DotGram(Parser_DotGram parser);
+
+		[global::System.ThreadStatic]
+		static Parser_DotGram? _spareParser;
+
+		[global::System.ThreadStatic]
+		static Parser_DotGram?[]? _deeperParsers;
+
+		[global::System.ThreadStatic]
+		static int _deeperParserCount;
+
+		const int KeptEntries_DotGram = 65536;
+
+		[global::System.ThreadStatic]
+		static Parser_DotGram? _largeParser;
+
+		[global::System.ThreadStatic]
+		static int _largeParserIdle;
+
+		[global::System.ThreadStatic]
+		static global::System.WeakReference<Parser_DotGram>? _largeParserLetGo;
+
+		[global::System.ThreadStatic]
+		static int _spareParserIdle;
+
+		[global::System.ThreadStatic]
+		static global::System.WeakReference<Parser_DotGram>? _spareParserLetGo;
+
+		const int LargeParserIdle_DotGram = 8;
+
+		const int SpareParserIdle_DotGram = 8;
+
+		static Parser_DotGram Recycled_DotGram()
+		{
+			var spare = _spareParser;
+
+			if (spare != null)
+				_spareParser = null;
+			else if (_deeperParserCount > 0)
+			{
+				spare = _deeperParsers![--_deeperParserCount]!;
+				_deeperParsers![_deeperParserCount] = null;
+			}
+			else if (_largeParser != null)
+			{
+				spare = _largeParser;
+				_largeParser = null;
+			}
+			else if (_largeParserLetGo != null && _largeParserLetGo.TryGetTarget(out var letGo))
+			{
+				spare = letGo;
+				_largeParserLetGo.SetTarget(null!);
+			}
+			else if (_spareParserLetGo != null && _spareParserLetGo.TryGetTarget(out var letGoSpare))
+			{
+				spare = letGoSpare;
+				_spareParserLetGo.SetTarget(null!);
+			}
+			else
+				return new Parser_DotGram();
+			return spare;
+		}
+
+		static void Recycle_DotGram(Parser_DotGram parser)
+		{
+			if (parser.Entries.Capacity > KeptEntries_DotGram)
+			{
+				if (_largeParser != null && !ReferenceEquals(_largeParser, parser))
+					(_largeParserLetGo ??= new global::System.WeakReference<Parser_DotGram>(_largeParser)).SetTarget(_largeParser);
+
+				// The same question the ordinary slot asks below: is the room far larger than the
+				// use. The bound decides which slot holds the arena, not whether to keep it.
+				if (parser.Entries.Capacity <= 4 * parser.Entries.Count)
+					_largeParserIdle = 0;
+				else if (++_largeParserIdle >= LargeParserIdle_DotGram)
+				{
+					(_largeParserLetGo ??= new global::System.WeakReference<Parser_DotGram>(parser)).SetTarget(parser);
+					_largeParser = null;
+					_largeParserIdle = 0;
+
+					return;
+				}
+
+				_largeParser = parser;
+
+				return;
+			}
+
+			// The ordinary slot lets go by the rule the parked one uses. Room and use are the
+			// list's own two numbers, which is as commensurable as it gets; four times and not
+			// twice because a list grows by doubling, so one doubling is ordinary slack.
+			if (parser.Entries.Capacity <= 4 * parser.Entries.Count)
+				_spareParserIdle = 0;
+			else if (++_spareParserIdle >= SpareParserIdle_DotGram)
+			{
+				(_spareParserLetGo ??= new global::System.WeakReference<Parser_DotGram>(parser)).SetTarget(parser);
+				_spareParserIdle = 0;
+
+				return;
+			}
+
+			if (_spareParser == null)
+				_spareParser = parser;
+			else if (_deeperParserCount < 3)
+				(_deeperParsers ??= new Parser_DotGram?[3])[_deeperParserCount++] = parser;
+		}
+
+		// Whether a character is Lu, Ll, Lt, Lm, Lo in Unicode 16.0.0: its high byte picks one of
+		// the blocks of 256 bits after the 256 bytes that number them, its low byte the bit.
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		static bool Categories_DotGram_1F(char c)
+		{
+			var bits = Categories_DotGram_1F_Bits;
+
+			return (bits[256 + (bits[c >> 8] << 5) + ((c & 0xFF) >> 3)] & (1 << (c & 7))) != 0;
+		}
+
+		static global::System.ReadOnlySpan<byte> Categories_DotGram_1F_Bits => new byte[]
+		{
+			0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+			16,1,17,18,19,1,20,21,22,23,24,25,26,27,1,28,
+			29,30,31,31,31,31,31,31,31,31,31,31,32,33,34,31,
+			35,36,31,31,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,27,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,37,1,38,39,40,41,42,43,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,44,31,31,31,31,31,31,31,31,
+			31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,
+			31,31,31,31,31,31,31,31,31,1,45,46,1,47,48,49,
+			0,0,0,0,0,0,0,0,254,255,255,7,254,255,255,7,0,0,0,0,0,4,32,4,255,255,127,255,255,255,127,255,
+			255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+			255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,195,255,3,0,31,80,0,0,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,223,188,64,215,255,255,251,255,255,255,255,255,255,255,255,255,191,255,
+			255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,3,252,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+			255,255,255,255,255,255,254,255,255,255,127,2,255,255,255,255,255,1,0,0,0,0,0,0,0,0,255,255,255,135,7,0,
+			0,0,0,0,255,255,255,255,255,7,0,0,0,192,254,255,255,255,255,255,255,255,255,255,255,255,47,0,96,192,0,156,
+			0,0,253,255,255,255,0,0,0,224,255,255,255,255,255,255,255,255,255,255,63,0,2,0,0,252,255,255,255,7,48,4,
+			255,255,63,4,16,1,0,0,255,255,255,1,255,7,255,255,255,126,0,0,255,255,255,255,255,3,0,0,0,0,0,0,
+			240,255,255,255,255,255,255,35,0,0,1,255,3,0,254,255,225,159,249,255,255,253,197,35,0,64,0,176,3,0,3,16,
+			224,135,249,255,255,253,109,3,0,0,0,94,0,0,28,0,224,191,251,255,255,253,237,35,0,0,1,0,3,0,0,2,
+			224,159,249,255,255,253,237,35,0,0,0,176,3,0,2,0,232,199,61,214,24,199,255,3,0,0,1,0,0,0,0,0,
+			224,223,253,255,255,253,255,35,0,0,0,39,3,0,0,0,225,223,253,255,255,253,239,35,0,0,0,96,3,0,6,0,
+			240,223,253,255,255,255,255,39,0,64,112,128,3,0,0,252,224,255,127,252,255,255,251,47,127,0,0,0,0,0,0,0,
+			254,255,255,255,255,255,13,0,127,0,0,0,0,0,0,0,214,247,255,255,175,255,13,32,95,0,0,240,0,0,0,0,
+			1,0,0,0,0,0,0,0,255,254,255,255,255,31,0,0,0,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			255,255,255,255,255,7,0,128,0,0,63,60,98,192,225,255,3,64,0,0,255,255,255,255,191,32,255,255,255,255,255,247,
+			255,255,255,255,255,255,255,255,255,61,127,61,255,255,255,255,255,61,255,255,255,255,61,127,61,255,127,255,255,255,255,255,
+			255,255,61,255,255,255,255,255,255,255,255,7,0,0,0,0,255,255,0,0,255,255,255,255,255,255,255,255,255,255,63,63,
+			254,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+			255,255,255,255,255,255,255,255,255,255,255,255,255,159,255,255,254,255,255,7,255,255,255,255,255,255,255,255,255,7,254,1,
+			255,255,3,128,255,255,3,0,255,255,3,0,255,223,1,0,255,255,255,255,255,255,15,0,0,0,128,16,0,0,0,0,
+			0,0,0,0,255,255,255,255,255,255,255,255,255,255,255,1,159,255,255,255,255,5,255,255,255,255,255,255,255,255,63,0,
+			255,255,255,127,0,0,0,0,0,0,255,255,255,63,31,0,255,255,255,255,255,15,255,255,255,3,0,0,0,0,0,0,
+			255,255,127,0,255,255,255,255,255,255,31,0,0,0,0,0,0,0,0,0,128,0,0,0,0,0,0,0,0,0,0,0,
+			224,255,255,255,255,255,15,0,224,31,0,0,0,0,0,0,248,255,255,255,1,192,0,252,255,255,255,255,63,0,0,0,
+			255,255,255,255,15,0,0,0,0,224,0,252,255,255,255,63,255,7,255,255,255,255,255,231,0,0,0,0,0,222,111,4,
+			255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,0,0,0,0,0,0,0,0,
+			255,255,63,63,255,255,255,255,63,63,255,170,255,255,255,63,255,255,255,255,255,255,223,95,220,31,207,15,255,31,220,31,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,128,0,0,255,31,0,0,0,0,0,0,0,0,0,0,0,0,
+			132,252,47,62,80,189,255,243,224,67,0,0,0,0,0,0,24,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,31,120,12,0,
+			255,255,255,255,191,32,255,255,255,255,255,255,255,128,0,0,255,255,127,0,127,127,127,127,127,127,127,127,0,0,0,0,
+			0,0,0,0,0,128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			96,0,0,0,0,0,62,24,254,255,255,255,255,255,255,255,255,255,127,224,254,255,255,255,255,255,255,255,255,255,255,247,
+			224,255,255,255,255,255,254,255,255,255,255,255,255,255,255,255,255,127,0,0,255,255,255,255,0,0,0,0,0,0,255,255,
+			255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,31,0,0,0,0,0,0,0,0,255,255,255,255,255,63,
+			255,31,255,255,0,12,0,0,255,255,255,255,255,127,0,128,255,255,255,63,255,255,255,255,255,255,255,255,63,0,0,0,
+			0,0,128,255,252,255,255,255,255,255,255,255,255,255,255,255,255,249,255,255,255,255,255,255,255,63,235,31,0,0,252,255,
+			187,247,255,255,7,0,0,0,255,255,255,255,255,255,15,0,252,255,255,255,255,255,15,0,0,0,0,0,0,0,252,104,
+			0,252,255,255,63,0,255,255,127,0,0,0,255,255,255,31,240,255,255,255,255,255,7,0,0,128,0,0,223,255,0,124,
+			255,255,255,255,255,1,0,0,247,15,0,0,255,255,127,196,255,255,255,255,255,255,98,62,5,0,0,56,255,7,28,0,
+			126,126,126,0,127,127,255,255,255,255,255,247,255,3,255,255,255,255,255,255,255,255,255,255,255,255,255,255,7,0,0,0,
+			255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,15,0,255,255,127,248,255,255,255,255,255,15,
+			255,255,255,255,255,255,255,255,255,255,255,255,255,63,255,255,255,255,255,255,255,255,255,255,255,255,255,3,0,0,0,0,
+			127,0,248,160,255,253,127,95,219,255,255,255,255,255,255,255,255,255,255,255,255,255,3,0,0,0,248,255,255,255,255,255,
+			255,255,255,255,255,255,255,63,0,0,255,255,255,255,255,255,255,255,252,255,255,255,255,255,255,0,0,0,0,0,255,15,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,223,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,31,
+			0,0,0,0,254,255,255,7,254,255,255,7,192,255,255,255,255,255,255,255,255,255,255,127,252,252,252,28,0,0,0,0,
+		};
+
+		// Whether a character is Zs, Zl, Zp in Unicode 16.0.0: its high byte picks one of
+		// the blocks of 256 bits after the 256 bytes that number them, its low byte the bit.
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		static bool Categories_DotGram_3800(char c)
+		{
+			var bits = Categories_DotGram_3800_Bits;
+
+			return (bits[256 + (bits[c >> 8] << 5) + ((c & 0xFF) >> 3)] & (1 << (c & 7))) != 0;
+		}
+
+		static global::System.ReadOnlySpan<byte> Categories_DotGram_3800_Bits => new byte[]
+		{
+			0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,
+			3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			255,7,0,0,0,131,0,0,0,0,0,128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		};
 
 
 		// The sets a refusal names, by number: built the first time a refusal asks for one, never in the
@@ -1556,18 +14867,82 @@ namespace AspectGenerator
 
 		static string[] ExpectedDecoded_DotGram(int id)
 		{
-			var data = "ACEGIKMOBABBBCBDBEBFBGBH"u8;
-			var built = ExpectedBuilt_DotGram ?? global::System.Threading.Interlocked.CompareExchange(ref ExpectedBuilt_DotGram, new string[]?[8], null) ?? ExpectedBuilt_DotGram!;
+			var data = "ACEGIKNPRTXZ\u005D\u005FaAaDaFaHaJaLaYa\u005Ba\u005Da\u005FbAbCbEbGbIbKbMbObQbSbUbWbYb\u005Cb\u005FcBcEcHcKcNcQcTcWcZc\u005Dd@dCdFdIdLdOdRdUdXd\u005Bd\u005EeAeDeGeJeMePeSeVeYe\u005Ce\u005FfBfEfHfKfNfWfZBABBBCBDBECFGBFBGBHDIJKBICJKBJBKCLMBLBMBNBOMIJKFLGDOHMENBPBQBRBSBTBUBVBWBXBYBZB\u005BB\u005CB\u005DB\u005EB\u005FBa@BaABaBBaCBaDBaEBaFBaGBaHBaIBaJBaKBaLBaMBaNBaOBaPBaQBaRBaSBaTBaUBaVBaWBaXBaYBaZBa\u005BBa\u005CBa\u005DBa\u005EBa\u005FBb@BbABbBBbCBbDBbEBbFEbFbCbBbDBbGBbH"u8;
+			var built = ExpectedBuilt_DotGram ?? global::System.Threading.Interlocked.CompareExchange(ref ExpectedBuilt_DotGram, new string[]?[78], null) ?? ExpectedBuilt_DotGram!;
 			var items = ExpectedItems_DotGram ?? global::System.Threading.Interlocked.CompareExchange(ref ExpectedItems_DotGram, new string[]
 				{
-					"['&' | '-' | '|']",
-					"\"pattern:\"",
-					"\"contains:\"",
-					"\"regex:\"",
-					"['p' | 'c' | 'r']",
-					"[^ '\\n' | '\\r']",
 					"end of input",
 					"[^ ]",
+					"Ws",
+					"\"abstract\"",
+					"\"extern\"",
+					"\"internal\"",
+					"\"instance\"",
+					"\"override\"",
+					"\"public\"",
+					"\"private\"",
+					"\"protected\"",
+					"\"static\"",
+					"\"sealed\"",
+					"\"unsafe\"",
+					"\"virtual\"",
+					"';'",
+					"any",
+					"'\\\\'",
+					"[^ ';'..'<' | '\\\\']",
+					"['<' | '\\\\' | '\\u0000'..':' | '='..'[' | ']'..'\uFFFF']",
+					"[':']",
+					"['(']",
+					"':'",
+					"[^ ':' | '<' | '\\\\']",
+					"['<' | '\\\\' | '\\u0000'..'9' | ';' | '='..'[' | ']'..'\uFFFF']",
+					"')'",
+					"'('",
+					"'>'",
+					"[^ '<' | '>' | '\\\\']",
+					"['<' | '\\\\' | '\\u0000'..';' | '=' | '?'..'[' | ']'..'\uFFFF']",
+					"'<'",
+					"['\\t'..'\\r' | '\u0085' | \\p{Zs} | \\p{Zl} | \\p{Zp}]",
+					"[^ ')' | ':' | '<' | '\\\\']",
+					"['<' | '\\\\' | '\\u0000'..'(' | '*'..'9' | ';' | '='..'[' | ']'..'\uFFFF']",
+					"[^ '(' | ':' | '<' | '\\\\']",
+					"['<' | '\\\\' | '\\u0000'..'\\'' | ')'..'9' | ';' | '='..'[' | ']'..'\uFFFF']",
+					"[\\p{L}]",
+					"'-'",
+					"'&'",
+					"'|'",
+					"['-' | '&' | '|']",
+					"['\\u0000'..'\\u0008' | '\\u000E'..'\\u001F' | '!'..'\u0084' | '\u0086'..'\u009F' | '\u00A1'..'\u167F' | '\u1681'..'\u1FFF' | '\u200B'..'\u2027' | '\u202A'..'\u202E' | '\u2030'..'\u205E' | '\u2060'..'\u2FFF' | '\u3001'..'\uFFFF']",
+					"['\\u0000'..'\\u0008' | '\\u000E'..'\\u001F' | '!'..'[' | ']'..'\u0084' | '\u0086'..'\u009F' | '\u00A1'..'\u167F' | '\u1681'..'\u1FFF' | '\u200B'..'\u2027' | '\u202A'..'\u202E' | '\u2030'..'\u205E' | '\u2060'..'\u2FFF' | '\u3001'..'\uFFFF']",
+					"['\\\\' | '\\u0000'..'\\u0008' | '\\u000E'..'\\u001F' | '!'..'[' | ']'..'\u0084' | '\u0086'..'\u009F' | '\u00A1'..'\u167F' | '\u1681'..'\u1FFF' | '\u200B'..'\u2027' | '\u202A'..'\u202E' | '\u2030'..'\u205E' | '\u2060'..'\u2FFF' | '\u3001'..'\uFFFF']",
+					"Bracket",
+					"WordCharacter",
+					"['[' | '<' | '\\\\' | '\\u0000'..'\\u0008' | '\\u000E'..'\\u001F' | '!'..';' | '='..'Z' | ']'..'\u0084' | '\u0086'..'\u009F' | '\u00A1'..'\u167F' | '\u1681'..'\u1FFF' | '\u200B'..'\u2027' | '\u202A'..'\u202E' | '\u2030'..'\u205E' | '\u2060'..'\u2FFF' | '\u3001'..'\uFFFF']",
+					"['[' | '<' | '\\u0000'..'\\u0008' | '\\u000E'..'\\u001F' | '!'..';' | '='..'Z' | ']'..'\u0084' | '\u0086'..'\u009F' | '\u00A1'..'\u167F' | '\u1681'..'\u1FFF' | '\u200B'..'\u2027' | '\u202A'..'\u202E' | '\u2030'..'\u205E' | '\u2060'..'\u2FFF' | '\u3001'..'\uFFFF']",
+					"[^ '\\t'..'\\r' | '<' | '['..'\\\\' | '\u0085' | \\p{Zs} | \\p{Zl} | \\p{Zp}]",
+					"']'",
+					"[' ' | ',']",
+					"'['",
+					"[^ '&' | '\\\\' | '|']",
+					"['&' | '|']",
+					"['\\\\' | '\\u0000'..'%' | '\\''..'[' | ']'..'{' | '}'..'\uFFFF' | '&' | '|']",
+					"'.'",
+					"[^ '.' | '<' | '\\\\']",
+					"['<' | '\\\\' | '\\u0000'..'-' | '/'..';' | '='..'[' | ']'..'\uFFFF']",
+					"[^ '('..')' | '<' | '\\\\']",
+					"['<' | '\\\\' | '(' | '\\u0000'..'\\'' | '*'..';' | '='..'[' | ']'..'\uFFFF']",
+					"','",
+					"[^ ',' | '<' | '['..'\\\\']",
+					"['[' | '<' | '\\\\' | '\\u0000'..'+' | '-'..';' | '='..'Z' | ']'..'\uFFFF']",
+					"'_'",
+					"\"this \"",
+					"\"in \"",
+					"\"out \"",
+					"\"params \"",
+					"\"readonly \"",
+					"\"ref \"",
+					"Escape",
+					"['r' | 'o' | 'i' | 'p']",
 				}, null) ?? ExpectedItems_DotGram!;
 			var starts = ExpectedStarts_DotGram;
 			var at = 0;
@@ -1575,7 +14950,7 @@ namespace AspectGenerator
 
 			if (starts == null)
 			{
-				starts = new int[8];
+				starts = new int[78];
 
 				for (var i = 0; i < starts.Length; i++)
 				{

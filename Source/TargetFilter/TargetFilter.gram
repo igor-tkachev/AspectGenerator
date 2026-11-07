@@ -1,17 +1,194 @@
-// The grammar of one line of a target filter. The generated parser is the internal TargetFilterParser;
-// regenerate it with Source/TargetFilter/regenerate.sh after any change to this file.
+// The grammar of a target filter line, and of the pieces a line is read in. The generated parser is the internal
+// TargetFilterParser; regenerate it with Source/TargetFilter/regenerate.sh after any change to this file.
 //
-// A line is an optional operator, an optional matcher prefix and the rest of the line.
+// What is read here is one line, after the filter reader has split the text at line breaks, trimmed every line and
+// dropped the blank lines and the comments; how lines group into rules stays with the reader. Like the filter
+// language itself, the grammar reads in stages: a line, then each piece of it that the language trims and reads again
+// on its own (a condition item, a value, a dotted name, the words of a method pattern, a parameter list and its
+// parameters). Each stage is a publication, read over the trimmed piece, so that a piece reads the same whether it
+// stands alone or in its line. Every value carries the span it was read from.
+//
+// Read everywhere alike:
+//   - `\x` is x, never special; a backslash that ends the text escapes nothing and stays in it.
+//   - `<…>` nests, and what is inside it is never a separator; a `<` that is not closed runs to the end of the text,
+//     and a `>` outside any `<…>` is an ordinary character.
+//   - Escapes stay in the text a value carries: what a segment means is decided by the same C# for every reader.
 
 @using System;
+@using Microsoft.CodeAnalysis.Text;
 
-Operator : @string = t: ('-' | '&' | '|') => @(t)
+trivia = none
 
-MatcherPrefix : @string = t: ("pattern:" | "contains:" | "regex:") => @(t)
+// ---- characters --------------------------------------------------------------------------------------------------
 
-Rest : @string = t: [^ '\r' | '\n']* => @(t)
+// What char.IsWhiteSpace and string.Trim take for white space.
+Ws      = [\p{Zs} | \p{Zl} | \p{Zp} | '\t'..'\r' | '\u0085']
 
-Line : @TargetFilterLine = op: Operator? & matcher: MatcherPrefix? & rest: Rest & eof
-	=> @(new TargetFilterLine(op, matcher, rest))
+// What char.IsLetter takes for a letter: the head of a condition key or a matcher prefix.
+Letters = [\p{L}]+
+
+Escape  = '\\' & (any | eof)
+
+Generic = '<' & { (Generic | Escape | [^ '<' | '>' | '\\'])* } & ('>' | eof)
+
+// An array rank specifier, [], [,], [ , ]: one unit, so that its commas and spaces separate nothing; any other '['
+// is an ordinary character.
+Bracket = { '[' & [',' | ' ']* & ']' | '[' }
+
+Rest : @TextSpan = any* => @(Span(parserSpan))
+
+// ---- a line ------------------------------------------------------------------------------------------------------
+
+Line : @TargetFilterLineSyntax
+	= op: Operator & Ws* & body: Body & eof => @(Line(op, body))
+	| body: Body & eof                       => @(Line(null, body))
+
+Operator : @OperatorSyntax
+	= '-' => @(new OperatorSyntax(TargetFilterLinePrefix.Exclude, Span(parserSpan)))
+	| '&' => @(new OperatorSyntax(TargetFilterLinePrefix.And,     Span(parserSpan)))
+	| '|' => @(new OperatorSyntax(TargetFilterLinePrefix.Or,      Span(parserSpan)))
+
+// A matcher prefix is a word before the first top-level colon. Its name is compared as the filter language compares
+// names, ordinally and ignoring case, which a C# guard does exactly.
+Body : @BodySyntax
+	= m: MatcherName & when @(IsPatternMatcher(m.Text)) & Ws* & body: PatternBody => @(new BodySyntax(TargetFilterMatcher.Pattern, m.Span, body))
+	| m: MatcherName & when @(IsTextMatcher(m.Text))    & Ws* & body: TextBody    => @(new BodySyntax(TextMatcher(m.Text), m.Span, body))
+	| body: NativeBody                                                            => @(new BodySyntax(TargetFilterMatcher.Native, default(TextSpan), body))
+
+MatcherName : @NameSyntax = name: Letters & Ws* & ':' => @(new NameSyntax(name, Span(parserSpan)))
+
+TextBody : @TargetFilterBodySyntax
+	= eof          => @(new EmptyBodySyntax(Span(parserSpan)))
+	| text: Rest   => @(new TextBodySyntax(text))
+
+// A native line that begins with a word and a colon names a condition key; a word that is not one is an unknown key,
+// whatever follows it.
+NativeBody : @TargetFilterBodySyntax
+	= key: ?=KeyHead & when @(!IsConditionKey(key.Text)) & Rest => @(new UnknownKeyBodySyntax(Span(parserSpan), key.Span))
+	| body: PatternBody                                         => @(body)
+
+KeyHead : @NameSyntax = name: Letters & ?=(Ws* & ':') => @(new NameSyntax(name, Span(parserSpan)))
+
+// Which reading a native rule takes, in this order: a top-level semicolon, a condition key, or nothing but
+// accessibility and modifier words make it a condition rule; anything else is a method pattern.
+PatternBody : @TargetFilterBodySyntax
+	= eof                                                           => @(new EmptyBodySyntax(Span(parserSpan)))
+	| ?=TopLevelSemicolon & rule: ConditionLine                     => @(rule)
+	| key: ?=KeyHead & when @(IsConditionKey(key.Text)) & rule: ConditionLine => @(rule)
+	| ?=ModifierWords & rule: ConditionLine                         => @(rule)
+	| pattern: MethodPattern                                        => @(pattern)
+
+TopLevelSemicolon = { (Generic | Escape | [^ ';' | '<' | '\\'])* } & ';'
+
+ModifierWords = ModifierWord & (Ws+ & ModifierWord)* & Ws* & eof
+
+ModifierWord = ("public" | "private" | "protected" | "internal"
+	| "static" | "instance" | "abstract" | "virtual" | "override" | "sealed" | "extern" | "unsafe") & ?=(Ws | eof)
+
+// ---- condition rules ---------------------------------------------------------------------------------------------
+
+ConditionLine : @TargetFilterBodySyntax
+	= first: ItemText & (';' & more: ItemText)* => @(new ConditionLineSyntax(Span(parserSpan), Spans(first, more)))
+
+ItemText : @TextSpan = { (Generic | Escape | [^ ';' | '<' | '\\'])* } => @(Span(parserSpan))
+
+// Read over one trimmed item.
+ConditionItem : @ConditionItemSyntax
+	= key: KeyName & Ws* & ':' & Ws* & value: Rest & eof => @(new KeyItemSyntax(Span(parserSpan), key, value))
+	| words: Words                                     => @(new WordsItemSyntax(Span(parserSpan), words))
+
+KeyName : @TextSpan = Letters => @(Span(parserSpan))
+
+// A word never begins with an escape: escapes in front of a word are dropped with what they escape, and a run of
+// nothing else is no word at all (`\x` alone separates nothing and says nothing).
+Words : @WordsSyntax = Ws* & (first: Chunk & (Ws+ & more: Chunk)*)? & Ws* & eof => @(new WordsSyntax(Spans(first, more)))
+
+Chunk : @ChunkSyntax
+	= { Escape+ } & word: Word? => @(new ChunkSyntax(word))
+	| word: Word                => @(new ChunkSyntax(word))
+
+Word : @TextSpan = { (Bracket | Generic | WordCharacter) & (Bracket | Generic | Escape | WordCharacter)* } => @(Span(parserSpan))
+
+WordCharacter = [^ \p{Zs} | \p{Zl} | \p{Zp} | '\t'..'\r' | '\u0085' | '[' | '<' | '\\']
+
+// Read over one trimmed value, or over the values of one key joined with " | ".
+//
+// A value's operators are top-level when no `<…>` and no `(…)` is open before them, counted apart: `<` and `>` keep
+// one count, `(` and `)` another, and a closing bracket with nothing open is an ordinary character. Two counts that
+// interleave freely are more than a grammar can say; the guard counts them.
+ConditionValue : @ConditionValueSyntax = first: Alternative & ('|' & more: Alternative)* & eof
+	=> @(new ConditionValueSyntax(Alternatives(first, more)))
+
+Alternative : @ConditionAlternativeSyntax = first: Operand & ('&' & more: Operand)*
+	=> @(new ConditionAlternativeSyntax(Span(parserSpan), Spans(first, more)))
+
+Operand : @TextSpan = { (Escape | [^ '|' | '&' | '\\'] | when @(IsInsideBrackets(parserText)) & ['|' | '&'])* } => @(Span(parserSpan))
+
+// ---- dotted patterns ---------------------------------------------------------------------------------------------
+
+// Read over a trimmed dotted pattern, a type pattern with its C# aliases expanded, or the name of a method pattern.
+Dotted : @DottedSyntax = first: DottedPart & ('.' & more: DottedPart)* & eof => @(new DottedSyntax(Spans(first, more)))
+
+DottedPart : @TextSpan = { (Generic | Escape | [^ '.' | '<' | '\\'])* } => @(Span(parserSpan))
+
+// ---- method patterns ---------------------------------------------------------------------------------------------
+
+// The return type pattern follows the first top-level colon, wherever it stands; the parameter list opens at the
+// first top-level parenthesis before it and must close at the first top-level `)`, with nothing but white space after.
+MethodPattern : @TargetFilterBodySyntax
+	= name: NameText & parameters: ParameterGroup? & returns: ReturnText? & eof
+	=> @(new MethodPatternSyntax(Span(parserSpan), name, parameters, returns))
+
+ReturnText : @TextSpan = ':' & text: Rest => @(text)
+
+NameText : @TextSpan = { (Generic | Escape | [^ '(' | ':' | '<' | '\\'])* } => @(Span(parserSpan))
+
+ParameterGroup : @ParameterGroupSyntax
+	= '(' & inner: InnerText & ')' & Ws* & ?=(':' | eof)  => @(new ParameterGroupSyntax(Span(parserSpan), inner, true))
+	| '(' & { (Generic | Escape | [^ ':' | '<' | '\\'])* }    => @(new ParameterGroupSyntax(Span(parserSpan), default(TextSpan), false))
+
+InnerText : @TextSpan = { (Generic | Escape | [^ ')' | ':' | '<' | '\\'])* } => @(Span(parserSpan))
+
+// ---- parameter lists ---------------------------------------------------------------------------------------------
+
+// Read over a trimmed parameter list: in parentheses when the text opens with one that closes at its very end
+// (outside `<…>`), bare otherwise.
+ParameterList : @ParameterListSyntax
+	= '(' & inner: ParenthesizedText & ')' & eof => @(new ParameterListSyntax(true, inner))
+	| inner: Rest & eof                          => @(new ParameterListSyntax(false, inner))
+
+ParenthesizedText : @TextSpan = { (Generic | Escape | Parenthesized | [^ '(' | ')' | '<' | '\\'])* } => @(Span(parserSpan))
+
+Parenthesized = '(' & { (Generic | Escape | Parenthesized | [^ '(' | ')' | '<' | '\\'])* } & ')'
+
+// Read over the trimmed text inside a parameter list.
+ParameterParts : @ParameterPartsSyntax = first: ParameterPart & (',' & more: ParameterPart)* & eof
+	=> @(new ParameterPartsSyntax(Spans(first, more)))
+
+ParameterPart : @TextSpan = { (Bracket | Generic | Escape | [^ ',' | '[' | '<' | '\\'])* } => @(Span(parserSpan))
+
+// Read over one trimmed parameter. A modifier is a word followed by a space, then any white space.
+Parameter : @ParameterSyntax
+	= '_' & eof                               => @(new ParameterSyntax(ParameterSyntaxKind.Any, null, default(TextSpan), Span(parserSpan)))
+	| m: ParameterModifier & type: ParameterType => @(Parameter(m, type))
+	| type: ParameterType                     => @(Parameter(null, type))
+
+ParameterModifier : @ModifierSyntax
+	= "ref" & ' ' & Ws* & "readonly" & ' ' & Ws* => @(new ModifierSyntax(AspectFilters.ParameterModifier.RefReadOnly, Span(parserSpan)))
+	| "ref"    & ' ' & Ws*                        => @(new ModifierSyntax(AspectFilters.ParameterModifier.Ref,         Span(parserSpan)))
+	| "out"    & ' ' & Ws*                        => @(new ModifierSyntax(AspectFilters.ParameterModifier.Out,         Span(parserSpan)))
+	| "in"     & ' ' & Ws*                        => @(new ModifierSyntax(AspectFilters.ParameterModifier.In,          Span(parserSpan)))
+	| "params" & ' ' & Ws*                        => @(new ModifierSyntax(AspectFilters.ParameterModifier.Params,      Span(parserSpan)))
+
+ParameterType : @ParameterTypeSyntax
+	= "this " & any* => @(new ParameterTypeSyntax(true,  Span(parserSpan)))
+	| any*           => @(new ParameterTypeSyntax(false, Span(parserSpan)))
 
 parse Line
+parse ConditionItem
+parse Words
+parse ConditionValue
+parse Dotted
+parse ParameterList
+parse ParameterParts
+parse Parameter
