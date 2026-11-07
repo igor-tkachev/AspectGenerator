@@ -48,8 +48,7 @@ namespace AspectGenerator.Tests.TargetFilters
 		[TestMethod]
 		public void RecursiveWildcardMatchesAsByTryingEveryLengthTest()
 		{
-			// Short and long names (the match keeps the positions reached in one word up to 63 values, in arrays past it),
-			// patterns of literal, wildcard, prefix and ** segments.
+			// Short and long names, patterns of literal, wildcard, prefix and ** segments.
 			string[] pieces = ["**", "**", "*", "a", "b", "a*", "c"];
 			var random      = new TargetFilterCorpus.SplitMix64(0x4147_5446_444D_0001UL);
 			var checks      = 0;
@@ -78,21 +77,50 @@ namespace AspectGenerator.Tests.TargetFilters
 		{
 			// Each ** used to try every number of values, again for every ** after it: forty of them against a name of nine
 			// segments took tens of seconds per call. The bound is generous, for slow machines.
-			var target = Target(["A", "B", "C", "D", "E", "F", "G", "H", "Save"]);
+			var name = Target(["A", "B", "C", "D", "E", "F", "G", "H", "Save"]);
 
 			foreach (var count in new[] { 12, 20, 40, 200 })
 			{
-				var set   = AspectFilters.GetFilters("fullmethod: " + string.Concat(Enumerable.Repeat("**.", count)) + "Nope");
-				var watch = Stopwatch.StartNew();
+				var prefix = "fullmethod: " + string.Concat(Enumerable.Repeat("**.", count));
 
-				Assert.IsFalse(set.Evaluate(target).IsMatch);
-				Assert.IsTrue(AspectFilters.GetFilters("fullmethod: " + string.Concat(Enumerable.Repeat("**.", count)) + "Save").Evaluate(target).IsMatch);
-
-				var line = $"{count} recursive wildcards against 9 segments: {watch.Elapsed.TotalMilliseconds:F2} ms";
-
-				TestContext.WriteLine(line);
-				Assert.IsTrue(watch.Elapsed.TotalMilliseconds < 500, line);
+				AssertTime(prefix + "Nope", name, expected: false);
+				AssertTime(prefix + "Save", name, expected: true);
 			}
+		}
+
+		[TestMethod]
+		public void MatchComparesOnlyTheSegmentsItNeedsTest()
+		{
+			// The first way that matches is the answer, so a name that matches early is not compared further: here each of
+			// the eight later segments would be a regular expression run of 200 ms that times out.
+			var segments = new[] { new string('a', 10) + "b" }.Concat(Enumerable.Repeat(new string('a', 32), 8));
+
+			AssertTime("fullmethod: **." + string.Concat(Enumerable.Repeat("a*", 10)) + "b.**", Target(segments), expected: true);
+
+			// A long name of literal segments and a final **: one comparison a segment.
+			var literal = Enumerable.Range(0, 16_000).Select(static i => "S" + i).ToArray();
+
+			AssertTime("fullmethod: " + string.Join(".", literal.Take(15_000)) + ".**", Target(literal), expected: true);
+			AssertTime("fullmethod: " + string.Join(".", literal.Take(15_000)) + ".Nope.**", Target(literal), expected: false);
+		}
+
+		void AssertTime(string filter, AspectFilters.MethodTarget target, bool expected)
+		{
+			// The filter must compile to one rule, or the time measured is of nothing.
+			var diagnostics = new List<AspectFilters.TargetFilterDiagnostic>();
+			var set         = AspectFilters.GetFilters(filter, diagnostics.Add);
+
+			Assert.AreEqual(1, set.Rules.Count, filter[..Math.Min(60, filter.Length)]);
+			Assert.AreEqual(0, diagnostics.Count, string.Join(", ", diagnostics.Select(static d => d.Message)));
+
+			var watch = Stopwatch.StartNew();
+
+			Assert.AreEqual(expected, set.Evaluate(target).IsMatch, filter[..Math.Min(60, filter.Length)]);
+
+			var line = $"{filter[..Math.Min(40, filter.Length)]}… ({filter.Length} characters) against {target.FullMethodSegments.Count} segments: {watch.Elapsed.TotalMilliseconds:F2} ms";
+
+			TestContext.WriteLine(line);
+			Assert.IsTrue(watch.Elapsed.TotalMilliseconds < 500, line);
 		}
 	}
 }

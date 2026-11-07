@@ -1322,12 +1322,10 @@ namespace AspectGenerator
 		sealed class DottedPattern
 		{
 			readonly ImmutableArray<SegmentMatcher> _segments;
-			readonly bool                           _hasRecursive;
 
 			DottedPattern(ImmutableArray<SegmentMatcher> segments)
 			{
-				_segments     = segments;
-				_hasRecursive = segments.Any(static s => s.Kind == SegmentMatcherKind.Recursive);
+				_segments = segments;
 			}
 
 			public ImmutableArray<SegmentMatcher> Segments => _segments;
@@ -1385,111 +1383,60 @@ namespace AspectGenerator
 
 			/// <summary>
 			/// Whether the segments match the values in order, a <c>**</c> standing for any number of values (none included)
-			/// and a final <c>**</c> for whatever is left. The set of value positions the pattern can have reached is carried
-			/// from one segment to the next, so every segment is compared with every value at most once: a pattern with many
-			/// <c>**</c> costs its length times the name's, not a power of it.
+			/// and a final <c>**</c> for whatever is left.
 			/// </summary>
+			/// <remarks>
+			/// Each <c>**</c> tries the number of values it takes in turn, fewest first, and the first way that matches is the
+			/// answer, so a segment is compared with a value only when a way being tried reaches that pair. A way that fails is
+			/// remembered by where it starts (the segment after a <c>**</c> and the value it is tried at), and is not tried
+			/// again from another <c>**</c>: without that, k of them try a power of the name's length in ways. The comparisons
+			/// made are the ones an exhaustive search would make, in its order, less the repeats, so the answer is the same
+			/// whatever a segment's comparison answers, a regular expression that times out included.
+			/// </remarks>
 			public bool IsMatch(List<string> values)
 			{
-				var count = values.Count;
+				var failed = default(ulong[]);
 
-				if (!_hasRecursive)
-				{
-					if (count != _segments.Length)
-						return false;
-
-					for (var i = 0; i < count; i++)
-						if (!_segments[i].IsMatch(values[i]))
-							return false;
-
-					return true;
-				}
-
-				return count < 64 ? IsMatchInBits(values) : IsMatchInArrays(values);
+				return IsMatch(values, 0, 0, ref failed);
 			}
 
-			/// <summary>The positions reached as the bits of one word: bit i is "the first i values are matched".</summary>
-			bool IsMatchInBits(List<string> values)
+			bool IsMatch(List<string> values, int patternIndex, int valueIndex, ref ulong[]? failed)
 			{
-				var count   = values.Count;
-				var all     = count == 63 ? ulong.MaxValue : (1UL << (count + 1)) - 1;
-				var current = 1UL;
-
-				for (var patternIndex = 0; patternIndex < _segments.Length; patternIndex++)
+				while (patternIndex < _segments.Length)
 				{
 					var segment = _segments[patternIndex];
-					var next    = 0UL;
 
 					if (segment.Kind == SegmentMatcherKind.Recursive)
 					{
 						if (patternIndex == _segments.Length - 1)
 							return true;
 
-						// Every position from the first one reached on.
-						var lowest = current & (~current + 1);
-
-						next = all & ~(lowest - 1);
-					}
-					else
-					{
-						for (var i = 0; i < count; i++)
-							if ((current >> i & 1) != 0 && segment.IsMatch(values[i]))
-								next |= 1UL << (i + 1);
-					}
-
-					if (next == 0)
-						return false;
-
-					current = next;
-				}
-
-				return (current >> count & 1) != 0;
-			}
-
-			bool IsMatchInArrays(List<string> values)
-			{
-				var count   = values.Count;
-				var current = new bool[count + 1];
-				var next    = new bool[count + 1];
-
-				current[0] = true;
-
-				for (var patternIndex = 0; patternIndex < _segments.Length; patternIndex++)
-				{
-					var segment = _segments[patternIndex];
-					var any     = false;
-
-					Array.Clear(next, 0, next.Length);
-
-					if (segment.Kind == SegmentMatcherKind.Recursive)
-					{
-						if (patternIndex == _segments.Length - 1)
-							return true;
-
-						for (var i = Array.IndexOf(current, true); i <= count; i++)
-							next[i] = true;
-
-						any = true;
-					}
-					else
-					{
-						for (var i = 0; i < count; i++)
+						for (var i = valueIndex; i <= values.Count; i++)
 						{
-							if (current[i] && segment.IsMatch(values[i]))
-							{
-								next[i + 1] = true;
-								any         = true;
-							}
+							// The ways that start at the next segment, one per value index.
+							var way = (patternIndex + 1) * (values.Count + 1) + i;
+
+							if (failed is not null && (failed[way >> 6] & 1UL << (way & 63)) != 0)
+								continue;
+
+							if (IsMatch(values, patternIndex + 1, i, ref failed))
+								return true;
+
+							failed ??= new ulong[((_segments.Length + 1) * (values.Count + 1) + 63) >> 6];
+							failed[way >> 6] |= 1UL << (way & 63);
 						}
+
+						return false;
 					}
 
-					if (!any)
+					if (valueIndex >= values.Count || !segment.IsMatch(values[valueIndex]))
 						return false;
 
-					(current, next) = (next, current);
+					patternIndex++;
+					valueIndex++;
 				}
 
-				return current[count];
+				return valueIndex == values.Count;
 			}
 		}
 
