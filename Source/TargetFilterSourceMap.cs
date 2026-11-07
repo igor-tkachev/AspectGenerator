@@ -28,13 +28,20 @@ namespace AspectGenerator
 		// itself, so this only bounds the work.
 		const int MaxDepth = 64;
 
+		// How many expressions one trace may visit and characters it may write, on top of the filter's own length. Each
+		// const is traced once and copied where it is used again, so a trace is linear in the source it reads; the budget
+		// stops one that reads too much source for too short a filter, which then points at the attribute.
+		const int MaxWork = 100_000;
+
 		readonly SyntaxTree[] _trees;
 		readonly TextSpan[]   _spans;
+		readonly int[]        _units;
 
-		TargetFilterSourceMap(SyntaxTree[] trees, TextSpan[] spans)
+		TargetFilterSourceMap(SyntaxTree[] trees, TextSpan[] spans, int[] units)
 		{
 			_trees = trees;
 			_spans = spans;
+			_units = units;
 		}
 
 		/// <summary>
@@ -43,12 +50,18 @@ namespace AspectGenerator
 		/// </summary>
 		public static TargetFilterSourceMap? Create(ExpressionSyntax expression, Compilation compilation, string value)
 		{
-			var builder = new Builder(compilation);
+			return Create(expression, compilation, value, MaxWork);
+		}
+
+		/// <summary>The map, with a budget of <paramref name="maxWork"/> expressions and characters on top of the value's length.</summary>
+		internal static TargetFilterSourceMap? Create(ExpressionSyntax expression, Compilation compilation, string value, int maxWork)
+		{
+			var builder = new Builder(compilation, value.Length, maxWork);
 
 			if (!builder.Append(expression, 0) || !string.Equals(builder.Text.ToString(), value, System.StringComparison.Ordinal))
 				return null;
 
-			return new TargetFilterSourceMap(builder.Trees.ToArray(), builder.Spans.ToArray());
+			return new TargetFilterSourceMap(builder.Trees.ToArray(), builder.Spans.ToArray(), builder.Units.ToArray());
 		}
 
 		/// <summary>
@@ -70,23 +83,34 @@ namespace AspectGenerator
 
 			var tree = _trees[span.Start];
 
-			// The two halves of a surrogate pair one escape makes share its span.
+			// Every character comes after the one before it in the source, except the two halves of a surrogate pair one
+			// escape makes, which share the escape. The same source text used twice (a const referenced twice) is not in
+			// order, and points nowhere.
 			for (var i = span.Start + 1; i < span.End; i++)
-				if (_trees[i] != tree || _spans[i] != _spans[i - 1] && _spans[i].Start < _spans[i - 1].End)
+				if (_trees[i] != tree || _units[i] != _units[i - 1] && _spans[i].Start < _spans[i - 1].End)
 					return null;
 
 			return Location.Create(tree, TextSpan.FromBounds(_spans[span.Start].Start, _spans[span.End - 1].End));
 		}
 
-		sealed class Builder(Compilation compilation)
+		sealed class Builder(Compilation compilation, int length, int maxWork)
 		{
+			// What a const traced before wrote: where in the trace, or -1 where it could not be traced.
+			readonly Dictionary<ISymbol,(int Start, int Length)> _constants = new(SymbolEqualityComparer.Default);
+
+			int _work;
+			int _unit;
+
 			public StringBuilder    Text  { get; } = new();
 			public List<SyntaxTree> Trees { get; } = new();
 			public List<TextSpan>   Spans { get; } = new();
 
+			/// <summary>The source unit (a character, an escape sequence) each character was made from: equal only for the two halves of one escape.</summary>
+			public List<int>        Units { get; } = new();
+
 			public bool Append(ExpressionSyntax expression, int depth)
 			{
-				if (depth > MaxDepth)
+				if (depth > MaxDepth || ++_work > maxWork + length || Text.Length > length)
 					return false;
 
 				switch (expression)
@@ -125,13 +149,49 @@ namespace AspectGenerator
 				if (symbol is not (IFieldSymbol { IsConst: true } or ILocalSymbol { IsConst: true }))
 					return false;
 
+				// A const traced before is copied, so that one used many times (each the sum of two others) costs its
+				// length, not the size of the tree of references below it.
+				if (_constants.TryGetValue(symbol, out var traced))
+					return traced.Start >= 0 && Copy(traced.Start, traced.Length);
+
 				// A const field declared once: one declarator, with its initializer.
 				if (symbol.DeclaringSyntaxReferences is not [var reference] ||
 					reference.GetSyntax() is not VariableDeclaratorSyntax { Initializer.Value: var initializer } ||
 					!compilation.ContainsSyntaxTree(initializer.SyntaxTree))
+				{
+					_constants[symbol] = (-1, 0);
+					return false;
+				}
+
+				var start = Text.Length;
+				var ok    = Append(initializer, depth + 1);
+
+				_constants[symbol] = ok ? (start, Text.Length - start) : (-1, 0);
+				return ok;
+			}
+
+			/// <summary>Writes again what the trace wrote at <paramref name="start"/>, as source units of their own.</summary>
+			bool Copy(int start, int count)
+			{
+				_work += count;
+
+				if (_work > maxWork + length || Text.Length + count > length)
 					return false;
 
-				return Append(initializer, depth + 1);
+				var units = new Dictionary<int,int>();
+
+				for (var i = start; i < start + count; i++)
+				{
+					if (!units.TryGetValue(Units[i], out var unit))
+						units[Units[i]] = unit = ++_unit;
+
+					Text.Append(Text[i]);
+					Trees.Add(Trees[i]);
+					Spans.Add(Spans[i]);
+					Units.Add(unit);
+				}
+
+				return true;
 			}
 
 			bool AppendLiteral(SyntaxToken token)
@@ -373,7 +433,7 @@ namespace AspectGenerator
 						var pair = char.ConvertFromUtf32(code);
 
 						Add(tree, offset + i, offset + i + length, pair[0]);
-						Add(tree, offset + i, offset + i + length, pair[1]);
+						Add(tree, offset + i, offset + i + length, pair[1], sameUnit: true);
 					}
 					else
 						Add(tree, offset + i, offset + i + length, (char)code);
@@ -384,11 +444,18 @@ namespace AspectGenerator
 				return true;
 			}
 
-			void Add(SyntaxTree tree, int start, int end, char ch)
+			void Add(SyntaxTree tree, int start, int end, char ch, bool sameUnit = false)
 			{
+				// A literal is read to its end; Append stops the trace at the next expression once it is over budget.
+				_work++;
+
+				if (!sameUnit)
+					_unit++;
+
 				Text.Append(ch);
 				Trees.Add(tree);
 				Spans.Add(TextSpan.FromBounds(start, end));
+				Units.Add(_unit);
 			}
 		}
 

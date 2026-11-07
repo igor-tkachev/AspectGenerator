@@ -96,6 +96,59 @@ namespace AspectGenerator.Tests.TargetFilters
 			Assert.IsNull(map.Locate(new TextSpan(1, 2)));
 		}
 
+		[TestMethod]
+		public void OneConstantUsedTwiceIsNotOneRunOfCharactersTest()
+		{
+			// The two characters are the one character of A, twice: each points at it, the two together at nothing.
+			var (expression, compilation, constant) = Parse("const string A = \"[\"; const string Value = \"regex: \" + A + A;");
+			var map = TargetFilterSourceMap.Create(expression, compilation, constant)!;
+
+			Assert.IsNotNull(map);
+			Assert.IsNotNull(map.Locate(new TextSpan(7, 1)));
+			Assert.IsNotNull(map.Locate(new TextSpan(8, 1)));
+			Assert.AreEqual(map.Locate(new TextSpan(7, 1)), map.Locate(new TextSpan(8, 1)));
+			Assert.IsNull(map.Locate(new TextSpan(7, 2)));
+
+			// The two halves of one escape do make one run.
+			var (pair, pairCompilation, pairConstant) = Parse("const string Value = \"a\\U0001F600\";");
+			var pairMap = TargetFilterSourceMap.Create(pair, pairCompilation, pairConstant)!;
+
+			Assert.AreEqual("\\U0001F600", pair.SyntaxTree.GetText().ToString(pairMap.Locate(new TextSpan(1, 2))!.SourceSpan));
+		}
+
+		[TestMethod]
+		public void ConstantsThatDoubleAtEveryLevelAreTracedOnceEachTest()
+		{
+			var declaration = new StringBuilder("const string E0 = \"\";");
+
+			for (var i = 1; i <= 30; i++)
+				declaration.Append(CultureInfo.InvariantCulture, $" const string E{i} = E{i - 1} + E{i - 1};");
+
+			declaration.Append(" const string Value = \"foo: bar\" + E30;");
+
+			var (expression, compilation, constant) = Parse(declaration.ToString());
+			var watch = System.Diagnostics.Stopwatch.StartNew();
+			var map   = TargetFilterSourceMap.Create(expression, compilation, constant);
+
+			watch.Stop();
+
+			Assert.IsNotNull(map);
+			Assert.AreEqual("foo", expression.SyntaxTree.GetText().ToString(map.Locate(new TextSpan(0, 3))!.SourceSpan));
+			Assert.IsTrue(watch.Elapsed < TimeSpan.FromSeconds(2), $"Traced in {watch.Elapsed}.");
+		}
+
+		[TestMethod]
+		public void ATraceOverItsBudgetIsNotTracedTest()
+		{
+			// Two thousand empty holes make a filter of three characters: past a budget of a thousand, no trace at all; within
+			// one of ten thousand, a trace.
+			var holes = string.Concat(Enumerable.Repeat("{\"\"}", 2_000));
+			var (expression, compilation, constant) = Parse("const string Value = $\"abc" + holes + "\";");
+
+			Assert.IsNull(TargetFilterSourceMap.Create(expression, compilation, constant, maxWork: 1_000));
+			Assert.IsNotNull(TargetFilterSourceMap.Create(expression, compilation, constant, maxWork: 10_000));
+		}
+
 		static void AssertTraced(TargetFilterSourceMap map, SyntaxTree tree, string value, string kind, string literal)
 		{
 			var text = tree.GetText();

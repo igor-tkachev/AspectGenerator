@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -133,6 +136,62 @@ namespace AspectGenerator.Tests
 			const string expression = "AspectGenerator.Tests.Library.LibraryFilters.Bad";
 
 			AssertLocated(new LocatedCase("library const", expression, "AG0204", 3, 11, AttributeText), LocatedSource(expression, ""), library);
+		}
+
+		[TestMethod]
+		public void AnUntraceableDefaultFilterIsReportedOnceAtTheAspectTest()
+		{
+			// nameof cannot be traced: the default filter's diagnostic points at the [Aspect] attribute, once for both
+			// applications, not at each of them.
+			var aspect = "Aspect(OnAfterCall = nameof(After), DefaultTargetFilter = \"foo: bar\" + nameof(FAttribute))";
+			var source = string.Join(
+				"\n",
+				"using System;",
+				"using AspectGenerator;",
+				"namespace AspectGenerator.Tests.GeneratorDriver;",
+				"[" + aspect + "]",
+				"[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]",
+				"sealed class FAttribute : Attribute",
+				"{",
+				"\tpublic static void After(InterceptInfo<string> info) { info.ReturnValue += \" f\"; }",
+				"}",
+				"[F] sealed class One { public string Save() { return \"\"; } public void Invoke() { Save(); } }",
+				"[F] sealed class Two { public string Load() { return \"\"; } public void Invoke() { Load(); } }",
+				"");
+
+			AssertLocated(new LocatedCase("untraceable default filter", "", "AG0204", 3, 1, aspect), source);
+		}
+
+		[TestMethod]
+		public void ConstantsThatDoubleAtEveryLevelAreTracedInLinearTimeTest()
+		{
+			// E30 is the sum of 2^30 empty strings by its references; each const is traced once, so the filter is located
+			// at once, in the literal before it.
+			var constants = new StringBuilder("static class E { public const string E0 = \"\";");
+
+			for (var i = 1; i <= 30; i++)
+				constants.Append(CultureInfo.InvariantCulture, $" public const string E{i} = E{i - 1} + E{i - 1};");
+
+			constants.Append(" }");
+
+			var watch = Stopwatch.StartNew();
+
+			AssertLocated(new LocatedCase("doubling constants", "", "AG0204", 5, 3, "foo"), LocatedSource("\"foo: bar\" + E.E30", constants.ToString()));
+
+			// Two runs (a build and a design-time build) of a generator over a small file; tracing 2^30 references would
+			// take minutes.
+			Assert.IsTrue(watch.Elapsed < TimeSpan.FromSeconds(20), $"Located in {watch.Elapsed}.");
+		}
+
+		[TestMethod]
+		public void TheSameConstantTwiceInARuleIsNotLocatedInItTest()
+		{
+			// "[[" is made of one "[" used twice: no characters of the source say it, so it points at the attribute.
+			const string expression = "\"regex: \" + Filters.Bracket + Filters.Bracket";
+
+			AssertLocated(
+				new LocatedCase("one const twice", expression, "AG0201", 3, 11, AttributeText),
+				LocatedSource(expression, "static class Filters { public const string Bracket = \"[\"; }"));
 		}
 
 		/// <summary>The assembly-level source with <paramref name="expression"/> as the filter; an array property where it is an array.</summary>

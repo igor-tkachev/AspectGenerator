@@ -805,8 +805,9 @@ namespace AspectGenerator
 		/// <c>TargetFilter</c> (a string or an array of them), read as one list of lines. A diagnostic points at the characters
 		/// of the filter it is about where they can be found in the source (<see cref="TargetFilterSourceMap"/>): the
 		/// <c>TargetFilter</c> argument of the application, or the <c>DefaultTargetFilter</c> argument of an aspect declared in
-		/// the compilation. Otherwise, as for an aspect of a referenced assembly, it points at <paramref name="location"/>,
-		/// the application.
+		/// the compilation. Where they cannot be traced, a diagnostic of that default filter points at the aspect's
+		/// <c>[Aspect]</c> attribute, and any other, as one of an aspect of a referenced assembly, at
+		/// <paramref name="location"/>, the application.
 		/// </summary>
 		AspectFilters.TargetFilterSet CompileAspectFilters(AttributeInfo definition, object? targetFilter, ExpressionSyntax? targetFilterExpression, Location? location)
 		{
@@ -818,6 +819,11 @@ namespace AspectGenerator
 				filters.Add("method: *");
 				sources.Add(null);
 			}
+
+			// The default filter belongs to the aspect: one declared in the compilation is reported at its [Aspect]
+			// attribute, once, where its characters cannot be traced as well.
+			var defaultIndex    = filters.Count;
+			var defaultLocation = definition.AspectDefinitionSyntax?.GetLocation();
 
 			filters.Add(definition.DefaultTargetFilter);
 			sources.Add(GetNamedArgumentExpression(definition.AspectDefinitionSyntax, "DefaultTargetFilter"));
@@ -847,7 +853,7 @@ namespace AspectGenerator
 				_diagnostics.Report(
 					diagnostic.Id,
 					diagnostic.Message,
-					Locate(diagnostic) ?? location,
+					Locate(diagnostic) ?? (diagnostic.FilterIndex == defaultIndex ? defaultLocation : null) ?? location,
 					diagnostic.Severity);
 			}
 
