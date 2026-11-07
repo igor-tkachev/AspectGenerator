@@ -1323,9 +1323,13 @@ namespace AspectGenerator
 		{
 			readonly ImmutableArray<SegmentMatcher> _segments;
 
+			/// <summary>Only a ** after another one can try a way again, so a pattern with one ** has nothing to remember.</summary>
+			readonly bool _rememberWays;
+
 			DottedPattern(ImmutableArray<SegmentMatcher> segments)
 			{
-				_segments = segments;
+				_segments     = segments;
+				_rememberWays = segments.Count(static s => s.Kind == SegmentMatcherKind.Recursive) > 1;
 			}
 
 			public ImmutableArray<SegmentMatcher> Segments => _segments;
@@ -1422,8 +1426,11 @@ namespace AspectGenerator
 							if (IsMatch(values, patternIndex + 1, i, ref failed))
 								return true;
 
-							failed ??= new ulong[((_segments.Length + 1) * (values.Count + 1) + 63) >> 6];
-							failed[way >> 6] |= 1UL << (way & 63);
+							if (_rememberWays)
+							{
+								failed ??= new ulong[((_segments.Length + 1) * (values.Count + 1) + 63) >> 6];
+								failed[way >> 6] |= 1UL << (way & 63);
+							}
 						}
 
 						return false;
