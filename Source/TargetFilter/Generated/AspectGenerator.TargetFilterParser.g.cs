@@ -7103,10 +7103,6 @@ namespace AspectGenerator
 
 					if (q0 < 0)
 					{
-					}
-
-					if (q0 < 0)
-					{
 						if (t0 < 1)
 							return -1;
 
@@ -7441,10 +7437,6 @@ namespace AspectGenerator
 					q0 = ReadPart1_Bracket(p, start);
 
 					if (q0 < 0)
-					{
-					}
-
-					if (q0 < 0)
 						ways.Next(w0, 1, 1);
 				}
 				if (q0 < 0 && d0 <= 1)
@@ -7452,10 +7444,6 @@ namespace AspectGenerator
 					var s2  = ways.Cursor;
 
 					q0 = ReadPart2_Bracket(p, start);
-
-					if (q0 < 0)
-					{
-					}
 				}
 
 				if (q0 < 0)
@@ -7561,10 +7549,6 @@ namespace AspectGenerator
 					var q0 = -1;
 
 					q0 = ReadPart1_Generic(p, start);
-
-					if (q0 < 0)
-					{
-					}
 
 					if (q0 < 0)
 					{
@@ -8299,15 +8283,9 @@ namespace AspectGenerator
 						break;
 					}
 
-					var rr2_11 = values.Count11;
 					var q1 = -1;
 
 					q1 = ReadPart0_ConditionValue(p, pos, rb_11);
-
-					if (q1 < 0)
-					{
-						values.Count11 = rr2_11;
-					}
 
 					if (q1 < 0)
 					{
@@ -8365,15 +8343,9 @@ namespace AspectGenerator
 						break;
 					}
 
-					var rr2_3 = values.Count3;
 					var q1 = -1;
 
 					q1 = ReadPart0_Alternative(p, pos, rb_3);
-
-					if (q1 < 0)
-					{
-						values.Count3 = rr2_3;
-					}
 
 					if (q1 < 0)
 					{
@@ -8650,15 +8622,9 @@ namespace AspectGenerator
 						break;
 					}
 
-					var rr2_3 = values.Count3;
 					var q1 = -1;
 
 					q1 = ReadPart0_Dotted(p, pos, rb_3);
-
-					if (q1 < 0)
-					{
-						values.Count3 = rr2_3;
-					}
 
 					if (q1 < 0)
 					{
@@ -8738,10 +8704,6 @@ namespace AspectGenerator
 					var q0 = -1;
 
 					q0 = ReadPart1_DottedPart(p, start);
-
-					if (q0 < 0)
-					{
-					}
 
 					if (q0 < 0)
 					{
@@ -8852,10 +8814,6 @@ namespace AspectGenerator
 					var q0 = -1;
 
 					q0 = ReadPart1_Generic(p, start);
-
-					if (q0 < 0)
-					{
-					}
 
 					if (q0 < 0)
 					{
@@ -9543,10 +9501,6 @@ namespace AspectGenerator
 					q0 = ReadPart0_ParameterList(p, pos);
 
 					if (q0 < 0)
-					{
-					}
-
-					if (q0 < 0)
 						ways.Next(w0, 1, 1);
 				}
 				if (q0 < 0 && d0 <= 1)
@@ -9554,10 +9508,6 @@ namespace AspectGenerator
 					var s2  = ways.Cursor;
 
 					q0 = ReadPart1_ParameterList(p, pos);
-
-					if (q0 < 0)
-					{
-					}
 				}
 
 				if (q0 < 0)
@@ -9656,10 +9606,6 @@ namespace AspectGenerator
 					var q0 = -1;
 
 					q0 = ReadPart1_ParenthesizedText(p, start);
-
-					if (q0 < 0)
-					{
-					}
 
 					if (q0 < 0)
 					{
@@ -9776,10 +9722,6 @@ namespace AspectGenerator
 					var q0 = -1;
 
 					q0 = ReadPart1_Generic(p, start);
-
-					if (q0 < 0)
-					{
-					}
 
 					if (q0 < 0)
 					{
@@ -9965,10 +9907,6 @@ namespace AspectGenerator
 					var q0 = -1;
 
 					q0 = ReadPart1_Parenthesized(p, start);
-
-					if (q0 < 0)
-					{
-					}
 
 					if (q0 < 0)
 					{
@@ -11030,10 +10968,6 @@ namespace AspectGenerator
 					q0 = ReadPart1_Bracket(p, start);
 
 					if (q0 < 0)
-					{
-					}
-
-					if (q0 < 0)
 						ways.Next(w0, 1, 1);
 				}
 				if (q0 < 0 && d0 <= 1)
@@ -11041,10 +10975,6 @@ namespace AspectGenerator
 					var s2  = ways.Cursor;
 
 					q0 = ReadPart2_Bracket(p, start);
-
-					if (q0 < 0)
-					{
-					}
 				}
 
 				if (q0 < 0)
@@ -11150,10 +11080,6 @@ namespace AspectGenerator
 					var q0 = -1;
 
 					q0 = ReadPart1_Generic(p, start);
-
-					if (q0 < 0)
-					{
-					}
 
 					if (q0 < 0)
 					{
@@ -11855,10 +11781,6 @@ namespace AspectGenerator
 					q0 = ReadPart0_Parameter(p, pos);
 
 					if (q0 < 0)
-					{
-					}
-
-					if (q0 < 0)
 						ways.Next(w0, 1, 2);
 				}
 				if (q0 < 0 && d0 <= 1)
@@ -12538,10 +12460,6 @@ namespace AspectGenerator
 					q0 = ReadPart0_ParameterType(p, pos);
 
 					if (q0 < 0)
-					{
-					}
-
-					if (q0 < 0)
 						ways.Next(w0, 1, 1);
 				}
 				if (q0 < 0 && d0 <= 1)
@@ -12549,10 +12467,6 @@ namespace AspectGenerator
 					var s2  = ways.Cursor;
 
 					q0 = ReadPart1_ParameterType(p, pos);
-
-					if (q0 < 0)
-					{
-					}
 				}
 
 				if (q0 < 0)
@@ -13774,55 +13688,25 @@ namespace AspectGenerator
 			return false;
 		}
 
-		/// <summary>
-		/// Half-open range of the input: [Start, End).
-		/// </summary>
-		/// <remarks>
-		/// <para>
-		/// What a capture of type <c>SourceSpan</c> comes back as, and what a
-		/// <c>recover</c> factory asking for <c>parserSpan</c> is handed (docs/syntax.md
-		/// §8.2). Two integers rather than the text between them: the text is already in the
-		/// caller's hands, and cutting a string out of it is the one allocation a parse
-		/// cannot avoid on the caller's behalf.
-		/// </para>
-		/// <para>
-		/// Ours rather than <c>System.Range</c>, because a consumer building for an older
-		/// framework very likely polyfills that one and two definitions of it in a
-		/// compilation is an error. Nested in the host class rather than put in a namespace,
-		/// because a type in a namespace has to be internal for two assemblies not to
-		/// collide over it — and internal is what a public method may not return. Here the
-		/// name belongs to the host, so neither is a problem.
-		/// </para>
-		/// <para>
-		/// It says where, not when. A span outlives nothing: read it against the same text
-		/// that was parsed, and against nothing else.
-		/// </para>
-		/// </remarks>
-		public readonly struct SourceSpan
+		internal readonly partial struct SourceSpan
 		{
-			/// <summary>A span of <paramref name="length"/> items beginning at <paramref name="start"/>.</summary>
 			public SourceSpan(int start, int length)
 			{
 				Start  = start;
 				Length = length;
 			}
 
-			/// <summary>Where it begins.</summary>
 			public int Start { get; }
 
-			/// <summary>How much of the input it covers.</summary>
 			public int Length { get; }
 
-			/// <summary>One past the last item, so an empty span has End equal to Start.</summary>
 			public int End { get { return Start + Length; } }
 
-			/// <summary>The text it covers, taken from the text it was measured against.</summary>
 			public global::System.ReadOnlySpan<char> On(global::System.ReadOnlySpan<char> text)
 			{
 				return text.Slice(Start, Length);
 			}
 
-			/// <summary>Where it begins and one past where it ends, as <c>[start..end)</c>.</summary>
 			public override string ToString() { return "[" + Start + ".." + End + ")"; }
 		}
 

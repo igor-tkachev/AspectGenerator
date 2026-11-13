@@ -3,33 +3,18 @@
 namespace DotGram
 {
 	/// <summary>
-	/// One reading of the grammar a class carries, beside the one <c>[Gram]</c> asks
-	/// for.
+	/// How a reading of a grammar is compiled: the options <c>[Gram]</c> and
+	/// <c>[GramParserVariant]</c> share.
 	/// </summary>
 	/// <remarks>
-	/// The same grammar compiled again under different options — another carrier,
-	/// another division, locations where the first has none. Each reading needs a
-	/// scope of its own, so each names a nested class with <see cref="Suffix"/>, and
-	/// what it does not say it takes from <c>[Gram]</c>.
+	/// Never written itself. A class writes one <c>[Gram]</c>, which says which grammar,
+	/// and a <c>[GramParserVariant]</c> for every further reading of it; an option that means
+	/// something on only one of the two is declared on that one.
 	/// </remarks>
-	[global::System.AttributeUsage(global::System.AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	[global::Microsoft.CodeAnalysis.Embedded]
-	internal class GramOptionsAttribute : global::System.Attribute
+	internal abstract class GramReadingAttribute : global::System.Attribute
 	{
-		/// <summary>
-		/// The nested class this compilation goes into, where the host has more
-		/// than one. One identifier; the host class itself where nothing is said.
-		/// </summary>
-		/// <remarks>
-		/// Two compilations cannot share a scope — a file's support is written
-		/// once and named for what it is — so the second gets a class, and its
-		/// parse methods are reached through it: <c>Sql.Immediate.TryParseR</c>.
-		/// What the host declares is still in reach from inside, a nested class
-		/// reading the static members around it by their simple names.
-		/// </remarks>
-		public string Suffix { get; set; }
-
 		/// <summary>
 		/// How large the parts of a divided recognizer are aimed to be, in the
 		/// generator's estimate of basic blocks. Zero takes the measured default.
@@ -45,7 +30,7 @@ namespace DotGram
 		/// recognizer asks for one part, and nothing written here can fail a
 		/// build.
 		/// </remarks>
-		public int PartSize { get; set; }
+		public int TargetMethodPartSize { get; set; }
 
 		/// <summary>
 		/// Read the input as tokens rather than as characters.
@@ -53,7 +38,7 @@ namespace DotGram
 		/// <remarks>
 		/// The grammar is cut in two: a lexical machine over characters that
 		/// answers with token kinds, and the same syntactic machine over those
-		/// (docs/design/lexical-adt-design.md). Nothing about the grammar changes and
+		/// (docs/internal/design/lexical-adt-design.md). Nothing about the grammar changes and
 		/// nothing about the published methods changes — they take a string and
 		/// answer as they did.
 		///
@@ -78,28 +63,28 @@ namespace DotGram
 		/// </summary>
 		/// <remarks>
 		/// <c>GramCarrier.Auto</c> unless set, which is <c>Immediate</c> wherever that
-		/// carrier can carry the grammar; where the tape would be safer the build says so
+		/// carrier can carry the grammar; where <c>Deferred</c> would be safer the build says so
 		/// (GRAM5016, GRAM5012). What each carrier gives up is written on it. A part of the
-		/// grammar the carrier cannot carry is compiled on the tape.
+		/// grammar the carrier cannot carry is compiled deferred.
 		/// </remarks>
 		public GramCarrier Carrier { get; set; }
 
 		/// <summary>
 		/// Says a construction may throw on a reading the parse gives up: carried
-		/// immediately, what one throws is then thrown only where the tape would have
-		/// built the value, and a refused parse throws nothing. Costs every construction
-		/// a little; the tape ignores it.
+		/// immediately, what one throws is then thrown only where the deferred carrier
+		/// would have built the value, and a refused parse throws nothing. Costs every
+		/// construction a little; the deferred carrier ignores it.
 		/// </summary>
 		public bool ConstructionsMayThrow { get; set; }
 
-		/// <summary>Add buffered pull-input publications beside existing forms.</summary>
-		public bool BufferedInput { get; set; }
+		/// <summary>Add buffered text-input publications, over a reader, beside existing forms.</summary>
+		public bool BufferedText { get; set; }
 
 		/// <summary>Add buffered byte-input publications; no text decoding is performed.</summary>
 		public bool BufferedBytes { get; set; }
 
 		/// <summary>Pass character captures as ReadOnlySpan&lt;char&gt; rather than string.</summary>
-		public bool SpanCaptures { get; set; }
+		public bool UseSpanCaptures { get; set; }
 
 		/// <summary>
 		/// The most input a buffered parse may hold at once, in characters or bytes, where a
@@ -109,13 +94,13 @@ namespace DotGram
 		/// A streaming overload's own <c>maxRetained</c> overrides it for that call. Past the
 		/// limit the parse throws <c>IOException</c> naming it. The default is no limit.
 		/// </remarks>
-		public int MaxRetained { get; set; } = int.MaxValue;
+		public int MaxBufferedInputLength { get; set; } = int.MaxValue;
 
 		/// <summary>
 		/// The initial capacity of a buffered parse's buffer, where a call does not say.
 		/// </summary>
 		/// <remarks>A streaming overload's own <c>bufferSize</c> overrides it for that call.</remarks>
-		public int BufferSize { get; set; } = 4096;
+		public int InitialBufferSize { get; set; } = 4096;
 
 		/// <summary>
 		/// How many stacks one parse may take beyond the one it began on.
@@ -132,18 +117,20 @@ namespace DotGram
 		/// the default, is no limit; one is a single extra stack; a reading that never
 		/// goes deep takes none whatever this says.
 		/// </remarks>
-		public int Stacks { get; set; }
+		public int MaxExtraStacks { get; set; }
 
 		/// <summary>
 		/// An interface whose implementors are told where they were written.
 		/// </summary>
 		/// <remarks>
 		/// Nothing written here changes what is read; it changes what a value knows
-		/// about itself. Name an interface with a settable property called
-		/// <c>Span</c>, and every rule whose value implements it is handed the range
-		/// of input it was built from — the rule's own text, without the trivia
-		/// around it, so that a comment falls between two of them rather than inside
-		/// one.
+		/// about itself. Name an interface declaring <c>void Locate(int at, int length)</c>
+		/// — with <c>UsePerCallLocations</c>, <c>void Locate(int at, int length, int gapStart)</c>
+		/// — and every rule whose value implements it is handed the range of input it was
+		/// built from: the rule's own text, without the trivia around it, so that a
+		/// comment falls between two of them rather than inside one. It is called through
+		/// the interface, so an explicit implementation serves, and a struct is told in
+		/// place. A class declaring <c>Locate</c> may be named instead.
 		///
 		/// What that buys is everything a parse cannot answer on its own: which
 		/// characters a diagnostic is about, which node a comment belongs to, and
@@ -151,27 +138,10 @@ namespace DotGram
 		/// nothing here pays nothing — a recognizer wants no positions, and most
 		/// grammars are recognizers.
 		///
-		/// The property is written once, by the reader, on a value it has just made
-		/// and nothing has yet seen.
+		/// <c>Locate</c> is called once, by the reader, on a value it has just made and
+		/// nothing has yet seen.
 		/// </remarks>
 		public global::System.Type LocationType { get; set; }
-
-		/// <summary>
-		/// Whether this reading is the class's own parser called with locations on, rather
-		/// than a second compilation of the grammar.
-		/// </summary>
-		/// <remarks>
-		/// Written on a <c>[GramOptions]</c> that names a <see cref="LocationType"/> and a
-		/// <see cref="Suffix"/>: the grammar is compiled once, its constructions are told
-		/// where they were written only when a call asks, and the nested class named by the
-		/// suffix holds the same published methods, each of them asking. A call that does
-		/// not ask pays a test per construction and nothing else.
-		///
-		/// The interface then offers <c>Locate(int at, int length, int gapStart)</c>, where
-		/// the gap start is where the text between the value and the token before it
-		/// begins: the end of that token, or where the reading began.
-		/// </remarks>
-		public bool PerCall { get; set; }
 
 		/// <summary>
 		/// Whether the grammar travels with the assembly, so that another project can
@@ -183,13 +153,13 @@ namespace DotGram
 		/// <c>[GramInclude(typeof(X))]</c> in another project finds it — without which
 		/// including a grammar across a reference cannot work at all.
 		///
-		/// Unset, it follows what the class already says: a publicly visible host is
-		/// offered outward and carries its grammar, and one that is not cannot be named
-		/// from outside anyway. Say it either way where that guess is wrong. It costs
-		/// the size of the grammar — measured at 4.7% of an assembly holding five of
-		/// them, whose bulk is the parsers they generated.
+		/// Not set, it follows what the class already says: the grammar is exported when
+		/// the class and every class around it are public, and one nothing outside can
+		/// name cannot be included from outside anyway. Say it either way where that
+		/// guess is wrong. It costs the size of the grammar — measured at 4.7% of an
+		/// assembly holding five of them, whose bulk is the parsers they generated.
 		/// </remarks>
-		public bool Portable { get; set; } = true;
+		public bool ExportGrammar { get; set; }
 
 		/// <summary>
 		/// Whether this reading is a trace build: its parser reports the rules it enters,
@@ -202,10 +172,61 @@ namespace DotGram
 		/// entered; and <c>GramProfile</c>, how often each rule was entered and how long
 		/// it took. Off, nothing of it is written. The build property
 		/// <c>DotGramTrace</c> asks the same of every grammar in a project, and a
-		/// <c>[GramOptions(Suffix = "Traced", Trace = true)]</c> puts a traced reading
+		/// <c>[GramParserVariant("Traced", Trace = true)]</c> puts a traced reading
 		/// beside an untouched one (docs/syntax.md, §6.9).
 		/// </remarks>
 		public bool Trace { get; set; }
+	}
+
+	/// <summary>
+	/// One more reading of the grammar a class carries, beside the one <c>[Gram]</c> asks
+	/// for.
+	/// </summary>
+	/// <remarks>
+	/// The same grammar compiled again under different options — another carrier,
+	/// another division, locations where the first has none. Each reading needs a
+	/// scope of its own, so each names the nested class it is compiled into, and what it
+	/// does not say it takes from <c>[Gram]</c>.
+	/// </remarks>
+	[global::System.AttributeUsage(global::System.AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+	[global::Microsoft.CodeAnalysis.Embedded]
+	internal sealed class GramParserVariantAttribute : GramReadingAttribute
+	{
+		/// <param name="name">
+		/// The nested class this reading is compiled into: one identifier, which no other
+		/// reading of the class names.
+		/// </param>
+		public GramParserVariantAttribute(string name) => Name = name;
+
+		/// <summary>
+		/// The nested class this reading is compiled into.
+		/// </summary>
+		/// <remarks>
+		/// Two compilations cannot share a scope — a file's support is written once and
+		/// named for what it is — so every further reading names a class, and its parse
+		/// methods are reached through it: <c>Sql.Immediate.TryParseR</c>. What the host
+		/// declares is still in reach from inside, a nested class reading the static members
+		/// around it by their simple names.
+		/// </remarks>
+		public string Name { get; }
+
+		/// <summary>
+		/// Whether this reading is the class's own parser called with locations on, rather
+		/// than a second compilation of the grammar.
+		/// </summary>
+		/// <remarks>
+		/// Written on a <c>[GramParserVariant]</c> that names a <see cref="GramReadingAttribute.LocationType"/>
+		/// and a <see cref="Name"/>: the grammar is compiled once, its
+		/// constructions are told where they were written only when a call asks, and the
+		/// nested class of that name holds the same published methods, each of them asking. A call that does
+		/// not ask pays a test per construction and nothing else.
+		///
+		/// The interface then offers <c>Locate(int at, int length, int gapStart)</c>, where
+		/// the gap start is where the text between the value and the token before it
+		/// begins: the end of that token, or where the reading began.
+		/// </remarks>
+		public bool UsePerCallLocations { get; set; }
 	}
 
 	/// <summary>How a generated reader carries what it has read.</summary>
@@ -213,15 +234,18 @@ namespace DotGram
 	internal enum GramCarrier
 	{
 		/// <summary>
-		/// The default: <c>Immediate</c> wherever it can carry the grammar, the tape
+		/// The default: <c>Immediate</c> wherever it can carry the grammar, <c>Deferred</c>
 		/// where it cannot. A construction runs as its alternative is read, also for a
-		/// reading the parse gives up; <c>Tape</c> holds every one back until a parse has
+		/// reading the parse gives up; <c>Deferred</c> holds every one back until a parse has
 		/// accepted. Where that matters the build says so (GRAM5016, GRAM5012).
 		/// </summary>
 		Auto,
 
-		/// <summary>Records on a tape, built into values once the parse is accepted.</summary>
-		Tape,
+		/// <summary>
+		/// What was read is recorded, and built into values once the parse is accepted: a
+		/// construction runs once per derivation accepted, never for one given up.
+		/// </summary>
+		Deferred,
 
 		/// <summary>
 		/// No deferral: a construction runs the moment its alternative has been read,
@@ -263,13 +287,13 @@ namespace DotGram
 	/// </summary>
 	/// <remarks>
 	/// One per class: this says <em>which</em> grammar, which is a thing a class has
-	/// one of. How to read it is what it shares with <see cref="GramOptionsAttribute"/>,
+	/// one of. How to read it is what it shares with <see cref="GramParserVariantAttribute"/>,
 	/// and a class wanting the same grammar read a second way writes one of those.
 	/// </remarks>
 	[global::System.AttributeUsage(global::System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	[global::Microsoft.CodeAnalysis.Embedded]
-	internal sealed class GramAttribute : GramOptionsAttribute
+	internal sealed class GramAttribute : GramReadingAttribute
 	{
 		/// <summary>The grammar is the <c>.gram</c> file named after the class.</summary>
 		public GramAttribute() { }
@@ -283,12 +307,22 @@ namespace DotGram
 		public string Source { get; }
 
 		/// <summary>
+		/// The nested class the first reading is compiled into, where it is not to be the
+		/// host class itself; nothing said is the host class.
+		/// </summary>
+		/// <remarks>
+		/// A class whose only reading is in a nested class answers through that class:
+		/// <c>[Gram("…", Name = "Fast")]</c> publishes <c>Host.Fast.ParseR</c>.
+		/// </remarks>
+		public string Name { get; set; }
+
+		/// <summary>
 		/// The name another grammar includes this one under, where nothing else was
 		/// said — the default, and no more: what a grammar is called inside another is
-		/// the includer's business, and <c>[GramInclude(…, As = "…")]</c> is where it
+		/// the includer's business, and <c>[GramInclude(…, Alias = "…")]</c> is where it
 		/// is said.
 		/// </summary>
-		public string IncludedAs { get; set; }
+		public string DefaultAlias { get; set; }
 	}
 
 	/// <summary>
@@ -298,9 +332,13 @@ namespace DotGram
 	/// A <c>.gram</c> file is read at compile time and does not travel: what ships is
 	/// the assembly. So the text is put here, on the class an including grammar names
 	/// — <c>[GramInclude(typeof(X))]</c> — and a grammar in a referenced assembly is
-	/// then found the same way one beside you is. The file wins where both are in
-	/// reach, so that a diagnostic points at something somebody can edit.
+	/// then found the same way one beside you is. A class from a referenced assembly
+	/// is always read from here, since this is the grammar it was compiled from; one
+	/// compiled beside you is read from its file, which is the one being edited.
+	///
+	/// Written by the generator, not by hand.
 	/// </remarks>
+	[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
 	[global::System.AttributeUsage(global::System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	[global::Microsoft.CodeAnalysis.Embedded]
@@ -317,7 +355,7 @@ namespace DotGram
 	/// <remarks>
 	/// <para>
 	/// The named class's rules are declared beside this grammar's own, under a
-	/// namespace called after the class unless <see cref="As"/> says otherwise, so
+	/// namespace called after the class unless <see cref="Alias"/> says otherwise, so
 	/// that <c>using Sql92</c> and <c>Sql92.ValueExpression</c> reach them (§5.1).
 	/// Write it as many times as there are grammars to build on: a dialect on a
 	/// standard, a standard on a library of lexemes, both at once.
@@ -356,7 +394,7 @@ namespace DotGram
 		/// The includer's to choose, which is the right way round: what a grammar is
 		/// called inside yours is your business and not its author's.
 		/// </remarks>
-		public string As { get; set; }
+		public string Alias { get; set; }
 	}
 
 	/// <summary>Names the language a grammar describes, for tooling to discover.</summary>
@@ -405,6 +443,8 @@ namespace DotGram
 	}
 
 	/// <summary>Declares a non-executing editor decision for a grammar guard.</summary>
+	/// <remarks>Experimental: may change or be removed in any release.</remarks>
+	[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
 	[global::System.AttributeUsage(global::System.AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	[global::Microsoft.CodeAnalysis.Embedded]
@@ -421,6 +461,8 @@ namespace DotGram
 	}
 
 	/// <summary>Maps an external recognizer to an equivalent grammar rule for editors.</summary>
+	/// <remarks>Experimental: may change or be removed in any release.</remarks>
+	[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
 	[global::System.AttributeUsage(global::System.AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	[global::Microsoft.CodeAnalysis.Embedded]
@@ -437,6 +479,8 @@ namespace DotGram
 	}
 
 	/// <summary>Locates the versioned language descriptor carried by a generated parser.</summary>
+	/// <remarks>Written by the generator, not by hand.</remarks>
+	[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
 	[global::System.AttributeUsage(global::System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	[global::Microsoft.CodeAnalysis.Embedded]

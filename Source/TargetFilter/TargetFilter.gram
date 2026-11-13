@@ -190,11 +190,11 @@ ParameterType : @ParameterTypeSyntax
 	= "this " & any* => @(new ParameterTypeSyntax(true,  Span(parserSpan)))
 	| any*           => @(new ParameterTypeSyntax(false, Span(parserSpan)))
 
-parse Line
-parse ConditionItem
-parse Words
-parse ConditionValue
-parse Dotted
-parse ParameterList
-parse ParameterParts
-parse Parameter
+positional parse Line
+positional parse ConditionItem
+positional parse Words
+positional parse ConditionValue
+positional parse Dotted
+positional parse ParameterList
+positional parse ParameterParts
+positional parse Parameter
