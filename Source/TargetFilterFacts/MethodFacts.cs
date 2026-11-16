@@ -291,11 +291,13 @@ namespace AspectGenerator.TargetFilterFacts
 			{
 				Require(FactProperty.Extern);
 
-				// A method with the runtime's internal-call implementation is extern in source (the modifier) but only carries
-				// the implementation flag in metadata; reading the flag makes both forms agree.
+				// Metadata records no 'extern' modifier: a P/Invoke has import data, and a method the runtime supplies carries
+				// an implementation flag. Those are what extern means here, in source and in metadata alike; a bare
+				// 'extern' with neither leaves no trace in metadata and is not extern in either form.
 				var method = Definition.Method;
 
-				return method.IsExtern || (method.MethodImplementationFlags & MethodImplAttributes.InternalCall) != 0;
+				return method.GetDllImportData() is not null ||
+					(method.MethodImplementationFlags & (MethodImplAttributes.InternalCall | MethodImplAttributes.ForwardRef)) != 0;
 			}
 		}
 
@@ -358,8 +360,8 @@ namespace AspectGenerator.TargetFilterFacts
 		/// <summary>
 		/// <c>async</c>: the return type of the call (so <c>Box&lt;Task&gt;.Get()</c> is async and <c>Box&lt;int&gt;.Get()</c>
 		/// is not) is <c>Task</c>, <c>ValueTask</c>, their generic forms, or another awaitable type: one with an accessible
-		/// instance <c>GetAwaiter()</c> whose result has <c>IsCompleted</c>, <c>GetResult()</c> and implements
-		/// <c>INotifyCompletion</c>. A type parameter is awaitable when one of its constraints is. The <c>async</c>
+		/// instance <c>GetAwaiter()</c> that the compiler accepts at an <c>await</c> in the consumer's compilation (see
+		/// <see cref="AwaitProbe"/>): accessibility, friend assemblies and constraints are the compiler's. The <c>async</c>
 		/// modifier itself is not recorded in metadata, so it is not what is read: an <c>async void</c> method and an
 		/// <c>IAsyncEnumerable&lt;T&gt;</c> iterator are not <c>async</c> here, in source or in a referenced assembly.
 		/// </summary>
@@ -369,114 +371,8 @@ namespace AspectGenerator.TargetFilterFacts
 			{
 				Require(FactProperty.Async);
 
-				return _isAsync ??= Computed(IsAwaitable(Method.ReturnType, _context.ProjectAssembly));
+				return _isAsync ??= Computed(AwaitProbe.IsAwaitable(Method.ReturnType, _context));
 			}
-		}
-
-		static bool IsAwaitable(ITypeSymbol type, IAssemblySymbol project)
-		{
-			if (type is ITypeParameterSymbol typeParameter)
-			{
-				foreach (var constraint in typeParameter.ConstraintTypes)
-					if (IsAwaitable(constraint, project))
-						return true;
-
-				return false;
-			}
-
-			if (type is not INamedTypeSymbol named)
-				return false;
-
-			if (named.OriginalDefinition.Name is "Task" or "ValueTask" &&
-				named.OriginalDefinition.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks")
-			{
-				return true;
-			}
-
-			foreach (var candidate in InstanceMembers(named, "GetAwaiter"))
-			{
-				if (candidate is IMethodSymbol { IsStatic: false, Parameters.Length: 0, TypeParameters.Length: 0, ReturnType: INamedTypeSymbol awaiter } getAwaiter &&
-					getAwaiter.ExplicitInterfaceImplementations.Length == 0 &&
-					IsAccessible(getAwaiter, project) &&
-					IsAwaiter(awaiter, project))
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		// What the compiler requires of an awaiter: IsCompleted (bool), GetResult(), and INotifyCompletion.
-		static bool IsAwaiter(INamedTypeSymbol awaiter, IAssemblySymbol project)
-		{
-			var notify = false;
-
-			foreach (var @interface in awaiter.TypeKind == TypeKind.Interface ? awaiter.AllInterfaces.Add(awaiter) : awaiter.AllInterfaces)
-			{
-				if (@interface.Name == "INotifyCompletion" && @interface.ContainingNamespace.ToDisplayString() == "System.Runtime.CompilerServices")
-				{
-					notify = true;
-					break;
-				}
-			}
-
-			if (!notify)
-				return false;
-
-			var completed = false;
-
-			foreach (var member in InstanceMembers(awaiter, "IsCompleted"))
-			{
-				if (member is IPropertySymbol { IsStatic: false, Type.SpecialType: SpecialType.System_Boolean, GetMethod: { } getter } &&
-					IsAccessible(getter, project))
-				{
-					completed = true;
-					break;
-				}
-			}
-
-			if (!completed)
-				return false;
-
-			foreach (var member in InstanceMembers(awaiter, "GetResult"))
-				if (member is IMethodSymbol { IsStatic: false, Parameters.Length: 0, TypeParameters.Length: 0 } getResult && IsAccessible(getResult, project))
-					return true;
-
-			return false;
-		}
-
-		// The members a member access on a value of the type finds: the type's own and its base classes' (an interface's
-		// own and its base interfaces'). A class does not find the members of its interfaces, which an explicit
-		// implementation would otherwise appear to provide.
-		static System.Collections.Generic.IEnumerable<ISymbol> InstanceMembers(INamedTypeSymbol type, string name)
-		{
-			if (type.TypeKind == TypeKind.Interface)
-			{
-				foreach (var member in type.GetMembers(name))
-					yield return member;
-
-				foreach (var @interface in type.AllInterfaces)
-					foreach (var member in @interface.GetMembers(name))
-						yield return member;
-
-				yield break;
-			}
-
-			for (var current = type; current is not null; current = current.BaseType)
-				foreach (var member in current.GetMembers(name))
-					yield return member;
-		}
-
-		// Public always; internal members only inside the project's own assembly.
-		static bool IsAccessible(ISymbol symbol, IAssemblySymbol project)
-		{
-			return symbol.DeclaredAccessibility switch
-			{
-				Accessibility.Public                                        => true,
-				Accessibility.Internal or Accessibility.ProtectedOrInternal => SymbolEqualityComparer.Default.Equals(symbol.ContainingAssembly, project),
-				_                                                           => false,
-			};
 		}
 
 		bool? _isGenerated;
@@ -595,51 +491,49 @@ namespace AspectGenerator.TargetFilterFacts
 			}
 		}
 
-		// A method implements an interface member when it, or a method it overrides, is what its type maps the member to.
+		// A method implements an interface member when its own type maps the member to the method, or to a method it
+		// overrides (the member was mapped in a base class and the method overrides it). A type that implements the
+		// interface again maps the member to its own method, so what a base class mapped does not count then.
 		static ImmutableArray<IMethodSymbol> FindImplementedMembers(IMethodSymbol method)
 		{
+			var type = method.ContainingType;
+
+			if (type.TypeKind == TypeKind.Interface)
+				return ImmutableArray.Create(method);
+
 			var builder = ImmutableArray.CreateBuilder<IMethodSymbol>();
 			var seen    = new System.Collections.Generic.HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
+			var chain   = new System.Collections.Generic.HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
 
 			for (var current = method; current is not null; current = GetOverridden(current))
+				chain.Add(current.OriginalDefinition);
+
+			foreach (var @interface in type.AllInterfaces)
 			{
-				var type = current.ContainingType;
-
-				if (type.TypeKind == TypeKind.Interface)
+				foreach (var member in @interface.GetMembers(method.Name))
 				{
-					if (seen.Add(current))
-						builder.Add(current);
-
-					continue;
-				}
-
-				foreach (var @interface in type.AllInterfaces)
-				{
-					foreach (var member in @interface.GetMembers(current.Name))
+					if (member is not IMethodSymbol interfaceMethod ||
+						type.FindImplementationForInterfaceMember(interfaceMethod) is not IMethodSymbol implementation ||
+						!chain.Contains(implementation.OriginalDefinition))
 					{
-						if (member is not IMethodSymbol interfaceMethod ||
-							type.FindImplementationForInterfaceMember(interfaceMethod) is not IMethodSymbol implementation ||
-							!SymbolEqualityComparer.Default.Equals(implementation.OriginalDefinition, current.OriginalDefinition))
-						{
-							continue;
-						}
-
-						// The call of a generic method implements the interface member with the same type arguments.
-						if (current.IsGenericMethod && !SymbolEqualityComparer.Default.Equals(current, current.ConstructedFrom) &&
-							interfaceMethod.TypeParameters.Length == current.TypeArguments.Length)
-						{
-							interfaceMethod = interfaceMethod.Construct(current.TypeArguments.ToArray());
-						}
-
-						if (seen.Add(interfaceMethod))
-							builder.Add(interfaceMethod);
+						continue;
 					}
-				}
 
-				foreach (var explicitImplementation in current.ExplicitInterfaceImplementations)
-					if (seen.Add(explicitImplementation))
-						builder.Add(explicitImplementation);
+					// The call of a generic method implements the interface member with the same type arguments.
+					if (method.IsGenericMethod && !SymbolEqualityComparer.Default.Equals(method, method.ConstructedFrom) &&
+						interfaceMethod.TypeParameters.Length == method.TypeArguments.Length)
+					{
+						interfaceMethod = interfaceMethod.Construct(method.TypeArguments.ToArray());
+					}
+
+					if (seen.Add(interfaceMethod))
+						builder.Add(interfaceMethod);
+				}
 			}
+
+			foreach (var explicitImplementation in method.ExplicitInterfaceImplementations)
+				if (seen.Add(explicitImplementation))
+					builder.Add(explicitImplementation);
 
 			return builder.ToImmutable();
 		}
