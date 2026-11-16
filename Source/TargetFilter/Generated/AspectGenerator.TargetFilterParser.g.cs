@@ -7872,8 +7872,10 @@ namespace AspectGenerator
 			internal void Go()
 			{
 				deepContext   = global::System.Threading.ExecutionContext.Capture();
+				#pragma warning disable RS1035 // Read only to hand the caller's cultures to the thread the reading moves to; nothing here formats by them.
 				deepCulture   = global::System.Globalization.CultureInfo.CurrentCulture;
 				deepUiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+				#pragma warning restore RS1035
 
 				global::System.Threading.ThreadInterruptedException? interrupted = null;
 
@@ -8011,20 +8013,26 @@ namespace AspectGenerator
 			static void ReadIn(object? state)
 			{
 				var deep      = (Deep_DotGram_ConditionItem)state!;
+				#pragma warning disable RS1035 // Read only to put this thread's own cultures back afterwards; nothing here formats by them.
 				var culture   = global::System.Globalization.CultureInfo.CurrentCulture;
 				var uiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+				#pragma warning restore RS1035
 
 				try
 				{
+					#pragma warning disable RS1035 // The caller's cultures, set on the thread that does the caller's work.
 					global::System.Globalization.CultureInfo.CurrentCulture   = deep.deepCulture!;
 					global::System.Globalization.CultureInfo.CurrentUICulture = deep.deepUiCulture!;
+					#pragma warning restore RS1035
 
 					deep.Run();
 				}
 				finally
 				{
+					#pragma warning disable RS1035 // This thread's own cultures, put back before it waits for the next reading.
 					global::System.Globalization.CultureInfo.CurrentCulture   = culture;
 					global::System.Globalization.CultureInfo.CurrentUICulture = uiCulture;
+					#pragma warning restore RS1035
 				}
 			}
 
@@ -9015,8 +9023,10 @@ namespace AspectGenerator
 			internal void Go()
 			{
 				deepContext   = global::System.Threading.ExecutionContext.Capture();
+				#pragma warning disable RS1035 // Read only to hand the caller's cultures to the thread the reading moves to; nothing here formats by them.
 				deepCulture   = global::System.Globalization.CultureInfo.CurrentCulture;
 				deepUiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+				#pragma warning restore RS1035
 
 				global::System.Threading.ThreadInterruptedException? interrupted = null;
 
@@ -9149,20 +9159,26 @@ namespace AspectGenerator
 			static void ReadIn(object? state)
 			{
 				var deep      = (Deep_DotGram_Dotted)state!;
+				#pragma warning disable RS1035 // Read only to put this thread's own cultures back afterwards; nothing here formats by them.
 				var culture   = global::System.Globalization.CultureInfo.CurrentCulture;
 				var uiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+				#pragma warning restore RS1035
 
 				try
 				{
+					#pragma warning disable RS1035 // The caller's cultures, set on the thread that does the caller's work.
 					global::System.Globalization.CultureInfo.CurrentCulture   = deep.deepCulture!;
 					global::System.Globalization.CultureInfo.CurrentUICulture = deep.deepUiCulture!;
+					#pragma warning restore RS1035
 
 					deep.Run();
 				}
 				finally
 				{
+					#pragma warning disable RS1035 // This thread's own cultures, put back before it waits for the next reading.
 					global::System.Globalization.CultureInfo.CurrentCulture   = culture;
 					global::System.Globalization.CultureInfo.CurrentUICulture = uiCulture;
+					#pragma warning restore RS1035
 				}
 			}
 
@@ -10124,8 +10140,10 @@ namespace AspectGenerator
 			internal void Go()
 			{
 				deepContext   = global::System.Threading.ExecutionContext.Capture();
+				#pragma warning disable RS1035 // Read only to hand the caller's cultures to the thread the reading moves to; nothing here formats by them.
 				deepCulture   = global::System.Globalization.CultureInfo.CurrentCulture;
 				deepUiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+				#pragma warning restore RS1035
 
 				global::System.Threading.ThreadInterruptedException? interrupted = null;
 
@@ -10260,20 +10278,26 @@ namespace AspectGenerator
 			static void ReadIn(object? state)
 			{
 				var deep      = (Deep_DotGram_ParameterList)state!;
+				#pragma warning disable RS1035 // Read only to put this thread's own cultures back afterwards; nothing here formats by them.
 				var culture   = global::System.Globalization.CultureInfo.CurrentCulture;
 				var uiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+				#pragma warning restore RS1035
 
 				try
 				{
+					#pragma warning disable RS1035 // The caller's cultures, set on the thread that does the caller's work.
 					global::System.Globalization.CultureInfo.CurrentCulture   = deep.deepCulture!;
 					global::System.Globalization.CultureInfo.CurrentUICulture = deep.deepUiCulture!;
+					#pragma warning restore RS1035
 
 					deep.Run();
 				}
 				finally
 				{
+					#pragma warning disable RS1035 // This thread's own cultures, put back before it waits for the next reading.
 					global::System.Globalization.CultureInfo.CurrentCulture   = culture;
 					global::System.Globalization.CultureInfo.CurrentUICulture = uiCulture;
+					#pragma warning restore RS1035
 				}
 			}
 
@@ -11354,8 +11378,10 @@ namespace AspectGenerator
 			internal void Go()
 			{
 				deepContext   = global::System.Threading.ExecutionContext.Capture();
+				#pragma warning disable RS1035 // Read only to hand the caller's cultures to the thread the reading moves to; nothing here formats by them.
 				deepCulture   = global::System.Globalization.CultureInfo.CurrentCulture;
 				deepUiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+				#pragma warning restore RS1035
 
 				global::System.Threading.ThreadInterruptedException? interrupted = null;
 
@@ -11491,20 +11517,26 @@ namespace AspectGenerator
 			static void ReadIn(object? state)
 			{
 				var deep      = (Deep_DotGram_ParameterParts)state!;
+				#pragma warning disable RS1035 // Read only to put this thread's own cultures back afterwards; nothing here formats by them.
 				var culture   = global::System.Globalization.CultureInfo.CurrentCulture;
 				var uiCulture = global::System.Globalization.CultureInfo.CurrentUICulture;
+				#pragma warning restore RS1035
 
 				try
 				{
+					#pragma warning disable RS1035 // The caller's cultures, set on the thread that does the caller's work.
 					global::System.Globalization.CultureInfo.CurrentCulture   = deep.deepCulture!;
 					global::System.Globalization.CultureInfo.CurrentUICulture = deep.deepUiCulture!;
+					#pragma warning restore RS1035
 
 					deep.Run();
 				}
 				finally
 				{
+					#pragma warning disable RS1035 // This thread's own cultures, put back before it waits for the next reading.
 					global::System.Globalization.CultureInfo.CurrentCulture   = culture;
 					global::System.Globalization.CultureInfo.CurrentUICulture = uiCulture;
+					#pragma warning restore RS1035
 				}
 			}
 

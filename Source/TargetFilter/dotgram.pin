@@ -5,5 +5,5 @@
 # commit  the DotGram commit whose DotGram.Cli generates the parser (the tool's version string does not tell commits apart)
 # sdk     the exact .NET SDK the generation runs with: the generated text includes the compiler's own text of the
 #         embedded attribute, so another SDK may write different bytes
-commit=6a4445ef94c229696fd06677876b374cd404bc8c
+commit=c7cd493b0e136bd52ef0ee3ada34a42f61b859e5
 sdk=10.0.401
