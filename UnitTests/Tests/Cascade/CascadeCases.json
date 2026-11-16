@@ -1,0 +1,3620 @@
+{
+ "about": "Cascade expectations for target filters. Input filters are text; 'facts' are the method records. 'errors' lists (block label, diagnostic id); a case with a filter error selects nothing. 'alternatives' holds the result under a non-default setting of the evaluator switch it is named after.",
+ "cases": [
+  {
+   "id": "class-method-save-replaces-method",
+   "description": "class method: Save* replaces method",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**\n- method: *Internal*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save*"
+     }
+    ],
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.RunInternal"
+     },
+     {
+      "method": "Shop.Services.OrderService.Ping"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveOrder",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveOrder",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SavePassword",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SavePassword",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.RunInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "RunInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Ping",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Ping",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveOrder": true,
+     "Shop.Services.OrderService.SavePassword": false,
+     "Shop.Services.OrderService.SaveInternal": true,
+     "Shop.Services.OrderService.RunInternal": true,
+     "Shop.Services.OrderService.Ping": false,
+     "Shop.Services.OrderService.Load": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "and-assembly-method-narrows",
+   "description": "and assembly.method narrows",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**\n- method: *Internal*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save* and assembly.method"
+     }
+    ],
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.RunInternal"
+     },
+     {
+      "method": "Shop.Services.OrderService.Ping"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveOrder",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveOrder",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SavePassword",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SavePassword",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.RunInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "RunInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Ping",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Ping",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveOrder": true,
+     "Shop.Services.OrderService.SavePassword": false,
+     "Shop.Services.OrderService.SaveInternal": false,
+     "Shop.Services.OrderService.RunInternal": true,
+     "Shop.Services.OrderService.Ping": false,
+     "Shop.Services.OrderService.Load": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "or-assembly-method-widens",
+   "description": "or assembly.method widens",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**\n- method: *Internal*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save* or assembly.method"
+     }
+    ],
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.RunInternal"
+     },
+     {
+      "method": "Shop.Services.OrderService.Ping"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveOrder",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveOrder",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SavePassword",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SavePassword",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.RunInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "RunInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Ping",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Ping",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveOrder": true,
+     "Shop.Services.OrderService.SavePassword": false,
+     "Shop.Services.OrderService.SaveInternal": true,
+     "Shop.Services.OrderService.RunInternal": true,
+     "Shop.Services.OrderService.Ping": false,
+     "Shop.Services.OrderService.Load": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "method-aspect-method-author-silent",
+   "description": "method: aspect.method (author silent)",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**\n- method: *Internal*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: aspect.method"
+     }
+    ],
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.RunInternal"
+     },
+     {
+      "method": "Shop.Services.OrderService.Ping"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveOrder",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveOrder",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SavePassword",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SavePassword",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.RunInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "RunInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Ping",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Ping",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveOrder": true,
+     "Shop.Services.OrderService.SavePassword": false,
+     "Shop.Services.OrderService.SaveInternal": true,
+     "Shop.Services.OrderService.RunInternal": true,
+     "Shop.Services.OrderService.Ping": false,
+     "Shop.Services.OrderService.Load": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "method-any-resets",
+   "description": "method: any resets",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**\n- method: *Internal*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: any"
+     }
+    ],
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.RunInternal"
+     },
+     {
+      "method": "Shop.Services.OrderService.Ping"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveOrder",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveOrder",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SavePassword",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SavePassword",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.RunInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "RunInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Ping",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Ping",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveOrder": true,
+     "Shop.Services.OrderService.SavePassword": false,
+     "Shop.Services.OrderService.SaveInternal": true,
+     "Shop.Services.OrderService.RunInternal": true,
+     "Shop.Services.OrderService.Ping": false,
+     "Shop.Services.OrderService.Load": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "bare-log-on-the-class",
+   "description": "bare [Log] on the class",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**\n- method: *Internal*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": null
+     }
+    ],
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.RunInternal"
+     },
+     {
+      "method": "Shop.Services.OrderService.Ping"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveOrder",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveOrder",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SavePassword",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SavePassword",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.RunInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "RunInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Ping",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Ping",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveOrder": true,
+     "Shop.Services.OrderService.SavePassword": false,
+     "Shop.Services.OrderService.SaveInternal": false,
+     "Shop.Services.OrderService.RunInternal": true,
+     "Shop.Services.OrderService.Ping": false,
+     "Shop.Services.OrderService.Load": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "attribute-audited-and-aspect-attribute-keeps-the-author-s-nolog",
+   "description": "attribute: Audited and aspect.attribute keeps the author's NoLog",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "attribute: Audited and aspect.attribute"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Secret",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Secret",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "AuditedAttribute",
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Secret": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "assembly-method-and-not-method-get",
+   "description": "assembly.method and not method: Get*",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "method: Save*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: assembly.method and not method: Get*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveA",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveA",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.GetSave",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "GetSave",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Load": false,
+     "Shop.Services.OrderService.SaveA": true,
+     "Shop.Services.OrderService.GetSave": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "a-reference-brings-the-compound-line-whole",
+   "description": "a reference brings the compound line whole",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "- method: *Internal* and public"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Sync* and assembly.method"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SyncInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SyncInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SyncAll",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SyncAll",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SyncInternal2",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SyncInternal2",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SyncInternal": false,
+     "Shop.Services.OrderService.SyncAll": true,
+     "Shop.Services.OrderService.SyncInternal2": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "assembly-attribute-any-is-invisible-to-aspect-attribute",
+   "description": "assembly attribute: any is invisible to aspect.attribute",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "attribute: any"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "attribute: aspect.attribute"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Pay",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Pay",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Pay2",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Pay2",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Pay": false,
+     "Shop.Services.OrderService.Pay2": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "assembly-location-replaces-the-implicit-here",
+   "description": "assembly.location replaces the implicit 'here'",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.Data.**"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "assembly.location"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Total",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Total",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Total": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "or-assembly-method-with-an-unrestricted-assembly-selects-all",
+   "description": "or assembly.method with an unrestricted assembly selects all",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save* or assembly.method"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Load": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "references-to-own-level-or-from-the-default-are-errors",
+   "description": "references to own level or from the default are errors",
+   "input": {
+    "default": "aspect.method",
+    "assembly": [
+     {
+      "filter": "assembly.method"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "public"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Load": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "aspect",
+      "id": "AG0233"
+     },
+     {
+      "block": "assembly#0",
+      "id": "AG0233"
+     }
+    ]
+   }
+  },
+  {
+   "id": "repeated-include-of-method-is-an-error",
+   "description": "repeated include of method is an error",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "- method: *Internal*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save* and assembly.method\nmethod: Get*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.GetInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "GetInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.GetInternal": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0225"
+     }
+    ]
+   }
+  },
+  {
+   "id": "two-assembly-blocks-are-alternatives",
+   "description": "two assembly blocks are alternatives",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "file": "a.cs",
+      "filter": "- method: *Internal*"
+     },
+     {
+      "file": "b.cs",
+      "filter": "- method: Get*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save* and assembly.method"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.GetSave",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "GetSave",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveInternal": true,
+     "Shop.Services.OrderService.GetSave": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "not-assembly-method",
+   "description": "not assembly.method",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "- method: *Internal*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "not assembly.method"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveInternal": true,
+     "Shop.Services.OrderService.Load": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "the-reference-brings-a-compound-line-the-class-removed-in-the-full-chain",
+   "description": "the reference brings a compound line the class removed in the full chain",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "- method: *Internal* and public"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "public\nmethod: Sync* and assembly.method"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SyncInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SyncInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SyncInternal": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "a-compound-line-of-the-default-removed-on-the-cut-chain",
+   "description": "a compound line of the default removed on the cut chain",
+   "input": {
+    "default": "method: Save* or public",
+    "assembly": [
+     {
+      "filter": "internal"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "assembly.method"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Load": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "assembly-method-subtracts",
+   "description": "- assembly.method subtracts",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "method: Get*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save*\n- assembly.method"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveA",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveA",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.GetA",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "GetA",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Load": false,
+     "Shop.Services.OrderService.SaveA": true,
+     "Shop.Services.OrderService.GetA": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "not-assembly-method-as-a-second-include-is-ag0225",
+   "description": "not assembly.method as a second include is AG0225",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "method: Get*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save*\nnot assembly.method"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Load": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0225"
+     }
+    ]
+   }
+  },
+  {
+   "id": "library-family-does-not-select-the-consumer-s-filter-decides-with-its-settings",
+   "description": "library family does not select; the consumer's filter decides with its settings",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "method: Write",
+      "settings": {
+       "Level": "Info"
+      }
+     }
+    ],
+    "library": {
+     "assembly": [
+      {
+       "filter": "static",
+       "settings": {
+        "Level": "Debug"
+       }
+      }
+     ],
+     "types": [],
+     "methods": [
+      {
+       "method": "Lib.C.Write"
+      }
+     ]
+    },
+    "facts": [
+     {
+      "id": "Lib.C.Write",
+      "namespace": "Lib",
+      "type": "Lib.C",
+      "name": "Write",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": false,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Lib.C.Write": true
+    },
+    "settings": {
+     "Lib.C.Write": {
+      "Level": "Info"
+     }
+    },
+    "errors": []
+   }
+  },
+  {
+   "id": "library-family-selects-library-settings-win",
+   "description": "library family selects; library settings win",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "method: Read",
+      "settings": {
+       "Level": "Info"
+      }
+     }
+    ],
+    "library": {
+     "assembly": [
+      {
+       "filter": "static",
+       "settings": {
+        "Level": "Debug"
+       }
+      }
+     ],
+     "types": [],
+     "methods": [
+      {
+       "method": "Lib.C.Read"
+      }
+     ]
+    },
+    "facts": [
+     {
+      "id": "Lib.C.Read",
+      "namespace": "Lib",
+      "type": "Lib.C",
+      "name": "Read",
+      "accessibility": "public",
+      "static": true,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": false,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Lib.C.Read": true
+    },
+    "settings": {
+     "Lib.C.Read": {
+      "Level": "Debug"
+     }
+    },
+    "errors": []
+   }
+  },
+  {
+   "id": "library-with-only-the-method-attribute-author-default-method-block",
+   "description": "library with only the method attribute: author default + method block",
+   "input": {
+    "default": "- attribute: NoLog",
+    "library": {
+     "assembly": [],
+     "types": [],
+     "methods": [
+      {
+       "method": "Lib.C.Write"
+      },
+      {
+       "method": "Lib.C.Quiet"
+      }
+     ]
+    },
+    "facts": [
+     {
+      "id": "Lib.C.Write",
+      "namespace": "Lib",
+      "type": "Lib.C",
+      "name": "Write",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": false,
+      "modifiers": []
+     },
+     {
+      "id": "Lib.C.Quiet",
+      "namespace": "Lib",
+      "type": "Lib.C",
+      "name": "Quiet",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": false,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Lib.C.Write": true,
+     "Lib.C.Quiet": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "method-filter-public-on-a-private-method",
+   "description": "method filter public on a private method",
+   "input": {
+    "default": "- attribute: NoLog",
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.Run",
+      "filter": "public"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Run",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Run",
+      "accessibility": "private",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Run": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "type-block-adds-its-place-assembly-subtraction-still-applies",
+   "description": "type block adds its place; assembly subtraction still applies",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.Data.**\n- method: Get*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.GetOrder",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "GetOrder",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Total",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Total",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Data.Repo.Save",
+      "namespace": "Shop.Data",
+      "type": "Shop.Data.Repo",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Other.X.Save",
+      "namespace": "Shop.Other",
+      "type": "Shop.Other.X",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.GetOrder": false,
+     "Shop.Services.OrderService.Total": true,
+     "Shop.Data.Repo.Save": true,
+     "Shop.Other.X.Save": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "the-author-s-attribute-is-not-touched-by-a-method-subtraction",
+   "description": "the author's attribute is not touched by a method subtraction",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "- method: *Internal* and not method: SyncInternal"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SyncInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SyncInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SyncInternal2",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SyncInternal2",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SyncInternal3",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SyncInternal3",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SyncInternal": false,
+     "Shop.Services.OrderService.SyncInternal2": false,
+     "Shop.Services.OrderService.SyncInternal3": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "attribute-audited-replaces-the-author-s-attribute",
+   "description": "attribute: Audited replaces the author's attribute",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "attribute: Audited"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Secret",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Secret",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "AuditedAttribute",
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Secret": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "attribute-obsolete-replaces-the-author-s-subtraction",
+   "description": "- attribute: Obsolete replaces the author's subtraction",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "- attribute: Obsolete"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Secret",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Secret",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Secret": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "a-class-subtraction-replaces-the-assembly-s-method-include",
+   "description": "a class subtraction replaces the assembly's method include",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "method: Save*"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "- method: Get*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.GetA",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "GetA",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Load": true,
+     "Shop.Services.OrderService.GetA": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "declaring-method-below-removes-the-assembly-s-compound-subtraction",
+   "description": "declaring method below removes the assembly's compound subtraction",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "- method: *Internal* and public"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Sync*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SyncInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SyncInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SyncInternal": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "a-tautology-is-a-declaration-and-replaces-the-author-s-include",
+   "description": "a tautology is a declaration and replaces the author's include",
+   "input": {
+    "default": "public",
+    "assembly": [
+     {
+      "filter": "method: Save* and (public or not public)"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveX",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveX",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveX": true,
+     "Shop.Services.OrderService.Load": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "bare-log-on-the-class-keeps-the-assembly-s-level",
+   "description": "bare [Log] on the class keeps the assembly's Level",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**",
+      "settings": {
+       "Level": "Debug"
+      }
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Load": true
+    },
+    "settings": {
+     "Shop.Services.OrderService.Load": {
+      "Level": "Debug"
+     }
+    },
+    "errors": []
+   }
+  },
+  {
+   "id": "log-on-outer-does-not-reach-outer-inner",
+   "description": "[Log] on Outer does not reach Outer.Inner",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Outer"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Outer.M",
+      "namespace": "Shop",
+      "type": "Shop.Outer",
+      "name": "M",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Outer.Inner.M",
+      "namespace": "Shop.Outer",
+      "type": "Shop.Outer.Inner",
+      "name": "M",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Outer.M": true,
+     "Shop.Outer.Inner.M": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "split-by-property-the-class-s-internal-replaces-public",
+   "description": "split by property; the class's internal replaces public",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "method: Save* and public"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "internal"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveB",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveB",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Load": false,
+     "Shop.Services.OrderService.SaveB": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "not-before-parentheses-is-a-syntax-error",
+   "description": "not before parentheses is a syntax error",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "not (not method: Save* or not public)"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Save": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "assembly#0",
+      "id": "AG0220"
+     }
+    ]
+   }
+  },
+  {
+   "id": "a-subtraction-splits-at-or-the-class-replaces-only-method",
+   "description": "a subtraction splits at or; the class replaces only - method",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "- (method: Save* or public)"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "- method: Reset*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveI",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveI",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Run",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Run",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Load": false,
+     "Shop.Services.OrderService.SaveI": true,
+     "Shop.Services.OrderService.Run": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "the-author-s-not-async-is-not-replaced-by-method",
+   "description": "the author's not async is not replaced by method:",
+   "input": {
+    "default": "not async",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveAsync",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveAsync",
+      "accessibility": "public",
+      "static": false,
+      "async": true,
+      "attributes": [],
+      "returns": "System.Threading.Tasks.Task",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveAsync": false,
+     "Shop.Services.OrderService.Save": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "async-on-the-class-replaces-the-author-s-not-async",
+   "description": "async on the class replaces the author's not async",
+   "input": {
+    "default": "not async",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "async"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveAsync",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveAsync",
+      "accessibility": "public",
+      "static": false,
+      "async": true,
+      "attributes": [],
+      "returns": "System.Threading.Tasks.Task",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveAsync": true,
+     "Shop.Services.OrderService.Save": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "a-method-filter-declaring-method-replaces-the-assembly-subtraction",
+   "description": "a method filter declaring method replaces the assembly subtraction",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "- method: *Internal*"
+     }
+    ],
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.SaveInternal",
+      "filter": "method: Save*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveInternal",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveInternal",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveOther",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveOther",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveInternal": true,
+     "Shop.Services.OrderService.SaveOther": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "split-then-merge-two-includes-of-method",
+   "description": "split then merge: two includes of method",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save* and public\nmethod: Get*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Get",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Get",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Get": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0225"
+     }
+    ]
+   }
+  },
+  {
+   "id": "any-beside-another-include-of-the-property",
+   "description": "any beside another include of the property",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: any\nmethod: Save*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Save": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0234"
+     }
+    ]
+   }
+  },
+  {
+   "id": "two-selecting-combinations-write-different-level-error",
+   "description": "two selecting combinations write different Level: error",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "file": "a.cs",
+      "filter": "public",
+      "settings": {
+       "Level": "Debug"
+      }
+     },
+     {
+      "file": "b.cs",
+      "filter": "static",
+      "settings": {
+       "Level": "Info"
+      }
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "file": "c.cs",
+      "filter": "not static"
+     },
+     {
+      "type": "Shop.Services.OrderService",
+      "file": "d.cs",
+      "filter": "internal"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.M",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "M",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.M": true
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "selection:Shop.Services.OrderService.M",
+      "id": "AG0235"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b-cs-writes-no-level-abstains-no-conflict",
+   "description": "b.cs writes no Level: abstains, no conflict",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "file": "a.cs",
+      "filter": "public",
+      "settings": {
+       "Level": "Debug"
+      }
+     },
+     {
+      "file": "b.cs",
+      "filter": "static"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "file": "c.cs",
+      "filter": "not static"
+     },
+     {
+      "type": "Shop.Services.OrderService",
+      "file": "d.cs",
+      "filter": "internal"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.M",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "M",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.M": true
+    },
+    "settings": {
+     "Shop.Services.OrderService.M": {
+      "Level": "Debug"
+     }
+    },
+    "errors": []
+   }
+  },
+  {
+   "id": "three-levels-compound-removed-no-resurrection",
+   "description": "three levels: compound removed, no resurrection",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "- returns: int"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "- returns: string and public"
+     }
+    ],
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.M",
+      "filter": "- public"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.M",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "M",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "int",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.M": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "class-method-a-method-attribute-is-more-specific",
+   "description": "class - method: *; a method attribute is more specific",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "- method: *"
+     }
+    ],
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.Pay2"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Pay",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Pay",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Pay2",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Pay2",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Pay": false,
+     "Shop.Services.OrderService.Pay2": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "attribute-any-on-the-method-lets-log-nolog-log",
+   "description": "attribute: any on the method lets [Log] [NoLog] log",
+   "input": {
+    "default": "- attribute: NoLog",
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.Ping",
+      "filter": "attribute: any"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Ping",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Ping",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Ping": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "repeated-method-include",
+   "description": "repeated method include",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "method: Save*\nmethod: Get*\n- method: *Internal"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Save": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "assembly#0",
+      "id": "AG0225"
+     }
+    ]
+   }
+  },
+  {
+   "id": "two-properties-on-two-lines-are-and",
+   "description": "two properties on two lines are AND",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**\npublic"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.A",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "A",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.B",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "B",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Other.X.A",
+      "namespace": "Other",
+      "type": "Other.X",
+      "name": "A",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.A": true,
+     "Shop.Services.OrderService.B": false,
+     "Other.X.A": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "the-class-s-subtraction-beats-the-assembly-s-attribute-any",
+   "description": "the class's subtraction beats the assembly's attribute: any",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "attribute: any"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "- attribute: NoLog"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Pay",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Pay",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Pay": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "bare-assembly-log-project-methods-only",
+   "description": "bare [assembly: Log]: project methods only",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {}
+    ],
+    "facts": [
+     {
+      "id": "System.Console.WriteLine",
+      "namespace": "System",
+      "type": "System.Console",
+      "name": "WriteLine",
+      "accessibility": "public",
+      "static": true,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": false,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "System.Console.WriteLine": false,
+     "Shop.Services.OrderService.Save": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "assembly-public-reaches-project-methods-only",
+   "description": "assembly public reaches project methods only",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "public"
+     }
+    ],
+    "facts": [
+     {
+      "id": "System.Console.WriteLine",
+      "namespace": "System",
+      "type": "System.Console",
+      "name": "WriteLine",
+      "accessibility": "public",
+      "static": true,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": false,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "System.Console.WriteLine": false,
+     "Shop.Services.OrderService.Save": true
+    },
+    "settings": {},
+    "errors": []
+   },
+   "alternatives": {
+    "AssemblyIncludeLiftsProject": {
+     "selected": {
+      "System.Console.WriteLine": true,
+      "Shop.Services.OrderService.Save": true
+     },
+     "settings": {},
+     "errors": []
+    }
+   }
+  },
+  {
+   "id": "assembly-naming-the-method-reaches-the-reference",
+   "description": "assembly naming the method reaches the reference",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "method: System.Console.WriteLine"
+     }
+    ],
+    "facts": [
+     {
+      "id": "System.Console.WriteLine",
+      "namespace": "System",
+      "type": "System.Console",
+      "name": "WriteLine",
+      "accessibility": "public",
+      "static": true,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": false,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "System.Console.WriteLine": true,
+     "Shop.Services.OrderService.Save": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "assembly-namespace-system-reaches-the-reference",
+   "description": "assembly namespace: System.** reaches the reference",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: System.**"
+     }
+    ],
+    "facts": [
+     {
+      "id": "System.Console.WriteLine",
+      "namespace": "System",
+      "type": "System.Console",
+      "name": "WriteLine",
+      "accessibility": "public",
+      "static": true,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": false,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "System.Console.WriteLine": true,
+     "Shop.Services.OrderService.Save": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "a-subtraction-alone-keeps-the-implicit-project",
+   "description": "a subtraction alone keeps the implicit project",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "- method: *Internal*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "System.Console.WriteLine",
+      "namespace": "System",
+      "type": "System.Console",
+      "name": "WriteLine",
+      "accessibility": "public",
+      "static": true,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": false,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "System.Console.WriteLine": false,
+     "Shop.Services.OrderService.Save": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "origin-any-lifts-it-explicitly",
+   "description": "origin: any lifts it explicitly",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "origin: any\npublic"
+     }
+    ],
+    "facts": [
+     {
+      "id": "System.Console.WriteLine",
+      "namespace": "System",
+      "type": "System.Console",
+      "name": "WriteLine",
+      "accessibility": "public",
+      "static": true,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": false,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "System.Console.WriteLine": true,
+     "Shop.Services.OrderService.Save": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "a-compound-line-and-a-separate-include-of-one-of-its-properties",
+   "description": "a compound line and a separate include of one of its properties",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save* or public\nmethod: Get*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Get",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Get",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Get": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0225"
+     }
+    ]
+   }
+  },
+  {
+   "id": "any-inside-an-expression",
+   "description": "any inside an expression",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save* or any"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Get",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Get",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Get": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0234"
+     }
+    ]
+   }
+  },
+  {
+   "id": "a-subtraction-of-any-is-an-error",
+   "description": "a subtraction of any is an error",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "- method: any"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Get",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Get",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Get": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0234"
+     }
+    ]
+   }
+  },
+  {
+   "id": "a-reference-to-another-property",
+   "description": "a reference to another property",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: assembly.accessibility"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Get",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Get",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Get": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0233"
+     }
+    ]
+   }
+  },
+  {
+   "id": "a-reference-to-a-setting",
+   "description": "a reference to a setting",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "assembly.Level"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Get",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Get",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Get": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0233"
+     }
+    ]
+   }
+  },
+  {
+   "id": "a-reference-inside-a-compound-part",
+   "description": "a reference inside a compound part",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "assembly.method or public"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Get",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Get",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Get": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0233"
+     }
+    ]
+   }
+  },
+  {
+   "id": "an-error-in-one-class-turns-the-whole-aspect-off",
+   "description": "an error in one class turns the whole aspect off",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**"
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save*\nmethod: Get*"
+     },
+     {
+      "type": "Shop.Data.Repo"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Save",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Data.Repo.Load",
+      "namespace": "Shop.Data",
+      "type": "Shop.Data.Repo",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Save": false,
+     "Shop.Data.Repo.Load": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0225"
+     }
+    ]
+   }
+  },
+  {
+   "id": "conjuncts-on-one-property-stay-together-overlapping-sets-join-one-part",
+   "description": "conjuncts on one property stay together; overlapping sets join one part",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: Save* and (method: *A or public)"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.SaveA",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveA",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveB",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveB",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.SaveC",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "SaveC",
+      "accessibility": "internal",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.SaveA": true,
+     "Shop.Services.OrderService.SaveB": true,
+     "Shop.Services.OrderService.SaveC": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
+   "id": "log-targetfilter-attribute-any-nolog-ping-vs-bare-log-nolog",
+   "description": "[Log(TargetFilter = attribute: any)] [NoLog] Ping vs bare [Log] [NoLog]",
+   "input": {
+    "default": "- attribute: NoLog",
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.Ping",
+      "filter": "attribute: any"
+     },
+     {
+      "method": "Shop.Services.OrderService.Pong"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Ping",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Ping",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Pong",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Pong",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Ping": true,
+     "Shop.Services.OrderService.Pong": false
+    },
+    "settings": {},
+    "errors": []
+   }
+  }
+ ]
+}
