@@ -13,7 +13,8 @@ namespace AspectGenerator.TargetFilterFacts
 	/// </summary>
 	sealed class FactContext
 	{
-		readonly System.Collections.Concurrent.ConcurrentDictionary<ITypeSymbol, bool> _awaitable = new(SymbolEqualityComparer.Default);
+		readonly System.Collections.Concurrent.ConcurrentDictionary<ITypeSymbol, AwaitProbe.Answer> _awaitable = new(SymbolEqualityComparer.Default);
+		readonly System.Collections.Concurrent.ConcurrentDictionary<(ITypeSymbol, INamedTypeSymbol?), bool> _scoped = new(new ScopedKeyComparer());
 
 		public FactContext(Compilation compilation, IAssemblySymbol? projectAssembly = null)
 		{
@@ -29,6 +30,19 @@ namespace AspectGenerator.TargetFilterFacts
 		/// evaluated, the library's assembly.
 		/// </summary>
 		public IAssemblySymbol ProjectAssembly { get; }
+
+		int _probes;
+
+		/// <summary>How many times the compiler was asked; tests pin that identical calls are not asked again.</summary>
+		internal int ProbeCount
+		{
+			get { return _probes; }
+		}
+
+		internal void CountProbe()
+		{
+			System.Threading.Interlocked.Increment(ref _probes);
+		}
 
 		readonly System.Lazy<ProbeHost?> _host;
 		readonly System.Collections.Concurrent.ConcurrentDictionary<SyntaxTree, SemanticModel> _models = new();
@@ -63,10 +77,16 @@ namespace AspectGenerator.TargetFilterFacts
 			return new ProbeHost(model, body.Statements[0].SpanStart);
 		}
 
-		/// <summary>The answers of <see cref="AwaitProbe"/>, one per type symbol.</summary>
-		internal System.Collections.Concurrent.ConcurrentDictionary<ITypeSymbol, bool> AwaitableCache
+		/// <summary>The answers of <see cref="AwaitProbe"/> that hold wherever the type is awaited, one per type symbol.</summary>
+		internal System.Collections.Concurrent.ConcurrentDictionary<ITypeSymbol, AwaitProbe.Answer> AwaitableCache
 		{
 			get { return _awaitable; }
+		}
+
+		/// <summary>The answers that depend on where the type is awaited: per type symbol and containing type of the code.</summary>
+		internal System.Collections.Concurrent.ConcurrentDictionary<(ITypeSymbol, INamedTypeSymbol?), bool> ScopedAwaitableCache
+		{
+			get { return _scoped; }
 		}
 	}
 
@@ -81,5 +101,18 @@ namespace AspectGenerator.TargetFilterFacts
 		public SemanticModel Model { get; }
 
 		public int Position { get; }
+	}
+
+	sealed class ScopedKeyComparer : System.Collections.Generic.IEqualityComparer<(ITypeSymbol, INamedTypeSymbol?)>
+	{
+		public bool Equals((ITypeSymbol, INamedTypeSymbol?) x, (ITypeSymbol, INamedTypeSymbol?) y)
+		{
+			return SymbolEqualityComparer.Default.Equals(x.Item1, y.Item1) && SymbolEqualityComparer.Default.Equals(x.Item2, y.Item2);
+		}
+
+		public int GetHashCode((ITypeSymbol, INamedTypeSymbol?) key)
+		{
+			return unchecked(SymbolEqualityComparer.Default.GetHashCode(key.Item1) * 397 ^ (key.Item2 is null ? 0 : SymbolEqualityComparer.Default.GetHashCode(key.Item2)));
+		}
 	}
 }

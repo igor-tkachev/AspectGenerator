@@ -178,5 +178,140 @@ namespace AspectGenerator.Tests.TargetFilters
 
 			Assert.IsTrue(Async(compilation, method, null));
 		}
+
+		[TestMethod]
+		public void IdenticalCallsAreAskedOnce()
+		{
+			var calls = string.Concat(Enumerable.Repeat("Make(); ", 2000));
+			var compilation = Compile(
+				Awaiter,
+				"public class Aw { public Awr GetAwaiter() { return new Awr(); } }",
+				"public static class U { public static Aw Make() { return new Aw(); } public static void Use() { " + calls + "} }");
+
+			var context = new FactContext(compilation);
+			var tree    = compilation.SyntaxTrees.Last();
+			var model   = compilation.GetSemanticModel(tree);
+			var sites   = tree.GetRoot().DescendantNodes().OfType<InvocationExpressionSyntax>().Where(static i => i.ToString() == "Make()").ToList();
+			var method  = (IMethodSymbol)model.GetSymbolInfo(sites[0]).Symbol!;
+
+			Assert.AreEqual(2000, sites.Count);
+
+			foreach (var site in sites)
+				Assert.IsTrue(MethodFacts.Create(method, FactProperty.Async, context, site).IsAsync);
+
+			Assert.IsTrue(context.ProbeCount <= 2, $"{context.ProbeCount} probes for 2000 identical calls.");
+		}
+
+		[TestMethod]
+		public void ABodilessDefinitionIsNotReadInAScopeThatAddsNames()
+		{
+			// The file-local A has a GetAwaiter that is not an awaiter. The only other method of the type is generic, and
+			// its type parameter A, constrained to an awaitable interface, would be awaitable if the return type were read
+			// there. The return type is not read there: without a scope that adds no names the answer is "not awaitable".
+			var compilation = Compile(
+				Awaiter,
+				"public interface IGoodA { Awr GetAwaiter(); }",
+				"""
+				file class A { public int GetAwaiter() { return 0; } }
+				file abstract class Owner
+				{
+					public abstract A Make();
+					public void Helper<A>() where A : IGoodA { }
+				}
+				""");
+
+			var method = compilation.GetSymbolsWithName("Owner").OfType<INamedTypeSymbol>().Single().GetMembers("Make").OfType<IMethodSymbol>().Single();
+
+			Assert.IsFalse(Async(compilation, method, null));
+		}
+
+		[TestMethod]
+		public void ACallOfAMethodNamedLikeTheProbeIsNotShadowed()
+		{
+			var compilation = Compile(
+				Awaiter,
+				"""
+				file class A { public Awr GetAwaiter() { return new Awr(); } }
+				file static class U
+				{
+					static A __AspectGeneratorProbe() { return new A(); }
+					public static void Use() { __AspectGeneratorProbe(); }
+				}
+				""");
+
+			AssertAwaitable(compilation, "__AspectGeneratorProbe()", true);
+		}
+
+		[TestMethod]
+		public void APrivatePartialMethodImplementedInAnotherFileIsFound()
+		{
+			var compilation = Compile(
+				Awaiter,
+				"partial class Owner { class A { public Awr GetAwaiter() { return new Awr(); } } private partial A Make(); public void Use() { Make(); } }",
+				"partial class Owner { private partial A Make() { return new A(); } }");
+
+			AssertAwaitable(compilation, "Make()", true);
+		}
+
+		[TestMethod]
+		public void ACustomAwaitableWithAPrivateGetAwaiterIsAwaitedInsideItsOwnType()
+		{
+			var compilation = Compile(
+				Awaiter,
+				"public class Self { Awr GetAwaiter() { return new Awr(); } public static Self Make() { return new Self(); } public static void Use() { Make(); } }",
+				"public static class Elsewhere { public static void Use() { Self.Make(); } }");
+
+			var (method, inside) = FindCall(compilation, "Make()");
+
+			Assert.IsTrue(Async(compilation, method, inside));
+
+			var (_, outside) = FindCall(compilation, "Self.Make()");
+
+			Assert.IsFalse(Async(compilation, method, outside));
+		}
+
+		[TestMethod]
+		public void KnownLimits_AnAnonymousTypeArgumentNeedsABodyAndAPlainCall()
+		{
+			var compilation = Compile(
+				Awaiter,
+				"""
+				public class Aw<T> { public Awr GetAwaiter() { return new Awr(); } }
+				public class Plain { public Awr GetAwaiter() { return new Awr(); } }
+				public class Inst
+				{
+					public Plain Make2() { return new Plain(); }
+					public Aw<T> Of2<T>(T value) { return new Aw<T>(); }
+				}
+				static class W
+				{
+					public static Aw<T> Of<T>(T value) { return new Aw<T>(); }
+					public static Plain Make() { return new Plain(); }
+					static readonly object Field = Of(new { X = 1 });
+					static readonly object Plain1 = Make();
+					public static void Use(Inst? i) { i?.Make2(); i?.Of2(new { X = 1 }); }
+				}
+				""");
+
+			// In a field initializer the call has no statement scope to bind an await in, and an anonymous type cannot be
+			// written: such a call is not awaitable here.
+			var (of, field) = FindCall(compilation, "Of(new { X = 1 })");
+
+			Assert.IsFalse(Async(compilation, of, field));
+
+			// A type that can be written is found wherever the call is: in an initializer, or behind a '?.'.
+			var (make, initializer) = FindCall(compilation, "Make()");
+
+			Assert.IsTrue(Async(compilation, make, initializer));
+
+			var (make2, conditional) = FindCall(compilation, ".Make2()");
+
+			Assert.IsTrue(Async(compilation, make2, conditional));
+
+			// Behind a '?.' the invocation is not an expression of its own, so an unwritable type is not awaitable there.
+			var (of2, anonymousConditional) = FindCall(compilation, ".Of2(new { X = 1 })");
+
+			Assert.IsFalse(Async(compilation, of2, anonymousConditional));
+		}
 	}
 }
