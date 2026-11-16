@@ -19,8 +19,10 @@ namespace AspectGenerator
 				return nameSet.Add(methodName) ? methodName : GetInterceptorName($"{methodName}_{++nameCounter}");
 			}
 
-			// Calls that need a generic interceptor share one per target and aspect list, whatever their type arguments:
-			// a filter evaluated on a referenced method's constructed signature can select different aspects per call.
+			// Calls share an interceptor when they have the same target and the same aspect list. Calls that need a generic
+			// interceptor share one whatever their type arguments, so their key is the target in terms of its own type
+			// parameters; a filter evaluated on a referenced method's constructed signature can select different aspects
+			// per call.
 			foreach (var group in aspectedMethods.GroupBy(static m => m, InterceptorGroupComparer.Instance).OrderBy(static m => (m.Key.GenericShape ?? m.Key.Method).Name))
 			{
 				var method      = group.Key.GenericShape ?? group.Key.Method;
@@ -72,10 +74,13 @@ namespace AspectGenerator
 			if (x is null || y is null)
 				return ReferenceEquals(x, y);
 
+			// The aspect list is compared for every call, not only for those that need a generic interceptor: an interceptor
+			// emits the list of its first call for all of its calls, so calls of one target with different lists need
+			// interceptors of their own.
 			if (!SymbolEqualityComparer.Default.Equals(x.GenericShape ?? x.Method, y.GenericShape ?? y.Method))
 				return false;
 
-			return x.GenericShape is null || x.Attributes.SequenceEqual(y.Attributes);
+			return x.Attributes.SequenceEqual(y.Attributes);
 		}
 
 		public int GetHashCode(AnalyzedInvocation obj)
