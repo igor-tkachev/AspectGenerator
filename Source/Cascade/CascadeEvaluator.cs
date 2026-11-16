@@ -50,9 +50,11 @@ namespace AspectGenerator.Cascade
 	}
 
 	/// <summary>
-	/// Compares setting values by content: arrays and other sequences (a constructor argument list, an array argument,
-	/// an array inside an argument list) are equal when their elements are, in order; anything else by
-	/// <see cref="object.Equals(object, object)"/>.
+	/// Compares setting values as an attribute constructor would tell them apart: two values are equal when they have the
+	/// same runtime type and, for arrays and other sequences (a constructor argument list, an array argument, an array
+	/// inside an argument list), equal elements in order, compared the same way; anything else by
+	/// <see cref="object.Equals(object, object)"/>. So <c>new int[] { 1 }</c> and <c>new object[] { 1 }</c> differ, and so
+	/// do <c>1</c> and <c>1L</c>.
 	/// </summary>
 	sealed class CascadeSettingComparer : IEqualityComparer<object?>
 	{
@@ -63,13 +65,13 @@ namespace AspectGenerator.Cascade
 			if (ReferenceEquals(x, y))
 				return true;
 
-			if (x is null || y is null)
+			if (x is null || y is null || x.GetType() != y.GetType())
 				return false;
 
-			if (x is IEnumerable xs && y is IEnumerable ys && x is not string && y is not string)
+			if (x is IEnumerable xs && x is not string)
 			{
 				var xe = xs.GetEnumerator();
-				var ye = ys.GetEnumerator();
+				var ye = ((IEnumerable)y).GetEnumerator();
 
 				while (true)
 				{
@@ -97,7 +99,7 @@ namespace AspectGenerator.Cascade
 
 			if (obj is IEnumerable items && obj is not string)
 			{
-				var hash = 17;
+				var hash = obj.GetType().GetHashCode();
 
 				foreach (var item in items)
 					hash = unchecked(hash * 31 + GetHashCode(item));

@@ -248,6 +248,52 @@ namespace AspectGenerator.Tests.Cascade
 		}
 
 		[TestMethod]
+		public void ArraysOfDifferentElementTypesDisagreeTest()
+		{
+			// An attribute constructor taking object sees int[] and object[] as different values.
+			var type = Block(CascadeLevel.Type, "accessibility: any");
+
+			int Conflicts(object? first, object? second)
+			{
+				var a = Block(CascadeLevel.Assembly, "public",   ("()", first));
+				var b = Block(CascadeLevel.Assembly, "internal", ("()", second));
+
+				return Evaluator(Block(CascadeLevel.Aspect, null), [a, b], type).Decide(Fact("Load"), [type], []).Conflicts.Length;
+			}
+
+			Assert.AreEqual(1, Conflicts(new int[] { 1 },                  new object[] { 1 }));
+			Assert.AreEqual(1, Conflicts(new object?[] { new int[] { 1 } }, new object?[] { new object[] { 1 } }));
+			Assert.AreEqual(1, Conflicts(new object?[] { 1 },              new object?[] { 1L }));
+			Assert.AreEqual(1, Conflicts(new object?[] { 1 },              new object?[] { (byte)1 }));
+			Assert.AreEqual(0, Conflicts(new object?[] { new int[] { 1 } }, new object?[] { new int[] { 1 } }));
+		}
+
+		[TestMethod]
+		public void SettingsAreSnapshotWhenTheBlockIsCreatedTest()
+		{
+			var settings  = new Dictionary<string,object?> { ["Level"] = "Debug" };
+			var tags      = new[] { "x" };
+			var (lines, _) = CascadeTextReader.Read("public");
+
+			settings["Tags"] = tags;
+
+			var assembly  = CascadeBlock<CaseFact>.Create(CascadeLevel.Assembly, lines, settings);
+			var type      = Block(CascadeLevel.Type, null);
+			var evaluator = Evaluator(Block(CascadeLevel.Aspect, null), [assembly], type);
+			var context   = evaluator.Prepare([type]);
+
+			settings["Format"] = "Long";
+			settings["Level"]  = "Info";
+			tags[0]            = "y";
+
+			var decision = evaluator.Decide(Fact("Load"), context, []);
+
+			Assert.AreEqual("Debug", decision.Settings["Level"].Value);
+			Assert.IsFalse(decision.Settings.ContainsKey("Format"));
+			CollectionAssert.AreEqual(new[] { "x" }, (string[])decision.Settings["Tags"].Value!);
+		}
+
+		[TestMethod]
 		public void SettingsOfAssemblyBlocksChosenPerMethodBlockTest()
 		{
 			// Each method block references the assembly level, so each picks its own assembly block: two values, a conflict.

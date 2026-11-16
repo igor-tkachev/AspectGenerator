@@ -91,7 +91,52 @@ namespace AspectGenerator.Tests.Cascade
 			Dictionary<string,Dictionary<string,string>> Settings,
 			List<(string Block, string Id)>              Errors);
 
-		static Result Run(JsonObject input, AssemblyFilterReach reach)
+		/// <summary>
+		/// The cases with a library filter that has an error, when such a filter turns the aspect off: nothing is selected,
+		/// and the errors are the filter errors of the library's blocks.
+		/// </summary>
+		[TestMethod]
+		public void LibraryFilterWithErrorTurnsTheAspectOff()
+		{
+			var count = 0;
+
+			foreach (var c in _cases.Value)
+			{
+				var input = c["input"]!.AsObject();
+
+				if (input["library"] is null)
+					continue;
+
+				var ignored = Run(input, AssemblyFilterReach.ProjectUnlessOriginOrPlace, UnreadableLibraryFilter.IgnoreWithWarning);
+				var off     = Run(input, AssemblyFilterReach.ProjectUnlessOriginOrPlace, UnreadableLibraryFilter.TurnAspectOff);
+				var dropped = ignored.Errors.Where(e => e.Id == CascadeDiagnosticIds.UnreadableLibrary).Select(e => e.Block).ToList();
+
+				if (dropped.Count == 0)
+				{
+					// Without a library filter error the two policies agree.
+					Assert.AreEqual(Describe(ignored), Describe(off), c["id"]!.GetValue<string>());
+					continue;
+				}
+
+				Assert.IsTrue(off.Selected.Values.All(v => !v), c["id"] + ": nothing is selected");
+				Assert.AreEqual(0, off.Settings.Count, c["id"] + ": settings");
+				CollectionAssert.AreEquivalent(dropped, off.Errors.Select(e => e.Block).Distinct().ToList(), c["id"] + ": error blocks");
+				Assert.IsFalse(off.Errors.Any(e => e.Id == CascadeDiagnosticIds.UnreadableLibrary), c["id"] + ": no AG0236");
+
+				count++;
+			}
+
+			Assert.AreNotEqual(0, count, "No case has a library filter with an error.");
+
+			static string Describe(Result r)
+			{
+				return string.Join(";", r.Selected.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => p.Key + "=" + p.Value)) + "|" +
+					string.Join(";", r.Settings.OrderBy(p => p.Key, StringComparer.Ordinal).SelectMany(m => m.Value.Select(v => m.Key + "." + v.Key + "=" + v.Value))) + "|" +
+					string.Join(";", r.Errors.Select(e => e.Block + " " + e.Id).OrderBy(e => e, StringComparer.Ordinal));
+			}
+		}
+
+		static Result Run(JsonObject input, AssemblyFilterReach reach, UnreadableLibraryFilter libraryFilterWithError = UnreadableLibraryFilter.IgnoreWithWarning)
 		{
 			var allBlocks = new List<CascadeBlock<CaseFact>>();
 			var labels    = new Dictionary<CascadeBlock<CaseFact>,string>();
@@ -137,7 +182,8 @@ namespace AspectGenerator.Tests.Cascade
 				consumer.Assembly,
 				consumerAll.Where(b => b != aspectDefault && !consumer.Assembly.Contains(b)),
 				f => f.Project,
-				allBlocks.Except(consumerAll));
+				allBlocks.Except(consumerAll),
+				libraryFilterWithError);
 
 			var result = new Result([], [], [..evaluator.Diagnostics.Concat(evaluator.Warnings).Select(e => (labels[(CascadeBlock<CaseFact>)e.Block!], e.Id))]);
 			var facts  = input["facts"]!.AsArray().Select(f => f.Deserialize<CaseFact>(_json)!).ToList();

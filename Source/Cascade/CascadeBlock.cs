@@ -99,7 +99,7 @@ namespace AspectGenerator.Cascade
 			IEnumerable<CascadeDiagnostic>?      readDiagnostics = null,
 			AssemblyFilterReach                  assemblyReach   = CascadeDefaults.AssemblyReach)
 		{
-			var block        = new CascadeBlock<TFact>(level, label ?? level.ToString(), source, settings ?? ImmutableDictionary<string,object?>.Empty);
+			var block        = new CascadeBlock<TFact>(level, label ?? level.ToString(), source, Snapshot(settings));
 			var diagnostics  = ImmutableArray.CreateBuilder<CascadeDiagnostic>();
 			var declarations = ImmutableArray.CreateBuilder<CascadeDeclaration<TFact>>();
 
@@ -335,6 +335,36 @@ namespace AspectGenerator.Cascade
 			CascadeDeclaration<TFact> Implicit(CascadeProperty property)
 			{
 				return new(block, false, new CascadeImplicit<TFact>(property), null);
+			}
+		}
+
+		/// <summary>
+		/// A copy of the settings the block keeps: the caller may change its dictionary or an array in it later, and the
+		/// plans built from the block must not see that.
+		/// </summary>
+		static ImmutableDictionary<string,object?> Snapshot(IReadOnlyDictionary<string,object?>? settings)
+		{
+			if (settings is null || settings.Count == 0)
+				return ImmutableDictionary<string,object?>.Empty;
+
+			var builder = ImmutableDictionary.CreateBuilder<string,object?>(StringComparer.Ordinal);
+
+			foreach (var setting in settings)
+				builder.Add(setting.Key, Copy(setting.Value));
+
+			return builder.ToImmutable();
+
+			static object? Copy(object? value)
+			{
+				if (value is not Array { Rank: 1 } array)
+					return value;
+
+				var copy = (Array)array.Clone();
+
+				for (var i = 0; i < copy.Length; i++)
+					copy.SetValue(Copy(copy.GetValue(i)), i);
+
+				return copy;
 			}
 		}
 
