@@ -10,10 +10,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace AspectGenerator.TargetFilterFacts
 {
 	/// <summary>
-	/// Asks the compiler whether a type can be awaited: a tiny method that awaits a parameter of the type is bound
-	/// against the consumer's compilation (its references, its friend assemblies, its constraints rules), and the type is
-	/// awaitable when that binds without an error to an instance <c>GetAwaiter()</c>. An extension <c>GetAwaiter</c> does
-	/// not count: it depends on the usings of the call site. The answer is cached per type symbol in the context.
+	/// Asks the compiler whether a type can be awaited: a local function that awaits a parameter of the type is bound
+	/// speculatively in the consumer's compilation (its references, its friend assemblies, its constraint rules), and the
+	/// type is awaitable when the await binds to an instance <c>GetAwaiter()</c> with <c>IsCompleted</c> and
+	/// <c>GetResult()</c>. An extension <c>GetAwaiter</c> does not count: it depends on the usings of the call site. The
+	/// answer is cached per type symbol in the context, and every probe of a context is bound in the one compilation the
+	/// context forks once (a fork per probe costs tens of milliseconds on a large compilation).
 	/// <para>
 	/// A type that nothing in its hierarchy gives a <c>GetAwaiter</c> member cannot be awaited, and is answered without
 	/// binding; so is <c>Task</c> and <c>ValueTask</c>.
@@ -48,6 +50,16 @@ namespace AspectGenerator.TargetFilterFacts
 			if (!HasGetAwaiter(type, 0))
 				return false;
 
+			return Bind(type, context);
+		}
+
+		internal static bool PassesFilter(ITypeSymbol type)
+		{
+			return HasGetAwaiter(type, 0);
+		}
+
+		internal static bool Bind(ITypeSymbol type, FactContext context)
+		{
 			var parameters = new List<ITypeParameterSymbol>();
 
 			Collect(type, parameters);
@@ -57,7 +69,9 @@ namespace AspectGenerator.TargetFilterFacts
 			foreach (var parameter in parameters)
 				names[parameter] = "P" + names.Count;
 
-			var text = new StringBuilder("static class __AspectGeneratorAwaitProbe { static async void F");
+			// A local function that awaits a parameter of the type, with the type parameters (and their constraints) the type
+			// mentions as its own: bound speculatively inside the one host method of the context's forked compilation.
+			var text = new StringBuilder("static async void F");
 
 			if (parameters.Count > 0)
 				text.Append('<').Append(string.Join(", ", parameters.Select(p => names[p]))).Append('>');
@@ -67,24 +81,24 @@ namespace AspectGenerator.TargetFilterFacts
 			foreach (var parameter in parameters)
 				AppendConstraints(text, parameter, names);
 
-			text.Append(" { await x; } }");
+			text.Append(" { await x; }");
 
-			var options = context.Compilation.SyntaxTrees.FirstOrDefault()?.Options as CSharpParseOptions ?? CSharpParseOptions.Default;
-			var tree    = CSharpSyntaxTree.ParseText(text.ToString(), options);
+			var host = context.ProbeHost;
 
-			if (context.Compilation is not CSharpCompilation compilation)
+			if (host is null)
 				return false;
 
-			var probe = compilation.AddSyntaxTrees(tree);
-			var model = probe.GetSemanticModel(tree);
+			var statement = SyntaxFactory.ParseStatement(text.ToString());
 
-			if (model.GetDiagnostics().Any(static d => d.Severity == DiagnosticSeverity.Error))
+			if (statement.ContainsDiagnostics || !host.Model.TryGetSpeculativeSemanticModel(host.Position, statement, out var model) || model is null)
 				return false;
 
-			var await = tree.GetRoot().DescendantNodes().OfType<AwaitExpressionSyntax>().Single();
+			var await = statement.DescendantNodes().OfType<AwaitExpressionSyntax>().Single();
 			var info  = model.GetAwaitExpressionInfo(await);
 
-			return info.GetAwaiterMethod is { IsExtensionMethod: false };
+			return info.GetAwaiterMethod is { IsExtensionMethod: false } &&
+				info.IsCompletedProperty is not null &&
+				info.GetResultMethod is not null;
 		}
 
 		// A necessary condition for the compiler to find an instance GetAwaiter: some member of that name in the type's
