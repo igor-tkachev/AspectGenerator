@@ -33,6 +33,7 @@ namespace AspectGenerator.TargetFilterFacts
 			"System.Runtime.CompilerServices.RefSafetyRulesAttribute",
 			"System.Runtime.CompilerServices.RequiresLocationAttribute",
 			"System.Runtime.CompilerServices.ParamCollectionAttribute",
+			"System.Runtime.CompilerServices.PreserveBaseOverridesAttribute",
 			"System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute",
 			"System.Runtime.CompilerServices.DynamicAttribute",
 			"System.Runtime.CompilerServices.TupleElementNamesAttribute",
