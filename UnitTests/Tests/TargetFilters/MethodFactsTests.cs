@@ -173,6 +173,14 @@ namespace AspectGenerator.Tests.TargetFilters
 				public interface IBadA { Awaiter GetAwaiter(); }
 				public class Cc { public T Ret<T>() where T : IGoodA, IBadA { return default!; } public T One<T>() where T : IGoodA { return default!; } }
 
+				public class AwR<T> where T : IAwaiterT, allows ref struct { public T GetAwaiter() { return default!; } }
+
+				public class Cd
+				{
+					public T0 Deep<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>() where T0 : T1 where T1 : T2 where T2 : T3 where T3 : T4 where T4 : T5 where T5 : T6 where T6 : T7 where T7 : T8 where T8 : T9 where T9 : IGoodA { return default!; }
+					public AwR<T> RetAllowsRef<T>() where T : IAwaiterT, allows ref struct { return default!; }
+				}
+
 				public class Derived : Facts { public override void InhAttrM() { } public override void Virt() { } }
 			}
 			""";
@@ -1022,6 +1030,42 @@ namespace AspectGenerator.Tests.TargetFilters
 				var method   = consumer.GetTypeByMetadataName("Lib.Ivt.Make")!.GetMembers("Get").OfType<IMethodSymbol>().Single();
 
 				Assert.AreEqual(expected, MethodFacts.Create(method, FactProperty.Async, new FactContext(consumer)).IsAsync, assembly);
+			}
+		}
+
+		[TestMethod]
+		public void TheConstraintsOfAnAwaiterAreTheCompilersWhateverTheirDepth()
+		{
+			ForEachVariant(v =>
+			{
+				// A chain of ten constrained type parameters ending in an awaitable interface.
+				Assert.IsTrue(v.Facts(v.Method("Lib.Shapes.Cd", "Deep"), FactProperty.Async).IsAsync);
+			});
+		}
+
+		[TestMethod]
+		public void AnAwaiterThatMayBeARefStructIsNotAwaitable()
+		{
+			// CS4027 at a real await.
+			ForEachVariant(v => Assert.IsFalse(v.Facts(v.Method("Lib.Shapes.Cd", "RetAllowsRef"), FactProperty.Async).IsAsync));
+		}
+
+		[TestMethod]
+		public void ProbesOfOneContextAreSafeToRunConcurrently()
+		{
+			var method = Impl.Method("Lib.Shapes.Facts", "ReturnAwG");
+
+			for (var round = 0; round < 20; round++)
+			{
+				var context = new FactContext(Impl.Consumer);
+				var results = new bool[16];
+
+				System.Threading.Tasks.Parallel.For(0, results.Length, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = 16 }, i =>
+				{
+					results[i] = MethodFacts.Create(method, FactProperty.Async, context).IsAsync;
+				});
+
+				Assert.IsTrue(results.All(static r => r), $"round {round}: {string.Join(",", results)}");
 			}
 		}
 

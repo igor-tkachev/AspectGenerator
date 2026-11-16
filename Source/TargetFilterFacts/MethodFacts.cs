@@ -45,8 +45,11 @@ namespace AspectGenerator.TargetFilterFacts
 		readonly FactContext  _context;
 		readonly MethodFacts? _definition;
 
-		MethodFacts(IMethodSymbol method, FactPlan plan, FactContext context, MethodFacts? definition)
+		readonly SyntaxNode? _callSite;
+
+		MethodFacts(IMethodSymbol method, FactPlan plan, FactContext context, MethodFacts? definition, SyntaxNode? callSite = null)
 		{
+			_callSite   = callSite;
 			Method      = method;
 			_plan       = plan;
 			_context    = context;
@@ -57,14 +60,14 @@ namespace AspectGenerator.TargetFilterFacts
 		/// The record of a call: the definition of the method and the constructed method the call binds to are the same
 		/// for a method that nothing constructs, and then the record is the definition record.
 		/// </summary>
-		public static MethodFacts Create(IMethodSymbol method, FactPlan plan, FactContext context)
+		public static MethodFacts Create(IMethodSymbol method, FactPlan plan, FactContext context, SyntaxNode? callSite = null)
 		{
 			var normalized = Normalize(method);
 			var definition = CreateDefinition(normalized, plan, context);
 
-			return SymbolEqualityComparer.Default.Equals(normalized, normalized.OriginalDefinition)
+			return callSite is null && SymbolEqualityComparer.Default.Equals(normalized, normalized.OriginalDefinition)
 				? definition
-				: definition.ForCall(normalized);
+				: definition.ForCall(normalized, callSite);
 		}
 
 		/// <summary>
@@ -78,17 +81,17 @@ namespace AspectGenerator.TargetFilterFacts
 		/// <summary>
 		/// The record of one call of this definition. <paramref name="call"/> is the constructed method a call binds to.
 		/// </summary>
-		public MethodFacts ForCall(IMethodSymbol call)
+		public MethodFacts ForCall(IMethodSymbol call, SyntaxNode? callSite = null)
 		{
 			if (_definition is not null)
-				return _definition.ForCall(call);
+				return _definition.ForCall(call, callSite);
 
 			var normalized = Normalize(call);
 
 			if (!SymbolEqualityComparer.Default.Equals(normalized.OriginalDefinition, Method))
 				throw new ArgumentException("The call is not a call of this definition.", nameof(call));
 
-			return new MethodFacts(normalized, _plan, _context, this);
+			return new MethodFacts(normalized, _plan, _context, this, callSite);
 		}
 
 		// A reduced extension method (x.Any()) is described in its static form, with the type arguments the call infers.
@@ -371,7 +374,7 @@ namespace AspectGenerator.TargetFilterFacts
 			{
 				Require(FactProperty.Async);
 
-				return _isAsync ??= Computed(AwaitProbe.IsAwaitable(Method.ReturnType, _context));
+				return _isAsync ??= Computed(AwaitProbe.IsAwaitable(Method, IsDefinition, _callSite, _context));
 			}
 		}
 
