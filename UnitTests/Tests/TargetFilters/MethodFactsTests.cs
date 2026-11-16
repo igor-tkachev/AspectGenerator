@@ -88,6 +88,12 @@ namespace AspectGenerator.Tests.TargetFilters
 					public PrivAw ReturnPriv() { return default!; }
 					public IntAw ReturnInt() { return default!; }
 					[MethodImpl(MethodImplOptions.InternalCall)] public static extern void Native();
+					[MethodImpl(MethodImplOptions.ForwardRef)] public static extern void Fwd();
+					#pragma warning disable CS0626 // A bare extern, which metadata cannot tell from a method with a body.
+					public static extern void Bare();
+					#pragma warning restore CS0626
+					public AwG<IAwaiterT> ReturnAwG() { return default!; }
+					public AwG<T> ReturnAwGen<T>() where T : IAwaiterT { return default!; }
 
 					public void RefRO(ref readonly int x) { }
 					public void InP(in int x) { }
@@ -156,6 +162,17 @@ namespace AspectGenerator.Tests.TargetFilters
 				public class CovBase { public virtual object Cov() { return ""; } }
 				public class CovDer : CovBase { public override string Cov() { return ""; } }
 
+				public interface IRe { void M(); }
+				public class ReB : IRe { public virtual void M() { } }
+				public class ReD : ReB, IRe { public override void M() { } void IRe.M() { } }
+
+				public interface IAwaiterT : INotifyCompletion { bool IsCompleted { get; } void GetResult(); }
+				public class AwG<T> where T : IAwaiterT { public T GetAwaiter() { return default!; } }
+
+				public interface IGoodA { Awaiter GetAwaiter(); }
+				public interface IBadA { Awaiter GetAwaiter(); }
+				public class Cc { public T Ret<T>() where T : IGoodA, IBadA { return default!; } public T One<T>() where T : IGoodA { return default!; } }
+
 				public class Derived : Facts { public override void InhAttrM() { } public override void Virt() { } }
 			}
 			""";
@@ -221,7 +238,7 @@ namespace AspectGenerator.Tests.TargetFilters
 
 			public MethodFacts Facts(IMethodSymbol method, FactProperty plan = FactProperty.All)
 			{
-				return MethodFacts.Create(method, plan, new FactContext(Consumer.Assembly));
+				return MethodFacts.Create(method, plan, new FactContext(Consumer));
 			}
 
 			/// <summary>The method symbol a call in the consumer binds to, as the semantic model gives it.</summary>
@@ -675,7 +692,7 @@ namespace AspectGenerator.Tests.TargetFilters
 
 				var tree    = consumer.SyntaxTrees.Single();
 				var model   = consumer.GetSemanticModel(tree);
-				var context = new FactContext(consumer.Assembly);
+				var context = new FactContext(consumer);
 				var name    = referenceAssembly ? "ref" : "impl";
 
 				IMethodSymbol Call(string text)
@@ -834,10 +851,10 @@ namespace AspectGenerator.Tests.TargetFilters
 
 			// A library's own filters are read with the library's assembly as the project.
 			var libraryAssembly = Impl.Type("Lib.Shapes.Facts").ContainingAssembly;
-			var inLibrary       = MethodFacts.Create(Impl.Method("Lib.Shapes.Facts", libraryMethod), FactProperty.Origin, new FactContext(libraryAssembly));
+			var inLibrary       = MethodFacts.Create(Impl.Method("Lib.Shapes.Facts", libraryMethod), FactProperty.Origin, new FactContext(Impl.Consumer, libraryAssembly));
 
 			Assert.IsTrue(inLibrary.IsProject);
-			Assert.IsFalse(MethodFacts.Create(Impl.Call("Calls", "list.Add(1)"), FactProperty.Origin, new FactContext(libraryAssembly)).IsProject);
+			Assert.IsFalse(MethodFacts.Create(Impl.Call("Calls", "list.Add(1)"), FactProperty.Origin, new FactContext(Impl.Consumer, libraryAssembly)).IsProject);
 		}
 
 		[TestMethod]
@@ -939,11 +956,85 @@ namespace AspectGenerator.Tests.TargetFilters
 		}
 
 		[TestMethod]
+		public void AMethodReimplementedInTheTypeDoesNotImplementWhatTheBaseMapped()
+		{
+			ForEachVariant(v =>
+			{
+				// ReD implements IRe again, explicitly, so its override of M is not what IRe.M maps to.
+				var d = v.Facts(v.Method("Lib.Shapes.ReD", "M"), FactProperty.Implements);
+
+				Assert.AreEqual(0, d.ImplementedMembers.Length);
+
+				var b = v.Facts(v.Method("Lib.Shapes.ReB", "M"), FactProperty.Implements);
+
+				CollectionAssert.AreEqual(new[] { "Lib.Shapes.IRe.M()" }, b.ImplementedMembers.Select(static x => x.ToDisplayString()).ToArray());
+			});
+		}
+
+		[TestMethod]
+		public void TheCompilerDecidesWhatIsAwaitable()
+		{
+			ForEachVariant(v =>
+			{
+				// An awaiter that is a type parameter constrained to an awaiter interface.
+				Assert.IsTrue(v.Facts(v.Method("Lib.Shapes.Facts", "ReturnAwG"), FactProperty.Async).IsAsync);
+				Assert.IsTrue(v.Facts(v.Method("Lib.Shapes.Facts", "ReturnAwGen"), FactProperty.Async).IsAsync);
+
+				// One constrained GetAwaiter is awaitable; two equally good ones are ambiguous at the await.
+				Assert.IsTrue(v.Facts(v.Method("Lib.Shapes.Cc", "One"), FactProperty.Async).IsAsync);
+				Assert.IsFalse(v.Facts(v.Method("Lib.Shapes.Cc", "Ret"), FactProperty.Async).IsAsync);
+			});
+		}
+
+		[TestMethod]
+		public void AnInternalGetAwaiterIsAwaitableOnlyForAFriendAssembly()
+		{
+			const string library =
+				"""
+				using System;
+				using System.Runtime.CompilerServices;
+				[assembly: InternalsVisibleTo("Friend")]
+				namespace Lib.Ivt
+				{
+					public class Awaiter : INotifyCompletion
+					{
+						public bool IsCompleted { get { return true; } }
+						public void GetResult() { }
+						public void OnCompleted(Action a) { }
+					}
+					public class IvtAw { internal Awaiter GetAwaiter() { return new Awaiter(); } }
+					public static class Make { public static IvtAw Get() { return new IvtAw(); } }
+				}
+				""";
+
+			var parse     = new CSharpParseOptions(LanguageVersion.Preview);
+			var framework = Framework().ToList();
+			var lib       = CSharpCompilation.Create("IvtLib", [CSharpSyntaxTree.ParseText(library, parse)], framework, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+			var image     = new MemoryStream();
+
+			Assert.IsTrue(lib.Emit(image).Success);
+
+			var reference = MetadataReference.CreateFromImage(image.ToArray());
+
+			foreach (var (assembly, expected) in new[] { ("Friend", true), ("Stranger", false) })
+			{
+				var consumer = CSharpCompilation.Create(assembly, [CSharpSyntaxTree.ParseText("class C { void M() { Lib.Ivt.Make.Get(); } }", parse)], framework.Append(reference), new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+				var method   = consumer.GetTypeByMetadataName("Lib.Ivt.Make")!.GetMembers("Get").OfType<IMethodSymbol>().Single();
+
+				Assert.AreEqual(expected, MethodFacts.Create(method, FactProperty.Async, new FactContext(consumer)).IsAsync, assembly);
+			}
+		}
+
+		[TestMethod]
 		public void ExternIncludesInternalCallMethods()
 		{
 			ForEachVariant(v =>
 			{
 				Assert.IsTrue(v.Facts(v.Method("Lib.Shapes.Facts", "Native"), FactProperty.Extern).IsExtern);
+				Assert.IsTrue(v.Facts(v.Method("Lib.Shapes.Facts", "Fwd"), FactProperty.Extern).IsExtern);
+
+				// Metadata keeps no trace of a bare extern, so neither form calls it extern.
+				Assert.IsFalse(v.Facts(v.Method("Lib.Shapes.Facts", "Bare"), FactProperty.Extern).IsExtern);
 				Assert.IsTrue(v.Facts(v.Method("Lib.Shapes.Facts", "getpid"), FactProperty.Extern).IsExtern);
 			});
 		}
@@ -985,7 +1076,7 @@ namespace AspectGenerator.Tests.TargetFilters
 						continue;
 					}
 
-					Assert.AreEqual(expected[i], MethodFacts.Create(method, FactProperty.Accessibility, new FactContext(all.Assembly)).Accessibility, $"{variant.Name} {names[i]}");
+					Assert.AreEqual(expected[i], MethodFacts.Create(method, FactProperty.Accessibility, new FactContext(all)).Accessibility, $"{variant.Name} {names[i]}");
 				}
 			}
 		}
@@ -1044,7 +1135,7 @@ namespace AspectGenerator.Tests.TargetFilters
 		{
 			var framework = Impl.Consumer;
 			var plan      = FactProperty.All;
-			var context   = new FactContext(framework.Assembly);
+			var context   = new FactContext(framework);
 
 			MethodFacts Facts(string type, string name, int parameters)
 			{
@@ -1118,7 +1209,7 @@ namespace AspectGenerator.Tests.TargetFilters
 
 			var tree    = compilation.SyntaxTrees.Single();
 			var model   = compilation.GetSemanticModel(tree);
-			var context = new FactContext(compilation.Assembly);
+			var context = new FactContext(compilation);
 
 			MethodFacts Create(string type, string name, int parameters)
 			{
