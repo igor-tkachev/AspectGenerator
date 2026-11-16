@@ -56,6 +56,19 @@ namespace AspectGenerator.Cascade
 		ProjectUnlessAnyInclude,
 	}
 
+	/// <summary>What happens to a filter read from a referenced assembly that has an error.</summary>
+	enum UnreadableLibraryFilter
+	{
+		/// <summary>
+		/// The block is left out with a warning naming it, and the rest of the aspect works: a consumer cannot edit a
+		/// library's filters, so they must not switch the aspect off in the consumer's build.
+		/// </summary>
+		IgnoreWithWarning,
+
+		/// <summary>The block's errors count as the aspect's own and turn the aspect off.</summary>
+		TurnAspectOff,
+	}
+
 	static class CascadeDefaults
 	{
 		/// <summary>
@@ -63,6 +76,11 @@ namespace AspectGenerator.Cascade
 		/// cascade tests run the other choice as well.
 		/// </summary>
 		public const AssemblyFilterReach AssemblyReach = AssemblyFilterReach.ProjectUnlessOriginOrPlace;
+
+		/// <summary>
+		/// What a library filter with an error does. The rule is not final yet; this is the one place that chooses it.
+		/// </summary>
+		public const UnreadableLibraryFilter LibraryFilterWithError = UnreadableLibraryFilter.IgnoreWithWarning;
 	}
 
 	/// <summary>The ids of the diagnostics the cascade reports.</summary>
@@ -74,6 +92,7 @@ namespace AspectGenerator.Cascade
 		public const string InvalidReference  = "AG0233";
 		public const string InvalidAny        = "AG0234";
 		public const string SettingsConflict  = "AG0235";
+		public const string UnreadableLibrary = "AG0236";
 	}
 
 	static class CascadePropertyExtensions

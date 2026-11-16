@@ -1,5 +1,5 @@
 {
- "about": "Cascade expectations for target filters. Input filters are text; 'facts' are the method records. 'errors' lists (block label, diagnostic id); a case with a filter error selects nothing. 'alternatives' holds the result under a non-default setting of the evaluator switch it is named after.",
+ "about": "Cascade expectations for target filters. Input filters are text; 'facts' are the method records. 'errors' lists (block label, diagnostic id); a case with a filter error selects nothing (AG0235, AG0236 excepted). 'alternatives' holds the result under a non-default setting of the evaluator switch it is named after.",
  "cases": [
   {
    "id": "class-method-save-replaces-method",
@@ -2545,14 +2545,32 @@
       "returns": "System.Void",
       "project": true,
       "modifiers": []
+     },
+     {
+      "id": "Shop.Data.Repo.N",
+      "namespace": "Shop.Data",
+      "type": "Shop.Data.Repo",
+      "name": "N",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
      }
     ]
    },
    "expected": {
     "selected": {
-     "Shop.Services.OrderService.M": true
+     "Shop.Services.OrderService.M": true,
+     "Shop.Data.Repo.N": true
     },
-    "settings": {},
+    "settings": {
+     "Shop.Data.Repo.N": {
+      "Level": "Debug"
+     }
+    },
     "errors": [
      {
       "block": "selection:Shop.Services.OrderService.M",
@@ -2617,6 +2635,163 @@
      }
     },
     "errors": []
+   }
+  },
+  {
+   "id": "two-blocks-of-one-chain-write-level-the-most-specific-writer-decides",
+   "description": "two blocks of one chain write Level: the most specific writer decides",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**",
+      "settings": {
+       "Level": "Debug"
+      }
+     }
+    ],
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "settings": {
+       "Level": "Info"
+      }
+     }
+    ],
+    "methods": [
+     {
+      "method": "Shop.Services.OrderService.Pay",
+      "settings": {
+       "Level": "Trace"
+      }
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Pay",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Pay",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Data.Repo.Save",
+      "namespace": "Shop.Data",
+      "type": "Shop.Data.Repo",
+      "name": "Save",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.Load": true,
+     "Shop.Services.OrderService.Pay": true,
+     "Shop.Data.Repo.Save": true
+    },
+    "settings": {
+     "Shop.Services.OrderService.Load": {
+      "Level": "Info"
+     },
+     "Shop.Services.OrderService.Pay": {
+      "Level": "Trace"
+     },
+     "Shop.Data.Repo.Save": {
+      "Level": "Debug"
+     }
+    },
+    "errors": []
+   }
+  },
+  {
+   "id": "an-unreadable-library-filter-is-dropped-with-ag0236-the-aspect-stays-on",
+   "description": "an unreadable library filter is dropped with AG0236; the aspect stays on",
+   "input": {
+    "default": "- attribute: NoLog",
+    "assembly": [
+     {
+      "filter": "namespace: Shop.**"
+     }
+    ],
+    "library": {
+     "assembly": [
+      {
+       "filter": "contains: Save"
+      }
+     ],
+     "types": [],
+     "methods": [
+      {
+       "method": "Lib.C.Write"
+      }
+     ]
+    },
+    "facts": [
+     {
+      "id": "Lib.C.Write",
+      "namespace": "Lib",
+      "type": "Lib.C",
+      "name": "Write",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": false,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.Load",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "Load",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Lib.C.Write": true,
+     "Shop.Services.OrderService.Load": true
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "assembly#0:lib",
+      "id": "AG0236"
+     }
+    ]
    }
   },
   {

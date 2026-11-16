@@ -149,6 +149,126 @@ namespace AspectGenerator.Tests.Cascade
 		}
 
 		[TestMethod]
+		public void ParenthesesInAnIncludeDoNotChangeTheSplitTest()
+		{
+			var (flat,   _) = CascadeTextReader.Read("static and method: Save* and public");
+			var (nested, _) = CascadeTextReader.Read("static and (method: Save* and public)");
+			var (deeper, _) = CascadeTextReader.Read("(static and (method: Save* and (public)))");
+
+			foreach (var lines in new[] { flat, nested, deeper })
+			{
+				var parts = CascadeBlock<CaseFact>.Split(lines[0]);
+
+				CollectionAssert.AreEqual(
+					new[] { CascadeProperty.Static, CascadeProperty.Method, CascadeProperty.Accessibility },
+					parts.Select(p => p.Properties).ToArray());
+			}
+		}
+
+		[TestMethod]
+		public void ParenthesesInASubtractionDoNotChangeTheSplitTest()
+		{
+			var (flat,   _) = CascadeTextReader.Read("- static or method: Get* or public");
+			var (nested, _) = CascadeTextReader.Read("- static or (method: Get* or public)");
+
+			foreach (var lines in new[] { flat, nested })
+			{
+				var parts = CascadeBlock<CaseFact>.Split(lines[0]);
+
+				CollectionAssert.AreEqual(
+					new[] { CascadeProperty.Static, CascadeProperty.Method, CascadeProperty.Accessibility },
+					parts.Select(p => p.Properties).ToArray());
+			}
+		}
+
+		[TestMethod]
+		public void ParenthesesDoNotChangeTheCascadeTest()
+		{
+			// The type's internal replaces the assembly's public only: method: Save* still applies.
+			foreach (var filter in new[] { "static and method: Save* and public", "static and (method: Save* and public)" })
+			{
+				var assembly  = Block(CascadeLevel.Assembly, filter);
+				var type      = Block(CascadeLevel.Type,     "internal");
+				var evaluator = Evaluator(Block(CascadeLevel.Aspect, null), [assembly], type);
+				var save      = Fact("SaveA", "internal");
+				var load      = Fact("Load",  "internal");
+
+				save.Static = true;
+				load.Static = true;
+
+				Assert.IsTrue (evaluator.Decide(save, [type], []).Selected, filter);
+				Assert.IsFalse(evaluator.Decide(load, [type], []).Selected, filter);
+			}
+
+			foreach (var filter in new[] { "- static or method: Get* or public", "- static or (method: Get* or public)" })
+			{
+				var assembly  = Block(CascadeLevel.Assembly, "namespace: Shop.**\n" + filter);
+				var type      = Block(CascadeLevel.Type,     "- internal");
+				var evaluator = Evaluator(Block(CascadeLevel.Aspect, null), [assembly], type);
+
+				Assert.IsTrue (evaluator.Decide(Fact("Load"),           [type], []).Selected, filter);
+				Assert.IsFalse(evaluator.Decide(Fact("GetA"),           [type], []).Selected, filter);
+				Assert.IsFalse(evaluator.Decide(Fact("Run", "internal"), [type], []).Selected, filter);
+			}
+		}
+
+		[TestMethod]
+		public void EqualArraySettingsAgreeTest()
+		{
+			var a         = Block(CascadeLevel.Assembly, "public",   ("Tags", new[] { "x", "y" }));
+			var b         = Block(CascadeLevel.Assembly, "internal", ("Tags", new[] { "x", "y" }));
+			var type      = Block(CascadeLevel.Type,     "accessibility: any");
+			var evaluator = Evaluator(Block(CascadeLevel.Aspect, null), [a, b], type);
+			var decision  = evaluator.Decide(Fact("Load"), [type], []);
+
+			Assert.AreEqual(0, decision.Conflicts.Length);
+			CollectionAssert.AreEqual(new[] { "x", "y" }, (string[])decision.Settings["Tags"].Value!);
+
+			var c = Block(CascadeLevel.Assembly, "internal", ("Tags", new[] { "y", "x" }));
+
+			Assert.AreEqual(1, Evaluator(Block(CascadeLevel.Aspect, null), [a, c], type).Decide(Fact("Load"), [type], []).Conflicts.Length);
+		}
+
+		[TestMethod]
+		public void EqualConstructorArgumentBundlesAgreeTest()
+		{
+			// All constructor arguments together are one setting; an array argument nests inside the bundle.
+			object?[] Bundle(int level, params string[] tags)
+			{
+				return [level, tags, null];
+			}
+
+			var a         = Block(CascadeLevel.Assembly, "public",   ("()", Bundle(1, "x")));
+			var b         = Block(CascadeLevel.Assembly, "internal", ("()", Bundle(1, "x")));
+			var c         = Block(CascadeLevel.Assembly, "internal", ("()", Bundle(1, "z")));
+			var type      = Block(CascadeLevel.Type,     "accessibility: any");
+
+			Assert.AreEqual(0, Evaluator(Block(CascadeLevel.Aspect, null), [a, b], type).Decide(Fact("Load"), [type], []).Conflicts.Length);
+			Assert.AreEqual(1, Evaluator(Block(CascadeLevel.Aspect, null), [a, c], type).Decide(Fact("Load"), [type], []).Conflicts.Length);
+		}
+
+		[TestMethod]
+		public void SettingsOfAssemblyBlocksChosenPerMethodBlockTest()
+		{
+			// Each method block references the assembly level, so each picks its own assembly block: two values, a conflict.
+			var a         = Block(CascadeLevel.Assembly, "method: Save*", ("Level", "Debug"));
+			var b         = Block(CascadeLevel.Assembly, "method: Load*", ("Level", "Info"));
+			var first     = Block(CascadeLevel.Method,   "method: assembly.method");
+			var second    = Block(CascadeLevel.Method,   "not assembly.method");
+			var evaluator = Evaluator(Block(CascadeLevel.Aspect, null), [a, b], first, second);
+
+			var both = evaluator.Decide(Fact("SaveA"), [], [first, second]);
+
+			Assert.IsTrue(both.Selected);
+			Assert.AreEqual(1, both.Conflicts.Length);
+
+			var one = evaluator.Decide(Fact("SaveA"), [], [first]);
+
+			Assert.AreEqual(0, one.Conflicts.Length);
+			Assert.AreEqual("Debug", one.Settings["Level"].Value);
+		}
+
+		[TestMethod]
 		public void ABlockOfAnotherLevelIsRejectedTest()
 		{
 			var type = Block(CascadeLevel.Type, null);

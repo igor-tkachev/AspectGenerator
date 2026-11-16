@@ -79,6 +79,9 @@ namespace AspectGenerator.Cascade
 
 		public ImmutableArray<CascadeDiagnostic> Diagnostics { get; private set; }
 
+		/// <summary>Whether a declaration of the block references the assembly level, so that its value depends on the assembly block.</summary>
+		public bool ReferencesAssembly { get; private set; }
+
 		public bool HasErrors => !Diagnostics.IsEmpty;
 
 		public override string ToString()
@@ -155,7 +158,12 @@ namespace AspectGenerator.Cascade
 			block.Diagnostics  = diagnostics.ToImmutable();
 
 			foreach (var declaration in block.Declarations)
+			{
 				block.Declared |= declaration.Properties;
+
+				if (declaration.Condition.Leaves().Any(l => l is CascadeReference<TFact> { Level: CascadeLevel.Assembly }))
+					block.ReferencesAssembly = true;
+			}
 
 			return block;
 		}
@@ -163,7 +171,8 @@ namespace AspectGenerator.Cascade
 		/// <summary>
 		/// Splits a line into its declarations: an include at its top-level <c>and</c>, a subtraction at its top-level
 		/// <c>or</c>, each into the connected groups of operands that share a property. Operands that share no property
-		/// with the rest become declarations of their own; a group keeps its operands in their order.
+		/// with the rest become declarations of their own; a group keeps its operands in their order. Parentheses do not
+		/// count: <c>a and (b and c)</c> splits as <c>a and b and c</c>.
 		/// </summary>
 		public static ImmutableArray<CascadeCondition<TFact>> Split(CascadeLine<TFact> line)
 		{
@@ -172,9 +181,13 @@ namespace AspectGenerator.Cascade
 			if (condition is not CascadeJunction<TFact> junction || junction.IsAnd == line.IsSubtraction)
 				return [condition];
 
+			var flat = new List<CascadeCondition<TFact>>();
+
+			Flatten(junction);
+
 			var groups = new List<(CascadeProperty Properties, List<CascadeCondition<TFact>> Operands)>();
 
-			foreach (var operand in junction.Operands)
+			foreach (var operand in flat)
 			{
 				var properties = operand.Properties;
 				var members    = new List<CascadeCondition<TFact>>();
@@ -203,6 +216,19 @@ namespace AspectGenerator.Cascade
 				result.Add(operands.Count == 1 ? operands[0] : new CascadeJunction<TFact>(junction.IsAnd, [..operands]));
 
 			return result.MoveToImmutable();
+
+			void Flatten(CascadeCondition<TFact> operand)
+			{
+				if (operand is CascadeJunction<TFact> inner && inner.IsAnd == junction.IsAnd)
+				{
+					foreach (var o in inner.Operands)
+						Flatten(o);
+				}
+				else
+				{
+					flat.Add(operand);
+				}
+			}
 		}
 
 		static (string Id, string Message)? CheckLine(CascadeLevel level, CascadeLine<TFact> line)

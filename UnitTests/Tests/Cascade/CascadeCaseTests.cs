@@ -36,7 +36,21 @@ namespace AspectGenerator.Tests.Cascade
 		static readonly Lazy<List<JsonObject>> _cases = new(() =>
 			JsonNode.Parse(File.ReadAllText(CasesPath))!["cases"]!.AsArray().Select(c => c!.AsObject()).ToList());
 
-		public static IEnumerable<object[]> Cases => _cases.Value.Select(c => new object[] { c["id"]!.GetValue<string>() });
+		/// <summary>
+		/// Every case under both reaches of an assembly block. The table's expectations are for
+		/// <see cref="AssemblyFilterReach.ProjectUnlessOriginOrPlace"/>; a case whose result differs under the other reach
+		/// carries it as an alternative named after that reach.
+		/// </summary>
+		public static IEnumerable<object[]> Cases => _cases.Value.SelectMany(c => new[]
+		{
+			new object[] { c["id"]!.GetValue<string>(), nameof(AssemblyFilterReach.ProjectUnlessOriginOrPlace) },
+			new object[] { c["id"]!.GetValue<string>(), nameof(AssemblyFilterReach.ProjectUnlessAnyInclude) },
+		});
+
+		static readonly Dictionary<AssemblyFilterReach,string> _alternativeNames = new()
+		{
+			[AssemblyFilterReach.ProjectUnlessAnyInclude] = "AssemblyIncludeLiftsProject",
+		};
 
 		static JsonObject Case(string id)
 		{
@@ -48,43 +62,28 @@ namespace AspectGenerator.Tests.Cascade
 		{
 			var ids = _cases.Value.Select(c => c["id"]!.GetValue<string>()).ToList();
 
-			Assert.AreEqual(64, ids.Count, "The number of cascade cases changed; update this count with the table.");
+			Assert.AreEqual(66, ids.Count, "The number of cascade cases changed; update this count with the table.");
 			Assert.AreEqual(ids.Count, ids.Distinct().Count(), "Case ids are not unique.");
+
+			var alternatives = _cases.Value.SelectMany(c => c["alternatives"]?.AsObject().Select(a => a.Key) ?? []).Distinct().ToList();
+
+			CollectionAssert.IsSubsetOf(alternatives, _alternativeNames.Values.ToList(), "An alternative names no reach the tests know.");
+			Assert.AreNotEqual(0, alternatives.Count, "No case has an alternative.");
 		}
 
 		[TestMethod]
 		[DynamicData(nameof(Cases))]
-		public void CascadeCase(string id)
+		public void CascadeCase(string id, string reachName)
 		{
+			var reach    = Enum.Parse<AssemblyFilterReach>(reachName);
 			var c        = Case(id);
-			var actual   = Run(c["input"]!.AsObject(), CascadeDefaults.AssemblyReach);
+			var actual   = Run(c["input"]!.AsObject(), reach);
 			var expected = c["expected"]!.AsObject();
 
-			Compare(id + ": " + c["description"], expected, actual);
-		}
+			if (_alternativeNames.TryGetValue(reach, out var name) && c["alternatives"]?[name] is JsonObject alternative)
+				expected = alternative;
 
-		/// <summary>The cases that differ when any include of an assembly block lifts its implicit <c>project</c>.</summary>
-		[TestMethod]
-		public void CascadeCaseWithAnyIncludeLiftingProject()
-		{
-			var count = 0;
-
-			foreach (var c in _cases.Value)
-			{
-				if (c["alternatives"]?["AssemblyIncludeLiftsProject"] is not JsonObject alternative)
-					continue;
-
-				var actual = Run(c["input"]!.AsObject(), AssemblyFilterReach.ProjectUnlessAnyInclude);
-
-				CollectionAssert.AreEquivalent(
-					Selected(alternative).ToList(),
-					actual.Selected.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => p.Key + "=" + p.Value).ToList(),
-					c["id"] + ": selection");
-
-				count++;
-			}
-
-			Assert.AreNotEqual(0, count, "No case has the alternative.");
+			Compare($"{id} ({reach}): {c["description"]}", expected, actual);
 		}
 
 		sealed record Result(
@@ -110,35 +109,37 @@ namespace AspectGenerator.Tests.Cascade
 			}
 
 			(List<CascadeBlock<CaseFact>> Assembly, List<(string Type, CascadeBlock<CaseFact> Block)> Types, List<(string Method, CascadeBlock<CaseFact> Block)> Methods)
-				Family(JsonNode? source)
+				Family(JsonNode? source, string suffix)
 			{
-				var assembly = (source?["assembly"]?.AsArray() ?? []).Select((b, i) => Block(CascadeLevel.Assembly, b, $"assembly#{i}")).ToList();
+				var assembly = (source?["assembly"]?.AsArray() ?? []).Select((b, i) => Block(CascadeLevel.Assembly, b, $"assembly#{i}{suffix}")).ToList();
 				var types    = (source?["types"]?.AsArray() ?? []).Select((b, i) =>
 				{
 					var type = b!["type"]!.GetValue<string>();
 
-					return (type, Block(CascadeLevel.Type, b, $"type:{type}#{i}"));
+					return (type, Block(CascadeLevel.Type, b, $"type:{type}#{i}{suffix}"));
 				}).ToList();
 				var methods  = (source?["methods"]?.AsArray() ?? []).Select((b, i) =>
 				{
 					var method = b!["method"]!.GetValue<string>();
 
-					return (method, Block(CascadeLevel.Method, b, $"method:{method}#{i}"));
+					return (method, Block(CascadeLevel.Method, b, $"method:{method}#{i}{suffix}"));
 				}).ToList();
 
 				return (assembly, types, methods);
 			}
 
 			var aspectDefault = Block(CascadeLevel.Aspect, input["default"] is JsonValue d ? new JsonObject { ["filter"] = d.GetValue<string>() } : null, "aspect");
-			var consumer      = Family(input);
-			var library       = input["library"] is JsonObject lib ? Family(lib) : default;
+			var consumer      = Family(input, "");
+			var consumerAll   = allBlocks.ToList();
+			var library       = input["library"] is JsonObject lib ? Family(lib, ":lib") : default;
 			var evaluator     = new CascadeEvaluator<CaseFact>(
 				aspectDefault,
 				consumer.Assembly,
-				allBlocks.Where(b => b != aspectDefault && !consumer.Assembly.Contains(b)),
-				f => f.Project);
+				consumerAll.Where(b => b != aspectDefault && !consumer.Assembly.Contains(b)),
+				f => f.Project,
+				allBlocks.Except(consumerAll));
 
-			var result = new Result([], [], [..evaluator.Diagnostics.Select(e => (labels[(CascadeBlock<CaseFact>)e.Block!], e.Id))]);
+			var result = new Result([], [], [..evaluator.Diagnostics.Concat(evaluator.Warnings).Select(e => (labels[(CascadeBlock<CaseFact>)e.Block!], e.Id))]);
 			var facts  = input["facts"]!.AsArray().Select(f => f.Deserialize<CaseFact>(_json)!).ToList();
 
 			foreach (var fact in facts)
