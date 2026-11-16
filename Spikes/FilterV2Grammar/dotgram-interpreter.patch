@@ -1,0 +1,44 @@
+--- a/src/DotGram/Language/DslRecognitionTrace.cs
++++ b/src/DotGram/Language/DslRecognitionTrace.cs
+@@ -220,7 +220,11 @@
+ 					var complete = new Match(match.End, extents);
+ 					Consider(complete, rule);
+ 
++					// The rule is entered at this position only while its body reads: what follows the match is not
++					// inside it, and may call it here again (trivia at a seam after an operand that read nothing).
++					_active.Remove((rule, position));
+ 					yield return complete;
++					_active.Add((rule, position));
+ 				}
+ 			}
+ 			finally
+@@ -331,6 +335,17 @@
+ 						yield return Match.Empty(position);
+ 					yield break;
+ 
++				case Node.Behind behind:
++					// The other half of a word literal's boundary: the item before it is no word character.
++					if (position == 0 || !Element(behind.Test, input[position - 1]))
++						yield return Match.Empty(position);
++					yield break;
++
++				case Node.Glue:
++					// Over characters adjacency is the absence of a seam, which the normalizer already left out.
++					yield return Match.Empty(position);
++					yield break;
++
+ 				case Node.External external:
+ 					if (contract is null ||
+ 						!contract.TryResolveExternal(external, owner, out var externalRule))
+@@ -342,6 +357,11 @@
+ 					foreach (var match in Rule(externalRule, position))
+ 						yield return match;
+ 					yield break;
++
++				default:
++					// A node this model does not read: the site is one it cannot read, not one the grammar refuses.
++					Unsupported = true;
++					yield break;
+ 			}
+ 		}
+ 

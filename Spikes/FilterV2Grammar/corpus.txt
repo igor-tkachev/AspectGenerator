@@ -1,0 +1,266 @@
+// Inputs the generated parser and the editor core must read alike. One input per line; \n, \r, \t and \\ are escapes,
+// \e alone is the empty input. `## name` starts a group.
+
+## empty
+\e
+
+# only a comment
+\n\n
+  # comment\n\n   # another\n
+\t\n \r\n
+
+## keys
+namespace: Shop
+namespace: Shop.**
+namespace: ""
+namespace: global::MyApp.**
+type: OrderService
+type: *Service
+type: Data.*Repository
+type: global::Shop.OrderService
+method: Save
+method: Save*
+method: *Repository.Save
+method: **.*Service.Save*
+method: List<int>.Add
+method: Get<*>
+returns: Task
+returns: Task<*>
+returns: ref int
+returns: ref readonly Span<int>
+returns: {void,Task}
+params: ()
+params: (..)
+params: (int, ..)
+params: (.., CancellationToken)
+params: (_, out bool)
+params: (this string)
+params: (ref readonly int, in Guid, params int[])
+param: CancellationToken
+param: out bool
+param: this IEnumerable<*>
+attribute: Obsolete
+attribute: ObsoleteAttribute
+attribute: System.ObsoleteAttribute
+inherits: DataConnection
+implements: ICommandHandler<*>.Handle
+overrides: Base.Save
+namespace : Shop
+method:Save
+
+## words
+public
+internal
+protected
+private
+protected internal
+internal protected
+private protected
+protected private
+static
+instance
+async
+virtual
+override
+abstract
+sealed
+extern
+extension
+project
+generated
+public static
+public static async
+not public
+not static
+private protected static
+
+## signatures
+Save
+Save*
+public Save*
+public static **.*Service.Save*(.., CancellationToken) : Task*
+*Service.Save*(int)
+Save* : Task<*>
+Save*(int, string) : void
+public Get*() : int?
+global::MyApp.Save
+Save: Task
+Save*(..)
+
+## operators
+method: Save* and public
+method: Save* or public
+method: Save* and (method: *A or public)
+public and static or internal
+not public and not static
+method: Save* and not method: SaveAll
+(public)
+((public))
+(public or internal) and static
+method: Save* and (public or internal) and not static
+a and b
+Save* or Get*
+
+## minus
+- method: *Internal*
+- public
+- method: X or public
+- method: *Internal* and public
+- (public or internal)
+-public
+- not static
+
+## multiline
+method: Save*\nor method: Get*
+method: Save*\n  and public
+method: Save* # saves\nor method: Get*
+method: Save*\n\n# comment\nor method: Get*
+namespace: Shop.**\n- method: *Internal*
+namespace: Shop.**\r\n- method: *Internal*\r\n
+method: Save* and (public\n or internal)
+method: Save* and (\n  public # a comment\n  or internal\n)
+(\npublic\n)
+public\nstatic
+\n\nmethod: Save*\n\n\n- public\n\n
+method: Save*\r\nor public
+method: Save* and\npublic
+not\npublic
+
+## references
+assembly.method
+aspect.attribute
+method: assembly.method
+method: Save* and assembly.method
+method: Save* or assembly.method
+attribute: aspect.attribute
+attribute: Audited and aspect.attribute
+- assembly.method
+method: Save* and not assembly.method
+assembly.Save*
+method: assembly.returns
+@assembly.Save*
+assembly.method or public
+accessibility: assembly.accessibility
+
+## any
+method: any
+attribute: any
+accessibility: any
+static: any
+async: any
+virtuality: any
+location: any
+origin: any
+extern: any
+extension: any
+generated: any
+method: @any
+method: Save* or any
+- method: any
+method: anyThing
+method: any*
+
+## patterns
+method: {Get,Find}*
+method: {Get, Find}*
+type: {Order,Invoice}Service
+method: "<Main>$"
+method: "a\\\"b"
+method: @and
+method: @namespace.X
+method: Shop.**.Save
+type: List<*>
+type: Dictionary<*,*>
+type: Dictionary<string, List<int>>
+param: int[]
+param: int[,]
+param: int[][,]
+param: int?
+param: int?[]
+param: *?
+param: (int, string)
+param: (int, (string, bool))
+returns: {int[], string}
+param: "System.Int32*"
+param: System.Nullable<*>
+type: *.static
+method: public*
+method: Save.*
+type: ***
+method: Save**
+method: a**b
+
+## errors-1-1
+contains: Save
+regex: ^Save.*$
+pattern: public Save*
+fulltype: Shop.OrderService
+fullmethod: Shop.OrderService.Save
+path: Shop/OrderService
+attributes: Obsolete
+& method: Save*
+| method: Save*
+method: Save*; static
+method: Get* | Find*
+method: Get*|Find*
+method: Get* & Find*
+params: (int, ...)
+method: Sa\\ve
+method: Get?
+signature: public Save*
+
+## errors-reserved
+within: Shop
+assembly: Shop
+iterator
+unsafe
+partial
+readonly
+exposed
+public readonly
+/Save.*/
+foo: bar
+custom: x and public
+
+## errors-syntax
+method: "a\"b"
+params: int
+method: Get?
+param: int?? 
+not (public or internal)
+not not public
+type: Task<>
+type: Dictionary<,>
+method: {}
+method: Save* and
+method: Save* or
+and public
+or public
+method:
+public static Save*(
+(public
+public)
+method: Save* and (public or
+returns: ref
+params: (int
+publik Save
+method: Save*\nand
+method: "unclosed
+type: List<int
+-
+-
+method: Save* and (public or internal))
+
+## recovery
+method: Save*\nbad (\nstatic
+method: Save*\nfoo bar\n- public
+foo bar\nmethod: Save*
+method: Save*\nmethod: (\nor public\nstatic
+public\n(unclosed\nstatic
+method: Save*\n- \nstatic
+not (a)\nmethod: Save*
+type: Task<>\nmethod: Get*
+method: Save*\nand\npublic
+a b c\nd e f\ng h i
+method: "unclosed\nstatic
+method: Save* # ok\npublik Save # bad\n- public # ok

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!-- The v2 filter grammar, generated at build time by the DotGram sources in $(DotGramSpikeRoot) (the pinned commit). -->
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<RootNamespace>AspectGenerator.FilterV2</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="FilterV2.gram" />
+		<ProjectReference Include="$(DotGramSpikeRoot)\src\DotGram\DotGram.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
+
+	<Import Project="$(DotGramSpikeRoot)\src\DotGram\build\DotGram.targets" />
+
+</Project>

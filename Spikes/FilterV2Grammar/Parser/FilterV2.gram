@@ -1,0 +1,259 @@
+// A spike of the grammar of target filters, version 2: one string (or one element of a string[]) in, a tree of spans out.
+// It reads the syntax only; what a line declares, which property a condition is about, whether a reference names the
+// property it stands in, and every other rule that needs more than the text are the binder's.
+//
+// Every rule that builds a value builds a Tree: its name, its span and its children. The same names and spans are what
+// the editor's interpreter reports for the rules it entered, which is how the spike compares the two.
+//
+// Layout:
+//   - At depth 0, spaces and tabs separate tokens and a line break ends the line, unless the next line that is not blank
+//     or a comment begins with `and` or `or`.
+//   - Inside parentheses a line break or a comment may stand between any two tokens: the expression in brackets is read
+//     with the trivia rebound.
+//   - A pattern is one lexeme: white space only inside `<…>`, `(…)` and `{…}`.
+//   - The tail of every list is atomic. Nothing after a list is ever helped by giving a turn back, and an unclosed list
+//     that gives its turns back one by one costs the square of its length (4,000 alternatives: about a second).
+//
+// Error productions read the forms of the 1.1 language and the forms the language refuses, so that the binder can say
+// what to write instead; each builds a tree whose name begins with `Error`.
+
+trivia       = { [' ' | '\t']* }
+wordboundary = [\p{L} | \p{Nd} | \p{Nl} | \p{Mn} | \p{Mc} | \p{Pc} | \p{Cf}]
+
+// ---- an item -----------------------------------------------------------------------------------------------------
+
+// The publication the build reads: a bad line is stepped over to its logical end, so the other lines still report.
+Item : @Tree = Lex.Blank & lead: LeadingOperator? & lines: Lines & eof => @(N("Item", parserSpan, lead, lines))
+
+Lines : @Tree[] = LineItem* recover Lex.Sync => @(N("ErrorLine", parserSpan))
+
+LineItem : @Tree = line: Line & Lex.LineEnd => line
+
+// The same reading without recovery: the first bad line fails the item.
+Strict : @Tree = Lex.Blank & lead: LeadingOperator? & lines: StrictLine* & eof => @(N("Item", parserSpan, lead, lines))
+
+StrictLine : @Tree = line: Line & Lex.LineEnd => line
+
+// A string[] element that begins with `and` or `or` would continue a line of another element.
+LeadingOperator : @Tree = ?=("and" | "or") => @(N("ErrorLeadingOperator", parserSpan))
+
+// ---- a line ------------------------------------------------------------------------------------------------------
+
+Line : @Tree
+	= minus: Minus & expr: Or         => @(N("Line", parserSpan, minus, expr))
+	| legacy: LegacyLineOperator      => @(N("Line", parserSpan, legacy))
+	| expr: Or                        => @(N("Line", parserSpan, expr))
+
+Minus : @Tree = '-' => @(N("Minus", parserSpan))
+
+// 1.1's `&` and `|` before a line.
+LegacyLineOperator : @Tree = ('&' | '|') & Lex.RestOfLine => @(N("ErrorLegacy", parserSpan))
+
+Or : @Tree = first: And & { (OrOp & more: And)* } => @(N("Or", parserSpan, first, more))
+
+And : @Tree = first: Unary & { (op: AndOp & more: Unary)* } => @(N("And", parserSpan, first, op, more))
+
+OrOp = Lex.Join? & "or"
+
+// 1.1 joined conditions with `;` and values with `&` and `|`.
+AndOp : @Tree
+	= Lex.Join? & "and"   => @(N("AndOp", parserSpan))
+	| (';' | '&' | '|')   => @(N("ErrorLegacy", parserSpan))
+
+Unary : @Tree
+	= "not" & ?=('(' | "not") & Lex.RestOfLine => @(N("ErrorNotGroup", parserSpan))
+	| "not" & atom: Atom                       => @(N("Not", parserSpan, atom))
+	| group: Group                             => group
+	| atom: Atom                               => atom
+
+// Inside parentheses the trivia takes line breaks and comments, in the expression and in every pattern it reads.
+Group : @Tree = '(' & Lex.InGap & expr: Or with (trivia = Lex.InGap, Lex.Sp = Lex.InGap) & Lex.InGap & ')'
+	=> @(N("Group", parserSpan, expr))
+
+// ---- conditions --------------------------------------------------------------------------------------------------
+
+Atom : @Tree
+	= c: KeyCondition    => c
+	| r: Reference       => r
+	| w: WordsOrSignature => w
+	| x: ReservedLiteral => x
+	| "any" & ?!Lex.PartStart => @(N("ErrorAny", parserSpan))
+
+KeyCondition : @Tree
+	= key: NameKey      & ':' & value: NameValue      => @(N("Condition", parserSpan, key, value))
+	| key: TypeKey      & ':' & value: TypeValue      => @(N("Condition", parserSpan, key, value))
+	| key: MethodKey    & ':' & value: MethodValue    => @(N("Condition", parserSpan, key, value))
+	| key: ReturnsKey   & ':' & value: ReturnsValue   => @(N("Condition", parserSpan, key, value))
+	| key: ParamsKey    & ':' & value: ParamsValue    => @(N("Condition", parserSpan, key, value))
+	| key: ParamKey     & ':' & value: ParamValue     => @(N("Condition", parserSpan, key, value))
+	| key: PropertyKey  & ':' & value: PropertyValue  => @(N("Condition", parserSpan, key, value))
+	| key: LegacyKey    & ':' & Lex.RestOfLine        => @(N("ErrorLegacy", parserSpan, key))
+	| key: ReservedKey  & ':' & Lex.RestOfLine        => @(N("ErrorReserved", parserSpan, key))
+	| key: UnknownKey   & ':' & Lex.RestOfAtom        => @(N("ErrorUnknownKey", parserSpan, key))
+
+NameKey     : @Tree = "namespace" => @(N("Key", parserSpan))
+TypeKey     : @Tree = ("type" | "attribute" | "inherits") => @(N("Key", parserSpan))
+MethodKey   : @Tree = ("method" | "implements" | "overrides") => @(N("Key", parserSpan))
+ReturnsKey  : @Tree = "returns" => @(N("Key", parserSpan))
+ParamsKey   : @Tree = "params" => @(N("Key", parserSpan))
+ParamKey    : @Tree = "param" => @(N("Key", parserSpan))
+
+// The properties written with words take their property name as a key, for `any` and references only.
+PropertyKey : @Tree = ("accessibility" | "static" | "async" | "virtuality" | "extern" | "extension" | "location" | "origin" | "generated")
+	=> @(N("Key", parserSpan))
+
+LegacyKey   : @Tree = ("contains" | "regex" | "pattern" | "fulltype" | "fullmethod" | "path" | "attributes") => @(N("Key", parserSpan))
+ReservedKey : @Tree = ("within" | "assembly" | "signature") => @(N("Key", parserSpan))
+// Keys are lowercase: `Save: Task` is a compact signature with a return type, `save: x` an unknown key. A known key
+// whose value cannot be read is a syntax error in its value, not an unknown key.
+UnknownKey  : @Tree = ?!KnownKey & { ['a'..'z']+ } & ?!Lex.IdChar & ?=(':' & ?!':') => @(N("Key", parserSpan))
+
+KnownKey = NameKey | TypeKey | MethodKey | ReturnsKey | ParamsKey | ParamKey | PropertyKey | LegacyKey | ReservedKey
+
+NameValue     : @Tree = v: CommonValue => v | p: Lex.Dotted      => p
+TypeValue     : @Tree = v: CommonValue => v | p: Lex.TypePattern => p
+MethodValue   : @Tree = v: CommonValue => v | p: Lex.Dotted      => p
+ReturnsValue  : @Tree = v: CommonValue => v | p: Lex.Returns     => p
+ParamsValue   : @Tree = v: CommonValue => v | p: Lex.ParamList   => p
+ParamValue    : @Tree = v: CommonValue => v | p: Lex.Param       => p
+PropertyValue : @Tree = v: CommonValue => v
+
+CommonValue : @Tree
+	= "any" & ?!Lex.PartStart => @(N("AnyValue", parserSpan))
+	| r: Reference            => r
+
+// `aspect.p` and `assembly.p`. What follows the dot is read as any pattern: a name that is no property is the binder's
+// error, not a method pattern (`@assembly.Save*` names one).
+Reference : @Tree = level: Level ~ '.' ~ target: Lex.ReferenceTarget => @(N("Reference", parserSpan, level, target))
+
+Level : @Tree = ("aspect" | "assembly") => @(N("Level", parserSpan))
+
+// A run of words is their conjunction; a method pattern after them makes it a compact signature.
+WordsOrSignature : @Tree
+	= first: Word & more: Word* & signature: Signature? => @(N("Words", parserSpan, first, more, signature))
+	| signature: Signature                             => signature
+
+Word : @Tree
+	= ("protected" & "internal" | "internal" & "protected" | "private" & "protected" | "protected" & "private")
+	                                                              => @(N("Word", parserSpan))
+	| ("public" | "internal" | "protected" | "private"
+	  | "static" | "instance" | "async" | "virtual" | "override" | "abstract" | "sealed" | "extern"
+	  | "extension" | "project" | "generated")                    => @(N("Word", parserSpan))
+	| ("iterator" | "unsafe" | "partial" | "readonly" | "exposed") => @(N("ErrorReserved", parserSpan))
+
+Signature : @Tree
+	= ?!(Level ~ '.') & name: Lex.Dotted & parameters: Lex.ParamList? & (':' & returns: Lex.TypePattern)?
+	=> @(N("Signature", parserSpan, name, parameters, returns))
+
+// `/…/` is reserved for a later version.
+ReservedLiteral : @Tree = '/' & Lex.RestOfAtom => @(N("ErrorReserved", parserSpan))
+
+// ---- lexemes -----------------------------------------------------------------------------------------------------
+
+namespace Lex
+{
+	trivia       = none
+	wordboundary = [\p{L} | \p{Nd} | \p{Nl} | \p{Mn} | \p{Mc} | \p{Pc} | \p{Cf}]
+
+	Eol     = "\r\n" | '\r' | '\n'
+	Comment = '#' & [^ '\r' | '\n']*
+	Blank   = { ([' ' | '\t'] | Comment | Eol)* }
+	InGap   = { ([' ' | '\t'] | Comment | Eol)* }
+	Sp      = { [' ' | '\t']* }
+	Sp1     = { [' ' | '\t']+ }
+
+	// The end of a line at depth 0: a comment, a line break and the blank lines after it, or the end of the item.
+	LineEnd = { [' ' | '\t']* & Comment? & (Eol & Blank | ?=eof) }
+
+	// A line break inside a line: only before `and` or `or`.
+	Join = { [' ' | '\t']* & Comment? & Eol & Blank & ?=("and" | "or") }
+
+	// Where a bad line ends: its logical end, counting parentheses and quotes; an open one runs to the end of the item.
+	Sync     = { RestOfLine & (Join & RestOfLine)* & LineEnd }
+	RestOfLine = { (SkipQuoted | SkipParen | [^ '\r' | '\n' | '(' | '"' | '#'])* }
+	RestOfAtom = { (SkipQuoted | SkipParen | [^ '\r' | '\n' | '(' | ')' | '"' | '#' | ' ' | '\t'])* }
+	SkipQuoted = '"' & { ('\\' & any | [^ '"' | '\\'])* } & ('"' | eof)
+	SkipParen  = '(' & { (SkipQuoted | SkipParen | [^ '(' | ')' | '"'])* } & (')' | eof)
+
+	IdChar     = [\p{L} | \p{Nd} | \p{Nl} | \p{Mn} | \p{Mc} | \p{Pc} | \p{Cf}]
+
+	// What may continue a name segment.
+	PartStart = IdChar | '*' | '{' | '"' | '@'
+
+	// A keyword is never a name segment on its own; `@` makes one a name.
+	Keyword = ("and" | "or" | "not" | "any"
+		| "namespace" | "type" | "method" | "returns" | "params" | "param" | "attribute" | "inherits" | "implements" | "overrides"
+		| "public" | "internal" | "protected" | "private" | "static" | "instance" | "async" | "virtual" | "override"
+		| "abstract" | "sealed" | "extern" | "extension" | "project" | "generated"
+		| "iterator" | "unsafe" | "partial" | "readonly" | "exposed" | "within" | "assembly" | "signature" | "aspect"
+		| "ref" | "out" | "in" | "this")
+		& ?!PartStart
+
+	// What a reference names: a property name, which is a keyword, or anything else the binder refuses as one.
+	ReferenceTarget : @Tree = { (IdChar | ['*' | '.' | '@' | '{' | '}' | ',' | '<' | '>' | '"'])+ } => @(N("ReferenceTarget", parserSpan))
+
+	Dotted : @Tree = global: Global? & first: Segment & { ('.' & more: Segment)* } => @(N("Dotted", parserSpan, global, first, more))
+
+	Global : @Tree = "global::" => @(N("Global", parserSpan))
+
+	Segment : @Tree
+		= "**" & ?!PartStart & ?!'<'               => @(N("Globstar", parserSpan))
+		| ?!Keyword & parts: Part+ & args: TypeArgs? => @(N("Segment", parserSpan, parts, args))
+
+	Part : @Tree
+		= { IdChar+ }                                 => @(N("Name", parserSpan))
+		| '@' & { IdChar+ }                           => @(N("Escaped", parserSpan))
+		| '*' & ?!'*'                                 => @(N("Star", parserSpan))
+		| "**"                                        => @(N("ErrorGlobstarInSegment", parserSpan))
+		| alt: NameAlternatives                       => alt
+		| q: Quoted                                   => q
+		| '\\' & any                                  => @(N("ErrorLegacy", parserSpan))
+		| '?' & ?=PartStart                           => @(N("ErrorLegacy", parserSpan))
+
+	NameAlternatives : @Tree
+		= '{' & Sp & first: Dotted & { (Sp & ',' & Sp & more: Dotted)* } & Sp & '}' => @(N("Alternatives", parserSpan, first, more))
+		| '{' & Sp & '}'                                                       => @(N("ErrorEmptyAlternatives", parserSpan))
+
+	Quoted : @Tree = '"' & { ('\\' & ['"' | '\\'] | [^ '"' | '\\' | '\r' | '\n'])* } & '"' => @(N("Quoted", parserSpan))
+
+	TypeArgs : @Tree
+		= '<' & Sp & first: TypePattern & { (Sp & ',' & Sp & more: TypePattern)* } & Sp & '>' => @(N("TypeArgs", parserSpan, first, more))
+		| '<' & Sp & (',' & Sp)* & '>'                                                   => @(N("ErrorOpenGeneric", parserSpan))
+
+	// Ranks and `?` in C# order: `int?[]` is an array of nullable int, `int[]?` an array that may be null.
+	TypePattern : @Tree = core: TypeCore & suffixes: TypeSuffix* => @(N("Type", parserSpan, core, suffixes))
+
+	TypeSuffix : @Tree = r: Rank => r | n: Nullable => n
+
+	TypeCore : @Tree
+		= t: Tuple            => t
+		| d: Dotted           => d
+		| a: TypeAlternatives => a
+
+	TypeAlternatives : @Tree
+		= '{' & Sp & first: TypePattern & { (Sp & ',' & Sp & more: TypePattern)* } & Sp & '}' => @(N("TypeAlternatives", parserSpan, first, more))
+
+	Tuple : @Tree
+		= '(' & Sp & first: TypePattern & { (Sp & ',' & Sp & more: TypePattern)+ } & Sp & ')' => @(N("Tuple", parserSpan, first, more))
+
+	Rank     : @Tree = '[' & Sp & (',' & Sp)* & ']' => @(N("Rank", parserSpan))
+	Nullable : @Tree = '?' => @(N("Nullable", parserSpan))
+
+	Returns : @Tree = modifier: RefModifier? & type: TypePattern => @(N("Returns", parserSpan, modifier, type))
+
+	RefModifier : @Tree = "ref" & Sp1 & ("readonly" & Sp1)? => @(N("Modifier", parserSpan))
+
+	ParamList : @Tree
+		= '(' & Sp & (first: Param & { (Sp & ',' & Sp & more: Param)* })? & Sp & ')' => @(N("Params", parserSpan, first, more))
+
+	Param : @Tree
+		= "..." & ?!'.'                          => @(N("ErrorLegacy", parserSpan))
+		| ".." & ?!'.'                           => @(N("AnyRun", parserSpan))
+		| '_' & ?!IdChar                         => @(N("AnyOne", parserSpan))
+		| modifiers: ParamModifier* & type: TypePattern => @(N("Param", parserSpan, modifiers, type))
+
+	ParamModifier : @Tree = ("ref" & Sp1 & "readonly" | "ref" | "out" | "in" | "params" | "this") & Sp1 => @(N("Modifier", parserSpan))
+}
+
+parse Item
+parse Strict

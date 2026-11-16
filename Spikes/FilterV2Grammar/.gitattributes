@@ -1,0 +1,2 @@
+# The patches apply to DotGram sources, whose C# files are CRLF: kept byte for byte.
+*.patch -text

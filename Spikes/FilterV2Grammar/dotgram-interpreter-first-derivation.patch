@@ -1,0 +1,27 @@
+--- a/src/DotGram/Language/DslRecognitionTrace.cs
++++ b/src/DotGram/Language/DslRecognitionTrace.cs
+@@ -108,9 +108,21 @@
+ 		// than one that takes the editor down: an overflow cannot be caught.
+ 		try
+ 		{
+-			candidates = graph.Trivia.TryGetValue(publication.Rule, out var trivia)
+-				? matcher.Whole(publication.Rule, trivia).ToArray()
+-				: matcher.Rule(publication.Rule, 0).ToArray();
++			var all = graph.Trivia.TryGetValue(publication.Rule, out var trivia)
++				? matcher.Whole(publication.Rule, trivia)
++				: matcher.Rule(publication.Rule, 0);
++			var read = new List<Match>();
++
++			// The first derivation that reads the whole input is the one a generated parser takes: stop there.
++			foreach (var candidate in all)
++			{
++				read.Add(candidate);
++
++				if (candidate.End == input.Length)
++					break;
++			}
++
++			candidates = read.ToArray();
+ 		}
+ 		catch (InsufficientExecutionStackException)
+ 		{

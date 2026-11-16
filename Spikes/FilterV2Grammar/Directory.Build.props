@@ -1,0 +1,10 @@
+<Project>
+	<!-- The spike is not part of AspectGenerator.slnx and ships nothing: the repository's settings, plus the DotGram checkout it builds against. -->
+	<Import Project="..\..\Directory.Build.props" />
+
+	<PropertyGroup>
+		<IsPackable>false</IsPackable>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<DotGramSpikeRoot Condition="'$(DotGramSpikeRoot)' == ''">$(DotGramRoot)</DotGramSpikeRoot>
+	</PropertyGroup>
+</Project>

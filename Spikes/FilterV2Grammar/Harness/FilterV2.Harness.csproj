@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!-- Holds the generated v2 parser to DotGram's editor core: the same grammar text read by the editor's interpreter
+	     (DotGram's Language.projitems, compiled here as every editor compiles it) and by the parser the generator wrote. -->
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>AspectGenerator.FilterV2.Harness</RootNamespace>
+		<!-- The editor core's sources are DotGram's, compiled under its own conventions, not this repository's. -->
+		<NoWarn>$(NoWarn);CS1591;CS8632</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.14.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="4.14.0" />
+		<ProjectReference Include="..\Parser\FilterV2.Parser.csproj" />
+	</ItemGroup>
+
+	<!-- DotGramEditorRoot: another checkout for the editor core alone, e.g. one with a change to the interpreter under trial. -->
+	<PropertyGroup>
+		<DotGramEditorRoot Condition="'$(DotGramEditorRoot)' == ''">$(DotGramSpikeRoot)</DotGramEditorRoot>
+	</PropertyGroup>
+
+	<Import Project="$(DotGramEditorRoot)\src\DotGram\Language.projitems" />
+
+</Project>
