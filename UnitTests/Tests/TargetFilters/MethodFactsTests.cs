@@ -84,6 +84,10 @@ namespace AspectGenerator.Tests.TargetFilters
 					public async IAsyncEnumerable<int> AEIter() { await Task.Yield(); yield return 1; }
 					public async void AsyncVoid() { await Task.Yield(); }
 					public Awaitable Custom() { return default!; }
+					public ExplAw ReturnExpl() { return default!; }
+					public PrivAw ReturnPriv() { return default!; }
+					public IntAw ReturnInt() { return default!; }
+					[MethodImpl(MethodImplOptions.InternalCall)] public static extern void Native();
 
 					public void RefRO(ref readonly int x) { }
 					public void InP(in int x) { }
@@ -127,6 +131,31 @@ namespace AspectGenerator.Tests.TargetFilters
 					public void OnCompleted(Action a) { }
 				}
 
+				public interface IAw { Awaiter GetAwaiter(); }
+				public class ExplAw : IAw { Awaiter IAw.GetAwaiter() { return default!; } }
+				public class PrivAw { Awaiter GetAwaiter() { return default!; } }
+				public class IntAw { public int GetAwaiter() { return 0; } }
+
+				public abstract class AbsBase { public virtual void AV() { } public abstract void AA(); }
+				public abstract class AbsDer : AbsBase { public abstract override void AV(); public sealed override void AA() { } }
+
+				public interface IVirt { void M(); }
+				public class VB : IVirt { public virtual void M() { } }
+				public class VD : VB { public override void M() { } }
+
+				public interface IG { void G<T>(T item); }
+				public class GImpl : IG { public void G<T>(T item) { } }
+
+				public class GBase<T> { public virtual void V(T item) { } public virtual void W<U>(U item) { } }
+				public class GMid<T> : GBase<T> { public override void V(T item) { } public override void W<U>(U item) { } }
+				public class GLeaf : GMid<string> { public override void V(string item) { } }
+
+				public class Holder<T> { public T Get() { return default!; } }
+				public class Cons { public T Con<T>() where T : Task { return default!; } }
+
+				public class CovBase { public virtual object Cov() { return ""; } }
+				public class CovDer : CovBase { public override string Cov() { return ""; } }
+
 				public class Derived : Facts { public override void InhAttrM() { } public override void Virt() { } }
 			}
 			""";
@@ -136,6 +165,7 @@ namespace AspectGenerator.Tests.TargetFilters
 			using System;
 			using System.Collections.Generic;
 			using System.Linq;
+			using System.Threading.Tasks;
 			using Lib.Shapes;
 
 			static class Consumer
@@ -152,6 +182,12 @@ namespace AspectGenerator.Tests.TargetFilters
 					numbers.Count2();
 					list.Add(1);
 					new Outer.Inner().Deep();
+					new GImpl().G<int>(1);
+					new GMid<int>().V(1);
+					new GMid<int>().W<string>("x");
+					new Holder<Task>().Get();
+					new Holder<int>().Get();
+					new Cons().Con<Task>();
 				}
 
 				static T Caller<T>(IEnumerable<T> items, T value)
@@ -802,6 +838,185 @@ namespace AspectGenerator.Tests.TargetFilters
 
 			Assert.IsTrue(inLibrary.IsProject);
 			Assert.IsFalse(MethodFacts.Create(Impl.Call("Calls", "list.Add(1)"), FactProperty.Origin, new FactContext(libraryAssembly)).IsProject);
+		}
+
+		[TestMethod]
+		public void AnAbstractOverrideIsBoth()
+		{
+			ForEachVariant(v =>
+			{
+				Virtuality V(string type, string name)
+				{
+					return v.Facts(v.Method(type, name), FactProperty.Virtuality).Virtuality;
+				}
+
+				Assert.AreEqual(Virtuality.Override | Virtuality.Abstract, V("Lib.Shapes.AbsDer", "AV"));
+				Assert.AreEqual(Virtuality.Abstract, V("Lib.Shapes.AbsBase", "AA"));
+				Assert.AreEqual(Virtuality.Override | Virtuality.Sealed, V("Lib.Shapes.AbsDer", "AA"));
+			});
+		}
+
+		[TestMethod]
+		public void AnOverrideImplementsWhatTheMethodItOverridesImplements()
+		{
+			ForEachVariant(v =>
+			{
+				var m = v.Facts(v.Method("Lib.Shapes.VD", "M"), FactProperty.Implements);
+
+				CollectionAssert.AreEqual(new[] { "Lib.Shapes.IVirt.M()" }, m.ImplementedMembers.Select(static x => x.ToDisplayString()).ToArray());
+			});
+		}
+
+		[TestMethod]
+		public void AGenericMethodImplementsTheInterfaceMemberConstructedWithItsTypeArguments()
+		{
+			ForEachVariant(v =>
+			{
+				var call = v.Facts(v.Call("Calls", "new GImpl().G<int>(1)"), FactProperty.Implements);
+
+				CollectionAssert.AreEqual(new[] { "Lib.Shapes.IG.G<int>(int)" }, call.ImplementedMembers.Select(static x => x.ToDisplayString()).ToArray());
+				CollectionAssert.AreEqual(new[] { "Lib.Shapes.IG.G<T>(T)" }, call.Definition.ImplementedMembers.Select(static x => x.ToDisplayString()).ToArray());
+			});
+		}
+
+		[TestMethod]
+		public void OverrideChainsSurviveConstruction()
+		{
+			ForEachVariant(v =>
+			{
+				string[] Chain(MethodFacts f)
+				{
+					return f.OverrideChain.Select(static x => x.ToDisplayString()).ToArray();
+				}
+
+				var v1 = v.Facts(v.Call("Calls", "new GMid<int>().V(1)"), FactProperty.Overrides);
+
+				CollectionAssert.AreEqual(new[] { "Lib.Shapes.GMid<int>.V(int)", "Lib.Shapes.GBase<int>.V(int)" }, Chain(v1));
+				CollectionAssert.AreEqual(new[] { "Lib.Shapes.GMid<T>.V(T)", "Lib.Shapes.GBase<T>.V(T)" }, Chain(v1.Definition));
+
+				var w = v.Facts(v.Call("Calls", "new GMid<int>().W<string>(\"x\")"), FactProperty.Overrides);
+
+				CollectionAssert.AreEqual(new[] { "Lib.Shapes.GMid<int>.W<string>(string)", "Lib.Shapes.GBase<int>.W<string>(string)" }, Chain(w));
+
+				var leaf = v.Facts(v.Method("Lib.Shapes.GLeaf", "V"), FactProperty.Overrides);
+
+				CollectionAssert.AreEqual(new[] { "Lib.Shapes.GLeaf.V(string)", "Lib.Shapes.GMid<string>.V(string)", "Lib.Shapes.GBase<string>.V(string)" }, Chain(leaf));
+			});
+		}
+
+		[TestMethod]
+		public void AsyncIsDecidedOnTheCallsConstructedReturnType()
+		{
+			ForEachVariant(v =>
+			{
+				bool Async(string call)
+				{
+					return v.Facts(v.Call("Calls", call), FactProperty.Async).IsAsync;
+				}
+
+				Assert.IsTrue(Async("new Holder<Task>().Get()"));
+				Assert.IsFalse(Async("new Holder<int>().Get()"));
+				Assert.IsFalse(v.Facts(v.Call("Calls", "new Holder<Task>().Get()"), FactProperty.Async).Definition.IsAsync);
+
+				// A type parameter constrained to an awaitable type is awaitable in the definition too.
+				var con = v.Facts(v.Call("Calls", "new Cons().Con<Task>()"), FactProperty.Async);
+
+				Assert.IsTrue(con.IsAsync);
+				Assert.IsTrue(con.Definition.IsAsync);
+			});
+		}
+
+		[TestMethod]
+		public void AnAwaitableTypeHasAnAccessibleInstanceGetAwaiterThatReturnsAnAwaiter()
+		{
+			ForEachVariant(v =>
+			{
+				foreach (var name in new[] { "ReturnExpl", "ReturnPriv", "ReturnInt" })
+					Assert.IsFalse(v.Facts(v.Method("Lib.Shapes.Facts", name), FactProperty.Async).IsAsync, name);
+
+				Assert.IsTrue(v.Facts(v.Method("Lib.Shapes.Facts", "Custom"), FactProperty.Async).IsAsync);
+			});
+		}
+
+		[TestMethod]
+		public void ExternIncludesInternalCallMethods()
+		{
+			ForEachVariant(v =>
+			{
+				Assert.IsTrue(v.Facts(v.Method("Lib.Shapes.Facts", "Native"), FactProperty.Extern).IsExtern);
+				Assert.IsTrue(v.Facts(v.Method("Lib.Shapes.Facts", "getpid"), FactProperty.Extern).IsExtern);
+			});
+		}
+
+		[TestMethod]
+		public void ACovariantOverrideHasNoWrittenAttributes()
+		{
+			ForEachVariant(v => Assert.AreEqual(0, v.Facts(v.Method("Lib.Shapes.CovDer", "Cov"), FactProperty.Attribute).Attributes.Length));
+		}
+
+		[TestMethod]
+		public void AccessibilityOfMembersTheMetadataOnlyCarriesWithImportOptionsAll()
+		{
+			string[] names = ["Int", "Priv", "PrivProt"];
+			Accessibility[] expected = [Accessibility.Internal, Accessibility.Private, Accessibility.ProtectedAndInternal];
+
+			for (var i = 0; i < names.Length; i++)
+				Assert.AreEqual(expected[i], Source.Facts(Source.Method("Lib.Shapes.Facts", names[i]), FactProperty.Accessibility).Accessibility, names[i]);
+
+			// Read without importing non-public members, as a consumer does, the metadata has neither.
+			foreach (var variant in new[] { Impl, Ref })
+				foreach (var name in new[] { "Int", "Priv" })
+					Assert.AreEqual(0, variant.Type("Lib.Shapes.Facts").GetMembers(name).Length, $"{variant.Name} {name}");
+
+			// Imported with every member, an implementation assembly reads all three; a reference assembly keeps only
+			// what a consumer can call.
+			foreach (var variant in new[] { Impl, Ref })
+			{
+				var all  = variant.Consumer.WithOptions(((CSharpCompilationOptions)variant.Consumer.Options).WithMetadataImportOptions(MetadataImportOptions.All));
+				var type = all.GetTypeByMetadataName("Lib.Shapes.Facts")!;
+
+				for (var i = 0; i < names.Length; i++)
+				{
+					var method = type.GetMembers(names[i]).OfType<IMethodSymbol>().SingleOrDefault();
+
+					if (method is null)
+					{
+						Assert.AreSame(Ref, variant, names[i]);
+						continue;
+					}
+
+					Assert.AreEqual(expected[i], MethodFacts.Create(method, FactProperty.Accessibility, new FactContext(all.Assembly)).Accessibility, $"{variant.Name} {names[i]}");
+				}
+			}
+		}
+
+		[TestMethod]
+		public void FactsAreComputedOnFirstReadNotWhenTheRecordIsMade()
+		{
+			var call  = Source.Call("Calls", "new Holder<Task>().Get()");
+			var facts = Source.Facts(call);
+
+			Assert.AreEqual(0, facts.ComputedFacts);
+			Assert.AreEqual(0, facts.Definition.ComputedFacts);
+
+			_ = facts.Attributes;
+			_ = facts.Attributes;
+
+			Assert.AreEqual(1, facts.Definition.ComputedFacts, "Attributes belong to the definition and are computed once.");
+			Assert.AreEqual(0, facts.ComputedFacts);
+
+			_ = facts.OverrideChain;
+			_ = facts.OverrideChain;
+			_ = facts.IsAsync;
+
+			Assert.AreEqual(3, facts.ComputedFacts + facts.Definition.ComputedFacts);
+
+			// A second call of the same definition finds the definition's facts already computed.
+			var second = facts.Definition.ForCall(Source.Call("Calls", "new Holder<int>().Get()"));
+
+			_ = second.Attributes;
+
+			Assert.AreEqual(1, facts.Definition.ComputedFacts);
 		}
 
 		[TestMethod]
