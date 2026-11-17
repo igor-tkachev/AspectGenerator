@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 
 using AspectGenerator.FilterV2;
 using AspectGenerator.TargetFilterFacts;
@@ -17,8 +18,11 @@ namespace AspectGenerator.TargetFilterBinding
 	/// </summary>
 	abstract class TypePattern
 	{
+		/// <exception cref="InsufficientExecutionStackException">The pattern and the type are nested deeper than the stack can follow.</exception>
 		public Tri Match(TypeShape type, MatchPhase phase)
 		{
+			RuntimeHelpers.EnsureSufficientExecutionStack();
+
 			return type is TypeParameterShape ? MatchTypeParameter(phase) : MatchCore(type, phase);
 		}
 
@@ -165,6 +169,9 @@ namespace AspectGenerator.TargetFilterBinding
 
 		internal override Tri MatchTypeParameter(MatchPhase phase)
 		{
+			// Alternatives nest without a type between them: each level is checked for the room it needs.
+			RuntimeHelpers.EnsureSufficientExecutionStack();
+
 			var best = Tri.False;
 
 			foreach (var alternative in _alternatives)
@@ -175,6 +182,8 @@ namespace AspectGenerator.TargetFilterBinding
 
 		internal override Tri MatchCore(TypeShape type, MatchPhase phase)
 		{
+			RuntimeHelpers.EnsureSufficientExecutionStack();
+
 			var best = Tri.False;
 
 			foreach (var alternative in _alternatives)
@@ -190,6 +199,8 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public override bool MatchAttribute(NamedTypeShape attribute)
 		{
+			RuntimeHelpers.EnsureSufficientExecutionStack();
+
 			foreach (var alternative in _alternatives)
 				if (alternative.MatchAttribute(attribute))
 					return true;

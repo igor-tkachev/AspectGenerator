@@ -333,6 +333,9 @@ namespace AspectGenerator.TargetFilterBinding
 
 		static BindingAnchors OfAll<T>(ImmutableArray<T> alternatives, Func<T, BindingAnchors> anchors)
 		{
+			// Alternatives nest; the builder reports a filter nested deeper than the stack can follow.
+			System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
+
 			var all = Nothing;
 
 			foreach (var alternative in alternatives)

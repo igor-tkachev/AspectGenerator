@@ -100,7 +100,8 @@ namespace AspectGenerator.TargetFilterBinding
 
 		/// <summary>
 		/// What every method the block can select satisfies, as far as it can be checked before binding: each include
-		/// of the block holds of a selected method, a subtraction only takes away.
+		/// of the block holds of a selected method, a subtraction only takes away. "The project" in it is the assembly
+		/// the block was written in: for a block read from a library, the library.
 		/// </summary>
 		public BindingAnchors Anchors { get; }
 
