@@ -169,7 +169,7 @@ namespace AspectGenerator.Tests.FilterV2
 		[TestMethod]
 		public void DeepNestingIsReportedNotCrashedTest()
 		{
-			foreach (var depth in new[] { 2_000, 20_000 })
+			foreach (var depth in new[] { 2_000, 20_000, 200_000 })
 			{
 				foreach (var input in new[] { new string('(', depth) + "public" + new string(')', depth), "type: " + string.Concat(Enumerable.Repeat("A<", depth)) + "B" + new string('>', depth) })
 				{

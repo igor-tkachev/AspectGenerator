@@ -278,11 +278,5 @@ namespace AspectGenerator.FilterV2
 				_                            => throw new ArgumentOutOfRangeException(nameof(property), property, null),
 			};
 		}
-
-		/// <summary>Whether a key takes only <c>any</c> or a reference: the keys of the properties written with words.</summary>
-		public static bool IsPropertyNameKey(FilterKey key)
-		{
-			return key >= FilterKey.Accessibility;
-		}
 	}
 }
