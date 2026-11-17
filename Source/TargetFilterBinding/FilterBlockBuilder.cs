@@ -481,20 +481,26 @@ namespace AspectGenerator.TargetFilterBinding
 				return condition is CascadeJunction<FilterTarget> junction && junction.IsAnd != ofAnd && ofAnd ? "(" + text + ")" : text;
 			}
 
-			/// <summary>The characters a part of a line covers: from its first leaf to its last.</summary>
+			/// <summary>
+			/// The characters a part of a line covers: the condition as written, or, for conditions of a line that the split
+			/// brought together, from the first of them to the last.
+			/// </summary>
 			(int Item, TextSpan Span) Extent(CascadeCondition<FilterTarget> condition)
 			{
+				if (_origins.TryGetValue(condition, out var origin))
+					return (origin.Item, origin.Span);
+
 				var item  = 0;
 				var start = int.MaxValue;
 				var end   = 0;
 
-				foreach (var leaf in condition.Leaves())
+				foreach (var operand in ((CascadeJunction<FilterTarget>)condition).Operands)
 				{
-					var origin = _origins[leaf];
+					var (operandItem, span) = Extent(operand);
 
-					item  = origin.Item;
-					start = Math.Min(start, origin.Span.Start);
-					end   = Math.Max(end,   origin.Span.End);
+					item  = operandItem;
+					start = Math.Min(start, span.Start);
+					end   = Math.Max(end,   span.End);
 				}
 
 				return (item, TextSpan.FromBounds(start, end));
@@ -547,10 +553,10 @@ namespace AspectGenerator.TargetFilterBinding
 				switch (expression)
 				{
 					case OrExpressionSyntax or:
-						return Junction(false, or.Operands);
+						return Junction(false, or.Operands, or.Span);
 
 					case AndExpressionSyntax and:
-						return and.OperatorErrors.IsEmpty ? Junction(true, and.Operands) : null;
+						return and.OperatorErrors.IsEmpty ? Junction(true, and.Operands, and.Span) : null;
 
 					case GroupExpressionSyntax group:
 						return Convert(group.Expression);
@@ -560,7 +566,14 @@ namespace AspectGenerator.TargetFilterBinding
 						// `not` stands before one condition; the reader has refused anything else.
 						var operand = Convert(not.Operand);
 
-						return operand is null or CascadeJunction<FilterTarget> ? null : new CascadeNot<FilterTarget>(operand);
+						if (operand is null or CascadeJunction<FilterTarget>)
+							return null;
+
+						var negation = new CascadeNot<FilterTarget>(operand);
+
+						_origins[negation] = new Origin(_item, _text, not.Span, not.Span);
+
+						return negation;
 					}
 
 					case KeyConditionSyntax condition:
@@ -577,7 +590,7 @@ namespace AspectGenerator.TargetFilterBinding
 				}
 			}
 
-			CascadeCondition<FilterTarget>? Junction(bool isAnd, ImmutableArray<FilterExpressionSyntax> operands)
+			CascadeCondition<FilterTarget>? Junction(bool isAnd, ImmutableArray<FilterExpressionSyntax> operands, TextSpan span)
 			{
 				var conditions = ImmutableArray.CreateBuilder<CascadeCondition<FilterTarget>>(operands.Length);
 
@@ -589,7 +602,11 @@ namespace AspectGenerator.TargetFilterBinding
 					conditions.Add(condition);
 				}
 
-				return new CascadeJunction<FilterTarget>(isAnd, conditions.MoveToImmutable());
+				var junction = new CascadeJunction<FilterTarget>(isAnd, conditions.MoveToImmutable());
+
+				_origins[junction] = new Origin(_item, _text, span, span);
+
+				return junction;
 			}
 
 			CascadeCondition<FilterTarget>? Reference(ReferenceSyntax reference, CascadeProperty? keyProperty, TextSpan span)
@@ -807,7 +824,14 @@ namespace AspectGenerator.TargetFilterBinding
 				if (conditions.Count == 0)
 					return null;
 
-				return conditions.Count == 1 ? conditions[0] : new CascadeJunction<FilterTarget>(true, conditions.ToImmutable());
+				if (conditions.Count == 1)
+					return conditions[0];
+
+				var junction = new CascadeJunction<FilterTarget>(true, conditions.ToImmutable());
+
+				_origins[junction] = new Origin(_item, _text, run.Span, run.Span);
+
+				return junction;
 			}
 
 			CascadeCondition<FilterTarget> Word(WordSyntax word)

@@ -277,15 +277,22 @@ namespace AspectGenerator.TargetFilterBinding
 			if (pattern.Segments.IsEmpty)
 				return Everything;
 
-			var root  = pattern.Global is null ? null : Literal(pattern.Segments[0]);
+			var roots = pattern.Global is null ? default : Literals(pattern.Segments[0]);
 			var names = NameAnchors(pattern.Segments[pattern.Segments.Length - 1]);
 
-			// A `**` anywhere may stand for no segment at all only before the last one; the last segment is the method's own
-			// either way, unless it is `**` itself, which NameAnchors answers with none.
+			// The last segment of the pattern is the method's own name, unless it is `**`, which says nothing of it.
 			if (names.IsDefault)
-				return root is null ? Everything : Of([new AnchorTerm(null, root, false)]);
+				return OfRoots(roots);
 
-			return Of(names.Select(name => new AnchorTerm(name, root, false)));
+			if (roots.IsDefault)
+				return Of(names.Select(static name => new AnchorTerm(name, null, false)));
+
+			return Of(names.SelectMany(name => roots.Select(root => new AnchorTerm(name, root, false))));
+		}
+
+		static BindingAnchors OfRoots(ImmutableArray<string> roots)
+		{
+			return roots.IsDefault ? Everything : Of(roots.Select(static root => new AnchorTerm(null, root, false)));
 		}
 
 		/// <summary>The anchors of a <c>namespace:</c> pattern, which is rooted whether it says <c>global::</c> or not.</summary>
@@ -294,8 +301,7 @@ namespace AspectGenerator.TargetFilterBinding
 			if (WholeAlternatives(pattern) is { IsDefault: false } alternatives)
 				return OfAll(alternatives, OfNamespace);
 
-			// The global namespace has no root: a method of it is rooted in its type.
-			return pattern.Segments.IsEmpty || Literal(pattern.Segments[0]) is not { Length: > 0 } root ? Everything : Of([new AnchorTerm(null, root, false)]);
+			return pattern.Segments.IsEmpty ? Everything : OfRoots(Literals(pattern.Segments[0]));
 		}
 
 		/// <summary>The anchors of a <c>type:</c> pattern: a root, where the type is written from <c>global::</c>.</summary>
@@ -322,9 +328,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 		static BindingAnchors OfRootedType(NamePatternSyntax name)
 		{
-			return name.Global is null || name.Segments.IsEmpty || Literal(name.Segments[0]) is not { Length: > 0 } root
-				? Everything
-				: Of([new AnchorTerm(null, root, false)]);
+			return name.Global is null || name.Segments.IsEmpty ? Everything : OfRoots(Literals(name.Segments[0]));
 		}
 
 		static BindingAnchors OfAll<T>(ImmutableArray<T> alternatives, Func<T, BindingAnchors> anchors)
@@ -349,6 +353,30 @@ namespace AspectGenerator.TargetFilterBinding
 			}
 
 			return default;
+		}
+
+		/// <summary>
+		/// The names a first segment can be, where it is text and alternatives of text only; default for any other, and for
+		/// the empty name: the global namespace is no root, a method of it is rooted in its type.
+		/// </summary>
+		static ImmutableArray<string> Literals(NameSegmentSyntax segment)
+		{
+			var anchors = NameAnchors(segment);
+
+			if (anchors.IsDefault)
+				return default;
+
+			var names = ImmutableArray.CreateBuilder<string>(anchors.Length);
+
+			foreach (var anchor in anchors)
+			{
+				if (!anchor.IsExact || anchor.Prefix.Length == 0)
+					return default;
+
+				names.Add(anchor.Prefix);
+			}
+
+			return names.ToImmutable();
 		}
 
 		/// <summary>The text of a segment that is text only; <see langword="null"/> for any other.</summary>
