@@ -153,13 +153,19 @@ namespace AspectGenerator.Tests.FilterV2
 				}
 			}
 
+			// The time bar is the shipped parser's: a Debug build of the generator runs it unoptimized, and is held to the
+			// growth bar only.
+			var optimized = typeof(FilterV2Reader).Assembly.GetCustomAttributes(typeof(DebuggableAttribute), false)
+				.Cast<DebuggableAttribute>()
+				.All(static a => !a.IsJITOptimizerDisabled);
+
 			foreach (var lines in new[] { _malformed, _malformedClosed })
 			{
 				var (malformed, _) = Time(Fill(lines, 10_000), 7);
 
-				TestContext.WriteLine($"10 KB malformed ('{lines[0]}' …): {malformed:0.000} ms (bar: 10 ms)");
+				TestContext.WriteLine($"10 KB malformed ('{lines[0]}' …): {malformed:0.000} ms (bar: 10 ms{(optimized ? "" : ", not held: the generator is not optimized")})");
 
-				if (malformed > 10)
+				if (optimized && malformed > 10)
 					failures.Add($"10 KB of malformed text ('{lines[0]}' …) read in {malformed:0.000} ms (bar: 10 ms)");
 			}
 
