@@ -408,7 +408,8 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 				("params: (int, string)",              Params("int", "string"),                         T, null),
 				("params: (int, string)",              Params("string", "int"),                         F, null),
 
-				// A modifier in the pattern is matched exactly; a pattern without one takes any.
+				// What the pattern writes is required and the rest is free; how a parameter is passed is matched exactly
+				// where the pattern says how. A pattern without modifiers takes any.
 				("params: (this string)",              Params("this string"),                           T, null),
 				("params: (this string)",              Params("string"),                                F, null),
 				("params: (string)",                   Params("this string"),                           T, null),
@@ -420,7 +421,10 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 				("params: (ref readonly int, in Guid, params int[])", Params("ref readonly int", "in System.Guid", "params int[]"), T, null),
 				("params: (ref readonly int, in Guid, params int[])", Params("ref readonly int", "in System.Guid", "int[]"),        F, null),
 				("params: (this ref int)",             Params("this ref int"),                          T, null),
-				("params: (ref int)",                  Params("this ref int"),                          F, null),
+				("params: (ref int)",                  Params("this ref int"),                          T, null),
+				("params: (this int)",                 Params("this ref int"),                          T, null),
+				("params: (in int)",                   Params("this ref int"),                          F, null),
+				("params: (this int)",                 Params("ref int"),                               F, null),
 
 				("param: CancellationToken",           Params("int", Token),                            T, null),
 				("param: CancellationToken",           Params("int"),                                   F, null),

@@ -184,8 +184,10 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 				("namespace: \"\"",                       Shapes, "Marked",            F),
 
 				("params: (this ref int)",                "Shop.Ext",   "E",           T),
-				("params: (this int)",                    "Shop.Ext",   "E",           F),
-				("params: (ref int)",                     "Shop.Ext",   "E",           F),
+				("params: (this int)",                    "Shop.Ext",   "E",           T),
+				("params: (ref int)",                     "Shop.Ext",   "E",           T),
+				("params: (this in int)",                 "Shop.Ext",   "E",           F),
+				("params: (params int)",                  "Shop.Ext",   "E",           F),
 				("params: (int)",                         "Shop.Ext",   "E",           T),
 				("extension and static and public",       "Shop.Ext",   "E",           T),
 				("public and instance and project",       Shapes, "Marked",            T),

@@ -29,10 +29,11 @@ namespace AspectGenerator.TargetFilterBinding
 	static class PatternDefaults
 	{
 		/// <summary>
-		/// How parameter modifiers are matched. The rule is not final yet; this is the one place that chooses it, and
-		/// the tests run the other choice as well.
+		/// How parameter modifiers are matched: what a pattern writes is required, what it does not write is free, and
+		/// how a parameter is passed is matched exactly where the pattern says how. This is the one place that chooses
+		/// it; the tests run the other choice as well.
 		/// </summary>
-		public const ParameterModifierMatching ModifierMatching = ParameterModifierMatching.ExactSet;
+		public const ParameterModifierMatching ModifierMatching = ParameterModifierMatching.PerKind;
 	}
 
 	/// <summary>A pattern the language refuses for what it is as a whole: where, under which id, and what to write.</summary>
