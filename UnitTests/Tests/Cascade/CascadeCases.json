@@ -1,5 +1,5 @@
 {
- "about": "Cascade expectations for target filters. Input filters are text; 'facts' are the method records. 'errors' lists (block label, diagnostic id); a case with a filter error selects nothing (AG0235, AG0236 excepted). 'alternatives' holds the result under a non-default setting of the evaluator switch it is named after.",
+ "about": "Cascade expectations for target filters. Input filters are text; 'facts' are the method records. 'errors' lists (block label, diagnostic id); a case with a filter error selects nothing (AG0235 excepted). 'alternatives' holds the result under a non-default setting of the evaluator switch it is named after.",
  "cases": [
   {
    "id": "class-method-save-replaces-method",
@@ -2729,8 +2729,8 @@
    }
   },
   {
-   "id": "an-unreadable-library-filter-is-dropped-with-ag0236-the-aspect-stays-on",
-   "description": "an unreadable library filter is dropped with AG0236; the aspect stays on",
+   "id": "an-unreadable-library-filter-is-an-error-and-the-aspect-selects-nothing",
+   "description": "an unreadable library filter is an error and the aspect selects nothing",
    "input": {
     "default": "- attribute: NoLog",
     "assembly": [
@@ -2782,8 +2782,8 @@
    },
    "expected": {
     "selected": {
-     "Lib.C.Write": true,
-     "Shop.Services.OrderService.Load": true
+     "Lib.C.Write": false,
+     "Shop.Services.OrderService.Load": false
     },
     "settings": {},
     "errors": [
@@ -2792,6 +2792,21 @@
       "id": "AG0236"
      }
     ]
+   },
+   "alternatives": {
+    "LibraryFilterWithErrorIgnored": {
+     "selected": {
+      "Lib.C.Write": true,
+      "Shop.Services.OrderService.Load": true
+     },
+     "settings": {},
+     "errors": [
+      {
+       "block": "assembly#0:lib",
+       "id": "AG0236"
+      }
+     ]
+    }
    }
   },
   {

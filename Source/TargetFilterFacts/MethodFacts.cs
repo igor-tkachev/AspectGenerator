@@ -416,9 +416,11 @@ namespace AspectGenerator.TargetFilterFacts
 		ImmutableArray<INamedTypeSymbol> _attributes;
 
 		/// <summary>
-		/// <c>attribute:</c>: the classes of the attributes written on the method or on any type that contains it
-		/// (outer types included), as <see cref="WrittenAttributes"/> defines "written". Attributes an override
-		/// inherits from the method it overrides do not count.
+		/// <c>attribute:</c>: the classes of the attributes the compiler reports on the method or on any type that
+		/// contains it (outer types included), in declaration order; an attribute repeated on several partial
+		/// declarations appears once per use. A symbol read from source and one read from metadata may report different
+		/// lists (the compiler adds some attributes only when it emits), and both are taken as reported. Attributes an
+		/// override inherits from the method it overrides do not count.
 		/// </summary>
 		public ImmutableArray<INamedTypeSymbol> Attributes
 		{
@@ -432,15 +434,24 @@ namespace AspectGenerator.TargetFilterFacts
 				{
 					var builder = ImmutableArray.CreateBuilder<INamedTypeSymbol>();
 
-					WrittenAttributes.AddTo(definition.Method, builder);
+					AddAttributes(definition.Method, builder);
 
 					for (var type = definition.Method.ContainingType; type is not null; type = type.ContainingType)
-						WrittenAttributes.AddTo(type, builder);
+						AddAttributes(type, builder);
 
 					definition._attributes = definition.Computed(builder.ToImmutable());
 				}
 
 				return definition._attributes;
+			}
+		}
+
+		static void AddAttributes(ISymbol symbol, ImmutableArray<INamedTypeSymbol>.Builder result)
+		{
+			foreach (var attribute in symbol.GetAttributes())
+			{
+				if (attribute.AttributeClass is { } type)
+					result.Add(type);
 			}
 		}
 

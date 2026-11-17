@@ -169,7 +169,11 @@ namespace AspectGenerator.Cascade
 
 			if (libraryFilterWithError == UnreadableLibraryFilter.TurnAspectOff)
 			{
-				Diagnostics = Diagnostics.AddRange(library.SelectMany(b => b.Diagnostics));
+				Diagnostics = Diagnostics.AddRange(library.Where(b => b.HasErrors).Select(b => new CascadeDiagnostic(
+					CascadeDiagnosticIds.UnreadableLibrary,
+					$"The target filter of '{b.Label}' read from a referenced assembly cannot be read: {b.Diagnostics[0].Message}",
+					b,
+					b.Source)));
 				Warnings    = [];
 			}
 			else
@@ -182,7 +186,10 @@ namespace AspectGenerator.Cascade
 			}
 		}
 
-		/// <summary>The errors of every block. Any of them turns the aspect off.</summary>
+		/// <summary>
+		/// The errors of every block; a library block that cannot be read counts as one error of its own. Any of them turns
+		/// the aspect off.
+		/// </summary>
 		public ImmutableArray<CascadeDiagnostic> Diagnostics { get; }
 
 		/// <summary>The library blocks left out because they have errors, one warning each.</summary>
@@ -269,7 +276,7 @@ namespace AspectGenerator.Cascade
 
 		IEnumerable<CascadeBlock<TFact>> Readable(IEnumerable<CascadeBlock<TFact>> libraryBlocks)
 		{
-			return _libraryFilterWithError == UnreadableLibraryFilter.IgnoreWithWarning ? libraryBlocks.Where(b => !b.HasErrors) : libraryBlocks;
+			return _libraryFilterWithError == UnreadableLibraryFilter.Ignored ? libraryBlocks.Where(b => !b.HasErrors) : libraryBlocks;
 		}
 
 		static CascadeBlock<TFact> Expect(CascadeBlock<TFact> block, CascadeLevel level)

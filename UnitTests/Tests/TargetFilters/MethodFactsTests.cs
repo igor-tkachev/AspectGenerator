@@ -345,7 +345,7 @@ namespace AspectGenerator.Tests.TargetFilters
 			return FactNames.FormatType(type);
 		}
 
-		/// <summary>Every fact of a record as text, except <see cref="MethodFacts.IsProject"/>, which differs by design.</summary>
+		/// <summary>Every fact of a record as text, except <see cref="MethodFacts.IsProject"/> and <see cref="MethodFacts.Attributes"/>, which differ by design.</summary>
 		static string Describe(MethodFacts f)
 		{
 			var lines = new List<string>
@@ -357,7 +357,6 @@ namespace AspectGenerator.Tests.TargetFilters
 				$"virtuality: {f.Virtuality}",
 				$"async: {f.IsAsync}",
 				$"generated: {f.IsGenerated}",
-				$"attributes: {string.Join(",", f.Attributes.Select(static a => a.Name))}",
 				$"namespace: {f.Namespace}",
 				$"type: {f.TypeName}",
 				$"path: {f.MethodPath}",
@@ -542,7 +541,7 @@ namespace AspectGenerator.Tests.TargetFilters
 		}
 
 		[TestMethod]
-		public void AttributesAreTheWrittenOnesOfTheMethodAndItsTypes()
+		public void AttributesAreWhatTheCompilerReportsOnTheMethodAndItsTypes()
 		{
 			ForEachVariant(v =>
 			{
@@ -551,22 +550,27 @@ namespace AspectGenerator.Tests.TargetFilters
 					return v.Facts(v.Method(type, name), FactProperty.Attribute).Attributes.Select(static a => a.Name).ToArray();
 				}
 
+				// An attribute of the type counts for every method of it, and is listed once per use.
+				CollectionAssert.AreEqual(new[] { "WrittenAttribute", "WrittenAttribute" }, A("Lib.Shapes.Facts", "Written").Where(static n => n == "WrittenAttribute").ToArray());
+				Assert.AreEqual(1, A("Lib.Shapes.Facts", "Written").Count(static n => n == "InhAttribute"));
+				Assert.AreEqual(2, A("Lib.Shapes.Facts", "InhAttrM").Count(static n => n == "InhAttribute"));
 
-				// The type's own attribute counts for every method of it, written twice because it is written twice.
-				CollectionAssert.AreEqual(new[] { "WrittenAttribute", "WrittenAttribute", "InhAttribute" }, A("Lib.Shapes.Facts", "Written"));
-				CollectionAssert.AreEqual(new[] { "InhAttribute", "InhAttribute" }, A("Lib.Shapes.Facts", "InhAttrM"));
+				// What the compiler adds when it emits is visible from metadata and not from source.
+				foreach (var name in new[] { "AsyncT", "AEIter", "AsyncStep" })
+				{
+					var emitted = A("Lib.Shapes.Facts", name).Any(static n => n is "AsyncStateMachineAttribute" or "AsyncIteratorStateMachineAttribute");
 
-				// Pseudo-attributes and what the compiler emits on its own are not written attributes.
-				CollectionAssert.AreEqual(new[] { "InhAttribute" }, A("Lib.Shapes.Facts", "getpid"));
-				CollectionAssert.AreEqual(new[] { "InhAttribute" }, A("Lib.Shapes.Facts", "Impl"));
-				CollectionAssert.AreEqual(new[] { "InhAttribute" }, A("Lib.Shapes.Facts", "AsyncT"));
-				CollectionAssert.AreEqual(new[] { "InhAttribute" }, A("Lib.Shapes.Facts", "AEIter"));
-				CollectionAssert.AreEqual(new[] { "InhAttribute" }, A("Lib.Shapes.Facts", "AsyncStep"));
-				CollectionAssert.AreEqual(new[] { "InhAttribute" }, A("Lib.Shapes.Facts", "NullableRef"));
-				Assert.AreEqual(0, A("Lib.Shapes.Rec", "ToString").Length);
+					Assert.AreEqual(!v.IsSource, emitted, name);
+				}
+
+				Assert.AreEqual(!v.IsSource, A("Lib.Shapes.Facts", "NullableRef").Contains("NullableContextAttribute"));
+
+				// Source also shows the pseudo-attributes, which metadata stores as flags.
+				Assert.AreEqual(v.IsSource, A("Lib.Shapes.Facts", "getpid").Contains("DllImportAttribute"));
+				Assert.AreEqual(v.IsSource, A("Lib.Shapes.Facts", "Impl").Contains("MethodImplAttribute"));
 
 				// An attribute inherited by a type or an override does not count.
-				Assert.AreEqual(0, A("Lib.Shapes.Derived", "InhAttrM").Length);
+				Assert.IsFalse(A("Lib.Shapes.Derived", "InhAttrM").Contains("InhAttribute"));
 			});
 		}
 
@@ -1084,9 +1088,16 @@ namespace AspectGenerator.Tests.TargetFilters
 		}
 
 		[TestMethod]
-		public void ACovariantOverrideHasNoWrittenAttributes()
+		public void ACovariantOverrideInheritsNoAttributes()
 		{
-			ForEachVariant(v => Assert.AreEqual(0, v.Facts(v.Method("Lib.Shapes.CovDer", "Cov"), FactProperty.Attribute).Attributes.Length));
+			ForEachVariant(v =>
+			{
+				var names = v.Facts(v.Method("Lib.Shapes.CovDer", "Cov"), FactProperty.Attribute).Attributes.Select(static a => a.Name).ToArray();
+
+				// Only what the compiler emits on the override itself; nothing comes from the method it overrides.
+				Assert.IsTrue(names.All(static n => n is "NullableContextAttribute" or "PreserveBaseOverridesAttribute"), string.Join(",", names));
+				Assert.AreEqual(!v.IsSource, names.Length > 0);
+			});
 		}
 
 		[TestMethod]

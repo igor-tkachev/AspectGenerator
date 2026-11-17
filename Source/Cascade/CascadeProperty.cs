@@ -59,14 +59,11 @@ namespace AspectGenerator.Cascade
 	/// <summary>What happens to a filter read from a referenced assembly that has an error.</summary>
 	enum UnreadableLibraryFilter
 	{
-		/// <summary>
-		/// The block is left out with a warning naming it, and the rest of the aspect works: a consumer cannot edit a
-		/// library's filters, so they must not switch the aspect off in the consumer's build.
-		/// </summary>
-		IgnoreWithWarning,
-
 		/// <summary>The block's errors count as the aspect's own and turn the aspect off.</summary>
 		TurnAspectOff,
+
+		/// <summary>The block is left out with a warning naming it, and the rest of the aspect works.</summary>
+		Ignored,
 	}
 
 	static class CascadeDefaults
@@ -78,9 +75,11 @@ namespace AspectGenerator.Cascade
 		public const AssemblyFilterReach AssemblyReach = AssemblyFilterReach.ProjectUnlessOriginOrPlace;
 
 		/// <summary>
-		/// What a library filter with an error does. The rule is not final yet; this is the one place that chooses it.
+		/// What a library filter with an error does: a filter that cannot be read (one written for another version of
+		/// the filter language, say) is an error like any other and turns the aspect off. The cascade tests run the
+		/// other choice as well.
 		/// </summary>
-		public const UnreadableLibraryFilter LibraryFilterWithError = UnreadableLibraryFilter.IgnoreWithWarning;
+		public const UnreadableLibraryFilter LibraryFilterWithError = UnreadableLibraryFilter.TurnAspectOff;
 	}
 
 	/// <summary>The ids of the diagnostics the cascade reports.</summary>

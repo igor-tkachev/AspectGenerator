@@ -37,19 +37,25 @@ namespace AspectGenerator.Tests.Cascade
 			JsonNode.Parse(File.ReadAllText(CasesPath))!["cases"]!.AsArray().Select(c => c!.AsObject()).ToList());
 
 		/// <summary>
-		/// Every case under both reaches of an assembly block. The table's expectations are for
-		/// <see cref="AssemblyFilterReach.ProjectUnlessOriginOrPlace"/>; a case whose result differs under the other reach
-		/// carries it as an alternative named after that reach.
+		/// Every case under both reaches of an assembly block and both policies for a library filter with an error. The
+		/// table's expectations are for the defaults; a case whose result differs under another choice carries it as an
+		/// alternative named after that choice. Only one choice at a time leaves its default.
 		/// </summary>
 		public static IEnumerable<object[]> Cases => _cases.Value.SelectMany(c => new[]
 		{
-			new object[] { c["id"]!.GetValue<string>(), nameof(AssemblyFilterReach.ProjectUnlessOriginOrPlace) },
-			new object[] { c["id"]!.GetValue<string>(), nameof(AssemblyFilterReach.ProjectUnlessAnyInclude) },
+			new object[] { c["id"]!.GetValue<string>(), nameof(AssemblyFilterReach.ProjectUnlessOriginOrPlace), nameof(UnreadableLibraryFilter.TurnAspectOff) },
+			new object[] { c["id"]!.GetValue<string>(), nameof(AssemblyFilterReach.ProjectUnlessAnyInclude),    nameof(UnreadableLibraryFilter.TurnAspectOff) },
+			new object[] { c["id"]!.GetValue<string>(), nameof(AssemblyFilterReach.ProjectUnlessOriginOrPlace), nameof(UnreadableLibraryFilter.Ignored) },
 		});
 
 		static readonly Dictionary<AssemblyFilterReach,string> _alternativeNames = new()
 		{
 			[AssemblyFilterReach.ProjectUnlessAnyInclude] = "AssemblyIncludeLiftsProject",
+		};
+
+		static readonly Dictionary<UnreadableLibraryFilter,string> _policyAlternativeNames = new()
+		{
+			[UnreadableLibraryFilter.Ignored] = "LibraryFilterWithErrorIgnored",
 		};
 
 		static JsonObject Case(string id)
@@ -67,23 +73,27 @@ namespace AspectGenerator.Tests.Cascade
 
 			var alternatives = _cases.Value.SelectMany(c => c["alternatives"]?.AsObject().Select(a => a.Key) ?? []).Distinct().ToList();
 
-			CollectionAssert.IsSubsetOf(alternatives, _alternativeNames.Values.ToList(), "An alternative names no reach the tests know.");
+			CollectionAssert.IsSubsetOf(alternatives, _alternativeNames.Values.Concat(_policyAlternativeNames.Values).ToList(), "An alternative names no choice the tests know.");
 			Assert.AreNotEqual(0, alternatives.Count, "No case has an alternative.");
 		}
 
 		[TestMethod]
 		[DynamicData(nameof(Cases))]
-		public void CascadeCase(string id, string reachName)
+		public void CascadeCase(string id, string reachName, string policyName)
 		{
 			var reach    = Enum.Parse<AssemblyFilterReach>(reachName);
+			var policy   = Enum.Parse<UnreadableLibraryFilter>(policyName);
 			var c        = Case(id);
-			var actual   = Run(c["input"]!.AsObject(), reach);
+			var actual   = Run(c["input"]!.AsObject(), reach, policy);
 			var expected = c["expected"]!.AsObject();
 
 			if (_alternativeNames.TryGetValue(reach, out var name) && c["alternatives"]?[name] is JsonObject alternative)
 				expected = alternative;
 
-			Compare($"{id} ({reach}): {c["description"]}", expected, actual);
+			if (_policyAlternativeNames.TryGetValue(policy, out name) && c["alternatives"]?[name] is JsonObject policyAlternative)
+				expected = policyAlternative;
+
+			Compare($"{id} ({reach}, {policy}): {c["description"]}", expected, actual);
 		}
 
 		sealed record Result(
@@ -93,7 +103,7 @@ namespace AspectGenerator.Tests.Cascade
 
 		/// <summary>
 		/// The cases with a library filter that has an error, when such a filter turns the aspect off: nothing is selected,
-		/// and the errors are the filter errors of the library's blocks.
+		/// and the errors are one AG0236 per library block that cannot be read.
 		/// </summary>
 		[TestMethod]
 		public void LibraryFilterWithErrorTurnsTheAspectOff()
@@ -107,7 +117,7 @@ namespace AspectGenerator.Tests.Cascade
 				if (input["library"] is null)
 					continue;
 
-				var ignored = Run(input, AssemblyFilterReach.ProjectUnlessOriginOrPlace, UnreadableLibraryFilter.IgnoreWithWarning);
+				var ignored = Run(input, AssemblyFilterReach.ProjectUnlessOriginOrPlace, UnreadableLibraryFilter.Ignored);
 				var off     = Run(input, AssemblyFilterReach.ProjectUnlessOriginOrPlace, UnreadableLibraryFilter.TurnAspectOff);
 				var dropped = ignored.Errors.Where(e => e.Id == CascadeDiagnosticIds.UnreadableLibrary).Select(e => e.Block).ToList();
 
@@ -121,7 +131,7 @@ namespace AspectGenerator.Tests.Cascade
 				Assert.IsTrue(off.Selected.Values.All(v => !v), c["id"] + ": nothing is selected");
 				Assert.AreEqual(0, off.Settings.Count, c["id"] + ": settings");
 				CollectionAssert.AreEquivalent(dropped, off.Errors.Select(e => e.Block).Distinct().ToList(), c["id"] + ": error blocks");
-				Assert.IsFalse(off.Errors.Any(e => e.Id == CascadeDiagnosticIds.UnreadableLibrary), c["id"] + ": no AG0236");
+				Assert.IsTrue(off.Errors.All(e => e.Id == CascadeDiagnosticIds.UnreadableLibrary), c["id"] + ": the errors are AG0236");
 
 				count++;
 			}
@@ -136,7 +146,7 @@ namespace AspectGenerator.Tests.Cascade
 			}
 		}
 
-		static Result Run(JsonObject input, AssemblyFilterReach reach, UnreadableLibraryFilter libraryFilterWithError = UnreadableLibraryFilter.IgnoreWithWarning)
+		static Result Run(JsonObject input, AssemblyFilterReach reach, UnreadableLibraryFilter libraryFilterWithError = CascadeDefaults.LibraryFilterWithError)
 		{
 			var allBlocks = new List<CascadeBlock<CaseFact>>();
 			var labels    = new Dictionary<CascadeBlock<CaseFact>,string>();
