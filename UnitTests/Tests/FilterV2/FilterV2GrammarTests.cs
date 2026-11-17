@@ -97,6 +97,18 @@ namespace AspectGenerator.Tests.FilterV2
 			Reports("method: Save* and (public\n or bad bad)\nstatic", FilterV2DiagnosticID.SyntaxError, "bad)", "!Syntax | [Static]");
 			Reports("bad bad\n or public\nstatic", FilterV2DiagnosticID.SyntaxError, "bad", "!Syntax | [Static]");
 
+			// A comment inside brackets ends at its line: brackets and quotes in it are not counted.
+			foreach (var comment in new[] { "# (", "# \"", "# )(", "# \"(\"" })
+			{
+				var bad = Read($"(public {comment}\n and bad bad)\nmethd: X\ntype: Task<>");
+
+				CollectionAssert.AreEqual(
+					new[] { FilterV2DiagnosticID.SyntaxError, FilterV2DiagnosticID.UnknownOrReserved, FilterV2DiagnosticID.SyntaxError },
+					bad.Diagnostics.Select(static d => d.Id).ToArray(),
+					$"{comment}: {string.Join("; ", bad.Diagnostics)}");
+				Assert.AreEqual("!Syntax | !UnknownKey | Type: Task<!OpenGeneric>", FilterV2Print.Item(bad.Item!), comment);
+			}
+
 			// An unclosed bracket or quote runs to the end of the item: nothing after it is read.
 			Reports("public\n(unclosed\nstatic", FilterV2DiagnosticID.SyntaxError, "static", "[Public] | !Syntax");
 			Reports("method: \"unclosed\nstatic", FilterV2DiagnosticID.SyntaxError, "", "!Syntax");
@@ -289,24 +301,35 @@ namespace AspectGenerator.Tests.FilterV2
 		}
 
 		[TestMethod]
-		public void OverridesKeyTest()
+		public void OverridesIsNoKeyOfItsOwnTest()
 		{
-			// Whether `overrides:` is a key of its own is one switch; while it is not, `implements:` covers overriding.
-			var reading  = Read("overrides: Base.Save");
-			var separate = FilterV2Language.OverridesIsKey;
+			// Today's policy: `implements:` covers overriding, and `overrides:` is an unknown key that says so.
+			// The switch is a constant: read it as a value, so that the assertion is about its value today.
+			Assert.AreEqual(false, typeof(FilterV2Language).GetField(nameof(FilterV2Language.OverridesIsKey))!.GetValue(null));
+
+			var reading = Read("overrides: Base.Save");
 
 			Assert.AreEqual("Overrides: Base.Save", FilterV2Print.Item(reading.Item!));
+			Assert.AreEqual(FilterV2DiagnosticID.UnknownOrReserved, reading.Diagnostics.Single().Id);
+			StringAssert.Contains(reading.Diagnostics.Single().Message, "'implements:'");
+			Assert.AreEqual("overrides", Text("overrides: Base.Save", reading.Diagnostics.Single().Span));
+			Assert.AreEqual(FilterV2DiagnosticID.InvalidReference, Read("implements: assembly.overrides").Diagnostics.Single().Id);
+			Assert.AreEqual(FilterV2DiagnosticID.InvalidReference, Read("assembly.overrides").Diagnostics.Single().Id);
 
-			if (separate)
-			{
-				Assert.AreEqual(0, reading.Diagnostics.Length);
-			}
-			else
-			{
-				Assert.AreEqual(FilterV2DiagnosticID.UnknownOrReserved, reading.Diagnostics.Single().Id);
-				StringAssert.Contains(reading.Diagnostics.Single().Message, "'implements:'");
-				Assert.AreEqual(FilterV2DiagnosticID.InvalidReference, Read("implements: assembly.overrides").Diagnostics.Single().Id);
-			}
+			// The word stays a keyword: a name equal to it needs `@`.
+			Reports("type: *.overrides", FilterV2DiagnosticID.SyntaxError, "overrides");
+		}
+
+		[TestMethod]
+		public void OverridesAsAKeyOfItsOwnTest()
+		{
+			// The alternative policy: `overrides:` is a key of its own, and its references are valid.
+			var reading = FilterV2Reader.Read("overrides: Base.Save", overridesIsKey: true);
+
+			Assert.AreEqual("Overrides: Base.Save", FilterV2Print.Item(reading.Item!));
+			Assert.AreEqual(0, reading.Diagnostics.Length, string.Join("; ", reading.Diagnostics));
+			Assert.AreEqual(0, FilterV2Reader.Read("overrides: assembly.overrides", overridesIsKey: true).Diagnostics.Length);
+			Assert.AreEqual(FilterV2DiagnosticID.InvalidReference, FilterV2Reader.Read("implements: assembly.overrides", overridesIsKey: true).Diagnostics.Single().Id);
 		}
 
 		[TestMethod]
@@ -339,6 +362,36 @@ namespace AspectGenerator.Tests.FilterV2
 		}
 
 		[TestMethod]
+		public void LegacyKeyInParenthesesTest()
+		{
+			// The value of a 1.1 key ends where the bracket around it closes.
+			foreach (var key in new[] { "contains", "regex", "pattern", "fulltype", "fullmethod", "path", "attributes", "signature" })
+			{
+				Reports($"({key}: C.Save)", FilterV2DiagnosticID.Legacy, $"{key}: C.Save", "(!Legacy)");
+				Reports($"public and ({key}: C.Save(int)) and static", FilterV2DiagnosticID.Legacy, $"{key}: C.Save(int)", "and{[Public], (!Legacy), [Static]}");
+				Reports($"(public or\n {key}: Save # )\n)", FilterV2DiagnosticID.Legacy, $"{key}: Save", "(or{[Public], !Legacy})");
+			}
+
+			Reports("(within: Shop)", FilterV2DiagnosticID.UnknownOrReserved, "within: Shop", "(!Reserved)");
+		}
+
+		[TestMethod]
+		public void CasedKeyTest()
+		{
+			// A key in another case is 1.1's spelling: keys are lowercase now.
+			StringAssert.Contains(Reports("Method: Save*", FilterV2DiagnosticID.Legacy, "Method", "!Legacy").Message, "'method:'");
+			StringAssert.Contains(Reports("NAMESPACE: Shop.**", FilterV2DiagnosticID.Legacy, "NAMESPACE").Message, "'namespace:'");
+			Reports("Contains: Save", FilterV2DiagnosticID.Legacy, "Contains");
+			Reports("(Type : *Service)", FilterV2DiagnosticID.Legacy, "Type", "(!Legacy)");
+			StringAssert.Contains(Reports("Returns: Task", FilterV2DiagnosticID.Legacy, "Returns").Message, "'@Returns: …'");
+
+			// A method of that name is written with `@` or a parameter list.
+			Reads("@Method: Save*", "[sig Method : Save*]");
+			Reads("Method(): Save*", "[sig Method() : Save*]");
+			Reads("Methods: Save*", "[sig Methods : Save*]");
+		}
+
+		[TestMethod]
 		public void ReservedKeyTest()
 		{
 			Reports("within: Shop", FilterV2DiagnosticID.UnknownOrReserved, "within: Shop", "!Reserved");
@@ -357,6 +410,18 @@ namespace AspectGenerator.Tests.FilterV2
 			Reads("Save: Task", "[sig Save : Task]");
 			Reads("@save: Task", "[sig save : Task]");
 			Reads("save(): Task", "[sig save() : Task]");
+
+			// Any identifier with no uppercase letter is a key: digits, `_` and letters outside ASCII too.
+			Reports("method2: X", FilterV2DiagnosticID.UnknownOrReserved, "method2", "!UnknownKey");
+			Reports("foo_bar: Task", FilterV2DiagnosticID.UnknownOrReserved, "foo_bar");
+			Reports("méthod: X", FilterV2DiagnosticID.UnknownOrReserved, "méthod");
+			Reports("_x: y", FilterV2DiagnosticID.UnknownOrReserved, "_x");
+			Reads("fooBar: Task", "[sig fooBar : Task]");
+
+			// The key's span is the key: white space before `:` is not part of it.
+			var text = "methd : X";
+
+			Assert.AreEqual(new TextSpan(0, 5), Reports(text, FilterV2DiagnosticID.UnknownOrReserved, "methd").Span);
 		}
 
 		[TestMethod]
@@ -375,7 +440,8 @@ namespace AspectGenerator.Tests.FilterV2
 			Reads("type: assembly.location", "Type: assembly->location");
 
 			// The wrong kind of pattern for the key.
-			Reports("params: int", FilterV2DiagnosticID.SyntaxError, "int");
+			StringAssert.Contains(Reports("params: int", FilterV2DiagnosticID.UnknownOrReserved, "params: int", "!WrongValue").Message, "'param: …'");
+			Reports("params: int and public", FilterV2DiagnosticID.UnknownOrReserved, "params: int", "and{!WrongValue, [Public]}");
 			Reports("method:", FilterV2DiagnosticID.SyntaxError, "");
 		}
 
@@ -656,6 +722,20 @@ namespace AspectGenerator.Tests.FilterV2
 			Reads("returns: {void,Task}", "Returns: {void,Task}");
 			Reads("returns: {int[], string}", "Returns: either{int[],string}");
 			Reads("param: {int, (int, int)}", "Param: either{int,tuple(int,int)}");
+
+			// Alternatives that a name goes on after are alternatives of names.
+			Reads("type: {Order,Invoice}Service<*>.Inner", "Type: {Order,Invoice}Service<*>.Inner");
+			Reads("type: {A,{B,C}}D", "Type: {A,{B,C}}D");
+			Reads("param: {int,string}[]", "Param: {int,string}[]");
+			Reports("type: {int[],string}Foo", FilterV2DiagnosticID.InvalidPattern, "{int[],string}", "Type: !TypesInNameFoo");
+			Reports("type: {}", FilterV2DiagnosticID.InvalidPattern, "{}", "Type: !EmptyAlternatives");
+
+			var text  = "type: {Get,Find}Service";
+			var name  = ((NamedTypeSyntax)((TypePatternSyntax)Only<KeyConditionSyntax>(Reads(text, "Type: {Get,Find}Service")).Value).Core).Name;
+			var parts = name.Segments.Single().Parts;
+
+			CollectionAssert.AreEqual(new[] { "{Get,Find}", "Service" }, parts.Select(p => Text(text, p.Span)).ToArray());
+			Assert.AreEqual("{Get,Find}Service", Text(text, name.Segments[0].Span));
 		}
 
 		[TestMethod]

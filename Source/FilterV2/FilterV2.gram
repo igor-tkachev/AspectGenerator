@@ -12,8 +12,10 @@
 //     in brackets is read with the trivia rebound. Patterns keep their own spacing: no line break inside `<…>`, a
 //     parameter list, `{…}` or a compact signature.
 //   - A pattern is one lexeme at its top level: white space only inside `<…>`, `(…)`, `{…}` and `[…]`.
-//   - The tail of every list is atomic. Nothing after a list is ever helped by giving a turn back, and an unclosed list
-//     that gives its turns back one by one costs the square of its length.
+//   - No list is atomic: a value built inside an atomic group is read again at every level that encloses it, so a list
+//     nested in a list would cost the square of its depth. A refused list gives its turns back one at a time, and each
+//     costs one test of the character that would have closed it.
+//   - Every bracket is read by one rule only, so a nested bracket is never read twice per level.
 //
 // Error productions read the forms of the 1.1 language and the forms the language refuses, into nodes that carry the
 // error and what to write instead.
@@ -50,9 +52,9 @@ Minus : @TextSpan = '-' => @(Span(parserSpan))
 // 1.1's `&` and `|` before a line.
 LegacyLineOperator : @FilterExpressionSyntax = op: ('&' | '|') & Lex.RestOfLine => @(LegacyLine(parserSpan, op))
 
-Or : @FilterExpressionSyntax = first: And & { (OrOp & more: And)* } => @(Or(parserSpan, first, more))
+Or : @FilterExpressionSyntax = first: And & (OrOp & more: And)* => @(Or(parserSpan, first, more))
 
-And : @FilterExpressionSyntax = first: Unary & { (op: AndOp & more: Unary)* } => @(And(parserSpan, first, op, more))
+And : @FilterExpressionSyntax = first: Unary & (op: AndOp & more: Unary)* => @(And(parserSpan, first, op, more))
 
 OrOp = Lex.Join? & "or"
 
@@ -90,8 +92,10 @@ KeyCondition : @FilterExpressionSyntax
 	| key: ParamKey     & ':' & value: ParamValue     => @(Condition(parserSpan, key, value))
 	| key: PropertyKey  & ':' & value: CommonValue    => @(Condition(parserSpan, key, value))
 	| key: PropertyKey  & ':' & Lex.RestOfAtom        => @(WrongValue(parserSpan, key))
-	| legacy: LegacyKey & ':' & rest: Lex.RestOfLine  => @(LegacyKey(parserSpan, legacy, rest))
-	| reserved: ReservedKey & ':' & Lex.RestOfLine    => @(ReservedKey(parserSpan, reserved))
+	| key: ParamsKey    & ':' & ?=Lex.WrongListStart & Lex.RestOfAtom => @(WrongValue(parserSpan, key))
+	| legacy: LegacyKey & ':' & rest: Lex.RestOfValue => @(LegacyKey(parserSpan, legacy, rest))
+	| reserved: ReservedKey & ':' & rest: Lex.RestOfValue => @(ReservedKey(parserSpan, reserved, rest))
+	| cased: CasedKey   & ':' & rest: Lex.RestOfValue => @(CasedKey(parserSpan, cased, rest))
 	| unknown: UnknownKey & ':' & Lex.RestOfAtom      => @(UnknownKey(parserSpan, unknown))
 
 NameKey     : @KeyToken = k: "namespace" => @(Key(k, parserSpan))
@@ -110,9 +114,12 @@ LegacyKey   : @NameToken = k: ("contains" | "regex" | "pattern" | "fulltype" | "
 
 ReservedKey : @NameToken = k: ("within" | "assembly") => @(new NameToken(k, Span(parserSpan)))
 
-// Keys are lowercase: `Save: Task` is a compact signature with a return type, `save: x` an unknown key. A known key
-// whose value cannot be read is a syntax error in its value, not an unknown key.
-UnknownKey  : @NameToken = ?!KnownKey & k: { ['a'..'z']+ } & ?!Lex.IdChar & ?=(':' & ?!':') => @(new NameToken(k, Span(parserSpan)))
+// Keys are lowercase: an identifier with no uppercase letter before `:` is a key (`save: x` an unknown one), anything
+// else a compact signature (`Save: Task`). A known key whose value cannot be read is a syntax error in its value, not an
+// unknown key. A key written in another case (`Method:`, 1.1 read keys ignoring case) is reported with its spelling.
+UnknownKey  : @NameToken = ?!KnownKey & k: Lex.Identifier & when @(IsLowercase(k)) & ?=(':' & ?!':') => @(new NameToken(k, Span(parserSpan, k)))
+
+CasedKey    : @NameToken = k: Lex.Identifier & when @(IsKeyInAnotherCase(k)) & ?=(':' & ?!':') => @(new NameToken(k, Span(parserSpan, k)))
 
 KnownKey = NameKey | TypeKey | MethodKey | ReturnsKey | ParamsKey | ParamKey | PropertyKey | LegacyKey | ReservedKey
 
@@ -186,7 +193,16 @@ namespace Lex
 	RestOfLine = { (SkipQuoted | SkipParen | [^ '\r' | '\n' | '(' | '"' | '#'])* }
 	RestOfAtom = { (SkipQuoted | SkipParen | [^ '\r' | '\n' | '(' | ')' | '"' | '#' | ' ' | '\t'])* }
 	SkipQuoted = '"' & { ('\\' & any | [^ '"' | '\\'])* } & ('"' | eof)
-	SkipParen  = '(' & { (SkipQuoted | SkipParen | [^ '(' | ')' | '"'])* } & (')' | eof)
+	SkipParen  = '(' & { (SkipQuoted | SkipParen | Comment | [^ '(' | ')' | '"' | '#'])* } & (')' | eof)
+
+	// The value of a key read only to be reported: up to the end of the line or a `)` that closes a bracket around it.
+	RestOfValue = { (SkipQuoted | SkipParen | [^ '\r' | '\n' | '(' | ')' | '"' | '#'])* }
+
+	// What a parameter list cannot begin with: `params: int` is a value of the wrong kind.
+	WrongListStart = [^ '(' | ' ' | '\t' | '\r' | '\n' | ')' | '#']
+
+	// An identifier: a letter or `_`, then name characters.
+	Identifier = { [\p{L} | \p{Nl} | '_'] & IdChar* }
 
 	IdChar     = [\p{L} | \p{Nd} | \p{Nl} | \p{Mn} | \p{Mc} | \p{Pc} | \p{Cf}]
 
@@ -207,11 +223,11 @@ namespace Lex
 	ReferenceTarget : @NameToken = t: { (IdChar | ['*' | '.' | '@' | '{' | '}' | ',' | '<' | '>' | '"'])+ } => @(new NameToken(t, Span(parserSpan)))
 
 	// A name where no type stands: a `?` after it is no nullable.
-	NamePattern : @NamePatternSyntax
-		= name: Dotted & '?' => @(QuestionAfterName(parserSpan, name))
-		| name: Dotted       => name
+	NamePattern : @NamePatternSyntax = name: Dotted & question: Question? => @(QuestionAfterName(parserSpan, name, question))
 
-	Dotted : @NamePatternSyntax = global: Global? & first: Segment & { ('.' & more: NextSegment)* } => @(Name(parserSpan, global, first, more))
+	Question : @SpanToken = '?' => @(new SpanToken(Span(parserSpan)))
+
+	Dotted : @NamePatternSyntax = global: Global? & first: Segment & ('.' & more: NextSegment)* => @(Name(parserSpan, global, first, more))
 
 	// After a dot a keyword can only be meant as a name.
 	NextSegment : @NameSegmentSyntax
@@ -238,13 +254,13 @@ namespace Lex
 		| '?' & ?=PartStart                           => @(QuestionInName(parserSpan))
 
 	NameAlternatives : @NamePartSyntax
-		= '{' & Sp & first: Dotted & { (Sp & ',' & Sp & more: Dotted)* } & Sp & '}' => @(Alternatives(parserSpan, first, more))
+		= '{' & Sp & first: Dotted & (Sp & ',' & Sp & more: Dotted)* & Sp & '}' => @(Alternatives(parserSpan, first, more))
 		| '{' & Sp & '}'                                                           => @(EmptyAlternatives(parserSpan))
 
 	Quoted : @NamePartSyntax = '"' & text: { ('\\' & [^ '\r' | '\n'] | [^ '"' | '\\' | '\r' | '\n'])* } & '"' => @(Quoted(parserSpan, text))
 
 	TypeArgs : @TypeArgumentsSyntax
-		= '<' & Sp & first: TypePattern & { (Sp & ',' & Sp & more: TypePattern)* } & Sp & '>' => @(TypeArguments(parserSpan, first, more))
+		= '<' & Sp & first: TypePattern & (Sp & ',' & Sp & more: TypePattern)* & Sp & '>' => @(TypeArguments(parserSpan, first, more))
 		| '<' & Sp & (',' & Sp)* & '>'                                                       => @(OpenGeneric(parserSpan, parserText))
 
 	// Ranks and `?` in C# order: `int?[]` is an array of nullable int, `int[]?` an array that may be null.
@@ -254,26 +270,37 @@ namespace Lex
 		= '[' & Sp & commas: { (',' & Sp)* } & ']' => @(Rank(parserSpan, commas))
 		| '?'                                      => @(new TypeSuffixSyntax(Span(parserSpan), 0))
 
+	// A type that begins with `{` is read once, as alternatives of types, and told apart afterwards: alternatives of
+	// names when it goes on as a name (`{Order,Invoice}Service`) or holds names only, alternatives of types otherwise.
+	// Reading it first as a name and then again as types would read every nested `{` twice per level.
 	TypeCore : @TypeCoreSyntax
 		= f: FunctionPointer  => f
 		| t: Tuple            => t
-		| d: Dotted           => @(new NamedTypeSyntax(d))
-		| a: TypeAlternatives => a
+		| b: BracedType       => b
+		| ?!'{' & d: Dotted   => @(new NamedTypeSyntax(d))
 
-	TypeAlternatives : @TypeCoreSyntax
-		= '{' & Sp & first: TypePattern & { (Sp & ',' & Sp & more: TypePattern)* } & Sp & '}' => @(new TypeAlternativesSyntax(Span(parserSpan), List(first, more)))
+	BracedType : @TypeCoreSyntax
+		= '{' & Sp & first: TypePattern & (Sp & ',' & Sp & more: TypePattern)* & Sp & close: Close & tail: NameTail
+		  => @(Braced(parserSpan, first, more, close, tail))
+		| '{' & Sp & close: Close & tail: NameTail
+		  => @(Braced(parserSpan, null, null, close, tail))
+
+	Close : @SpanToken = '}' => @(new SpanToken(Span(parserSpan)))
+
+	// What may follow alternatives in a name: more parts of the segment, type arguments, more segments; maybe nothing.
+	NameTail : @NameTailToken = parts: Part* & args: TypeArgs? & ('.' & more: NextSegment)* => @(new NameTailToken(Span(parserSpan), Array(parts), args, Array(more)))
 
 	Tuple : @TypeCoreSyntax
-		= '(' & Sp & first: TypePattern & { (Sp & ',' & Sp & more: TypePattern)+ } & Sp & ')' => @(new TupleTypeSyntax(Span(parserSpan), List(first, more)))
+		= '(' & Sp & first: TypePattern & (Sp & ',' & Sp & more: TypePattern)+ & Sp & ')' => @(new TupleTypeSyntax(Span(parserSpan), List(first, more)))
 
 	// `delegate* unmanaged[Stdcall, SuppressGCTransition]<int, void>`: one type; the commas in `[…]` and `<…>` are its own.
 	FunctionPointer : @TypeCoreSyntax
 		= "delegate" & '*' & Sp & convention: CallingConvention? & Sp
-		  & '<' & Sp & first: FunctionPointerParameter & { (Sp & ',' & Sp & more: FunctionPointerParameter)* } & Sp & '>'
+		  & '<' & Sp & first: FunctionPointerParameter & (Sp & ',' & Sp & more: FunctionPointerParameter)* & Sp & '>'
 		=> @(FunctionPointer(parserSpan, convention, first, more))
 
 	CallingConvention : @CallingConventionToken
-		= kind: "unmanaged" & Sp & '[' & Sp & first: ConventionName & { (Sp & ',' & Sp & more: ConventionName)* } & Sp & ']'
+		= kind: "unmanaged" & Sp & '[' & Sp & first: ConventionName & (Sp & ',' & Sp & more: ConventionName)* & Sp & ']'
 		                                  => @(Convention(kind, first, more))
 		| kind: ("managed" | "unmanaged") => @(Convention(kind, null, null))
 
@@ -295,7 +322,7 @@ namespace Lex
 		| type: TypePattern                                  => @(new ReturnsPatternSyntax(Span(parserSpan), FilterRefKind.Any, type))
 
 	ParamList : @ParameterListPatternSyntax
-		= '(' & Sp & first: Param & { (Sp & ',' & Sp & more: Param)* } & Sp & ')' => @(Parameters(parserSpan, first, more))
+		= '(' & Sp & first: Param & (Sp & ',' & Sp & more: Param)* & Sp & ')' => @(Parameters(parserSpan, first, more))
 		| '(' & Sp & ')'                                                         => @(Parameters(parserSpan, null, null))
 
 	Param : @ParameterPatternSyntax

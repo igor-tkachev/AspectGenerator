@@ -433,8 +433,8 @@
   !Syntax
   AG0220 13+0 Syntax error at the end of the line: expected quoted text.
 [errors-syntax] params: int
-  !Syntax
-  AG0220 8+3 Syntax error: expected a condition.
+  !WrongValue
+  AG0221 0+11 'params:' takes a parameter list ('(int, ..)'); a condition on one parameter is written 'param: …'.
 [errors-syntax] method: Get?
   Method: Get!QuestionOutsideType
   AG0224 11+1 '?' means nullable and stands only after a type; for any characters in a name write '*'.
@@ -491,7 +491,7 @@
   AG0220 12+0 Syntax error at the end of the line: expected a name pattern, quoted text or ')'.
 [errors-syntax] publik Save
   !Syntax
-  AG0220 7+4 Syntax error: expected '(', ':' or the end of the line.
+  AG0220 7+4 Syntax error: expected ':', '(' or the end of the line.
 [errors-syntax] method: Save*\nand
   Method: Save* | !Syntax
   AG0220 17+0 Syntax error at the end of the line: expected ':'.
@@ -503,10 +503,10 @@
   AG0220 14+0 Syntax error at the end of the line: expected a name pattern, quoted text or '>'.
 [errors-syntax] -
   !Syntax
-  AG0220 1+0 Syntax error at the end of the line: expected 'not', '(', a key, a reference, a word, a name pattern, quoted text or 'any'.
+  AG0220 1+0 Syntax error at the end of the line: expected 'not', '(', a key, a word, a reference, a name pattern, quoted text or 'any'.
 [errors-syntax] -
   !Syntax
-  AG0220 1+0 Syntax error at the end of the line: expected 'not', '(', a key, a reference, a word, a name pattern, quoted text or 'any'.
+  AG0220 1+0 Syntax error at the end of the line: expected 'not', '(', a key, a word, a reference, a name pattern, quoted text or 'any'.
 [errors-syntax] method: Save* and (public or internal))
   !Syntax
   AG0220 38+1 Syntax error: expected 'and' or the end of the line.
@@ -515,10 +515,10 @@
   AG0220 19+0 Syntax error at the end of the line: expected a name pattern or ')'.
 [recovery] method: Save*\nfoo bar\n- public
   Method: Save* | !Syntax | - [Public]
-  AG0220 18+3 Syntax error: expected '(', ':' or the end of the line.
+  AG0220 18+3 Syntax error: expected ':', '(' or the end of the line.
 [recovery] foo bar\nmethod: Save*
   !Syntax | Method: Save*
-  AG0220 4+3 Syntax error: expected '(', ':' or the end of the line.
+  AG0220 4+3 Syntax error: expected ':', '(' or the end of the line.
 [recovery] method: Save*\nmethod: (\nor public\nstatic
   Method: Save* | !Syntax
   AG0220 22+1 Syntax error: expected 'any' or a reference.
@@ -539,12 +539,12 @@
   AG0220 17+0 Syntax error at the end of the line: expected ':'.
 [recovery] a b c\nd e f\ng h i
   !Syntax | !Syntax | !Syntax
-  AG0220 2+3 Syntax error: expected '(', ':' or the end of the line.
-  AG0220 8+3 Syntax error: expected '(', ':' or the end of the line.
-  AG0220 14+3 Syntax error: expected '(', ':' or the end of the line.
+  AG0220 2+3 Syntax error: expected ':', '(' or the end of the line.
+  AG0220 8+3 Syntax error: expected ':', '(' or the end of the line.
+  AG0220 14+3 Syntax error: expected ':', '(' or the end of the line.
 [recovery] method: "unclosed\nstatic
   !Syntax
   AG0220 17+0 Syntax error at the end of the line: expected quoted text.
 [recovery] method: Save* # ok\npublik Save # bad\n- public # ok
   Method: Save* | !Syntax | - [Public]
-  AG0220 26+10 Syntax error: expected '(', ':' or the end of the line.
+  AG0220 26+10 Syntax error: expected ':', '(' or the end of the line.

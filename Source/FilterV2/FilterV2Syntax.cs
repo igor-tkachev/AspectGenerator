@@ -42,6 +42,8 @@ namespace AspectGenerator.FilterV2
 		QuestionOutsideType,
 		/// <summary><c>{}</c>.</summary>
 		EmptyAlternatives,
+		/// <summary>Alternatives of types other than names that a name goes on after: <c>{int[], string}Foo</c>.</summary>
+		TypesInName,
 		/// <summary>A backslash in quoted text before anything but <c>"</c> or <c>\</c>.</summary>
 		InvalidEscape,
 		/// <summary>A form of the 1.1 language; the error gives the version 2 spelling.</summary>

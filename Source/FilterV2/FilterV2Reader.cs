@@ -35,6 +35,7 @@ namespace AspectGenerator.FilterV2
 				FilterSyntaxErrorKind.AnyRunTwice         => InvalidPattern,
 				FilterSyntaxErrorKind.QuestionOutsideType => InvalidPattern,
 				FilterSyntaxErrorKind.EmptyAlternatives   => InvalidPattern,
+				FilterSyntaxErrorKind.TypesInName         => InvalidPattern,
 				FilterSyntaxErrorKind.InvalidEscape       => InvalidPattern,
 				FilterSyntaxErrorKind.Legacy              => Legacy,
 				FilterSyntaxErrorKind.NestedTooDeeply     => NestedTooDeeply,
@@ -94,6 +95,12 @@ namespace AspectGenerator.FilterV2
 	{
 		public static FilterItemReading Read(string text)
 		{
+			return Read(text, FilterV2Language.OverridesIsKey);
+		}
+
+		/// <summary>Reads with <c>overrides:</c> a key of its own or not, whatever <see cref="FilterV2Language.OverridesIsKey"/> says.</summary>
+		internal static FilterItemReading Read(string text, bool overridesIsKey)
+		{
 			FilterItemSyntax item;
 
 			try
@@ -118,10 +125,10 @@ namespace AspectGenerator.FilterV2
 					FilterSyntaxErrorKind.NestedTooDeeply, new TextSpan(0, text.Length), "The filter is nested too deeply to be read."))));
 			}
 
-			return new FilterItemReading(item, Check(item, text));
+			return new FilterItemReading(item, Check(item, text, overridesIsKey));
 		}
 
-		static ImmutableArray<FilterDiagnostic> Check(FilterItemSyntax item, string text)
+		static ImmutableArray<FilterDiagnostic> Check(FilterItemSyntax item, string text, bool overridesIsKey)
 		{
 			var errors = new List<FilterSyntaxError>();
 
@@ -129,7 +136,7 @@ namespace AspectGenerator.FilterV2
 				errors.Add(item.LeadingOperator);
 
 			foreach (var line in item.Lines)
-				CheckLine(line, text, errors);
+				CheckLine(line, text, overridesIsKey, errors);
 
 			return errors
 				.OrderBy(static e => e.Span.Start)
@@ -139,7 +146,7 @@ namespace AspectGenerator.FilterV2
 		}
 
 		/// <summary>Walks a line without recursion: a tree is as deep as the brackets of the filter.</summary>
-		static void CheckLine(FilterLineSyntax line, string text, List<FilterSyntaxError> errors)
+		static void CheckLine(FilterLineSyntax line, string text, bool overridesIsKey, List<FilterSyntaxError> errors)
 		{
 			var stack = new Stack<(FilterSyntaxNode Node, bool UnderNot)>();
 
@@ -171,7 +178,7 @@ namespace AspectGenerator.FilterV2
 						break;
 
 					case KeyConditionSyntax condition:
-						CheckKey(condition, errors);
+						CheckKey(condition, overridesIsKey, errors);
 
 						if (condition.Value is AnyValueSyntax any && (underNot || line.IsSubtraction))
 							errors.Add(new FilterSyntaxError(FilterSyntaxErrorKind.InvalidAny, any.Span, line.IsSubtraction
@@ -180,7 +187,7 @@ namespace AspectGenerator.FilterV2
 						break;
 
 					case ReferenceSyntax reference:
-						CheckReferenceTarget(reference, errors);
+						CheckReferenceTarget(reference, overridesIsKey, errors);
 						break;
 				}
 
@@ -241,16 +248,16 @@ namespace AspectGenerator.FilterV2
 					errors.Add(new FilterSyntaxError(FilterSyntaxErrorKind.QuestionOutsideType, type.Suffixes[i].Span, "'?' stands once after a type: a nullable type is not made nullable again."));
 		}
 
-		static void CheckKey(KeyConditionSyntax condition, List<FilterSyntaxError> errors)
+		static void CheckKey(KeyConditionSyntax condition, bool overridesIsKey, List<FilterSyntaxError> errors)
 		{
-			if (condition.Key == FilterKey.Overrides && !FilterV2Language.OverridesIsKey)
+			if (condition.Key == FilterKey.Overrides && !overridesIsKey)
 			{
 				errors.Add(new FilterSyntaxError(FilterSyntaxErrorKind.UnknownKey, condition.KeySpan,
 					"Unknown key 'overrides:': 'implements:' matches a method that overrides a matching member as well as one that implements it."));
 				return;
 			}
 
-			if (condition.Value is not ReferenceSyntax reference || !FilterV2Language.TryGetProperty(reference.Target, out var target))
+			if (condition.Value is not ReferenceSyntax reference || !FilterV2Language.TryGetProperty(reference.Target, overridesIsKey, out var target))
 				return;
 
 			var property = FilterV2Language.Property(condition.Key);
@@ -261,9 +268,9 @@ namespace AspectGenerator.FilterV2
 		}
 
 		/// <summary>The checks of a reference that its own text decides: whether it names a property at all.</summary>
-		static void CheckReferenceTarget(ReferenceSyntax reference, List<FilterSyntaxError> errors)
+		static void CheckReferenceTarget(ReferenceSyntax reference, bool overridesIsKey, List<FilterSyntaxError> errors)
 		{
-			if (FilterV2Language.TryGetProperty(reference.Target, out _))
+			if (FilterV2Language.TryGetProperty(reference.Target, overridesIsKey, out _))
 				return;
 
 			var level = LevelName(reference.Level);

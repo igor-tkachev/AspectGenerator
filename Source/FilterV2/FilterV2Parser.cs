@@ -31,6 +31,33 @@ namespace AspectGenerator.FilterV2
 			return new TextSpan((int)span.Start, (int)span.Length);
 		}
 
+		/// <summary>The span of a token that begins where a rule does and is <paramref name="text"/> long: trivia after it is not its.</summary>
+		static TextSpan Span(SourceSpan span, string text)
+		{
+			return new TextSpan((int)span.Start, text.Length);
+		}
+
+		/// <summary>An identifier with no uppercase or titlecase letter.</summary>
+		static bool IsLowercase(string identifier)
+		{
+			foreach (var ch in identifier)
+				if (char.IsUpper(ch) || char.GetUnicodeCategory(ch) == System.Globalization.UnicodeCategory.TitlecaseLetter)
+					return false;
+
+			return true;
+		}
+
+		/// <summary>A key of the language, or of 1.1, written in another case: <c>Method</c>, <c>NAMESPACE</c>, <c>Contains</c>.</summary>
+		static bool IsKeyInAnotherCase(string identifier)
+		{
+			if (IsLowercase(identifier))
+				return false;
+
+			var lower = identifier.ToLowerInvariant();
+
+			return FilterV2Language.IsKey(lower) || lower is "contains" or "regex" or "pattern" or "fulltype" or "fullmethod" or "path" or "attributes" or "signature" or "within" or "assembly";
+		}
+
 		static ImmutableArray<T> Array<T>(T[]? items)
 		{
 			return items is null ? ImmutableArray<T>.Empty : ImmutableArray.Create(items);
@@ -166,8 +193,11 @@ namespace AspectGenerator.FilterV2
 
 		static FilterExpressionSyntax WrongValue(SourceSpan span, KeyToken key)
 		{
-			return new ErrorExpressionSyntax(Error(FilterSyntaxErrorKind.WrongValue, span,
-				$"'{key.Text}:' takes only 'any' or a reference ('assembly.{key.Text}', 'aspect.{key.Text}'); a condition on it is written with its words."));
+			var message = key.Key == FilterKey.Params
+				? "'params:' takes a parameter list ('(int, ..)'); a condition on one parameter is written 'param: …'."
+				: $"'{key.Text}:' takes only 'any' or a reference ('assembly.{key.Text}', 'aspect.{key.Text}'); a condition on it is written with its words.";
+
+			return new ErrorExpressionSyntax(Error(FilterSyntaxErrorKind.WrongValue, span, message));
 		}
 
 		static FilterExpressionSyntax LegacyKey(SourceSpan span, NameToken key, string rest)
@@ -184,12 +214,28 @@ namespace AspectGenerator.FilterV2
 				_                     => "it was removed",
 			};
 
-			return new ErrorExpressionSyntax(Error(FilterSyntaxErrorKind.Legacy, span, $"'{key.Text}:' is version 1.1 syntax: {instead}."));
+			return new ErrorExpressionSyntax(new FilterSyntaxError(FilterSyntaxErrorKind.Legacy, Trimmed(span, rest), $"'{key.Text}:' is version 1.1 syntax: {instead}."));
 		}
 
-		static FilterExpressionSyntax ReservedKey(SourceSpan span, NameToken key)
+		static FilterExpressionSyntax CasedKey(SourceSpan span, NameToken key, string rest)
 		{
-			return new ErrorExpressionSyntax(Error(FilterSyntaxErrorKind.Reserved, span, $"'{key.Text}:' is reserved for a later version."));
+			var lower = key.Text.ToLowerInvariant();
+
+			return new ErrorExpressionSyntax(new FilterSyntaxError(FilterSyntaxErrorKind.Legacy, key.Span,
+				$"Keys are lowercase: write '{lower}:'. A compact signature of a method named {key.Text} is written '@{key.Text}: …' or '{key.Text}(): …'."));
+		}
+
+		static FilterExpressionSyntax ReservedKey(SourceSpan span, NameToken key, string rest)
+		{
+			return new ErrorExpressionSyntax(new FilterSyntaxError(FilterSyntaxErrorKind.Reserved, Trimmed(span, rest), $"'{key.Text}:' is reserved for a later version."));
+		}
+
+		/// <summary>The span of a form that ends with <paramref name="rest"/>, without the white space it ends with.</summary>
+		static TextSpan Trimmed(SourceSpan span, string rest)
+		{
+			var whole = Span(span);
+
+			return new TextSpan(whole.Start, whole.Length - (rest.Length - rest.TrimEnd().Length));
 		}
 
 		static FilterExpressionSyntax UnknownKey(SourceSpan span, NameToken key)
@@ -234,12 +280,13 @@ namespace AspectGenerator.FilterV2
 			return new NamePatternSyntax(Span(span), global?.Span, List(first, more));
 		}
 
-		static NamePatternSyntax QuestionAfterName(SourceSpan span, NamePatternSyntax name)
+		static NamePatternSyntax QuestionAfterName(SourceSpan span, NamePatternSyntax name, SpanToken? question)
 		{
-			var whole = Span(span);
+			if (question is null)
+				return name;
 
-			return new NamePatternSyntax(whole, name.Global, name.Segments,
-				new FilterSyntaxError(FilterSyntaxErrorKind.QuestionOutsideType, new TextSpan(whole.End - 1, 1), QuestionMessage));
+			return new NamePatternSyntax(Span(span), name.Global, name.Segments,
+				new FilterSyntaxError(FilterSyntaxErrorKind.QuestionOutsideType, question.Span, QuestionMessage));
 		}
 
 		const string QuestionMessage = "'?' means nullable and stands only after a type; for any characters in a name write '*'.";
@@ -348,6 +395,52 @@ namespace AspectGenerator.FilterV2
 
 		// ---- type patterns ---------------------------------------------------------------------------------------
 
+		/// <summary>
+		/// A type that begins with <c>{</c>, read once as alternatives of types: alternatives of names where a name goes on
+		/// after them or every alternative is a name, alternatives of types otherwise.
+		/// </summary>
+		static TypeCoreSyntax Braced(SourceSpan span, TypePatternSyntax? first, TypePatternSyntax[]? more, SpanToken close, NameTailToken tail)
+		{
+			var whole  = Span(span);
+			var braces = TextSpan.FromBounds(whole.Start, close.Span.End);
+
+			if (first is null)
+				return NamedFromBraces(whole, NamePartSyntax.Refused(new FilterSyntaxError(FilterSyntaxErrorKind.EmptyAlternatives, braces, "'{}' holds no alternative.")), tail);
+
+			var items = List(first, more);
+			var names = ImmutableArray.CreateBuilder<NamePatternSyntax>(items.Length);
+
+			foreach (var item in items)
+				if (item.Suffixes.IsEmpty && item.Core is NamedTypeSyntax named)
+					names.Add(named.Name);
+
+			if (names.Count == items.Length)
+				return NamedFromBraces(whole, NamePartSyntax.Choice(braces, names.MoveToImmutable()), tail);
+
+			if (tail.IsEmpty)
+				return new TypeAlternativesSyntax(whole, items);
+
+			return NamedFromBraces(whole, NamePartSyntax.Refused(new FilterSyntaxError(FilterSyntaxErrorKind.TypesInName, braces,
+				"Alternatives that a name goes on after hold names only; alternatives of other types stand alone ('{int[], string}').")), tail);
+		}
+
+		static TypeCoreSyntax NamedFromBraces(TextSpan whole, NamePartSyntax braces, NameTailToken tail)
+		{
+			var parts = ImmutableArray.CreateBuilder<NamePartSyntax>(1 + tail.Parts.Length);
+
+			parts.Add(braces);
+			parts.AddRange(tail.Parts);
+
+			var end      = tail.Arguments?.Span.End ?? (tail.Parts.IsEmpty ? braces.Span.End : tail.Parts[tail.Parts.Length - 1].Span.End);
+			var segment  = new NameSegmentSyntax(TextSpan.FromBounds(whole.Start, end), false, parts.MoveToImmutable(), tail.Arguments);
+			var segments = ImmutableArray.CreateBuilder<NameSegmentSyntax>(1 + tail.More.Length);
+
+			segments.Add(segment);
+			segments.AddRange(tail.More);
+
+			return new NamedTypeSyntax(new NamePatternSyntax(whole, null, segments.MoveToImmutable()));
+		}
+
 		static TypeSuffixSyntax Rank(SourceSpan span, string commas)
 		{
 			var rank = 1;
@@ -436,6 +529,24 @@ namespace AspectGenerator.FilterV2
 			}
 
 			public FilterSyntaxError? Error { get; }
+		}
+
+		/// <summary>What follows alternatives in a name: more parts, type arguments, more segments, or nothing.</summary>
+		internal sealed class NameTailToken
+		{
+			public NameTailToken(TextSpan span, ImmutableArray<NamePartSyntax> parts, TypeArgumentsSyntax? arguments, ImmutableArray<NameSegmentSyntax> more)
+			{
+				Span      = span;
+				Parts     = parts;
+				Arguments = arguments;
+				More      = more;
+			}
+
+			public TextSpan                          Span      { get; }
+			public ImmutableArray<NamePartSyntax>    Parts     { get; }
+			public TypeArgumentsSyntax?              Arguments { get; }
+			public ImmutableArray<NameSegmentSyntax> More      { get; }
+			public bool                              IsEmpty   => Span.IsEmpty;
 		}
 
 		/// <summary>The calling convention of a function pointer.</summary>

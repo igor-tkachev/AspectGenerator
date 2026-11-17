@@ -198,7 +198,7 @@ errors-reserved	/Save.*/	Line@0+8 [] !{Reserved}
 errors-reserved	foo: bar	Line@0+8 [] !{UnknownKey}
 errors-reserved	custom: x and public	Line@0+20 [Words@14+6] !{UnknownKey}
 errors-syntax	method: "a"b"	Bad@0+0 [] !{Line}	Bad@0+13 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
-errors-syntax	params: int	Bad@0+0 [] !{Line}	Bad@0+11 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	params: int	Bad@0+0 [] !{Line}	Line@0+11 [] !{WrongValue}	a type where a parameter list stands is a value of the wrong kind for the key, not a syntax error
 errors-syntax	method: Get?	Bad@0+0 [] !{Line}	Line@0+12 [Condition@0+12] !{QuestionOutsideType}	'?' after a name where no type stands is reported as an invalid pattern, with '*' to write instead
 errors-syntax	param: int?? 	Line@0+13 [Condition@0+12] !{}
 errors-syntax	not (public or internal)	Line@0+24 [] !{NotGroup}	Line@0+24 [Group@4+20 Words@5+7 Words@15+8] !{NotGroup}	a refused 'not' keeps what it stands before, so the errors inside are reported too

@@ -13,7 +13,16 @@ namespace AspectGenerator.FilterV2
 	{
 		static readonly HashSet<string> _keyRules = new(StringComparer.Ordinal)
 		{
-			"NameKey", "TypeKey", "MethodKey", "ReturnsKey", "ParamsKey", "ParamKey", "PropertyKey", "LegacyKey", "ReservedKey", "UnknownKey", "KeyCondition",
+			"NameKey", "TypeKey", "MethodKey", "ReturnsKey", "ParamsKey", "ParamKey", "PropertyKey", "LegacyKey", "ReservedKey", "UnknownKey", "CasedKey",
+			"KeyCondition", "Identifier", "Lex.Identifier",
+		};
+
+		/// <summary>The keys, as the grammar lists their literals where a key may begin.</summary>
+		static readonly HashSet<string> _keys = new(StringComparer.Ordinal)
+		{
+			"namespace", "type", "method", "returns", "params", "param", "attribute", "inherits", "implements", "overrides", "accessibility",
+			"virtuality", "location", "origin", "contains", "regex", "pattern", "fulltype", "fullmethod", "path", "attributes", "signature",
+			"within",
 		};
 
 		static readonly HashSet<string> _words = new(StringComparer.Ordinal)
@@ -35,8 +44,8 @@ namespace AspectGenerator.FilterV2
 
 		/// <summary>
 		/// The keywords as the grammar lists them where a name was expected: a keyword there is read only to say it needs
-		/// <c>@</c>, so the list says nothing the reader wants to know. <c>signature</c> appears in a list through that
-		/// reading alone.
+		/// <c>@</c>, so the list says nothing the reader wants to know. <c>within</c> appears as a literal of its own through
+		/// that reading alone (where a key may begin, the grammar lists only its first letter).
 		/// </summary>
 		static readonly HashSet<string> _keywords = new(StringComparer.Ordinal)
 		{
@@ -48,7 +57,7 @@ namespace AspectGenerator.FilterV2
 		{
 			var result   = new List<string>();
 			var items    = Split(expected);
-			var keywords = items.Exists(static i => i.Trim() == "\"signature\"");
+			var keywords = items.Exists(static i => i.Trim() == "\"within\"");
 
 			foreach (var raw in items)
 			{
@@ -64,7 +73,7 @@ namespace AspectGenerator.FilterV2
 
 				string? said;
 
-				if (_keyRules.Contains(item))
+				if (_keyRules.Contains(item) || _keys.Contains(text) || IsLetterClass(item))
 					said = "a key";
 				else if (_left.Contains(text) || _left.Contains(item))
 					said = null;
@@ -98,6 +107,23 @@ namespace AspectGenerator.FilterV2
 				return result[0];
 
 			return string.Join(", ", result.GetRange(0, result.Count - 1)) + " or " + result[result.Count - 1];
+		}
+
+		/// <summary>A class of lowercase letters only, <c>['t' | 'a' | 'i']</c>: the first letters of keys.</summary>
+		static bool IsLetterClass(string item)
+		{
+			if (!item.StartsWith("[", StringComparison.Ordinal) || !item.EndsWith("]", StringComparison.Ordinal))
+				return false;
+
+			foreach (var part in item.Substring(1, item.Length - 2).Split('|'))
+			{
+				var letter = part.Trim();
+
+				if (letter.Length != 3 || letter[0] != '\'' || letter[2] != '\'' || letter[1] is < 'a' or > 'z')
+					return false;
+			}
+
+			return true;
 		}
 
 		static string Unquote(string item)

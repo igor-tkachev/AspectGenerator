@@ -77,8 +77,17 @@ namespace AspectGenerator.Tests.FilterV2
 			yield return ("long name, unclosed <",      n => "method: A<" + new string('a', n),                                                           [1_000, 10_000, 100_000]);
 			yield return ("{…} alternatives",           n => "method: {" + string.Join(",", Enumerable.Range(0, n).Select(static i => "A" + i)) + "}",    [10, 100, 1_000]);
 			yield return ("{…} alternatives, unclosed", n => "method: {" + string.Join(",", Enumerable.Range(0, n).Select(static i => "A" + i)),          [10, 100, 1_000]);
-			yield return ("nested parentheses",         n => new string('(', n) + "public" + new string(')', n),                                         [20, 200, 2_000]);
+			yield return ("nested parentheses",         n => new string('(', n) + "public" + new string(')', n),                                         [200, 2_000, 20_000]);
 			yield return ("nested parentheses, open",   n => new string('(', n) + "public",                                                              [20, 200, 2_000]);
+			yield return ("nested {…}, unclosed",       n => "type: " + new string('{', n) + "int",                                                       [100, 1_000, 10_000]);
+			yield return ("nested {…}",                 n => "type: " + new string('{', n) + "int" + new string('}', n),                                 [100, 1_000, 10_000]);
+			yield return ("nested {…} types",           n => "type: " + new string('{', n) + "int[]" + new string('}', n),                               [100, 1_000, 10_000]);
+			yield return ("nested tuples, unclosed",    n => "type: " + new string('(', n) + "int",                                                       [100, 1_000, 10_000]);
+			yield return ("nested tuples, open tails",  n => "type: " + string.Concat(Enumerable.Repeat("(int, ", n)) + "int",                            [100, 1_000, 10_000]);
+			yield return ("nested tuples",              n => "type: " + string.Concat(Enumerable.Repeat("(int, ", n)) + "int" + new string(')', n),       [100, 1_000, 10_000]);
+			yield return ("nested or (…)",              n => string.Concat(Enumerable.Repeat("public or (", n)) + "public" + new string(')', n),            [100, 1_000, 10_000]);
+			yield return ("nested and (…)",             n => string.Concat(Enumerable.Repeat("public and (", n)) + "public" + new string(')', n),           [100, 1_000, 10_000]);
+			yield return ("nested <…> lists",           n => "type: " + string.Concat(Enumerable.Repeat("A<int, ", n)) + "int" + new string('>', n),     [100, 1_000, 10_000]);
 			yield return ("nested <…>",                 n => "type: " + string.Concat(Enumerable.Repeat("A<", n)) + "B" + new string('>', n),             [20, 200, 2_000]);
 		}
 
@@ -97,6 +106,10 @@ namespace AspectGenerator.Tests.FilterV2
 
 					for (var i = 0; i < rounds; i++)
 					{
+						// A collection left over from the read before is not this read's cost.
+						GC.Collect();
+						GC.WaitForPendingFinalizers();
+
 						var watch = Stopwatch.StartNew();
 
 						reading = FilterV2Reader.Read(input);
@@ -138,7 +151,7 @@ namespace AspectGenerator.Tests.FilterV2
 				foreach (var size in sizes)
 				{
 					var input          = make(size);
-					var (ms, reading)  = Time(input, size >= 100_000 ? 3 : 7);
+					var (ms, reading)  = Time(input, size >= 100_000 ? 5 : 9);
 
 					times.Add(ms);
 					TestContext.WriteLine($"{shape,-28} {size,7} {input.Length,8} chars {ms,9:0.000} ms  {Outcome(reading)}");

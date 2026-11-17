@@ -177,6 +177,11 @@ namespace AspectGenerator.FilterV2
 			["generated"]     = FilterProperty.Generated,
 		};
 
+		public static bool IsKey(string text)
+		{
+			return _keys.ContainsKey(text);
+		}
+
 		public static FilterKey Key(string text)
 		{
 			return _keys[text];
@@ -187,10 +192,13 @@ namespace AspectGenerator.FilterV2
 			return _words[text];
 		}
 
-		/// <summary>The property a reference names, by its property name; <see langword="false"/> for any other text.</summary>
-		public static bool TryGetProperty(string name, out FilterProperty property)
+		/// <summary>
+		/// The property a reference names, by its property name; <see langword="false"/> for any other text, and for
+		/// <c>overrides</c> unless it is a key of its own.
+		/// </summary>
+		public static bool TryGetProperty(string name, bool overridesIsKey, out FilterProperty property)
 		{
-			if (name == "overrides" && !OverridesIsKey)
+			if (name == "overrides" && !overridesIsKey)
 			{
 				property = default;
 				return false;
