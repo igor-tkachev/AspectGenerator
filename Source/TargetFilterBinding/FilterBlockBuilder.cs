@@ -403,7 +403,8 @@ namespace AspectGenerator.TargetFilterBinding
 
 			/// <summary>
 			/// A property is included once in a filter, over all of its items; a compound part counts as an include of each
-			/// of its properties. The later include is reported and its line left out.
+			/// of its properties. The later include is reported and its line left out; what else that line includes still
+			/// counts against the lines after it.
 			/// </summary>
 			public void CheckIncludes()
 			{
@@ -419,7 +420,10 @@ namespace AspectGenerator.TargetFilterBinding
 						var first = seen.FirstOrDefault(p => p.Properties.Overlaps(part.Properties));
 
 						if (first is null)
+						{
+							seen.Add(part);
 							continue;
+						}
 
 						var (item, span) = Extent(part);
 						var shared       = PropertyNames(first.Properties & part.Properties);
@@ -444,9 +448,6 @@ namespace AspectGenerator.TargetFilterBinding
 
 						line.Dropped = true;
 					}
-
-					if (!line.Dropped)
-						seen.AddRange(line.Parts);
 				}
 			}
 

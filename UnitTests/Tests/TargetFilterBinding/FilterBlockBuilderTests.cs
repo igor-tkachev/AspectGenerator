@@ -61,6 +61,9 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			// Every later include is reported, once.
 			AssertErrors(CascadeLevel.Type, ["method: A\nmethod: B\nmethod: C"],               "AG0225 [0] 'method: B'", "AG0225 [0] 'method: C'");
 
+			// A line that repeats one property still includes its others.
+			AssertErrors(CascadeLevel.Type, ["method: A\npublic and method: B\ninternal"],     "AG0225 [0] 'method: B'", "AG0225 [0] 'internal'");
+
 			// All items of one attribute are one filter.
 			AssertErrors(CascadeLevel.Type, ["method: Save*", "public", "method: Get*"],       "AG0225 [2] 'method: Get*'");
 

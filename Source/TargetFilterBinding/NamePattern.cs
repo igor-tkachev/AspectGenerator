@@ -90,6 +90,9 @@ namespace AspectGenerator.TargetFilterBinding
 		/// <summary>The pattern of an empty path: the global namespace, written <c>""</c>.</summary>
 		public static readonly NamePattern EmptyPath = new(new Step(StepKind.Accept, null), 1, isRooted: true, fixedSegments: 0, minSegments: 0, choices: 0);
 
+		/// <summary>The answers one match may keep, a byte each.</summary>
+		const int MaxRemembered = 1 << 20;
+
 		readonly Step _start;
 		readonly int  _stepCount;
 		readonly int  _fixedSegments;
@@ -153,6 +156,7 @@ namespace AspectGenerator.TargetFilterBinding
 			byte[]? _answers;
 			int[]?  _offsets;
 			int     _positions;
+			bool    _remembers;
 
 			public Run(NamePattern pattern, SegmentPath path, MatchPhase phase)
 			{
@@ -163,11 +167,12 @@ namespace AspectGenerator.TargetFilterBinding
 				_answers   = null;
 				_offsets   = null;
 				_positions = 0;
+				_remembers = pattern._remembers;
 			}
 
 			public Tri From(Step step, int segment, int position)
 			{
-				if (!_pattern._remembers)
+				if (!_remembers)
 					return Follow(step, segment, position);
 
 				if (_answers is null)
@@ -178,7 +183,16 @@ namespace AspectGenerator.TargetFilterBinding
 						_offsets[i + 1] = _offsets[i] + _path.NameLength(i) + 1;
 
 					_positions = _offsets[_count] + 1;
-					_answers   = new byte[_pattern._stepCount * _positions];
+
+					// A pattern and a name too long to keep an answer for every step and position are searched without.
+					if ((long)_pattern._stepCount * _positions > MaxRemembered)
+					{
+						_remembers = false;
+
+						return Follow(step, segment, position);
+					}
+
+					_answers = new byte[_pattern._stepCount * _positions];
 				}
 
 				var index = step.Index * _positions + _offsets![segment] + position;
