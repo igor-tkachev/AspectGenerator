@@ -326,7 +326,14 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 					Assert.IsTrue(block.Block.Diagnostics.All(static d => d.Source is FilterBlockDiagnostic), $"{level} '{input}': {string.Join("; ", block.Block.Diagnostics)}");
 
 					foreach (var diagnostic in block.Diagnostics)
+					{
 						Assert.IsTrue(diagnostic.Span.End <= input.Length, $"{level} '{input}': {diagnostic}");
+						Assert.AreNotEqual(FilterBlockBuilder.UnreadLine, diagnostic.Message, $"{level} '{input}': a line the reader accepts is no condition");
+					}
+
+					// Every line the reader accepts is a line of the block.
+					if (!block.HasErrors)
+						Assert.AreEqual(FilterV2Reader.Read(input).Item!.Lines.Length, block.Block.Declarations.Where(static d => !d.IsImplicit).Select(static d => d.Line).Distinct().Count(), $"{level} '{input}'");
 
 					if (block.HasErrors)
 						continue;

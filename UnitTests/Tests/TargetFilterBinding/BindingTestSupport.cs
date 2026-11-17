@@ -203,13 +203,16 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 		/// <summary>How many of the type's segments are namespaces; all but the last unless set.</summary>
 		public int NamespaceSegments { get; init; } = -1;
 
+		ImmutableArray<NameSegment> _namespace;
+
 		public ImmutableArray<NameSegment> Namespace
 		{
 			get
 			{
-				var count = NamespaceSegments < 0 ? ContainingType.Segments.Length - 1 : NamespaceSegments;
+				if (_namespace.IsDefault)
+					_namespace = [..ContainingType.Segments.Take(NamespaceSegments < 0 ? ContainingType.Segments.Length - 1 : NamespaceSegments)];
 
-				return [..ContainingType.Segments.Take(count)];
+				return _namespace;
 			}
 		}
 

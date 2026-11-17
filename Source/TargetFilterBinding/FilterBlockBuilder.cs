@@ -190,6 +190,8 @@ namespace AspectGenerator.TargetFilterBinding
 			return new FilterBlock(block, [..diagnostics], facts, includes.ToImmutable());
 		}
 
+		internal const string UnreadLine = "The line cannot be read.";
+
 		/// <summary>The same property under its three names: of the language, of the cascade, of the fact record.</summary>
 		internal static CascadeProperty ToCascade(FilterProperty property)
 		{
@@ -314,10 +316,15 @@ namespace AspectGenerator.TargetFilterBinding
 						continue;
 					}
 
-					// A form the reader refused without an error inside this line's span cannot be; were there one, the line
-					// is no declaration.
+					// The reader reports every form it refuses, so a line that is no condition has an error already. No line
+					// is left out in silence: one that has none gets its own.
 					if (condition is null)
+					{
+						if (!reading.HasErrors)
+							Diagnostics.Add(new FilterBlockDiagnostic(FilterV2DiagnosticID.SyntaxError, index, line.Span, UnreadLine));
+
 						continue;
+					}
 
 					var cascadeLine = new CascadeLine<FilterTarget>(line.IsSubtraction, condition, new FilterLineOrigin(index, line, text.Substring(line.Span.Start, line.Span.Length)));
 
@@ -328,8 +335,9 @@ namespace AspectGenerator.TargetFilterBinding
 
 			static bool HasErrorIn(ImmutableArray<FilterDiagnostic> diagnostics, TextSpan line)
 			{
+				// An error at the very end of a line is the line's: what it still expected there.
 				foreach (var diagnostic in diagnostics)
-					if (diagnostic.Span.Start >= line.Start && diagnostic.Span.Start < line.End || diagnostic.Span.Start == line.Start)
+					if (diagnostic.Span.Start >= line.Start && diagnostic.Span.Start <= line.End)
 						return true;
 
 				return false;

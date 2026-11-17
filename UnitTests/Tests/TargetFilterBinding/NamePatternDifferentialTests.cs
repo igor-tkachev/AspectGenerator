@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
+using AspectGenerator.Cascade;
 using AspectGenerator.TargetFilterBinding;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -252,6 +253,69 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			TestContext.WriteLine($"{clock.ElapsedMilliseconds} ms");
 
 			Assert.IsTrue(clock.Elapsed < TimeSpan.FromSeconds(20), $"{clock.ElapsedMilliseconds} ms");
+		}
+
+		/// <summary>
+		/// The conditions of an ordinary filter are answered without allocating: they run for every call that is bound.
+		/// </summary>
+		[TestMethod]
+		public void OrdinaryConditionsAllocateNothingTest()
+		{
+			var block = FilterBlockBuilder.Build(CascadeLevel.Aspect,
+			[
+				"""
+				namespace: Shop.** and type: *Service<*>
+				method: **.Save* or *Repository.{Get,Find}*Async or global::Shop.Services.OrderService<int>.Load
+				params: (int, .., CancellationToken)
+				param: ref readonly List<*>
+				returns: Task<(int, string?)[]>
+				attribute: {Audited, Obsolete}
+				- attribute: NoLog
+				inherits: IService<*>
+				implements: IService<int>.Save*
+				public and instance and not async and not generated and project
+				"""
+			]);
+
+			Assert.AreEqual(0, block.Diagnostics.Length, string.Join("; ", block.Diagnostics));
+
+			const string List  = "System.Collections.Generic.List<int>";
+			const string Token = "System.Threading.CancellationToken";
+
+			var facts = new RecordFacts("Shop.Services.OrderService<int>", "SaveAll", "System.Threading.Tasks.Task<(int, string)[]>", "int", "ref readonly " + List, Token)
+			{
+				Attributes         = [ShapeText.ParseNamed("Shop.AuditedAttribute")],
+				InheritedTypes     = [ShapeText.ParseNamed("Shop.Services.OrderService<int>"), ShapeText.ParseNamed("Shop.IService<int>")],
+				ImplementedMembers = [RecordFacts.MethodShape("Shop.IService<int>", "SaveAll")],
+			};
+
+			bool Ask(MatchPhase phase)
+			{
+				var target = phase == MatchPhase.Call ? FilterTarget.Call(facts) : FilterTarget.Definition(facts);
+				var holds  = true;
+
+				foreach (var declaration in block.Block.Declarations)
+					holds &= declaration.IsSatisfied(target, null!);
+
+				return holds && !target.DependsOnCall;
+			}
+
+			Assert.IsTrue(Ask(MatchPhase.Call));
+			Assert.IsTrue(Ask(MatchPhase.Definition));
+
+			const int Count = 20_000;
+
+			var bytes = GC.GetAllocatedBytesForCurrentThread();
+
+			for (var i = 0; i < Count; i++)
+				Ask(MatchPhase.Call);
+
+			bytes = GC.GetAllocatedBytesForCurrentThread() - bytes;
+
+			TestContext.WriteLine($"{bytes / Count} bytes a decision");
+
+			// The target of a decision, and nothing per condition.
+			Assert.IsTrue(bytes / Count <= 64, $"{bytes / Count} bytes a decision");
 		}
 
 		/// <summary>
