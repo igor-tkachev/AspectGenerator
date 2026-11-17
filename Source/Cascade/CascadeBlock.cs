@@ -130,16 +130,18 @@ namespace AspectGenerator.Cascade
 					declarations.Add(new(block, line.IsSubtraction, part, line));
 			}
 
-			var includes = declarations.Where(d => !d.IsSubtraction).ToList();
+			// A property is included once: every include after the first of a property is one error, where it repeats.
+			var included = new List<CascadeDeclaration<TFact>>();
 
-			for (var i = 0; i < includes.Count; i++)
-			for (var j = i + 1; j < includes.Count; j++)
+			foreach (var b in declarations.Where(d => !d.IsSubtraction))
 			{
-				var a = includes[i];
-				var b = includes[j];
+				var a = included.FirstOrDefault(d => d.Properties.Overlaps(b.Properties));
 
-				if (!a.Properties.Overlaps(b.Properties))
+				if (a is null)
+				{
+					included.Add(b);
 					continue;
+				}
 
 				var lineSource = b.Line!.Source ?? a.Line!.Source;
 

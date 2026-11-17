@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 
 namespace AspectGenerator.TargetFilterBinding
 {
@@ -33,23 +32,146 @@ namespace AspectGenerator.TargetFilterBinding
 	}
 
 	/// <summary>
+	/// The name of one segment as a pattern without alternatives writes it: literal text around its stars.
+	/// <c>Get*By*Async</c> is the pieces <c>Get</c>, <c>By</c>, <c>Async</c>; a name without a star is one piece.
+	/// </summary>
+	sealed class SegmentGlob : IEquatable<SegmentGlob>
+	{
+		readonly ImmutableArray<string> _pieces;
+
+		/// <param name="pieces">The text before the first star, between each two stars, and after the last: one more than there are stars.</param>
+		public SegmentGlob(ImmutableArray<string> pieces)
+		{
+			_pieces = pieces;
+
+			foreach (var piece in pieces)
+				HasText |= piece.Length != 0;
+		}
+
+		/// <summary>No star: the whole name.</summary>
+		public bool IsExact => _pieces.Length == 1;
+
+		/// <summary>Some literal text: the glob does not take every name.</summary>
+		public bool HasText { get; }
+
+		/// <summary>The name of an exact glob.</summary>
+		public string Text => _pieces[0];
+
+		public bool Matches(string name)
+		{
+			return Matches(name, name.Length);
+		}
+
+		/// <summary>
+		/// Whether the first <paramref name="length"/> characters of <paramref name="name"/> are a name of the glob. The
+		/// first and the last piece stand at the ends; each piece between them is taken at the first place it is found
+		/// after the one before, which leaves the most room for the pieces after it.
+		/// </summary>
+		public bool Matches(string name, int length)
+		{
+			var first = _pieces[0];
+
+			if (_pieces.Length == 1)
+				return length == first.Length && string.CompareOrdinal(name, 0, first, 0, length) == 0;
+
+			var last = _pieces[_pieces.Length - 1];
+
+			if (length < first.Length + last.Length ||
+				string.CompareOrdinal(name, 0, first, 0, first.Length) != 0 ||
+				string.CompareOrdinal(name, length - last.Length, last, 0, last.Length) != 0)
+			{
+				return false;
+			}
+
+			var position = first.Length;
+			var limit    = length - last.Length;
+
+			for (var i = 1; i < _pieces.Length - 1; i++)
+			{
+				var piece = _pieces[i];
+
+				if (piece.Length == 0)
+					continue;
+
+				if (limit - position < piece.Length)
+					return false;
+
+				var found = name.IndexOf(piece, position, limit - position, StringComparison.Ordinal);
+
+				if (found < 0)
+					return false;
+
+				position = found + piece.Length;
+			}
+
+			return true;
+		}
+
+		public bool Equals(SegmentGlob? other)
+		{
+			return other is not null && _pieces.Length == other._pieces.Length && ToString() == other.ToString();
+		}
+
+		public override bool Equals(object? obj)
+		{
+			return Equals(obj as SegmentGlob);
+		}
+
+		public override int GetHashCode()
+		{
+			return StringComparer.Ordinal.GetHashCode(ToString());
+		}
+
+		public override string ToString()
+		{
+			return string.Join("*", _pieces);
+		}
+	}
+
+	/// <summary>
 	/// A dotted name pattern, compiled: <c>*</c> matches within one segment, <c>**</c> whole segments, <c>{a,b}</c>
 	/// either alternative, <c>&lt;…&gt;</c> the type arguments of a segment (a segment without them takes any arity).
 	/// A rooted pattern matches the whole path; any other a trailing run of whole segments.
 	/// </summary>
 	/// <remarks>
-	/// The pattern is a chain of steps, each knowing the step after it; an alternative is a chain of its own that ends
-	/// in the step after the braces. Matching follows the chain and tries again only where a step has a choice
-	/// (how much <c>*</c> or <c>**</c> takes, which alternative), so a pattern without wildcards is compared once. A
-	/// pattern with several choices remembers what it found at a step and a position, so that its cost stays the
-	/// product of its length and the length of the name however the choices combine.
+	/// Nothing here recurses over the pattern or the name, and no match costs more than the length of the pattern times
+	/// the length of the name.
+	/// <para>
+	/// A pattern without alternatives is a list of segments, each a <see cref="SegmentGlob"/>: its segments are
+	/// compared one by one where their number is fixed, and where <c>**</c> stands between them the comparison goes back
+	/// to the last <c>**</c> when it fails, as a glob does within a name. Such a match allocates nothing.
+	/// </para>
+	/// <para>
+	/// A pattern with alternatives, or with both <c>**</c> and type arguments (where one way to place <c>**</c> can
+	/// answer for every call and another only for some), is a chain of steps of one character each, followed in all its
+	/// ways at once: the steps that can stand at a position of the name are a set, and the set moves along the name.
+	/// </para>
 	/// </remarks>
 	sealed class NamePattern
 	{
+		// ---- a pattern without alternatives ------------------------------------------------------------------------
+
+		/// <summary>One segment: <c>**</c> where <see cref="Glob"/> is null.</summary>
+		internal readonly struct Segment
+		{
+			public Segment(SegmentGlob? glob, ImmutableArray<TypePattern> arguments)
+			{
+				Glob      = glob;
+				Arguments = arguments;
+			}
+
+			public SegmentGlob? Glob { get; }
+
+			/// <summary>The type arguments written after the name; default where none are, which takes any arity.</summary>
+			public ImmutableArray<TypePattern> Arguments { get; }
+		}
+
+		// ---- a pattern with alternatives ---------------------------------------------------------------------------
+
 		internal enum StepKind : byte
 		{
-			/// <summary>Literal text at the current position of the segment's name.</summary>
-			Text,
+			/// <summary>One character of the segment's name.</summary>
+			Char,
 			/// <summary><c>*</c>: any run of characters of the segment's name.</summary>
 			Star,
 			/// <summary><c>&lt;…&gt;</c> at the end of the segment's name.</summary>
@@ -66,50 +188,63 @@ namespace AspectGenerator.TargetFilterBinding
 
 		internal sealed class Step
 		{
-			public Step(StepKind kind, Step? next)
+			public Step(StepKind kind, Step? next, int index)
 			{
-				Kind = kind;
-				Next = next;
+				Kind  = kind;
+				Next  = next;
+				Index = index;
 			}
 
 			public readonly StepKind Kind;
 			public readonly Step?    Next;
+			public readonly int      Index;
 
-			public int                         Index;
-			public string                      Text      = "";
+			public char                        Char;
 			public ImmutableArray<TypePattern> Arguments = ImmutableArray<TypePattern>.Empty;
 			public ImmutableArray<Step>        Branches  = ImmutableArray<Step>.Empty;
-
-			/// <summary>
-			/// For a <c>*</c> followed only by text up to the end of its segment: the length of that text, which leaves
-			/// the star one place to end; -1 otherwise.
-			/// </summary>
-			public int TailLength = -1;
 		}
 
 		/// <summary>The pattern of an empty path: the global namespace, written <c>""</c>.</summary>
-		public static readonly NamePattern EmptyPath = new(new Step(StepKind.Accept, null), 1, isRooted: true, fixedSegments: 0, minSegments: 0, choices: 0);
+		public static readonly NamePattern EmptyPath = new(ImmutableArray<Segment>.Empty, isRooted: true);
 
-		/// <summary>The answers one match may keep, a byte each.</summary>
-		const int MaxRemembered = 1 << 20;
+		readonly ImmutableArray<Segment> _segments;
+		readonly bool                    _hasGlobstar;
+		readonly Step?                   _start;
+		readonly Step?                   _accept;
+		readonly Step[]?                 _steps;
+		readonly int                     _stepCount;
+		readonly int                     _fixedSegments;
+		readonly int                     _minSegments;
 
-		readonly Step _start;
-		readonly int  _stepCount;
-		readonly int  _fixedSegments;
-		readonly int  _minSegments;
-		readonly bool _remembers;
+		/// <summary>A pattern without alternatives. With <c>**</c> among its segments none of them has type arguments.</summary>
+		internal NamePattern(ImmutableArray<Segment> segments, bool isRooted)
+		{
+			_segments = segments;
+			IsRooted  = isRooted;
 
+			foreach (var segment in segments)
+			{
+				if (segment.Glob is null)
+					_hasGlobstar = true;
+				else
+					_minSegments++;
+			}
+
+			_fixedSegments = _hasGlobstar ? -1 : segments.Length;
+		}
+
+		/// <summary>A pattern as a chain of steps.</summary>
 		/// <param name="fixedSegments">The number of segments every match has, or -1 when <c>**</c> or an alternative makes it vary.</param>
 		/// <param name="minSegments">A lower bound of the number of segments a match has.</param>
-		/// <param name="choices">The number of steps with a choice.</param>
-		internal NamePattern(Step start, int stepCount, bool isRooted, int fixedSegments, int minSegments, int choices)
+		internal NamePattern(Step start, Step accept, Step[] steps, bool isRooted, int fixedSegments, int minSegments)
 		{
 			_start         = start;
-			_stepCount     = stepCount;
+			_accept        = accept;
+			_steps         = steps;
+			_stepCount     = steps.Length;
 			IsRooted       = isRooted;
 			_fixedSegments = fixedSegments;
 			_minSegments   = minSegments;
-			_remembers     = choices > 2;
 		}
 
 		public bool IsRooted { get; }
@@ -121,210 +256,307 @@ namespace AspectGenerator.TargetFilterBinding
 			if (count < _minSegments || IsRooted && _fixedSegments >= 0 && count != _fixedSegments)
 				return Tri.False;
 
-			var run = new Run(this, path, phase);
+			if (_start is not null)
+				return Follow(path, phase);
 
-			try
+			return _hasGlobstar ? MatchAround(path).ToTri() : MatchInPlace(path, count - _fixedSegments, phase);
+		}
+
+		/// <summary>A fixed number of segments: each stands against one segment of the path.</summary>
+		Tri MatchInPlace(SegmentPath path, int first, MatchPhase phase)
+		{
+			// The names first: they cost less than the type arguments, and most paths fail on them.
+			for (var i = _segments.Length - 1; i >= 0; i--)
+				if (!_segments[i].Glob!.Matches(path[first + i].Name, path.NameLength(first + i)))
+					return Tri.False;
+
+			var answer = Tri.True;
+
+			for (var i = 0; i < _segments.Length && answer != Tri.False; i++)
 			{
-				if (IsRooted)
-					return run.From(_start, 0, 0);
+				var patterns = _segments[i].Arguments;
 
-				if (_fixedSegments >= 0)
-					return run.From(_start, count - _fixedSegments, 0);
+				if (patterns.IsDefault)
+					continue;
 
-				var best = Tri.False;
+				var arguments = path[first + i].TypeArguments;
 
-				for (var start = count - _minSegments; start >= 0 && best != Tri.True; start--)
-					best = best.Or(run.From(_start, start, 0));
+				if (arguments.Length != patterns.Length)
+					return Tri.False;
 
-				return best;
+				for (var a = 0; a < patterns.Length && answer != Tri.False; a++)
+					answer = answer.And(patterns[a].Match(arguments[a], phase));
 			}
-			catch (InsufficientExecutionStackException)
+
+			return answer;
+		}
+
+		/// <summary>
+		/// Segments around <c>**</c>, none with type arguments: the segments are taken in order, and where one fails the
+		/// last <c>**</c> takes one segment more. A pattern that is not rooted has a <c>**</c> before its first segment.
+		/// </summary>
+		bool MatchAround(SegmentPath path)
+		{
+			var count     = path.Count;
+			var p         = 0;
+			var s         = 0;
+			var starP     = IsRooted ? -1 : 0;
+			var starS     = 0;
+
+			while (s < count)
 			{
-				// A pattern with more choices in a row than the stack can follow matches nothing.
-				return Tri.False;
+				if (p < _segments.Length && _segments[p].Glob is null)
+				{
+					starP = ++p;
+					starS = s;
+				}
+				else if (p < _segments.Length && _segments[p].Glob!.Matches(path[s].Name, path.NameLength(s)))
+				{
+					p++;
+					s++;
+				}
+				else if (starP >= 0)
+				{
+					p = starP;
+					s = ++starS;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			while (p < _segments.Length && _segments[p].Glob is null)
+				p++;
+
+			return p == _segments.Length;
+		}
+
+		// ---- following the steps -----------------------------------------------------------------------------------
+
+		/// <summary>The steps that stand at one position, each with the best answer of the ways that lead to it.</summary>
+		sealed class StepSet
+		{
+			public StepSet(int size)
+			{
+				Answers = new byte[size];
+				Members = new int[size];
+			}
+
+			public readonly byte[] Answers;
+			public readonly int[]  Members;
+			public int             Count;
+
+			public void Clear()
+			{
+				for (var i = 0; i < Count; i++)
+					Answers[Members[i]] = 0;
+
+				Count = 0;
 			}
 		}
 
-		struct Run
+		/// <summary>What following a pattern writes on: kept for the next match of the thread, so that a match allocates nothing.</summary>
+		sealed class Scratch
 		{
-			readonly NamePattern _pattern;
-			readonly SegmentPath _path;
-			readonly MatchPhase  _phase;
-			readonly int         _count;
-
-			// What a step answered at a position, plus one: zero is "not asked yet".
-			byte[]? _answers;
-			int[]?  _offsets;
-			int     _positions;
-			bool    _remembers;
-
-			public Run(NamePattern pattern, SegmentPath path, MatchPhase phase)
+			public Scratch(int size)
 			{
-				_pattern   = pattern;
-				_path      = path;
-				_phase     = phase;
-				_count     = path.Count;
-				_answers   = null;
-				_offsets   = null;
-				_positions = 0;
-				_remembers = pattern._remembers;
+				Size        = size;
+				Here        = new StepSet(size);
+				NextChar    = new StepSet(size);
+				NextSegment = new StepSet(size);
+				Pending     = new int[size * 2];
 			}
 
-			public Tri From(Step step, int segment, int position)
+			public readonly int Size;
+			public StepSet      Here;
+			public StepSet      NextChar;
+			public StepSet      NextSegment;
+			public readonly int[] Pending;
+			public int            PendingCount;
+		}
+
+		[ThreadStatic]
+		static Scratch? _scratch;
+
+		Tri Follow(SegmentPath path, MatchPhase phase)
+		{
+			// A match inside a match (a type argument that is a pattern of this kind) finds the scratch taken and makes
+			// its own.
+			var scratch = _scratch;
+
+			_scratch = null;
+
+			if (scratch is null || scratch.Size < _stepCount)
+				scratch = new Scratch(Math.Max(_stepCount, 64));
+
+			try
 			{
-				if (!_remembers)
-					return Follow(step, segment, position);
+				return Follow(path, phase, scratch);
+			}
+			finally
+			{
+				scratch.Here.Clear();
+				scratch.NextChar.Clear();
+				scratch.NextSegment.Clear();
+				scratch.PendingCount = 0;
 
-				if (_answers is null)
+				_scratch = scratch;
+			}
+		}
+
+		Tri Follow(SegmentPath path, MatchPhase phase, Scratch scratch)
+		{
+			var count      = path.Count;
+			var firstStart = IsRooted ? 0 : _fixedSegments >= 0 ? count - _fixedSegments : 0;
+			var lastStart  = IsRooted ? 0 : _fixedSegments >= 0 ? count - _fixedSegments : count - _minSegments;
+
+			for (var segment = 0; segment <= count; segment++)
+			{
+				// The steps that the segment before left for the start of this one.
+				var here = scratch.NextSegment;
+
+				scratch.NextSegment = scratch.Here;
+				scratch.Here        = here;
+				scratch.NextSegment.Clear();
+
+				for (var i = 0; i < here.Count; i++)
+					scratch.Pending[scratch.PendingCount++] = here.Members[i];
+
+				if (segment >= firstStart && segment <= lastStart)
+					Add(scratch, here, _start!, (byte)Tri.True, pending: true);
+
+				if (here.Count == 0)
 				{
-					_offsets = new int[_count + 1];
+					if (segment > lastStart)
+						return Tri.False;
 
-					for (var i = 0; i < _count; i++)
-						_offsets[i + 1] = _offsets[i] + _path.NameLength(i) + 1;
-
-					_positions = _offsets[_count] + 1;
-
-					// A pattern and a name too long to keep an answer for every step and position are searched without.
-					if ((long)_pattern._stepCount * _positions > MaxRemembered)
-					{
-						_remembers = false;
-
-						return Follow(step, segment, position);
-					}
-
-					_answers = new byte[_pattern._stepCount * _positions];
+					continue;
 				}
 
-				var index = step.Index * _positions + _offsets![segment] + position;
+				var atEnd  = segment == count;
+				var name   = atEnd ? "" : path[segment].Name;
+				var length = atEnd ? 0  : path.NameLength(segment);
 
-				if (_answers[index] != 0)
-					return (Tri)(_answers[index] - 1);
-
-				var answer = Follow(step, segment, position);
-
-				_answers[index] = (byte)((int)answer + 1);
-
-				return answer;
-			}
-
-			Tri Follow(Step? step, int segment, int position)
-			{
-				RuntimeHelpers.EnsureSufficientExecutionStack();
-
-				var answer = Tri.True;
-
-				while (step is not null)
+				for (var position = 0; ; position++)
 				{
-					switch (step.Kind)
+					// What follows without reading a character.
+					while (scratch.PendingCount > 0)
 					{
-						case StepKind.Text:
+						var step   = StepAt(scratch.Pending[--scratch.PendingCount]);
+						var answer = here.Answers[step.Index];
+
+						switch (step.Kind)
 						{
-							if (segment >= _count)
-								return Tri.False;
+							case StepKind.Alternatives:
+								foreach (var branch in step.Branches)
+									Add(scratch, here, branch, answer, pending: true);
 
-							var text = step.Text;
-
-							if (position + text.Length > _path.NameLength(segment) ||
-								string.CompareOrdinal(_path[segment].Name, position, text, 0, text.Length) != 0)
-							{
-								return Tri.False;
-							}
-
-							position += text.Length;
-							break;
-						}
-
-						case StepKind.Arguments:
-						{
-							if (segment >= _count || position != _path.NameLength(segment))
-								return Tri.False;
-
-							var arguments = _path[segment].TypeArguments;
-
-							if (arguments.Length != step.Arguments.Length)
-								return Tri.False;
-
-							for (var i = 0; i < arguments.Length; i++)
-							{
-								answer = answer.And(step.Arguments[i].Match(arguments[i], _phase));
-
-								if (answer == Tri.False)
-									return Tri.False;
-							}
-
-							break;
-						}
-
-						case StepKind.SegmentEnd:
-							if (segment >= _count || position != _path.NameLength(segment))
-								return Tri.False;
-
-							segment++;
-							position = 0;
-							break;
-
-						case StepKind.Accept:
-							return segment == _count && position == 0 ? answer : Tri.False;
-
-						case StepKind.Star:
-						{
-							if (segment >= _count)
-								return Tri.False;
-
-							var length = _path.NameLength(segment);
-
-							if (step.TailLength >= 0)
-							{
-								// Only text follows up to the end of the segment: the star ends where that text begins.
-								if (length - step.TailLength < position)
-									return Tri.False;
-
-								position = length - step.TailLength;
 								break;
-							}
 
-							var best = Tri.False;
+							case StepKind.Star:
+								if (!atEnd)
+									Add(scratch, here, step.Next!, answer, pending: true);
 
-							for (var end = length; end >= position && best != Tri.True; end--)
-								best = best.Or(From(step.Next!, segment, end));
+								break;
 
-							return answer.And(best);
-						}
+							case StepKind.Globstar:
+								if (position == 0)
+								{
+									Add(scratch, here, step.Next!, answer, pending: true);
 
-						case StepKind.Globstar:
-						{
-							if (position != 0)
-								return Tri.False;
+									if (!atEnd)
+										Add(scratch, scratch.NextSegment, step, answer, pending: false);
+								}
 
-							var best = Tri.False;
+								break;
 
-							for (var next = segment; next <= _count && best != Tri.True; next++)
-								best = best.Or(From(step.Next!, next, 0));
+							case StepKind.Arguments:
+								if (!atEnd && position == length)
+								{
+									var arguments = path[segment].TypeArguments;
 
-							return answer.And(best);
-						}
+									if (arguments.Length != step.Arguments.Length)
+										break;
 
-						case StepKind.Alternatives:
-						{
-							var best = Tri.False;
+									var all = (Tri)answer;
 
-							foreach (var branch in step.Branches)
-							{
-								best = best.Or(From(branch, segment, position));
+									for (var a = 0; a < arguments.Length && all != Tri.False; a++)
+										all = all.And(step.Arguments[a].Match(arguments[a], phase));
 
-								if (best == Tri.True)
-									break;
-							}
+									if (all != Tri.False)
+										Add(scratch, here, step.Next!, (byte)all, pending: true);
+								}
 
-							return answer.And(best);
+								break;
+
+							case StepKind.SegmentEnd:
+								if (!atEnd && position == length)
+									Add(scratch, scratch.NextSegment, step.Next!, answer, pending: false);
+
+								break;
 						}
 					}
 
-					step = step.Next;
+					if (atEnd)
+						return (Tri)here.Answers[_accept!.Index];
+
+					if (position == length)
+						break;
+
+					// What follows by reading the character at the position.
+					var next = scratch.NextChar;
+					var ch   = name[position];
+
+					for (var i = 0; i < here.Count; i++)
+					{
+						var index = here.Members[i];
+						var step  = StepAt(index);
+
+						if (step.Kind == StepKind.Star)
+							Add(scratch, next, step, here.Answers[index], pending: false);
+						else if (step.Kind == StepKind.Char && step.Char == ch)
+							Add(scratch, next, step.Next!, here.Answers[index], pending: false);
+					}
+
+					here.Clear();
+
+					scratch.NextChar = here;
+					scratch.Here     = next;
+					here             = next;
+
+					for (var i = 0; i < here.Count; i++)
+						scratch.Pending[scratch.PendingCount++] = here.Members[i];
 				}
 
-				return Tri.False;
+				here.Clear();
 			}
+
+			return Tri.False;
+		}
+
+		Step StepAt(int index)
+		{
+			return _steps![index];
+		}
+
+		/// <summary>Puts a step into a set, or raises its answer there; a step whose answer rose at this position is followed again.</summary>
+		static void Add(Scratch scratch, StepSet set, Step step, byte answer, bool pending)
+		{
+			var known = set.Answers[step.Index];
+
+			if (known >= answer)
+				return;
+
+			if (known == 0)
+				set.Members[set.Count++] = step.Index;
+
+			set.Answers[step.Index] = answer;
+
+			// A step is followed at most twice at a position, as its answer rises from "depends" to "true" once: the
+			// list of steps to follow has room for that.
+			if (pending)
+				scratch.Pending[scratch.PendingCount++] = step.Index;
 		}
 	}
 

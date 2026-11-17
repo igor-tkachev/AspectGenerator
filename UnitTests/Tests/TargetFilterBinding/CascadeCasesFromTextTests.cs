@@ -62,7 +62,7 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 		[TestMethod]
 		public void EveryCaseOfTheTableIsRunTest()
 		{
-			Assert.AreEqual(66, _cases.Value.Count, "The number of cascade cases changed; update this count with the table.");
+			Assert.AreEqual(68, _cases.Value.Count, "The number of cascade cases changed; update this count with the table.");
 		}
 
 		[TestMethod]

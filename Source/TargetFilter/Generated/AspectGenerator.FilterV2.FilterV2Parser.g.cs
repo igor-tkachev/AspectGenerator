@@ -798,31 +798,6 @@ namespace AspectGenerator.FilterV2
      (Group(parserSpan, expr));
 #line default
 
-		static FilterExpressionSyntax New_DotGram_Atom_With1(FilterExpressionSyntax c) =>
-#line 80 "../../FilterV2/FilterV2.gram"
-                                c;
-#line default
-
-		static FilterExpressionSyntax New1_DotGram_Atom_With1(ReferenceSyntax r) =>
-#line 81 "../../FilterV2/FilterV2.gram"
-                                 (new ReferenceExpressionSyntax(r));
-#line default
-
-		static FilterExpressionSyntax New2_DotGram_Atom_With1(FilterExpressionSyntax w) =>
-#line 82 "../../FilterV2/FilterV2.gram"
-                                w;
-#line default
-
-		static FilterExpressionSyntax New3_DotGram_Atom_With1(FilterExpressionSyntax x) =>
-#line 83 "../../FilterV2/FilterV2.gram"
-                                x;
-#line default
-
-		static FilterExpressionSyntax New4_DotGram_Atom_With1(SourceSpan parserSpan) =>
-#line 84 "../../FilterV2/FilterV2.gram"
-                                 (BareAny(parserSpan));
-#line default
-
 		static FilterExpressionSyntax New_DotGram_KeyCondition_With1(SourceSpan parserSpan, KeyToken key, FilterValueSyntax value) =>
 #line 87 "../../FilterV2/FilterV2.gram"
                                                        (Condition(parserSpan, key, value));
@@ -898,16 +873,6 @@ namespace AspectGenerator.FilterV2
                                                                                                    (new NameToken(k, Span(parserSpan, k)));
 #line default
 
-		static FilterValueSyntax New_DotGram_CommonValue_With1(SourceSpan parserSpan) =>
-#line 133 "../../FilterV2/FilterV2.gram"
-                               (new AnyValueSyntax(Span(parserSpan)));
-#line default
-
-		static FilterValueSyntax New1_DotGram_CommonValue_With1(ReferenceSyntax r) =>
-#line 134 "../../FilterV2/FilterV2.gram"
-                              r;
-#line default
-
 		static FilterExpressionSyntax New_DotGram_WordsOrSignature_With1(SourceSpan parserSpan, WordSyntax first, WordSyntax[] more, SignatureSyntax? signature) =>
 #line 144 "../../FilterV2/FilterV2.gram"
                                                          (Words(parserSpan, first, more, signature));
@@ -958,64 +923,29 @@ namespace AspectGenerator.FilterV2
                                                                      (ReservedLiteral(parserSpan));
 #line default
 
-		static FilterValueSyntax New_DotGram_NameValue_With1(FilterValueSyntax v) =>
-#line 126 "../../FilterV2/FilterV2.gram"
-                                                       v;
+		static FilterExpressionSyntax New_DotGram_Atom_With1(FilterExpressionSyntax c) =>
+#line 80 "../../FilterV2/FilterV2.gram"
+                                c;
 #line default
 
-		static FilterValueSyntax New1_DotGram_NameValue_With1(NamePatternSyntax p) =>
-#line 126 "../../FilterV2/FilterV2.gram"
-                                                                                 p;
+		static FilterExpressionSyntax New1_DotGram_Atom_With1(ReferenceSyntax r) =>
+#line 81 "../../FilterV2/FilterV2.gram"
+                                 (new ReferenceExpressionSyntax(r));
 #line default
 
-		static FilterValueSyntax New2_DotGram_NameValue_With1(FilterValueSyntax k) =>
-#line 126 "../../FilterV2/FilterV2.gram"
-                                                                                                           k;
+		static FilterExpressionSyntax New2_DotGram_Atom_With1(FilterExpressionSyntax w) =>
+#line 82 "../../FilterV2/FilterV2.gram"
+                                w;
 #line default
 
-		static FilterValueSyntax New_DotGram_TypeValue_With1(FilterValueSyntax v) =>
-#line 127 "../../FilterV2/FilterV2.gram"
-                                                       v;
+		static FilterExpressionSyntax New3_DotGram_Atom_With1(FilterExpressionSyntax x) =>
+#line 83 "../../FilterV2/FilterV2.gram"
+                                x;
 #line default
 
-		static FilterValueSyntax New1_DotGram_TypeValue_With1(TypePatternSyntax p) =>
-#line 127 "../../FilterV2/FilterV2.gram"
-                                                                                 p;
-#line default
-
-		static FilterValueSyntax New2_DotGram_TypeValue_With1(FilterValueSyntax k) =>
-#line 127 "../../FilterV2/FilterV2.gram"
-                                                                                                           k;
-#line default
-
-		static FilterValueSyntax New_DotGram_ReturnsValue_With1(FilterValueSyntax v) =>
-#line 128 "../../FilterV2/FilterV2.gram"
-                                                       v;
-#line default
-
-		static FilterValueSyntax New1_DotGram_ReturnsValue_With1(ReturnsPatternSyntax p) =>
-#line 128 "../../FilterV2/FilterV2.gram"
-                                                                                 p;
-#line default
-
-		static FilterValueSyntax New_DotGram_ParamsValue_With1(FilterValueSyntax v) =>
-#line 129 "../../FilterV2/FilterV2.gram"
-                                                       v;
-#line default
-
-		static FilterValueSyntax New1_DotGram_ParamsValue_With1(ParameterListPatternSyntax p) =>
-#line 129 "../../FilterV2/FilterV2.gram"
-                                                                                 p;
-#line default
-
-		static FilterValueSyntax New_DotGram_ParamValue_With1(FilterValueSyntax v) =>
-#line 130 "../../FilterV2/FilterV2.gram"
-                                                       v;
-#line default
-
-		static FilterValueSyntax New1_DotGram_ParamValue_With1(ParameterPatternSyntax p) =>
-#line 130 "../../FilterV2/FilterV2.gram"
-                                                                                 p;
+		static FilterExpressionSyntax New4_DotGram_Atom_With1(SourceSpan parserSpan) =>
+#line 84 "../../FilterV2/FilterV2.gram"
+                                 (BareAny(parserSpan));
 #line default
 
 		static FilterLineSyntax Recover_DotGram_Lines(SourceSpan parserSpan, string parserExpected, long parserFailurePosition, string parserInput) =>
@@ -1062,11 +992,11 @@ namespace AspectGenerator.FilterV2
 				var capture107 = 0;
 				var capture130 = 0;
 				var capture146 = 0;
+				var capture170 = 0;
+				var capture172 = 0;
 				var capture174 = 0;
 				var capture176 = 0;
-				var capture178 = 0;
-				var capture180 = 0;
-				var capture181 = 0;
+				var capture177 = 0;
 				var opened48 = -1;
 				var opened49 = -1;
 				var opened50 = -1;
@@ -1085,8 +1015,8 @@ namespace AspectGenerator.FilterV2
 				var opened97 = -1;
 				var opened126 = -1;
 				var opened129 = -1;
-				var opened187 = -1;
-				var opened188 = -1;
+				var opened182 = -1;
+				var opened183 = -1;
 
 				entries.Add(new ParserEntry(ParserEntry.Call, 1, pos, -1, -1, -1, -1, 0, rootRule));
 				call = 0;
@@ -1150,946 +1080,924 @@ namespace AspectGenerator.FilterV2
 						state = RecognizePart2_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 109:
+					case 110:
 					case 111:
-					case 112:
+					case 129:
 					case 130:
-					case 131:
-					case 133:
+					case 132:
 						state = RecognizePart3_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 135:
-					case 137:
+					case 134:
+					case 136:
+					case 138:
 					case 139:
 					case 140:
 					case 141:
-					case 142:
-					case 147:
-					case 149:
-					case 152:
+					case 146:
+					case 148:
+					case 151:
 						state = RecognizePart4_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 157:
-					case 159:
-					case 161:
-					case 164:
-					case 166:
-					case 169:
-					case 172:
-					case 174:
+					case 156:
+					case 158:
+					case 160:
+					case 163:
+					case 165:
+					case 168:
+					case 171:
+					case 173:
 						state = RecognizePart5_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 177:
-					case 180:
-					case 182:
-					case 185:
-					case 188:
-					case 191:
-					case 194:
+					case 176:
+					case 179:
+					case 181:
+					case 184:
+					case 187:
+					case 190:
+					case 193:
 						state = RecognizePart6_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 197:
-					case 200:
-					case 202:
-					case 205:
-					case 208:
-					case 211:
-					case 214:
+					case 196:
+					case 199:
+					case 201:
+					case 204:
+					case 207:
+					case 210:
+					case 213:
 						state = RecognizePart7_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 216:
-					case 219:
-					case 221:
-					case 223:
-					case 225:
-					case 228:
-					case 231:
+					case 215:
+					case 218:
+					case 220:
+					case 222:
+					case 224:
+					case 227:
+					case 230:
 						state = RecognizePart8_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 234:
-					case 237:
-					case 240:
-					case 242:
-					case 244:
-					case 247:
+					case 233:
+					case 236:
+					case 239:
+					case 241:
+					case 243:
+					case 246:
 						state = RecognizePart9_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 250:
-					case 252:
-					case 255:
-					case 258:
-					case 261:
-					case 264:
-					case 267:
+					case 249:
+					case 251:
+					case 254:
+					case 257:
+					case 260:
+					case 263:
+					case 266:
 						state = RecognizePart10_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 270:
-					case 273:
+					case 269:
+					case 272:
+					case 274:
 					case 275:
 					case 276:
-					case 277:
-					case 279:
-					case 287:
-					case 296:
+					case 278:
+					case 286:
+					case 295:
 						state = RecognizePart11_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 300:
-					case 303:
-					case 309:
+					case 299:
+					case 302:
+					case 308:
+					case 319:
 					case 320:
 					case 321:
-					case 322:
-					case 326:
-					case 328:
-					case 340:
+					case 325:
+					case 327:
 						state = RecognizePart12_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 342:
-					case 346:
-					case 349:
-					case 351:
-					case 353:
-					case 355:
-					case 359:
-					case 368:
-					case 372:
+					case 339:
+					case 341:
+					case 345:
+					case 348:
+					case 350:
+					case 352:
+					case 354:
+					case 358:
+					case 367:
+					case 371:
 						state = RecognizePart13_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 378:
-					case 383:
-					case 388:
-					case 393:
-					case 397:
-					case 400:
+					case 377:
+					case 382:
+					case 387:
+					case 392:
+					case 396:
+					case 399:
+					case 401:
 					case 402:
-					case 403:
 						state = RecognizePart14_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 405:
+					case 404:
+					case 414:
 					case 415:
 					case 416:
-					case 417:
-					case 434:
+					case 433:
+					case 444:
 					case 445:
 					case 446:
-					case 447:
 						state = RecognizePart15_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 448:
+					case 447:
+					case 455:
 					case 456:
-					case 457:
-					case 459:
-					case 464:
-					case 471:
-					case 473:
-					case 475:
-					case 477:
+					case 458:
+					case 463:
+					case 470:
+					case 472:
+					case 474:
+					case 476:
 						state = RecognizePart16_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 483:
-					case 488:
-					case 497:
-					case 499:
-					case 501:
-					case 503:
+					case 482:
+					case 487:
+					case 496:
+					case 498:
+					case 500:
+					case 502:
+					case 504:
 					case 505:
-					case 506:
-					case 508:
+					case 507:
+					case 511:
 					case 512:
 					case 513:
-					case 514:
+					case 521:
 					case 522:
 					case 523:
-					case 524:
-					case 527:
-					case 529:
-					case 531:
-					case 533:
-					case 535:
+					case 526:
+					case 528:
+					case 530:
+					case 532:
 						state = RecognizePart17_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 537:
+					case 534:
+					case 536:
+					case 554:
 					case 555:
 					case 556:
-					case 557:
+					case 567:
 					case 568:
 					case 569:
-					case 570:
+					case 576:
 					case 577:
-					case 578:
+					case 583:
 					case 584:
-					case 585:
-					case 586:
 						state = RecognizePart18_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 587:
-					case 590:
+					case 585:
+					case 589:
+					case 591:
 					case 592:
-					case 593:
-					case 599:
+					case 598:
+					case 600:
 					case 601:
-					case 602:
+					case 603:
 					case 604:
-					case 605:
+					case 606:
 					case 607:
-					case 608:
-					case 610:
-					case 612:
-					case 614:
-					case 618:
+					case 609:
+					case 611:
+					case 613:
+					case 617:
 						state = RecognizePart19_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 620:
-					case 622:
-					case 624:
-					case 626:
+					case 619:
+					case 621:
+					case 623:
+					case 625:
+					case 627:
 					case 628:
-					case 631:
-					case 633:
-					case 635:
+					case 630:
+					case 632:
+					case 634:
+					case 636:
 					case 637:
-					case 638:
-					case 640:
-					case 642:
-					case 644:
-					case 648:
+					case 639:
+					case 641:
+					case 643:
 						state = RecognizePart20_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 650:
-					case 652:
-					case 654:
-					case 656:
+					case 647:
+					case 649:
+					case 651:
+					case 653:
+					case 655:
+					case 657:
 					case 658:
-					case 659:
-					case 661:
-					case 663:
-					case 668:
-					case 670:
-					case 672:
-					case 675:
-					case 677:
+					case 660:
+					case 662:
+					case 667:
+					case 669:
 						state = RecognizePart21_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 678:
-					case 688:
-					case 690:
-					case 696:
+					case 671:
+					case 672:
+					case 674:
+					case 676:
+					case 687:
+					case 689:
+					case 695:
+					case 697:
 					case 698:
-					case 699:
-					case 701:
-					case 703:
-					case 705:
-					case 707:
+					case 700:
+					case 702:
+					case 704:
+					case 706:
 						state = RecognizePart22_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 710:
-					case 712:
-					case 714:
+					case 709:
+					case 711:
+					case 713:
+					case 715:
 					case 716:
-					case 719:
-					case 723:
-					case 727:
-					case 731:
+					case 718:
+					case 722:
+					case 726:
+					case 730:
+					case 736:
 					case 737:
 					case 738:
-					case 739:
 						state = RecognizePart23_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 742:
-					case 760:
+					case 741:
+					case 759:
 						state = RecognizePart24_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 770:
-					case 775:
+					case 769:
+					case 774:
+					case 779:
 					case 780:
 					case 781:
-					case 782:
+					case 792:
 					case 793:
 					case 794:
-					case 795:
-					case 799:
+					case 798:
+					case 800:
 					case 801:
-					case 802:
-					case 804:
+					case 803:
 						state = RecognizePart25_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 806:
-					case 808:
-					case 813:
-					case 815:
+					case 805:
+					case 807:
+					case 812:
+					case 814:
+					case 816:
 					case 817:
-					case 820:
+					case 819:
+					case 821:
 					case 822:
-					case 823:
-					case 825:
-					case 827:
-					case 829:
-					case 833:
+					case 824:
+					case 826:
+					case 828:
+					case 832:
 						state = RecognizePart26_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 835:
-					case 837:
-					case 839:
-					case 841:
-					case 843:
-					case 846:
-					case 848:
+					case 834:
+					case 836:
+					case 838:
+					case 840:
+					case 842:
+					case 845:
+					case 847:
 						state = RecognizePart27_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 851:
-					case 853:
-					case 855:
+					case 850:
+					case 852:
+					case 854:
+					case 856:
 					case 857:
-					case 858:
-					case 860:
-					case 862:
-					case 864:
-					case 866:
-					case 868:
-					case 871:
-					case 875:
-					case 878:
-					case 880:
+					case 859:
+					case 861:
+					case 863:
+					case 865:
+					case 867:
+					case 870:
+					case 874:
 						state = RecognizePart28_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 882:
-					case 894:
+					case 876:
+					case 879:
+					case 881:
+					case 893:
+					case 897:
 					case 898:
-					case 899:
-					case 905:
+					case 904:
+					case 908:
 					case 909:
-					case 910:
-					case 912:
 						state = RecognizePart29_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 914:
-					case 916:
-					case 918:
-					case 923:
-					case 933:
-					case 937:
+					case 911:
+					case 913:
+					case 915:
+					case 917:
+					case 922:
+					case 932:
+					case 936:
 						state = RecognizePart30_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 938:
-					case 940:
-					case 944:
-					case 951:
+					case 937:
+					case 939:
+					case 943:
+					case 950:
 						state = RecognizePart31_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 956:
-					case 958:
-					case 960:
-					case 962:
-					case 964:
-					case 966:
-					case 969:
-					case 973:
+					case 955:
+					case 957:
+					case 959:
+					case 961:
+					case 963:
+					case 965:
+					case 968:
+					case 972:
 						state = RecognizePart32_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 978:
-					case 983:
+					case 976:
+					case 982:
+					case 986:
 					case 987:
-					case 988:
-					case 990:
-					case 998:
-					case 1000:
+					case 989:
+					case 997:
+					case 999:
 						state = RecognizePart33_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1002:
-					case 1009:
-					case 1019:
+					case 1001:
+					case 1008:
+					case 1018:
+					case 1022:
 					case 1023:
-					case 1024:
-					case 1031:
-					case 1034:
-					case 1036:
-					case 1038:
+					case 1030:
+					case 1033:
+					case 1035:
+					case 1037:
 						state = RecognizePart34_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1040:
-					case 1047:
-					case 1057:
+					case 1039:
+					case 1046:
+					case 1056:
+					case 1060:
 					case 1061:
-					case 1062:
+					case 1064:
 					case 1065:
 					case 1066:
-					case 1067:
+					case 1068:
 					case 1069:
-					case 1070:
-					case 1075:
-					case 1078:
+					case 1074:
+					case 1077:
 						state = RecognizePart35_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
+					case 1078:
 					case 1079:
 					case 1080:
 					case 1081:
 					case 1082:
 					case 1083:
 					case 1084:
-					case 1085:
-					case 1090:
-					case 1093:
-					case 1095:
-					case 1097:
-					case 1099:
-					case 1101:
-					case 1104:
+					case 1089:
+					case 1092:
+					case 1094:
+					case 1096:
+					case 1098:
+					case 1100:
+					case 1103:
 						state = RecognizePart36_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1109:
-					case 1114:
+					case 1108:
+					case 1113:
+					case 1117:
 					case 1118:
-					case 1119:
-					case 1121:
-					case 1123:
-					case 1125:
+					case 1120:
+					case 1122:
+					case 1124:
+					case 1128:
 					case 1129:
-					case 1130:
-					case 1134:
+					case 1133:
 						state = RecognizePart37_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1139:
-					case 1141:
-					case 1143:
-					case 1145:
-					case 1150:
+					case 1136:
+					case 1138:
+					case 1140:
+					case 1142:
+					case 1144:
+					case 1149:
 						state = RecognizePart38_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1154:
-					case 1159:
-					case 1163:
-					case 1168:
+					case 1153:
+					case 1158:
+					case 1162:
+					case 1167:
+					case 1171:
 					case 1172:
-					case 1173:
 						state = RecognizePart39_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
+					case 1174:
 					case 1176:
-					case 1177:
-					case 1180:
-					case 1183:
-					case 1185:
-					case 1188:
-					case 1191:
+					case 1179:
+					case 1182:
+					case 1184:
+					case 1187:
+					case 1190:
 						state = RecognizePart40_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1194:
-					case 1196:
-					case 1198:
-					case 1201:
-					case 1203:
-					case 1205:
-					case 1208:
+					case 1193:
+					case 1195:
+					case 1197:
+					case 1200:
+					case 1202:
+					case 1204:
+					case 1207:
 						state = RecognizePart41_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1210:
-					case 1213:
-					case 1215:
-					case 1220:
-					case 1224:
-					case 1226:
-					case 1227:
-					case 1228:
-					case 1229:
-					case 1231:
+					case 1209:
+					case 1212:
+					case 1214:
+					case 1219:
+					case 1223:
 						state = RecognizePart42_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1233:
-					case 1240:
+					case 1225:
+					case 1227:
+					case 1239:
+					case 1241:
 					case 1242:
 					case 1243:
-					case 1244:
-					case 1250:
+					case 1249:
+					case 1253:
 					case 1254:
-					case 1255:
-					case 1257:
-					case 1261:
+					case 1256:
+					case 1260:
+					case 1262:
 					case 1263:
-					case 1264:
+					case 1265:
 					case 1266:
-					case 1267:
-					case 1269:
-					case 1270:
+					case 1268:
+					case 1272:
 					case 1273:
 					case 1274:
 					case 1275:
-					case 1276:
 						state = RecognizePart43_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1277:
-					case 1279:
-					case 1281:
-					case 1285:
-					case 1289:
-					case 1299:
-					case 1303:
-					case 1304:
-					case 1306:
+					case 1276:
+					case 1278:
+					case 1280:
+					case 1284:
+					case 1288:
+					case 1298:
+					case 1302:
 						state = RecognizePart44_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
+					case 1303:
+					case 1305:
 					case 1310:
 					case 1312:
 					case 1314:
 					case 1316:
-					case 1318:
+					case 1317:
 					case 1319:
 					case 1321:
 					case 1323:
 					case 1325:
-					case 1327:
-					case 1334:
-					case 1335:
-					case 1340:
-					case 1344:
+					case 1332:
+					case 1333:
 						state = RecognizePart45_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1346:
-					case 1360:
-					case 1364:
-					case 1367:
-					case 1368:
+					case 1338:
+					case 1342:
+					case 1344:
+					case 1358:
+					case 1362:
+					case 1365:
 						state = RecognizePart46_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
+					case 1366:
+					case 1367:
 					case 1369:
-					case 1371:
+					case 1370:
 					case 1372:
+					case 1373:
 					case 1374:
 					case 1375:
-					case 1376:
 					case 1377:
-					case 1379:
+					case 1381:
+					case 1382:
 					case 1383:
-					case 1384:
-					case 1385:
-					case 1389:
+					case 1387:
+					case 1388:
 					case 1390:
-					case 1392:
-					case 1396:
+					case 1394:
 						state = RecognizePart47_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1398:
-					case 1412:
-					case 1416:
-					case 1419:
-					case 1420:
+					case 1396:
+					case 1410:
+					case 1414:
+					case 1417:
 						state = RecognizePart48_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
+					case 1418:
+					case 1419:
 					case 1421:
+					case 1422:
 					case 1423:
-					case 1424:
-					case 1425:
-					case 1428:
+					case 1426:
+					case 1427:
 					case 1429:
-					case 1431:
+					case 1441:
 					case 1443:
-					case 1445:
 						state = RecognizePart49_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1451:
-					case 1455:
+					case 1447:
+					case 1449:
+					case 1453:
+					case 1458:
 					case 1460:
 					case 1462:
+					case 1467:
 					case 1469:
-					case 1470:
-					case 1472:
-					case 1474:
+					case 1471:
 					case 1476:
 					case 1478:
-					case 1479:
-					case 1481:
-					case 1483:
+					case 1480:
 					case 1485:
-					case 1492:
+					case 1487:
+					case 1489:
 					case 1494:
 					case 1496:
 					case 1498:
-					case 1499:
-					case 1501:
 					case 1503:
+					case 1505:
 						state = RecognizePart50_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1505:
-					case 1510:
+					case 1507:
 					case 1512:
 					case 1514:
-					case 1521:
-					case 1523:
-					case 1524:
-					case 1526:
-					case 1528:
-					case 1530:
-					case 1537:
+					case 1516:
+					case 1525:
+					case 1535:
+					case 1539:
 					case 1540:
-					case 1542:
-					case 1544:
-					case 1546:
-					case 1553:
-					case 1555:
 						state = RecognizePart51_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1556:
-					case 1558:
-					case 1560:
-					case 1562:
+					case 1542:
+					case 1553:
+					case 1563:
 					case 1567:
-					case 1569:
-					case 1571:
-					case 1580:
-					case 1590:
-					case 1594:
+					case 1568:
 						state = RecognizePart52_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
+					case 1570:
+					case 1581:
+					case 1591:
 					case 1595:
-					case 1597:
-					case 1608:
-					case 1618:
-					case 1622:
-					case 1623:
+					case 1596:
 						state = RecognizePart53_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1625:
-					case 1636:
-					case 1646:
-					case 1650:
-					case 1651:
+					case 1598:
+					case 1609:
+					case 1619:
+					case 1623:
+					case 1624:
+					case 1630:
 						state = RecognizePart54_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1653:
-					case 1664:
-					case 1674:
+					case 1636:
+					case 1647:
+					case 1657:
+					case 1661:
+					case 1662:
+					case 1665:
+					case 1666:
+					case 1667:
+					case 1669:
+					case 1670:
+					case 1675:
 					case 1678:
-					case 1679:
-					case 1685:
 						state = RecognizePart55_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1691:
-					case 1702:
-					case 1712:
-					case 1716:
-					case 1717:
-					case 1720:
-					case 1721:
-					case 1722:
-					case 1724:
-					case 1725:
-					case 1730:
-					case 1733:
+					case 1679:
+					case 1680:
+					case 1681:
+					case 1682:
+					case 1683:
+					case 1684:
+					case 1689:
+					case 1695:
+					case 1698:
 						state = RecognizePart56_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1734:
-					case 1735:
-					case 1736:
-					case 1737:
-					case 1738:
-					case 1739:
-					case 1744:
-					case 1750:
-					case 1753:
+					case 1703:
+					case 1708:
+					case 1712:
+					case 1713:
+					case 1715:
+					case 1717:
+					case 1719:
+					case 1723:
+					case 1724:
+					case 1728:
 						state = RecognizePart57_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1758:
-					case 1763:
-					case 1767:
-					case 1768:
-					case 1770:
-					case 1772:
-					case 1774:
-					case 1778:
-					case 1779:
-					case 1783:
+					case 1731:
+					case 1733:
+					case 1735:
+					case 1737:
+					case 1739:
 						state = RecognizePart58_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1786:
-					case 1788:
-					case 1790:
-					case 1792:
-					case 1794:
+					case 1748:
+					case 1757:
+					case 1766:
+					case 1767:
 						state = RecognizePart59_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1803:
-					case 1812:
-					case 1821:
-					case 1822:
+					case 1769:
+					case 1771:
+					case 1774:
+					case 1777:
+					case 1779:
+					case 1782:
+					case 1785:
 						state = RecognizePart60_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1824:
-					case 1826:
-					case 1829:
-					case 1832:
-					case 1834:
-					case 1837:
-					case 1840:
+					case 1788:
+					case 1790:
+					case 1792:
+					case 1795:
+					case 1797:
+					case 1799:
+					case 1802:
 						state = RecognizePart61_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1843:
-					case 1845:
-					case 1847:
-					case 1850:
-					case 1852:
-					case 1854:
-					case 1857:
+					case 1804:
+					case 1807:
+					case 1809:
+					case 1818:
+					case 1821:
 						state = RecognizePart62_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1859:
+					case 1822:
+					case 1834:
+					case 1836:
+					case 1838:
+					case 1844:
+					case 1846:
+					case 1850:
+					case 1852:
+					case 1853:
+					case 1855:
+					case 1856:
+					case 1860:
+					case 1861:
 					case 1862:
-					case 1864:
-					case 1873:
+					case 1863:
+					case 1865:
 						state = RecognizePart63_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
+					case 1867:
 					case 1875:
+					case 1885:
 					case 1889:
-					case 1891:
-					case 1893:
-					case 1899:
-					case 1901:
-					case 1905:
-					case 1907:
-					case 1908:
-					case 1910:
-					case 1915:
-					case 1916:
-					case 1917:
-					case 1918:
+					case 1890:
+					case 1892:
 						state = RecognizePart64_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1920:
-					case 1922:
-					case 1930:
-					case 1940:
-					case 1944:
-					case 1945:
-					case 1947:
+					case 1897:
+					case 1899:
+					case 1901:
+					case 1903:
+					case 1904:
+					case 1906:
+					case 1910:
+					case 1919:
+					case 1925:
+					case 1929:
 						state = RecognizePart65_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
+					case 1931:
+					case 1945:
+					case 1949:
+					case 1952:
 					case 1953:
-					case 1955:
-					case 1957:
-					case 1959:
-					case 1960:
-					case 1962:
-					case 1966:
-					case 1975:
-					case 1981:
-					case 1985:
 						state = RecognizePart66_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 1987:
-					case 2001:
-					case 2005:
-					case 2008:
-					case 2009:
+					case 1954:
+					case 1956:
+					case 1957:
+					case 1960:
+					case 1961:
+					case 1962:
+					case 1969:
+					case 1975:
+					case 1977:
+					case 1981:
+					case 1983:
+					case 1985:
 						state = RecognizePart67_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 2010:
-					case 2012:
-					case 2013:
-					case 2016:
-					case 2017:
-					case 2018:
-					case 2025:
-					case 2031:
-					case 2033:
-					case 2037:
+					case 1990:
+					case 1994:
+					case 1996:
+					case 1997:
+					case 2001:
+					case 2004:
+					case 2005:
+					case 2006:
 						state = RecognizePart68_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 2039:
-					case 2053:
-					case 2057:
-					case 2060:
-					case 2061:
-					case 2062:
+					case 2008:
+					case 2009:
+					case 2010:
+					case 2012:
+					case 2021:
+					case 2031:
+					case 2035:
+					case 2036:
+					case 2038:
+					case 2040:
 						state = RecognizePart69_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 2064:
+					case 2043:
+					case 2045:
+					case 2049:
+					case 2050:
+					case 2053:
+					case 2056:
+					case 2058:
+					case 2062:
 					case 2065:
-					case 2066:
-					case 2068:
-					case 2077:
-					case 2087:
-					case 2091:
-					case 2092:
-					case 2094:
-					case 2096:
 						state = RecognizePart70_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 2099:
-					case 2101:
-					case 2105:
-					case 2106:
-					case 2109:
-					case 2112:
-					case 2114:
-					case 2118:
-					case 2121:
+					case 2066:
+					case 2067:
+					case 2070:
+					case 2074:
+					case 2075:
+					case 2076:
+					case 2078:
+					case 2079:
+					case 2083:
+					case 2085:
+					case 2087:
+					case 2088:
 						state = RecognizePart71_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 2122:
-					case 2123:
-					case 2126:
-					case 2130:
-					case 2131:
-					case 2132:
-					case 2134:
-					case 2135:
-					case 2139:
-					case 2141:
-					case 2143:
-					case 2144:
+					case 2091:
+					case 2097:
+					case 2099:
+					case 2103:
+					case 2106:
+					case 2107:
+					case 2108:
+					case 2111:
 						state = RecognizePart72_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 2147:
-					case 2153:
-					case 2155:
-					case 2159:
-					case 2162:
-					case 2163:
-					case 2164:
-					case 2167:
+					case 2112:
+					case 2115:
+					case 2116:
+					case 2117:
+					case 2122:
+					case 2124:
+					case 2126:
+					case 2131:
+					case 2136:
+					case 2138:
 						state = RecognizePart73_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 2168:
-					case 2171:
-					case 2172:
-					case 2173:
-					case 2178:
-					case 2180:
-					case 2182:
-					case 2187:
-					case 2192:
-					case 2194:
+					case 2142:
+					case 2148:
+					case 2152:
+					case 2153:
+					case 2155:
+					case 2156:
+					case 2160:
+					case 2163:
 						state = RecognizePart74_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 2198:
-					case 2204:
-					case 2208:
-					case 2209:
-					case 2211:
-					case 2212:
-					case 2216:
-					case 2219:
+					case 2164:
+					case 2165:
+					case 2167:
+					case 2168:
+					case 2169:
+					case 2179:
+					case 2183:
+					case 2184:
+					case 2185:
+					case 2186:
+					case 2188:
 						state = RecognizePart75_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 2220:
-					case 2221:
-					case 2223:
-					case 2224:
-					case 2225:
-					case 2235:
-					case 2239:
-					case 2240:
-					case 2241:
-					case 2242:
-					case 2244:
+					case 2189:
+					case 2193:
+					case 2196:
+					case 2197:
+					case 2200:
+					case 2206:
+					case 2208:
+					case 2209:
 						state = RecognizePart76_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 2245:
-					case 2249:
-					case 2252:
-					case 2253:
-					case 2256:
-					case 2262:
-					case 2264:
-					case 2265:
+					case 2210:
+					case 2214:
+					case 2217:
+					case 2218:
+					case 2219:
+					case 2223:
+					case 2226:
+					case 2229:
+					case 2232:
+					case 2237:
 						state = RecognizePart77_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
-					case 2266:
-					case 2270:
-					case 2273:
-					case 2274:
-					case 2275:
-					case 2279:
-					case 2282:
-					case 2285:
-					case 2288:
-					case 2293:
+					case 2241:
+					case 2242:
+					case 2244:
+					case 2245:
+					case 2248:
+					case 2250:
+					case 2251:
+					case 2252:
+					case 2256:
+					case 2259:
 						state = RecognizePart78_DotGram(text, ref failure);
-						if (state == 2) goto Fail;
-						goto Dispatch;
-					case 2297:
-					case 2298:
-					case 2300:
-					case 2301:
-					case 2304:
-					case 2306:
-					case 2307:
-					case 2308:
-					case 2312:
-					case 2315:
-						state = RecognizePart79_DotGram(text, ref failure);
 						if (state == 2) goto Fail;
 						goto Dispatch;
 					default: expected = null; goto Fail;
@@ -2381,43 +2289,25 @@ namespace AspectGenerator.FilterV2
 								recognized = values5[0];
 								break;
 							case 102:
-								recognized = values5[0];
+								recognized = values8[0];
 								break;
 							case 103:
 								recognized = values8[0];
 								break;
 							case 104:
-								recognized = values8[0];
+								recognized = values5[0];
 								break;
 							case 105:
-								recognized = values9[0];
-								break;
-							case 106:
-								recognized = values5[0];
-								break;
-							case 107:
 								recognized = values11[0];
 								break;
-							case 108:
+							case 106:
 								recognized = values12[0];
 								break;
-							case 109:
+							case 107:
 								recognized = values5[0];
 								break;
-							case 110:
-								recognized = values9[0];
-								break;
-							case 111:
-								recognized = values9[0];
-								break;
-							case 112:
-								recognized = values9[0];
-								break;
-							case 113:
-								recognized = values9[0];
-								break;
-							case 114:
-								recognized = values9[0];
+							case 108:
+								recognized = values5[0];
 								break;
 							default:
 								recognized = values[0];
@@ -2602,7 +2492,7 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) { state = 2265; goto Leave; }
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) { state = 2209; goto Leave; }
 						}
 					}
 
@@ -2625,7 +2515,7 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == 'a' || c == 'o') { state = 2253; goto Leave; }
+							if (c == 'a' || c == 'o') { state = 2197; goto Leave; }
 						}
 					}
 
@@ -2644,7 +2534,7 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) { state = 2244; goto Leave; }
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) { state = 2188; goto Leave; }
 						}
 					}
 
@@ -2665,7 +2555,7 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2242, p, call, atomic, repeat, lookahead, 0, 3));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2186, p, call, atomic, repeat, lookahead, 0, 3));
 						call = callIndex;
 					}
 
@@ -2683,14 +2573,14 @@ namespace AspectGenerator.FilterV2
 						stood0 = failure.Position; tied0 = failure.ExpectedMore?.Count ?? 0;
 						if (repeating.Value >= 0)
 							entries.Add(new ParserEntry(ParserEntry.Choice, 16, p, call, atomic, repeat, lookahead, 0));
-						if (repeating.Value >= 0) { state = 2241; goto Leave; }
+						if (repeating.Value >= 0) { state = 2185; goto Leave; }
 					}
 
 					S16:
 					{
 						reach = p;
 						reach0 = p;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2134, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2078, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -2699,13 +2589,13 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2132, p, call, atomic, repeat, lookahead, 0, 4));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2076, p, call, atomic, repeat, lookahead, 0, 4));
 						call = callIndex;
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2101, p, call, atomic, repeat, lookahead, 0, 6));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2045, p, call, atomic, repeat, lookahead, 0, 6));
 						call = callIndex;
 					}
 
@@ -2716,8 +2606,8 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '-') { state = 2094; goto Leave; }
-						if (c == '&' || c == '|') { state = 2068; goto Leave; }
+						if (c == '-') { state = 2038; goto Leave; }
+						if (c == '&' || c == '|') { state = 2012; goto Leave; }
 						if (RecognizeIn_DotGram(RecognizeSet0_DotGram, c)) goto S21;
 						expected = ExpectedSet_DotGram(20);
 						{ state = 2; goto Leave; }
@@ -2726,21 +2616,21 @@ namespace AspectGenerator.FilterV2
 					S21:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2066, p, call, atomic, repeat, lookahead, 0, 9));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2010, p, call, atomic, repeat, lookahead, 0, 9));
 						call = callIndex;
 					}
 
 					S22:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2018, p, call, atomic, repeat, lookahead, 0, 10));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1962, p, call, atomic, repeat, lookahead, 0, 10));
 						call = callIndex;
 					}
 
 					S23:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1962, p, call, atomic, repeat, lookahead, 0, 13));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1906, p, call, atomic, repeat, lookahead, 0, 13));
 						call = callIndex;
 					}
 
@@ -2749,9 +2639,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'n')) { state = 1955; goto Leave; }
+							if (!(c == 'n')) { state = 1899; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1431, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1429, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -2809,7 +2699,7 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1429, p, call, atomic, repeat, lookahead, 0, 14));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1427, p, call, atomic, repeat, lookahead, 0, 14));
 						call = callIndex;
 					}
 
@@ -3027,21 +2917,21 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1425, p, call, atomic, repeat, lookahead, 0, 95));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1423, p, call, atomic, repeat, lookahead, 0, 95));
 						call = callIndex;
 					}
 
 					S47:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1377, p, call, atomic, repeat, lookahead, 0, 96));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1375, p, call, atomic, repeat, lookahead, 0, 96));
 						call = callIndex;
 					}
 
 					S48:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1321, p, call, atomic, repeat, lookahead, 0, 99));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1319, p, call, atomic, repeat, lookahead, 0, 99));
 						call = callIndex;
 					}
 
@@ -3050,7 +2940,7 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'n')) { state = 1314; goto Leave; }
+							if (!(c == 'n')) { state = 1312; goto Leave; }
 						}
 						entries.Add(new ParserEntry(ParserEntry.Choice, 67, p, call, atomic, repeat, lookahead, 0));
 					}
@@ -3226,7 +3116,7 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'n')) { state = 1314; goto Leave; }
+							if (!(c == 'n')) { state = 1312; goto Leave; }
 						}
 						entries.Add(new ParserEntry(ParserEntry.Choice, 82, p, call, atomic, repeat, lookahead, 0));
 					}
@@ -3402,9 +3292,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'n')) { state = 1314; goto Leave; }
+							if (!(c == 'n')) { state = 1312; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1314, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1312, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -3467,7 +3357,7 @@ namespace AspectGenerator.FilterV2
 					S87:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1312, p, call, atomic, repeat, lookahead, 0, 101));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1310, p, call, atomic, repeat, lookahead, 0, 108));
 						call = callIndex;
 					}
 
@@ -3476,14 +3366,14 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet8_DotGram, c))) { state = 1125; goto Leave; }
+							if (!(RecognizeIn_DotGram(RecognizeSet8_DotGram, c))) { state = 1124; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1121, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1120, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1119, p, call, atomic, repeat, lookahead, 0, 102));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1118, p, call, atomic, repeat, lookahead, 0, 101));
 						call = callIndex;
 					}
 
@@ -3491,9 +3381,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'n')) { state = 612; goto Leave; }
+							if (!(c == 'n')) { state = 611; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 612, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 611, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -3610,7 +3500,7 @@ namespace AspectGenerator.FilterV2
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 17 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 157, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 153, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -3642,7 +3532,7 @@ namespace AspectGenerator.FilterV2
 					S101:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 610, p, call, atomic, repeat, lookahead, 0, 110));
+						entries.Add(new ParserEntry(ParserEntry.Call, 609, p, call, atomic, repeat, lookahead, 0, 29));
 						call = callIndex;
 					}
 
@@ -3651,14 +3541,14 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'a')) { state = 137; goto Leave; }
+							if (!(c == 'a')) { state = 136; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 137, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 136, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 135, p, call, atomic, repeat, lookahead, 0, 105));
+						entries.Add(new ParserEntry(ParserEntry.Call, 134, p, call, atomic, repeat, lookahead, 0, 34));
 						call = callIndex;
 					}
 
@@ -3667,9 +3557,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'a')) { state = 111; goto Leave; }
+							if (!(c == 'a')) { state = 110; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 111, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 110, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -3722,32 +3612,6 @@ namespace AspectGenerator.FilterV2
 					}
 
 					{
-						seaming++;
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 109, p, call, atomic, repeat, lookahead, 0, -2));
-						call = callIndex;
-						{ state = 33; goto Leave; }
-					}
-
-					Leave:
-					return state;
-				}
-
-				int RecognizePart3_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 109: goto S109;
-						case 111: goto S111;
-						case 112: goto S112;
-						case 130: goto S130;
-						case 131: goto S131;
-						case 133: goto S133;
-					}
-					goto Leave;
-
-					S109:
-					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
@@ -3764,14 +3628,30 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S111:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart3_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 110: goto S110;
+						case 111: goto S111;
+						case 129: goto S129;
+						case 130: goto S130;
+						case 132: goto S132;
+					}
+					goto Leave;
+
+					S110:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 133, p, call, atomic, repeat, lookahead, 0, 35));
+						entries.Add(new ParserEntry(ParserEntry.Call, 132, p, call, atomic, repeat, lookahead, 0, 35));
 						call = callIndex;
 					}
 
-					S112:
+					S111:
 					{
 						opened72 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 72, p, call, atomic, repeat, lookahead, 0));
@@ -3781,9 +3661,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'a')) goto S131;
+							if (!(c == 'a')) goto S130;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 131, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 130, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -3829,7 +3709,7 @@ namespace AspectGenerator.FilterV2
 						p += 6;
 					}
 
-					S116:
+					S115:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -3888,7 +3768,7 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 130, p, call, atomic, repeat, lookahead, 0, 64));
+						entries.Add(new ParserEntry(ParserEntry.Call, 129, p, call, atomic, repeat, lookahead, 0, 64));
 						call = callIndex;
 					}
 
@@ -3903,13 +3783,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (RecognizeIn_DotGram(RecognizeSet6_DotGram, c)) goto S129;
-						if (c <= 255 && RecognizeClass17_DotGram[c] != 0) goto S122;
+						if (RecognizeIn_DotGram(RecognizeSet6_DotGram, c)) goto S128;
+						if (c <= 255 && RecognizeClass17_DotGram[c] != 0) goto S121;
 						expected = ExpectedSet_DotGram(108);
 						{ state = 2; goto Leave; }
 					}
 
-					S122:
+					S121:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -3925,7 +3805,7 @@ namespace AspectGenerator.FilterV2
 						p++;
 					}
 
-					S123:
+					S122:
 					{
 						turn0 = p;
 					}
@@ -3934,15 +3814,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(108);
-							goto S125;
+							goto S124;
 						}
 						c = text[p];
-						if (RecognizeIn_DotGram(RecognizeSet6_DotGram, c)) goto S128;
-						if (c <= 255 && RecognizeClass17_DotGram[c] != 0) goto S127;
+						if (RecognizeIn_DotGram(RecognizeSet6_DotGram, c)) goto S127;
+						if (c <= 255 && RecognizeClass17_DotGram[c] != 0) goto S126;
 						expected = ExpectedSet_DotGram(108);
 					}
 
-					S125:
+					S124:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -3965,21 +3845,34 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S127:
+					S126:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(107);
-							goto S125;
+							goto S124;
 						}
 						c = text[p];
 						if (!(c <= 255 && RecognizeClass17_DotGram[c] != 0))
 						{
 							expected = ExpectedSet_DotGram(107);
-							goto S125;
+							goto S124;
 						}
 						p++;
-						goto S123;
+						goto S122;
+					}
+
+					S127:
+					{
+						var scanned = Scan_DotGram_Lex_IdChar(text, p);
+						if (scanned < 0)
+						{
+							p = -1 - scanned;
+							expected = ExpectedSet_DotGram(98);
+							goto S124;
+						}
+						p = scanned;
+						goto S122;
 					}
 
 					S128:
@@ -3989,26 +3882,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(98);
-							goto S125;
-						}
-						p = scanned;
-						goto S123;
-					}
-
-					S129:
-					{
-						var scanned = Scan_DotGram_Lex_IdChar(text, p);
-						if (scanned < 0)
-						{
-							p = -1 - scanned;
-							expected = ExpectedSet_DotGram(98);
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S123;
+						goto S122;
 					}
 
-					S130:
+					S129:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -4017,7 +3897,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S131:
+					S130:
 					{
 						if (p > 0)
 						{
@@ -4063,15 +3943,15 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						goto S116;
+						goto S115;
 					}
 
-					S133:
+					S132:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 35 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 182, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 71, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -4087,24 +3967,24 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 135: goto S135;
-						case 137: goto S137;
+						case 134: goto S134;
+						case 136: goto S136;
+						case 138: goto S138;
 						case 139: goto S139;
 						case 140: goto S140;
 						case 141: goto S141;
-						case 142: goto S142;
-						case 147: goto S147;
-						case 149: goto S149;
-						case 152: goto S152;
+						case 146: goto S146;
+						case 148: goto S148;
+						case 151: goto S151;
 					}
 					goto Leave;
 
-					S135:
+					S134:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 105 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 192, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 34 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 59, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -4112,55 +3992,55 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S137:
+					S136:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet4_DotGram, c))) { state = 604; goto Leave; }
-							if (!(c <= 255 && RecognizeClass11_DotGram[c] != 0)) goto S138;
+							if (!(RecognizeIn_DotGram(RecognizeSet4_DotGram, c))) { state = 603; goto Leave; }
+							if (!(c <= 255 && RecognizeClass11_DotGram[c] != 0)) goto S137;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 604, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 603, p, call, atomic, repeat, lookahead, 0));
+					}
+
+					S137:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 601, p, call, atomic, repeat, lookahead, 0, 65));
+						call = callIndex;
 					}
 
 					S138:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 602, p, call, atomic, repeat, lookahead, 0, 65));
+						entries.Add(new ParserEntry(ParserEntry.Call, 592, p, call, atomic, repeat, lookahead, 0, 67));
 						call = callIndex;
 					}
 
 					S139:
 					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 593, p, call, atomic, repeat, lookahead, 0, 67));
-						call = callIndex;
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (c == 'g') { state = 585; goto Leave; }
+						}
 					}
 
 					S140:
 					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (c == 'g') { state = 586; goto Leave; }
-						}
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 577, p, call, atomic, repeat, lookahead, 0, 71));
+						call = callIndex;
 					}
 
 					S141:
 					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 578, p, call, atomic, repeat, lookahead, 0, 71));
-						call = callIndex;
-					}
-
-					S142:
-					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '*')) goto S147;
+							if (!(c == '*')) goto S146;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 147, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 146, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -4212,21 +4092,21 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S147:
+					S146:
 					{
 						var lookaheadIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Lookahead, 276, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Lookahead, 275, p, call, atomic, repeat, lookahead, 0));
 						lookahead = lookaheadIndex;
 						negating++;
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 275, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 274, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
 					}
 
-					S149:
+					S148:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -4236,27 +4116,27 @@ namespace AspectGenerator.FilterV2
 						c = text[p];
 						switch (c)
 						{
-							case 'a': { state = 252; goto Leave; }
-							case 'e': { state = 244; goto Leave; }
-							case 'g': { state = 242; goto Leave; }
-							case 'i': { state = 225; goto Leave; }
-							case 'l': { state = 223; goto Leave; }
-							case 'm': { state = 221; goto Leave; }
-							case 'n': { state = 216; goto Leave; }
-							case 'o': { state = 202; goto Leave; }
-							case 'p': { state = 182; goto Leave; }
-							case 'r': { state = 174; goto Leave; }
-							case 's': { state = 166; goto Leave; }
-							case 't': { state = 161; goto Leave; }
-							case 'u': { state = 159; goto Leave; }
-							case 'v': goto S154;
-							case 'w': goto S150;
+							case 'a': { state = 251; goto Leave; }
+							case 'e': { state = 243; goto Leave; }
+							case 'g': { state = 241; goto Leave; }
+							case 'i': { state = 224; goto Leave; }
+							case 'l': { state = 222; goto Leave; }
+							case 'm': { state = 220; goto Leave; }
+							case 'n': { state = 215; goto Leave; }
+							case 'o': { state = 201; goto Leave; }
+							case 'p': { state = 181; goto Leave; }
+							case 'r': { state = 173; goto Leave; }
+							case 's': { state = 165; goto Leave; }
+							case 't': { state = 160; goto Leave; }
+							case 'u': { state = 158; goto Leave; }
+							case 'v': goto S153;
+							case 'w': goto S149;
 						}
 						expected = ExpectedSet_DotGram(106);
 						{ state = 2; goto Leave; }
 					}
 
-					S150:
+					S149:
 					{
 						if (p > 0)
 						{
@@ -4300,7 +4180,7 @@ namespace AspectGenerator.FilterV2
 						p += 6;
 					}
 
-					S152:
+					S151:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -4326,9 +4206,9 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S154:
+					S153:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 157, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 156, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -4380,7 +4260,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 10;
-						goto S152;
+						goto S151;
 					}
 
 					Leave:
@@ -4391,18 +4271,18 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 157: goto S157;
-						case 159: goto S159;
-						case 161: goto S161;
-						case 164: goto S164;
-						case 166: goto S166;
-						case 169: goto S169;
-						case 172: goto S172;
-						case 174: goto S174;
+						case 156: goto S156;
+						case 158: goto S158;
+						case 160: goto S160;
+						case 163: goto S163;
+						case 165: goto S165;
+						case 168: goto S168;
+						case 171: goto S171;
+						case 173: goto S173;
 					}
 					goto Leave;
 
-					S157:
+					S156:
 					{
 						if (p > 0)
 						{
@@ -4446,10 +4326,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S159:
+					S158:
 					{
 						if (p > 0)
 						{
@@ -4491,12 +4371,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S161:
+					S160:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 164, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 163, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -4536,10 +4416,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 4;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S164:
+					S163:
 					{
 						if (p > 0)
 						{
@@ -4577,12 +4457,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 4;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S166:
+					S165:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 169, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 168, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -4626,12 +4506,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S169:
+					S168:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 172, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 171, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -4675,10 +4555,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S172:
+					S171:
 					{
 						if (p > 0)
 						{
@@ -4726,12 +4606,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S174:
+					S173:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 177, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 176, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -4777,7 +4657,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
 					Leave:
@@ -4788,19 +4668,19 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 177: goto S177;
-						case 180: goto S180;
-						case 182: goto S182;
-						case 185: goto S185;
-						case 188: goto S188;
-						case 191: goto S191;
-						case 194: goto S194;
+						case 176: goto S176;
+						case 179: goto S179;
+						case 181: goto S181;
+						case 184: goto S184;
+						case 187: goto S187;
+						case 190: goto S190;
+						case 193: goto S193;
 					}
 					goto Leave;
 
-					S177:
+					S176:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 180, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 179, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -4848,10 +4728,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S180:
+					S179:
 					{
 						if (p > 0)
 						{
@@ -4887,12 +4767,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 3;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S182:
+					S181:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 185, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 184, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -4936,12 +4816,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S185:
+					S184:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 188, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 187, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -4983,12 +4863,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 5;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S188:
+					S187:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 191, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 190, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5032,12 +4912,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S191:
+					S190:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 194, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 193, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5087,12 +4967,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S194:
+					S193:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 197, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 196, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5138,7 +5018,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
 					Leave:
@@ -5149,19 +5029,19 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 197: goto S197;
-						case 200: goto S200;
-						case 202: goto S202;
-						case 205: goto S205;
-						case 208: goto S208;
-						case 211: goto S211;
-						case 214: goto S214;
+						case 196: goto S196;
+						case 199: goto S199;
+						case 201: goto S201;
+						case 204: goto S204;
+						case 207: goto S207;
+						case 210: goto S210;
+						case 213: goto S213;
 					}
 					goto Leave;
 
-					S197:
+					S196:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 200, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 199, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5207,10 +5087,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S200:
+					S199:
 					{
 						if (p > 0)
 						{
@@ -5254,12 +5134,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S202:
+					S201:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 205, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 204, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5292,12 +5172,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S205:
+					S204:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 208, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 207, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5347,12 +5227,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S208:
+					S207:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 211, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 210, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5396,12 +5276,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S211:
+					S210:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 214, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 213, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5449,10 +5329,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S214:
+					S213:
 					{
 						if (p > 0)
 						{
@@ -5488,7 +5368,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 3;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
 					Leave:
@@ -5499,19 +5379,19 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 216: goto S216;
-						case 219: goto S219;
-						case 221: goto S221;
-						case 223: goto S223;
-						case 225: goto S225;
-						case 228: goto S228;
-						case 231: goto S231;
+						case 215: goto S215;
+						case 218: goto S218;
+						case 220: goto S220;
+						case 222: goto S222;
+						case 224: goto S224;
+						case 227: goto S227;
+						case 230: goto S230;
 					}
 					goto Leave;
 
-					S216:
+					S215:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 219, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 218, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5549,10 +5429,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 3;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S219:
+					S218:
 					{
 						if (p > 0)
 						{
@@ -5600,10 +5480,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S221:
+					S220:
 					{
 						if (p > 0)
 						{
@@ -5645,10 +5525,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S223:
+					S222:
 					{
 						if (p > 0)
 						{
@@ -5694,12 +5574,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S225:
+					S224:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 228, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 227, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5747,12 +5627,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S228:
+					S227:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 231, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 230, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5804,12 +5684,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 10;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S231:
+					S230:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 234, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 233, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5857,7 +5737,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
 					Leave:
@@ -5868,18 +5748,18 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 234: goto S234;
-						case 237: goto S237;
-						case 240: goto S240;
-						case 242: goto S242;
-						case 244: goto S244;
-						case 247: goto S247;
+						case 233: goto S233;
+						case 236: goto S236;
+						case 239: goto S239;
+						case 241: goto S241;
+						case 243: goto S243;
+						case 246: goto S246;
 					}
 					goto Leave;
 
-					S234:
+					S233:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 237, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 236, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5927,12 +5807,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S237:
+					S236:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 240, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 239, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -5980,10 +5860,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S240:
+					S239:
 					{
 						if (p > 0)
 						{
@@ -6014,10 +5894,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S242:
+					S241:
 					{
 						if (p > 0)
 						{
@@ -6065,12 +5945,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S244:
+					S243:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 247, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 246, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -6114,12 +5994,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S247:
+					S246:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 250, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 249, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -6169,7 +6049,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
 					Leave:
@@ -6180,17 +6060,17 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 250: goto S250;
-						case 252: goto S252;
-						case 255: goto S255;
-						case 258: goto S258;
-						case 261: goto S261;
-						case 264: goto S264;
-						case 267: goto S267;
+						case 249: goto S249;
+						case 251: goto S251;
+						case 254: goto S254;
+						case 257: goto S257;
+						case 260: goto S260;
+						case 263: goto S263;
+						case 266: goto S266;
 					}
 					goto Leave;
 
-					S250:
+					S249:
 					{
 						if (p > 0)
 						{
@@ -6234,12 +6114,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S252:
+					S251:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 255, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 254, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -6277,12 +6157,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 3;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S255:
+					S254:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 258, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 257, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -6320,12 +6200,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 3;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S258:
+					S257:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 261, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 260, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -6369,12 +6249,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S261:
+					S260:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 264, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 263, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -6422,12 +6302,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S264:
+					S263:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 267, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 266, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -6477,12 +6357,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S267:
+					S266:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 270, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 269, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -6540,7 +6420,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 13;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
 					Leave:
@@ -6551,20 +6431,20 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 270: goto S270;
-						case 273: goto S273;
+						case 269: goto S269;
+						case 272: goto S272;
+						case 274: goto S274;
 						case 275: goto S275;
 						case 276: goto S276;
-						case 277: goto S277;
-						case 279: goto S279;
-						case 287: goto S287;
-						case 296: goto S296;
+						case 278: goto S278;
+						case 286: goto S286;
+						case 295: goto S295;
 					}
 					goto Leave;
 
-					S270:
+					S269:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 273, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 272, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -6606,10 +6486,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 5;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S273:
+					S272:
 					{
 						if (p > 0)
 						{
@@ -6655,10 +6535,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 152; goto Leave; }
+						{ state = 151; goto Leave; }
 					}
 
-					S275:
+					S274:
 					{
 						global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
 						var looked = entries[lookahead];
@@ -6674,40 +6554,40 @@ namespace AspectGenerator.FilterV2
 						{ state = 2; goto Leave; }
 					}
 
-					S276:
+					S275:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S277:
+					S276:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						if (repeating.Value >= 1)
-							entries.Add(new ParserEntry(ParserEntry.Choice, 351, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.Choice, 350, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 349, p, call, atomic, repeat, lookahead, 0, 72));
+						entries.Add(new ParserEntry(ParserEntry.Call, 348, p, call, atomic, repeat, lookahead, 0, 72));
 						call = callIndex;
 					}
 
-					S279:
+					S278:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet6_DotGram, c))) goto S287;
-							goto S280;
+							if (!(RecognizeIn_DotGram(RecognizeSet6_DotGram, c))) goto S286;
+							goto S279;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 287, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 286, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S280:
+					S279:
 					{
 						opened96 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 96, p, call, atomic, repeat, lookahead, 0));
@@ -6724,7 +6604,7 @@ namespace AspectGenerator.FilterV2
 						p = scanned;
 					}
 
-					S282:
+					S281:
 					{
 						turn0 = p;
 					}
@@ -6735,13 +6615,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(98);
-							goto S284;
+							goto S283;
 						}
 						p = scanned;
-						goto S282;
+						goto S281;
 					}
 
-					S284:
+					S283:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -6799,18 +6679,18 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S287:
+					S286:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '@')) goto S296;
-							goto S288;
+							if (!(c == '@')) goto S295;
+							goto S287;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 296, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 295, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S288:
+					S287:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '@')
 						{
@@ -6836,7 +6716,7 @@ namespace AspectGenerator.FilterV2
 						p = scanned;
 					}
 
-					S291:
+					S290:
 					{
 						turn0 = p;
 					}
@@ -6847,13 +6727,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(98);
-							goto S293;
+							goto S292;
 						}
 						p = scanned;
-						goto S291;
+						goto S290;
 					}
 
-					S293:
+					S292:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -6911,14 +6791,14 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S296:
+					S295:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '*')) { state = 303; goto Leave; }
+							if (!(c == '*')) { state = 302; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 300, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 299, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -6955,30 +6835,29 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 300: goto S300;
-						case 303: goto S303;
-						case 309: goto S309;
+						case 299: goto S299;
+						case 302: goto S302;
+						case 308: goto S308;
+						case 319: goto S319;
 						case 320: goto S320;
 						case 321: goto S321;
-						case 322: goto S322;
-						case 326: goto S326;
-						case 328: goto S328;
-						case 340: goto S340;
+						case 325: goto S325;
+						case 327: goto S327;
 					}
 					goto Leave;
 
-					S300:
+					S299:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '*')) goto S303;
-							goto S301;
+							if (!(c == '*')) goto S302;
+							goto S300;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 303, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 302, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S301:
+					S300:
 					{
 						if (text.Length - p < 2)
 						{
@@ -7004,21 +6883,21 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S303:
+					S302:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '{')) goto S328;
-							goto S304;
+							if (!(c == '{')) goto S327;
+							goto S303;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 328, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 327, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S304:
+					S303:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 326, p, call, atomic, repeat, lookahead, 0, 73));
+						entries.Add(new ParserEntry(ParserEntry.Call, 325, p, call, atomic, repeat, lookahead, 0, 73));
 						call = callIndex;
 					}
 
@@ -7026,9 +6905,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '{')) goto S322;
+							if (!(c == '{')) goto S321;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 322, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 321, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -7046,12 +6925,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 309, p, call, atomic, repeat, lookahead, 0, 67));
+						entries.Add(new ParserEntry(ParserEntry.Call, 308, p, call, atomic, repeat, lookahead, 0, 67));
 						call = callIndex;
-						{ state = 140; goto Leave; }
+						{ state = 139; goto Leave; }
 					}
 
-					S309:
+					S308:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -7063,11 +6942,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S314;
+							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S313;
 						}
 					}
 
-					S311:
+					S310:
 					{
 						p = Scan_DotGram_Lex_Sp(text, p);
 					}
@@ -7086,16 +6965,16 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S314:
+					S313:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S315:
+					S314:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 321, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 320, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -7117,21 +6996,21 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 320, p, call, atomic, repeat, lookahead, 0, 67));
+						entries.Add(new ParserEntry(ParserEntry.Call, 319, p, call, atomic, repeat, lookahead, 0, 67));
 						call = callIndex;
-						{ state = 140; goto Leave; }
+						{ state = 139; goto Leave; }
 					}
 
-					S320:
+					S319:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 67 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 101, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S315;
+						goto S314;
 					}
 
-					S321:
+					S320:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -7140,10 +7019,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S311;
+						goto S310;
 					}
 
-					S322:
+					S321:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '{')
 						{
@@ -7171,7 +7050,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S326:
+					S325:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -7184,21 +7063,21 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S328:
+					S327:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) { state = 342; goto Leave; }
-							goto S329;
+							if (!(c == '"')) { state = 341; goto Leave; }
+							goto S328;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 342, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 341, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S329:
+					S328:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 340, p, call, atomic, repeat, lookahead, 0, 74));
+						entries.Add(new ParserEntry(ParserEntry.Call, 339, p, call, atomic, repeat, lookahead, 0, 74));
 						call = callIndex;
 					}
 
@@ -7215,7 +7094,7 @@ namespace AspectGenerator.FilterV2
 						capture102 = p;
 					}
 
-					S332:
+					S331:
 					{
 						turn0 = p;
 					}
@@ -7224,15 +7103,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(121);
-							goto S334;
+							goto S333;
 						}
 						c = text[p];
-						if (c == '\\') goto S338;
-						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S337;
+						if (c == '\\') goto S337;
+						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S336;
 						expected = ExpectedSet_DotGram(121);
 					}
 
-					S334:
+					S333:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -7264,29 +7143,29 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S337:
+					S336:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(120);
-							goto S334;
+							goto S333;
 						}
 						c = text[p];
 						if (!(!(c == '\n' || c == '\r' || c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(120);
-							goto S334;
+							goto S333;
 						}
 						p++;
-						goto S332;
+						goto S331;
 					}
 
-					S338:
+					S337:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S334;
+							goto S333;
 						}
 						p += 1;
 					}
@@ -7295,19 +7174,40 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(19);
-							goto S334;
+							goto S333;
 						}
 						c = text[p];
 						if (!(!(c == '\n' || c == '\r')))
 						{
 							expected = ExpectedSet_DotGram(19);
-							goto S334;
+							goto S333;
 						}
 						p++;
-						goto S332;
+						goto S331;
 					}
 
-					S340:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart13_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 339: goto S339;
+						case 341: goto S341;
+						case 345: goto S345;
+						case 348: goto S348;
+						case 350: goto S350;
+						case 352: goto S352;
+						case 354: goto S354;
+						case 358: goto S358;
+						case 367: goto S367;
+						case 371: goto S371;
+					}
+					goto Leave;
+
+					S339:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -7320,38 +7220,18 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					Leave:
-					return state;
-				}
-
-				int RecognizePart13_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 342: goto S342;
-						case 346: goto S346;
-						case 349: goto S349;
-						case 351: goto S351;
-						case 353: goto S353;
-						case 355: goto S355;
-						case 359: goto S359;
-						case 368: goto S368;
-						case 372: goto S372;
-					}
-					goto Leave;
-
-					S342:
+					S341:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\\')) goto S346;
-							goto S343;
+							if (!(c == '\\')) goto S345;
+							goto S342;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 346, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 345, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S343:
+					S342:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
@@ -7377,7 +7257,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S346:
+					S345:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '?')
 						{
@@ -7406,7 +7286,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S349:
+					S348:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -7419,10 +7299,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 277; goto Leave; }
+						{ state = 276; goto Leave; }
 					}
 
-					S351:
+					S350:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -7437,31 +7317,31 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '<') goto S354;
+							if (c == '<') goto S353;
 						}
 					}
 
-					S353:
+					S352:
 					{
 						entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
 						{ state = 0; goto Leave; }
 					}
 
-					S354:
+					S353:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 577, p, call, atomic, repeat, lookahead, 0, 75));
+						entries.Add(new ParserEntry(ParserEntry.Call, 576, p, call, atomic, repeat, lookahead, 0, 75));
 						call = callIndex;
 					}
 
-					S355:
+					S354:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '<')) { state = 570; goto Leave; }
+							if (!(c == '<')) { state = 569; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 570, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 569, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -7479,14 +7359,14 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 557, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 556, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
 					}
 
-					S359:
+					S358:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 537, p, call, atomic, repeat, lookahead, 0, 78));
+						entries.Add(new ParserEntry(ParserEntry.Call, 536, p, call, atomic, repeat, lookahead, 0, 78));
 						call = callIndex;
 					}
 
@@ -7494,14 +7374,14 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'd')) { state = 459; goto Leave; }
+							if (!(c == 'd')) { state = 458; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 459, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 458, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 457, p, call, atomic, repeat, lookahead, 0, 83));
+						entries.Add(new ParserEntry(ParserEntry.Call, 456, p, call, atomic, repeat, lookahead, 0, 83));
 						call = callIndex;
 					}
 
@@ -7581,11 +7461,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == 'm' || c == 'u') { state = 417; goto Leave; }
+							if (c == 'm' || c == 'u') { state = 416; goto Leave; }
 						}
 					}
 
-					S368:
+					S367:
 					{
 						p = Scan_DotGram_Lex_Sp(text, p);
 					}
@@ -7605,23 +7485,23 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 405, p, call, atomic, repeat, lookahead, 0, 86));
+						entries.Add(new ParserEntry(ParserEntry.Call, 404, p, call, atomic, repeat, lookahead, 0, 86));
 						call = callIndex;
 					}
 
-					S372:
+					S371:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass19_DotGram[c] != 0)) { state = 402; goto Leave; }
+							if (!(c <= 255 && RecognizeClass19_DotGram[c] != 0)) { state = 401; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 402, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 401, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 397, p, call, atomic, repeat, lookahead, 0, 87));
+						entries.Add(new ParserEntry(ParserEntry.Call, 396, p, call, atomic, repeat, lookahead, 0, 87));
 						call = callIndex;
 					}
 
@@ -7629,9 +7509,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'r')) { state = 388; goto Leave; }
+							if (!(c == 'r')) { state = 387; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 383, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 382, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -7681,7 +7561,7 @@ namespace AspectGenerator.FilterV2
 								{ state = 2; goto Leave; }
 							}
 						}
-						{ state = 378; goto Leave; }
+						{ state = 377; goto Leave; }
 					}
 
 					Leave:
@@ -7692,18 +7572,18 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 378: goto S378;
-						case 383: goto S383;
-						case 388: goto S388;
-						case 393: goto S393;
-						case 397: goto S397;
-						case 400: goto S400;
+						case 377: goto S377;
+						case 382: goto S382;
+						case 387: goto S387;
+						case 392: goto S392;
+						case 396: goto S396;
+						case 399: goto S399;
+						case 401: goto S401;
 						case 402: goto S402;
-						case 403: goto S403;
 					}
 					goto Leave;
 
-					S378:
+					S377:
 					{
 						var scanned = Scan_DotGram_Lex_Sp1(text, p);
 						if (scanned < 0)
@@ -7779,18 +7659,18 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S383:
+					S382:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'r')) goto S388;
-							goto S384;
+							if (!(c == 'r')) goto S387;
+							goto S383;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 388, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 387, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S384:
+					S383:
 					{
 						if (p > 0)
 						{
@@ -7845,18 +7725,18 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S388:
+					S387:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'i')) goto S393;
-							goto S389;
+							if (!(c == 'i')) goto S392;
+							goto S388;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 393, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 392, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S389:
+					S388:
 					{
 						if (p > 0)
 						{
@@ -7906,7 +7786,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S393:
+					S392:
 					{
 						if (p > 0)
 						{
@@ -7961,7 +7841,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S397:
+					S396:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -7982,12 +7862,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 400, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 399, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
-					S400:
+					S399:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -8000,15 +7880,15 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S402:
+					S401:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 403, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 402, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
-					S403:
+					S402:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -8029,18 +7909,18 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 405: goto S405;
+						case 404: goto S404;
+						case 414: goto S414;
 						case 415: goto S415;
 						case 416: goto S416;
-						case 417: goto S417;
-						case 434: goto S434;
+						case 433: goto S433;
+						case 444: goto S444;
 						case 445: goto S445;
 						case 446: goto S446;
-						case 447: goto S447;
 					}
 					goto Leave;
 
-					S405:
+					S404:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -8052,11 +7932,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S409;
+							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S408;
 						}
 					}
 
-					S407:
+					S406:
 					{
 						p = Scan_DotGram_Lex_Sp(text, p);
 					}
@@ -8071,16 +7951,16 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S409:
+					S408:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S410:
+					S409:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 416, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 415, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -8102,21 +7982,21 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 415, p, call, atomic, repeat, lookahead, 0, 86));
+						entries.Add(new ParserEntry(ParserEntry.Call, 414, p, call, atomic, repeat, lookahead, 0, 86));
 						call = callIndex;
-						{ state = 372; goto Leave; }
+						{ state = 371; goto Leave; }
 					}
 
-					S415:
+					S414:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 86 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 125, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S410;
+						goto S409;
 					}
 
-					S416:
+					S415:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -8125,13 +8005,13 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S407;
+						goto S406;
 					}
 
-					S417:
+					S416:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 456, p, call, atomic, repeat, lookahead, 0, 84));
+						entries.Add(new ParserEntry(ParserEntry.Call, 455, p, call, atomic, repeat, lookahead, 0, 84));
 						call = callIndex;
 					}
 
@@ -8139,9 +8019,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'u')) goto S447;
+							if (!(c == 'u')) goto S446;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 447, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 446, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -8264,11 +8144,11 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 434, p, call, atomic, repeat, lookahead, 0, 85));
+						entries.Add(new ParserEntry(ParserEntry.Call, 433, p, call, atomic, repeat, lookahead, 0, 85));
 						call = callIndex;
 					}
 
-					S428:
+					S427:
 					{
 						capture130 = p;
 					}
@@ -8284,7 +8164,7 @@ namespace AspectGenerator.FilterV2
 						p = scanned;
 					}
 
-					S430:
+					S429:
 					{
 						turn0 = p;
 					}
@@ -8295,13 +8175,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(98);
-							goto S432;
+							goto S431;
 						}
 						p = scanned;
-						goto S430;
+						goto S429;
 					}
 
-					S432:
+					S431:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -8324,7 +8204,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S434:
+					S433:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -8336,11 +8216,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S439;
+							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S438;
 						}
 					}
 
-					S436:
+					S435:
 					{
 						p = Scan_DotGram_Lex_Sp(text, p);
 					}
@@ -8359,16 +8239,16 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S439:
+					S438:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S440:
+					S439:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 446, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 445, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -8390,21 +8270,21 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 445, p, call, atomic, repeat, lookahead, 0, 85));
+						entries.Add(new ParserEntry(ParserEntry.Call, 444, p, call, atomic, repeat, lookahead, 0, 85));
 						call = callIndex;
-						goto S428;
+						goto S427;
 					}
 
-					S445:
+					S444:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 85 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 128, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S440;
+						goto S439;
 					}
 
-					S446:
+					S445:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -8413,14 +8293,14 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S436;
+						goto S435;
 					}
 
-					S447:
+					S446:
 					{
 						opened129 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 129, p, call, atomic, repeat, lookahead, 0));
-						{ state = 448; goto Leave; }
+						{ state = 447; goto Leave; }
 					}
 
 					Leave:
@@ -8431,19 +8311,19 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 448: goto S448;
+						case 447: goto S447;
+						case 455: goto S455;
 						case 456: goto S456;
-						case 457: goto S457;
-						case 459: goto S459;
-						case 464: goto S464;
-						case 471: goto S471;
-						case 473: goto S473;
-						case 475: goto S475;
-						case 477: goto S477;
+						case 458: goto S458;
+						case 463: goto S463;
+						case 470: goto S470;
+						case 472: goto S472;
+						case 474: goto S474;
+						case 476: goto S476;
 					}
 					goto Leave;
 
-					S448:
+					S447:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -8451,13 +8331,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'm') goto S454;
-						if (c == 'u') goto S449;
+						if (c == 'm') goto S453;
+						if (c == 'u') goto S448;
 						expected = ExpectedSet_DotGram(131);
 						{ state = 2; goto Leave; }
 					}
 
-					S449:
+					S448:
 					{
 						if (p > 0)
 						{
@@ -8507,7 +8387,7 @@ namespace AspectGenerator.FilterV2
 						p += 9;
 					}
 
-					S451:
+					S450:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -8560,7 +8440,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S454:
+					S453:
 					{
 						if (p > 0)
 						{
@@ -8604,19 +8484,19 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						goto S451;
+						goto S450;
 					}
 
-					S456:
+					S455:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 84 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 123, capturedCall, call, atomic, repeat, lookahead, p));
-						{ state = 368; goto Leave; }
+						{ state = 367; goto Leave; }
 					}
 
-					S457:
+					S456:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -8629,21 +8509,21 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S459:
+					S458:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '(')) goto S477;
-							goto S460;
+							if (!(c == '(')) goto S476;
+							goto S459;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 477, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 476, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S460:
+					S459:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 475, p, call, atomic, repeat, lookahead, 0, 82));
+						entries.Add(new ParserEntry(ParserEntry.Call, 474, p, call, atomic, repeat, lookahead, 0, 82));
 						call = callIndex;
 					}
 
@@ -8662,12 +8542,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 464, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 463, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
-					S464:
+					S463:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -8681,13 +8561,13 @@ namespace AspectGenerator.FilterV2
 						repeat = repeatIndex;
 					}
 
-					S466:
+					S465:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						if (repeating.Value >= 1)
-							entries.Add(new ParserEntry(ParserEntry.Choice, 473, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.Choice, 472, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -8709,12 +8589,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 471, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 470, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
-					S471:
+					S470:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -8727,10 +8607,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S466;
+						goto S465;
 					}
 
-					S473:
+					S472:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -8746,7 +8626,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 64; goto Leave; }
 					}
 
-					S475:
+					S474:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -8759,21 +8639,21 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S477:
+					S476:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '{')) { state = 533; goto Leave; }
-							goto S478;
+							if (!(c == '{')) { state = 532; goto Leave; }
+							goto S477;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 533, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 532, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S478:
+					S477:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 531, p, call, atomic, repeat, lookahead, 0, 79));
+						entries.Add(new ParserEntry(ParserEntry.Call, 530, p, call, atomic, repeat, lookahead, 0, 79));
 						call = callIndex;
 					}
 
@@ -8781,9 +8661,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '{')) { state = 524; goto Leave; }
+							if (!(c == '{')) { state = 523; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 524, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 523, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -8801,9 +8681,9 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 483, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 482, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
 					Leave:
@@ -8814,30 +8694,29 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 483: goto S483;
-						case 488: goto S488;
-						case 497: goto S497;
-						case 499: goto S499;
-						case 501: goto S501;
-						case 503: goto S503;
+						case 482: goto S482;
+						case 487: goto S487;
+						case 496: goto S496;
+						case 498: goto S498;
+						case 500: goto S500;
+						case 502: goto S502;
+						case 504: goto S504;
 						case 505: goto S505;
-						case 506: goto S506;
-						case 508: goto S508;
+						case 507: goto S507;
+						case 511: goto S511;
 						case 512: goto S512;
 						case 513: goto S513;
-						case 514: goto S514;
+						case 521: goto S521;
 						case 522: goto S522;
 						case 523: goto S523;
-						case 524: goto S524;
-						case 527: goto S527;
-						case 529: goto S529;
-						case 531: goto S531;
-						case 533: goto S533;
-						case 535: goto S535;
+						case 526: goto S526;
+						case 528: goto S528;
+						case 530: goto S530;
+						case 532: goto S532;
 					}
 					goto Leave;
 
-					S483:
+					S482:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -8849,22 +8728,22 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S516;
+							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S515;
 						}
 					}
 
-					S485:
+					S484:
 					{
 						p = Scan_DotGram_Lex_Sp(text, p);
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 488, p, call, atomic, repeat, lookahead, 0, 80));
+						entries.Add(new ParserEntry(ParserEntry.Call, 487, p, call, atomic, repeat, lookahead, 0, 80));
 						call = callIndex;
 					}
 
-					S487:
+					S486:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '}')
 						{
@@ -8875,7 +8754,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S488:
+					S487:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -8885,8 +8764,17 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 514, p, call, atomic, repeat, lookahead, 0, 81));
+						entries.Add(new ParserEntry(ParserEntry.Call, 513, p, call, atomic, repeat, lookahead, 0, 81));
 						call = callIndex;
+					}
+
+					S489:
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (RecognizeIn_DotGram(RecognizeSet4_DotGram, c)) goto S508;
+						}
 					}
 
 					S490:
@@ -8894,7 +8782,7 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (RecognizeIn_DotGram(RecognizeSet4_DotGram, c)) goto S509;
+							if (c == '<') goto S506;
 						}
 					}
 
@@ -8903,34 +8791,25 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '<') goto S507;
-						}
-					}
-
-					S492:
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (c == '.') goto S493;
+							if (c == '.') goto S492;
 						}
 						{ state = 0; goto Leave; }
 					}
 
-					S493:
+					S492:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S494:
+					S493:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 506, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 505, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -8946,30 +8825,30 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 505, p, call, atomic, repeat, lookahead, 0, 68));
+						entries.Add(new ParserEntry(ParserEntry.Call, 504, p, call, atomic, repeat, lookahead, 0, 68));
 						call = callIndex;
 					}
 
-					S497:
+					S496:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet4_DotGram, c))) goto S501;
-							if (!(c <= 255 && RecognizeClass11_DotGram[c] != 0)) goto S498;
+							if (!(RecognizeIn_DotGram(RecognizeSet4_DotGram, c))) goto S500;
+							if (!(c <= 255 && RecognizeClass11_DotGram[c] != 0)) goto S497;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 501, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 500, p, call, atomic, repeat, lookahead, 0));
+					}
+
+					S497:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 498, p, call, atomic, repeat, lookahead, 0, 71));
+						call = callIndex;
+						{ state = 141; goto Leave; }
 					}
 
 					S498:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 499, p, call, atomic, repeat, lookahead, 0, 71));
-						call = callIndex;
-						{ state = 142; goto Leave; }
-					}
-
-					S499:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -8982,7 +8861,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S501:
+					S500:
 					{
 						opened92 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 92, p, call, atomic, repeat, lookahead, 0));
@@ -8990,12 +8869,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 503, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 502, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 149; goto Leave; }
+						{ state = 148; goto Leave; }
 					}
 
-					S503:
+					S502:
 					{
 						var openedAt = opened92;
 
@@ -9036,16 +8915,16 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S505:
+					S504:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 68 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 120, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S494;
+						goto S493;
 					}
 
-					S506:
+					S505:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -9057,52 +8936,52 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S507:
+					S506:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 508, p, call, atomic, repeat, lookahead, 0, 75));
+						entries.Add(new ParserEntry(ParserEntry.Call, 507, p, call, atomic, repeat, lookahead, 0, 75));
 						call = callIndex;
-						{ state = 355; goto Leave; }
+						{ state = 354; goto Leave; }
 					}
 
-					S508:
+					S507:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 75 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 119, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S492;
+						goto S491;
 					}
 
-					S509:
+					S508:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S510:
+					S509:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 513, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 512, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 512, p, call, atomic, repeat, lookahead, 0, 72));
+						entries.Add(new ParserEntry(ParserEntry.Call, 511, p, call, atomic, repeat, lookahead, 0, 72));
 						call = callIndex;
-						{ state = 279; goto Leave; }
+						{ state = 278; goto Leave; }
 					}
 
-					S512:
+					S511:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 72 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 118, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S510;
+						goto S509;
 					}
 
-					S513:
+					S512:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -9111,10 +8990,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S491;
+						goto S490;
 					}
 
-					S514:
+					S513:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -9127,16 +9006,16 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S516:
+					S515:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S517:
+					S516:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 523, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 522, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -9158,21 +9037,21 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 522, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 521, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
-					S522:
+					S521:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 76 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 113, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S517;
+						goto S516;
 					}
 
-					S523:
+					S522:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -9181,10 +9060,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S485;
+						goto S484;
 					}
 
-					S524:
+					S523:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '{')
 						{
@@ -9200,12 +9079,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 527, p, call, atomic, repeat, lookahead, 0, 80));
+						entries.Add(new ParserEntry(ParserEntry.Call, 526, p, call, atomic, repeat, lookahead, 0, 80));
 						call = callIndex;
-						goto S487;
+						goto S486;
 					}
 
-					S527:
+					S526:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -9215,12 +9094,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 529, p, call, atomic, repeat, lookahead, 0, 81));
+						entries.Add(new ParserEntry(ParserEntry.Call, 528, p, call, atomic, repeat, lookahead, 0, 81));
 						call = callIndex;
-						goto S490;
+						goto S489;
 					}
 
-					S529:
+					S528:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -9233,7 +9112,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S531:
+					S530:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -9246,7 +9125,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S533:
+					S532:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -9261,12 +9140,35 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 535, p, call, atomic, repeat, lookahead, 0, 67));
+						entries.Add(new ParserEntry(ParserEntry.Call, 534, p, call, atomic, repeat, lookahead, 0, 67));
 						call = callIndex;
-						{ state = 140; goto Leave; }
+						{ state = 139; goto Leave; }
 					}
 
-					S535:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart18_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 534: goto S534;
+						case 536: goto S536;
+						case 554: goto S554;
+						case 555: goto S555;
+						case 556: goto S556;
+						case 567: goto S567;
+						case 568: goto S568;
+						case 569: goto S569;
+						case 576: goto S576;
+						case 577: goto S577;
+						case 583: goto S583;
+						case 584: goto S584;
+					}
+					goto Leave;
+
+					S534:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -9279,30 +9181,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					Leave:
-					return state;
-				}
-
-				int RecognizePart18_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 537: goto S537;
-						case 555: goto S555;
-						case 556: goto S556;
-						case 557: goto S557;
-						case 568: goto S568;
-						case 569: goto S569;
-						case 570: goto S570;
-						case 577: goto S577;
-						case 578: goto S578;
-						case 584: goto S584;
-						case 585: goto S585;
-						case 586: goto S586;
-					}
-					goto Leave;
-
-					S537:
+					S536:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -9314,26 +9193,26 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '?' || c == '[') goto S539;
+							if (c == '?' || c == '[') goto S538;
 						}
 						{ state = 0; goto Leave; }
 					}
 
-					S539:
+					S538:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S540:
+					S539:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 556, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 555, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 555, p, call, atomic, repeat, lookahead, 0, 77));
+						entries.Add(new ParserEntry(ParserEntry.Call, 554, p, call, atomic, repeat, lookahead, 0, 77));
 						call = callIndex;
 					}
 
@@ -9344,13 +9223,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '[') goto S545;
-						if (c == '?') goto S543;
+						if (c == '[') goto S544;
+						if (c == '?') goto S542;
 						expected = ExpectedSet_DotGram(126);
 						{ state = 2; goto Leave; }
 					}
 
-					S543:
+					S542:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '?')
 						{
@@ -9365,7 +9244,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S545:
+					S544:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '[')
 						{
@@ -9383,7 +9262,7 @@ namespace AspectGenerator.FilterV2
 						capture107 = p;
 					}
 
-					S548:
+					S547:
 					{
 						turn0 = p;
 					}
@@ -9392,17 +9271,17 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length || text[p] != ',')
 						{
 							expected = ExpectedSet_DotGram(119);
-							goto S551;
+							goto S550;
 						}
 						p += 1;
 					}
 
 					{
 						p = Scan_DotGram_Lex_Sp(text, p);
-						goto S548;
+						goto S547;
 					}
 
-					S551:
+					S550:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -9438,16 +9317,16 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S555:
+					S554:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 77 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 106, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S540;
+						goto S539;
 					}
 
-					S556:
+					S555:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -9459,7 +9338,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S557:
+					S556:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -9471,11 +9350,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S562;
+							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S561;
 						}
 					}
 
-					S559:
+					S558:
 					{
 						p = Scan_DotGram_Lex_Sp(text, p);
 					}
@@ -9494,16 +9373,16 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S562:
+					S561:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S563:
+					S562:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 569, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 568, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -9525,21 +9404,21 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 568, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 567, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
-					S568:
+					S567:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 76 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 104, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S563;
+						goto S562;
 					}
 
-					S569:
+					S568:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -9548,10 +9427,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S559;
+						goto S558;
 					}
 
-					S570:
+					S569:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '<')
 						{
@@ -9561,7 +9440,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S571:
+					S570:
 					{
 						p = Scan_DotGram_Lex_Sp(text, p);
 					}
@@ -9574,13 +9453,13 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length || text[p] != ',')
 						{
 							expected = ExpectedSet_DotGram(119);
-							goto S574;
+							goto S573;
 						}
 						p += 1;
-						goto S571;
+						goto S570;
 					}
 
-					S574:
+					S573:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -9612,16 +9491,16 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S577:
+					S576:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 75 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 95, capturedCall, call, atomic, repeat, lookahead, p));
-						{ state = 353; goto Leave; }
+						{ state = 352; goto Leave; }
 					}
 
-					S578:
+					S577:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -9633,25 +9512,25 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '.') goto S580;
+							if (c == '.') goto S579;
 						}
 						{ state = 0; goto Leave; }
 					}
 
-					S580:
+					S579:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S581:
+					S580:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 585, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 584, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -9667,21 +9546,21 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 584, p, call, atomic, repeat, lookahead, 0, 68));
+						entries.Add(new ParserEntry(ParserEntry.Call, 583, p, call, atomic, repeat, lookahead, 0, 68));
 						call = callIndex;
-						{ state = 497; goto Leave; }
+						{ state = 496; goto Leave; }
 					}
 
-					S584:
+					S583:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 68 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 90, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S581;
+						goto S580;
 					}
 
-					S585:
+					S584:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -9693,14 +9572,6 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S586:
-					{
-						var repeatIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
-						repeat = repeatIndex;
-						{ state = 587; goto Leave; }
-					}
-
 					Leave:
 					return state;
 				}
@@ -9709,36 +9580,43 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 587: goto S587;
-						case 590: goto S590;
+						case 585: goto S585;
+						case 589: goto S589;
+						case 591: goto S591;
 						case 592: goto S592;
-						case 593: goto S593;
-						case 599: goto S599;
+						case 598: goto S598;
+						case 600: goto S600;
 						case 601: goto S601;
-						case 602: goto S602;
+						case 603: goto S603;
 						case 604: goto S604;
-						case 605: goto S605;
+						case 606: goto S606;
 						case 607: goto S607;
-						case 608: goto S608;
-						case 610: goto S610;
-						case 612: goto S612;
-						case 614: goto S614;
-						case 618: goto S618;
+						case 609: goto S609;
+						case 611: goto S611;
+						case 613: goto S613;
+						case 617: goto S617;
 					}
 					goto Leave;
 
-					S587:
+					S585:
+					{
+						var repeatIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+						repeat = repeatIndex;
+					}
+
+					S586:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) goto S592;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 592, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) goto S591;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 591, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 590, p, call, atomic, repeat, lookahead, 0, 70));
+						entries.Add(new ParserEntry(ParserEntry.Call, 589, p, call, atomic, repeat, lookahead, 0, 70));
 						call = callIndex;
 					}
 
@@ -9778,7 +9656,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S590:
+					S589:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -9791,10 +9669,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S587;
+						goto S586;
 					}
 
-					S592:
+					S591:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -9803,10 +9681,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 141; goto Leave; }
+						{ state = 140; goto Leave; }
 					}
 
-					S593:
+					S592:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -9818,30 +9696,30 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '?') goto S595;
+							if (c == '?') goto S594;
 						}
 						{ state = 0; goto Leave; }
 					}
 
-					S595:
+					S594:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S596:
+					S595:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) goto S601;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 601, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) goto S600;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 600, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 599, p, call, atomic, repeat, lookahead, 0, 66));
+						entries.Add(new ParserEntry(ParserEntry.Call, 598, p, call, atomic, repeat, lookahead, 0, 66));
 						call = callIndex;
 					}
 
@@ -9855,7 +9733,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S599:
+					S598:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -9868,10 +9746,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S596;
+						goto S595;
 					}
 
-					S601:
+					S600:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -9883,12 +9761,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S602:
+					S601:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 65 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 193, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 60, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -9896,14 +9774,14 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S604:
+					S603:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 608, p, call, atomic, repeat, lookahead, 0, 69));
+						entries.Add(new ParserEntry(ParserEntry.Call, 607, p, call, atomic, repeat, lookahead, 0, 69));
 						call = callIndex;
 					}
 
-					S605:
+					S604:
 					{
 						opened93 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 93, p, call, atomic, repeat, lookahead, 0));
@@ -9911,12 +9789,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 607, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 606, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 149; goto Leave; }
+						{ state = 148; goto Leave; }
 					}
 
-					S607:
+					S606:
 					{
 						var openedAt = opened93;
 
@@ -9953,12 +9831,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S608:
+					S607:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 69 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 194, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 61, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -9966,12 +9844,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S610:
+					S609:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 110 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 158, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 29 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 154, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -9979,23 +9857,23 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S612:
+					S611:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass10_DotGram[c] != 0)) { state = 642; goto Leave; }
+							if (!(c <= 255 && RecognizeClass10_DotGram[c] != 0)) { state = 641; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 642, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 641, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 624, p, call, atomic, repeat, lookahead, 0, 18));
+						entries.Add(new ParserEntry(ParserEntry.Call, 623, p, call, atomic, repeat, lookahead, 0, 18));
 						call = callIndex;
 					}
 
-					S614:
+					S613:
 					{
 						opened49 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 49, p, call, atomic, repeat, lookahead, 0));
@@ -10008,14 +9886,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == 't') { state = 622; goto Leave; }
-						if (c == 'a') { state = 620; goto Leave; }
-						if (c == 'i') goto S616;
+						if (c == 't') { state = 621; goto Leave; }
+						if (c == 'a') { state = 619; goto Leave; }
+						if (c == 'i') goto S615;
 						expected = ExpectedSet_DotGram(40);
 						{ state = 2; goto Leave; }
 					}
 
-					S616:
+					S615:
 					{
 						if (p > 0)
 						{
@@ -10063,7 +9941,7 @@ namespace AspectGenerator.FilterV2
 						p += 8;
 					}
 
-					S618:
+					S617:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -10120,24 +9998,24 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 620: goto S620;
-						case 622: goto S622;
-						case 624: goto S624;
-						case 626: goto S626;
+						case 619: goto S619;
+						case 621: goto S621;
+						case 623: goto S623;
+						case 625: goto S625;
+						case 627: goto S627;
 						case 628: goto S628;
-						case 631: goto S631;
-						case 633: goto S633;
-						case 635: goto S635;
+						case 630: goto S630;
+						case 632: goto S632;
+						case 634: goto S634;
+						case 636: goto S636;
 						case 637: goto S637;
-						case 638: goto S638;
-						case 640: goto S640;
-						case 642: goto S642;
-						case 644: goto S644;
-						case 648: goto S648;
+						case 639: goto S639;
+						case 641: goto S641;
+						case 643: goto S643;
 					}
 					goto Leave;
 
-					S620:
+					S619:
 					{
 						if (p > 0)
 						{
@@ -10185,10 +10063,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 618; goto Leave; }
+						{ state = 617; goto Leave; }
 					}
 
-					S622:
+					S621:
 					{
 						if (p > 0)
 						{
@@ -10226,26 +10104,26 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 4;
-						{ state = 618; goto Leave; }
+						{ state = 617; goto Leave; }
 					}
 
-					S624:
+					S623:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 18 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 159, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 155, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 626, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 625, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S626:
+					S625:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -10258,40 +10136,41 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 628, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 627, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S628:
+					S627:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 640, p, call, atomic, repeat, lookahead, 0, 111));
+						entries.Add(new ParserEntry(ParserEntry.Call, 639, p, call, atomic, repeat, lookahead, 0, 30));
 						call = callIndex;
 					}
 
+					S628:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'a')) goto S633;
+							if (!(c == 'a')) goto S632;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 633, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 632, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 631, p, call, atomic, repeat, lookahead, 0, 105));
+						entries.Add(new ParserEntry(ParserEntry.Call, 630, p, call, atomic, repeat, lookahead, 0, 34));
 						call = callIndex;
 						{ state = 104; goto Leave; }
 					}
 
-					S631:
+					S630:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 105 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 195, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 34 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 62, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -10299,31 +10178,31 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S633:
+					S632:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet5_DotGram, c))) goto S637;
-							if (!(c <= 255 && RecognizeClass11_DotGram[c] != 0)) goto S634;
+							if (!(RecognizeIn_DotGram(RecognizeSet5_DotGram, c))) goto S636;
+							if (!(c <= 255 && RecognizeClass11_DotGram[c] != 0)) goto S633;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 637, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 636, p, call, atomic, repeat, lookahead, 0));
+					}
+
+					S633:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 634, p, call, atomic, repeat, lookahead, 0, 76));
+						call = callIndex;
+						{ state = 358; goto Leave; }
 					}
 
 					S634:
 					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 635, p, call, atomic, repeat, lookahead, 0, 76));
-						call = callIndex;
-						{ state = 359; goto Leave; }
-					}
-
-					S635:
-					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 76 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 196, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 63, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -10331,20 +10210,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S637:
+					S636:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 638, p, call, atomic, repeat, lookahead, 0, 69));
+						entries.Add(new ParserEntry(ParserEntry.Call, 637, p, call, atomic, repeat, lookahead, 0, 69));
 						call = callIndex;
-						{ state = 605; goto Leave; }
+						{ state = 604; goto Leave; }
 					}
 
-					S638:
+					S637:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 69 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 197, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 64, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -10352,12 +10231,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S640:
+					S639:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 111 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 160, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 30 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 156, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -10365,23 +10244,23 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S642:
+					S641:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass9_DotGram[c] != 0)) { state = 661; goto Leave; }
+							if (!(c <= 255 && RecognizeClass9_DotGram[c] != 0)) { state = 660; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 661, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 660, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 654, p, call, atomic, repeat, lookahead, 0, 19));
+						entries.Add(new ParserEntry(ParserEntry.Call, 653, p, call, atomic, repeat, lookahead, 0, 19));
 						call = callIndex;
 					}
 
-					S644:
+					S643:
 					{
 						opened50 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 50, p, call, atomic, repeat, lookahead, 0));
@@ -10394,14 +10273,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'm') { state = 652; goto Leave; }
-						if (c == 'i') { state = 650; goto Leave; }
-						if (c == 'o') goto S646;
+						if (c == 'm') { state = 651; goto Leave; }
+						if (c == 'i') { state = 649; goto Leave; }
+						if (c == 'o') goto S645;
 						expected = ExpectedSet_DotGram(44);
 						{ state = 2; goto Leave; }
 					}
 
-					S646:
+					S645:
 					{
 						if (p > 0)
 						{
@@ -10449,9 +10328,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
+						{ state = 647; goto Leave; }
 					}
 
-					S648:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart21_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 647: goto S647;
+						case 649: goto S649;
+						case 651: goto S651;
+						case 653: goto S653;
+						case 655: goto S655;
+						case 657: goto S657;
+						case 658: goto S658;
+						case 660: goto S660;
+						case 662: goto S662;
+						case 667: goto S667;
+						case 669: goto S669;
+					}
+					goto Leave;
+
+					S647:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -10500,31 +10402,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					Leave:
-					return state;
-				}
-
-				int RecognizePart21_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 650: goto S650;
-						case 652: goto S652;
-						case 654: goto S654;
-						case 656: goto S656;
-						case 658: goto S658;
-						case 659: goto S659;
-						case 661: goto S661;
-						case 663: goto S663;
-						case 668: goto S668;
-						case 670: goto S670;
-						case 672: goto S672;
-						case 675: goto S675;
-						case 677: goto S677;
-					}
-					goto Leave;
-
-					S650:
+					S649:
 					{
 						if (p > 0)
 						{
@@ -10574,10 +10452,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 10;
-						{ state = 648; goto Leave; }
+						goto S647;
 					}
 
-					S652:
+					S651:
 					{
 						if (p > 0)
 						{
@@ -10619,26 +10497,26 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 648; goto Leave; }
+						goto S647;
 					}
 
-					S654:
+					S653:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 19 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 161, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 157, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 656, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 655, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S656:
+					S655:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -10651,25 +10529,25 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 658, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 657, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S658:
+					S657:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 659, p, call, atomic, repeat, lookahead, 0, 110));
+						entries.Add(new ParserEntry(ParserEntry.Call, 658, p, call, atomic, repeat, lookahead, 0, 29));
 						call = callIndex;
 						{ state = 102; goto Leave; }
 					}
 
-					S659:
+					S658:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 110 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 162, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 29 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 158, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -10677,23 +10555,23 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S661:
+					S660:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'r')) { state = 705; goto Leave; }
+							if (!(c == 'r')) { state = 704; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 705, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 704, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 668, p, call, atomic, repeat, lookahead, 0, 20));
+						entries.Add(new ParserEntry(ParserEntry.Call, 667, p, call, atomic, repeat, lookahead, 0, 20));
 						call = callIndex;
 					}
 
-					S663:
+					S662:
 					{
 						opened51 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 51, p, call, atomic, repeat, lookahead, 0));
@@ -10792,23 +10670,23 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S668:
+					S667:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 20 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 163, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 159, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 670, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 669, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S670:
+					S669:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -10821,53 +10699,9 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 672, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 671, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
-					}
-
-					S672:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 703, p, call, atomic, repeat, lookahead, 0, 112));
-						call = callIndex;
-					}
-
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(c == 'a')) goto S677;
-						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 677, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 675, p, call, atomic, repeat, lookahead, 0, 105));
-						call = callIndex;
-						{ state = 104; goto Leave; }
-					}
-
-					S675:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 105 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 198, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S677:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 701, p, call, atomic, repeat, lookahead, 0, 88));
-						call = callIndex;
-						{ state = 678; goto Leave; }
 					}
 
 					Leave:
@@ -10878,27 +10712,73 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 678: goto S678;
-						case 688: goto S688;
-						case 690: goto S690;
-						case 696: goto S696;
+						case 671: goto S671;
+						case 672: goto S672;
+						case 674: goto S674;
+						case 676: goto S676;
+						case 687: goto S687;
+						case 689: goto S689;
+						case 695: goto S695;
+						case 697: goto S697;
 						case 698: goto S698;
-						case 699: goto S699;
-						case 701: goto S701;
-						case 703: goto S703;
-						case 705: goto S705;
-						case 707: goto S707;
+						case 700: goto S700;
+						case 702: goto S702;
+						case 704: goto S704;
+						case 706: goto S706;
 					}
 					goto Leave;
 
-					S678:
+					S671:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 702, p, call, atomic, repeat, lookahead, 0, 31));
+						call = callIndex;
+					}
+
+					S672:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'r')) goto S698;
+							if (!(c == 'a')) goto S676;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 690, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 676, p, call, atomic, repeat, lookahead, 0));
+					}
+
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 674, p, call, atomic, repeat, lookahead, 0, 34));
+						call = callIndex;
+						{ state = 104; goto Leave; }
+					}
+
+					S674:
+					{
+						var capturedCall = completedCall;
+						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 34 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 65, capturedCall, call, atomic, repeat, lookahead, p));
+					}
+
+					{
+						entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
+						{ state = 0; goto Leave; }
+					}
+
+					S676:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 700, p, call, atomic, repeat, lookahead, 0, 88));
+						call = callIndex;
+					}
+
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == 'r')) goto S697;
+						}
+						entries.Add(new ParserEntry(ParserEntry.Choice, 689, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -11033,12 +10913,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 688, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 687, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
-					S688:
+					S687:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -11051,14 +10931,14 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S690:
+					S689:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'r')) goto S698;
+							if (!(c == 'r')) goto S697;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 698, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 697, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -11123,12 +11003,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 696, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 695, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
-					S696:
+					S695:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -11141,15 +11021,15 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S698:
+					S697:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 699, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 698, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
-					S699:
+					S698:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -11162,12 +11042,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S701:
+					S700:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 88 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 199, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 66, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -11175,12 +11055,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S703:
+					S702:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 112 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 164, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 31 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 160, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -11188,23 +11068,23 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S705:
+					S704:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'p')) { state = 827; goto Leave; }
+							if (!(c == 'p')) { state = 826; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 806, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 805, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 712, p, call, atomic, repeat, lookahead, 0, 21));
+						entries.Add(new ParserEntry(ParserEntry.Call, 711, p, call, atomic, repeat, lookahead, 0, 21));
 						call = callIndex;
 					}
 
-					S707:
+					S706:
 					{
 						opened52 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 52, p, call, atomic, repeat, lookahead, 0));
@@ -11251,7 +11131,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 710; goto Leave; }
+						{ state = 709; goto Leave; }
 					}
 
 					Leave:
@@ -11262,21 +11142,22 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 710: goto S710;
-						case 712: goto S712;
-						case 714: goto S714;
+						case 709: goto S709;
+						case 711: goto S711;
+						case 713: goto S713;
+						case 715: goto S715;
 						case 716: goto S716;
-						case 719: goto S719;
-						case 723: goto S723;
-						case 727: goto S727;
-						case 731: goto S731;
+						case 718: goto S718;
+						case 722: goto S722;
+						case 726: goto S726;
+						case 730: goto S730;
+						case 736: goto S736;
 						case 737: goto S737;
 						case 738: goto S738;
-						case 739: goto S739;
 					}
 					goto Leave;
 
-					S710:
+					S709:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -11325,23 +11206,23 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S712:
+					S711:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 21 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 165, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 161, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 714, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 713, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S714:
+					S713:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -11354,18 +11235,19 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 716, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 715, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S716:
+					S715:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 804, p, call, atomic, repeat, lookahead, 0, 113));
+						entries.Add(new ParserEntry(ParserEntry.Call, 803, p, call, atomic, repeat, lookahead, 0, 32));
 						call = callIndex;
 					}
 
+					S716:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -11373,27 +11255,27 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'a') { state = 801; goto Leave; }
-						if (c == '(') goto S718;
+						if (c == 'a') { state = 800; goto Leave; }
+						if (c == '(') goto S717;
 						expected = ExpectedSet_DotGram(73);
 						{ state = 2; goto Leave; }
 					}
 
-					S718:
+					S717:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 799, p, call, atomic, repeat, lookahead, 0, 89));
+						entries.Add(new ParserEntry(ParserEntry.Call, 798, p, call, atomic, repeat, lookahead, 0, 89));
 						call = callIndex;
 					}
 
-					S719:
+					S718:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '(')) { state = 795; goto Leave; }
+							if (!(c == '(')) { state = 794; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 795, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 794, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -11411,18 +11293,18 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 782, p, call, atomic, repeat, lookahead, 0, 90));
+						entries.Add(new ParserEntry(ParserEntry.Call, 781, p, call, atomic, repeat, lookahead, 0, 90));
 						call = callIndex;
 					}
 
-					S723:
+					S722:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '.')) goto S731;
+							if (!(c == '.')) goto S730;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 727, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 726, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -11467,18 +11349,18 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S727:
+					S726:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '.')) goto S731;
-							goto S728;
+							if (!(c == '.')) goto S730;
+							goto S727;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 731, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 730, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S728:
+					S727:
 					{
 						if (text.Length - p < 2)
 						{
@@ -11516,14 +11398,14 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S731:
+					S730:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '_')) goto S737;
+							if (!(c == '_')) goto S736;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 737, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 736, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -11576,24 +11458,24 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S737:
+					S736:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass20_DotGram[c] != 0) goto S741;
+							if (c <= 255 && RecognizeClass20_DotGram[c] != 0) goto S740;
 						}
 					}
 
-					S738:
+					S737:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 739, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 738, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
-					S739:
+					S738:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -11606,12 +11488,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S741:
+					S740:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
-						{ state = 742; goto Leave; }
+						{ state = 741; goto Leave; }
 					}
 
 					Leave:
@@ -11622,19 +11504,19 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 742: goto S742;
-						case 760: goto S760;
+						case 741: goto S741;
+						case 759: goto S759;
 					}
 					goto Leave;
 
-					S742:
+					S741:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 781, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 780, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 780, p, call, atomic, repeat, lookahead, 0, 91));
+						entries.Add(new ParserEntry(ParserEntry.Call, 779, p, call, atomic, repeat, lookahead, 0, 91));
 						call = callIndex;
 					}
 
@@ -11647,17 +11529,17 @@ namespace AspectGenerator.FilterV2
 						c = text[p];
 						switch (c)
 						{
-							case 'i': { state = 775; goto Leave; }
-							case 'o': { state = 770; goto Leave; }
-							case 'p': goto S765;
-							case 'r': goto S750;
-							case 't': goto S745;
+							case 'i': { state = 774; goto Leave; }
+							case 'o': { state = 769; goto Leave; }
+							case 'p': goto S764;
+							case 'r': goto S749;
+							case 't': goto S744;
 						}
 						expected = ExpectedSet_DotGram(138);
 						{ state = 2; goto Leave; }
 					}
 
-					S745:
+					S744:
 					{
 						if (p > 0)
 						{
@@ -11725,9 +11607,9 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S750:
+					S749:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 760, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 759, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -11865,7 +11747,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S760:
+					S759:
 					{
 						if (p > 0)
 						{
@@ -11931,7 +11813,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S765:
+					S764:
 					{
 						if (p > 0)
 						{
@@ -12011,22 +11893,22 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 770: goto S770;
-						case 775: goto S775;
+						case 769: goto S769;
+						case 774: goto S774;
+						case 779: goto S779;
 						case 780: goto S780;
 						case 781: goto S781;
-						case 782: goto S782;
+						case 792: goto S792;
 						case 793: goto S793;
 						case 794: goto S794;
-						case 795: goto S795;
-						case 799: goto S799;
+						case 798: goto S798;
+						case 800: goto S800;
 						case 801: goto S801;
-						case 802: goto S802;
-						case 804: goto S804;
+						case 803: goto S803;
 					}
 					goto Leave;
 
-					S770:
+					S769:
 					{
 						if (p > 0)
 						{
@@ -12092,7 +11974,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S775:
+					S774:
 					{
 						if (p > 0)
 						{
@@ -12153,16 +12035,16 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S780:
+					S779:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 91 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 139, capturedCall, call, atomic, repeat, lookahead, p));
-						{ state = 742; goto Leave; }
+						{ state = 741; goto Leave; }
 					}
 
-					S781:
+					S780:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -12171,10 +12053,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 738; goto Leave; }
+						{ state = 737; goto Leave; }
 					}
 
-					S782:
+					S781:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -12186,11 +12068,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S787;
+							if (c <= 255 && RecognizeClass18_DotGram[c] != 0) goto S786;
 						}
 					}
 
-					S784:
+					S783:
 					{
 						p = Scan_DotGram_Lex_Sp(text, p);
 					}
@@ -12209,16 +12091,16 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S787:
+					S786:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S788:
+					S787:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 794, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 793, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -12240,21 +12122,21 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 793, p, call, atomic, repeat, lookahead, 0, 90));
+						entries.Add(new ParserEntry(ParserEntry.Call, 792, p, call, atomic, repeat, lookahead, 0, 90));
 						call = callIndex;
-						{ state = 723; goto Leave; }
+						{ state = 722; goto Leave; }
 					}
 
-					S793:
+					S792:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 90 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 138, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S788;
+						goto S787;
 					}
 
-					S794:
+					S793:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -12263,10 +12145,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S784;
+						goto S783;
 					}
 
-					S795:
+					S794:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '(')
 						{
@@ -12294,12 +12176,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S799:
+					S798:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 89 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 201, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 68, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -12307,20 +12189,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S801:
+					S800:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 802, p, call, atomic, repeat, lookahead, 0, 105));
+						entries.Add(new ParserEntry(ParserEntry.Call, 801, p, call, atomic, repeat, lookahead, 0, 34));
 						call = callIndex;
 						{ state = 104; goto Leave; }
 					}
 
-					S802:
+					S801:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 105 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 200, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 34 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 67, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -12328,12 +12210,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S804:
+					S803:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 113 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 166, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 32 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 162, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -12349,38 +12231,39 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 806: goto S806;
-						case 808: goto S808;
-						case 813: goto S813;
-						case 815: goto S815;
+						case 805: goto S805;
+						case 807: goto S807;
+						case 812: goto S812;
+						case 814: goto S814;
+						case 816: goto S816;
 						case 817: goto S817;
-						case 820: goto S820;
+						case 819: goto S819;
+						case 821: goto S821;
 						case 822: goto S822;
-						case 823: goto S823;
-						case 825: goto S825;
-						case 827: goto S827;
-						case 829: goto S829;
-						case 833: goto S833;
+						case 824: goto S824;
+						case 826: goto S826;
+						case 828: goto S828;
+						case 832: goto S832;
 					}
 					goto Leave;
 
-					S806:
+					S805:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'p')) goto S827;
+							if (!(c == 'p')) goto S826;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 827, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 826, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 813, p, call, atomic, repeat, lookahead, 0, 22));
+						entries.Add(new ParserEntry(ParserEntry.Call, 812, p, call, atomic, repeat, lookahead, 0, 22));
 						call = callIndex;
 					}
 
-					S808:
+					S807:
 					{
 						opened53 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 53, p, call, atomic, repeat, lookahead, 0));
@@ -12475,23 +12358,23 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S813:
+					S812:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 22 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 167, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 163, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 815, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 814, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S815:
+					S814:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -12504,40 +12387,41 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 817, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 816, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S817:
+					S816:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 825, p, call, atomic, repeat, lookahead, 0, 114));
+						entries.Add(new ParserEntry(ParserEntry.Call, 824, p, call, atomic, repeat, lookahead, 0, 33));
 						call = callIndex;
 					}
 
+					S817:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'a')) goto S822;
+							if (!(c == 'a')) goto S821;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 822, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 821, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 820, p, call, atomic, repeat, lookahead, 0, 105));
+						entries.Add(new ParserEntry(ParserEntry.Call, 819, p, call, atomic, repeat, lookahead, 0, 34));
 						call = callIndex;
 						{ state = 104; goto Leave; }
 					}
 
-					S820:
+					S819:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 105 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 202, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 34 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 69, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -12545,20 +12429,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S822:
+					S821:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 823, p, call, atomic, repeat, lookahead, 0, 90));
+						entries.Add(new ParserEntry(ParserEntry.Call, 822, p, call, atomic, repeat, lookahead, 0, 90));
 						call = callIndex;
-						{ state = 723; goto Leave; }
+						{ state = 722; goto Leave; }
 					}
 
-					S823:
+					S822:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 90 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 203, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 70, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -12566,12 +12450,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S825:
+					S824:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 114 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 168, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 33 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 164, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -12579,23 +12463,23 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S827:
+					S826:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass8_DotGram[c] != 0)) { state = 910; goto Leave; }
+							if (!(c <= 255 && RecognizeClass8_DotGram[c] != 0)) { state = 909; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 860, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 859, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 853, p, call, atomic, repeat, lookahead, 0, 23));
+						entries.Add(new ParserEntry(ParserEntry.Call, 852, p, call, atomic, repeat, lookahead, 0, 23));
 						call = callIndex;
 					}
 
-					S829:
+					S828:
 					{
 						opened54 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 54, p, call, atomic, repeat, lookahead, 0));
@@ -12610,19 +12494,19 @@ namespace AspectGenerator.FilterV2
 						c = text[p];
 						switch (c)
 						{
-							case 'a': { state = 848; goto Leave; }
-							case 'e': { state = 843; goto Leave; }
-							case 'g': { state = 841; goto Leave; }
-							case 'l': { state = 839; goto Leave; }
-							case 'o': { state = 837; goto Leave; }
-							case 's': { state = 835; goto Leave; }
-							case 'v': goto S831;
+							case 'a': { state = 847; goto Leave; }
+							case 'e': { state = 842; goto Leave; }
+							case 'g': { state = 840; goto Leave; }
+							case 'l': { state = 838; goto Leave; }
+							case 'o': { state = 836; goto Leave; }
+							case 's': { state = 834; goto Leave; }
+							case 'v': goto S830;
 						}
 						expected = ExpectedSet_DotGram(57);
 						{ state = 2; goto Leave; }
 					}
 
-					S831:
+					S830:
 					{
 						if (p > 0)
 						{
@@ -12674,7 +12558,7 @@ namespace AspectGenerator.FilterV2
 						p += 10;
 					}
 
-					S833:
+					S832:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -12731,17 +12615,17 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 835: goto S835;
-						case 837: goto S837;
-						case 839: goto S839;
-						case 841: goto S841;
-						case 843: goto S843;
-						case 846: goto S846;
-						case 848: goto S848;
+						case 834: goto S834;
+						case 836: goto S836;
+						case 838: goto S838;
+						case 840: goto S840;
+						case 842: goto S842;
+						case 845: goto S845;
+						case 847: goto S847;
 					}
 					goto Leave;
 
-					S835:
+					S834:
 					{
 						if (p > 0)
 						{
@@ -12783,10 +12667,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 833; goto Leave; }
+						{ state = 832; goto Leave; }
 					}
 
-					S837:
+					S836:
 					{
 						if (p > 0)
 						{
@@ -12828,10 +12712,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 833; goto Leave; }
+						{ state = 832; goto Leave; }
 					}
 
-					S839:
+					S838:
 					{
 						if (p > 0)
 						{
@@ -12877,10 +12761,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 833; goto Leave; }
+						{ state = 832; goto Leave; }
 					}
 
-					S841:
+					S840:
 					{
 						if (p > 0)
 						{
@@ -12928,12 +12812,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 833; goto Leave; }
+						{ state = 832; goto Leave; }
 					}
 
-					S843:
+					S842:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 846, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 845, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -12977,10 +12861,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 833; goto Leave; }
+						{ state = 832; goto Leave; }
 					}
 
-					S846:
+					S845:
 					{
 						if (p > 0)
 						{
@@ -13028,12 +12912,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 833; goto Leave; }
+						{ state = 832; goto Leave; }
 					}
 
-					S848:
+					S847:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 851, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 850, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -13091,7 +12975,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 13;
-						{ state = 833; goto Leave; }
+						{ state = 832; goto Leave; }
 					}
 
 					Leave:
@@ -13102,24 +12986,22 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 851: goto S851;
-						case 853: goto S853;
-						case 855: goto S855;
+						case 850: goto S850;
+						case 852: goto S852;
+						case 854: goto S854;
+						case 856: goto S856;
 						case 857: goto S857;
-						case 858: goto S858;
-						case 860: goto S860;
-						case 862: goto S862;
-						case 864: goto S864;
-						case 866: goto S866;
-						case 868: goto S868;
-						case 871: goto S871;
-						case 875: goto S875;
-						case 878: goto S878;
-						case 880: goto S880;
+						case 859: goto S859;
+						case 861: goto S861;
+						case 863: goto S863;
+						case 865: goto S865;
+						case 867: goto S867;
+						case 870: goto S870;
+						case 874: goto S874;
 					}
 					goto Leave;
 
-					S851:
+					S850:
 					{
 						if (p > 0)
 						{
@@ -13159,26 +13041,26 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 5;
-						{ state = 833; goto Leave; }
+						{ state = 832; goto Leave; }
 					}
 
-					S853:
+					S852:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 23 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 169, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 165, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 855, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 854, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S855:
+					S854:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -13191,25 +13073,25 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 857, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 856, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S857:
+					S856:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 858, p, call, atomic, repeat, lookahead, 0, 105));
+						entries.Add(new ParserEntry(ParserEntry.Call, 857, p, call, atomic, repeat, lookahead, 0, 34));
 						call = callIndex;
 						{ state = 104; goto Leave; }
 					}
 
-					S858:
+					S857:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 105 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 170, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 34 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 166, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -13217,40 +13099,40 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S860:
+					S859:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass8_DotGram[c] != 0)) { state = 910; goto Leave; }
+							if (!(c <= 255 && RecognizeClass8_DotGram[c] != 0)) { state = 909; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 910, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 909, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 862, p, call, atomic, repeat, lookahead, 0, 23));
+						entries.Add(new ParserEntry(ParserEntry.Call, 861, p, call, atomic, repeat, lookahead, 0, 23));
 						call = callIndex;
-						{ state = 829; goto Leave; }
+						{ state = 828; goto Leave; }
 					}
 
-					S862:
+					S861:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 23 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 171, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 167, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 864, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 863, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S864:
+					S863:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -13263,12 +13145,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 866, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 865, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S866:
+					S865:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -13279,11 +13161,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S870;
+							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S869;
 						}
 					}
 
-					S868:
+					S867:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -13299,20 +13181,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S870:
+					S869:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S871:
+					S870:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 909, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 908, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -13324,14 +13206,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') { state = 899; goto Leave; }
-						if (c == '(') goto S874;
-						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S873;
+						if (c == '"') { state = 898; goto Leave; }
+						if (c == '(') goto S873;
+						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S872;
 						expected = ExpectedSet_DotGram(31);
 						{ state = 2; goto Leave; }
 					}
 
-					S873:
+					S872:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -13345,17 +13227,17 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S871;
+						goto S870;
 					}
 
-					S874:
+					S873:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 871, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 870, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
 					}
 
-					S875:
+					S874:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '(')
 						{
@@ -13369,17 +13251,39 @@ namespace AspectGenerator.FilterV2
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
 						atomic = atomicIndex;
+						{ state = 876; goto Leave; }
 					}
 
+					Leave:
+					return state;
+				}
+
+				int RecognizePart29_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 876: goto S876;
+						case 879: goto S879;
+						case 881: goto S881;
+						case 893: goto S893;
+						case 897: goto S897;
+						case 898: goto S898;
+						case 904: goto S904;
+						case 908: goto S908;
+						case 909: goto S909;
+					}
+					goto Leave;
+
+					S876:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S881;
+							if ((c >= '\0' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S880;
 						}
 					}
 
-					S878:
+					S877:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -13394,13 +13298,13 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == ')')) goto S880;
+							if (!(c == ')')) goto S879;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 880, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 879, p, call, atomic, repeat, lookahead, 0));
 						{ state = 64; goto Leave; }
 					}
 
-					S880:
+					S879:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -13413,40 +13317,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S881:
+					S880:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
-						{ state = 882; goto Leave; }
 					}
 
-					Leave:
-					return state;
-				}
-
-				int RecognizePart29_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 882: goto S882;
-						case 894: goto S894;
-						case 898: goto S898;
-						case 899: goto S899;
-						case 905: goto S905;
-						case 909: goto S909;
-						case 910: goto S910;
-						case 912: goto S912;
-					}
-					goto Leave;
-
-					S882:
+					S881:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 898, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 897, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -13458,15 +13342,15 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S888;
-						if (c == '(') goto S887;
-						if (c == '#') goto S885;
-						if ((c >= '\0' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S884;
+						if (c == '"') goto S887;
+						if (c == '(') goto S886;
+						if (c == '#') goto S884;
+						if ((c >= '\0' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S883;
 						expected = ExpectedSet_DotGram(96);
 						{ state = 2; goto Leave; }
 					}
 
-					S884:
+					S883:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -13480,10 +13364,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S882;
+						goto S881;
 					}
 
-					S885:
+					S884:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -13499,30 +13383,30 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 882, runStart, call, atomic, repeat, lookahead, p));
-						goto S882;
+							entries.Add(new ParserEntry(ParserEntry.Run, 881, runStart, call, atomic, repeat, lookahead, p));
+						goto S881;
+					}
+
+					S886:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 881, p, call, atomic, repeat, lookahead, 0, -1));
+						call = callIndex;
+						{ state = 874; goto Leave; }
 					}
 
 					S887:
 					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 882, p, call, atomic, repeat, lookahead, 0, -1));
-						call = callIndex;
-						{ state = 875; goto Leave; }
+						if ((uint)p >= (uint)text.Length || text[p] != '"')
+						{
+							expected = ExpectedSet_DotGram(7);
+							{ state = 2; goto Leave; }
+						}
+						p += 1;
 					}
 
 					S888:
 					{
-						if ((uint)p >= (uint)text.Length || text[p] != '"')
-						{
-							expected = ExpectedSet_DotGram(7);
-							{ state = 2; goto Leave; }
-						}
-						p += 1;
-					}
-
-					S889:
-					{
 						turn0 = p;
 					}
 
@@ -13530,15 +13414,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S891;
+							goto S890;
 						}
 						c = text[p];
-						if (c == '\\') goto S896;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S895;
+						if (c == '\\') goto S895;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S894;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S891:
+					S890:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -13560,9 +13444,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S894;
+							if (!(c == '"')) goto S893;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 894, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 893, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -13572,45 +13456,45 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S882;
+						goto S881;
+					}
+
+					S893:
+					{
+						var scanned = Scan_DotGram_eof(text, p);
+						if (scanned < 0)
+						{
+							p = -1 - scanned;
+							expected = ExpectedSet_DotGram(2);
+							{ state = 2; goto Leave; }
+						}
+						p = scanned;
+						goto S881;
 					}
 
 					S894:
 					{
-						var scanned = Scan_DotGram_eof(text, p);
-						if (scanned < 0)
-						{
-							p = -1 - scanned;
-							expected = ExpectedSet_DotGram(2);
-							{ state = 2; goto Leave; }
-						}
-						p = scanned;
-						goto S882;
-					}
-
-					S895:
-					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S891;
+							goto S890;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S891;
+							goto S890;
 						}
 						p++;
-						goto S889;
+						goto S888;
 					}
 
-					S896:
+					S895:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S891;
+							goto S890;
 						}
 						p += 1;
 					}
@@ -13621,13 +13505,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S891;
+							goto S890;
 						}
 						p = scanned;
-						goto S889;
+						goto S888;
 					}
 
-					S898:
+					S897:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -13636,10 +13520,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 878; goto Leave; }
+						goto S877;
 					}
 
-					S899:
+					S898:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -13649,7 +13533,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S900:
+					S899:
 					{
 						turn0 = p;
 					}
@@ -13658,15 +13542,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S902;
+							goto S901;
 						}
 						c = text[p];
-						if (c == '\\') goto S907;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S906;
+						if (c == '\\') goto S906;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S905;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S902:
+					S901:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -13688,9 +13572,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S905;
+							if (!(c == '"')) goto S904;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 905, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 904, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -13700,10 +13584,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						{ state = 871; goto Leave; }
+						{ state = 870; goto Leave; }
 					}
 
-					S905:
+					S904:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -13713,32 +13597,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						{ state = 871; goto Leave; }
+						{ state = 870; goto Leave; }
 					}
 
-					S906:
+					S905:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S902;
+							goto S901;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S902;
+							goto S901;
 						}
 						p++;
-						goto S900;
+						goto S899;
 					}
 
-					S907:
+					S906:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S902;
+							goto S901;
 						}
 						p += 1;
 					}
@@ -13749,13 +13633,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S902;
+							goto S901;
 						}
 						p = scanned;
-						goto S900;
+						goto S899;
 					}
 
-					S909:
+					S908:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -13764,40 +13648,24 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 868; goto Leave; }
+						{ state = 867; goto Leave; }
 					}
 
-					S910:
+					S909:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'p')) { state = 938; goto Leave; }
+							if (!(c == 'p')) { state = 937; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 938, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 937, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 912, p, call, atomic, repeat, lookahead, 0, 21));
+						entries.Add(new ParserEntry(ParserEntry.Call, 911, p, call, atomic, repeat, lookahead, 0, 21));
 						call = callIndex;
-						{ state = 707; goto Leave; }
-					}
-
-					S912:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 21 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 172, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						seaming++;
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 914, p, call, atomic, repeat, lookahead, 0, -2));
-						call = callIndex;
-						{ state = 33; goto Leave; }
+						{ state = 706; goto Leave; }
 					}
 
 					Leave:
@@ -13808,16 +13676,33 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 914: goto S914;
-						case 916: goto S916;
-						case 918: goto S918;
-						case 923: goto S923;
-						case 933: goto S933;
-						case 937: goto S937;
+						case 911: goto S911;
+						case 913: goto S913;
+						case 915: goto S915;
+						case 917: goto S917;
+						case 922: goto S922;
+						case 932: goto S932;
+						case 936: goto S936;
 					}
 					goto Leave;
 
-					S914:
+					S911:
+					{
+						var capturedCall = completedCall;
+						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 21 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 168, capturedCall, call, atomic, repeat, lookahead, p));
+					}
+
+					{
+						seaming++;
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 913, p, call, atomic, repeat, lookahead, 0, -2));
+						call = callIndex;
+						{ state = 33; goto Leave; }
+					}
+
+					S913:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -13830,12 +13715,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 916, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 915, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S916:
+					S915:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -13853,12 +13738,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 918, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 917, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S918:
+					S917:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -13869,11 +13754,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S922;
+							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S921;
 						}
 					}
 
-					S920:
+					S919:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -13889,20 +13774,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S922:
+					S921:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S923:
+					S922:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 937, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 936, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -13914,14 +13799,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S927;
-						if (c == '(') goto S926;
-						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S925;
+						if (c == '"') goto S926;
+						if (c == '(') goto S925;
+						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S924;
 						expected = ExpectedSet_DotGram(31);
 						{ state = 2; goto Leave; }
 					}
 
-					S925:
+					S924:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -13935,18 +13820,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S923;
+						goto S922;
+					}
+
+					S925:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 922, p, call, atomic, repeat, lookahead, 0, -1));
+						call = callIndex;
+						{ state = 874; goto Leave; }
 					}
 
 					S926:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 923, p, call, atomic, repeat, lookahead, 0, -1));
-						call = callIndex;
-						{ state = 875; goto Leave; }
-					}
-
-					S927:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -13956,7 +13841,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S928:
+					S927:
 					{
 						turn0 = p;
 					}
@@ -13965,15 +13850,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S930;
+							goto S929;
 						}
 						c = text[p];
-						if (c == '\\') goto S935;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S934;
+						if (c == '\\') goto S934;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S933;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S930:
+					S929:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -13995,9 +13880,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S933;
+							if (!(c == '"')) goto S932;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 933, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 932, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -14007,10 +13892,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S923;
+						goto S922;
 					}
 
-					S933:
+					S932:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -14020,32 +13905,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S923;
+						goto S922;
 					}
 
-					S934:
+					S933:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S930;
+							goto S929;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S930;
+							goto S929;
 						}
 						p++;
-						goto S928;
+						goto S927;
 					}
 
-					S935:
+					S934:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S930;
+							goto S929;
 						}
 						p += 1;
 					}
@@ -14056,13 +13941,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S930;
+							goto S929;
 						}
 						p = scanned;
-						goto S928;
+						goto S927;
 					}
 
-					S937:
+					S936:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -14071,7 +13956,7 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S920;
+						goto S919;
 					}
 
 					Leave:
@@ -14082,30 +13967,30 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 938: goto S938;
-						case 940: goto S940;
-						case 944: goto S944;
-						case 951: goto S951;
+						case 937: goto S937;
+						case 939: goto S939;
+						case 943: goto S943;
+						case 950: goto S950;
 					}
 					goto Leave;
 
-					S938:
+					S937:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass7_DotGram[c] != 0)) { state = 988; goto Leave; }
+							if (!(c <= 255 && RecognizeClass7_DotGram[c] != 0)) { state = 987; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 988, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 987, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 962, p, call, atomic, repeat, lookahead, 0, 24));
+						entries.Add(new ParserEntry(ParserEntry.Call, 961, p, call, atomic, repeat, lookahead, 0, 24));
 						call = callIndex;
 					}
 
-					S940:
+					S939:
 					{
 						opened55 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 55, p, call, atomic, repeat, lookahead, 0));
@@ -14120,18 +14005,18 @@ namespace AspectGenerator.FilterV2
 						c = text[p];
 						switch (c)
 						{
-							case 'a': { state = 960; goto Leave; }
-							case 'c': { state = 958; goto Leave; }
-							case 'f': goto S953;
-							case 'p': goto S948;
-							case 'r': goto S946;
-							case 's': goto S942;
+							case 'a': { state = 959; goto Leave; }
+							case 'c': { state = 957; goto Leave; }
+							case 'f': goto S952;
+							case 'p': goto S947;
+							case 'r': goto S945;
+							case 's': goto S941;
 						}
 						expected = ExpectedSet_DotGram(66);
 						{ state = 2; goto Leave; }
 					}
 
-					S942:
+					S941:
 					{
 						if (p > 0)
 						{
@@ -14181,7 +14066,7 @@ namespace AspectGenerator.FilterV2
 						p += 9;
 					}
 
-					S944:
+					S943:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -14230,7 +14115,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S946:
+					S945:
 					{
 						if (p > 0)
 						{
@@ -14270,12 +14155,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 5;
-						goto S944;
+						goto S943;
 					}
 
-					S948:
+					S947:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 951, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 950, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -14321,10 +14206,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						goto S944;
+						goto S943;
 					}
 
-					S951:
+					S950:
 					{
 						if (p > 0)
 						{
@@ -14362,12 +14247,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 4;
-						goto S944;
+						goto S943;
 					}
 
-					S953:
+					S952:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 956, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 955, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -14415,7 +14300,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						goto S944;
+						goto S943;
 					}
 
 					Leave:
@@ -14426,18 +14311,18 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 956: goto S956;
-						case 958: goto S958;
-						case 960: goto S960;
-						case 962: goto S962;
-						case 964: goto S964;
-						case 966: goto S966;
-						case 969: goto S969;
-						case 973: goto S973;
+						case 955: goto S955;
+						case 957: goto S957;
+						case 959: goto S959;
+						case 961: goto S961;
+						case 963: goto S963;
+						case 965: goto S965;
+						case 968: goto S968;
+						case 972: goto S972;
 					}
 					goto Leave;
 
-					S956:
+					S955:
 					{
 						if (p > 0)
 						{
@@ -14487,10 +14372,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 10;
-						{ state = 944; goto Leave; }
+						{ state = 943; goto Leave; }
 					}
 
-					S958:
+					S957:
 					{
 						if (p > 0)
 						{
@@ -14536,10 +14421,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 944; goto Leave; }
+						{ state = 943; goto Leave; }
 					}
 
-					S960:
+					S959:
 					{
 						if (p > 0)
 						{
@@ -14589,26 +14474,26 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 10;
-						{ state = 944; goto Leave; }
+						{ state = 943; goto Leave; }
 					}
 
-					S962:
+					S961:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 24 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 173, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 169, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 964, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 963, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S964:
+					S963:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -14621,14 +14506,14 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 966, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 965, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S966:
+					S965:
 					{
-						capture174 = p;
+						capture170 = p;
 					}
 
 					{
@@ -14641,11 +14526,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S972;
+							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S971;
 						}
 					}
 
-					S969:
+					S968:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -14657,7 +14542,7 @@ namespace AspectGenerator.FilterV2
 					}
 
 					{
-						entries.Add(new ParserEntry(ParserEntry.Capture, 174, capture174, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.Capture, 170, capture170, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -14665,20 +14550,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S972:
+					S971:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S973:
+					S972:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 987, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 986, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -14690,14 +14575,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S977;
-						if (c == '(') goto S976;
-						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S975;
+						if (c == '"') { state = 976; goto Leave; }
+						if (c == '(') goto S975;
+						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S974;
 						expected = ExpectedSet_DotGram(34);
 						{ state = 2; goto Leave; }
 					}
 
-					S975:
+					S974:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -14711,26 +14596,15 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S973;
+						goto S972;
 					}
 
-					S976:
+					S975:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 973, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 972, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 875; goto Leave; }
-					}
-
-					S977:
-					{
-						if ((uint)p >= (uint)text.Length || text[p] != '"')
-						{
-							expected = ExpectedSet_DotGram(7);
-							{ state = 2; goto Leave; }
-						}
-						p += 1;
-						{ state = 978; goto Leave; }
+						{ state = 874; goto Leave; }
 					}
 
 					Leave:
@@ -14741,17 +14615,27 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 978: goto S978;
-						case 983: goto S983;
+						case 976: goto S976;
+						case 982: goto S982;
+						case 986: goto S986;
 						case 987: goto S987;
-						case 988: goto S988;
-						case 990: goto S990;
-						case 998: goto S998;
-						case 1000: goto S1000;
+						case 989: goto S989;
+						case 997: goto S997;
+						case 999: goto S999;
 					}
 					goto Leave;
 
-					S978:
+					S976:
+					{
+						if ((uint)p >= (uint)text.Length || text[p] != '"')
+						{
+							expected = ExpectedSet_DotGram(7);
+							{ state = 2; goto Leave; }
+						}
+						p += 1;
+					}
+
+					S977:
 					{
 						turn0 = p;
 					}
@@ -14760,15 +14644,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S980;
+							goto S979;
 						}
 						c = text[p];
-						if (c == '\\') goto S985;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S984;
+						if (c == '\\') goto S984;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S983;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S980:
+					S979:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -14790,9 +14674,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S983;
+							if (!(c == '"')) goto S982;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 983, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 982, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -14802,10 +14686,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						{ state = 973; goto Leave; }
+						{ state = 972; goto Leave; }
 					}
 
-					S983:
+					S982:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -14815,32 +14699,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						{ state = 973; goto Leave; }
+						{ state = 972; goto Leave; }
 					}
 
-					S984:
+					S983:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S980;
+							goto S979;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S980;
+							goto S979;
 						}
 						p++;
-						goto S978;
+						goto S977;
 					}
 
-					S985:
+					S984:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S980;
+							goto S979;
 						}
 						p += 1;
 					}
@@ -14851,13 +14735,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S980;
+							goto S979;
 						}
 						p = scanned;
-						goto S978;
+						goto S977;
 					}
 
-					S987:
+					S986:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -14866,26 +14750,26 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 969; goto Leave; }
+						{ state = 968; goto Leave; }
 					}
 
-					S988:
+					S987:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'a' || c == 'w')) { state = 1024; goto Leave; }
+							if (!(c == 'a' || c == 'w')) { state = 1023; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1024, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1023, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 998, p, call, atomic, repeat, lookahead, 0, 25));
+						entries.Add(new ParserEntry(ParserEntry.Call, 997, p, call, atomic, repeat, lookahead, 0, 25));
 						call = callIndex;
 					}
 
-					S990:
+					S989:
 					{
 						opened56 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 56, p, call, atomic, repeat, lookahead, 0));
@@ -14898,13 +14782,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'w') goto S996;
-						if (c == 'a') goto S992;
+						if (c == 'w') goto S995;
+						if (c == 'a') goto S991;
 						expected = ExpectedSet_DotGram(69);
 						{ state = 2; goto Leave; }
 					}
 
-					S992:
+					S991:
 					{
 						if (p > 0)
 						{
@@ -14952,7 +14836,7 @@ namespace AspectGenerator.FilterV2
 						p += 8;
 					}
 
-					S994:
+					S993:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -15001,7 +14885,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S996:
+					S995:
 					{
 						if (p > 0)
 						{
@@ -15043,26 +14927,26 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						goto S994;
+						goto S993;
 					}
 
-					S998:
+					S997:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 25 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 175, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 171, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1000, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 999, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1000:
+					S999:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -15075,7 +14959,7 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1002, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1001, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
@@ -15088,21 +14972,21 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 1002: goto S1002;
-						case 1009: goto S1009;
-						case 1019: goto S1019;
+						case 1001: goto S1001;
+						case 1008: goto S1008;
+						case 1018: goto S1018;
+						case 1022: goto S1022;
 						case 1023: goto S1023;
-						case 1024: goto S1024;
-						case 1031: goto S1031;
-						case 1034: goto S1034;
-						case 1036: goto S1036;
-						case 1038: goto S1038;
+						case 1030: goto S1030;
+						case 1033: goto S1033;
+						case 1035: goto S1035;
+						case 1037: goto S1037;
 					}
 					goto Leave;
 
-					S1002:
+					S1001:
 					{
-						capture176 = p;
+						capture172 = p;
 					}
 
 					{
@@ -15115,11 +14999,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1008;
+							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1007;
 						}
 					}
 
-					S1005:
+					S1004:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -15131,7 +15015,7 @@ namespace AspectGenerator.FilterV2
 					}
 
 					{
-						entries.Add(new ParserEntry(ParserEntry.Capture, 176, capture176, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.Capture, 172, capture172, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -15139,20 +15023,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1008:
+					S1007:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1009:
+					S1008:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1023, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1022, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -15164,14 +15048,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S1013;
-						if (c == '(') goto S1012;
-						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1011;
+						if (c == '"') goto S1012;
+						if (c == '(') goto S1011;
+						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1010;
 						expected = ExpectedSet_DotGram(34);
 						{ state = 2; goto Leave; }
 					}
 
-					S1011:
+					S1010:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -15185,18 +15069,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1009;
+						goto S1008;
+					}
+
+					S1011:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1008, p, call, atomic, repeat, lookahead, 0, -1));
+						call = callIndex;
+						{ state = 874; goto Leave; }
 					}
 
 					S1012:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1009, p, call, atomic, repeat, lookahead, 0, -1));
-						call = callIndex;
-						{ state = 875; goto Leave; }
-					}
-
-					S1013:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -15206,7 +15090,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S1014:
+					S1013:
 					{
 						turn0 = p;
 					}
@@ -15215,15 +15099,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S1016;
+							goto S1015;
 						}
 						c = text[p];
-						if (c == '\\') goto S1021;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1020;
+						if (c == '\\') goto S1020;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1019;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S1016:
+					S1015:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -15245,9 +15129,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S1019;
+							if (!(c == '"')) goto S1018;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1019, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1018, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -15257,10 +15141,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S1009;
+						goto S1008;
 					}
 
-					S1019:
+					S1018:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -15270,32 +15154,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S1009;
+						goto S1008;
 					}
 
-					S1020:
+					S1019:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1016;
+							goto S1015;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1016;
+							goto S1015;
 						}
 						p++;
-						goto S1014;
+						goto S1013;
 					}
 
-					S1021:
+					S1020:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S1016;
+							goto S1015;
 						}
 						p += 1;
 					}
@@ -15306,13 +15190,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S1016;
+							goto S1015;
 						}
 						p = scanned;
-						goto S1014;
+						goto S1013;
 					}
 
-					S1023:
+					S1022:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -15321,27 +15205,27 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1005;
+						goto S1004;
 					}
 
-					S1024:
+					S1023:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet3_DotGram, c))) { state = 1062; goto Leave; }
+							if (!(RecognizeIn_DotGram(RecognizeSet3_DotGram, c))) { state = 1061; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1062, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1061, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1036, p, call, atomic, repeat, lookahead, 0, 104));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1035, p, call, atomic, repeat, lookahead, 0, 103));
 						call = callIndex;
 					}
 
 					{
-						capture181 = p;
+						capture177 = p;
 					}
 
 					{
@@ -15356,7 +15240,7 @@ namespace AspectGenerator.FilterV2
 					}
 
 					{
-						entries.Add(new ParserEntry(ParserEntry.Capture, 181, capture181, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.Capture, 177, capture177, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -15366,7 +15250,7 @@ namespace AspectGenerator.FilterV2
 						for (var candidateAt = entries.Count - 1; candidateAt > call; candidateAt--)
 						{
 							var candidate = entries[candidateAt];
-							if (candidate.Kind == ParserEntry.Capture && candidate.CallIndex == call && (candidate.State == 181))
+							if (candidate.Kind == ParserEntry.Capture && candidate.CallIndex == call && (candidate.State == 177))
 							{
 								guardCaptured0At = candidateAt;
 								break;
@@ -15379,12 +15263,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1031, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1030, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1031:
+					S1030:
 					{
 						var lookaheadIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Lookahead, 0, p, call, atomic, repeat, lookahead, 1));
@@ -15403,12 +15287,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1034, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1033, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1034:
+					S1033:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -15434,23 +15318,23 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1036:
+					S1035:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 104 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 177, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 103 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 173, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1038, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1037, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1038:
+					S1037:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -15463,7 +15347,7 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1040, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1039, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
@@ -15476,24 +15360,24 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 1040: goto S1040;
-						case 1047: goto S1047;
-						case 1057: goto S1057;
+						case 1039: goto S1039;
+						case 1046: goto S1046;
+						case 1056: goto S1056;
+						case 1060: goto S1060;
 						case 1061: goto S1061;
-						case 1062: goto S1062;
+						case 1064: goto S1064;
 						case 1065: goto S1065;
 						case 1066: goto S1066;
-						case 1067: goto S1067;
+						case 1068: goto S1068;
 						case 1069: goto S1069;
-						case 1070: goto S1070;
-						case 1075: goto S1075;
-						case 1078: goto S1078;
+						case 1074: goto S1074;
+						case 1077: goto S1077;
 					}
 					goto Leave;
 
-					S1040:
+					S1039:
 					{
-						capture178 = p;
+						capture174 = p;
 					}
 
 					{
@@ -15506,11 +15390,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1046;
+							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1045;
 						}
 					}
 
-					S1043:
+					S1042:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -15522,7 +15406,7 @@ namespace AspectGenerator.FilterV2
 					}
 
 					{
-						entries.Add(new ParserEntry(ParserEntry.Capture, 178, capture178, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.Capture, 174, capture174, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -15530,20 +15414,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1046:
+					S1045:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1047:
+					S1046:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1061, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1060, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -15555,14 +15439,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S1051;
-						if (c == '(') goto S1050;
-						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1049;
+						if (c == '"') goto S1050;
+						if (c == '(') goto S1049;
+						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1048;
 						expected = ExpectedSet_DotGram(34);
 						{ state = 2; goto Leave; }
 					}
 
-					S1049:
+					S1048:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -15576,18 +15460,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1047;
+						goto S1046;
+					}
+
+					S1049:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1046, p, call, atomic, repeat, lookahead, 0, -1));
+						call = callIndex;
+						{ state = 874; goto Leave; }
 					}
 
 					S1050:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1047, p, call, atomic, repeat, lookahead, 0, -1));
-						call = callIndex;
-						{ state = 875; goto Leave; }
-					}
-
-					S1051:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -15597,7 +15481,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S1052:
+					S1051:
 					{
 						turn0 = p;
 					}
@@ -15606,15 +15490,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S1054;
+							goto S1053;
 						}
 						c = text[p];
-						if (c == '\\') goto S1059;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1058;
+						if (c == '\\') goto S1058;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1057;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S1054:
+					S1053:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -15636,9 +15520,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S1057;
+							if (!(c == '"')) goto S1056;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1057, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1056, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -15648,10 +15532,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S1047;
+						goto S1046;
 					}
 
-					S1057:
+					S1056:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -15661,32 +15545,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S1047;
+						goto S1046;
 					}
 
-					S1058:
+					S1057:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1054;
+							goto S1053;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1054;
+							goto S1053;
 						}
 						p++;
-						goto S1052;
+						goto S1051;
 					}
 
-					S1059:
+					S1058:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S1054;
+							goto S1053;
 						}
 						p += 1;
 					}
@@ -15697,13 +15581,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S1054;
+							goto S1053;
 						}
 						p = scanned;
-						goto S1052;
+						goto S1051;
 					}
 
-					S1061:
+					S1060:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -15712,19 +15596,19 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1043;
+						goto S1042;
 					}
 
-					S1062:
+					S1061:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1095, p, call, atomic, repeat, lookahead, 0, 103));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1094, p, call, atomic, repeat, lookahead, 0, 102));
 						call = callIndex;
 					}
 
 					{
 						var lookaheadIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Lookahead, 1084, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Lookahead, 1083, p, call, atomic, repeat, lookahead, 0));
 						lookahead = lookaheadIndex;
 						negating++;
 					}
@@ -15738,32 +15622,32 @@ namespace AspectGenerator.FilterV2
 						c = text[p];
 						switch (c)
 						{
-							case 'a': { state = 1081; goto Leave; }
-							case 'c': case 'f': goto S1070;
-							case 'e': case 'g': case 'l': case 'v': goto S1069;
-							case 'i': { state = 1080; goto Leave; }
-							case 'm': goto S1078;
-							case 'n': { state = 1079; goto Leave; }
-							case 'o': goto S1077;
-							case 'p': goto S1073;
-							case 'r': goto S1071;
-							case 's': goto S1068;
-							case 't': goto S1067;
-							case 'w': goto S1065;
+							case 'a': { state = 1080; goto Leave; }
+							case 'c': case 'f': goto S1069;
+							case 'e': case 'g': case 'l': case 'v': goto S1068;
+							case 'i': { state = 1079; goto Leave; }
+							case 'm': goto S1077;
+							case 'n': { state = 1078; goto Leave; }
+							case 'o': goto S1076;
+							case 'p': goto S1072;
+							case 'r': goto S1070;
+							case 's': goto S1067;
+							case 't': goto S1066;
+							case 'w': goto S1064;
 						}
 						expected = ExpectedSet_DotGram(72);
 						{ state = 2; goto Leave; }
 					}
 
-					S1065:
+					S1064:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1066, p, call, atomic, repeat, lookahead, 0, 25));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1065, p, call, atomic, repeat, lookahead, 0, 25));
 						call = callIndex;
-						{ state = 990; goto Leave; }
+						{ state = 989; goto Leave; }
 					}
 
-					S1066:
+					S1065:
 					{
 						global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
 						var looked = entries[lookahead];
@@ -15779,82 +15663,82 @@ namespace AspectGenerator.FilterV2
 						{ state = 2; goto Leave; }
 					}
 
-					S1067:
+					S1066:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1066, p, call, atomic, repeat, lookahead, 0, 18));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1065, p, call, atomic, repeat, lookahead, 0, 18));
 						call = callIndex;
-						{ state = 614; goto Leave; }
+						{ state = 613; goto Leave; }
+					}
+
+					S1067:
+					{
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1069, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					S1068:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1070, p, call, atomic, repeat, lookahead, 0));
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1065, p, call, atomic, repeat, lookahead, 0, 23));
+						call = callIndex;
+						{ state = 828; goto Leave; }
 					}
 
 					S1069:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1066, p, call, atomic, repeat, lookahead, 0, 23));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1065, p, call, atomic, repeat, lookahead, 0, 24));
 						call = callIndex;
-						{ state = 829; goto Leave; }
+						{ state = 939; goto Leave; }
 					}
 
 					S1070:
 					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1066, p, call, atomic, repeat, lookahead, 0, 24));
-						call = callIndex;
-						{ state = 940; goto Leave; }
-					}
-
-					S1071:
-					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1070, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1069, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1066, p, call, atomic, repeat, lookahead, 0, 20));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1065, p, call, atomic, repeat, lookahead, 0, 20));
 						call = callIndex;
-						{ state = 663; goto Leave; }
+						{ state = 662; goto Leave; }
 					}
 
-					S1073:
+					S1072:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1075, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1074, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1066, p, call, atomic, repeat, lookahead, 0, 21));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1065, p, call, atomic, repeat, lookahead, 0, 21));
 						call = callIndex;
-						{ state = 707; goto Leave; }
+						{ state = 706; goto Leave; }
 					}
 
-					S1075:
-					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1070, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1066, p, call, atomic, repeat, lookahead, 0, 22));
-						call = callIndex;
-						{ state = 808; goto Leave; }
-					}
-
-					S1077:
+					S1074:
 					{
 						entries.Add(new ParserEntry(ParserEntry.Choice, 1069, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S1078:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1066, p, call, atomic, repeat, lookahead, 0, 19));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1065, p, call, atomic, repeat, lookahead, 0, 22));
 						call = callIndex;
-						{ state = 644; goto Leave; }
+						{ state = 807; goto Leave; }
+					}
+
+					S1076:
+					{
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1068, p, call, atomic, repeat, lookahead, 0));
+					}
+
+					S1077:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1065, p, call, atomic, repeat, lookahead, 0, 19));
+						call = callIndex;
+						{ state = 643; goto Leave; }
 					}
 
 					Leave:
@@ -15865,67 +15749,67 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
+						case 1078: goto S1078;
 						case 1079: goto S1079;
 						case 1080: goto S1080;
 						case 1081: goto S1081;
 						case 1082: goto S1082;
 						case 1083: goto S1083;
 						case 1084: goto S1084;
-						case 1085: goto S1085;
-						case 1090: goto S1090;
-						case 1093: goto S1093;
-						case 1095: goto S1095;
-						case 1097: goto S1097;
-						case 1099: goto S1099;
-						case 1101: goto S1101;
-						case 1104: goto S1104;
+						case 1089: goto S1089;
+						case 1092: goto S1092;
+						case 1094: goto S1094;
+						case 1096: goto S1096;
+						case 1098: goto S1098;
+						case 1100: goto S1100;
+						case 1103: goto S1103;
 					}
 					goto Leave;
 
-					S1079:
+					S1078:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1066, p, call, atomic, repeat, lookahead, 0, 17));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1065, p, call, atomic, repeat, lookahead, 0, 17));
 						call = callIndex;
 						{ state = 92; goto Leave; }
 					}
 
+					S1079:
+					{
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1077, p, call, atomic, repeat, lookahead, 0));
+						{ state = 1066; goto Leave; }
+					}
+
 					S1080:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1078, p, call, atomic, repeat, lookahead, 0));
-						{ state = 1067; goto Leave; }
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1081, p, call, atomic, repeat, lookahead, 0));
+						{ state = 1066; goto Leave; }
 					}
 
 					S1081:
 					{
 						entries.Add(new ParserEntry(ParserEntry.Choice, 1082, p, call, atomic, repeat, lookahead, 0));
-						{ state = 1067; goto Leave; }
+						{ state = 1068; goto Leave; }
 					}
 
 					S1082:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1083, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1064, p, call, atomic, repeat, lookahead, 0));
 						{ state = 1069; goto Leave; }
 					}
 
 					S1083:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1065, p, call, atomic, repeat, lookahead, 0));
-						{ state = 1070; goto Leave; }
-					}
-
-					S1084:
-					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1085, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1084, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1085:
+					S1084:
 					{
-						capture180 = p;
+						capture176 = p;
 					}
 
 					{
@@ -15940,7 +15824,7 @@ namespace AspectGenerator.FilterV2
 					}
 
 					{
-						entries.Add(new ParserEntry(ParserEntry.Capture, 180, capture180, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.Capture, 176, capture176, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -15950,7 +15834,7 @@ namespace AspectGenerator.FilterV2
 						for (var candidateAt = entries.Count - 1; candidateAt > call; candidateAt--)
 						{
 							var candidate = entries[candidateAt];
-							if (candidate.Kind == ParserEntry.Capture && candidate.CallIndex == call && (candidate.State == 180))
+							if (candidate.Kind == ParserEntry.Capture && candidate.CallIndex == call && (candidate.State == 176))
 							{
 								guardCaptured0At = candidateAt;
 								break;
@@ -15963,12 +15847,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1090, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1089, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1090:
+					S1089:
 					{
 						var lookaheadIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Lookahead, 0, p, call, atomic, repeat, lookahead, 1));
@@ -15987,12 +15871,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1093, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1092, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1093:
+					S1092:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -16018,23 +15902,23 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1095:
+					S1094:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 103 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 179, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 102 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 175, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1097, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1096, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1097:
+					S1096:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != ':')
 						{
@@ -16047,12 +15931,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1099, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1098, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1099:
+					S1098:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -16063,11 +15947,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1103;
+							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1102;
 						}
 					}
 
-					S1101:
+					S1100:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -16083,20 +15967,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1103:
+					S1102:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1104:
+					S1103:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1118, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1117, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -16108,14 +15992,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S1108;
-						if (c == '(') goto S1107;
-						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1106;
+						if (c == '"') goto S1107;
+						if (c == '(') goto S1106;
+						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1105;
 						expected = ExpectedSet_DotGram(31);
 						{ state = 2; goto Leave; }
 					}
 
-					S1106:
+					S1105:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -16129,18 +16013,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1104;
+						goto S1103;
+					}
+
+					S1106:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1103, p, call, atomic, repeat, lookahead, 0, -1));
+						call = callIndex;
+						{ state = 874; goto Leave; }
 					}
 
 					S1107:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1104, p, call, atomic, repeat, lookahead, 0, -1));
-						call = callIndex;
-						{ state = 875; goto Leave; }
-					}
-
-					S1108:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -16148,7 +16032,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						{ state = 1109; goto Leave; }
+						{ state = 1108; goto Leave; }
 					}
 
 					Leave:
@@ -16159,20 +16043,20 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 1109: goto S1109;
-						case 1114: goto S1114;
+						case 1108: goto S1108;
+						case 1113: goto S1113;
+						case 1117: goto S1117;
 						case 1118: goto S1118;
-						case 1119: goto S1119;
-						case 1121: goto S1121;
-						case 1123: goto S1123;
-						case 1125: goto S1125;
+						case 1120: goto S1120;
+						case 1122: goto S1122;
+						case 1124: goto S1124;
+						case 1128: goto S1128;
 						case 1129: goto S1129;
-						case 1130: goto S1130;
-						case 1134: goto S1134;
+						case 1133: goto S1133;
 					}
 					goto Leave;
 
-					S1109:
+					S1108:
 					{
 						turn0 = p;
 					}
@@ -16181,15 +16065,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S1111;
+							goto S1110;
 						}
 						c = text[p];
-						if (c == '\\') goto S1116;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1115;
+						if (c == '\\') goto S1115;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1114;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S1111:
+					S1110:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -16211,9 +16095,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S1114;
+							if (!(c == '"')) goto S1113;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1114, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1113, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -16223,10 +16107,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						{ state = 1104; goto Leave; }
+						{ state = 1103; goto Leave; }
 					}
 
-					S1114:
+					S1113:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -16236,32 +16120,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						{ state = 1104; goto Leave; }
+						{ state = 1103; goto Leave; }
 					}
 
-					S1115:
+					S1114:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1111;
+							goto S1110;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1111;
+							goto S1110;
 						}
 						p++;
-						goto S1109;
+						goto S1108;
 					}
 
-					S1116:
+					S1115:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S1111;
+							goto S1110;
 						}
 						p += 1;
 					}
@@ -16272,13 +16156,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S1111;
+							goto S1110;
 						}
 						p = scanned;
-						goto S1109;
+						goto S1108;
 					}
 
-					S1118:
+					S1117:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -16287,15 +16171,15 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 1101; goto Leave; }
+						{ state = 1100; goto Leave; }
 					}
 
-					S1119:
+					S1118:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 102 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 153, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 101 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 187, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -16303,29 +16187,29 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1121:
+					S1120:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'a')) goto S1125;
+							if (!(c == 'a')) goto S1124;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1125, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1124, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1123, p, call, atomic, repeat, lookahead, 0, 35));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1122, p, call, atomic, repeat, lookahead, 0, 35));
 						call = callIndex;
-						{ state = 112; goto Leave; }
+						{ state = 111; goto Leave; }
 					}
 
-					S1123:
+					S1122:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 35 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 154, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 188, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -16333,21 +16217,21 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
+					S1124:
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(RecognizeIn_DotGram(RecognizeSet7_DotGram, c))) { state = 1280; goto Leave; }
+							if (!(c == '/' || c == 'a')) goto S1125;
+						}
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1280, p, call, atomic, repeat, lookahead, 0));
+					}
+
 					S1125:
 					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet7_DotGram, c))) { state = 1281; goto Leave; }
-							if (!(c == '/' || c == 'a')) goto S1126;
-						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1281, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					S1126:
-					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1279, p, call, atomic, repeat, lookahead, 0, 106));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1278, p, call, atomic, repeat, lookahead, 0, 104));
 						call = callIndex;
 					}
 
@@ -16355,18 +16239,18 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass13_DotGram[c] != 0)) { state = 1276; goto Leave; }
+							if (!(c <= 255 && RecognizeClass13_DotGram[c] != 0)) { state = 1275; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1276, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1275, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1224, p, call, atomic, repeat, lookahead, 0, 107));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1223, p, call, atomic, repeat, lookahead, 0, 105));
 						call = callIndex;
 					}
 
-					S1129:
+					S1128:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -16376,20 +16260,20 @@ namespace AspectGenerator.FilterV2
 						c = text[p];
 						switch (c)
 						{
-							case 'a': case 'g': case 'o': case 's': case 'v': { state = 1173; goto Leave; }
-							case 'e': { state = 1172; goto Leave; }
-							case 'i': { state = 1215; goto Leave; }
-							case 'p': { state = 1145; goto Leave; }
-							case 'r': case 'u': goto S1130;
+							case 'a': case 'g': case 'o': case 's': case 'v': { state = 1172; goto Leave; }
+							case 'e': { state = 1171; goto Leave; }
+							case 'i': { state = 1214; goto Leave; }
+							case 'p': { state = 1144; goto Leave; }
+							case 'r': case 'u': goto S1129;
 						}
 						expected = ExpectedSet_DotGram(93);
 						{ state = 2; goto Leave; }
 					}
 
-					S1130:
+					S1129:
 					{
-						opened188 = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 188, p, call, atomic, repeat, lookahead, 0));
+						opened183 = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 183, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -16399,16 +16283,16 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'i') { state = 1143; goto Leave; }
-						if (c == 'u') { state = 1141; goto Leave; }
-						if (c == 'p') { state = 1139; goto Leave; }
-						if (c == 'r') goto S1137;
-						if (c == 'e') goto S1132;
+						if (c == 'i') { state = 1142; goto Leave; }
+						if (c == 'u') { state = 1140; goto Leave; }
+						if (c == 'p') { state = 1138; goto Leave; }
+						if (c == 'r') { state = 1136; goto Leave; }
+						if (c == 'e') goto S1131;
 						expected = ExpectedSet_DotGram(92);
 						{ state = 2; goto Leave; }
 					}
 
-					S1132:
+					S1131:
 					{
 						if (p > 0)
 						{
@@ -16454,7 +16338,7 @@ namespace AspectGenerator.FilterV2
 						p += 7;
 					}
 
-					S1134:
+					S1133:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -16468,9 +16352,9 @@ namespace AspectGenerator.FilterV2
 					}
 
 					{
-						var openedAt = opened188;
+						var openedAt = opened183;
 
-						if ((uint)openedAt >= (uint)entries.Count || entries[openedAt].Kind != ParserEntry.CaptureOpen || entries[openedAt].State != 188 || entries[openedAt].CallIndex != call)
+						if ((uint)openedAt >= (uint)entries.Count || entries[openedAt].Kind != ParserEntry.CaptureOpen || entries[openedAt].State != 183 || entries[openedAt].CallIndex != call)
 						{
 							var closed = 0;
 
@@ -16478,7 +16362,7 @@ namespace AspectGenerator.FilterV2
 							{
 								var opened = entries[openedAt];
 
-								if (opened.State != 188) continue;
+								if (opened.State != 183) continue;
 
 								if (opened.Kind == ParserEntry.Capture)
 								{
@@ -16495,11 +16379,11 @@ namespace AspectGenerator.FilterV2
 								closed--;
 							}
 
-							opened188 = openedAt;
+							opened183 = openedAt;
 						}
 
 						global::System.Diagnostics.Debug.Assert(openedAt >= 0);
-						entries.Add(new ParserEntry(ParserEntry.Capture, 188, entries[openedAt].Position, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.Capture, 183, entries[openedAt].Position, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -16507,7 +16391,24 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1137:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart38_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 1136: goto S1136;
+						case 1138: goto S1138;
+						case 1140: goto S1140;
+						case 1142: goto S1142;
+						case 1144: goto S1144;
+						case 1149: goto S1149;
+					}
+					goto Leave;
+
+					S1136:
 					{
 						if (p > 0)
 						{
@@ -16553,26 +16454,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						goto S1134;
+						{ state = 1133; goto Leave; }
 					}
 
-					Leave:
-					return state;
-				}
-
-				int RecognizePart38_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 1139: goto S1139;
-						case 1141: goto S1141;
-						case 1143: goto S1143;
-						case 1145: goto S1145;
-						case 1150: goto S1150;
-					}
-					goto Leave;
-
-					S1139:
+					S1138:
 					{
 						if (p > 0)
 						{
@@ -16616,10 +16501,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						{ state = 1134; goto Leave; }
+						{ state = 1133; goto Leave; }
 					}
 
-					S1141:
+					S1140:
 					{
 						if (p > 0)
 						{
@@ -16661,10 +16546,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 1134; goto Leave; }
+						{ state = 1133; goto Leave; }
 					}
 
-					S1143:
+					S1142:
 					{
 						if (p > 0)
 						{
@@ -16710,12 +16595,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 1134; goto Leave; }
+						{ state = 1133; goto Leave; }
 					}
 
-					S1145:
+					S1144:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1154, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1153, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -16782,12 +16667,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1150, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1149, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1150:
+					S1149:
 					{
 						if (p > 0)
 						{
@@ -16860,18 +16745,18 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 1154: goto S1154;
-						case 1159: goto S1159;
-						case 1163: goto S1163;
-						case 1168: goto S1168;
+						case 1153: goto S1153;
+						case 1158: goto S1158;
+						case 1162: goto S1162;
+						case 1167: goto S1167;
+						case 1171: goto S1171;
 						case 1172: goto S1172;
-						case 1173: goto S1173;
 					}
 					goto Leave;
 
-					S1154:
+					S1153:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1163, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1162, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -16934,12 +16819,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1159, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1158, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1159:
+					S1158:
 					{
 						if (p > 0)
 						{
@@ -17006,9 +16891,9 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1163:
+					S1162:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1172, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1171, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -17075,12 +16960,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1168, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1167, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1168:
+					S1167:
 					{
 						if (p > 0)
 						{
@@ -17143,15 +17028,15 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1172:
+					S1171:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1130, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1129, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S1173:
+					S1172:
 					{
-						opened187 = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 187, p, call, atomic, repeat, lookahead, 0));
+						opened182 = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 182, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -17163,31 +17048,17 @@ namespace AspectGenerator.FilterV2
 						c = text[p];
 						switch (c)
 						{
-							case 'a': { state = 1210; goto Leave; }
-							case 'e': { state = 1205; goto Leave; }
-							case 'g': { state = 1203; goto Leave; }
-							case 'i': { state = 1198; goto Leave; }
-							case 'o': { state = 1196; goto Leave; }
-							case 'p': { state = 1185; goto Leave; }
-							case 's': { state = 1180; goto Leave; }
-							case 'v': goto S1175;
+							case 'a': { state = 1209; goto Leave; }
+							case 'e': { state = 1204; goto Leave; }
+							case 'g': { state = 1202; goto Leave; }
+							case 'i': { state = 1197; goto Leave; }
+							case 'o': { state = 1195; goto Leave; }
+							case 'p': { state = 1184; goto Leave; }
+							case 's': { state = 1179; goto Leave; }
+							case 'v': { state = 1174; goto Leave; }
 						}
 						expected = ExpectedSet_DotGram(86);
 						{ state = 2; goto Leave; }
-					}
-
-					S1175:
-					{
-						if (p > 0)
-						{
-							c = text[p - 1];
-							if ((c < 128 ? c <= 255 && RecognizeClass0_DotGram[c] != 0 : (Categories_DotGram_4837F(c))))
-							{
-								expected = ExpectedSet_DotGram(16);
-								{ state = 2; goto Leave; }
-							}
-						}
-						{ state = 1176; goto Leave; }
 					}
 
 					Leave:
@@ -17198,17 +17069,29 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
+						case 1174: goto S1174;
 						case 1176: goto S1176;
-						case 1177: goto S1177;
-						case 1180: goto S1180;
-						case 1183: goto S1183;
-						case 1185: goto S1185;
-						case 1188: goto S1188;
-						case 1191: goto S1191;
+						case 1179: goto S1179;
+						case 1182: goto S1182;
+						case 1184: goto S1184;
+						case 1187: goto S1187;
+						case 1190: goto S1190;
 					}
 					goto Leave;
 
-					S1176:
+					S1174:
+					{
+						if (p > 0)
+						{
+							c = text[p - 1];
+							if ((c < 128 ? c <= 255 && RecognizeClass0_DotGram[c] != 0 : (Categories_DotGram_4837F(c))))
+							{
+								expected = ExpectedSet_DotGram(16);
+								{ state = 2; goto Leave; }
+							}
+						}
+					}
+
 					{
 						if (text.Length - p < 7)
 						{
@@ -17242,7 +17125,7 @@ namespace AspectGenerator.FilterV2
 						p += 7;
 					}
 
-					S1177:
+					S1176:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -17256,9 +17139,9 @@ namespace AspectGenerator.FilterV2
 					}
 
 					{
-						var openedAt = opened187;
+						var openedAt = opened182;
 
-						if ((uint)openedAt >= (uint)entries.Count || entries[openedAt].Kind != ParserEntry.CaptureOpen || entries[openedAt].State != 187 || entries[openedAt].CallIndex != call)
+						if ((uint)openedAt >= (uint)entries.Count || entries[openedAt].Kind != ParserEntry.CaptureOpen || entries[openedAt].State != 182 || entries[openedAt].CallIndex != call)
 						{
 							var closed = 0;
 
@@ -17266,7 +17149,7 @@ namespace AspectGenerator.FilterV2
 							{
 								var opened = entries[openedAt];
 
-								if (opened.State != 187) continue;
+								if (opened.State != 182) continue;
 
 								if (opened.Kind == ParserEntry.Capture)
 								{
@@ -17283,11 +17166,11 @@ namespace AspectGenerator.FilterV2
 								closed--;
 							}
 
-							opened187 = openedAt;
+							opened182 = openedAt;
 						}
 
 						global::System.Diagnostics.Debug.Assert(openedAt >= 0);
-						entries.Add(new ParserEntry(ParserEntry.Capture, 187, entries[openedAt].Position, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.Capture, 182, entries[openedAt].Position, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -17295,9 +17178,9 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1180:
+					S1179:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1183, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1182, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -17341,10 +17224,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						goto S1177;
+						goto S1176;
 					}
 
-					S1183:
+					S1182:
 					{
 						if (p > 0)
 						{
@@ -17386,12 +17269,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						goto S1177;
+						goto S1176;
 					}
 
-					S1185:
+					S1184:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1188, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1187, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -17435,12 +17318,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						goto S1177;
+						goto S1176;
 					}
 
-					S1188:
+					S1187:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1191, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1190, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -17490,12 +17373,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						goto S1177;
+						goto S1176;
 					}
 
-					S1191:
+					S1190:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1194, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1193, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -17541,7 +17424,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						goto S1177;
+						goto S1176;
 					}
 
 					Leave:
@@ -17552,17 +17435,17 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 1194: goto S1194;
-						case 1196: goto S1196;
-						case 1198: goto S1198;
-						case 1201: goto S1201;
-						case 1203: goto S1203;
-						case 1205: goto S1205;
-						case 1208: goto S1208;
+						case 1193: goto S1193;
+						case 1195: goto S1195;
+						case 1197: goto S1197;
+						case 1200: goto S1200;
+						case 1202: goto S1202;
+						case 1204: goto S1204;
+						case 1207: goto S1207;
 					}
 					goto Leave;
 
-					S1194:
+					S1193:
 					{
 						if (p > 0)
 						{
@@ -17606,10 +17489,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						{ state = 1177; goto Leave; }
+						{ state = 1176; goto Leave; }
 					}
 
-					S1196:
+					S1195:
 					{
 						if (p > 0)
 						{
@@ -17655,12 +17538,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 1177; goto Leave; }
+						{ state = 1176; goto Leave; }
 					}
 
-					S1198:
+					S1197:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1201, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1200, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -17708,10 +17591,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 1177; goto Leave; }
+						{ state = 1176; goto Leave; }
 					}
 
-					S1201:
+					S1200:
 					{
 						if (p > 0)
 						{
@@ -17757,10 +17640,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 1177; goto Leave; }
+						{ state = 1176; goto Leave; }
 					}
 
-					S1203:
+					S1202:
 					{
 						if (p > 0)
 						{
@@ -17808,12 +17691,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 1177; goto Leave; }
+						{ state = 1176; goto Leave; }
 					}
 
-					S1205:
+					S1204:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1208, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1207, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -17857,10 +17740,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 1177; goto Leave; }
+						{ state = 1176; goto Leave; }
 					}
 
-					S1208:
+					S1207:
 					{
 						if (p > 0)
 						{
@@ -17908,7 +17791,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 1177; goto Leave; }
+						{ state = 1176; goto Leave; }
 					}
 
 					Leave:
@@ -17919,22 +17802,17 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 1210: goto S1210;
-						case 1213: goto S1213;
-						case 1215: goto S1215;
-						case 1220: goto S1220;
-						case 1224: goto S1224;
-						case 1226: goto S1226;
-						case 1227: goto S1227;
-						case 1228: goto S1228;
-						case 1229: goto S1229;
-						case 1231: goto S1231;
+						case 1209: goto S1209;
+						case 1212: goto S1212;
+						case 1214: goto S1214;
+						case 1219: goto S1219;
+						case 1223: goto S1223;
 					}
 					goto Leave;
 
-					S1210:
+					S1209:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1213, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1212, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -17976,10 +17854,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 5;
-						{ state = 1177; goto Leave; }
+						{ state = 1176; goto Leave; }
 					}
 
-					S1213:
+					S1212:
 					{
 						if (p > 0)
 						{
@@ -18025,12 +17903,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 1177; goto Leave; }
+						{ state = 1176; goto Leave; }
 					}
 
-					S1215:
+					S1214:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1172, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1171, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -18095,12 +17973,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1220, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1219, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1220:
+					S1219:
 					{
 						if (p > 0)
 						{
@@ -18167,76 +18045,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1224:
+					S1223:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 107 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 183, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 105 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 178, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1226, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1225, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
-					}
-
-					S1226:
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (c <= 255 && RecognizeClass21_DotGram[c] != 0) { state = 1270; goto Leave; }
-						}
-					}
-
-					S1227:
-					{
-						seaming++;
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1228, p, call, atomic, repeat, lookahead, 0, -2));
-						call = callIndex;
-						{ state = 33; goto Leave; }
-					}
-
-					S1228:
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (RecognizeIn_DotGram(RecognizeSet7_DotGram, c)) goto S1230;
-						}
-					}
-
-					S1229:
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1230:
-					{
-						var repeatIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
-						repeat = repeatIndex;
-					}
-
-					S1231:
-					{
-						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
-						var repeating = entries[repeat];
-						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) { state = 1269; goto Leave; }
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1269, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1267, p, call, atomic, repeat, lookahead, 0, 108));
-						call = callIndex;
-						{ state = 1233; goto Leave; }
 					}
 
 					Leave:
@@ -18247,33 +18069,88 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 1233: goto S1233;
-						case 1240: goto S1240;
+						case 1225: goto S1225;
+						case 1227: goto S1227;
+						case 1239: goto S1239;
+						case 1241: goto S1241;
 						case 1242: goto S1242;
 						case 1243: goto S1243;
-						case 1244: goto S1244;
-						case 1250: goto S1250;
+						case 1249: goto S1249;
+						case 1253: goto S1253;
 						case 1254: goto S1254;
-						case 1255: goto S1255;
-						case 1257: goto S1257;
-						case 1261: goto S1261;
+						case 1256: goto S1256;
+						case 1260: goto S1260;
+						case 1262: goto S1262;
 						case 1263: goto S1263;
-						case 1264: goto S1264;
+						case 1265: goto S1265;
 						case 1266: goto S1266;
-						case 1267: goto S1267;
-						case 1269: goto S1269;
-						case 1270: goto S1270;
+						case 1268: goto S1268;
+						case 1272: goto S1272;
 						case 1273: goto S1273;
 						case 1274: goto S1274;
 						case 1275: goto S1275;
-						case 1276: goto S1276;
 					}
 					goto Leave;
 
-					S1233:
+					S1225:
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (c <= 255 && RecognizeClass21_DotGram[c] != 0) goto S1269;
+						}
+					}
+
+					S1226:
+					{
+						seaming++;
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1227, p, call, atomic, repeat, lookahead, 0, -2));
+						call = callIndex;
+						{ state = 33; goto Leave; }
+					}
+
+					S1227:
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (RecognizeIn_DotGram(RecognizeSet7_DotGram, c)) goto S1229;
+						}
+					}
+
+					S1228:
+					{
+						entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
+						{ state = 0; goto Leave; }
+					}
+
+					S1229:
+					{
+						var repeatIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
+						repeat = repeatIndex;
+					}
+
+					S1230:
+					{
+						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+						var repeating = entries[repeat];
+						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
+						if (repeating.Value >= 1) goto S1268;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1268, p, call, atomic, repeat, lookahead, 0));
+					}
+
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1266, p, call, atomic, repeat, lookahead, 0, 106));
+						call = callIndex;
+					}
+
+					S1232:
 					{
 						var lookaheadIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Lookahead, 1242, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Lookahead, 1241, p, call, atomic, repeat, lookahead, 0));
 						lookahead = lookaheadIndex;
 						negating++;
 					}
@@ -18282,9 +18159,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'a')) goto S1240;
+							if (!(c == 'a')) goto S1239;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1240, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1239, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -18330,7 +18207,7 @@ namespace AspectGenerator.FilterV2
 						p += 6;
 					}
 
-					S1237:
+					S1236:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -18367,7 +18244,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 2; goto Leave; }
 					}
 
-					S1240:
+					S1239:
 					{
 						if (p > 0)
 						{
@@ -18413,75 +18290,75 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						goto S1237;
+						goto S1236;
 					}
 
-					S1242:
+					S1241:
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1243, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1242, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1243:
+					S1242:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1244, p, call, atomic, repeat, lookahead, 0, 65));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1243, p, call, atomic, repeat, lookahead, 0, 65));
 						call = callIndex;
-						{ state = 139; goto Leave; }
+						{ state = 138; goto Leave; }
 					}
 
-					S1244:
+					S1243:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 65 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 189, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 184, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass15_DotGram[c] != 0) goto S1258;
+							if (c <= 255 && RecognizeClass15_DotGram[c] != 0) goto S1257;
 						}
 					}
 
-					S1246:
+					S1245:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass14_DotGram[c] != 0) goto S1247;
+							if (c <= 255 && RecognizeClass14_DotGram[c] != 0) goto S1246;
 						}
 						{ state = 0; goto Leave; }
 					}
 
-					S1247:
+					S1246:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1248:
+					S1247:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) goto S1257;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1257, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) goto S1256;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1256, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1255, p, call, atomic, repeat, lookahead, 0, 41));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1254, p, call, atomic, repeat, lookahead, 0, 41));
 						call = callIndex;
 					}
 
-					S1250:
+					S1249:
 					{
 						p = Scan_DotGram_Lex_Sp(text, p);
 					}
@@ -18501,12 +18378,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1254, p, call, atomic, repeat, lookahead, 0, 76));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1253, p, call, atomic, repeat, lookahead, 0, 76));
 						call = callIndex;
-						{ state = 359; goto Leave; }
+						{ state = 358; goto Leave; }
 					}
 
-					S1254:
+					S1253:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -18515,12 +18392,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1255:
+					S1254:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 41 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 191, capturedCall, call, atomic, repeat, lookahead, p));
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 186, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -18528,10 +18405,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S1248;
+						goto S1247;
 					}
 
-					S1257:
+					S1256:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -18543,41 +18420,41 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1258:
+					S1257:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1259:
+					S1258:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) goto S1266;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1266, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) goto S1265;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1265, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1264, p, call, atomic, repeat, lookahead, 0, 40));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1263, p, call, atomic, repeat, lookahead, 0, 40));
 						call = callIndex;
 					}
 
-					S1261:
+					S1260:
 					{
 						p = Scan_DotGram_Lex_Sp(text, p);
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1263, p, call, atomic, repeat, lookahead, 0, 89));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1262, p, call, atomic, repeat, lookahead, 0, 89));
 						call = callIndex;
-						{ state = 719; goto Leave; }
+						{ state = 718; goto Leave; }
 					}
 
-					S1263:
+					S1262:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -18586,39 +18463,11 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1264:
+					S1263:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 40 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 190, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
-						var repeated = entries[repeat];
-						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
-						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S1259;
-					}
-
-					S1266:
-					{
-						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
-						var finished = entries[repeat];
-						global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
-						var previousRepeat = finished.RepeatIndex;
-						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
-						repeat = previousRepeat;
-						lookahead = finished.LookaheadIndex;
-						goto S1246;
-					}
-
-					S1267:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 108 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 185, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
@@ -18627,10 +18476,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 1231; goto Leave; }
+						goto S1258;
 					}
 
-					S1269:
+					S1265:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -18639,47 +18488,75 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 1229; goto Leave; }
+						goto S1245;
 					}
 
-					S1270:
+					S1266:
+					{
+						var capturedCall = completedCall;
+						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 106 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 180, capturedCall, call, atomic, repeat, lookahead, p));
+					}
+
+					{
+						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+						var repeated = entries[repeat];
+						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
+						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
+						goto S1230;
+					}
+
+					S1268:
+					{
+						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
+						var finished = entries[repeat];
+						global::System.Diagnostics.Debug.Assert(finished.Kind == ParserEntry.Repeat);
+						var previousRepeat = finished.RepeatIndex;
+						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
+						repeat = previousRepeat;
+						lookahead = finished.LookaheadIndex;
+						goto S1228;
+					}
+
+					S1269:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1271:
+					S1270:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1275, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1274, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1273, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1272, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1273:
+					S1272:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1274, p, call, atomic, repeat, lookahead, 0, 107));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1273, p, call, atomic, repeat, lookahead, 0, 105));
 						call = callIndex;
-						{ state = 1129; goto Leave; }
+						{ state = 1128; goto Leave; }
 					}
 
-					S1274:
+					S1273:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 107 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 184, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S1271;
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 105 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 179, capturedCall, call, atomic, repeat, lookahead, p));
+						goto S1270;
 					}
 
-					S1275:
+					S1274:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -18688,15 +18565,15 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 1227; goto Leave; }
+						goto S1226;
 					}
 
-					S1276:
+					S1275:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1277, p, call, atomic, repeat, lookahead, 0, 108));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1276, p, call, atomic, repeat, lookahead, 0, 106));
 						call = callIndex;
-						goto S1233;
+						goto S1232;
 					}
 
 					Leave:
@@ -18707,24 +18584,22 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 1277: goto S1277;
-						case 1279: goto S1279;
-						case 1281: goto S1281;
-						case 1285: goto S1285;
-						case 1289: goto S1289;
-						case 1299: goto S1299;
-						case 1303: goto S1303;
-						case 1304: goto S1304;
-						case 1306: goto S1306;
+						case 1276: goto S1276;
+						case 1278: goto S1278;
+						case 1280: goto S1280;
+						case 1284: goto S1284;
+						case 1288: goto S1288;
+						case 1298: goto S1298;
+						case 1302: goto S1302;
 					}
 					goto Leave;
 
-					S1277:
+					S1276:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 108 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 186, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 106 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 181, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -18732,12 +18607,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1279:
+					S1278:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 106 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 155, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 104 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 189, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -18745,21 +18620,21 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1281:
+					S1280:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '/')) goto S1306;
-							goto S1282;
+							if (!(c == '/')) { state = 1305; goto Leave; }
+							goto S1281;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1306, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1305, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S1282:
+					S1281:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1304, p, call, atomic, repeat, lookahead, 0, 109));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1303, p, call, atomic, repeat, lookahead, 0, 107));
 						call = callIndex;
 					}
 
@@ -18775,12 +18650,12 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1285, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1284, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1285:
+					S1284:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -18791,11 +18666,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1288;
+							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1287;
 						}
 					}
 
-					S1287:
+					S1286:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -18807,20 +18682,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1288:
+					S1287:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1289:
+					S1288:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1303, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1302, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -18832,14 +18707,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S1293;
-						if (c == '(') goto S1292;
-						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1291;
+						if (c == '"') goto S1292;
+						if (c == '(') goto S1291;
+						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1290;
 						expected = ExpectedSet_DotGram(31);
 						{ state = 2; goto Leave; }
 					}
 
-					S1291:
+					S1290:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -18853,18 +18728,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1289;
+						goto S1288;
+					}
+
+					S1291:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1288, p, call, atomic, repeat, lookahead, 0, -1));
+						call = callIndex;
+						{ state = 874; goto Leave; }
 					}
 
 					S1292:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1289, p, call, atomic, repeat, lookahead, 0, -1));
-						call = callIndex;
-						{ state = 875; goto Leave; }
-					}
-
-					S1293:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -18874,7 +18749,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S1294:
+					S1293:
 					{
 						turn0 = p;
 					}
@@ -18883,15 +18758,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S1296;
+							goto S1295;
 						}
 						c = text[p];
-						if (c == '\\') goto S1301;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1300;
+						if (c == '\\') goto S1300;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1299;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S1296:
+					S1295:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -18913,9 +18788,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S1299;
+							if (!(c == '"')) goto S1298;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1299, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1298, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -18925,10 +18800,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S1289;
+						goto S1288;
 					}
 
-					S1299:
+					S1298:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -18938,32 +18813,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S1289;
+						goto S1288;
 					}
 
-					S1300:
+					S1299:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1296;
+							goto S1295;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1296;
+							goto S1295;
 						}
 						p++;
-						goto S1294;
+						goto S1293;
 					}
 
-					S1301:
+					S1300:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S1296;
+							goto S1295;
 						}
 						p += 1;
 					}
@@ -18974,13 +18849,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S1296;
+							goto S1295;
 						}
 						p = scanned;
-						goto S1294;
+						goto S1293;
 					}
 
-					S1303:
+					S1302:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -18989,15 +18864,39 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1287;
+						goto S1286;
 					}
 
-					S1304:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart45_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 1303: goto S1303;
+						case 1305: goto S1305;
+						case 1310: goto S1310;
+						case 1312: goto S1312;
+						case 1314: goto S1314;
+						case 1316: goto S1316;
+						case 1317: goto S1317;
+						case 1319: goto S1319;
+						case 1321: goto S1321;
+						case 1323: goto S1323;
+						case 1325: goto S1325;
+						case 1332: goto S1332;
+						case 1333: goto S1333;
+					}
+					goto Leave;
+
+					S1303:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 109 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 156, capturedCall, call, atomic, repeat, lookahead, p));
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 107 && entries[capturedCall].Value == p);
+						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 190, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
 					{
@@ -19005,7 +18904,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1306:
+					S1305:
 					{
 						if (p > 0)
 						{
@@ -19056,40 +18955,6 @@ namespace AspectGenerator.FilterV2
 					}
 
 					{
-						seaming++;
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1310, p, call, atomic, repeat, lookahead, 0, -2));
-						call = callIndex;
-						{ state = 33; goto Leave; }
-					}
-
-					Leave:
-					return state;
-				}
-
-				int RecognizePart45_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 1310: goto S1310;
-						case 1312: goto S1312;
-						case 1314: goto S1314;
-						case 1316: goto S1316;
-						case 1318: goto S1318;
-						case 1319: goto S1319;
-						case 1321: goto S1321;
-						case 1323: goto S1323;
-						case 1325: goto S1325;
-						case 1327: goto S1327;
-						case 1334: goto S1334;
-						case 1335: goto S1335;
-						case 1340: goto S1340;
-						case 1344: goto S1344;
-					}
-					goto Leave;
-
-					S1310:
-					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
@@ -19106,11 +18971,11 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1312:
+					S1310:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 101 && entries[capturedCall].Value == p);
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 108 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 149, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
@@ -19119,26 +18984,26 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1314:
+					S1312:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '(')) goto S1318;
-							goto S1315;
+							if (!(c == '(')) goto S1316;
+							goto S1313;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1318, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1316, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S1315:
+					S1313:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1316, p, call, atomic, repeat, lookahead, 0, 100));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1314, p, call, atomic, repeat, lookahead, 0, 100));
 						call = callIndex;
 						{ state = 55; goto Leave; }
 					}
 
-					S1316:
+					S1314:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -19151,19 +19016,19 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1318:
+					S1316:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1319, p, call, atomic, repeat, lookahead, 0, 101));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1317, p, call, atomic, repeat, lookahead, 0, 108));
 						call = callIndex;
 						{ state = 88; goto Leave; }
 					}
 
-					S1319:
+					S1317:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 101 && entries[capturedCall].Value == p);
+						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 108 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 151, capturedCall, call, atomic, repeat, lookahead, p));
 					}
 
@@ -19172,7 +19037,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1321:
+					S1319:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -19183,45 +19048,45 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1323, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1321, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1323:
+					S1321:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass3_DotGram[c] != 0) goto S1324;
+							if (c <= 255 && RecognizeClass3_DotGram[c] != 0) goto S1322;
 						}
 						{ state = 0; goto Leave; }
 					}
 
-					S1324:
+					S1322:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1325:
+					S1323:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1376, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1374, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1327, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1325, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1327:
+					S1325:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1372, p, call, atomic, repeat, lookahead, 0, 98));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1370, p, call, atomic, repeat, lookahead, 0, 98));
 						call = callIndex;
 					}
 
@@ -19232,13 +19097,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c <= 255 && RecognizeClass4_DotGram[c] != 0) goto S1333;
-						if (c <= 255 && RecognizeClass5_DotGram[c] != 0) goto S1329;
+						if (c <= 255 && RecognizeClass4_DotGram[c] != 0) goto S1331;
+						if (c <= 255 && RecognizeClass5_DotGram[c] != 0) goto S1327;
 						expected = ExpectedSet_DotGram(24);
 						{ state = 2; goto Leave; }
 					}
 
-					S1329:
+					S1327:
 					{
 						capture146 = p;
 					}
@@ -19267,25 +19132,25 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1333:
+					S1331:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1339;
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1337;
 						}
 					}
 
-					S1334:
+					S1332:
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1335, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1333, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1335:
+					S1333:
 					{
 						if (p > 0)
 						{
@@ -19340,20 +19205,38 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1339:
+					S1337:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
+						{ state = 1338; goto Leave; }
 					}
 
-					S1340:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart46_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 1338: goto S1338;
+						case 1342: goto S1342;
+						case 1344: goto S1344;
+						case 1358: goto S1358;
+						case 1362: goto S1362;
+						case 1365: goto S1365;
+					}
+					goto Leave;
+
+					S1338:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) { state = 1371; goto Leave; }
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1371, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) { state = 1369; goto Leave; }
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1369, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -19362,40 +19245,40 @@ namespace AspectGenerator.FilterV2
 						atomic = atomicIndex;
 					}
 
-					S1342:
+					S1340:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(0);
-							goto S1343;
+							goto S1341;
 						}
 						c = text[p];
 						if (!((c == '\t' || c == ' ')))
 						{
 							expected = ExpectedSet_DotGram(0);
-							goto S1343;
+							goto S1341;
 						}
 						p++;
-						goto S1342;
+						goto S1340;
 					}
 
-					S1343:
+					S1341:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '#') { state = 1369; goto Leave; }
+							if (c == '#') { state = 1367; goto Leave; }
 						}
 					}
 
-					S1344:
+					S1342:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) { state = 1368; goto Leave; }
+							if (!(c == '\r')) { state = 1366; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1368, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1366, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -19416,26 +19299,9 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						{ state = 1346; goto Leave; }
 					}
 
-					Leave:
-					return state;
-				}
-
-				int RecognizePart46_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 1346: goto S1346;
-						case 1360: goto S1360;
-						case 1364: goto S1364;
-						case 1367: goto S1367;
-						case 1368: goto S1368;
-					}
-					goto Leave;
-
-					S1346:
+					S1344:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -19446,11 +19312,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1359;
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1357;
 						}
 					}
 
-					S1348:
+					S1346:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -19472,13 +19338,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 81; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'a') goto S1357;
-						if (c == 'o') goto S1351;
+						if (c == 'a') goto S1355;
+						if (c == 'o') goto S1349;
 						expected = ExpectedSet_DotGram(18);
 						{ state = 81; goto Leave; }
 					}
 
-					S1351:
+					S1349:
 					{
 						if (p > 0)
 						{
@@ -19506,7 +19372,7 @@ namespace AspectGenerator.FilterV2
 						p += 2;
 					}
 
-					S1353:
+					S1351:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -19538,10 +19404,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 1340; goto Leave; }
+						goto S1338;
 					}
 
-					S1357:
+					S1355:
 					{
 						if (p > 0)
 						{
@@ -19567,17 +19433,17 @@ namespace AspectGenerator.FilterV2
 							{ state = 81; goto Leave; }
 						}
 						p += 3;
-						goto S1353;
+						goto S1351;
 					}
 
-					S1359:
+					S1357:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1360:
+					S1358:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -19602,7 +19468,7 @@ namespace AspectGenerator.FilterV2
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1367, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1365, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -19614,21 +19480,21 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '\t' || c == ' ') { p++; goto S1360; }
-						if (c == '#') goto S1365;
-						if (c == '\n' || c == '\r') goto S1362;
+						if (c == '\t' || c == ' ') { p++; goto S1358; }
+						if (c == '#') goto S1363;
+						if (c == '\n' || c == '\r') goto S1360;
 						expected = ExpectedSet_DotGram(6);
 						{ state = 2; goto Leave; }
 					}
 
-					S1362:
+					S1360:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) goto S1364;
+							if (!(c == '\r')) goto S1362;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1364, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1362, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -19649,10 +19515,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						goto S1360;
+						goto S1358;
 					}
 
-					S1364:
+					S1362:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -19666,10 +19532,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1360;
+						goto S1358;
 					}
 
-					S1365:
+					S1363:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -19685,11 +19551,11 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 1360, runStart, call, atomic, repeat, lookahead, p));
-						goto S1360;
+							entries.Add(new ParserEntry(ParserEntry.Run, 1358, runStart, call, atomic, repeat, lookahead, p));
+						goto S1358;
 					}
 
-					S1367:
+					S1365:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -19698,10 +19564,37 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1348;
+						goto S1346;
 					}
 
-					S1368:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart47_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 1366: goto S1366;
+						case 1367: goto S1367;
+						case 1369: goto S1369;
+						case 1370: goto S1370;
+						case 1372: goto S1372;
+						case 1373: goto S1373;
+						case 1374: goto S1374;
+						case 1375: goto S1375;
+						case 1377: goto S1377;
+						case 1381: goto S1381;
+						case 1382: goto S1382;
+						case 1383: goto S1383;
+						case 1387: goto S1387;
+						case 1388: goto S1388;
+						case 1390: goto S1390;
+						case 1394: goto S1394;
+					}
+					goto Leave;
+
+					S1366:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -19715,36 +19608,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1346;
+						{ state = 1344; goto Leave; }
 					}
 
-					Leave:
-					return state;
-				}
-
-				int RecognizePart47_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 1369: goto S1369;
-						case 1371: goto S1371;
-						case 1372: goto S1372;
-						case 1374: goto S1374;
-						case 1375: goto S1375;
-						case 1376: goto S1376;
-						case 1377: goto S1377;
-						case 1379: goto S1379;
-						case 1383: goto S1383;
-						case 1384: goto S1384;
-						case 1385: goto S1385;
-						case 1389: goto S1389;
-						case 1390: goto S1390;
-						case 1392: goto S1392;
-						case 1396: goto S1396;
-					}
-					goto Leave;
-
-					S1369:
+					S1367:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -19754,24 +19621,24 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S1370:
+					S1368:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = (seaming == 0 || ((uint)p >= (uint)text.Length || failure.OutOfInput > p)) ? ExpectedSet_DotGram(19) : RecognizeUnrecorded_DotGram;
-							{ state = 1344; goto Leave; }
+							{ state = 1342; goto Leave; }
 						}
 						c = text[p];
 						if (!(!(c == '\n' || c == '\r')))
 						{
 							expected = (seaming == 0 || ((uint)p >= (uint)text.Length || failure.OutOfInput > p)) ? ExpectedSet_DotGram(19) : RecognizeUnrecorded_DotGram;
-							{ state = 1344; goto Leave; }
+							{ state = 1342; goto Leave; }
 						}
 						p++;
-						goto S1370;
+						goto S1368;
 					}
 
-					S1371:
+					S1369:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -19780,10 +19647,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 1334; goto Leave; }
+						{ state = 1332; goto Leave; }
 					}
 
-					S1372:
+					S1370:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -19794,29 +19661,29 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1374, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1372, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1374:
+					S1372:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1375, p, call, atomic, repeat, lookahead, 0, 99));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1373, p, call, atomic, repeat, lookahead, 0, 99));
 						call = callIndex;
 						{ state = 49; goto Leave; }
 					}
 
-					S1375:
+					S1373:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 99 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 145, capturedCall, call, atomic, repeat, lookahead, p));
-						{ state = 1325; goto Leave; }
+						{ state = 1323; goto Leave; }
 					}
 
-					S1376:
+					S1374:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -19828,7 +19695,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1377:
+					S1375:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -19839,33 +19706,51 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1379, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1377, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1379:
+					S1377:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass2_DotGram[c] != 0) goto S1380;
+							if (c <= 255 && RecognizeClass2_DotGram[c] != 0) goto S1378;
 						}
 						{ state = 0; goto Leave; }
 					}
 
-					S1380:
+					S1378:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1381:
+					S1379:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1424, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1422, p, call, atomic, repeat, lookahead, 0));
 					}
 
+					{
+						seaming++;
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1381, p, call, atomic, repeat, lookahead, 0, -2));
+						call = callIndex;
+						{ state = 33; goto Leave; }
+					}
+
+					S1381:
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1389;
+						}
+					}
+
+					S1382:
 					{
 						seaming++;
 						var callIndex = entries.Count;
@@ -19875,24 +19760,6 @@ namespace AspectGenerator.FilterV2
 					}
 
 					S1383:
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1391;
-						}
-					}
-
-					S1384:
-					{
-						seaming++;
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1385, p, call, atomic, repeat, lookahead, 0, -2));
-						call = callIndex;
-						{ state = 33; goto Leave; }
-					}
-
-					S1385:
 					{
 						if (p > 0)
 						{
@@ -19940,42 +19807,42 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1389, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1387, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1389:
+					S1387:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1390, p, call, atomic, repeat, lookahead, 0, 96));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1388, p, call, atomic, repeat, lookahead, 0, 96));
 						call = callIndex;
 						{ state = 48; goto Leave; }
 					}
 
-					S1390:
+					S1388:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 96 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 142, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S1381;
+						goto S1379;
 					}
 
-					S1391:
+					S1389:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1392:
+					S1390:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) { state = 1423; goto Leave; }
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1423, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) { state = 1421; goto Leave; }
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1421, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -19984,40 +19851,40 @@ namespace AspectGenerator.FilterV2
 						atomic = atomicIndex;
 					}
 
-					S1394:
+					S1392:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(0);
-							goto S1395;
+							goto S1393;
 						}
 						c = text[p];
 						if (!((c == '\t' || c == ' ')))
 						{
 							expected = ExpectedSet_DotGram(0);
-							goto S1395;
+							goto S1393;
 						}
 						p++;
-						goto S1394;
+						goto S1392;
 					}
 
-					S1395:
+					S1393:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '#') { state = 1421; goto Leave; }
+							if (c == '#') { state = 1419; goto Leave; }
 						}
 					}
 
-					S1396:
+					S1394:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) { state = 1420; goto Leave; }
+							if (!(c == '\r')) { state = 1418; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1420, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1418, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -20038,7 +19905,7 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						{ state = 1398; goto Leave; }
+						{ state = 1396; goto Leave; }
 					}
 
 					Leave:
@@ -20049,15 +19916,14 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 1398: goto S1398;
-						case 1412: goto S1412;
-						case 1416: goto S1416;
-						case 1419: goto S1419;
-						case 1420: goto S1420;
+						case 1396: goto S1396;
+						case 1410: goto S1410;
+						case 1414: goto S1414;
+						case 1417: goto S1417;
 					}
 					goto Leave;
 
-					S1398:
+					S1396:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -20068,11 +19934,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1411;
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1409;
 						}
 					}
 
-					S1400:
+					S1398:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -20094,13 +19960,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 81; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'a') goto S1409;
-						if (c == 'o') goto S1403;
+						if (c == 'a') goto S1407;
+						if (c == 'o') goto S1401;
 						expected = ExpectedSet_DotGram(18);
 						{ state = 81; goto Leave; }
 					}
 
-					S1403:
+					S1401:
 					{
 						if (p > 0)
 						{
@@ -20128,7 +19994,7 @@ namespace AspectGenerator.FilterV2
 						p += 2;
 					}
 
-					S1405:
+					S1403:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -20160,10 +20026,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 1392; goto Leave; }
+						{ state = 1390; goto Leave; }
 					}
 
-					S1409:
+					S1407:
 					{
 						if (p > 0)
 						{
@@ -20189,17 +20055,17 @@ namespace AspectGenerator.FilterV2
 							{ state = 81; goto Leave; }
 						}
 						p += 3;
-						goto S1405;
+						goto S1403;
 					}
 
-					S1411:
+					S1409:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1412:
+					S1410:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -20224,7 +20090,7 @@ namespace AspectGenerator.FilterV2
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1419, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1417, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -20236,21 +20102,21 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '\t' || c == ' ') { p++; goto S1412; }
-						if (c == '#') goto S1417;
-						if (c == '\n' || c == '\r') goto S1414;
+						if (c == '\t' || c == ' ') { p++; goto S1410; }
+						if (c == '#') goto S1415;
+						if (c == '\n' || c == '\r') goto S1412;
 						expected = ExpectedSet_DotGram(6);
 						{ state = 2; goto Leave; }
 					}
 
-					S1414:
+					S1412:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) goto S1416;
+							if (!(c == '\r')) goto S1414;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1416, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1414, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -20271,10 +20137,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						goto S1412;
+						goto S1410;
 					}
 
-					S1416:
+					S1414:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -20288,10 +20154,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1412;
+						goto S1410;
 					}
 
-					S1417:
+					S1415:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -20307,11 +20173,11 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 1412, runStart, call, atomic, repeat, lookahead, p));
-						goto S1412;
+							entries.Add(new ParserEntry(ParserEntry.Run, 1410, runStart, call, atomic, repeat, lookahead, p));
+						goto S1410;
 					}
 
-					S1419:
+					S1417:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -20320,10 +20186,31 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1400;
+						goto S1398;
 					}
 
-					S1420:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart49_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 1418: goto S1418;
+						case 1419: goto S1419;
+						case 1421: goto S1421;
+						case 1422: goto S1422;
+						case 1423: goto S1423;
+						case 1426: goto S1426;
+						case 1427: goto S1427;
+						case 1429: goto S1429;
+						case 1441: goto S1441;
+						case 1443: goto S1443;
+					}
+					goto Leave;
+
+					S1418:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -20337,30 +20224,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1398;
+						{ state = 1396; goto Leave; }
 					}
 
-					Leave:
-					return state;
-				}
-
-				int RecognizePart49_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 1421: goto S1421;
-						case 1423: goto S1423;
-						case 1424: goto S1424;
-						case 1425: goto S1425;
-						case 1428: goto S1428;
-						case 1429: goto S1429;
-						case 1431: goto S1431;
-						case 1443: goto S1443;
-						case 1445: goto S1445;
-					}
-					goto Leave;
-
-					S1421:
+					S1419:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -20370,24 +20237,24 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S1422:
+					S1420:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = (seaming == 0 || ((uint)p >= (uint)text.Length || failure.OutOfInput > p)) ? ExpectedSet_DotGram(19) : RecognizeUnrecorded_DotGram;
-							{ state = 1396; goto Leave; }
+							{ state = 1394; goto Leave; }
 						}
 						c = text[p];
 						if (!(!(c == '\n' || c == '\r')))
 						{
 							expected = (seaming == 0 || ((uint)p >= (uint)text.Length || failure.OutOfInput > p)) ? ExpectedSet_DotGram(19) : RecognizeUnrecorded_DotGram;
-							{ state = 1396; goto Leave; }
+							{ state = 1394; goto Leave; }
 						}
 						p++;
-						goto S1422;
+						goto S1420;
 					}
 
-					S1423:
+					S1421:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -20396,10 +20263,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 1384; goto Leave; }
+						{ state = 1382; goto Leave; }
 					}
 
-					S1424:
+					S1422:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -20411,7 +20278,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1425:
+					S1423:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -20426,18 +20293,18 @@ namespace AspectGenerator.FilterV2
 					{
 						seaming++;
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1428, p, call, atomic, repeat, lookahead, 0, -2));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1426, p, call, atomic, repeat, lookahead, 0, -2));
 						call = callIndex;
 						{ state = 33; goto Leave; }
 					}
 
-					S1428:
+					S1426:
 					{
 						p = Scan_DotGram_trivia(text, p);
 						{ state = 64; goto Leave; }
 					}
 
-					S1429:
+					S1427:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -20450,14 +20317,14 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1431:
+					S1429:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'n')) { state = 1955; goto Leave; }
+							if (!(c == 'n')) { state = 1899; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1445, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1443, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -20566,12 +20433,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1443, p, call, atomic, repeat, lookahead, 0, 13));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1441, p, call, atomic, repeat, lookahead, 0, 13));
 						call = callIndex;
 						{ state = 24; goto Leave; }
 					}
 
-					S1443:
+					S1441:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -20584,14 +20451,14 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1445:
+					S1443:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'n')) { state = 1955; goto Leave; }
+							if (!(c == 'n')) { state = 1899; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1955, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1899, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -20641,17 +20508,7 @@ namespace AspectGenerator.FilterV2
 								{ state = 2; goto Leave; }
 							}
 						}
-					}
-
-					{
-						p = Scan_DotGram_trivia(text, p);
-					}
-
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1953, p, call, atomic, repeat, lookahead, 0, 15));
-						call = callIndex;
-						{ state = 1451; goto Leave; }
+						{ state = 1447; goto Leave; }
 					}
 
 					Leave:
@@ -20662,43 +20519,53 @@ namespace AspectGenerator.FilterV2
 				{
 					switch (state)
 					{
-						case 1451: goto S1451;
-						case 1455: goto S1455;
+						case 1447: goto S1447;
+						case 1449: goto S1449;
+						case 1453: goto S1453;
+						case 1458: goto S1458;
 						case 1460: goto S1460;
 						case 1462: goto S1462;
+						case 1467: goto S1467;
 						case 1469: goto S1469;
-						case 1470: goto S1470;
-						case 1472: goto S1472;
-						case 1474: goto S1474;
+						case 1471: goto S1471;
 						case 1476: goto S1476;
 						case 1478: goto S1478;
-						case 1479: goto S1479;
-						case 1481: goto S1481;
-						case 1483: goto S1483;
+						case 1480: goto S1480;
 						case 1485: goto S1485;
-						case 1492: goto S1492;
+						case 1487: goto S1487;
+						case 1489: goto S1489;
 						case 1494: goto S1494;
 						case 1496: goto S1496;
 						case 1498: goto S1498;
-						case 1499: goto S1499;
-						case 1501: goto S1501;
 						case 1503: goto S1503;
+						case 1505: goto S1505;
 					}
 					goto Leave;
 
-					S1451:
+					S1447:
 					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet2_DotGram, c))) { state = 1774; goto Leave; }
-						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1770, p, call, atomic, repeat, lookahead, 0));
+						p = Scan_DotGram_trivia(text, p);
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1768, p, call, atomic, repeat, lookahead, 0, 16));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1897, p, call, atomic, repeat, lookahead, 0, 15));
+						call = callIndex;
+					}
+
+					S1449:
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(RecognizeIn_DotGram(RecognizeSet2_DotGram, c))) { state = 1719; goto Leave; }
+						}
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1715, p, call, atomic, repeat, lookahead, 0));
+					}
+
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1713, p, call, atomic, repeat, lookahead, 0, 16));
 						call = callIndex;
 					}
 
@@ -20706,19 +20573,19 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'n')) goto S1483;
+							if (!(c == 'n')) goto S1460;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1483, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1460, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1455, p, call, atomic, repeat, lookahead, 0, 17));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1453, p, call, atomic, repeat, lookahead, 0, 17));
 						call = callIndex;
 						{ state = 92; goto Leave; }
 					}
 
-					S1455:
+					S1453:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -20745,194 +20612,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1481, p, call, atomic, repeat, lookahead, 0, 29));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1458, p, call, atomic, repeat, lookahead, 0, 29));
 						call = callIndex;
+						{ state = 102; goto Leave; }
 					}
 
-					S1460:
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(c == 'a')) goto S1474;
-						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1474, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1472, p, call, atomic, repeat, lookahead, 0, 34));
-						call = callIndex;
-					}
-
-					S1462:
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(c == 'a')) goto S1469;
-						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1469, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					{
-						if (p > 0)
-						{
-							c = text[p - 1];
-							if ((c < 128 ? c <= 255 && RecognizeClass0_DotGram[c] != 0 : (Categories_DotGram_4837F(c))))
-							{
-								expected = ExpectedSet_DotGram(16);
-								{ state = 2; goto Leave; }
-							}
-						}
-					}
-
-					{
-						if (text.Length - p < 3)
-						{
-							p = RecognizeRanOut_DotGram(text, p, "any", false, lookahead < 0, negating == 0, ref failure);
-							expected = ExpectedSet_DotGram(29);
-							{ state = 2; goto Leave; }
-						}
-						if (!global::System.MemoryExtensions.SequenceEqual(text.Slice(p, 3), global::System.MemoryExtensions.AsSpan("any")))
-						{
-							if (lookahead < 0)
-							{
-								if (text[p] == 'a')
-								{
-									if (text[p + 1] != 'n')
-										p += 1;
-									else
-										p += 2;
-								}
-							}
-							expected = ExpectedSet_DotGram(29);
-							{ state = 2; goto Leave; }
-						}
-						p += 3;
-					}
-
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if ((c < 128 ? c <= 255 && RecognizeClass0_DotGram[c] != 0 : (Categories_DotGram_4837F(c))))
-							{
-								expected = ExpectedSet_DotGram(14);
-								{ state = 2; goto Leave; }
-							}
-						}
-					}
-
-					{
-						p = Scan_DotGram_trivia(text, p);
-					}
-
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (((c < 128 ? c <= 255 && RecognizeClass0_DotGram[c] != 0 : (Categories_DotGram_4837F(c)))) || (c <= 255 && RecognizeClass6_DotGram[c] != 0))
-							{
-								expected = ExpectedSet_DotGram(28);
-								{ state = 2; goto Leave; }
-							}
-						}
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1469:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1470, p, call, atomic, repeat, lookahead, 0, 35));
-						call = callIndex;
-						{ state = 112; goto Leave; }
-					}
-
-					S1470:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 35 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 71, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1472:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 34 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 59, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1474:
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet4_DotGram, c))) goto S1478;
-							if (!(c <= 255 && RecognizeClass11_DotGram[c] != 0)) goto S1475;
-						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1478, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					S1475:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1476, p, call, atomic, repeat, lookahead, 0, 65));
-						call = callIndex;
-						{ state = 139; goto Leave; }
-					}
-
-					S1476:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 65 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 60, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1478:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1479, p, call, atomic, repeat, lookahead, 0, 69));
-						call = callIndex;
-						{ state = 605; goto Leave; }
-					}
-
-					S1479:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 69 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 61, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 2, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1481:
+					S1458:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -20945,24 +20630,24 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1483:
+					S1460:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass10_DotGram[c] != 0)) goto S1503;
+							if (!(c <= 255 && RecognizeClass10_DotGram[c] != 0)) goto S1469;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1503, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1469, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1485, p, call, atomic, repeat, lookahead, 0, 18));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1462, p, call, atomic, repeat, lookahead, 0, 18));
 						call = callIndex;
-						{ state = 614; goto Leave; }
+						{ state = 613; goto Leave; }
 					}
 
-					S1485:
+					S1462:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -20989,93 +20674,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1501, p, call, atomic, repeat, lookahead, 0, 30));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1467, p, call, atomic, repeat, lookahead, 0, 30));
 						call = callIndex;
+						{ state = 628; goto Leave; }
 					}
 
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(c == 'a')) goto S1494;
-						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1494, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1492, p, call, atomic, repeat, lookahead, 0, 34));
-						call = callIndex;
-						goto S1462;
-					}
-
-					S1492:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 34 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 62, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1494:
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet5_DotGram, c))) goto S1498;
-							if (!(c <= 255 && RecognizeClass11_DotGram[c] != 0)) goto S1495;
-						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1498, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					S1495:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1496, p, call, atomic, repeat, lookahead, 0, 76));
-						call = callIndex;
-						{ state = 359; goto Leave; }
-					}
-
-					S1496:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 76 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 63, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1498:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1499, p, call, atomic, repeat, lookahead, 0, 69));
-						call = callIndex;
-						{ state = 605; goto Leave; }
-					}
-
-					S1499:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 69 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 64, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 2, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1501:
+					S1467:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21088,52 +20692,24 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1503:
+					S1469:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass9_DotGram[c] != 0)) { state = 1512; goto Leave; }
+							if (!(c <= 255 && RecognizeClass9_DotGram[c] != 0)) goto S1478;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1512, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1478, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1505, p, call, atomic, repeat, lookahead, 0, 19));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1471, p, call, atomic, repeat, lookahead, 0, 19));
 						call = callIndex;
-						{ state = 644; goto Leave; }
+						{ state = 643; goto Leave; }
 					}
 
-					Leave:
-					return state;
-				}
-
-				int RecognizePart51_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 1505: goto S1505;
-						case 1510: goto S1510;
-						case 1512: goto S1512;
-						case 1514: goto S1514;
-						case 1521: goto S1521;
-						case 1523: goto S1523;
-						case 1524: goto S1524;
-						case 1526: goto S1526;
-						case 1528: goto S1528;
-						case 1530: goto S1530;
-						case 1537: goto S1537;
-						case 1540: goto S1540;
-						case 1542: goto S1542;
-						case 1544: goto S1544;
-						case 1546: goto S1546;
-						case 1553: goto S1553;
-						case 1555: goto S1555;
-					}
-					goto Leave;
-
-					S1505:
+					S1471:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21160,12 +20736,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1510, p, call, atomic, repeat, lookahead, 0, 29));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1476, p, call, atomic, repeat, lookahead, 0, 29));
 						call = callIndex;
-						{ state = 1460; goto Leave; }
+						{ state = 102; goto Leave; }
 					}
 
-					S1510:
+					S1476:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21178,24 +20754,24 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1512:
+					S1478:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'r')) goto S1528;
+							if (!(c == 'r')) goto S1487;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1528, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1487, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1514, p, call, atomic, repeat, lookahead, 0, 20));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1480, p, call, atomic, repeat, lookahead, 0, 20));
 						call = callIndex;
-						{ state = 663; goto Leave; }
+						{ state = 662; goto Leave; }
 					}
 
-					S1514:
+					S1480:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21222,61 +20798,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1526, p, call, atomic, repeat, lookahead, 0, 31));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1485, p, call, atomic, repeat, lookahead, 0, 31));
 						call = callIndex;
+						{ state = 672; goto Leave; }
 					}
 
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(c == 'a')) goto S1523;
-						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1523, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1521, p, call, atomic, repeat, lookahead, 0, 34));
-						call = callIndex;
-						{ state = 1462; goto Leave; }
-					}
-
-					S1521:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 34 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 65, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1523:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1524, p, call, atomic, repeat, lookahead, 0, 88));
-						call = callIndex;
-						{ state = 678; goto Leave; }
-					}
-
-					S1524:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 88 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 66, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1526:
+					S1485:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21289,24 +20816,24 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1528:
+					S1487:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'p')) { state = 1560; goto Leave; }
+							if (!(c == 'p')) goto S1505;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1544, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1496, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1530, p, call, atomic, repeat, lookahead, 0, 21));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1489, p, call, atomic, repeat, lookahead, 0, 21));
 						call = callIndex;
-						{ state = 707; goto Leave; }
+						{ state = 706; goto Leave; }
 					}
 
-					S1530:
+					S1489:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21333,66 +20860,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1542, p, call, atomic, repeat, lookahead, 0, 32));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1494, p, call, atomic, repeat, lookahead, 0, 32));
 						call = callIndex;
+						{ state = 716; goto Leave; }
 					}
 
-					{
-						if ((uint)p >= (uint)text.Length)
-						{
-							expected = ExpectedSet_DotGram(73);
-							{ state = 2; goto Leave; }
-						}
-						c = text[p];
-						if (c == 'a') goto S1539;
-						if (c == '(') goto S1536;
-						expected = ExpectedSet_DotGram(73);
-						{ state = 2; goto Leave; }
-					}
-
-					S1536:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1537, p, call, atomic, repeat, lookahead, 0, 89));
-						call = callIndex;
-						{ state = 719; goto Leave; }
-					}
-
-					S1537:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 89 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 68, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1539:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1540, p, call, atomic, repeat, lookahead, 0, 34));
-						call = callIndex;
-						{ state = 1462; goto Leave; }
-					}
-
-					S1540:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 34 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 67, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1542:
+					S1494:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21405,24 +20878,24 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1544:
+					S1496:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'p')) { state = 1560; goto Leave; }
+							if (!(c == 'p')) goto S1505;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1560, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1505, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1546, p, call, atomic, repeat, lookahead, 0, 22));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1498, p, call, atomic, repeat, lookahead, 0, 22));
 						call = callIndex;
-						{ state = 808; goto Leave; }
+						{ state = 807; goto Leave; }
 					}
 
-					S1546:
+					S1498:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21449,82 +20922,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1558, p, call, atomic, repeat, lookahead, 0, 33));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1503, p, call, atomic, repeat, lookahead, 0, 33));
 						call = callIndex;
+						{ state = 817; goto Leave; }
 					}
 
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(c == 'a')) goto S1555;
-						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1555, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1553, p, call, atomic, repeat, lookahead, 0, 34));
-						call = callIndex;
-						{ state = 1462; goto Leave; }
-					}
-
-					S1553:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 34 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 69, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1555:
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1556, p, call, atomic, repeat, lookahead, 0, 90));
-						call = callIndex;
-						{ state = 723; goto Leave; }
-					}
-
-					Leave:
-					return state;
-				}
-
-				int RecognizePart52_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 1556: goto S1556;
-						case 1558: goto S1558;
-						case 1560: goto S1560;
-						case 1562: goto S1562;
-						case 1567: goto S1567;
-						case 1569: goto S1569;
-						case 1571: goto S1571;
-						case 1580: goto S1580;
-						case 1590: goto S1590;
-						case 1594: goto S1594;
-					}
-					goto Leave;
-
-					S1556:
-					{
-						var capturedCall = completedCall;
-						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
-						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 90 && entries[capturedCall].Value == p);
-						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 70, capturedCall, call, atomic, repeat, lookahead, p));
-					}
-
-					{
-						entries.Add(new ParserEntry(ParserEntry.Construct, 1, p, call, atomic, repeat, lookahead, 0));
-						{ state = 0; goto Leave; }
-					}
-
-					S1558:
+					S1503:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21537,24 +20940,43 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1560:
+					S1505:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass8_DotGram[c] != 0)) { state = 1595; goto Leave; }
+							if (!(c <= 255 && RecognizeClass8_DotGram[c] != 0)) { state = 1540; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1569, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1514, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1562, p, call, atomic, repeat, lookahead, 0, 23));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1507, p, call, atomic, repeat, lookahead, 0, 23));
 						call = callIndex;
-						{ state = 829; goto Leave; }
+						{ state = 828; goto Leave; }
 					}
 
-					S1562:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart51_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 1507: goto S1507;
+						case 1512: goto S1512;
+						case 1514: goto S1514;
+						case 1516: goto S1516;
+						case 1525: goto S1525;
+						case 1535: goto S1535;
+						case 1539: goto S1539;
+						case 1540: goto S1540;
+					}
+					goto Leave;
+
+					S1507:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21581,12 +21003,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1567, p, call, atomic, repeat, lookahead, 0, 34));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1512, p, call, atomic, repeat, lookahead, 0, 34));
 						call = callIndex;
-						{ state = 1462; goto Leave; }
+						{ state = 104; goto Leave; }
 					}
 
-					S1567:
+					S1512:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21599,24 +21021,24 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1569:
+					S1514:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass8_DotGram[c] != 0)) { state = 1595; goto Leave; }
+							if (!(c <= 255 && RecognizeClass8_DotGram[c] != 0)) goto S1540;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1595, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1540, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1571, p, call, atomic, repeat, lookahead, 0, 23));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1516, p, call, atomic, repeat, lookahead, 0, 23));
 						call = callIndex;
-						{ state = 829; goto Leave; }
+						{ state = 828; goto Leave; }
 					}
 
-					S1571:
+					S1516:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21651,11 +21073,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1579;
+							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1524;
 						}
 					}
 
-					S1577:
+					S1522:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -21671,20 +21093,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1579:
+					S1524:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1580:
+					S1525:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1594, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1539, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -21696,14 +21118,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S1584;
-						if (c == '(') goto S1583;
-						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1582;
+						if (c == '"') goto S1529;
+						if (c == '(') goto S1528;
+						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1527;
 						expected = ExpectedSet_DotGram(31);
 						{ state = 2; goto Leave; }
 					}
 
-					S1582:
+					S1527:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -21717,18 +21139,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1580;
+						goto S1525;
 					}
 
-					S1583:
+					S1528:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1580, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1525, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 875; goto Leave; }
+						{ state = 874; goto Leave; }
 					}
 
-					S1584:
+					S1529:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -21738,7 +21160,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S1585:
+					S1530:
 					{
 						turn0 = p;
 					}
@@ -21747,15 +21169,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S1587;
+							goto S1532;
 						}
 						c = text[p];
-						if (c == '\\') goto S1592;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1591;
+						if (c == '\\') goto S1537;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1536;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S1587:
+					S1532:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -21777,9 +21199,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S1590;
+							if (!(c == '"')) goto S1535;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1590, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1535, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -21789,10 +21211,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S1580;
+						goto S1525;
 					}
 
-					S1590:
+					S1535:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -21802,32 +21224,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S1580;
+						goto S1525;
 					}
 
-					S1591:
+					S1536:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1587;
+							goto S1532;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1587;
+							goto S1532;
 						}
 						p++;
-						goto S1585;
+						goto S1530;
 					}
 
-					S1592:
+					S1537:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S1587;
+							goto S1532;
 						}
 						p += 1;
 					}
@@ -21838,13 +21260,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S1587;
+							goto S1532;
 						}
 						p = scanned;
-						goto S1585;
+						goto S1530;
 					}
 
-					S1594:
+					S1539:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -21853,44 +21275,43 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1577;
+						goto S1522;
+					}
+
+					S1540:
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (!(c == 'p')) { state = 1568; goto Leave; }
+						}
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1568, p, call, atomic, repeat, lookahead, 0));
+					}
+
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1542, p, call, atomic, repeat, lookahead, 0, 21));
+						call = callIndex;
+						{ state = 706; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart53_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart52_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1595: goto S1595;
-						case 1597: goto S1597;
-						case 1608: goto S1608;
-						case 1618: goto S1618;
-						case 1622: goto S1622;
-						case 1623: goto S1623;
+						case 1542: goto S1542;
+						case 1553: goto S1553;
+						case 1563: goto S1563;
+						case 1567: goto S1567;
+						case 1568: goto S1568;
 					}
 					goto Leave;
 
-					S1595:
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (!(c == 'p')) goto S1623;
-						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1623, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1597, p, call, atomic, repeat, lookahead, 0, 21));
-						call = callIndex;
-						{ state = 707; goto Leave; }
-					}
-
-					S1597:
+					S1542:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -21943,11 +21364,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1607;
+							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1552;
 						}
 					}
 
-					S1605:
+					S1550:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -21963,20 +21384,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1607:
+					S1552:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1608:
+					S1553:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1622, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1567, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -21988,14 +21409,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S1612;
-						if (c == '(') goto S1611;
-						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1610;
+						if (c == '"') goto S1557;
+						if (c == '(') goto S1556;
+						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1555;
 						expected = ExpectedSet_DotGram(31);
 						{ state = 2; goto Leave; }
 					}
 
-					S1610:
+					S1555:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -22009,18 +21430,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1608;
+						goto S1553;
 					}
 
-					S1611:
+					S1556:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1608, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1553, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 875; goto Leave; }
+						{ state = 874; goto Leave; }
 					}
 
-					S1612:
+					S1557:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -22030,7 +21451,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S1613:
+					S1558:
 					{
 						turn0 = p;
 					}
@@ -22039,15 +21460,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S1615;
+							goto S1560;
 						}
 						c = text[p];
-						if (c == '\\') goto S1620;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1619;
+						if (c == '\\') goto S1565;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1564;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S1615:
+					S1560:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -22069,9 +21490,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S1618;
+							if (!(c == '"')) goto S1563;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1618, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1563, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -22081,10 +21502,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S1608;
+						goto S1553;
 					}
 
-					S1618:
+					S1563:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -22094,32 +21515,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S1608;
+						goto S1553;
 					}
 
-					S1619:
+					S1564:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1615;
+							goto S1560;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1615;
+							goto S1560;
 						}
 						p++;
-						goto S1613;
+						goto S1558;
 					}
 
-					S1620:
+					S1565:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S1615;
+							goto S1560;
 						}
 						p += 1;
 					}
@@ -22130,13 +21551,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S1615;
+							goto S1560;
 						}
 						p = scanned;
-						goto S1613;
+						goto S1558;
 					}
 
-					S1622:
+					S1567:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -22145,43 +21566,43 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1605;
+						goto S1550;
 					}
 
-					S1623:
+					S1568:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass7_DotGram[c] != 0)) { state = 1651; goto Leave; }
+							if (!(c <= 255 && RecognizeClass7_DotGram[c] != 0)) { state = 1596; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1651, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1596, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1625, p, call, atomic, repeat, lookahead, 0, 24));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1570, p, call, atomic, repeat, lookahead, 0, 24));
 						call = callIndex;
-						{ state = 940; goto Leave; }
+						{ state = 939; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart54_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart53_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1625: goto S1625;
-						case 1636: goto S1636;
-						case 1646: goto S1646;
-						case 1650: goto S1650;
-						case 1651: goto S1651;
+						case 1570: goto S1570;
+						case 1581: goto S1581;
+						case 1591: goto S1591;
+						case 1595: goto S1595;
+						case 1596: goto S1596;
 					}
 					goto Leave;
 
-					S1625:
+					S1570:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -22220,11 +21641,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1635;
+							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1580;
 						}
 					}
 
-					S1632:
+					S1577:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -22244,20 +21665,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1635:
+					S1580:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1636:
+					S1581:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1650, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1595, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -22269,14 +21690,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S1640;
-						if (c == '(') goto S1639;
-						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1638;
+						if (c == '"') goto S1585;
+						if (c == '(') goto S1584;
+						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1583;
 						expected = ExpectedSet_DotGram(34);
 						{ state = 2; goto Leave; }
 					}
 
-					S1638:
+					S1583:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -22290,18 +21711,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1636;
+						goto S1581;
 					}
 
-					S1639:
+					S1584:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1636, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1581, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 875; goto Leave; }
+						{ state = 874; goto Leave; }
 					}
 
-					S1640:
+					S1585:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -22311,7 +21732,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S1641:
+					S1586:
 					{
 						turn0 = p;
 					}
@@ -22320,15 +21741,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S1643;
+							goto S1588;
 						}
 						c = text[p];
-						if (c == '\\') goto S1648;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1647;
+						if (c == '\\') goto S1593;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1592;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S1643:
+					S1588:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -22350,9 +21771,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S1646;
+							if (!(c == '"')) goto S1591;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1646, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1591, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -22362,10 +21783,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S1636;
+						goto S1581;
 					}
 
-					S1646:
+					S1591:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -22375,32 +21796,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S1636;
+						goto S1581;
 					}
 
-					S1647:
+					S1592:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1643;
+							goto S1588;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1643;
+							goto S1588;
 						}
 						p++;
-						goto S1641;
+						goto S1586;
 					}
 
-					S1648:
+					S1593:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S1643;
+							goto S1588;
 						}
 						p += 1;
 					}
@@ -22411,13 +21832,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S1643;
+							goto S1588;
 						}
 						p = scanned;
-						goto S1641;
+						goto S1586;
 					}
 
-					S1650:
+					S1595:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -22426,44 +21847,44 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1632;
+						goto S1577;
 					}
 
-					S1651:
+					S1596:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'a' || c == 'w')) { state = 1679; goto Leave; }
+							if (!(c == 'a' || c == 'w')) { state = 1624; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1679, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1624, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1653, p, call, atomic, repeat, lookahead, 0, 25));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1598, p, call, atomic, repeat, lookahead, 0, 25));
 						call = callIndex;
-						{ state = 990; goto Leave; }
+						{ state = 989; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart55_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart54_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1653: goto S1653;
-						case 1664: goto S1664;
-						case 1674: goto S1674;
-						case 1678: goto S1678;
-						case 1679: goto S1679;
-						case 1685: goto S1685;
+						case 1598: goto S1598;
+						case 1609: goto S1609;
+						case 1619: goto S1619;
+						case 1623: goto S1623;
+						case 1624: goto S1624;
+						case 1630: goto S1630;
 					}
 					goto Leave;
 
-					S1653:
+					S1598:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -22502,11 +21923,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1663;
+							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1608;
 						}
 					}
 
-					S1660:
+					S1605:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -22526,20 +21947,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1663:
+					S1608:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1664:
+					S1609:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1678, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1623, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -22551,14 +21972,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S1668;
-						if (c == '(') goto S1667;
-						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1666;
+						if (c == '"') goto S1613;
+						if (c == '(') goto S1612;
+						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1611;
 						expected = ExpectedSet_DotGram(34);
 						{ state = 2; goto Leave; }
 					}
 
-					S1666:
+					S1611:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -22572,18 +21993,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1664;
+						goto S1609;
 					}
 
-					S1667:
+					S1612:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1664, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1609, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 875; goto Leave; }
+						{ state = 874; goto Leave; }
 					}
 
-					S1668:
+					S1613:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -22593,7 +22014,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S1669:
+					S1614:
 					{
 						turn0 = p;
 					}
@@ -22602,15 +22023,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S1671;
+							goto S1616;
 						}
 						c = text[p];
-						if (c == '\\') goto S1676;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1675;
+						if (c == '\\') goto S1621;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1620;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S1671:
+					S1616:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -22632,9 +22053,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S1674;
+							if (!(c == '"')) goto S1619;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1674, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1619, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -22644,10 +22065,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S1664;
+						goto S1609;
 					}
 
-					S1674:
+					S1619:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -22657,32 +22078,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S1664;
+						goto S1609;
 					}
 
-					S1675:
+					S1620:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1671;
+							goto S1616;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1671;
+							goto S1616;
 						}
 						p++;
-						goto S1669;
+						goto S1614;
 					}
 
-					S1676:
+					S1621:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S1671;
+							goto S1616;
 						}
 						p += 1;
 					}
@@ -22693,13 +22114,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S1671;
+							goto S1616;
 						}
 						p = scanned;
-						goto S1669;
+						goto S1614;
 					}
 
-					S1678:
+					S1623:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -22708,22 +22129,22 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1660;
+						goto S1605;
 					}
 
-					S1679:
+					S1624:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet3_DotGram, c))) { state = 1717; goto Leave; }
+							if (!(RecognizeIn_DotGram(RecognizeSet3_DotGram, c))) { state = 1662; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1717, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1662, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1691, p, call, atomic, repeat, lookahead, 0, 27));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1636, p, call, atomic, repeat, lookahead, 0, 27));
 						call = callIndex;
 					}
 
@@ -22763,7 +22184,7 @@ namespace AspectGenerator.FilterV2
 						if (!RecognizeGuard1_DotGram(guardCaptured0)) { expected = null; { state = 2; goto Leave; } }
 					}
 
-					S1685:
+					S1630:
 					{
 						p = Scan_DotGram_trivia(text, p);
 					}
@@ -22806,26 +22227,26 @@ namespace AspectGenerator.FilterV2
 					return state;
 				}
 
-				int RecognizePart56_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart55_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1691: goto S1691;
-						case 1702: goto S1702;
-						case 1712: goto S1712;
-						case 1716: goto S1716;
-						case 1717: goto S1717;
-						case 1720: goto S1720;
-						case 1721: goto S1721;
-						case 1722: goto S1722;
-						case 1724: goto S1724;
-						case 1725: goto S1725;
-						case 1730: goto S1730;
-						case 1733: goto S1733;
+						case 1636: goto S1636;
+						case 1647: goto S1647;
+						case 1657: goto S1657;
+						case 1661: goto S1661;
+						case 1662: goto S1662;
+						case 1665: goto S1665;
+						case 1666: goto S1666;
+						case 1667: goto S1667;
+						case 1669: goto S1669;
+						case 1670: goto S1670;
+						case 1675: goto S1675;
+						case 1678: goto S1678;
 					}
 					goto Leave;
 
-					S1691:
+					S1636:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -22864,11 +22285,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1701;
+							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1646;
 						}
 					}
 
-					S1698:
+					S1643:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -22888,20 +22309,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1701:
+					S1646:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1702:
+					S1647:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1716, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1661, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -22913,14 +22334,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S1706;
-						if (c == '(') goto S1705;
-						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1704;
+						if (c == '"') goto S1651;
+						if (c == '(') goto S1650;
+						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1649;
 						expected = ExpectedSet_DotGram(34);
 						{ state = 2; goto Leave; }
 					}
 
-					S1704:
+					S1649:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -22934,18 +22355,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1702;
+						goto S1647;
 					}
 
-					S1705:
+					S1650:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1702, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1647, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 875; goto Leave; }
+						{ state = 874; goto Leave; }
 					}
 
-					S1706:
+					S1651:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -22955,7 +22376,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S1707:
+					S1652:
 					{
 						turn0 = p;
 					}
@@ -22964,15 +22385,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S1709;
+							goto S1654;
 						}
 						c = text[p];
-						if (c == '\\') goto S1714;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1713;
+						if (c == '\\') goto S1659;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1658;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S1709:
+					S1654:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -22994,9 +22415,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S1712;
+							if (!(c == '"')) goto S1657;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1712, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1657, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -23006,10 +22427,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S1702;
+						goto S1647;
 					}
 
-					S1712:
+					S1657:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -23019,32 +22440,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S1702;
+						goto S1647;
 					}
 
-					S1713:
+					S1658:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1709;
+							goto S1654;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1709;
+							goto S1654;
 						}
 						p++;
-						goto S1707;
+						goto S1652;
 					}
 
-					S1714:
+					S1659:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S1709;
+							goto S1654;
 						}
 						p += 1;
 					}
@@ -23055,13 +22476,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S1709;
+							goto S1654;
 						}
 						p = scanned;
-						goto S1707;
+						goto S1652;
 					}
 
-					S1716:
+					S1661:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -23070,19 +22491,19 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1698;
+						goto S1643;
 					}
 
-					S1717:
+					S1662:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1744, p, call, atomic, repeat, lookahead, 0, 26));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1689, p, call, atomic, repeat, lookahead, 0, 26));
 						call = callIndex;
 					}
 
 					{
 						var lookaheadIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Lookahead, 1739, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Lookahead, 1684, p, call, atomic, repeat, lookahead, 0));
 						lookahead = lookaheadIndex;
 						negating++;
 					}
@@ -23096,32 +22517,32 @@ namespace AspectGenerator.FilterV2
 						c = text[p];
 						switch (c)
 						{
-							case 'a': { state = 1736; goto Leave; }
-							case 'c': case 'f': goto S1725;
-							case 'e': case 'g': case 'l': case 'v': goto S1724;
-							case 'i': { state = 1735; goto Leave; }
-							case 'm': goto S1733;
-							case 'n': { state = 1734; goto Leave; }
-							case 'o': goto S1732;
-							case 'p': goto S1728;
-							case 'r': goto S1726;
-							case 's': goto S1723;
-							case 't': goto S1722;
-							case 'w': goto S1720;
+							case 'a': { state = 1681; goto Leave; }
+							case 'c': case 'f': goto S1670;
+							case 'e': case 'g': case 'l': case 'v': goto S1669;
+							case 'i': { state = 1680; goto Leave; }
+							case 'm': goto S1678;
+							case 'n': { state = 1679; goto Leave; }
+							case 'o': goto S1677;
+							case 'p': goto S1673;
+							case 'r': goto S1671;
+							case 's': goto S1668;
+							case 't': goto S1667;
+							case 'w': goto S1665;
 						}
 						expected = ExpectedSet_DotGram(72);
 						{ state = 2; goto Leave; }
 					}
 
-					S1720:
+					S1665:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1721, p, call, atomic, repeat, lookahead, 0, 25));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1666, p, call, atomic, repeat, lookahead, 0, 25));
 						call = callIndex;
-						{ state = 990; goto Leave; }
+						{ state = 989; goto Leave; }
 					}
 
-					S1721:
+					S1666:
 					{
 						global::System.Diagnostics.Debug.Assert(lookahead >= 0 && lookahead < entries.Count);
 						var looked = entries[lookahead];
@@ -23137,137 +22558,137 @@ namespace AspectGenerator.FilterV2
 						{ state = 2; goto Leave; }
 					}
 
-					S1722:
+					S1667:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1721, p, call, atomic, repeat, lookahead, 0, 18));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1666, p, call, atomic, repeat, lookahead, 0, 18));
 						call = callIndex;
-						{ state = 614; goto Leave; }
+						{ state = 613; goto Leave; }
 					}
 
-					S1723:
+					S1668:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1725, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1670, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S1724:
+					S1669:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1721, p, call, atomic, repeat, lookahead, 0, 23));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1666, p, call, atomic, repeat, lookahead, 0, 23));
 						call = callIndex;
-						{ state = 829; goto Leave; }
+						{ state = 828; goto Leave; }
 					}
 
-					S1725:
+					S1670:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1721, p, call, atomic, repeat, lookahead, 0, 24));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1666, p, call, atomic, repeat, lookahead, 0, 24));
 						call = callIndex;
-						{ state = 940; goto Leave; }
+						{ state = 939; goto Leave; }
 					}
 
-					S1726:
+					S1671:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1725, p, call, atomic, repeat, lookahead, 0));
-					}
-
-					{
-						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1721, p, call, atomic, repeat, lookahead, 0, 20));
-						call = callIndex;
-						{ state = 663; goto Leave; }
-					}
-
-					S1728:
-					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1730, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1670, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1721, p, call, atomic, repeat, lookahead, 0, 21));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1666, p, call, atomic, repeat, lookahead, 0, 20));
 						call = callIndex;
-						{ state = 707; goto Leave; }
+						{ state = 662; goto Leave; }
 					}
 
-					S1730:
+					S1673:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1725, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1675, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1721, p, call, atomic, repeat, lookahead, 0, 22));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1666, p, call, atomic, repeat, lookahead, 0, 21));
 						call = callIndex;
-						{ state = 808; goto Leave; }
+						{ state = 706; goto Leave; }
 					}
 
-					S1732:
+					S1675:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1724, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1670, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S1733:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1721, p, call, atomic, repeat, lookahead, 0, 19));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1666, p, call, atomic, repeat, lookahead, 0, 22));
 						call = callIndex;
-						{ state = 644; goto Leave; }
+						{ state = 807; goto Leave; }
+					}
+
+					S1677:
+					{
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1669, p, call, atomic, repeat, lookahead, 0));
+					}
+
+					S1678:
+					{
+						var callIndex = entries.Count;
+						entries.Add(new ParserEntry(ParserEntry.Call, 1666, p, call, atomic, repeat, lookahead, 0, 19));
+						call = callIndex;
+						{ state = 643; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart57_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart56_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1734: goto S1734;
-						case 1735: goto S1735;
-						case 1736: goto S1736;
-						case 1737: goto S1737;
-						case 1738: goto S1738;
-						case 1739: goto S1739;
-						case 1744: goto S1744;
-						case 1750: goto S1750;
-						case 1753: goto S1753;
+						case 1679: goto S1679;
+						case 1680: goto S1680;
+						case 1681: goto S1681;
+						case 1682: goto S1682;
+						case 1683: goto S1683;
+						case 1684: goto S1684;
+						case 1689: goto S1689;
+						case 1695: goto S1695;
+						case 1698: goto S1698;
 					}
 					goto Leave;
 
-					S1734:
+					S1679:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1721, p, call, atomic, repeat, lookahead, 0, 17));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1666, p, call, atomic, repeat, lookahead, 0, 17));
 						call = callIndex;
 						{ state = 92; goto Leave; }
 					}
 
-					S1735:
+					S1680:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1733, p, call, atomic, repeat, lookahead, 0));
-						{ state = 1722; goto Leave; }
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1678, p, call, atomic, repeat, lookahead, 0));
+						{ state = 1667; goto Leave; }
 					}
 
-					S1736:
+					S1681:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1737, p, call, atomic, repeat, lookahead, 0));
-						{ state = 1722; goto Leave; }
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1682, p, call, atomic, repeat, lookahead, 0));
+						{ state = 1667; goto Leave; }
 					}
 
-					S1737:
+					S1682:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1738, p, call, atomic, repeat, lookahead, 0));
-						{ state = 1724; goto Leave; }
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1683, p, call, atomic, repeat, lookahead, 0));
+						{ state = 1669; goto Leave; }
 					}
 
-					S1738:
+					S1683:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1720, p, call, atomic, repeat, lookahead, 0));
-						{ state = 1725; goto Leave; }
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1665, p, call, atomic, repeat, lookahead, 0));
+						{ state = 1670; goto Leave; }
 					}
 
-					S1739:
+					S1684:
 					{
 						p = Scan_DotGram_trivia(text, p);
 					}
@@ -23306,10 +22727,10 @@ namespace AspectGenerator.FilterV2
 						}
 						var guardCaptured0 = guardCaptured0At < 0 ? string.Empty : text.Slice(entries[guardCaptured0At].Position, entries[guardCaptured0At].Value - entries[guardCaptured0At].Position).ToString();
 						if (!RecognizeGuard0_DotGram(guardCaptured0)) { expected = null; { state = 2; goto Leave; } }
-						{ state = 1685; goto Leave; }
+						{ state = 1630; goto Leave; }
 					}
 
-					S1744:
+					S1689:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -23344,11 +22765,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1752;
+							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1697;
 						}
 					}
 
-					S1750:
+					S1695:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -23364,20 +22785,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1752:
+					S1697:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1753:
+					S1698:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1767, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1712, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -23389,14 +22810,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S1757;
-						if (c == '(') goto S1756;
-						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1755;
+						if (c == '"') goto S1702;
+						if (c == '(') goto S1701;
+						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1700;
 						expected = ExpectedSet_DotGram(31);
 						{ state = 2; goto Leave; }
 					}
 
-					S1755:
+					S1700:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -23410,18 +22831,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1753;
+						goto S1698;
 					}
 
-					S1756:
+					S1701:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1753, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1698, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 875; goto Leave; }
+						{ state = 874; goto Leave; }
 					}
 
-					S1757:
+					S1702:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -23429,31 +22850,31 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						{ state = 1758; goto Leave; }
+						{ state = 1703; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart58_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart57_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1758: goto S1758;
-						case 1763: goto S1763;
-						case 1767: goto S1767;
-						case 1768: goto S1768;
-						case 1770: goto S1770;
-						case 1772: goto S1772;
-						case 1774: goto S1774;
-						case 1778: goto S1778;
-						case 1779: goto S1779;
-						case 1783: goto S1783;
+						case 1703: goto S1703;
+						case 1708: goto S1708;
+						case 1712: goto S1712;
+						case 1713: goto S1713;
+						case 1715: goto S1715;
+						case 1717: goto S1717;
+						case 1719: goto S1719;
+						case 1723: goto S1723;
+						case 1724: goto S1724;
+						case 1728: goto S1728;
 					}
 					goto Leave;
 
-					S1758:
+					S1703:
 					{
 						turn0 = p;
 					}
@@ -23462,15 +22883,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S1760;
+							goto S1705;
 						}
 						c = text[p];
-						if (c == '\\') goto S1765;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1764;
+						if (c == '\\') goto S1710;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1709;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S1760:
+					S1705:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -23492,9 +22913,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S1763;
+							if (!(c == '"')) goto S1708;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1763, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1708, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -23504,10 +22925,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						{ state = 1753; goto Leave; }
+						{ state = 1698; goto Leave; }
 					}
 
-					S1763:
+					S1708:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -23517,32 +22938,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						{ state = 1753; goto Leave; }
+						{ state = 1698; goto Leave; }
 					}
 
-					S1764:
+					S1709:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1760;
+							goto S1705;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1760;
+							goto S1705;
 						}
 						p++;
-						goto S1758;
+						goto S1703;
 					}
 
-					S1765:
+					S1710:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S1760;
+							goto S1705;
 						}
 						p += 1;
 					}
@@ -23553,13 +22974,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S1760;
+							goto S1705;
 						}
 						p = scanned;
-						goto S1758;
+						goto S1703;
 					}
 
-					S1767:
+					S1712:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -23568,10 +22989,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 1750; goto Leave; }
+						{ state = 1695; goto Leave; }
 					}
 
-					S1768:
+					S1713:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -23584,24 +23005,24 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1770:
+					S1715:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'a')) goto S1774;
+							if (!(c == 'a')) goto S1719;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1774, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1719, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1772, p, call, atomic, repeat, lookahead, 0, 35));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1717, p, call, atomic, repeat, lookahead, 0, 35));
 						call = callIndex;
-						{ state = 112; goto Leave; }
+						{ state = 111; goto Leave; }
 					}
 
-					S1772:
+					S1717:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -23614,21 +23035,21 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1774:
+					S1719:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(RecognizeIn_DotGram(RecognizeSet1_DotGram, c))) { state = 1922; goto Leave; }
-							if (!(c == '/' || c == 'a')) goto S1775;
+							if (!(RecognizeIn_DotGram(RecognizeSet1_DotGram, c))) { state = 1867; goto Leave; }
+							if (!(c == '/' || c == 'a')) goto S1720;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1922, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1867, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S1775:
+					S1720:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1920, p, call, atomic, repeat, lookahead, 0, 37));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1865, p, call, atomic, repeat, lookahead, 0, 37));
 						call = callIndex;
 					}
 
@@ -23636,18 +23057,18 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c <= 255 && RecognizeClass13_DotGram[c] != 0)) { state = 1917; goto Leave; }
+							if (!(c <= 255 && RecognizeClass13_DotGram[c] != 0)) { state = 1862; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1917, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1862, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1873, p, call, atomic, repeat, lookahead, 0, 38));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1818, p, call, atomic, repeat, lookahead, 0, 38));
 						call = callIndex;
 					}
 
-					S1778:
+					S1723:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -23657,17 +23078,17 @@ namespace AspectGenerator.FilterV2
 						c = text[p];
 						switch (c)
 						{
-							case 'a': case 'g': case 'o': case 's': case 'v': { state = 1822; goto Leave; }
-							case 'e': { state = 1821; goto Leave; }
-							case 'i': { state = 1864; goto Leave; }
-							case 'p': { state = 1794; goto Leave; }
-							case 'r': case 'u': goto S1779;
+							case 'a': case 'g': case 'o': case 's': case 'v': { state = 1767; goto Leave; }
+							case 'e': { state = 1766; goto Leave; }
+							case 'i': { state = 1809; goto Leave; }
+							case 'p': { state = 1739; goto Leave; }
+							case 'r': case 'u': goto S1724;
 						}
 						expected = ExpectedSet_DotGram(93);
 						{ state = 2; goto Leave; }
 					}
 
-					S1779:
+					S1724:
 					{
 						opened79 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 79, p, call, atomic, repeat, lookahead, 0));
@@ -23680,16 +23101,16 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'i') { state = 1792; goto Leave; }
-						if (c == 'u') { state = 1790; goto Leave; }
-						if (c == 'p') { state = 1788; goto Leave; }
-						if (c == 'r') { state = 1786; goto Leave; }
-						if (c == 'e') goto S1781;
+						if (c == 'i') { state = 1737; goto Leave; }
+						if (c == 'u') { state = 1735; goto Leave; }
+						if (c == 'p') { state = 1733; goto Leave; }
+						if (c == 'r') { state = 1731; goto Leave; }
+						if (c == 'e') goto S1726;
 						expected = ExpectedSet_DotGram(92);
 						{ state = 2; goto Leave; }
 					}
 
-					S1781:
+					S1726:
 					{
 						if (p > 0)
 						{
@@ -23735,7 +23156,7 @@ namespace AspectGenerator.FilterV2
 						p += 7;
 					}
 
-					S1783:
+					S1728:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -23792,19 +23213,19 @@ namespace AspectGenerator.FilterV2
 					return state;
 				}
 
-				int RecognizePart59_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart58_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1786: goto S1786;
-						case 1788: goto S1788;
-						case 1790: goto S1790;
-						case 1792: goto S1792;
-						case 1794: goto S1794;
+						case 1731: goto S1731;
+						case 1733: goto S1733;
+						case 1735: goto S1735;
+						case 1737: goto S1737;
+						case 1739: goto S1739;
 					}
 					goto Leave;
 
-					S1786:
+					S1731:
 					{
 						if (p > 0)
 						{
@@ -23850,10 +23271,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 1783; goto Leave; }
+						{ state = 1728; goto Leave; }
 					}
 
-					S1788:
+					S1733:
 					{
 						if (p > 0)
 						{
@@ -23897,10 +23318,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						{ state = 1783; goto Leave; }
+						{ state = 1728; goto Leave; }
 					}
 
-					S1790:
+					S1735:
 					{
 						if (p > 0)
 						{
@@ -23942,10 +23363,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 1783; goto Leave; }
+						{ state = 1728; goto Leave; }
 					}
 
-					S1792:
+					S1737:
 					{
 						if (p > 0)
 						{
@@ -23991,12 +23412,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 1783; goto Leave; }
+						{ state = 1728; goto Leave; }
 					}
 
-					S1794:
+					S1739:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1803, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1748, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -24132,20 +23553,20 @@ namespace AspectGenerator.FilterV2
 					return state;
 				}
 
-				int RecognizePart60_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart59_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1803: goto S1803;
-						case 1812: goto S1812;
-						case 1821: goto S1821;
-						case 1822: goto S1822;
+						case 1748: goto S1748;
+						case 1757: goto S1757;
+						case 1766: goto S1766;
+						case 1767: goto S1767;
 					}
 					goto Leave;
 
-					S1803:
+					S1748:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1812, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1757, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -24275,9 +23696,9 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1812:
+					S1757:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1821, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1766, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -24407,12 +23828,12 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1821:
+					S1766:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1779, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1724, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S1822:
+					S1767:
 					{
 						opened78 = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.CaptureOpen, 78, p, call, atomic, repeat, lookahead, 0));
@@ -24427,14 +23848,14 @@ namespace AspectGenerator.FilterV2
 						c = text[p];
 						switch (c)
 						{
-							case 'a': { state = 1859; goto Leave; }
-							case 'e': { state = 1854; goto Leave; }
-							case 'g': { state = 1852; goto Leave; }
-							case 'i': { state = 1847; goto Leave; }
-							case 'o': { state = 1845; goto Leave; }
-							case 'p': { state = 1834; goto Leave; }
-							case 's': { state = 1829; goto Leave; }
-							case 'v': { state = 1824; goto Leave; }
+							case 'a': { state = 1804; goto Leave; }
+							case 'e': { state = 1799; goto Leave; }
+							case 'g': { state = 1797; goto Leave; }
+							case 'i': { state = 1792; goto Leave; }
+							case 'o': { state = 1790; goto Leave; }
+							case 'p': { state = 1779; goto Leave; }
+							case 's': { state = 1774; goto Leave; }
+							case 'v': { state = 1769; goto Leave; }
 						}
 						expected = ExpectedSet_DotGram(86);
 						{ state = 2; goto Leave; }
@@ -24444,21 +23865,21 @@ namespace AspectGenerator.FilterV2
 					return state;
 				}
 
-				int RecognizePart61_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart60_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1824: goto S1824;
-						case 1826: goto S1826;
-						case 1829: goto S1829;
-						case 1832: goto S1832;
-						case 1834: goto S1834;
-						case 1837: goto S1837;
-						case 1840: goto S1840;
+						case 1769: goto S1769;
+						case 1771: goto S1771;
+						case 1774: goto S1774;
+						case 1777: goto S1777;
+						case 1779: goto S1779;
+						case 1782: goto S1782;
+						case 1785: goto S1785;
 					}
 					goto Leave;
 
-					S1824:
+					S1769:
 					{
 						if (p > 0)
 						{
@@ -24504,7 +23925,7 @@ namespace AspectGenerator.FilterV2
 						p += 7;
 					}
 
-					S1826:
+					S1771:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -24557,9 +23978,9 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1829:
+					S1774:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1832, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1777, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -24603,10 +24024,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						goto S1826;
+						goto S1771;
 					}
 
-					S1832:
+					S1777:
 					{
 						if (p > 0)
 						{
@@ -24648,12 +24069,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						goto S1826;
+						goto S1771;
 					}
 
-					S1834:
+					S1779:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1837, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1782, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -24697,12 +24118,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						goto S1826;
+						goto S1771;
 					}
 
-					S1837:
+					S1782:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1840, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1785, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -24752,12 +24173,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						goto S1826;
+						goto S1771;
 					}
 
-					S1840:
+					S1785:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1843, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1788, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -24803,28 +24224,28 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						goto S1826;
+						goto S1771;
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart62_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart61_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1843: goto S1843;
-						case 1845: goto S1845;
-						case 1847: goto S1847;
-						case 1850: goto S1850;
-						case 1852: goto S1852;
-						case 1854: goto S1854;
-						case 1857: goto S1857;
+						case 1788: goto S1788;
+						case 1790: goto S1790;
+						case 1792: goto S1792;
+						case 1795: goto S1795;
+						case 1797: goto S1797;
+						case 1799: goto S1799;
+						case 1802: goto S1802;
 					}
 					goto Leave;
 
-					S1843:
+					S1788:
 					{
 						if (p > 0)
 						{
@@ -24868,10 +24289,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 7;
-						{ state = 1826; goto Leave; }
+						{ state = 1771; goto Leave; }
 					}
 
-					S1845:
+					S1790:
 					{
 						if (p > 0)
 						{
@@ -24917,12 +24338,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 1826; goto Leave; }
+						{ state = 1771; goto Leave; }
 					}
 
-					S1847:
+					S1792:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1850, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1795, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -24970,10 +24391,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 1826; goto Leave; }
+						{ state = 1771; goto Leave; }
 					}
 
-					S1850:
+					S1795:
 					{
 						if (p > 0)
 						{
@@ -25019,10 +24440,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 1826; goto Leave; }
+						{ state = 1771; goto Leave; }
 					}
 
-					S1852:
+					S1797:
 					{
 						if (p > 0)
 						{
@@ -25070,12 +24491,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 1826; goto Leave; }
+						{ state = 1771; goto Leave; }
 					}
 
-					S1854:
+					S1799:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1857, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1802, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -25119,10 +24540,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 6;
-						{ state = 1826; goto Leave; }
+						{ state = 1771; goto Leave; }
 					}
 
-					S1857:
+					S1802:
 					{
 						if (p > 0)
 						{
@@ -25170,27 +24591,28 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 9;
-						{ state = 1826; goto Leave; }
+						{ state = 1771; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart63_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart62_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1859: goto S1859;
-						case 1862: goto S1862;
-						case 1864: goto S1864;
-						case 1873: goto S1873;
+						case 1804: goto S1804;
+						case 1807: goto S1807;
+						case 1809: goto S1809;
+						case 1818: goto S1818;
+						case 1821: goto S1821;
 					}
 					goto Leave;
 
-					S1859:
+					S1804:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1862, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1807, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -25232,10 +24654,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 5;
-						{ state = 1826; goto Leave; }
+						{ state = 1771; goto Leave; }
 					}
 
-					S1862:
+					S1807:
 					{
 						if (p > 0)
 						{
@@ -25281,12 +24703,12 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						{ state = 1826; goto Leave; }
+						{ state = 1771; goto Leave; }
 					}
 
-					S1864:
+					S1809:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1821, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1766, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -25418,7 +24840,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1873:
+					S1818:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -25428,88 +24850,90 @@ namespace AspectGenerator.FilterV2
 
 					{
 						p = Scan_DotGram_trivia(text, p);
-						{ state = 1875; goto Leave; }
+					}
+
+					{
+						if ((uint)p < (uint)text.Length)
+						{
+							c = text[p];
+							if (c <= 255 && RecognizeClass12_DotGram[c] != 0) { state = 1856; goto Leave; }
+						}
+					}
+
+					S1821:
+					{
+						p = Scan_DotGram_trivia(text, p);
+						{ state = 1822; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart64_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart63_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1875: goto S1875;
-						case 1889: goto S1889;
-						case 1891: goto S1891;
-						case 1893: goto S1893;
-						case 1899: goto S1899;
-						case 1901: goto S1901;
-						case 1905: goto S1905;
-						case 1907: goto S1907;
-						case 1908: goto S1908;
-						case 1910: goto S1910;
-						case 1915: goto S1915;
-						case 1916: goto S1916;
-						case 1917: goto S1917;
-						case 1918: goto S1918;
+						case 1822: goto S1822;
+						case 1834: goto S1834;
+						case 1836: goto S1836;
+						case 1838: goto S1838;
+						case 1844: goto S1844;
+						case 1846: goto S1846;
+						case 1850: goto S1850;
+						case 1852: goto S1852;
+						case 1853: goto S1853;
+						case 1855: goto S1855;
+						case 1856: goto S1856;
+						case 1860: goto S1860;
+						case 1861: goto S1861;
+						case 1862: goto S1862;
+						case 1863: goto S1863;
+						case 1865: goto S1865;
 					}
 					goto Leave;
 
-					S1875:
+					S1822:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass12_DotGram[c] != 0) goto S1911;
+							if (RecognizeIn_DotGram(RecognizeSet1_DotGram, c)) goto S1824;
 						}
 					}
 
-					S1876:
-					{
-						p = Scan_DotGram_trivia(text, p);
-					}
-
-					{
-						if ((uint)p < (uint)text.Length)
-						{
-							c = text[p];
-							if (RecognizeIn_DotGram(RecognizeSet1_DotGram, c)) goto S1879;
-						}
-					}
-
-					S1878:
+					S1823:
 					{
 						entries.Add(new ParserEntry(ParserEntry.Construct, 0, p, call, atomic, repeat, lookahead, 0));
 						{ state = 0; goto Leave; }
 					}
 
-					S1879:
+					S1824:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1880:
+					S1825:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) goto S1910;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1910, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) goto S1855;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1855, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1908, p, call, atomic, repeat, lookahead, 0, 39));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1853, p, call, atomic, repeat, lookahead, 0, 39));
 						call = callIndex;
 					}
 
-					S1882:
+					S1827:
 					{
 						var lookaheadIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Lookahead, 1891, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Lookahead, 1836, p, call, atomic, repeat, lookahead, 0));
 						lookahead = lookaheadIndex;
 						negating++;
 					}
@@ -25518,9 +24942,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == 'a')) goto S1889;
+							if (!(c == 'a')) goto S1834;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1889, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1834, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -25566,7 +24990,7 @@ namespace AspectGenerator.FilterV2
 						p += 6;
 					}
 
-					S1886:
+					S1831:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -25603,7 +25027,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 2; goto Leave; }
 					}
 
-					S1889:
+					S1834:
 					{
 						if (p > 0)
 						{
@@ -25649,22 +25073,22 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 8;
-						goto S1886;
+						goto S1831;
 					}
 
-					S1891:
+					S1836:
 					{
 						p = Scan_DotGram_trivia(text, p);
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1893, p, call, atomic, repeat, lookahead, 0, 65));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1838, p, call, atomic, repeat, lookahead, 0, 65));
 						call = callIndex;
-						{ state = 139; goto Leave; }
+						{ state = 138; goto Leave; }
 					}
 
-					S1893:
+					S1838:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -25676,44 +25100,44 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass15_DotGram[c] != 0) goto S1902;
+							if (c <= 255 && RecognizeClass15_DotGram[c] != 0) goto S1847;
 						}
 					}
 
-					S1895:
+					S1840:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass14_DotGram[c] != 0) goto S1896;
+							if (c <= 255 && RecognizeClass14_DotGram[c] != 0) goto S1841;
 						}
 						{ state = 0; goto Leave; }
 					}
 
-					S1896:
+					S1841:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1897:
+					S1842:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) goto S1901;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1901, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) goto S1846;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1846, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1899, p, call, atomic, repeat, lookahead, 0, 41));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1844, p, call, atomic, repeat, lookahead, 0, 41));
 						call = callIndex;
-						{ state = 1250; goto Leave; }
+						{ state = 1249; goto Leave; }
 					}
 
-					S1899:
+					S1844:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -25726,10 +25150,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S1897;
+						goto S1842;
 					}
 
-					S1901:
+					S1846:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -25741,30 +25165,30 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1902:
+					S1847:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1903:
+					S1848:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) goto S1907;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1907, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) goto S1852;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1852, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1905, p, call, atomic, repeat, lookahead, 0, 40));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1850, p, call, atomic, repeat, lookahead, 0, 40));
 						call = callIndex;
-						{ state = 1261; goto Leave; }
+						{ state = 1260; goto Leave; }
 					}
 
-					S1905:
+					S1850:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -25777,10 +25201,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S1903;
+						goto S1848;
 					}
 
-					S1907:
+					S1852:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -25789,10 +25213,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1895;
+						goto S1840;
 					}
 
-					S1908:
+					S1853:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -25805,10 +25229,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S1880;
+						goto S1825;
 					}
 
-					S1910:
+					S1855:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -25817,19 +25241,19 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1878;
+						goto S1823;
 					}
 
-					S1911:
+					S1856:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1912:
+					S1857:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1916, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1861, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -25838,21 +25262,21 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1915, p, call, atomic, repeat, lookahead, 0, 38));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1860, p, call, atomic, repeat, lookahead, 0, 38));
 						call = callIndex;
-						{ state = 1778; goto Leave; }
+						{ state = 1723; goto Leave; }
 					}
 
-					S1915:
+					S1860:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 38 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 75, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S1912;
+						goto S1857;
 					}
 
-					S1916:
+					S1861:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -25861,18 +25285,18 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1876;
+						{ state = 1821; goto Leave; }
 					}
 
-					S1917:
+					S1862:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1918, p, call, atomic, repeat, lookahead, 0, 39));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1863, p, call, atomic, repeat, lookahead, 0, 39));
 						call = callIndex;
-						goto S1882;
+						goto S1827;
 					}
 
-					S1918:
+					S1863:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -25885,25 +25309,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					Leave:
-					return state;
-				}
-
-				int RecognizePart65_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 1920: goto S1920;
-						case 1922: goto S1922;
-						case 1930: goto S1930;
-						case 1940: goto S1940;
-						case 1944: goto S1944;
-						case 1945: goto S1945;
-						case 1947: goto S1947;
-					}
-					goto Leave;
-
-					S1920:
+					S1865:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -25916,21 +25322,38 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1922:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart64_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 1867: goto S1867;
+						case 1875: goto S1875;
+						case 1885: goto S1885;
+						case 1889: goto S1889;
+						case 1890: goto S1890;
+						case 1892: goto S1892;
+					}
+					goto Leave;
+
+					S1867:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '/')) goto S1947;
-							goto S1923;
+							if (!(c == '/')) goto S1892;
+							goto S1868;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1947, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1892, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S1923:
+					S1868:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1945, p, call, atomic, repeat, lookahead, 0, 42));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1890, p, call, atomic, repeat, lookahead, 0, 42));
 						call = callIndex;
 					}
 
@@ -25957,11 +25380,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1929;
+							if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || (c >= '!' && c <= '"') || (c >= '$' && c <= '(') || (c >= '*' && c <= '\uFFFF')) goto S1874;
 						}
 					}
 
-					S1928:
+					S1873:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -25973,20 +25396,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1929:
+					S1874:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1930:
+					S1875:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1944, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1889, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -25998,14 +25421,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S1934;
-						if (c == '(') goto S1933;
-						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1932;
+						if (c == '"') goto S1879;
+						if (c == '(') goto S1878;
+						if ((c >= '\0' && c <= '\b') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '\u001F') || c == '!' || (c >= '$' && c <= '\'') || (c >= '*' && c <= '\uFFFF')) goto S1877;
 						expected = ExpectedSet_DotGram(31);
 						{ state = 2; goto Leave; }
 					}
 
-					S1932:
+					S1877:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -26019,18 +25442,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1930;
+						goto S1875;
 					}
 
-					S1933:
+					S1878:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1930, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1875, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 875; goto Leave; }
+						{ state = 874; goto Leave; }
 					}
 
-					S1934:
+					S1879:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -26040,7 +25463,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S1935:
+					S1880:
 					{
 						turn0 = p;
 					}
@@ -26049,15 +25472,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S1937;
+							goto S1882;
 						}
 						c = text[p];
-						if (c == '\\') goto S1942;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1941;
+						if (c == '\\') goto S1887;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S1886;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S1937:
+					S1882:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -26079,9 +25502,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S1940;
+							if (!(c == '"')) goto S1885;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1940, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1885, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -26091,10 +25514,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S1930;
+						goto S1875;
 					}
 
-					S1940:
+					S1885:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -26104,32 +25527,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S1930;
+						goto S1875;
 					}
 
-					S1941:
+					S1886:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1937;
+							goto S1882;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S1937;
+							goto S1882;
 						}
 						p++;
-						goto S1935;
+						goto S1880;
 					}
 
-					S1942:
+					S1887:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S1937;
+							goto S1882;
 						}
 						p += 1;
 					}
@@ -26140,13 +25563,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S1937;
+							goto S1882;
 						}
 						p = scanned;
-						goto S1935;
+						goto S1880;
 					}
 
-					S1944:
+					S1889:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -26155,10 +25578,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1928;
+						goto S1873;
 					}
 
-					S1945:
+					S1890:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -26171,7 +25594,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1947:
+					S1892:
 					{
 						if (p > 0)
 						{
@@ -26222,10 +25645,6 @@ namespace AspectGenerator.FilterV2
 					}
 
 					{
-						p = Scan_DotGram_trivia(text, p);
-					}
-
-					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
@@ -26246,24 +25665,24 @@ namespace AspectGenerator.FilterV2
 					return state;
 				}
 
-				int RecognizePart66_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart65_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1953: goto S1953;
-						case 1955: goto S1955;
-						case 1957: goto S1957;
-						case 1959: goto S1959;
-						case 1960: goto S1960;
-						case 1962: goto S1962;
-						case 1966: goto S1966;
-						case 1975: goto S1975;
-						case 1981: goto S1981;
-						case 1985: goto S1985;
+						case 1897: goto S1897;
+						case 1899: goto S1899;
+						case 1901: goto S1901;
+						case 1903: goto S1903;
+						case 1904: goto S1904;
+						case 1906: goto S1906;
+						case 1910: goto S1910;
+						case 1919: goto S1919;
+						case 1925: goto S1925;
+						case 1929: goto S1929;
 					}
 					goto Leave;
 
-					S1953:
+					S1897:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -26276,26 +25695,26 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1955:
+					S1899:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '(')) goto S1959;
-							goto S1956;
+							if (!(c == '(')) goto S1903;
+							goto S1900;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 1959, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1903, p, call, atomic, repeat, lookahead, 0));
 					}
 
-					S1956:
+					S1900:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1957, p, call, atomic, repeat, lookahead, 0, 14));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1901, p, call, atomic, repeat, lookahead, 0, 14));
 						call = callIndex;
 						{ state = 30; goto Leave; }
 					}
 
-					S1957:
+					S1901:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -26308,15 +25727,15 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1959:
+					S1903:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 1960, p, call, atomic, repeat, lookahead, 0, 15));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1904, p, call, atomic, repeat, lookahead, 0, 15));
 						call = callIndex;
-						{ state = 1451; goto Leave; }
+						{ state = 1449; goto Leave; }
 					}
 
-					S1960:
+					S1904:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -26329,7 +25748,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1962:
+					S1906:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -26345,21 +25764,21 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass3_DotGram[c] != 0) goto S1965;
+							if (c <= 255 && RecognizeClass3_DotGram[c] != 0) goto S1909;
 						}
 						{ state = 0; goto Leave; }
 					}
 
-					S1965:
+					S1909:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1966:
+					S1910:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2017, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1961, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -26368,7 +25787,7 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2013, p, call, atomic, repeat, lookahead, 0, 12));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1957, p, call, atomic, repeat, lookahead, 0, 12));
 						call = callIndex;
 					}
 
@@ -26379,13 +25798,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c <= 255 && RecognizeClass4_DotGram[c] != 0) goto S1974;
-						if (c <= 255 && RecognizeClass5_DotGram[c] != 0) goto S1970;
+						if (c <= 255 && RecognizeClass4_DotGram[c] != 0) goto S1918;
+						if (c <= 255 && RecognizeClass5_DotGram[c] != 0) goto S1914;
 						expected = ExpectedSet_DotGram(24);
 						{ state = 2; goto Leave; }
 					}
 
-					S1970:
+					S1914:
 					{
 						capture14 = p;
 					}
@@ -26414,16 +25833,16 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1974:
+					S1918:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1980;
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1924;
 						}
 					}
 
-					S1975:
+					S1919:
 					{
 						p = Scan_DotGram_trivia(text, p);
 					}
@@ -26482,20 +25901,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S1980:
+					S1924:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S1981:
+					S1925:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) { state = 2012; goto Leave; }
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2012, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) { state = 1956; goto Leave; }
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1956, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -26504,40 +25923,40 @@ namespace AspectGenerator.FilterV2
 						atomic = atomicIndex;
 					}
 
-					S1983:
+					S1927:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(0);
-							goto S1984;
+							goto S1928;
 						}
 						c = text[p];
 						if (!((c == '\t' || c == ' ')))
 						{
 							expected = ExpectedSet_DotGram(0);
-							goto S1984;
+							goto S1928;
 						}
 						p++;
-						goto S1983;
+						goto S1927;
 					}
 
-					S1984:
+					S1928:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '#') { state = 2010; goto Leave; }
+							if (c == '#') { state = 1954; goto Leave; }
 						}
 					}
 
-					S1985:
+					S1929:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) { state = 2009; goto Leave; }
+							if (!(c == '\r')) { state = 1953; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2009, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1953, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -26558,26 +25977,26 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						{ state = 1987; goto Leave; }
+						{ state = 1931; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart67_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart66_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 1987: goto S1987;
-						case 2001: goto S2001;
-						case 2005: goto S2005;
-						case 2008: goto S2008;
-						case 2009: goto S2009;
+						case 1931: goto S1931;
+						case 1945: goto S1945;
+						case 1949: goto S1949;
+						case 1952: goto S1952;
+						case 1953: goto S1953;
 					}
 					goto Leave;
 
-					S1987:
+					S1931:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -26588,11 +26007,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S2000;
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1944;
 						}
 					}
 
-					S1989:
+					S1933:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -26614,13 +26033,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 81; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'a') goto S1998;
-						if (c == 'o') goto S1992;
+						if (c == 'a') goto S1942;
+						if (c == 'o') goto S1936;
 						expected = ExpectedSet_DotGram(18);
 						{ state = 81; goto Leave; }
 					}
 
-					S1992:
+					S1936:
 					{
 						if (p > 0)
 						{
@@ -26648,7 +26067,7 @@ namespace AspectGenerator.FilterV2
 						p += 2;
 					}
 
-					S1994:
+					S1938:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -26680,10 +26099,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 1981; goto Leave; }
+						{ state = 1925; goto Leave; }
 					}
 
-					S1998:
+					S1942:
 					{
 						if (p > 0)
 						{
@@ -26709,17 +26128,17 @@ namespace AspectGenerator.FilterV2
 							{ state = 81; goto Leave; }
 						}
 						p += 3;
-						goto S1994;
+						goto S1938;
 					}
 
-					S2000:
+					S1944:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2001:
+					S1945:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -26744,7 +26163,7 @@ namespace AspectGenerator.FilterV2
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2008, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 1952, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -26756,21 +26175,21 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '\t' || c == ' ') { p++; goto S2001; }
-						if (c == '#') goto S2006;
-						if (c == '\n' || c == '\r') goto S2003;
+						if (c == '\t' || c == ' ') { p++; goto S1945; }
+						if (c == '#') goto S1950;
+						if (c == '\n' || c == '\r') goto S1947;
 						expected = ExpectedSet_DotGram(6);
 						{ state = 2; goto Leave; }
 					}
 
-					S2003:
+					S1947:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) goto S2005;
+							if (!(c == '\r')) goto S1949;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2005, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 1949, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -26791,10 +26210,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						goto S2001;
+						goto S1945;
 					}
 
-					S2005:
+					S1949:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -26808,10 +26227,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2001;
+						goto S1945;
 					}
 
-					S2006:
+					S1950:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -26827,11 +26246,11 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2001, runStart, call, atomic, repeat, lookahead, p));
-						goto S2001;
+							entries.Add(new ParserEntry(ParserEntry.Run, 1945, runStart, call, atomic, repeat, lookahead, p));
+						goto S1945;
 					}
 
-					S2008:
+					S1952:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -26840,10 +26259,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S1989;
+						goto S1933;
 					}
 
-					S2009:
+					S1953:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -26857,31 +26276,33 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S1987;
+						goto S1931;
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart68_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart67_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 2010: goto S2010;
-						case 2012: goto S2012;
-						case 2013: goto S2013;
-						case 2016: goto S2016;
-						case 2017: goto S2017;
-						case 2018: goto S2018;
-						case 2025: goto S2025;
-						case 2031: goto S2031;
-						case 2033: goto S2033;
-						case 2037: goto S2037;
+						case 1954: goto S1954;
+						case 1956: goto S1956;
+						case 1957: goto S1957;
+						case 1960: goto S1960;
+						case 1961: goto S1961;
+						case 1962: goto S1962;
+						case 1969: goto S1969;
+						case 1975: goto S1975;
+						case 1977: goto S1977;
+						case 1981: goto S1981;
+						case 1983: goto S1983;
+						case 1985: goto S1985;
 					}
 					goto Leave;
 
-					S2010:
+					S1954:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -26891,24 +26312,24 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S2011:
+					S1955:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = (seaming == 0 || ((uint)p >= (uint)text.Length || failure.OutOfInput > p)) ? ExpectedSet_DotGram(19) : RecognizeUnrecorded_DotGram;
-							{ state = 1985; goto Leave; }
+							{ state = 1929; goto Leave; }
 						}
 						c = text[p];
 						if (!(!(c == '\n' || c == '\r')))
 						{
 							expected = (seaming == 0 || ((uint)p >= (uint)text.Length || failure.OutOfInput > p)) ? ExpectedSet_DotGram(19) : RecognizeUnrecorded_DotGram;
-							{ state = 1985; goto Leave; }
+							{ state = 1929; goto Leave; }
 						}
 						p++;
-						goto S2011;
+						goto S1955;
 					}
 
-					S2012:
+					S1956:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -26917,10 +26338,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 1975; goto Leave; }
+						{ state = 1919; goto Leave; }
 					}
 
-					S2013:
+					S1957:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -26934,21 +26355,21 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2016, p, call, atomic, repeat, lookahead, 0, 13));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1960, p, call, atomic, repeat, lookahead, 0, 13));
 						call = callIndex;
 						{ state = 24; goto Leave; }
 					}
 
-					S2016:
+					S1960:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 13 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 13, capturedCall, call, atomic, repeat, lookahead, p));
-						{ state = 1966; goto Leave; }
+						{ state = 1910; goto Leave; }
 					}
 
-					S2017:
+					S1961:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -26960,7 +26381,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S2018:
+					S1962:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -26976,21 +26397,21 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass2_DotGram[c] != 0) goto S2021;
+							if (c <= 255 && RecognizeClass2_DotGram[c] != 0) goto S1965;
 						}
 						{ state = 0; goto Leave; }
 					}
 
-					S2021:
+					S1965:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2022:
+					S1966:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2065, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2009, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -27001,11 +26422,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S2032;
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S1976;
 						}
 					}
 
-					S2025:
+					S1969:
 					{
 						p = Scan_DotGram_trivia(text, p);
 					}
@@ -27060,34 +26481,34 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2031, p, call, atomic, repeat, lookahead, 0, 10));
+						entries.Add(new ParserEntry(ParserEntry.Call, 1975, p, call, atomic, repeat, lookahead, 0, 10));
 						call = callIndex;
 						{ state = 23; goto Leave; }
 					}
 
-					S2031:
+					S1975:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
 						global::System.Diagnostics.Debug.Assert(entries[capturedCall].Kind == ParserEntry.Completed && entries[capturedCall].CallIndex == call && entries[capturedCall].RuleIndex == 10 && entries[capturedCall].Value == p);
 						entries.Add(new ParserEntry(ParserEntry.RuleCapture, 10, capturedCall, call, atomic, repeat, lookahead, p));
-						goto S2022;
+						goto S1966;
 					}
 
-					S2032:
+					S1976:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2033:
+					S1977:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) { state = 2064; goto Leave; }
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2064, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) { state = 2008; goto Leave; }
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2008, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -27096,40 +26517,40 @@ namespace AspectGenerator.FilterV2
 						atomic = atomicIndex;
 					}
 
-					S2035:
+					S1979:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(0);
-							goto S2036;
+							goto S1980;
 						}
 						c = text[p];
 						if (!((c == '\t' || c == ' ')))
 						{
 							expected = ExpectedSet_DotGram(0);
-							goto S2036;
+							goto S1980;
 						}
 						p++;
-						goto S2035;
+						goto S1979;
 					}
 
-					S2036:
+					S1980:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '#') { state = 2062; goto Leave; }
+							if (c == '#') { state = 2006; goto Leave; }
 						}
 					}
 
-					S2037:
+					S1981:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) { state = 2061; goto Leave; }
+							if (!(c == '\r')) { state = 2005; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2061, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2005, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -27150,27 +26571,9 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						{ state = 2039; goto Leave; }
 					}
 
-					Leave:
-					return state;
-				}
-
-				int RecognizePart69_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
-				{
-					switch (state)
-					{
-						case 2039: goto S2039;
-						case 2053: goto S2053;
-						case 2057: goto S2057;
-						case 2060: goto S2060;
-						case 2061: goto S2061;
-						case 2062: goto S2062;
-					}
-					goto Leave;
-
-					S2039:
+					S1983:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -27181,11 +26584,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S2052;
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) { state = 1996; goto Leave; }
 						}
 					}
 
-					S2041:
+					S1985:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -27207,13 +26610,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 81; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'a') goto S2050;
-						if (c == 'o') goto S2044;
+						if (c == 'a') { state = 1994; goto Leave; }
+						if (c == 'o') goto S1988;
 						expected = ExpectedSet_DotGram(18);
 						{ state = 81; goto Leave; }
 					}
 
-					S2044:
+					S1988:
 					{
 						if (p > 0)
 						{
@@ -27239,9 +26642,29 @@ namespace AspectGenerator.FilterV2
 							{ state = 81; goto Leave; }
 						}
 						p += 2;
+						{ state = 1990; goto Leave; }
 					}
 
-					S2046:
+					Leave:
+					return state;
+				}
+
+				int RecognizePart68_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				{
+					switch (state)
+					{
+						case 1990: goto S1990;
+						case 1994: goto S1994;
+						case 1996: goto S1996;
+						case 1997: goto S1997;
+						case 2001: goto S2001;
+						case 2004: goto S2004;
+						case 2005: goto S2005;
+						case 2006: goto S2006;
+					}
+					goto Leave;
+
+					S1990:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -27273,10 +26696,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						{ state = 2033; goto Leave; }
+						{ state = 1977; goto Leave; }
 					}
 
-					S2050:
+					S1994:
 					{
 						if (p > 0)
 						{
@@ -27302,17 +26725,17 @@ namespace AspectGenerator.FilterV2
 							{ state = 81; goto Leave; }
 						}
 						p += 3;
-						goto S2046;
+						goto S1990;
 					}
 
-					S2052:
+					S1996:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2053:
+					S1997:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -27337,7 +26760,7 @@ namespace AspectGenerator.FilterV2
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2060, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2004, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -27349,21 +26772,21 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '\t' || c == ' ') { p++; goto S2053; }
-						if (c == '#') goto S2058;
-						if (c == '\n' || c == '\r') goto S2055;
+						if (c == '\t' || c == ' ') { p++; goto S1997; }
+						if (c == '#') goto S2002;
+						if (c == '\n' || c == '\r') goto S1999;
 						expected = ExpectedSet_DotGram(6);
 						{ state = 2; goto Leave; }
 					}
 
-					S2055:
+					S1999:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) goto S2057;
+							if (!(c == '\r')) goto S2001;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2057, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2001, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -27384,10 +26807,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						goto S2053;
+						goto S1997;
 					}
 
-					S2057:
+					S2001:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -27401,10 +26824,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2053;
+						goto S1997;
 					}
 
-					S2058:
+					S2002:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -27420,11 +26843,11 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2053, runStart, call, atomic, repeat, lookahead, p));
-						goto S2053;
+							entries.Add(new ParserEntry(ParserEntry.Run, 1997, runStart, call, atomic, repeat, lookahead, p));
+						goto S1997;
 					}
 
-					S2060:
+					S2004:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -27433,10 +26856,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S2041;
+						{ state = 1985; goto Leave; }
 					}
 
-					S2061:
+					S2005:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -27450,10 +26873,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2039;
+						{ state = 1983; goto Leave; }
 					}
 
-					S2062:
+					S2006:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -27463,45 +26886,45 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S2063:
+					S2007:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = (seaming == 0 || ((uint)p >= (uint)text.Length || failure.OutOfInput > p)) ? ExpectedSet_DotGram(19) : RecognizeUnrecorded_DotGram;
-							{ state = 2037; goto Leave; }
+							{ state = 1981; goto Leave; }
 						}
 						c = text[p];
 						if (!(!(c == '\n' || c == '\r')))
 						{
 							expected = (seaming == 0 || ((uint)p >= (uint)text.Length || failure.OutOfInput > p)) ? ExpectedSet_DotGram(19) : RecognizeUnrecorded_DotGram;
-							{ state = 2037; goto Leave; }
+							{ state = 1981; goto Leave; }
 						}
 						p++;
-						goto S2063;
+						goto S2007;
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart70_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart69_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 2064: goto S2064;
-						case 2065: goto S2065;
-						case 2066: goto S2066;
-						case 2068: goto S2068;
-						case 2077: goto S2077;
-						case 2087: goto S2087;
-						case 2091: goto S2091;
-						case 2092: goto S2092;
-						case 2094: goto S2094;
-						case 2096: goto S2096;
+						case 2008: goto S2008;
+						case 2009: goto S2009;
+						case 2010: goto S2010;
+						case 2012: goto S2012;
+						case 2021: goto S2021;
+						case 2031: goto S2031;
+						case 2035: goto S2035;
+						case 2036: goto S2036;
+						case 2038: goto S2038;
+						case 2040: goto S2040;
 					}
 					goto Leave;
 
-					S2064:
+					S2008:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -27510,10 +26933,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 2025; goto Leave; }
+						{ state = 1969; goto Leave; }
 					}
 
-					S2065:
+					S2009:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -27525,7 +26948,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S2066:
+					S2010:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -27538,10 +26961,10 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S2068:
+					S2012:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2092, p, call, atomic, repeat, lookahead, 0, 8));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2036, p, call, atomic, repeat, lookahead, 0, 8));
 						call = callIndex;
 					}
 
@@ -27582,11 +27005,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '\uFFFF')) goto S2076;
+							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '\uFFFF')) goto S2020;
 						}
 					}
 
-					S2075:
+					S2019:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -27598,20 +27021,20 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S2076:
+					S2020:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2077:
+					S2021:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2091, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2035, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -27623,14 +27046,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S2081;
-						if (c == '(') goto S2080;
-						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= ')' && c <= '\uFFFF')) goto S2079;
+						if (c == '"') goto S2025;
+						if (c == '(') goto S2024;
+						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= ')' && c <= '\uFFFF')) goto S2023;
 						expected = ExpectedSet_DotGram(13);
 						{ state = 2; goto Leave; }
 					}
 
-					S2079:
+					S2023:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -27644,18 +27067,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2077;
+						goto S2021;
 					}
 
-					S2080:
+					S2024:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2077, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2021, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 875; goto Leave; }
+						{ state = 874; goto Leave; }
 					}
 
-					S2081:
+					S2025:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -27665,7 +27088,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S2082:
+					S2026:
 					{
 						turn0 = p;
 					}
@@ -27674,15 +27097,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S2084;
+							goto S2028;
 						}
 						c = text[p];
-						if (c == '\\') goto S2089;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S2088;
+						if (c == '\\') goto S2033;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S2032;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S2084:
+					S2028:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -27704,9 +27127,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S2087;
+							if (!(c == '"')) goto S2031;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2087, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2031, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -27716,10 +27139,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S2077;
+						goto S2021;
 					}
 
-					S2087:
+					S2031:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -27729,32 +27152,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S2077;
+						goto S2021;
 					}
 
-					S2088:
+					S2032:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S2084;
+							goto S2028;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S2084;
+							goto S2028;
 						}
 						p++;
-						goto S2082;
+						goto S2026;
 					}
 
-					S2089:
+					S2033:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S2084;
+							goto S2028;
 						}
 						p += 1;
 					}
@@ -27765,13 +27188,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S2084;
+							goto S2028;
 						}
 						p = scanned;
-						goto S2082;
+						goto S2026;
 					}
 
-					S2091:
+					S2035:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -27780,10 +27203,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S2075;
+						goto S2019;
 					}
 
-					S2092:
+					S2036:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -27796,10 +27219,10 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S2094:
+					S2038:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2096, p, call, atomic, repeat, lookahead, 0, 7));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2040, p, call, atomic, repeat, lookahead, 0, 7));
 						call = callIndex;
 					}
 
@@ -27813,7 +27236,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S2096:
+					S2040:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -27827,7 +27250,7 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2099, p, call, atomic, repeat, lookahead, 0, 9));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2043, p, call, atomic, repeat, lookahead, 0, 9));
 						call = callIndex;
 						{ state = 22; goto Leave; }
 					}
@@ -27836,23 +27259,23 @@ namespace AspectGenerator.FilterV2
 					return state;
 				}
 
-				int RecognizePart71_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart70_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 2099: goto S2099;
-						case 2101: goto S2101;
-						case 2105: goto S2105;
-						case 2106: goto S2106;
-						case 2109: goto S2109;
-						case 2112: goto S2112;
-						case 2114: goto S2114;
-						case 2118: goto S2118;
-						case 2121: goto S2121;
+						case 2043: goto S2043;
+						case 2045: goto S2045;
+						case 2049: goto S2049;
+						case 2050: goto S2050;
+						case 2053: goto S2053;
+						case 2056: goto S2056;
+						case 2058: goto S2058;
+						case 2062: goto S2062;
+						case 2065: goto S2065;
 					}
 					goto Leave;
 
-					S2099:
+					S2043:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -27865,7 +27288,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S2101:
+					S2045:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -27893,35 +27316,35 @@ namespace AspectGenerator.FilterV2
 							p++;
 						}
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2105, runStart, call, atomic, repeat, lookahead, p));
+							entries.Add(new ParserEntry(ParserEntry.Run, 2049, runStart, call, atomic, repeat, lookahead, p));
 					}
 
-					S2105:
+					S2049:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '#') { state = 2126; goto Leave; }
+							if (c == '#') { state = 2070; goto Leave; }
 						}
 					}
 
-					S2106:
+					S2050:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\n' || c == '\r')) { state = 2123; goto Leave; }
+							if (!(c == '\n' || c == '\r')) { state = 2067; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2123, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2067, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) { state = 2122; goto Leave; }
+							if (!(c == '\r')) { state = 2066; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2122, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2066, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -27944,7 +27367,7 @@ namespace AspectGenerator.FilterV2
 						p += 2;
 					}
 
-					S2109:
+					S2053:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -27955,11 +27378,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S2113;
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S2057;
 						}
 					}
 
-					S2111:
+					S2055:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -27970,7 +27393,7 @@ namespace AspectGenerator.FilterV2
 						lookahead = boundary.LookaheadIndex;
 					}
 
-					S2112:
+					S2056:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -27982,14 +27405,14 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S2113:
+					S2057:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2114:
+					S2058:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -28014,7 +27437,7 @@ namespace AspectGenerator.FilterV2
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2121, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2065, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -28026,21 +27449,21 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '\t' || c == ' ') { p++; goto S2114; }
-						if (c == '#') goto S2119;
-						if (c == '\n' || c == '\r') goto S2116;
+						if (c == '\t' || c == ' ') { p++; goto S2058; }
+						if (c == '#') goto S2063;
+						if (c == '\n' || c == '\r') goto S2060;
 						expected = ExpectedSet_DotGram(6);
 						{ state = 2; goto Leave; }
 					}
 
-					S2116:
+					S2060:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) goto S2118;
+							if (!(c == '\r')) goto S2062;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2118, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2062, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -28061,10 +27484,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						goto S2114;
+						goto S2058;
 					}
 
-					S2118:
+					S2062:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -28078,10 +27501,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2114;
+						goto S2058;
 					}
 
-					S2119:
+					S2063:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -28097,11 +27520,11 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2114, runStart, call, atomic, repeat, lookahead, p));
-						goto S2114;
+							entries.Add(new ParserEntry(ParserEntry.Run, 2058, runStart, call, atomic, repeat, lookahead, p));
+						goto S2058;
 					}
 
-					S2121:
+					S2065:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -28110,33 +27533,33 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S2111;
+						goto S2055;
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart72_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart71_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 2122: goto S2122;
-						case 2123: goto S2123;
-						case 2126: goto S2126;
-						case 2130: goto S2130;
-						case 2131: goto S2131;
-						case 2132: goto S2132;
-						case 2134: goto S2134;
-						case 2135: goto S2135;
-						case 2139: goto S2139;
-						case 2141: goto S2141;
-						case 2143: goto S2143;
-						case 2144: goto S2144;
+						case 2066: goto S2066;
+						case 2067: goto S2067;
+						case 2070: goto S2070;
+						case 2074: goto S2074;
+						case 2075: goto S2075;
+						case 2076: goto S2076;
+						case 2078: goto S2078;
+						case 2079: goto S2079;
+						case 2083: goto S2083;
+						case 2085: goto S2085;
+						case 2087: goto S2087;
+						case 2088: goto S2088;
 					}
 					goto Leave;
 
-					S2122:
+					S2066:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -28150,10 +27573,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						{ state = 2109; goto Leave; }
+						{ state = 2053; goto Leave; }
 					}
 
-					S2123:
+					S2067:
 					{
 						turn0 = p;
 					}
@@ -28171,23 +27594,23 @@ namespace AspectGenerator.FilterV2
 
 					{
 						p = turn0;
-						{ state = 2112; goto Leave; }
+						{ state = 2056; goto Leave; }
 					}
 
-					S2126:
+					S2070:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2127:
+					S2071:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) goto S2131;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2131, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) goto S2075;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2075, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -28205,19 +27628,19 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2130, runStart, call, atomic, repeat, lookahead, p));
+							entries.Add(new ParserEntry(ParserEntry.Run, 2074, runStart, call, atomic, repeat, lookahead, p));
 					}
 
-					S2130:
+					S2074:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S2127;
+						goto S2071;
 					}
 
-					S2131:
+					S2075:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -28226,10 +27649,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 2106; goto Leave; }
+						{ state = 2050; goto Leave; }
 					}
 
-					S2132:
+					S2076:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -28243,26 +27666,26 @@ namespace AspectGenerator.FilterV2
 							var choice = entries[choiceAt];
 							if (choice.Kind == ParserEntry.Choice)
 								entries[choiceAt] = new ParserEntry(ParserEntry.Dead, choice.State, choice.Position, choice.CallIndex, choice.AtomicIndex, choice.RepeatIndex, choice.LookaheadIndex, choice.Value, choice.RuleIndex);
-							if (choice.RepeatIndex == repeat && choice.State == 2134 && (choice.Kind == ParserEntry.Choice || choice.Kind == ParserEntry.Dead || choice.Kind == ParserEntry.PendingRecovery)) break;
+							if (choice.RepeatIndex == repeat && choice.State == 2078 && (choice.Kind == ParserEntry.Choice || choice.Kind == ParserEntry.Dead || choice.Kind == ParserEntry.PendingRecovery)) break;
 						}
 						var acceptedRepeat = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, acceptedRepeat.Position, acceptedRepeat.CallIndex, acceptedRepeat.AtomicIndex, acceptedRepeat.RepeatIndex, acceptedRepeat.LookaheadIndex, acceptedRepeat.Value + 1);
 						{ state = 15; goto Leave; }
 					}
 
-					S2134:
+					S2078:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						if ((uint)p >= (uint)text.Length) { expected = null; { state = 2; goto Leave; } }
 						expecting0 = Expecting_DotGram(ref failure, reach0, stood0, tied0);
-						entries.Add(new ParserEntry(ParserEntry.PendingRecovery, 2134, p, call, reach0, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.PendingRecovery, 2078, p, call, reach0, repeat, lookahead, 0));
 					}
 
-					S2135:
+					S2079:
 					{
-						if ((uint)p >= (uint)text.Length) { state = 2153; goto Leave; }
+						if ((uint)p >= (uint)text.Length) { state = 2097; goto Leave; }
 						syncFrom = p;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2240, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2184, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -28281,11 +27704,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '\uFFFF')) { state = 2224; goto Leave; }
+							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '\uFFFF')) { state = 2168; goto Leave; }
 						}
 					}
 
-					S2139:
+					S2083:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -28300,11 +27723,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) { state = 2173; goto Leave; }
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) { state = 2117; goto Leave; }
 						}
 					}
 
-					S2141:
+					S2085:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -28321,35 +27744,35 @@ namespace AspectGenerator.FilterV2
 							p++;
 						}
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2143, runStart, call, atomic, repeat, lookahead, p));
+							entries.Add(new ParserEntry(ParserEntry.Run, 2087, runStart, call, atomic, repeat, lookahead, p));
 					}
 
-					S2143:
+					S2087:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '#') { state = 2167; goto Leave; }
+							if (c == '#') { state = 2111; goto Leave; }
 						}
 					}
 
-					S2144:
+					S2088:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\n' || c == '\r')) { state = 2164; goto Leave; }
+							if (!(c == '\n' || c == '\r')) { state = 2108; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2164, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2108, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) { state = 2163; goto Leave; }
+							if (!(c == '\r')) { state = 2107; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2163, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2107, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -28370,29 +27793,29 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						{ state = 2147; goto Leave; }
+						{ state = 2091; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart73_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart72_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 2147: goto S2147;
-						case 2153: goto S2153;
-						case 2155: goto S2155;
-						case 2159: goto S2159;
-						case 2162: goto S2162;
-						case 2163: goto S2163;
-						case 2164: goto S2164;
-						case 2167: goto S2167;
+						case 2091: goto S2091;
+						case 2097: goto S2097;
+						case 2099: goto S2099;
+						case 2103: goto S2103;
+						case 2106: goto S2106;
+						case 2107: goto S2107;
+						case 2108: goto S2108;
+						case 2111: goto S2111;
 					}
 					goto Leave;
 
-					S2147:
+					S2091:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -28403,11 +27826,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S2154;
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S2098;
 						}
 					}
 
-					S2149:
+					S2093:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -28418,7 +27841,7 @@ namespace AspectGenerator.FilterV2
 						lookahead = boundary.LookaheadIndex;
 					}
 
-					S2150:
+					S2094:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -28443,7 +27866,7 @@ namespace AspectGenerator.FilterV2
 						if (p <= syncFrom) { expected = null; { state = 2; goto Leave; } }
 					}
 
-					S2153:
+					S2097:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var recoveryFrom = p;
@@ -28453,13 +27876,13 @@ namespace AspectGenerator.FilterV2
 						for (var recoveryAt = entries.Count - 1; recoveryAt > repeat; recoveryAt--)
 						{
 							var candidate = entries[recoveryAt];
-							if (candidate.Kind == ParserEntry.PendingRecovery && candidate.State == 2134)
+							if (candidate.Kind == ParserEntry.PendingRecovery && candidate.State == 2078)
 							{
 								recoveryFrom = candidate.Position;
 								recoveryReach = candidate.AtomicIndex;
 								break;
 							}
-							if (!recoveryBoundary && candidate.Kind == ParserEntry.Choice && candidate.State == 2240)
+							if (!recoveryBoundary && candidate.Kind == ParserEntry.Choice && candidate.State == 2184)
 							{
 								recoveryTo = candidate.Position;
 								recoveryBoundary = true;
@@ -28470,7 +27893,7 @@ namespace AspectGenerator.FilterV2
 							var choice = entries[choiceAt];
 							if (choice.Kind == ParserEntry.Choice)
 								entries[choiceAt] = new ParserEntry(ParserEntry.Dead, choice.State, choice.Position, choice.CallIndex, choice.AtomicIndex, choice.RepeatIndex, choice.LookaheadIndex, choice.Value, choice.RuleIndex);
-							if (choice.RepeatIndex == repeat && choice.State == 2134 && (choice.Kind == ParserEntry.Choice || choice.Kind == ParserEntry.Dead || choice.Kind == ParserEntry.PendingRecovery)) break;
+							if (choice.RepeatIndex == repeat && choice.State == 2078 && (choice.Kind == ParserEntry.Choice || choice.Kind == ParserEntry.Dead || choice.Kind == ParserEntry.PendingRecovery)) break;
 						}
 						(parser.Expectations ??= new global::System.Collections.Generic.Dictionary<int, string[]?>())[entries.Count] = expecting0;
 						entries.Add(new ParserEntry(ParserEntry.Recovery, 0, recoveryFrom, call, recoveryReach, repeat, lookahead, recoveryTo, entries[repeat].Value));
@@ -28479,14 +27902,14 @@ namespace AspectGenerator.FilterV2
 						{ state = 15; goto Leave; }
 					}
 
-					S2154:
+					S2098:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2155:
+					S2099:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -28511,7 +27934,7 @@ namespace AspectGenerator.FilterV2
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2162, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2106, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -28523,21 +27946,21 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '\t' || c == ' ') { p++; goto S2155; }
-						if (c == '#') goto S2160;
-						if (c == '\n' || c == '\r') goto S2157;
+						if (c == '\t' || c == ' ') { p++; goto S2099; }
+						if (c == '#') goto S2104;
+						if (c == '\n' || c == '\r') goto S2101;
 						expected = ExpectedSet_DotGram(6);
 						{ state = 2; goto Leave; }
 					}
 
-					S2157:
+					S2101:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) goto S2159;
+							if (!(c == '\r')) goto S2103;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2159, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2103, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -28558,10 +27981,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						goto S2155;
+						goto S2099;
 					}
 
-					S2159:
+					S2103:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -28575,10 +27998,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2155;
+						goto S2099;
 					}
 
-					S2160:
+					S2104:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -28594,11 +28017,11 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2155, runStart, call, atomic, repeat, lookahead, p));
-						goto S2155;
+							entries.Add(new ParserEntry(ParserEntry.Run, 2099, runStart, call, atomic, repeat, lookahead, p));
+						goto S2099;
 					}
 
-					S2162:
+					S2106:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -28607,10 +28030,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						goto S2149;
+						goto S2093;
 					}
 
-					S2163:
+					S2107:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -28624,10 +28047,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2147;
+						goto S2091;
 					}
 
-					S2164:
+					S2108:
 					{
 						turn0 = p;
 					}
@@ -28645,45 +28068,45 @@ namespace AspectGenerator.FilterV2
 
 					{
 						p = turn0;
-						goto S2150;
+						goto S2094;
 					}
 
-					S2167:
+					S2111:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
-						{ state = 2168; goto Leave; }
+						{ state = 2112; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart74_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart73_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 2168: goto S2168;
-						case 2171: goto S2171;
-						case 2172: goto S2172;
-						case 2173: goto S2173;
-						case 2178: goto S2178;
-						case 2180: goto S2180;
-						case 2182: goto S2182;
-						case 2187: goto S2187;
-						case 2192: goto S2192;
-						case 2194: goto S2194;
+						case 2112: goto S2112;
+						case 2115: goto S2115;
+						case 2116: goto S2116;
+						case 2117: goto S2117;
+						case 2122: goto S2122;
+						case 2124: goto S2124;
+						case 2126: goto S2126;
+						case 2131: goto S2131;
+						case 2136: goto S2136;
+						case 2138: goto S2138;
 					}
 					goto Leave;
 
-					S2168:
+					S2112:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) goto S2172;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2172, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) goto S2116;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2116, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -28701,19 +28124,19 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2171, runStart, call, atomic, repeat, lookahead, p));
+							entries.Add(new ParserEntry(ParserEntry.Run, 2115, runStart, call, atomic, repeat, lookahead, p));
 					}
 
-					S2171:
+					S2115:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S2168;
+						goto S2112;
 					}
 
-					S2172:
+					S2116:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -28722,19 +28145,19 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 2144; goto Leave; }
+						{ state = 2088; goto Leave; }
 					}
 
-					S2173:
+					S2117:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2174:
+					S2118:
 					{
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2223, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2167, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -28743,40 +28166,40 @@ namespace AspectGenerator.FilterV2
 						atomic = atomicIndex;
 					}
 
-					S2176:
+					S2120:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(0);
-							goto S2177;
+							goto S2121;
 						}
 						c = text[p];
 						if (!((c == '\t' || c == ' ')))
 						{
 							expected = ExpectedSet_DotGram(0);
-							goto S2177;
+							goto S2121;
 						}
 						p++;
-						goto S2176;
+						goto S2120;
 					}
 
-					S2177:
+					S2121:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == '#') { state = 2221; goto Leave; }
+							if (c == '#') { state = 2165; goto Leave; }
 						}
 					}
 
-					S2178:
+					S2122:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) { state = 2220; goto Leave; }
+							if (!(c == '\r')) { state = 2164; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2220, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2164, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -28799,7 +28222,7 @@ namespace AspectGenerator.FilterV2
 						p += 2;
 					}
 
-					S2180:
+					S2124:
 					{
 						var atomicIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Atomic, 0, p, call, atomic, repeat, lookahead, 0));
@@ -28810,11 +28233,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) { state = 2211; goto Leave; }
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) { state = 2155; goto Leave; }
 						}
 					}
 
-					S2182:
+					S2126:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -28836,13 +28259,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 81; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'a') { state = 2209; goto Leave; }
-						if (c == 'o') goto S2185;
+						if (c == 'a') { state = 2153; goto Leave; }
+						if (c == 'o') goto S2129;
 						expected = ExpectedSet_DotGram(18);
 						{ state = 81; goto Leave; }
 					}
 
-					S2185:
+					S2129:
 					{
 						if (p > 0)
 						{
@@ -28870,7 +28293,7 @@ namespace AspectGenerator.FilterV2
 						p += 2;
 					}
 
-					S2187:
+					S2131:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -28907,11 +28330,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '\uFFFF')) goto S2193;
+							if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '"') || (c >= '$' && c <= '\uFFFF')) goto S2137;
 						}
 					}
 
-					S2192:
+					S2136:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -28920,23 +28343,23 @@ namespace AspectGenerator.FilterV2
 						atomic = boundary.AtomicIndex;
 						repeat = boundary.RepeatIndex;
 						lookahead = boundary.LookaheadIndex;
-						goto S2174;
+						goto S2118;
 					}
 
-					S2193:
+					S2137:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2194:
+					S2138:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2208, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2152, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -28948,14 +28371,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') { state = 2198; goto Leave; }
-						if (c == '(') goto S2197;
-						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= ')' && c <= '\uFFFF')) goto S2196;
+						if (c == '"') { state = 2142; goto Leave; }
+						if (c == '(') goto S2141;
+						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= ')' && c <= '\uFFFF')) goto S2140;
 						expected = ExpectedSet_DotGram(13);
 						{ state = 2; goto Leave; }
 					}
 
-					S2196:
+					S2140:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -28969,37 +28392,37 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2194;
+						goto S2138;
 					}
 
-					S2197:
+					S2141:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2194, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2138, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 875; goto Leave; }
+						{ state = 874; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart75_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart74_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 2198: goto S2198;
-						case 2204: goto S2204;
-						case 2208: goto S2208;
-						case 2209: goto S2209;
-						case 2211: goto S2211;
-						case 2212: goto S2212;
-						case 2216: goto S2216;
-						case 2219: goto S2219;
+						case 2142: goto S2142;
+						case 2148: goto S2148;
+						case 2152: goto S2152;
+						case 2153: goto S2153;
+						case 2155: goto S2155;
+						case 2156: goto S2156;
+						case 2160: goto S2160;
+						case 2163: goto S2163;
 					}
 					goto Leave;
 
-					S2198:
+					S2142:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -29009,7 +28432,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S2199:
+					S2143:
 					{
 						turn0 = p;
 					}
@@ -29018,15 +28441,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S2201;
+							goto S2145;
 						}
 						c = text[p];
-						if (c == '\\') goto S2206;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S2205;
+						if (c == '\\') goto S2150;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S2149;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S2201:
+					S2145:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -29048,9 +28471,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S2204;
+							if (!(c == '"')) goto S2148;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2204, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2148, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -29060,10 +28483,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						{ state = 2194; goto Leave; }
+						{ state = 2138; goto Leave; }
 					}
 
-					S2204:
+					S2148:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -29073,32 +28496,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						{ state = 2194; goto Leave; }
+						{ state = 2138; goto Leave; }
 					}
 
-					S2205:
+					S2149:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S2201;
+							goto S2145;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S2201;
+							goto S2145;
 						}
 						p++;
-						goto S2199;
+						goto S2143;
 					}
 
-					S2206:
+					S2150:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S2201;
+							goto S2145;
 						}
 						p += 1;
 					}
@@ -29109,13 +28532,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S2201;
+							goto S2145;
 						}
 						p = scanned;
-						goto S2199;
+						goto S2143;
 					}
 
-					S2208:
+					S2152:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -29124,10 +28547,10 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 2192; goto Leave; }
+						{ state = 2136; goto Leave; }
 					}
 
-					S2209:
+					S2153:
 					{
 						if (p > 0)
 						{
@@ -29153,17 +28576,17 @@ namespace AspectGenerator.FilterV2
 							{ state = 81; goto Leave; }
 						}
 						p += 3;
-						{ state = 2187; goto Leave; }
+						{ state = 2131; goto Leave; }
 					}
 
-					S2211:
+					S2155:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2212:
+					S2156:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -29188,7 +28611,7 @@ namespace AspectGenerator.FilterV2
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2219, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2163, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -29200,21 +28623,21 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '\t' || c == ' ') { p++; goto S2212; }
-						if (c == '#') goto S2217;
-						if (c == '\n' || c == '\r') goto S2214;
+						if (c == '\t' || c == ' ') { p++; goto S2156; }
+						if (c == '#') goto S2161;
+						if (c == '\n' || c == '\r') goto S2158;
 						expected = ExpectedSet_DotGram(6);
 						{ state = 2; goto Leave; }
 					}
 
-					S2214:
+					S2158:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) goto S2216;
+							if (!(c == '\r')) goto S2160;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2216, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2160, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -29235,10 +28658,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						goto S2212;
+						goto S2156;
 					}
 
-					S2216:
+					S2160:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -29252,10 +28675,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2212;
+						goto S2156;
 					}
 
-					S2217:
+					S2161:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -29271,11 +28694,11 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2212, runStart, call, atomic, repeat, lookahead, p));
-						goto S2212;
+							entries.Add(new ParserEntry(ParserEntry.Run, 2156, runStart, call, atomic, repeat, lookahead, p));
+						goto S2156;
 					}
 
-					S2219:
+					S2163:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -29284,32 +28707,32 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 2182; goto Leave; }
+						{ state = 2126; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart76_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart75_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 2220: goto S2220;
-						case 2221: goto S2221;
-						case 2223: goto S2223;
-						case 2224: goto S2224;
-						case 2225: goto S2225;
-						case 2235: goto S2235;
-						case 2239: goto S2239;
-						case 2240: goto S2240;
-						case 2241: goto S2241;
-						case 2242: goto S2242;
-						case 2244: goto S2244;
+						case 2164: goto S2164;
+						case 2165: goto S2165;
+						case 2167: goto S2167;
+						case 2168: goto S2168;
+						case 2169: goto S2169;
+						case 2179: goto S2179;
+						case 2183: goto S2183;
+						case 2184: goto S2184;
+						case 2185: goto S2185;
+						case 2186: goto S2186;
+						case 2188: goto S2188;
 					}
 					goto Leave;
 
-					S2220:
+					S2164:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -29323,10 +28746,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						{ state = 2180; goto Leave; }
+						{ state = 2124; goto Leave; }
 					}
 
-					S2221:
+					S2165:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -29336,24 +28759,24 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S2222:
+					S2166:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = (seaming == 0 || ((uint)p >= (uint)text.Length || failure.OutOfInput > p)) ? ExpectedSet_DotGram(19) : RecognizeUnrecorded_DotGram;
-							{ state = 2178; goto Leave; }
+							{ state = 2122; goto Leave; }
 						}
 						c = text[p];
 						if (!(!(c == '\n' || c == '\r')))
 						{
 							expected = (seaming == 0 || ((uint)p >= (uint)text.Length || failure.OutOfInput > p)) ? ExpectedSet_DotGram(19) : RecognizeUnrecorded_DotGram;
-							{ state = 2178; goto Leave; }
+							{ state = 2122; goto Leave; }
 						}
 						p++;
-						goto S2222;
+						goto S2166;
 					}
 
-					S2223:
+					S2167:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -29362,23 +28785,23 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 2141; goto Leave; }
+						{ state = 2085; goto Leave; }
 					}
 
-					S2224:
+					S2168:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2225:
+					S2169:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2239, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2183, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -29390,14 +28813,14 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '"') goto S2229;
-						if (c == '(') goto S2228;
-						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= ')' && c <= '\uFFFF')) goto S2227;
+						if (c == '"') goto S2173;
+						if (c == '(') goto S2172;
+						if ((c >= '\0' && c <= '\t') || (c >= '\v' && c <= '\f') || (c >= '\u000E' && c <= '!') || (c >= '$' && c <= '\'') || (c >= ')' && c <= '\uFFFF')) goto S2171;
 						expected = ExpectedSet_DotGram(13);
 						{ state = 2; goto Leave; }
 					}
 
-					S2227:
+					S2171:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -29411,18 +28834,18 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2225;
+						goto S2169;
 					}
 
-					S2228:
+					S2172:
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2225, p, call, atomic, repeat, lookahead, 0, -1));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2169, p, call, atomic, repeat, lookahead, 0, -1));
 						call = callIndex;
-						{ state = 875; goto Leave; }
+						{ state = 874; goto Leave; }
 					}
 
-					S2229:
+					S2173:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '"')
 						{
@@ -29432,7 +28855,7 @@ namespace AspectGenerator.FilterV2
 						p += 1;
 					}
 
-					S2230:
+					S2174:
 					{
 						turn0 = p;
 					}
@@ -29441,15 +28864,15 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(11);
-							goto S2232;
+							goto S2176;
 						}
 						c = text[p];
-						if (c == '\\') goto S2237;
-						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S2236;
+						if (c == '\\') goto S2181;
+						if ((c >= '\0' && c <= '!') || (c >= '#' && c <= '[') || (c >= ']' && c <= '\uFFFF')) goto S2180;
 						expected = ExpectedSet_DotGram(11);
 					}
 
-					S2232:
+					S2176:
 					{
 						if (p > turn0 && lookahead < 0)
 						{
@@ -29471,9 +28894,9 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '"')) goto S2235;
+							if (!(c == '"')) goto S2179;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2235, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2179, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -29483,10 +28906,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 1;
-						goto S2225;
+						goto S2169;
 					}
 
-					S2235:
+					S2179:
 					{
 						var scanned = Scan_DotGram_eof(text, p);
 						if (scanned < 0)
@@ -29496,32 +28919,32 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p = scanned;
-						goto S2225;
+						goto S2169;
 					}
 
-					S2236:
+					S2180:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S2232;
+							goto S2176;
 						}
 						c = text[p];
 						if (!(!(c == '"' || c == '\\')))
 						{
 							expected = ExpectedSet_DotGram(10);
-							goto S2232;
+							goto S2176;
 						}
 						p++;
-						goto S2230;
+						goto S2174;
 					}
 
-					S2237:
+					S2181:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '\\')
 						{
 							expected = ExpectedSet_DotGram(9);
-							goto S2232;
+							goto S2176;
 						}
 						p += 1;
 					}
@@ -29532,13 +28955,13 @@ namespace AspectGenerator.FilterV2
 						{
 							p = -1 - scanned;
 							expected = ExpectedSet_DotGram(8);
-							goto S2232;
+							goto S2176;
 						}
 						p = scanned;
-						goto S2230;
+						goto S2174;
 					}
 
-					S2239:
+					S2183:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -29547,16 +28970,16 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 2139; goto Leave; }
+						{ state = 2083; goto Leave; }
 					}
 
-					S2240:
+					S2184:
 					{
 						p++;
-						{ state = 2135; goto Leave; }
+						{ state = 2079; goto Leave; }
 					}
 
-					S2241:
+					S2185:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -29568,7 +28991,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S2242:
+					S2186:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -29578,37 +29001,37 @@ namespace AspectGenerator.FilterV2
 
 					{
 						p = Scan_DotGram_trivia(text, p);
-						{ state = 880; goto Leave; }
+						{ state = 879; goto Leave; }
 					}
 
-					S2244:
+					S2188:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
-						{ state = 2245; goto Leave; }
+						{ state = 2189; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart77_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart76_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 2245: goto S2245;
-						case 2249: goto S2249;
-						case 2252: goto S2252;
-						case 2253: goto S2253;
-						case 2256: goto S2256;
-						case 2262: goto S2262;
-						case 2264: goto S2264;
-						case 2265: goto S2265;
+						case 2189: goto S2189;
+						case 2193: goto S2193;
+						case 2196: goto S2196;
+						case 2197: goto S2197;
+						case 2200: goto S2200;
+						case 2206: goto S2206;
+						case 2208: goto S2208;
+						case 2209: goto S2209;
 					}
 					goto Leave;
 
-					S2245:
+					S2189:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -29633,7 +29056,7 @@ namespace AspectGenerator.FilterV2
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2252, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2196, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -29645,21 +29068,21 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '\t' || c == ' ') { p++; goto S2245; }
-						if (c == '#') goto S2250;
-						if (c == '\n' || c == '\r') goto S2247;
+						if (c == '\t' || c == ' ') { p++; goto S2189; }
+						if (c == '#') goto S2194;
+						if (c == '\n' || c == '\r') goto S2191;
 						expected = ExpectedSet_DotGram(6);
 						{ state = 2; goto Leave; }
 					}
 
-					S2247:
+					S2191:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) goto S2249;
+							if (!(c == '\r')) goto S2193;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2249, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2193, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -29680,10 +29103,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						goto S2245;
+						goto S2189;
 					}
 
-					S2249:
+					S2193:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -29697,10 +29120,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2245;
+						goto S2189;
 					}
 
-					S2250:
+					S2194:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -29716,11 +29139,11 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2245, runStart, call, atomic, repeat, lookahead, p));
-						goto S2245;
+							entries.Add(new ParserEntry(ParserEntry.Run, 2189, runStart, call, atomic, repeat, lookahead, p));
+						goto S2189;
 					}
 
-					S2252:
+					S2196:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -29732,29 +29155,29 @@ namespace AspectGenerator.FilterV2
 						{ state = 11; goto Leave; }
 					}
 
-					S2253:
+					S2197:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2254:
+					S2198:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) goto S2264;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2264, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) goto S2208;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2208, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2262, p, call, atomic, repeat, lookahead, 0, 5));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2206, p, call, atomic, repeat, lookahead, 0, 5));
 						call = callIndex;
 					}
 
-					S2256:
+					S2200:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -29762,13 +29185,13 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == 'a') goto S2260;
-						if (c == 'o') goto S2257;
+						if (c == 'a') goto S2204;
+						if (c == 'o') goto S2201;
 						expected = ExpectedSet_DotGram(18);
 						{ state = 2; goto Leave; }
 					}
 
-					S2257:
+					S2201:
 					{
 						if (p > 0)
 						{
@@ -29801,7 +29224,7 @@ namespace AspectGenerator.FilterV2
 						p += 2;
 					}
 
-					S2259:
+					S2203:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -29815,7 +29238,7 @@ namespace AspectGenerator.FilterV2
 						{ state = 0; goto Leave; }
 					}
 
-					S2260:
+					S2204:
 					{
 						if (p > 0)
 						{
@@ -29851,10 +29274,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 3;
-						goto S2259;
+						goto S2203;
 					}
 
-					S2262:
+					S2206:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -29867,10 +29290,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S2254;
+						goto S2198;
 					}
 
-					S2264:
+					S2208:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -29882,36 +29305,36 @@ namespace AspectGenerator.FilterV2
 						{ state = 8; goto Leave; }
 					}
 
-					S2265:
+					S2209:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
-						{ state = 2266; goto Leave; }
+						{ state = 2210; goto Leave; }
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart78_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart77_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 2266: goto S2266;
-						case 2270: goto S2270;
-						case 2273: goto S2273;
-						case 2274: goto S2274;
-						case 2275: goto S2275;
-						case 2279: goto S2279;
-						case 2282: goto S2282;
-						case 2285: goto S2285;
-						case 2288: goto S2288;
-						case 2293: goto S2293;
+						case 2210: goto S2210;
+						case 2214: goto S2214;
+						case 2217: goto S2217;
+						case 2218: goto S2218;
+						case 2219: goto S2219;
+						case 2223: goto S2223;
+						case 2226: goto S2226;
+						case 2229: goto S2229;
+						case 2232: goto S2232;
+						case 2237: goto S2237;
 					}
 					goto Leave;
 
-					S2266:
+					S2210:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -29936,7 +29359,7 @@ namespace AspectGenerator.FilterV2
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2273, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2217, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -29948,21 +29371,21 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '\t' || c == ' ') { p++; goto S2266; }
-						if (c == '#') goto S2271;
-						if (c == '\n' || c == '\r') goto S2268;
+						if (c == '\t' || c == ' ') { p++; goto S2210; }
+						if (c == '#') goto S2215;
+						if (c == '\n' || c == '\r') goto S2212;
 						expected = ExpectedSet_DotGram(6);
 						{ state = 2; goto Leave; }
 					}
 
-					S2268:
+					S2212:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) goto S2270;
+							if (!(c == '\r')) goto S2214;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2270, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2214, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -29983,10 +29406,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						goto S2266;
+						goto S2210;
 					}
 
-					S2270:
+					S2214:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -30000,10 +29423,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2266;
+						goto S2210;
 					}
 
-					S2271:
+					S2215:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -30019,11 +29442,11 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2266, runStart, call, atomic, repeat, lookahead, p));
-						goto S2266;
+							entries.Add(new ParserEntry(ParserEntry.Run, 2210, runStart, call, atomic, repeat, lookahead, p));
+						goto S2210;
 					}
 
-					S2273:
+					S2217:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -30035,13 +29458,13 @@ namespace AspectGenerator.FilterV2
 						{ state = 5; goto Leave; }
 					}
 
-					S2274:
+					S2218:
 					{
 						p = Scan_DotGram_trivia(text, p);
 						{ state = 0; goto Leave; }
 					}
 
-					S2275:
+					S2219:
 					{
 						p = Scan_DotGram_trivia(text, p);
 					}
@@ -30062,11 +29485,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) { state = 2307; goto Leave; }
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) { state = 2251; goto Leave; }
 						}
 					}
 
-					S2279:
+					S2223:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -30085,11 +29508,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c == 'a' || c == 'o') { state = 2301; goto Leave; }
+							if (c == 'a' || c == 'o') { state = 2245; goto Leave; }
 						}
 					}
 
-					S2282:
+					S2226:
 					{
 						p = Scan_DotGram_trivia(text, p);
 					}
@@ -30104,11 +29527,11 @@ namespace AspectGenerator.FilterV2
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S2292;
+							if (c <= 255 && RecognizeClass1_DotGram[c] != 0) goto S2236;
 						}
 					}
 
-					S2285:
+					S2229:
 					{
 						global::System.Diagnostics.Debug.Assert(atomic >= 0 && atomic < entries.Count);
 						var boundary = entries[atomic];
@@ -30125,12 +29548,12 @@ namespace AspectGenerator.FilterV2
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2288, p, call, atomic, repeat, lookahead, 0, 3));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2232, p, call, atomic, repeat, lookahead, 0, 3));
 						call = callIndex;
 						{ state = 14; goto Leave; }
 					}
 
-					S2288:
+					S2232:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -30155,17 +29578,17 @@ namespace AspectGenerator.FilterV2
 
 					{
 						failure.Ended = p;
-						goto S2274;
+						goto S2218;
 					}
 
-					S2292:
+					S2236:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2293:
+					S2237:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -30190,7 +29613,7 @@ namespace AspectGenerator.FilterV2
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2300, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2244, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -30202,21 +29625,21 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '\t' || c == ' ') { p++; goto S2293; }
-						if (c == '#') { state = 2298; goto Leave; }
-						if (c == '\n' || c == '\r') goto S2295;
+						if (c == '\t' || c == ' ') { p++; goto S2237; }
+						if (c == '#') { state = 2242; goto Leave; }
+						if (c == '\n' || c == '\r') goto S2239;
 						expected = ExpectedSet_DotGram(6);
 						{ state = 2; goto Leave; }
 					}
 
-					S2295:
+					S2239:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) { state = 2297; goto Leave; }
+							if (!(c == '\r')) { state = 2241; goto Leave; }
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2297, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2241, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -30237,31 +29660,31 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						goto S2293;
+						goto S2237;
 					}
 
 					Leave:
 					return state;
 				}
 
-				int RecognizePart79_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
+				int RecognizePart78_DotGram(global::System.ReadOnlySpan<char> text, ref Failure failure)
 				{
 					switch (state)
 					{
-						case 2297: goto S2297;
-						case 2298: goto S2298;
-						case 2300: goto S2300;
-						case 2301: goto S2301;
-						case 2304: goto S2304;
-						case 2306: goto S2306;
-						case 2307: goto S2307;
-						case 2308: goto S2308;
-						case 2312: goto S2312;
-						case 2315: goto S2315;
+						case 2241: goto S2241;
+						case 2242: goto S2242;
+						case 2244: goto S2244;
+						case 2245: goto S2245;
+						case 2248: goto S2248;
+						case 2250: goto S2250;
+						case 2251: goto S2251;
+						case 2252: goto S2252;
+						case 2256: goto S2256;
+						case 2259: goto S2259;
 					}
 					goto Leave;
 
-					S2297:
+					S2241:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -30275,10 +29698,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						{ state = 2293; goto Leave; }
+						{ state = 2237; goto Leave; }
 					}
 
-					S2298:
+					S2242:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -30294,11 +29717,11 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2293, runStart, call, atomic, repeat, lookahead, p));
-						{ state = 2293; goto Leave; }
+							entries.Add(new ParserEntry(ParserEntry.Run, 2237, runStart, call, atomic, repeat, lookahead, p));
+						{ state = 2237; goto Leave; }
 					}
 
-					S2300:
+					S2244:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -30307,33 +29730,33 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 2285; goto Leave; }
+						{ state = 2229; goto Leave; }
 					}
 
-					S2301:
+					S2245:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2302:
+					S2246:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
-						if (repeating.Value >= 1) goto S2306;
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2306, p, call, atomic, repeat, lookahead, 0));
+						if (repeating.Value >= 1) goto S2250;
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2250, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
 						var callIndex = entries.Count;
-						entries.Add(new ParserEntry(ParserEntry.Call, 2304, p, call, atomic, repeat, lookahead, 0, 5));
+						entries.Add(new ParserEntry(ParserEntry.Call, 2248, p, call, atomic, repeat, lookahead, 0, 5));
 						call = callIndex;
-						{ state = 2256; goto Leave; }
+						{ state = 2200; goto Leave; }
 					}
 
-					S2304:
+					S2248:
 					{
 						var capturedCall = completedCall;
 						global::System.Diagnostics.Debug.Assert(capturedCall >= 0);
@@ -30346,10 +29769,10 @@ namespace AspectGenerator.FilterV2
 						var repeated = entries[repeat];
 						entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeated.Position, repeated.CallIndex, repeated.AtomicIndex, repeated.RepeatIndex, repeated.LookaheadIndex, repeated.Value + 1);
 						entries.Add(new ParserEntry(ParserEntry.TurnDone, 0, p, call, atomic, repeat, lookahead, 0));
-						goto S2302;
+						goto S2246;
 					}
 
-					S2306:
+					S2250:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -30358,17 +29781,17 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 2282; goto Leave; }
+						{ state = 2226; goto Leave; }
 					}
 
-					S2307:
+					S2251:
 					{
 						var repeatIndex = entries.Count;
 						entries.Add(new ParserEntry(ParserEntry.Repeat, 0, p, call, atomic, repeat, lookahead, 0));
 						repeat = repeatIndex;
 					}
 
-					S2308:
+					S2252:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
@@ -30393,7 +29816,7 @@ namespace AspectGenerator.FilterV2
 						var repeating = entries[repeat];
 						global::System.Diagnostics.Debug.Assert(repeating.Kind == ParserEntry.Repeat);
 						{
-							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2315, p, call, atomic, repeat, lookahead, 0));
+							entries.Add(new ParserEntry(ParserEntry.LoopExit, 2259, p, call, atomic, repeat, lookahead, 0));
 							entries[repeat] = new ParserEntry(ParserEntry.Repeat, 0, repeating.Position, repeating.CallIndex, repeating.AtomicIndex, repeating.RepeatIndex, repeating.LookaheadIndex, repeating.Value, p);
 						}
 					}
@@ -30405,21 +29828,21 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						c = text[p];
-						if (c == '\t' || c == ' ') { p++; goto S2308; }
-						if (c == '#') goto S2313;
-						if (c == '\n' || c == '\r') goto S2310;
+						if (c == '\t' || c == ' ') { p++; goto S2252; }
+						if (c == '#') goto S2257;
+						if (c == '\n' || c == '\r') goto S2254;
 						expected = ExpectedSet_DotGram(6);
 						{ state = 2; goto Leave; }
 					}
 
-					S2310:
+					S2254:
 					{
 						if ((uint)p < (uint)text.Length)
 						{
 							c = text[p];
-							if (!(c == '\r')) goto S2312;
+							if (!(c == '\r')) goto S2256;
 						}
-						entries.Add(new ParserEntry(ParserEntry.Choice, 2312, p, call, atomic, repeat, lookahead, 0));
+						entries.Add(new ParserEntry(ParserEntry.Choice, 2256, p, call, atomic, repeat, lookahead, 0));
 					}
 
 					{
@@ -30440,10 +29863,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p += 2;
-						goto S2308;
+						goto S2252;
 					}
 
-					S2312:
+					S2256:
 					{
 						if ((uint)p >= (uint)text.Length)
 						{
@@ -30457,10 +29880,10 @@ namespace AspectGenerator.FilterV2
 							{ state = 2; goto Leave; }
 						}
 						p++;
-						goto S2308;
+						goto S2252;
 					}
 
-					S2313:
+					S2257:
 					{
 						if ((uint)p >= (uint)text.Length || text[p] != '#')
 						{
@@ -30476,11 +29899,11 @@ namespace AspectGenerator.FilterV2
 						var stop = stopFound < 0 ? -1 : p + stopFound;
 						p = stop < 0 ? text.Length : stop;
 						if (p > runStart)
-							entries.Add(new ParserEntry(ParserEntry.Run, 2308, runStart, call, atomic, repeat, lookahead, p));
-						goto S2308;
+							entries.Add(new ParserEntry(ParserEntry.Run, 2252, runStart, call, atomic, repeat, lookahead, p));
+						goto S2252;
 					}
 
-					S2315:
+					S2259:
 					{
 						global::System.Diagnostics.Debug.Assert(repeat >= 0 && repeat < entries.Count);
 						var finished = entries[repeat];
@@ -30489,7 +29912,7 @@ namespace AspectGenerator.FilterV2
 						if (entries.Count == repeat + 1) entries.RemoveAt(repeat);
 						repeat = previousRepeat;
 						lookahead = finished.LookaheadIndex;
-						{ state = 2279; goto Leave; }
+						{ state = 2223; goto Leave; }
 					}
 
 					Leave:
@@ -30714,7 +30137,7 @@ namespace AspectGenerator.FilterV2
 		static int RecWhole_DotGram_Item(global::System.ReadOnlySpan<char> text, int pos, ref Failure failure, out FilterItemSyntax value, string parserInput)
 		{
 			object? recognized;
-			var end = Recognize_DotGram(text, pos, 2275, 2, true, true, parserInput, ref failure, out recognized);
+			var end = Recognize_DotGram(text, pos, 2219, 2, true, true, parserInput, ref failure, out recognized);
 			value = end < 0 ? default! : (FilterItemSyntax)recognized!;
 			return end;
 		}
@@ -30897,10 +30320,10 @@ namespace AspectGenerator.FilterV2
 					case 69:
 					case 70:
 					case 71:
-					case 72:
-					case 73:
 						MaterializePart0_DotGram(text, completedAt);
 						break;
+					case 72:
+					case 73:
 					case 74:
 					case 75:
 					case 76:
@@ -30932,15 +30355,7 @@ namespace AspectGenerator.FilterV2
 					case 106:
 					case 107:
 					case 108:
-					case 109:
-					case 110:
-					case 111:
-					case 112:
-					case 113:
 						MaterializePart1_DotGram(text, completedAt);
-						break;
-					case 114:
-						MaterializePart2_DotGram(text, completedAt);
 						break;
 				}
 			}
@@ -32697,6 +32112,15 @@ namespace AspectGenerator.FilterV2
 						}
 						break;
 					}
+				}
+			}
+
+			void MaterializePart1_DotGram(global::System.ReadOnlySpan<char> text, int completedAt)
+			{
+				var completed = entries[completedAt];
+
+				switch (completed.RuleIndex)
+				{
 					case 72:
 					{
 						var captured0From = -1;
@@ -32836,15 +32260,6 @@ namespace AspectGenerator.FilterV2
 						}
 						break;
 					}
-				}
-			}
-
-			void MaterializePart1_DotGram(global::System.ReadOnlySpan<char> text, int completedAt)
-			{
-				var completed = entries[completedAt];
-
-				switch (completed.RuleIndex)
-				{
 					case 74:
 					{
 						var captured0From = -1;
@@ -33928,76 +33343,6 @@ namespace AspectGenerator.FilterV2
 						var captured0At = -1;
 						var captured1At = -1;
 						var captured2At = -1;
-						var captured3At = -1;
-						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
-						{
-							var candidate = entries[capturedAt];
-
-							switch (candidate.State)
-							{
-								case 153:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
-										captured0At = candidate.Position;
-									break;
-								case 154:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
-										captured1At = candidate.Position;
-									break;
-								case 155:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured2At < 0)
-										captured2At = candidate.Position;
-									break;
-								case 156:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured3At < 0)
-										captured3At = candidate.Position;
-									break;
-							}
-						}
-
-						FilterExpressionSyntax? captured0 = captured0At < 0 ? default(FilterExpressionSyntax?) : values5[captured0At];
-
-						ReferenceSyntax? captured1 = captured1At < 0 ? default(ReferenceSyntax?) : values10[captured1At];
-
-						FilterExpressionSyntax? captured2 = captured2At < 0 ? default(FilterExpressionSyntax?) : values5[captured2At];
-
-						FilterExpressionSyntax? captured3 = captured3At < 0 ? default(FilterExpressionSyntax?) : values5[captured3At];
-
-						var chosen = -1;
-						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
-						{
-							var candidate = entries[chosenAt];
-							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
-							{
-								chosen = candidate.State;
-								break;
-							}
-						}
-						global::System.Diagnostics.Debug.Assert(chosen >= 0);
-						switch (chosen)
-						{
-							case 0:
-								values5[completedAt] = New_DotGram_Atom_With1((FilterExpressionSyntax)captured0!);
-								break;
-							case 1:
-								values5[completedAt] = New1_DotGram_Atom_With1((ReferenceSyntax)captured1!);
-								break;
-							case 2:
-								values5[completedAt] = New2_DotGram_Atom_With1((FilterExpressionSyntax)captured2!);
-								break;
-							case 3:
-								values5[completedAt] = New3_DotGram_Atom_With1((FilterExpressionSyntax)captured3!);
-								break;
-							case 4:
-								values5[completedAt] = New4_DotGram_Atom_With1(new SourceSpan(completed.Position, completed.Value - completed.Position));
-								break;
-						}
-						break;
-					}
-					case 102:
-					{
-						var captured0At = -1;
-						var captured1At = -1;
-						var captured2At = -1;
 						var captured3From = -1;
 						var captured3To   = -1;
 						var captured4At = -1;
@@ -34009,35 +33354,35 @@ namespace AspectGenerator.FilterV2
 
 							switch (candidate.State)
 							{
+								case 153:
+								case 155:
 								case 157:
 								case 159:
 								case 161:
 								case 163:
 								case 165:
 								case 167:
-								case 169:
-								case 171:
-								case 172:
+								case 168:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
 										captured0At = candidate.Position;
 									break;
+								case 154:
+								case 156:
 								case 158:
 								case 160:
 								case 162:
 								case 164:
 								case 166:
-								case 168:
-								case 170:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
 										captured1At = candidate.Position;
 									break;
-								case 173:
+								case 169:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured2At < 0)
 										captured2At = candidate.Position;
 									break;
+								case 170:
+								case 172:
 								case 174:
-								case 176:
-								case 178:
 									if (candidate.Kind == ParserEntry.Capture && candidate.CallIndex == completedAt)
 									{
 										if (captured3To < 0)
@@ -34045,15 +33390,15 @@ namespace AspectGenerator.FilterV2
 										captured3From = candidate.Position;
 									}
 									break;
-								case 175:
+								case 171:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured4At < 0)
 										captured4At = candidate.Position;
 									break;
-								case 177:
+								case 173:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured5At < 0)
 										captured5At = candidate.Position;
 									break;
-								case 179:
+								case 175:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured6At < 0)
 										captured6At = candidate.Position;
 									break;
@@ -34133,7 +33478,7 @@ namespace AspectGenerator.FilterV2
 						}
 						break;
 					}
-					case 103:
+					case 102:
 					{
 						var captured0From = -1;
 						var captured0To   = -1;
@@ -34143,7 +33488,7 @@ namespace AspectGenerator.FilterV2
 
 							switch (candidate.State)
 							{
-								case 180:
+								case 176:
 									if (candidate.Kind == ParserEntry.Capture && candidate.CallIndex == completedAt)
 									{
 										if (captured0To < 0)
@@ -34163,7 +33508,7 @@ namespace AspectGenerator.FilterV2
 						values8[completedAt] = New_DotGram_UnknownKey_With1(new SourceSpan(completed.Position, completed.Value - completed.Position), captured0!);
 						break;
 					}
-					case 104:
+					case 103:
 					{
 						var captured0From = -1;
 						var captured0To   = -1;
@@ -34173,7 +33518,7 @@ namespace AspectGenerator.FilterV2
 
 							switch (candidate.State)
 							{
-								case 181:
+								case 177:
 									if (candidate.Kind == ParserEntry.Capture && candidate.CallIndex == completedAt)
 									{
 										if (captured0To < 0)
@@ -34193,47 +33538,7 @@ namespace AspectGenerator.FilterV2
 						values8[completedAt] = New_DotGram_CasedKey_With1(new SourceSpan(completed.Position, completed.Value - completed.Position), captured0!);
 						break;
 					}
-					case 105:
-					{
-						var captured0At = -1;
-						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
-						{
-							var candidate = entries[capturedAt];
-
-							switch (candidate.State)
-							{
-								case 182:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
-										captured0At = candidate.Position;
-									break;
-							}
-						}
-
-						ReferenceSyntax? captured0 = captured0At < 0 ? default(ReferenceSyntax?) : values10[captured0At];
-
-						var chosen = -1;
-						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
-						{
-							var candidate = entries[chosenAt];
-							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
-							{
-								chosen = candidate.State;
-								break;
-							}
-						}
-						global::System.Diagnostics.Debug.Assert(chosen >= 0);
-						switch (chosen)
-						{
-							case 0:
-								values9[completedAt] = New_DotGram_CommonValue_With1(new SourceSpan(completed.Position, completed.Value - completed.Position));
-								break;
-							case 1:
-								values9[completedAt] = New1_DotGram_CommonValue_With1((ReferenceSyntax)captured0!);
-								break;
-						}
-						break;
-					}
-					case 106:
+					case 104:
 					{
 						var captured0At = -1;
 						var captured2At = -1;
@@ -34243,12 +33548,12 @@ namespace AspectGenerator.FilterV2
 
 							switch (candidate.State)
 							{
-								case 183:
+								case 178:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
 										captured0At = candidate.Position;
 									break;
-								case 185:
-								case 186:
+								case 180:
+								case 181:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured2At < 0)
 										captured2At = candidate.Position;
 									break;
@@ -34261,14 +33566,14 @@ namespace AspectGenerator.FilterV2
 						for (var capturedAt1 = linkHeads[completedAt]; capturedAt1 >= 0; capturedAt1 = linkNexts[capturedAt1])
 						{
 							var candidate = entries[capturedAt1];
-							if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && (candidate.State == 184)) captured1Count++;
+							if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && (candidate.State == 179)) captured1Count++;
 						}
 						var captured1 = (captured1Count == 0 ? global::System.Array.Empty<WordSyntax>() : new WordSyntax[captured1Count]);
 						var captured1Item = captured1Count;
 						for (var capturedAt1 = linkHeads[completedAt]; capturedAt1 >= 0; capturedAt1 = linkNexts[capturedAt1])
 						{
 							var candidate = entries[capturedAt1];
-							if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && (candidate.State == 184))
+							if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && (candidate.State == 179))
 							{
 								captured1[--captured1Item] = values11[candidate.Position];
 							}
@@ -34298,7 +33603,7 @@ namespace AspectGenerator.FilterV2
 						}
 						break;
 					}
-					case 107:
+					case 105:
 					{
 						var captured0From = -1;
 						var captured0To   = -1;
@@ -34308,8 +33613,8 @@ namespace AspectGenerator.FilterV2
 
 							switch (candidate.State)
 							{
-								case 187:
-								case 188:
+								case 182:
+								case 183:
 									if (candidate.Kind == ParserEntry.Capture && candidate.CallIndex == completedAt)
 									{
 										if (captured0To < 0)
@@ -34360,7 +33665,7 @@ namespace AspectGenerator.FilterV2
 						}
 						break;
 					}
-					case 108:
+					case 106:
 					{
 						var captured0At = -1;
 						var captured1At = -1;
@@ -34371,15 +33676,15 @@ namespace AspectGenerator.FilterV2
 
 							switch (candidate.State)
 							{
-								case 189:
+								case 184:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
 										captured0At = candidate.Position;
 									break;
-								case 190:
+								case 185:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
 										captured1At = candidate.Position;
 									break;
-								case 191:
+								case 186:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured2At < 0)
 										captured2At = candidate.Position;
 									break;
@@ -34396,42 +33701,49 @@ namespace AspectGenerator.FilterV2
 						values12[completedAt] = New_DotGram_Signature_With1(new SourceSpan(completed.Position, completed.Value - completed.Position), captured0!, captured1, captured2);
 						break;
 					}
-					case 109:
+					case 107:
 					{
 						values5[completedAt] = New_DotGram_ReservedLiteral_With1(new SourceSpan(completed.Position, completed.Value - completed.Position));
 						break;
 					}
-					case 110:
+					case 108:
 					{
 						var captured0At = -1;
 						var captured1At = -1;
 						var captured2At = -1;
+						var captured3At = -1;
 						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
 						{
 							var candidate = entries[capturedAt];
 
 							switch (candidate.State)
 							{
-								case 192:
+								case 187:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
 										captured0At = candidate.Position;
 									break;
-								case 193:
+								case 188:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
 										captured1At = candidate.Position;
 									break;
-								case 194:
+								case 189:
 									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured2At < 0)
 										captured2At = candidate.Position;
 									break;
+								case 190:
+									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured3At < 0)
+										captured3At = candidate.Position;
+									break;
 							}
 						}
 
-						FilterValueSyntax? captured0 = captured0At < 0 ? default(FilterValueSyntax?) : values9[captured0At];
+						FilterExpressionSyntax? captured0 = captured0At < 0 ? default(FilterExpressionSyntax?) : values5[captured0At];
 
-						NamePatternSyntax? captured1 = captured1At < 0 ? default(NamePatternSyntax?) : values15[captured1At];
+						ReferenceSyntax? captured1 = captured1At < 0 ? default(ReferenceSyntax?) : values10[captured1At];
 
-						FilterValueSyntax? captured2 = captured2At < 0 ? default(FilterValueSyntax?) : values9[captured2At];
+						FilterExpressionSyntax? captured2 = captured2At < 0 ? default(FilterExpressionSyntax?) : values5[captured2At];
+
+						FilterExpressionSyntax? captured3 = captured3At < 0 ? default(FilterExpressionSyntax?) : values5[captured3At];
 
 						var chosen = -1;
 						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
@@ -34447,220 +33759,19 @@ namespace AspectGenerator.FilterV2
 						switch (chosen)
 						{
 							case 0:
-								values9[completedAt] = New_DotGram_NameValue_With1((FilterValueSyntax)captured0!);
+								values5[completedAt] = New_DotGram_Atom_With1((FilterExpressionSyntax)captured0!);
 								break;
 							case 1:
-								values9[completedAt] = New1_DotGram_NameValue_With1((NamePatternSyntax)captured1!);
+								values5[completedAt] = New1_DotGram_Atom_With1((ReferenceSyntax)captured1!);
 								break;
 							case 2:
-								values9[completedAt] = New2_DotGram_NameValue_With1((FilterValueSyntax)captured2!);
+								values5[completedAt] = New2_DotGram_Atom_With1((FilterExpressionSyntax)captured2!);
 								break;
-						}
-						break;
-					}
-					case 111:
-					{
-						var captured0At = -1;
-						var captured1At = -1;
-						var captured2At = -1;
-						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
-						{
-							var candidate = entries[capturedAt];
-
-							switch (candidate.State)
-							{
-								case 195:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
-										captured0At = candidate.Position;
-									break;
-								case 196:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
-										captured1At = candidate.Position;
-									break;
-								case 197:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured2At < 0)
-										captured2At = candidate.Position;
-									break;
-							}
-						}
-
-						FilterValueSyntax? captured0 = captured0At < 0 ? default(FilterValueSyntax?) : values9[captured0At];
-
-						TypePatternSyntax? captured1 = captured1At < 0 ? default(TypePatternSyntax?) : values14[captured1At];
-
-						FilterValueSyntax? captured2 = captured2At < 0 ? default(FilterValueSyntax?) : values9[captured2At];
-
-						var chosen = -1;
-						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
-						{
-							var candidate = entries[chosenAt];
-							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
-							{
-								chosen = candidate.State;
+							case 3:
+								values5[completedAt] = New3_DotGram_Atom_With1((FilterExpressionSyntax)captured3!);
 								break;
-							}
-						}
-						global::System.Diagnostics.Debug.Assert(chosen >= 0);
-						switch (chosen)
-						{
-							case 0:
-								values9[completedAt] = New_DotGram_TypeValue_With1((FilterValueSyntax)captured0!);
-								break;
-							case 1:
-								values9[completedAt] = New1_DotGram_TypeValue_With1((TypePatternSyntax)captured1!);
-								break;
-							case 2:
-								values9[completedAt] = New2_DotGram_TypeValue_With1((FilterValueSyntax)captured2!);
-								break;
-						}
-						break;
-					}
-					case 112:
-					{
-						var captured0At = -1;
-						var captured1At = -1;
-						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
-						{
-							var candidate = entries[capturedAt];
-
-							switch (candidate.State)
-							{
-								case 198:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
-										captured0At = candidate.Position;
-									break;
-								case 199:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
-										captured1At = candidate.Position;
-									break;
-							}
-						}
-
-						FilterValueSyntax? captured0 = captured0At < 0 ? default(FilterValueSyntax?) : values9[captured0At];
-
-						ReturnsPatternSyntax? captured1 = captured1At < 0 ? default(ReturnsPatternSyntax?) : values27[captured1At];
-
-						var chosen = -1;
-						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
-						{
-							var candidate = entries[chosenAt];
-							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
-							{
-								chosen = candidate.State;
-								break;
-							}
-						}
-						global::System.Diagnostics.Debug.Assert(chosen >= 0);
-						switch (chosen)
-						{
-							case 0:
-								values9[completedAt] = New_DotGram_ReturnsValue_With1((FilterValueSyntax)captured0!);
-								break;
-							case 1:
-								values9[completedAt] = New1_DotGram_ReturnsValue_With1((ReturnsPatternSyntax)captured1!);
-								break;
-						}
-						break;
-					}
-					case 113:
-					{
-						var captured0At = -1;
-						var captured1At = -1;
-						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
-						{
-							var candidate = entries[capturedAt];
-
-							switch (candidate.State)
-							{
-								case 200:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
-										captured0At = candidate.Position;
-									break;
-								case 201:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
-										captured1At = candidate.Position;
-									break;
-							}
-						}
-
-						FilterValueSyntax? captured0 = captured0At < 0 ? default(FilterValueSyntax?) : values9[captured0At];
-
-						ParameterListPatternSyntax? captured1 = captured1At < 0 ? default(ParameterListPatternSyntax?) : values13[captured1At];
-
-						var chosen = -1;
-						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
-						{
-							var candidate = entries[chosenAt];
-							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
-							{
-								chosen = candidate.State;
-								break;
-							}
-						}
-						global::System.Diagnostics.Debug.Assert(chosen >= 0);
-						switch (chosen)
-						{
-							case 0:
-								values9[completedAt] = New_DotGram_ParamsValue_With1((FilterValueSyntax)captured0!);
-								break;
-							case 1:
-								values9[completedAt] = New1_DotGram_ParamsValue_With1((ParameterListPatternSyntax)captured1!);
-								break;
-						}
-						break;
-					}
-				}
-			}
-
-			void MaterializePart2_DotGram(global::System.ReadOnlySpan<char> text, int completedAt)
-			{
-				var completed = entries[completedAt];
-
-				switch (completed.RuleIndex)
-				{
-					case 114:
-					{
-						var captured0At = -1;
-						var captured1At = -1;
-						for (var capturedAt = linkHeads[completedAt]; capturedAt >= 0; capturedAt = linkNexts[capturedAt])
-						{
-							var candidate = entries[capturedAt];
-
-							switch (candidate.State)
-							{
-								case 202:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured0At < 0)
-										captured0At = candidate.Position;
-									break;
-								case 203:
-									if (candidate.Kind == ParserEntry.RuleCapture && candidate.CallIndex == completedAt && captured1At < 0)
-										captured1At = candidate.Position;
-									break;
-							}
-						}
-
-						FilterValueSyntax? captured0 = captured0At < 0 ? default(FilterValueSyntax?) : values9[captured0At];
-
-						ParameterPatternSyntax? captured1 = captured1At < 0 ? default(ParameterPatternSyntax?) : values28[captured1At];
-
-						var chosen = -1;
-						for (var chosenAt = linkHeads[completedAt]; chosenAt >= 0; chosenAt = linkNexts[chosenAt])
-						{
-							var candidate = entries[chosenAt];
-							if (candidate.Kind == ParserEntry.Construct && candidate.CallIndex == completedAt)
-							{
-								chosen = candidate.State;
-								break;
-							}
-						}
-						global::System.Diagnostics.Debug.Assert(chosen >= 0);
-						switch (chosen)
-						{
-							case 0:
-								values9[completedAt] = New_DotGram_ParamValue_With1((FilterValueSyntax)captured0!);
-								break;
-							case 1:
-								values9[completedAt] = New1_DotGram_ParamValue_With1((ParameterPatternSyntax)captured1!);
+							case 4:
+								values5[completedAt] = New4_DotGram_Atom_With1(new SourceSpan(completed.Position, completed.Value - completed.Position));
 								break;
 						}
 						break;
@@ -34749,9 +33860,9 @@ namespace AspectGenerator.FilterV2
 
 		static readonly char[] RecognizeSet7_DotGram = { '\t', '\n', '\r', '\r', ' ', ' ', '"', '#', '*', '*', '0', '9', '?', 'Z', '\\', '\\', '_', '_', 'a', '{', '\u00AA', '\u00AA', '\u00AD', '\u00AD', '\u00B5', '\u00B5', '\u00BA', '\u00BA', '\u00C0', '\u00D6', '\u00D8', '\u00F6', '\u00F8', '\u02C1', '\u02C6', '\u02D1', '\u02E0', '\u02E4', '\u02EC', '\u02EC', '\u02EE', '\u02EE', '\u0300', '\u0374', '\u0376', '\u0377', '\u037A', '\u037D', '\u037F', '\u037F', '\u0386', '\u0386', '\u0388', '\u038A', '\u038C', '\u038C', '\u038E', '\u03A1', '\u03A3', '\u03F5', '\u03F7', '\u0481', '\u0483', '\u0487', '\u048A', '\u052F', '\u0531', '\u0556', '\u0559', '\u0559', '\u0560', '\u0588', '\u0591', '\u05BD', '\u05BF', '\u05BF', '\u05C1', '\u05C2', '\u05C4', '\u05C5', '\u05C7', '\u05C7', '\u05D0', '\u05EA', '\u05EF', '\u05F2', '\u0600', '\u0605', '\u0610', '\u061A', '\u061C', '\u061C', '\u0620', '\u0669', '\u066E', '\u06D3', '\u06D5', '\u06DD', '\u06DF', '\u06E8', '\u06EA', '\u06FC', '\u06FF', '\u06FF', '\u070F', '\u074A', '\u074D', '\u07B1', '\u07C0', '\u07F5', '\u07FA', '\u07FA', '\u07FD', '\u07FD', '\u0800', '\u082D', '\u0840', '\u085B', '\u0860', '\u086A', '\u0870', '\u0887', '\u0889', '\u088E', '\u0890', '\u0891', '\u0897', '\u0963', '\u0966', '\u096F', '\u0971', '\u0983', '\u0985', '\u098C', '\u098F', '\u0990', '\u0993', '\u09A8', '\u09AA', '\u09B0', '\u09B2', '\u09B2', '\u09B6', '\u09B9', '\u09BC', '\u09C4', '\u09C7', '\u09C8', '\u09CB', '\u09CE', '\u09D7', '\u09D7', '\u09DC', '\u09DD', '\u09DF', '\u09E3', '\u09E6', '\u09F1', '\u09FC', '\u09FC', '\u09FE', '\u09FE', '\u0A01', '\u0A03', '\u0A05', '\u0A0A', '\u0A0F', '\u0A10', '\u0A13', '\u0A28', '\u0A2A', '\u0A30', '\u0A32', '\u0A33', '\u0A35', '\u0A36', '\u0A38', '\u0A39', '\u0A3C', '\u0A3C', '\u0A3E', '\u0A42', '\u0A47', '\u0A48', '\u0A4B', '\u0A4D', '\u0A51', '\u0A51', '\u0A59', '\u0A5C', '\u0A5E', '\u0A5E', '\u0A66', '\u0A75', '\u0A81', '\u0A83', '\u0A85', '\u0A8D', '\u0A8F', '\u0A91', '\u0A93', '\u0AA8', '\u0AAA', '\u0AB0', '\u0AB2', '\u0AB3', '\u0AB5', '\u0AB9', '\u0ABC', '\u0AC5', '\u0AC7', '\u0AC9', '\u0ACB', '\u0ACD', '\u0AD0', '\u0AD0', '\u0AE0', '\u0AE3', '\u0AE6', '\u0AEF', '\u0AF9', '\u0AFF', '\u0B01', '\u0B03', '\u0B05', '\u0B0C', '\u0B0F', '\u0B10', '\u0B13', '\u0B28', '\u0B2A', '\u0B30', '\u0B32', '\u0B33', '\u0B35', '\u0B39', '\u0B3C', '\u0B44', '\u0B47', '\u0B48', '\u0B4B', '\u0B4D', '\u0B55', '\u0B57', '\u0B5C', '\u0B5D', '\u0B5F', '\u0B63', '\u0B66', '\u0B6F', '\u0B71', '\u0B71', '\u0B82', '\u0B83', '\u0B85', '\u0B8A', '\u0B8E', '\u0B90', '\u0B92', '\u0B95', '\u0B99', '\u0B9A', '\u0B9C', '\u0B9C', '\u0B9E', '\u0B9F', '\u0BA3', '\u0BA4', '\u0BA8', '\u0BAA', '\u0BAE', '\u0BB9', '\u0BBE', '\u0BC2', '\u0BC6', '\u0BC8', '\u0BCA', '\u0BCD', '\u0BD0', '\u0BD0', '\u0BD7', '\u0BD7', '\u0BE6', '\u0BEF', '\u0C00', '\u0C0C', '\u0C0E', '\u0C10', '\u0C12', '\u0C28', '\u0C2A', '\u0C39', '\u0C3C', '\u0C44', '\u0C46', '\u0C48', '\u0C4A', '\u0C4D', '\u0C55', '\u0C56', '\u0C58', '\u0C5A', '\u0C5D', '\u0C5D', '\u0C60', '\u0C63', '\u0C66', '\u0C6F', '\u0C80', '\u0C83', '\u0C85', '\u0C8C', '\u0C8E', '\u0C90', '\u0C92', '\u0CA8', '\u0CAA', '\u0CB3', '\u0CB5', '\u0CB9', '\u0CBC', '\u0CC4', '\u0CC6', '\u0CC8', '\u0CCA', '\u0CCD', '\u0CD5', '\u0CD6', '\u0CDD', '\u0CDE', '\u0CE0', '\u0CE3', '\u0CE6', '\u0CEF', '\u0CF1', '\u0CF3', '\u0D00', '\u0D0C', '\u0D0E', '\u0D10', '\u0D12', '\u0D44', '\u0D46', '\u0D48', '\u0D4A', '\u0D4E', '\u0D54', '\u0D57', '\u0D5F', '\u0D63', '\u0D66', '\u0D6F', '\u0D7A', '\u0D7F', '\u0D81', '\u0D83', '\u0D85', '\u0D96', '\u0D9A', '\u0DB1', '\u0DB3', '\u0DBB', '\u0DBD', '\u0DBD', '\u0DC0', '\u0DC6', '\u0DCA', '\u0DCA', '\u0DCF', '\u0DD4', '\u0DD6', '\u0DD6', '\u0DD8', '\u0DDF', '\u0DE6', '\u0DEF', '\u0DF2', '\u0DF3', '\u0E01', '\u0E3A', '\u0E40', '\u0E4E', '\u0E50', '\u0E59', '\u0E81', '\u0E82', '\u0E84', '\u0E84', '\u0E86', '\u0E8A', '\u0E8C', '\u0EA3', '\u0EA5', '\u0EA5', '\u0EA7', '\u0EBD', '\u0EC0', '\u0EC4', '\u0EC6', '\u0EC6', '\u0EC8', '\u0ECE', '\u0ED0', '\u0ED9', '\u0EDC', '\u0EDF', '\u0F00', '\u0F00', '\u0F18', '\u0F19', '\u0F20', '\u0F29', '\u0F35', '\u0F35', '\u0F37', '\u0F37', '\u0F39', '\u0F39', '\u0F3E', '\u0F47', '\u0F49', '\u0F6C', '\u0F71', '\u0F84', '\u0F86', '\u0F97', '\u0F99', '\u0FBC', '\u0FC6', '\u0FC6', '\u1000', '\u1049', '\u1050', '\u109D', '\u10A0', '\u10C5', '\u10C7', '\u10C7', '\u10CD', '\u10CD', '\u10D0', '\u10FA', '\u10FC', '\u1248', '\u124A', '\u124D', '\u1250', '\u1256', '\u1258', '\u1258', '\u125A', '\u125D', '\u1260', '\u1288', '\u128A', '\u128D', '\u1290', '\u12B0', '\u12B2', '\u12B5', '\u12B8', '\u12BE', '\u12C0', '\u12C0', '\u12C2', '\u12C5', '\u12C8', '\u12D6', '\u12D8', '\u1310', '\u1312', '\u1315', '\u1318', '\u135A', '\u135D', '\u135F', '\u1380', '\u138F', '\u13A0', '\u13F5', '\u13F8', '\u13FD', '\u1401', '\u166C', '\u166F', '\u167F', '\u1681', '\u169A', '\u16A0', '\u16EA', '\u16EE', '\u16F8', '\u1700', '\u1715', '\u171F', '\u1734', '\u1740', '\u1753', '\u1760', '\u176C', '\u176E', '\u1770', '\u1772', '\u1773', '\u1780', '\u17D3', '\u17D7', '\u17D7', '\u17DC', '\u17DD', '\u17E0', '\u17E9', '\u180B', '\u1819', '\u1820', '\u1878', '\u1880', '\u18AA', '\u18B0', '\u18F5', '\u1900', '\u191E', '\u1920', '\u192B', '\u1930', '\u193B', '\u1946', '\u196D', '\u1970', '\u1974', '\u1980', '\u19AB', '\u19B0', '\u19C9', '\u19D0', '\u19D9', '\u1A00', '\u1A1B', '\u1A20', '\u1A5E', '\u1A60', '\u1A7C', '\u1A7F', '\u1A89', '\u1A90', '\u1A99', '\u1AA7', '\u1AA7', '\u1AB0', '\u1ABD', '\u1ABF', '\u1ACE', '\u1B00', '\u1B4C', '\u1B50', '\u1B59', '\u1B6B', '\u1B73', '\u1B80', '\u1BF3', '\u1C00', '\u1C37', '\u1C40', '\u1C49', '\u1C4D', '\u1C7D', '\u1C80', '\u1C8A', '\u1C90', '\u1CBA', '\u1CBD', '\u1CBF', '\u1CD0', '\u1CD2', '\u1CD4', '\u1CFA', '\u1D00', '\u1F15', '\u1F18', '\u1F1D', '\u1F20', '\u1F45', '\u1F48', '\u1F4D', '\u1F50', '\u1F57', '\u1F59', '\u1F59', '\u1F5B', '\u1F5B', '\u1F5D', '\u1F5D', '\u1F5F', '\u1F7D', '\u1F80', '\u1FB4', '\u1FB6', '\u1FBC', '\u1FBE', '\u1FBE', '\u1FC2', '\u1FC4', '\u1FC6', '\u1FCC', '\u1FD0', '\u1FD3', '\u1FD6', '\u1FDB', '\u1FE0', '\u1FEC', '\u1FF2', '\u1FF4', '\u1FF6', '\u1FFC', '\u200B', '\u200F', '\u202A', '\u202E', '\u203F', '\u2040', '\u2054', '\u2054', '\u2060', '\u2064', '\u2066', '\u206F', '\u2071', '\u2071', '\u207F', '\u207F', '\u2090', '\u209C', '\u20D0', '\u20DC', '\u20E1', '\u20E1', '\u20E5', '\u20F0', '\u2102', '\u2102', '\u2107', '\u2107', '\u210A', '\u2113', '\u2115', '\u2115', '\u2119', '\u211D', '\u2124', '\u2124', '\u2126', '\u2126', '\u2128', '\u2128', '\u212A', '\u212D', '\u212F', '\u2139', '\u213C', '\u213F', '\u2145', '\u2149', '\u214E', '\u214E', '\u2160', '\u2188', '\u2C00', '\u2CE4', '\u2CEB', '\u2CF3', '\u2D00', '\u2D25', '\u2D27', '\u2D27', '\u2D2D', '\u2D2D', '\u2D30', '\u2D67', '\u2D6F', '\u2D6F', '\u2D7F', '\u2D96', '\u2DA0', '\u2DA6', '\u2DA8', '\u2DAE', '\u2DB0', '\u2DB6', '\u2DB8', '\u2DBE', '\u2DC0', '\u2DC6', '\u2DC8', '\u2DCE', '\u2DD0', '\u2DD6', '\u2DD8', '\u2DDE', '\u2DE0', '\u2DFF', '\u2E2F', '\u2E2F', '\u3005', '\u3007', '\u3021', '\u302F', '\u3031', '\u3035', '\u3038', '\u303C', '\u3041', '\u3096', '\u3099', '\u309A', '\u309D', '\u309F', '\u30A1', '\u30FA', '\u30FC', '\u30FF', '\u3105', '\u312F', '\u3131', '\u318E', '\u31A0', '\u31BF', '\u31F0', '\u31FF', '\u3400', '\u4DBF', '\u4E00', '\uA48C', '\uA4D0', '\uA4FD', '\uA500', '\uA60C', '\uA610', '\uA62B', '\uA640', '\uA66F', '\uA674', '\uA67D', '\uA67F', '\uA6F1', '\uA717', '\uA71F', '\uA722', '\uA788', '\uA78B', '\uA7CD', '\uA7D0', '\uA7D1', '\uA7D3', '\uA7D3', '\uA7D5', '\uA7DC', '\uA7F2', '\uA827', '\uA82C', '\uA82C', '\uA840', '\uA873', '\uA880', '\uA8C5', '\uA8D0', '\uA8D9', '\uA8E0', '\uA8F7', '\uA8FB', '\uA8FB', '\uA8FD', '\uA92D', '\uA930', '\uA953', '\uA960', '\uA97C', '\uA980', '\uA9C0', '\uA9CF', '\uA9D9', '\uA9E0', '\uA9FE', '\uAA00', '\uAA36', '\uAA40', '\uAA4D', '\uAA50', '\uAA59', '\uAA60', '\uAA76', '\uAA7A', '\uAAC2', '\uAADB', '\uAADD', '\uAAE0', '\uAAEF', '\uAAF2', '\uAAF6', '\uAB01', '\uAB06', '\uAB09', '\uAB0E', '\uAB11', '\uAB16', '\uAB20', '\uAB26', '\uAB28', '\uAB2E', '\uAB30', '\uAB5A', '\uAB5C', '\uAB69', '\uAB70', '\uABEA', '\uABEC', '\uABED', '\uABF0', '\uABF9', '\uAC00', '\uD7A3', '\uD7B0', '\uD7C6', '\uD7CB', '\uD7FB', '\uF900', '\uFA6D', '\uFA70', '\uFAD9', '\uFB00', '\uFB06', '\uFB13', '\uFB17', '\uFB1D', '\uFB28', '\uFB2A', '\uFB36', '\uFB38', '\uFB3C', '\uFB3E', '\uFB3E', '\uFB40', '\uFB41', '\uFB43', '\uFB44', '\uFB46', '\uFBB1', '\uFBD3', '\uFD3D', '\uFD50', '\uFD8F', '\uFD92', '\uFDC7', '\uFDF0', '\uFDFB', '\uFE00', '\uFE0F', '\uFE20', '\uFE2F', '\uFE33', '\uFE34', '\uFE4D', '\uFE4F', '\uFE70', '\uFE74', '\uFE76', '\uFEFC', '\uFEFF', '\uFEFF', '\uFF10', '\uFF19', '\uFF21', '\uFF3A', '\uFF3F', '\uFF3F', '\uFF41', '\uFF5A', '\uFF66', '\uFFBE', '\uFFC2', '\uFFC7', '\uFFCA', '\uFFCF', '\uFFD2', '\uFFD7', '\uFFDA', '\uFFDC', '\uFFF9', '\uFFFB' };
 
-		static readonly char[] RecognizeSet8_DotGram = { '\t', '\n', '\r', '\r', ' ', ' ', '#', '#', 'A', 'Z', '_', '_', 'a', 'z', '\u00AA', '\u00AA', '\u00B5', '\u00B5', '\u00BA', '\u00BA', '\u00C0', '\u00D6', '\u00D8', '\u00F6', '\u00F8', '\u02C1', '\u02C6', '\u02D1', '\u02E0', '\u02E4', '\u02EC', '\u02EC', '\u02EE', '\u02EE', '\u0370', '\u0374', '\u0376', '\u0377', '\u037A', '\u037D', '\u037F', '\u037F', '\u0386', '\u0386', '\u0388', '\u038A', '\u038C', '\u038C', '\u038E', '\u03A1', '\u03A3', '\u03F5', '\u03F7', '\u0481', '\u048A', '\u052F', '\u0531', '\u0556', '\u0559', '\u0559', '\u0560', '\u0588', '\u05D0', '\u05EA', '\u05EF', '\u05F2', '\u0620', '\u064A', '\u066E', '\u066F', '\u0671', '\u06D3', '\u06D5', '\u06D5', '\u06E5', '\u06E6', '\u06EE', '\u06EF', '\u06FA', '\u06FC', '\u06FF', '\u06FF', '\u0710', '\u0710', '\u0712', '\u072F', '\u074D', '\u07A5', '\u07B1', '\u07B1', '\u07CA', '\u07EA', '\u07F4', '\u07F5', '\u07FA', '\u07FA', '\u0800', '\u0815', '\u081A', '\u081A', '\u0824', '\u0824', '\u0828', '\u0828', '\u0840', '\u0858', '\u0860', '\u086A', '\u0870', '\u0887', '\u0889', '\u088E', '\u08A0', '\u08C9', '\u0904', '\u0939', '\u093D', '\u093D', '\u0950', '\u0950', '\u0958', '\u0961', '\u0971', '\u0980', '\u0985', '\u098C', '\u098F', '\u0990', '\u0993', '\u09A8', '\u09AA', '\u09B0', '\u09B2', '\u09B2', '\u09B6', '\u09B9', '\u09BD', '\u09BD', '\u09CE', '\u09CE', '\u09DC', '\u09DD', '\u09DF', '\u09E1', '\u09F0', '\u09F1', '\u09FC', '\u09FC', '\u0A05', '\u0A0A', '\u0A0F', '\u0A10', '\u0A13', '\u0A28', '\u0A2A', '\u0A30', '\u0A32', '\u0A33', '\u0A35', '\u0A36', '\u0A38', '\u0A39', '\u0A59', '\u0A5C', '\u0A5E', '\u0A5E', '\u0A72', '\u0A74', '\u0A85', '\u0A8D', '\u0A8F', '\u0A91', '\u0A93', '\u0AA8', '\u0AAA', '\u0AB0', '\u0AB2', '\u0AB3', '\u0AB5', '\u0AB9', '\u0ABD', '\u0ABD', '\u0AD0', '\u0AD0', '\u0AE0', '\u0AE1', '\u0AF9', '\u0AF9', '\u0B05', '\u0B0C', '\u0B0F', '\u0B10', '\u0B13', '\u0B28', '\u0B2A', '\u0B30', '\u0B32', '\u0B33', '\u0B35', '\u0B39', '\u0B3D', '\u0B3D', '\u0B5C', '\u0B5D', '\u0B5F', '\u0B61', '\u0B71', '\u0B71', '\u0B83', '\u0B83', '\u0B85', '\u0B8A', '\u0B8E', '\u0B90', '\u0B92', '\u0B95', '\u0B99', '\u0B9A', '\u0B9C', '\u0B9C', '\u0B9E', '\u0B9F', '\u0BA3', '\u0BA4', '\u0BA8', '\u0BAA', '\u0BAE', '\u0BB9', '\u0BD0', '\u0BD0', '\u0C05', '\u0C0C', '\u0C0E', '\u0C10', '\u0C12', '\u0C28', '\u0C2A', '\u0C39', '\u0C3D', '\u0C3D', '\u0C58', '\u0C5A', '\u0C5D', '\u0C5D', '\u0C60', '\u0C61', '\u0C80', '\u0C80', '\u0C85', '\u0C8C', '\u0C8E', '\u0C90', '\u0C92', '\u0CA8', '\u0CAA', '\u0CB3', '\u0CB5', '\u0CB9', '\u0CBD', '\u0CBD', '\u0CDD', '\u0CDE', '\u0CE0', '\u0CE1', '\u0CF1', '\u0CF2', '\u0D04', '\u0D0C', '\u0D0E', '\u0D10', '\u0D12', '\u0D3A', '\u0D3D', '\u0D3D', '\u0D4E', '\u0D4E', '\u0D54', '\u0D56', '\u0D5F', '\u0D61', '\u0D7A', '\u0D7F', '\u0D85', '\u0D96', '\u0D9A', '\u0DB1', '\u0DB3', '\u0DBB', '\u0DBD', '\u0DBD', '\u0DC0', '\u0DC6', '\u0E01', '\u0E30', '\u0E32', '\u0E33', '\u0E40', '\u0E46', '\u0E81', '\u0E82', '\u0E84', '\u0E84', '\u0E86', '\u0E8A', '\u0E8C', '\u0EA3', '\u0EA5', '\u0EA5', '\u0EA7', '\u0EB0', '\u0EB2', '\u0EB3', '\u0EBD', '\u0EBD', '\u0EC0', '\u0EC4', '\u0EC6', '\u0EC6', '\u0EDC', '\u0EDF', '\u0F00', '\u0F00', '\u0F40', '\u0F47', '\u0F49', '\u0F6C', '\u0F88', '\u0F8C', '\u1000', '\u102A', '\u103F', '\u103F', '\u1050', '\u1055', '\u105A', '\u105D', '\u1061', '\u1061', '\u1065', '\u1066', '\u106E', '\u1070', '\u1075', '\u1081', '\u108E', '\u108E', '\u10A0', '\u10C5', '\u10C7', '\u10C7', '\u10CD', '\u10CD', '\u10D0', '\u10FA', '\u10FC', '\u1248', '\u124A', '\u124D', '\u1250', '\u1256', '\u1258', '\u1258', '\u125A', '\u125D', '\u1260', '\u1288', '\u128A', '\u128D', '\u1290', '\u12B0', '\u12B2', '\u12B5', '\u12B8', '\u12BE', '\u12C0', '\u12C0', '\u12C2', '\u12C5', '\u12C8', '\u12D6', '\u12D8', '\u1310', '\u1312', '\u1315', '\u1318', '\u135A', '\u1380', '\u138F', '\u13A0', '\u13F5', '\u13F8', '\u13FD', '\u1401', '\u166C', '\u166F', '\u167F', '\u1681', '\u169A', '\u16A0', '\u16EA', '\u16EE', '\u16F8', '\u1700', '\u1711', '\u171F', '\u1731', '\u1740', '\u1751', '\u1760', '\u176C', '\u176E', '\u1770', '\u1780', '\u17B3', '\u17D7', '\u17D7', '\u17DC', '\u17DC', '\u1820', '\u1878', '\u1880', '\u1884', '\u1887', '\u18A8', '\u18AA', '\u18AA', '\u18B0', '\u18F5', '\u1900', '\u191E', '\u1950', '\u196D', '\u1970', '\u1974', '\u1980', '\u19AB', '\u19B0', '\u19C9', '\u1A00', '\u1A16', '\u1A20', '\u1A54', '\u1AA7', '\u1AA7', '\u1B05', '\u1B33', '\u1B45', '\u1B4C', '\u1B83', '\u1BA0', '\u1BAE', '\u1BAF', '\u1BBA', '\u1BE5', '\u1C00', '\u1C23', '\u1C4D', '\u1C4F', '\u1C5A', '\u1C7D', '\u1C80', '\u1C8A', '\u1C90', '\u1CBA', '\u1CBD', '\u1CBF', '\u1CE9', '\u1CEC', '\u1CEE', '\u1CF3', '\u1CF5', '\u1CF6', '\u1CFA', '\u1CFA', '\u1D00', '\u1DBF', '\u1E00', '\u1F15', '\u1F18', '\u1F1D', '\u1F20', '\u1F45', '\u1F48', '\u1F4D', '\u1F50', '\u1F57', '\u1F59', '\u1F59', '\u1F5B', '\u1F5B', '\u1F5D', '\u1F5D', '\u1F5F', '\u1F7D', '\u1F80', '\u1FB4', '\u1FB6', '\u1FBC', '\u1FBE', '\u1FBE', '\u1FC2', '\u1FC4', '\u1FC6', '\u1FCC', '\u1FD0', '\u1FD3', '\u1FD6', '\u1FDB', '\u1FE0', '\u1FEC', '\u1FF2', '\u1FF4', '\u1FF6', '\u1FFC', '\u2071', '\u2071', '\u207F', '\u207F', '\u2090', '\u209C', '\u2102', '\u2102', '\u2107', '\u2107', '\u210A', '\u2113', '\u2115', '\u2115', '\u2119', '\u211D', '\u2124', '\u2124', '\u2126', '\u2126', '\u2128', '\u2128', '\u212A', '\u212D', '\u212F', '\u2139', '\u213C', '\u213F', '\u2145', '\u2149', '\u214E', '\u214E', '\u2160', '\u2188', '\u2C00', '\u2CE4', '\u2CEB', '\u2CEE', '\u2CF2', '\u2CF3', '\u2D00', '\u2D25', '\u2D27', '\u2D27', '\u2D2D', '\u2D2D', '\u2D30', '\u2D67', '\u2D6F', '\u2D6F', '\u2D80', '\u2D96', '\u2DA0', '\u2DA6', '\u2DA8', '\u2DAE', '\u2DB0', '\u2DB6', '\u2DB8', '\u2DBE', '\u2DC0', '\u2DC6', '\u2DC8', '\u2DCE', '\u2DD0', '\u2DD6', '\u2DD8', '\u2DDE', '\u2E2F', '\u2E2F', '\u3005', '\u3007', '\u3021', '\u3029', '\u3031', '\u3035', '\u3038', '\u303C', '\u3041', '\u3096', '\u309D', '\u309F', '\u30A1', '\u30FA', '\u30FC', '\u30FF', '\u3105', '\u312F', '\u3131', '\u318E', '\u31A0', '\u31BF', '\u31F0', '\u31FF', '\u3400', '\u4DBF', '\u4E00', '\uA48C', '\uA4D0', '\uA4FD', '\uA500', '\uA60C', '\uA610', '\uA61F', '\uA62A', '\uA62B', '\uA640', '\uA66E', '\uA67F', '\uA69D', '\uA6A0', '\uA6EF', '\uA717', '\uA71F', '\uA722', '\uA788', '\uA78B', '\uA7CD', '\uA7D0', '\uA7D1', '\uA7D3', '\uA7D3', '\uA7D5', '\uA7DC', '\uA7F2', '\uA801', '\uA803', '\uA805', '\uA807', '\uA80A', '\uA80C', '\uA822', '\uA840', '\uA873', '\uA882', '\uA8B3', '\uA8F2', '\uA8F7', '\uA8FB', '\uA8FB', '\uA8FD', '\uA8FE', '\uA90A', '\uA925', '\uA930', '\uA946', '\uA960', '\uA97C', '\uA984', '\uA9B2', '\uA9CF', '\uA9CF', '\uA9E0', '\uA9E4', '\uA9E6', '\uA9EF', '\uA9FA', '\uA9FE', '\uAA00', '\uAA28', '\uAA40', '\uAA42', '\uAA44', '\uAA4B', '\uAA60', '\uAA76', '\uAA7A', '\uAA7A', '\uAA7E', '\uAAAF', '\uAAB1', '\uAAB1', '\uAAB5', '\uAAB6', '\uAAB9', '\uAABD', '\uAAC0', '\uAAC0', '\uAAC2', '\uAAC2', '\uAADB', '\uAADD', '\uAAE0', '\uAAEA', '\uAAF2', '\uAAF4', '\uAB01', '\uAB06', '\uAB09', '\uAB0E', '\uAB11', '\uAB16', '\uAB20', '\uAB26', '\uAB28', '\uAB2E', '\uAB30', '\uAB5A', '\uAB5C', '\uAB69', '\uAB70', '\uABE2', '\uAC00', '\uD7A3', '\uD7B0', '\uD7C6', '\uD7CB', '\uD7FB', '\uF900', '\uFA6D', '\uFA70', '\uFAD9', '\uFB00', '\uFB06', '\uFB13', '\uFB17', '\uFB1D', '\uFB1D', '\uFB1F', '\uFB28', '\uFB2A', '\uFB36', '\uFB38', '\uFB3C', '\uFB3E', '\uFB3E', '\uFB40', '\uFB41', '\uFB43', '\uFB44', '\uFB46', '\uFBB1', '\uFBD3', '\uFD3D', '\uFD50', '\uFD8F', '\uFD92', '\uFDC7', '\uFDF0', '\uFDFB', '\uFE70', '\uFE74', '\uFE76', '\uFEFC', '\uFF21', '\uFF3A', '\uFF41', '\uFF5A', '\uFF66', '\uFFBE', '\uFFC2', '\uFFC7', '\uFFCA', '\uFFCF', '\uFFD2', '\uFFD7', '\uFFDA', '\uFFDC' };
-
 		static readonly byte[] RecognizeClass21_DotGram = { 0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,0,0,1,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+
+		static readonly char[] RecognizeSet8_DotGram = { '\t', '\n', '\r', '\r', ' ', ' ', '#', '#', 'A', 'Z', '_', '_', 'a', 'z', '\u00AA', '\u00AA', '\u00B5', '\u00B5', '\u00BA', '\u00BA', '\u00C0', '\u00D6', '\u00D8', '\u00F6', '\u00F8', '\u02C1', '\u02C6', '\u02D1', '\u02E0', '\u02E4', '\u02EC', '\u02EC', '\u02EE', '\u02EE', '\u0370', '\u0374', '\u0376', '\u0377', '\u037A', '\u037D', '\u037F', '\u037F', '\u0386', '\u0386', '\u0388', '\u038A', '\u038C', '\u038C', '\u038E', '\u03A1', '\u03A3', '\u03F5', '\u03F7', '\u0481', '\u048A', '\u052F', '\u0531', '\u0556', '\u0559', '\u0559', '\u0560', '\u0588', '\u05D0', '\u05EA', '\u05EF', '\u05F2', '\u0620', '\u064A', '\u066E', '\u066F', '\u0671', '\u06D3', '\u06D5', '\u06D5', '\u06E5', '\u06E6', '\u06EE', '\u06EF', '\u06FA', '\u06FC', '\u06FF', '\u06FF', '\u0710', '\u0710', '\u0712', '\u072F', '\u074D', '\u07A5', '\u07B1', '\u07B1', '\u07CA', '\u07EA', '\u07F4', '\u07F5', '\u07FA', '\u07FA', '\u0800', '\u0815', '\u081A', '\u081A', '\u0824', '\u0824', '\u0828', '\u0828', '\u0840', '\u0858', '\u0860', '\u086A', '\u0870', '\u0887', '\u0889', '\u088E', '\u08A0', '\u08C9', '\u0904', '\u0939', '\u093D', '\u093D', '\u0950', '\u0950', '\u0958', '\u0961', '\u0971', '\u0980', '\u0985', '\u098C', '\u098F', '\u0990', '\u0993', '\u09A8', '\u09AA', '\u09B0', '\u09B2', '\u09B2', '\u09B6', '\u09B9', '\u09BD', '\u09BD', '\u09CE', '\u09CE', '\u09DC', '\u09DD', '\u09DF', '\u09E1', '\u09F0', '\u09F1', '\u09FC', '\u09FC', '\u0A05', '\u0A0A', '\u0A0F', '\u0A10', '\u0A13', '\u0A28', '\u0A2A', '\u0A30', '\u0A32', '\u0A33', '\u0A35', '\u0A36', '\u0A38', '\u0A39', '\u0A59', '\u0A5C', '\u0A5E', '\u0A5E', '\u0A72', '\u0A74', '\u0A85', '\u0A8D', '\u0A8F', '\u0A91', '\u0A93', '\u0AA8', '\u0AAA', '\u0AB0', '\u0AB2', '\u0AB3', '\u0AB5', '\u0AB9', '\u0ABD', '\u0ABD', '\u0AD0', '\u0AD0', '\u0AE0', '\u0AE1', '\u0AF9', '\u0AF9', '\u0B05', '\u0B0C', '\u0B0F', '\u0B10', '\u0B13', '\u0B28', '\u0B2A', '\u0B30', '\u0B32', '\u0B33', '\u0B35', '\u0B39', '\u0B3D', '\u0B3D', '\u0B5C', '\u0B5D', '\u0B5F', '\u0B61', '\u0B71', '\u0B71', '\u0B83', '\u0B83', '\u0B85', '\u0B8A', '\u0B8E', '\u0B90', '\u0B92', '\u0B95', '\u0B99', '\u0B9A', '\u0B9C', '\u0B9C', '\u0B9E', '\u0B9F', '\u0BA3', '\u0BA4', '\u0BA8', '\u0BAA', '\u0BAE', '\u0BB9', '\u0BD0', '\u0BD0', '\u0C05', '\u0C0C', '\u0C0E', '\u0C10', '\u0C12', '\u0C28', '\u0C2A', '\u0C39', '\u0C3D', '\u0C3D', '\u0C58', '\u0C5A', '\u0C5D', '\u0C5D', '\u0C60', '\u0C61', '\u0C80', '\u0C80', '\u0C85', '\u0C8C', '\u0C8E', '\u0C90', '\u0C92', '\u0CA8', '\u0CAA', '\u0CB3', '\u0CB5', '\u0CB9', '\u0CBD', '\u0CBD', '\u0CDD', '\u0CDE', '\u0CE0', '\u0CE1', '\u0CF1', '\u0CF2', '\u0D04', '\u0D0C', '\u0D0E', '\u0D10', '\u0D12', '\u0D3A', '\u0D3D', '\u0D3D', '\u0D4E', '\u0D4E', '\u0D54', '\u0D56', '\u0D5F', '\u0D61', '\u0D7A', '\u0D7F', '\u0D85', '\u0D96', '\u0D9A', '\u0DB1', '\u0DB3', '\u0DBB', '\u0DBD', '\u0DBD', '\u0DC0', '\u0DC6', '\u0E01', '\u0E30', '\u0E32', '\u0E33', '\u0E40', '\u0E46', '\u0E81', '\u0E82', '\u0E84', '\u0E84', '\u0E86', '\u0E8A', '\u0E8C', '\u0EA3', '\u0EA5', '\u0EA5', '\u0EA7', '\u0EB0', '\u0EB2', '\u0EB3', '\u0EBD', '\u0EBD', '\u0EC0', '\u0EC4', '\u0EC6', '\u0EC6', '\u0EDC', '\u0EDF', '\u0F00', '\u0F00', '\u0F40', '\u0F47', '\u0F49', '\u0F6C', '\u0F88', '\u0F8C', '\u1000', '\u102A', '\u103F', '\u103F', '\u1050', '\u1055', '\u105A', '\u105D', '\u1061', '\u1061', '\u1065', '\u1066', '\u106E', '\u1070', '\u1075', '\u1081', '\u108E', '\u108E', '\u10A0', '\u10C5', '\u10C7', '\u10C7', '\u10CD', '\u10CD', '\u10D0', '\u10FA', '\u10FC', '\u1248', '\u124A', '\u124D', '\u1250', '\u1256', '\u1258', '\u1258', '\u125A', '\u125D', '\u1260', '\u1288', '\u128A', '\u128D', '\u1290', '\u12B0', '\u12B2', '\u12B5', '\u12B8', '\u12BE', '\u12C0', '\u12C0', '\u12C2', '\u12C5', '\u12C8', '\u12D6', '\u12D8', '\u1310', '\u1312', '\u1315', '\u1318', '\u135A', '\u1380', '\u138F', '\u13A0', '\u13F5', '\u13F8', '\u13FD', '\u1401', '\u166C', '\u166F', '\u167F', '\u1681', '\u169A', '\u16A0', '\u16EA', '\u16EE', '\u16F8', '\u1700', '\u1711', '\u171F', '\u1731', '\u1740', '\u1751', '\u1760', '\u176C', '\u176E', '\u1770', '\u1780', '\u17B3', '\u17D7', '\u17D7', '\u17DC', '\u17DC', '\u1820', '\u1878', '\u1880', '\u1884', '\u1887', '\u18A8', '\u18AA', '\u18AA', '\u18B0', '\u18F5', '\u1900', '\u191E', '\u1950', '\u196D', '\u1970', '\u1974', '\u1980', '\u19AB', '\u19B0', '\u19C9', '\u1A00', '\u1A16', '\u1A20', '\u1A54', '\u1AA7', '\u1AA7', '\u1B05', '\u1B33', '\u1B45', '\u1B4C', '\u1B83', '\u1BA0', '\u1BAE', '\u1BAF', '\u1BBA', '\u1BE5', '\u1C00', '\u1C23', '\u1C4D', '\u1C4F', '\u1C5A', '\u1C7D', '\u1C80', '\u1C8A', '\u1C90', '\u1CBA', '\u1CBD', '\u1CBF', '\u1CE9', '\u1CEC', '\u1CEE', '\u1CF3', '\u1CF5', '\u1CF6', '\u1CFA', '\u1CFA', '\u1D00', '\u1DBF', '\u1E00', '\u1F15', '\u1F18', '\u1F1D', '\u1F20', '\u1F45', '\u1F48', '\u1F4D', '\u1F50', '\u1F57', '\u1F59', '\u1F59', '\u1F5B', '\u1F5B', '\u1F5D', '\u1F5D', '\u1F5F', '\u1F7D', '\u1F80', '\u1FB4', '\u1FB6', '\u1FBC', '\u1FBE', '\u1FBE', '\u1FC2', '\u1FC4', '\u1FC6', '\u1FCC', '\u1FD0', '\u1FD3', '\u1FD6', '\u1FDB', '\u1FE0', '\u1FEC', '\u1FF2', '\u1FF4', '\u1FF6', '\u1FFC', '\u2071', '\u2071', '\u207F', '\u207F', '\u2090', '\u209C', '\u2102', '\u2102', '\u2107', '\u2107', '\u210A', '\u2113', '\u2115', '\u2115', '\u2119', '\u211D', '\u2124', '\u2124', '\u2126', '\u2126', '\u2128', '\u2128', '\u212A', '\u212D', '\u212F', '\u2139', '\u213C', '\u213F', '\u2145', '\u2149', '\u214E', '\u214E', '\u2160', '\u2188', '\u2C00', '\u2CE4', '\u2CEB', '\u2CEE', '\u2CF2', '\u2CF3', '\u2D00', '\u2D25', '\u2D27', '\u2D27', '\u2D2D', '\u2D2D', '\u2D30', '\u2D67', '\u2D6F', '\u2D6F', '\u2D80', '\u2D96', '\u2DA0', '\u2DA6', '\u2DA8', '\u2DAE', '\u2DB0', '\u2DB6', '\u2DB8', '\u2DBE', '\u2DC0', '\u2DC6', '\u2DC8', '\u2DCE', '\u2DD0', '\u2DD6', '\u2DD8', '\u2DDE', '\u2E2F', '\u2E2F', '\u3005', '\u3007', '\u3021', '\u3029', '\u3031', '\u3035', '\u3038', '\u303C', '\u3041', '\u3096', '\u309D', '\u309F', '\u30A1', '\u30FA', '\u30FC', '\u30FF', '\u3105', '\u312F', '\u3131', '\u318E', '\u31A0', '\u31BF', '\u31F0', '\u31FF', '\u3400', '\u4DBF', '\u4E00', '\uA48C', '\uA4D0', '\uA4FD', '\uA500', '\uA60C', '\uA610', '\uA61F', '\uA62A', '\uA62B', '\uA640', '\uA66E', '\uA67F', '\uA69D', '\uA6A0', '\uA6EF', '\uA717', '\uA71F', '\uA722', '\uA788', '\uA78B', '\uA7CD', '\uA7D0', '\uA7D1', '\uA7D3', '\uA7D3', '\uA7D5', '\uA7DC', '\uA7F2', '\uA801', '\uA803', '\uA805', '\uA807', '\uA80A', '\uA80C', '\uA822', '\uA840', '\uA873', '\uA882', '\uA8B3', '\uA8F2', '\uA8F7', '\uA8FB', '\uA8FB', '\uA8FD', '\uA8FE', '\uA90A', '\uA925', '\uA930', '\uA946', '\uA960', '\uA97C', '\uA984', '\uA9B2', '\uA9CF', '\uA9CF', '\uA9E0', '\uA9E4', '\uA9E6', '\uA9EF', '\uA9FA', '\uA9FE', '\uAA00', '\uAA28', '\uAA40', '\uAA42', '\uAA44', '\uAA4B', '\uAA60', '\uAA76', '\uAA7A', '\uAA7A', '\uAA7E', '\uAAAF', '\uAAB1', '\uAAB1', '\uAAB5', '\uAAB6', '\uAAB9', '\uAABD', '\uAAC0', '\uAAC0', '\uAAC2', '\uAAC2', '\uAADB', '\uAADD', '\uAAE0', '\uAAEA', '\uAAF2', '\uAAF4', '\uAB01', '\uAB06', '\uAB09', '\uAB0E', '\uAB11', '\uAB16', '\uAB20', '\uAB26', '\uAB28', '\uAB2E', '\uAB30', '\uAB5A', '\uAB5C', '\uAB69', '\uAB70', '\uABE2', '\uAC00', '\uD7A3', '\uD7B0', '\uD7C6', '\uD7CB', '\uD7FB', '\uF900', '\uFA6D', '\uFA70', '\uFAD9', '\uFB00', '\uFB06', '\uFB13', '\uFB17', '\uFB1D', '\uFB1D', '\uFB1F', '\uFB28', '\uFB2A', '\uFB36', '\uFB38', '\uFB3C', '\uFB3E', '\uFB3E', '\uFB40', '\uFB41', '\uFB43', '\uFB44', '\uFB46', '\uFBB1', '\uFBD3', '\uFD3D', '\uFD50', '\uFD8F', '\uFD92', '\uFDC7', '\uFDF0', '\uFDFB', '\uFE70', '\uFE74', '\uFE76', '\uFEFC', '\uFF21', '\uFF3A', '\uFF41', '\uFF5A', '\uFF66', '\uFFBE', '\uFFC2', '\uFFC7', '\uFFCA', '\uFFCF', '\uFFD2', '\uFFD7', '\uFFDA', '\uFFDC' };
 
 		internal readonly partial struct SourceSpan
 		{

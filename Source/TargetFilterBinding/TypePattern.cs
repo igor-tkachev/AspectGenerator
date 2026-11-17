@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 
 using AspectGenerator.FilterV2;
 using AspectGenerator.TargetFilterFacts;
@@ -18,11 +17,12 @@ namespace AspectGenerator.TargetFilterBinding
 	/// </summary>
 	abstract class TypePattern
 	{
-		/// <exception cref="InsufficientExecutionStackException">The pattern and the type are nested deeper than the stack can follow.</exception>
+		/// <remarks>
+		/// A pattern matches the patterns inside it by calling them; the compiler of patterns refuses one nested deeper
+		/// than <see cref="PatternCompiler.MaxDepth"/>, so the depth of these calls is bounded where the pattern is read.
+		/// </remarks>
 		public Tri Match(TypeShape type, MatchPhase phase)
 		{
-			RuntimeHelpers.EnsureSufficientExecutionStack();
-
 			return type is TypeParameterShape ? MatchTypeParameter(phase) : MatchCore(type, phase);
 		}
 
@@ -169,9 +169,6 @@ namespace AspectGenerator.TargetFilterBinding
 
 		internal override Tri MatchTypeParameter(MatchPhase phase)
 		{
-			// Alternatives nest without a type between them: each level is checked for the room it needs.
-			RuntimeHelpers.EnsureSufficientExecutionStack();
-
 			var best = Tri.False;
 
 			foreach (var alternative in _alternatives)
@@ -182,8 +179,6 @@ namespace AspectGenerator.TargetFilterBinding
 
 		internal override Tri MatchCore(TypeShape type, MatchPhase phase)
 		{
-			RuntimeHelpers.EnsureSufficientExecutionStack();
-
 			var best = Tri.False;
 
 			foreach (var alternative in _alternatives)
@@ -199,8 +194,6 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public override bool MatchAttribute(NamedTypeShape attribute)
 		{
-			RuntimeHelpers.EnsureSufficientExecutionStack();
-
 			foreach (var alternative in _alternatives)
 				if (alternative.MatchAttribute(attribute))
 					return true;
@@ -255,44 +248,102 @@ namespace AspectGenerator.TargetFilterBinding
 			return answer;
 		}
 
+		/// <summary>The same names, each as often: the order they are written in says nothing.</summary>
 		bool SameConventions(ImmutableArray<string> conventions)
 		{
 			if (conventions.Length != _conventions.Length)
 				return false;
 
 			foreach (var convention in _conventions)
-				if (!conventions.Contains(convention))
+				if (Count(conventions, convention) != Count(_conventions, convention))
 					return false;
 
 			return true;
+
+			static int Count(ImmutableArray<string> names, string name)
+			{
+				var count = 0;
+
+				foreach (var candidate in names)
+					if (candidate == name)
+						count++;
+
+				return count;
+			}
+		}
+	}
+
+	/// <summary>
+	/// Quoted text where a type stands, and nothing else: a type whose name is that text, as quoted text in any name,
+	/// or a type whose whole text it is. That names the types no pattern spells: <c>"System.Int32*"</c> is a pointer.
+	/// The text of a type is its full name with its type arguments, written as C# writes them without spaces.
+	/// </summary>
+	sealed class QuotedTypePattern : TypePattern
+	{
+		readonly string           _text;
+		readonly NamedTypePattern _name;
+
+		public QuotedTypePattern(string text, NamedTypePattern name)
+		{
+			_text = text;
+			_name = name;
+		}
+
+		internal override Tri MatchCore(TypeShape type, MatchPhase phase)
+		{
+			var named = _name.MatchCore(type, phase);
+
+			return named == Tri.True || type is NamedTypeShape ? named : (type.ToString() == _text).ToTri();
+		}
+
+		public override bool MatchAttribute(NamedTypeShape attribute)
+		{
+			return _name.MatchAttribute(attribute);
 		}
 	}
 
 	/// <summary>A parameter pattern: <c>ref readonly int</c>, <c>this IEnumerable&lt;*&gt;</c>, <c>_</c>, <c>..</c>.</summary>
 	sealed class ParameterPattern
 	{
-		public ParameterPattern(ParameterPatternKind kind, ParameterModifiers modifiers, TypePattern? type)
+		const ParameterModifiers Passing = ParameterModifiers.Ref | ParameterModifiers.RefReadOnly | ParameterModifiers.In | ParameterModifiers.Out;
+
+		readonly ParameterModifierMatching _matching;
+
+		public ParameterPattern(ParameterPatternKind kind, ParameterModifiers modifiers, TypePattern? type, ParameterModifierMatching matching = PatternDefaults.ModifierMatching)
 		{
 			Kind      = kind;
 			Modifiers = modifiers;
 			Type      = type;
+			_matching = matching;
 		}
 
 		public ParameterPatternKind Kind      { get; }
 		public ParameterModifiers   Modifiers { get; }
 		public TypePattern?         Type      { get; }
 
-		/// <summary>
-		/// A pattern written with modifiers matches a parameter with exactly those; one written without matches any
-		/// parameter of a matching type.
-		/// </summary>
+		/// <summary>A pattern written without modifiers matches any parameter of a matching type; see <see cref="ParameterModifierMatching"/> for one written with.</summary>
 		public Tri Match(ParameterShape parameter, MatchPhase phase)
 		{
 			if (Kind != ParameterPatternKind.Typed)
 				return Tri.True;
 
-			if (Modifiers != ParameterModifiers.None && Modifiers != parameter.Modifiers)
-				return Tri.False;
+			if (Modifiers != ParameterModifiers.None)
+			{
+				if (_matching == ParameterModifierMatching.ExactSet)
+				{
+					if (Modifiers != parameter.Modifiers)
+						return Tri.False;
+				}
+				else
+				{
+					// How it is passed, exactly, where the pattern says how; `this` and `params` where the pattern says so.
+					if ((Modifiers & Passing) != 0 && (Modifiers & Passing) != (parameter.Modifiers & Passing))
+						return Tri.False;
+
+					if ((Modifiers & ~Passing & ~parameter.Modifiers) != 0)
+						return Tri.False;
+				}
+			}
 
 			return Type!.Match(parameter.Type, phase);
 		}

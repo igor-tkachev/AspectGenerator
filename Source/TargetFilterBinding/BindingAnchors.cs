@@ -14,105 +14,27 @@ namespace AspectGenerator.TargetFilterBinding
 	// them is bound and then decided.
 
 	/// <summary>
-	/// What a method pattern says of the method's own name: text it starts with, text it ends with, or the whole name
-	/// (<c>Append*</c>, <c>*Async</c>, <c>Get*Async</c>, <c>Save</c>). It is checked on the name a call is written with.
-	/// </summary>
-	readonly struct NameAnchor : IEquatable<NameAnchor>
-	{
-		public NameAnchor(string prefix, string suffix, bool isExact)
-		{
-			Prefix  = prefix;
-			Suffix  = suffix;
-			IsExact = isExact;
-		}
-
-		/// <summary>The text the name starts with; the whole name for an exact anchor.</summary>
-		public string Prefix  { get; }
-		public string Suffix  { get; }
-		public bool   IsExact { get; }
-
-		public static NameAnchor Exact(string name)
-		{
-			return new NameAnchor(name, "", true);
-		}
-
-		public bool Matches(string name)
-		{
-			if (IsExact)
-				return string.Equals(name, Prefix, StringComparison.Ordinal);
-
-			return
-				name.Length >= Prefix.Length + Suffix.Length &&
-				name.StartsWith(Prefix, StringComparison.Ordinal) &&
-				name.EndsWith(Suffix, StringComparison.Ordinal);
-		}
-
-		/// <summary>The anchor of a name that both anchors hold of, or <see langword="null"/> when no name can satisfy both.</summary>
-		public NameAnchor? And(NameAnchor other)
-		{
-			if (IsExact)
-				return other.Matches(Prefix) ? this : null;
-
-			if (other.IsExact)
-				return Matches(other.Prefix) ? other : null;
-
-			string prefix, suffix;
-
-			if (Prefix.StartsWith(other.Prefix, StringComparison.Ordinal))
-				prefix = Prefix;
-			else if (other.Prefix.StartsWith(Prefix, StringComparison.Ordinal))
-				prefix = other.Prefix;
-			else
-				return null;
-
-			if (Suffix.EndsWith(other.Suffix, StringComparison.Ordinal))
-				suffix = Suffix;
-			else if (other.Suffix.EndsWith(Suffix, StringComparison.Ordinal))
-				suffix = other.Suffix;
-			else
-				return null;
-
-			return new NameAnchor(prefix, suffix, false);
-		}
-
-		public bool Equals(NameAnchor other)
-		{
-			return IsExact == other.IsExact && Prefix == other.Prefix && Suffix == other.Suffix;
-		}
-
-		public override bool Equals(object? obj)
-		{
-			return obj is NameAnchor other && Equals(other);
-		}
-
-		public override int GetHashCode()
-		{
-			return unchecked((StringComparer.Ordinal.GetHashCode(Prefix) * 397 ^ StringComparer.Ordinal.GetHashCode(Suffix)) * 2 + (IsExact ? 1 : 0));
-		}
-
-		public override string ToString()
-		{
-			return IsExact ? Prefix : Prefix + "*" + Suffix;
-		}
-	}
-
-	/// <summary>
 	/// One way a filter can select a method, as far as it can be checked before binding: every part that is set holds
 	/// of the method. A term with nothing set holds of every method.
 	/// </summary>
 	sealed class AnchorTerm : IEquatable<AnchorTerm>
 	{
-		public static readonly AnchorTerm Unbounded = new(null, null, false);
+		public static readonly AnchorTerm Unbounded = new(ImmutableArray<SegmentGlob>.Empty, null, false);
 
-		public AnchorTerm(NameAnchor? name, string? root, bool isProjectOnly)
+		public AnchorTerm(ImmutableArray<SegmentGlob> names, string? root, bool isProjectOnly)
 		{
-			Name          = name;
+			Names         = names;
 			Root          = root;
 			IsProjectOnly = isProjectOnly;
 		}
 
-		/// <summary>What the method's name starts or ends with.</summary>
-		public NameAnchor? Name { get; }
+		/// <summary>
+		/// What the conditions on the method say of its own name, each the last segment of a method pattern with some
+		/// literal text in it (<c>Append*</c>, <c>*Async</c>, <c>*Internal*</c>, <c>Save</c>): the name a call is written
+		/// with has to match every one of them. They are kept apart, as two of them may be met by the same characters:
+		/// <c>Save*</c> and <c>*ave</c> both hold of <c>Save</c>.
+		/// </summary>
+		public ImmutableArray<SegmentGlob> Names { get; }
 
 		/// <summary>
 		/// The first segment of the method's full name: its root namespace, or its outermost type when that is declared
@@ -123,29 +45,45 @@ namespace AspectGenerator.TargetFilterBinding
 		/// <summary>The method is declared in the project.</summary>
 		public bool IsProjectOnly { get; }
 
-		public bool IsUnbounded => Name is null && Root is null && !IsProjectOnly;
+		public bool IsUnbounded => Names.IsEmpty && Root is null && !IsProjectOnly;
 
+		public bool MatchesName(string name)
+		{
+			foreach (var glob in Names)
+				if (!glob.Matches(name))
+					return false;
+
+			return true;
+		}
+
+		/// <summary>The term of a method both terms hold of, or <see langword="null"/> where it is plain that no method is: two roots, or a whole name that another condition on the name refuses.</summary>
 		public AnchorTerm? And(AnchorTerm other)
 		{
 			if (Root is not null && other.Root is not null && Root != other.Root)
 				return null;
 
-			var name = Name;
+			var names = Names;
 
-			if (name is { } mine && other.Name is { } theirs)
+			foreach (var glob in other.Names)
+				if (!names.Contains(glob))
+					names = names.Add(glob);
+
+			foreach (var exact in names)
 			{
-				name = mine.And(theirs);
+				if (!exact.IsExact)
+					continue;
 
-				if (name is null)
-					return null;
+				foreach (var glob in names)
+					if (!glob.Matches(exact.Text))
+						return null;
 			}
 
-			return new AnchorTerm(name ?? other.Name, Root ?? other.Root, IsProjectOnly || other.IsProjectOnly);
+			return new AnchorTerm(names, Root ?? other.Root, IsProjectOnly || other.IsProjectOnly);
 		}
 
 		public bool Equals(AnchorTerm? other)
 		{
-			return other is not null && Nullable.Equals(Name, other.Name) && Root == other.Root && IsProjectOnly == other.IsProjectOnly;
+			return other is not null && Root == other.Root && IsProjectOnly == other.IsProjectOnly && Names.Length == other.Names.Length && ToString() == other.ToString();
 		}
 
 		public override bool Equals(object? obj)
@@ -155,7 +93,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public override int GetHashCode()
 		{
-			return unchecked((Name.GetHashCode() * 397 ^ (Root is null ? 0 : StringComparer.Ordinal.GetHashCode(Root))) * 2 + (IsProjectOnly ? 1 : 0));
+			return StringComparer.Ordinal.GetHashCode(ToString());
 		}
 
 		public override string ToString()
@@ -165,7 +103,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 			var parts = new List<string>();
 
-			if (Name is { } name)
+			foreach (var name in Names)
 				parts.Add("name " + name);
 
 			if (Root is not null)
@@ -189,7 +127,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public static readonly BindingAnchors Everything = new(ImmutableArray.Create(AnchorTerm.Unbounded));
 		public static readonly BindingAnchors Nothing    = new(ImmutableArray<AnchorTerm>.Empty);
-		public static readonly BindingAnchors Project    = new(ImmutableArray.Create(new AnchorTerm(null, null, true)));
+		public static readonly BindingAnchors Project    = new(ImmutableArray.Create(new AnchorTerm(ImmutableArray<SegmentGlob>.Empty, null, true)));
 
 		BindingAnchors(ImmutableArray<AnchorTerm> terms)
 		{
@@ -249,13 +187,13 @@ namespace AspectGenerator.TargetFilterBinding
 		}
 
 		/// <summary>
-		/// Whether a call written with this method name may be selected, as far as names tell: some term has no name
-		/// anchor, or one that the name satisfies.
+		/// Whether a call written with this method name may be selected, as far as names tell: the name meets every
+		/// condition on it of some term.
 		/// </summary>
 		public bool MayBindName(string name)
 		{
 			foreach (var term in Terms)
-				if (term.Name is not { } anchor || anchor.Matches(name))
+				if (term.MatchesName(name))
 					return true;
 
 			return false;
@@ -268,94 +206,79 @@ namespace AspectGenerator.TargetFilterBinding
 
 		// ---- from the syntax of a pattern ------------------------------------------------------------------------
 
+		static readonly ImmutableArray<SegmentGlob> NoNames = ImmutableArray<SegmentGlob>.Empty;
+
 		/// <summary>The anchors of a <c>method:</c> pattern or the name of a compact signature.</summary>
 		public static BindingAnchors OfMethod(NamePatternSyntax pattern)
 		{
-			if (WholeAlternatives(pattern) is { IsDefault: false } alternatives)
-				return OfAll(alternatives, OfMethod);
+			var all = Nothing;
 
+			foreach (var whole in PatternCompiler.WholeAlternatives(pattern))
+				all = all.Or(OfOneMethod(whole));
+
+			return all;
+		}
+
+		static BindingAnchors OfOneMethod(NamePatternSyntax pattern)
+		{
 			if (pattern.Segments.IsEmpty)
 				return Everything;
 
 			var roots = pattern.Global is null ? default : Literals(pattern.Segments[0]);
-			var names = NameAnchors(pattern.Segments[pattern.Segments.Length - 1]);
+			var names = NameGlobs(pattern.Segments[pattern.Segments.Length - 1]);
 
 			// The last segment of the pattern is the method's own name, unless it is `**`, which says nothing of it.
 			if (names.IsDefault)
 				return OfRoots(roots);
 
 			if (roots.IsDefault)
-				return Of(names.Select(static name => new AnchorTerm(name, null, false)));
+				return Of(names.Select(static name => new AnchorTerm(ImmutableArray.Create(name), null, false)));
 
-			return Of(names.SelectMany(name => roots.Select(root => new AnchorTerm(name, root, false))));
+			return Of(names.SelectMany(name => roots.Select(root => new AnchorTerm(ImmutableArray.Create(name), root, false))));
 		}
 
 		static BindingAnchors OfRoots(ImmutableArray<string> roots)
 		{
-			return roots.IsDefault ? Everything : Of(roots.Select(static root => new AnchorTerm(null, root, false)));
+			return roots.IsDefault ? Everything : Of(roots.Select(static root => new AnchorTerm(NoNames, root, false)));
 		}
 
 		/// <summary>The anchors of a <c>namespace:</c> pattern, which is rooted whether it says <c>global::</c> or not.</summary>
 		public static BindingAnchors OfNamespace(NamePatternSyntax pattern)
 		{
-			if (WholeAlternatives(pattern) is { IsDefault: false } alternatives)
-				return OfAll(alternatives, OfNamespace);
+			var all = Nothing;
 
-			return pattern.Segments.IsEmpty ? Everything : OfRoots(Literals(pattern.Segments[0]));
+			foreach (var whole in PatternCompiler.WholeAlternatives(pattern))
+				all = all.Or(whole.Segments.IsEmpty ? Everything : OfRoots(Literals(whole.Segments[0])));
+
+			return all;
 		}
 
 		/// <summary>The anchors of a <c>type:</c> pattern: a root, where the type is written from <c>global::</c>.</summary>
 		public static BindingAnchors OfType(TypePatternSyntax pattern)
 		{
+			// Alternatives of types stand in one another; the compiler of patterns has refused a nesting too deep to follow.
 			if (!pattern.Suffixes.IsEmpty)
 				return Everything;
+
+			var all = Nothing;
 
 			switch (pattern.Core)
 			{
 				case TypeAlternativesSyntax alternatives:
-					return OfAll(alternatives.Alternatives, OfType);
+					foreach (var alternative in alternatives.Alternatives)
+						all = all.Or(OfType(alternative));
 
-				case NamedTypeSyntax named when WholeAlternatives(named.Name) is { IsDefault: false } alternatives:
-					return OfAll(alternatives, OfRootedType);
+					return all;
 
 				case NamedTypeSyntax named:
-					return OfRootedType(named.Name);
+					foreach (var whole in PatternCompiler.WholeAlternatives(named.Name))
+						all = all.Or(whole.Global is null || whole.Segments.IsEmpty ? Everything : OfRoots(Literals(whole.Segments[0])));
+
+					return all;
 
 				default:
 					return Everything;
 			}
-		}
-
-		static BindingAnchors OfRootedType(NamePatternSyntax name)
-		{
-			return name.Global is null || name.Segments.IsEmpty ? Everything : OfRoots(Literals(name.Segments[0]));
-		}
-
-		static BindingAnchors OfAll<T>(ImmutableArray<T> alternatives, Func<T, BindingAnchors> anchors)
-		{
-			// Alternatives nest; the builder reports a filter nested deeper than the stack can follow.
-			System.Runtime.CompilerServices.RuntimeHelpers.EnsureSufficientExecutionStack();
-
-			var all = Nothing;
-
-			foreach (var alternative in alternatives)
-				all = all.Or(anchors(alternative));
-
-			return all;
-		}
-
-		static ImmutableArray<NamePatternSyntax> WholeAlternatives(NamePatternSyntax pattern)
-		{
-			if (pattern.Global is null &&
-				pattern.Segments.Length == 1 &&
-				pattern.Segments[0] is { IsGlobstar: false, TypeArguments: null } segment &&
-				segment.Parts.Length == 1 &&
-				segment.Parts[0].Kind == NamePartKind.Alternatives)
-			{
-				return segment.Parts[0].Alternatives;
-			}
-
-			return default;
 		}
 
 		/// <summary>
@@ -364,19 +287,19 @@ namespace AspectGenerator.TargetFilterBinding
 		/// </summary>
 		static ImmutableArray<string> Literals(NameSegmentSyntax segment)
 		{
-			var anchors = NameAnchors(segment);
+			var globs = NameGlobs(segment);
 
-			if (anchors.IsDefault)
+			if (globs.IsDefault)
 				return default;
 
-			var names = ImmutableArray.CreateBuilder<string>(anchors.Length);
+			var names = ImmutableArray.CreateBuilder<string>(globs.Length);
 
-			foreach (var anchor in anchors)
+			foreach (var glob in globs)
 			{
-				if (!anchor.IsExact || anchor.Prefix.Length == 0)
+				if (!glob.IsExact || glob.Text.Length == 0)
 					return default;
 
-				names.Add(anchor.Prefix);
+				names.Add(glob.Text);
 			}
 
 			return names.ToImmutable();
@@ -402,17 +325,16 @@ namespace AspectGenerator.TargetFilterBinding
 		}
 
 		/// <summary>
-		/// What the last segment of a method pattern says of the method's name: one anchor per way its alternatives
-		/// combine, or default when some way starts and ends with a wildcard and so says nothing.
+		/// What a segment says of a name: one glob per way its alternatives combine, or default when some way holds no
+		/// literal text and so says nothing, or the alternatives are more than text.
 		/// </summary>
-		static ImmutableArray<NameAnchor> NameAnchors(NameSegmentSyntax segment)
+		static ImmutableArray<SegmentGlob> NameGlobs(NameSegmentSyntax segment)
 		{
 			if (segment.IsGlobstar)
 				return default;
 
-			// Each way to read the parts so far: the text the name starts with, whether a wildcard was passed, and the text
-			// since the last wildcard.
-			var ways = new List<(string Prefix, bool Open, string Tail)> { ("", false, "") };
+			// Each way to read the parts so far: the pieces of text around the stars passed.
+			var ways = new List<ImmutableArray<string>> { ImmutableArray.Create("") };
 
 			foreach (var part in segment.Parts)
 			{
@@ -426,7 +348,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 					case NamePartKind.Star:
 						for (var i = 0; i < ways.Count; i++)
-							ways[i] = (ways[i].Prefix, true, "");
+							ways[i] = ways[i].Add("");
 
 						break;
 
@@ -450,7 +372,7 @@ namespace AspectGenerator.TargetFilterBinding
 						if ((long)ways.Count * texts.Count > MaxTerms)
 							return default;
 
-						var next = new List<(string, bool, string)>(ways.Count * texts.Count);
+						var next = new List<ImmutableArray<string>>(ways.Count * texts.Count);
 
 						foreach (var way in ways)
 							foreach (var text in texts)
@@ -465,23 +387,23 @@ namespace AspectGenerator.TargetFilterBinding
 				}
 			}
 
-			var anchors = ImmutableArray.CreateBuilder<NameAnchor>(ways.Count);
+			var globs = ImmutableArray.CreateBuilder<SegmentGlob>(ways.Count);
 
-			foreach (var (prefix, open, tail) in ways)
+			foreach (var way in ways)
 			{
-				if (!open)
-					anchors.Add(NameAnchor.Exact(prefix));
-				else if (prefix.Length == 0 && tail.Length == 0)
+				var glob = new SegmentGlob(way);
+
+				if (!glob.HasText)
 					return default;
-				else
-					anchors.Add(new NameAnchor(prefix, tail, false));
+
+				globs.Add(glob);
 			}
 
-			return anchors.ToImmutable();
+			return globs.ToImmutable();
 
-			static (string, bool, string) Append((string Prefix, bool Open, string Tail) way, string text)
+			static ImmutableArray<string> Append(ImmutableArray<string> way, string text)
 			{
-				return way.Open ? (way.Prefix, true, way.Tail + text) : (way.Prefix + text, false, "");
+				return way.SetItem(way.Length - 1, way[way.Length - 1] + text);
 			}
 		}
 	}

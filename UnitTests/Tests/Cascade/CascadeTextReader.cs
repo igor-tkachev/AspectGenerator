@@ -304,7 +304,10 @@ namespace AspectGenerator.Tests.Cascade
 			foreach (var name in fact.Attributes)
 			{
 				yield return name;
-				yield return name.EndsWith("Attribute", StringComparison.Ordinal) ? name[..^"Attribute".Length] : name + "Attribute";
+
+				// `attribute: X` finds the class X or XAttribute, as C# does; a class without the suffix has one name.
+				if (name.EndsWith("Attribute", StringComparison.Ordinal) && name.Length > "Attribute".Length)
+					yield return name[..^"Attribute".Length];
 			}
 		}
 

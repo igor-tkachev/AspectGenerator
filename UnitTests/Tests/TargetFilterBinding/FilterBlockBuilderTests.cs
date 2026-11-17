@@ -266,7 +266,7 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			Assert.AreEqual(FactProperty.Attribute,                             Facts("- attribute: NoLog"));
 			Assert.AreEqual(FactProperty.Inherits,                              Facts("inherits: Base"));
 			Assert.AreEqual(FactProperty.Implements | FactProperty.Overrides,   Facts("implements: Base.Save", overridesIsKey: false));
-			Assert.AreEqual(FactProperty.Implements,                            Facts("implements: Base.Save", overridesIsKey: true));
+			Assert.AreEqual(FactProperty.Implements | FactProperty.Method,      Facts("implements: Base.Save", overridesIsKey: true));
 			Assert.AreEqual(FactProperty.Overrides,                             Facts("overrides: Base.Save",  overridesIsKey: true));
 			Assert.AreEqual(FactProperty.Accessibility | FactProperty.Static,   Facts("public static"));
 			Assert.AreEqual(FactProperty.Static,                                Facts("instance"));

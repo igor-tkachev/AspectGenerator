@@ -451,6 +451,42 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			]);
 		}
 
+		/// <summary>
+		/// The two ways to match the modifiers a pattern writes. They agree where the pattern writes none, or all the
+		/// parameter has; they differ where the parameter has more.
+		/// </summary>
+		[TestMethod]
+		public void ParameterModifiersInBothMatchingsTest()
+		{
+			(string Filter, string[] Parameters, Tri ExactSet, Tri PerKind)[] rows =
+			[
+				("params: (int)",                 ["this ref int"],        T, T),
+				("params: (this ref int)",        ["this ref int"],        T, T),
+				("params: (ref int)",             ["ref int"],             T, T),
+				("params: (ref int)",             ["in int"],              F, F),
+				("params: (ref int)",             ["int"],                 F, F),
+				("params: (this int)",            ["int"],                 F, F),
+				("params: (params int[])",        ["int[]"],               F, F),
+				("params: (ref int)",             ["this ref int"],        F, T),
+				("params: (this int)",            ["this ref int"],        F, T),
+				("params: (this int)",            ["this int"],            T, T),
+				("params: (in int)",              ["this ref int"],        F, F),
+				("params: (this in int)",         ["this ref int"],        F, F),
+				("params: (int[])",               ["params int[]"],        T, T),
+				("param: ref readonly int",       ["ref readonly int"],    T, T),
+				("param: ref readonly int",       ["ref int"],             F, F),
+				("param: out *",                  ["int", "out bool"],     T, T),
+			];
+
+			foreach (var (filter, parameters, exactSet, perKind) in rows)
+			{
+				var facts = Params(parameters);
+
+				Assert.AreEqual(exactSet, FilterProbe.Answer(filter, facts, modifiers: ParameterModifierMatching.ExactSet), $"{filter} on ({string.Join(", ", parameters)}), exact set");
+				Assert.AreEqual(perKind,  FilterProbe.Answer(filter, facts, modifiers: ParameterModifierMatching.PerKind),  $"{filter} on ({string.Join(", ", parameters)}), per kind");
+			}
+		}
+
 		[TestMethod]
 		public void AttributesMatchWithOrWithoutTheSuffixTest()
 		{

@@ -180,7 +180,29 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public override string ToString()
 		{
-			return "delegate*";
+			var convention = IsManaged ? "" : Conventions.IsEmpty ? " unmanaged" : $" unmanaged[{string.Join(",", Conventions)}]";
+			var types      = new System.Collections.Generic.List<string>();
+
+			foreach (var parameter in Parameters)
+				types.Add(Write(parameter));
+
+			types.Add(Write(Return));
+
+			return $"delegate*{convention}<{string.Join(",", types)}>";
+
+			static string Write(FunctionPointerParameterShape parameter)
+			{
+				var passing = parameter.Modifiers switch
+				{
+					ParameterModifiers.Ref         => "ref ",
+					ParameterModifiers.RefReadOnly => "ref readonly ",
+					ParameterModifiers.In          => "in ",
+					ParameterModifiers.Out         => "out ",
+					_                              => "",
+				};
+
+				return passing + parameter.Type;
+			}
 		}
 	}
 

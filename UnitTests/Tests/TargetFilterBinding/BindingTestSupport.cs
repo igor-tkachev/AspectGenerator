@@ -285,11 +285,13 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 		/// The answer of a filter of one line and no reference on a method: every declaration of the line holds, or one
 		/// does not, or one cannot say for every call of the definition.
 		/// </summary>
-		public static Tri Answer(string filter, IMethodFacts facts, MatchPhase phase = MatchPhase.Call, bool? overridesIsKey = null)
+		public static Tri Answer(string filter, IMethodFacts facts, MatchPhase phase = MatchPhase.Call, bool? overridesIsKey = null, ParameterModifierMatching? modifiers = null)
 		{
-			var block = overridesIsKey is { } isKey
-				? FilterBlockBuilder.Build(CascadeLevel.Aspect, [filter], overridesIsKey: isKey)
-				: FilterBlockBuilder.Build(CascadeLevel.Aspect, [filter]);
+			var block = FilterBlockBuilder.Build(
+				CascadeLevel.Aspect,
+				[filter],
+				overridesIsKey:   overridesIsKey ?? AspectGenerator.FilterV2.FilterV2Language.OverridesIsKey,
+				modifierMatching: modifiers ?? PatternDefaults.ModifierMatching);
 
 			Assert.AreEqual(0, block.Diagnostics.Length, $"'{filter}': {string.Join("; ", block.Diagnostics)}");
 			Assert.AreNotEqual(0, block.Block.Declarations.Length, $"'{filter}' declares nothing.");

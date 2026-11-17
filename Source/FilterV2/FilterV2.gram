@@ -81,7 +81,7 @@ Atom : @FilterExpressionSyntax
 	| r: Reference              => @(new ReferenceExpressionSyntax(r))
 	| w: WordsOrSignature       => w
 	| x: ReservedLiteral        => x
-	| "any" & ?!Lex.PartStart   => @(BareAny(parserSpan))
+	| "any" ~ ?!Lex.PartStart   => @(BareAny(parserSpan))
 
 KeyCondition : @FilterExpressionSyntax
 	= key: NameKey      & ':' & value: NameValue      => @(Condition(parserSpan, key, value))
@@ -130,7 +130,7 @@ ParamsValue   : @FilterValueSyntax = v: CommonValue => v | p: Lex.ParamList   =>
 ParamValue    : @FilterValueSyntax = v: CommonValue => v | p: Lex.Param       => p
 
 CommonValue : @FilterValueSyntax
-	= "any" & ?!Lex.PartStart => @(new AnyValueSyntax(Span(parserSpan)))
+	= "any" ~ ?!Lex.PartStart => @(new AnyValueSyntax(Span(parserSpan)))
 	| r: Reference            => r
 
 // `aspect.p` and `assembly.p`. What follows the dot is read as any pattern: a name that is no property is the reader's

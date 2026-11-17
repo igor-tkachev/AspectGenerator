@@ -265,14 +265,14 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			[
 				"""
 				namespace: Shop.** and type: *Service<*>
-				method: **.Save* or *Repository.{Get,Find}*Async or global::Shop.Services.OrderService<int>.Load
+				method: Get*By*And* or **.Save* or *Repository.{Get,Find}*Async or **.Shop.**.Services.Order*<int>.{Find,L*d} or Load<*>
 				params: (int, .., CancellationToken)
 				param: ref readonly List<*>
 				returns: Task<(int, string?)[]>
 				attribute: {Audited, Obsolete}
 				- attribute: NoLog
 				inherits: IService<*>
-				implements: IService<int>.Save*
+				implements: IService<int>.{Save,Load}*
 				public and instance and not async and not generated and project
 				"""
 			]);
@@ -282,11 +282,11 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			const string List  = "System.Collections.Generic.List<int>";
 			const string Token = "System.Threading.CancellationToken";
 
-			var facts = new RecordFacts("Shop.Services.OrderService<int>", "SaveAll", "System.Threading.Tasks.Task<(int, string)[]>", "int", "ref readonly " + List, Token)
+			var facts = new RecordFacts("Shop.Services.OrderService<int>", "Load", "System.Threading.Tasks.Task<(int, string)[]>", "int", "ref readonly " + List, Token)
 			{
 				Attributes         = [ShapeText.ParseNamed("Shop.AuditedAttribute")],
 				InheritedTypes     = [ShapeText.ParseNamed("Shop.Services.OrderService<int>"), ShapeText.ParseNamed("Shop.IService<int>")],
-				ImplementedMembers = [RecordFacts.MethodShape("Shop.IService<int>", "SaveAll")],
+				ImplementedMembers = [RecordFacts.MethodShape("Shop.IService<int>", "LoadAll")],
 			};
 
 			bool Ask(MatchPhase phase)
@@ -300,8 +300,11 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 				return holds && !target.DependsOnCall;
 			}
 
+			// The method is matched by the fourth alternative of its line only: the three before it are tried and fail,
+			// among them a name of several stars and one of alternatives; the fourth has `**`, type arguments and both.
 			Assert.IsTrue(Ask(MatchPhase.Call));
 			Assert.IsTrue(Ask(MatchPhase.Definition));
+			Assert.AreEqual(Tri.False, FilterProbe.Answer("method: Get*By*And* or **.Save* or *Repository.{Get,Find}*Async or Load<*>", facts));
 
 			const int Count = 20_000;
 
@@ -318,27 +321,18 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			Assert.IsTrue(bytes / Count <= 64, $"{bytes / Count} bytes a decision");
 		}
 
-		/// <summary>
-		/// More choices in a row than the stack can follow: the matcher gives up and the pattern matches nothing, where
-		/// following it would end the compiler.
-		/// </summary>
+		/// <summary>Segments by the thousand: the matcher follows no pattern and no name by calling itself.</summary>
 		[TestMethod]
-		public void MoreChoicesThanTheStackHoldsMatchNothingTest()
+		public void AVeryLongNameIsMatchedWithoutDepthTest()
 		{
-			const int Count = 200_000;
-
-			var name    = new string('a', Count);
-			var facts   = new RecordFacts("Shop." + name, name);
-			var pattern = string.Concat(Enumerable.Repeat("{a}", Count));
-
-			Assert.AreEqual(Tri.False, FilterProbe.Answer("type: " + pattern, facts));
-			Assert.AreEqual(Tri.True,  FilterProbe.Answer("type: " + string.Concat(Enumerable.Repeat("{a}", 100)), new RecordFacts("Shop." + new string('a', 100), "M")));
-
-			// Segments by the thousand are followed without a choice.
 			var dotted = string.Join(".", Enumerable.Repeat("a", 20_000));
+			var facts  = new RecordFacts(dotted + ".C", "M");
 
-			Assert.AreEqual(Tri.True,  FilterProbe.Answer("type: global::" + dotted + ".*", new RecordFacts(dotted + ".C", "M")));
-			Assert.AreEqual(Tri.False, FilterProbe.Answer("type: global::" + dotted + ".b", new RecordFacts(dotted + ".C", "M")));
+			Assert.AreEqual(Tri.True,  FilterProbe.Answer("type: global::" + dotted + ".*", facts));
+			Assert.AreEqual(Tri.False, FilterProbe.Answer("type: global::" + dotted + ".b", facts));
+			Assert.AreEqual(Tri.True,  FilterProbe.Answer("type: a.**.a.{b,C}", facts));
+			Assert.AreEqual(Tri.False, FilterProbe.Answer("type: b.**.a.{b,C}", facts));
+			Assert.AreEqual(Tri.True,  FilterProbe.Answer("namespace: a.**.a", facts));
 		}
 	}
 }

@@ -24,6 +24,9 @@ namespace AspectGenerator.Tests.FilterV2
 
 		const int StackSize = 1024 * 1024;
 
+		/// <summary>How many times a measurement past its bar is taken again before it counts as past it.</summary>
+		const int Remeasures = 4;
+
 		/// <summary>Times below this are compared as this: a ratio of two sub-microsecond reads says nothing.</summary>
 		const double FloorMs = 0.05;
 
@@ -161,6 +164,18 @@ namespace AspectGenerator.Tests.FilterV2
 				{
 					var ratio = Math.Max(times[i], FloorMs) / Math.Max(times[i - 1], FloorMs);
 
+					// The times are wall-clock, and on a loaded machine one of a pair can be slow by chance. Growth that is
+					// really past the bar is past it every time: the pair is measured again, and the least growth counts.
+					for (var attempt = 0; attempt < Remeasures && ratio > 20; attempt++)
+					{
+						var (small, _) = Time(make(sizes[i - 1]), 15);
+						var (large, _) = Time(make(sizes[i]), 15);
+
+						ratio = Math.Min(ratio, Math.Max(large, FloorMs) / Math.Max(small, FloorMs));
+
+						TestContext.WriteLine($"{shape,-28} measured again: {small:0.000} ms → {large:0.000} ms");
+					}
+
 					if (ratio > 20)
 						failures.Add($"{shape}: {sizes[i - 1]} → {sizes[i]} grew {ratio:0.0}× (bar: 20× for 10× the input)");
 				}
@@ -175,6 +190,9 @@ namespace AspectGenerator.Tests.FilterV2
 			foreach (var lines in new[] { _malformed, _malformedClosed })
 			{
 				var (malformed, _) = Time(Fill(lines, 10_000), 7);
+
+				for (var attempt = 0; attempt < Remeasures && optimized && malformed > 10; attempt++)
+					malformed = Math.Min(malformed, Time(Fill(lines, 10_000), 15).Ms);
 
 				TestContext.WriteLine($"10 KB malformed ('{lines[0]}' …): {malformed:0.000} ms (bar: 10 ms{(optimized ? "" : ", not held: the generator is not optimized")})");
 

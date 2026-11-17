@@ -286,10 +286,12 @@ namespace AspectGenerator.TargetFilterBinding
 		/// Whether a call of this definition can answer <c>async</c> otherwise than the definition.
 		/// <list type="bullet">
 		/// <item>A type whose awaiter only some code may use is answered by the code that awaits it, call by call.</item>
-		/// <item>A return type that names no type parameter is the same in every call.</item>
-		/// <item>A definition that is awaitable by the constraints of its type parameters stays awaitable whatever
-		/// satisfies them. One that is not can become awaitable in a call when a type argument brings the awaiter: the
-		/// return type is a type parameter itself, or has a <c>GetAwaiter</c> whose result the type arguments decide.</item>
+		/// <item>A return type that names no type parameter is the same in every call, and so are <c>Task&lt;T&gt;</c> and
+		/// <c>ValueTask&lt;T&gt;</c>, awaitable whatever <c>T</c> is.</item>
+		/// <item>A return type that is a type parameter is whatever the call puts there. Its constraints promise nothing:
+		/// a type that satisfies them can hide the awaiter they bring with a member that is none.</item>
+		/// <item>Any other return type that names a type parameter is decided by the call when it has a
+		/// <c>GetAwaiter</c> at all, whose result the type arguments may decide; without one no call is awaitable.</item>
 		/// </list>
 		/// </summary>
 		bool AsyncVaries()
@@ -300,10 +302,20 @@ namespace AspectGenerator.TargetFilterBinding
 			if (_context.AwaitableCache.TryGetValue(type, out var answer) && answer == AwaitProbe.Answer.NeedsContext)
 				return true;
 
-			if (isAsync || !MentionsTypeParameter(type, 0))
+			if (!MentionsTypeParameter(type, 0))
 				return false;
 
-			return type is ITypeParameterSymbol || HasGetAwaiter(type);
+			if (type is ITypeParameterSymbol)
+				return true;
+
+			if (isAsync &&
+				type.OriginalDefinition is INamedTypeSymbol { Name: "Task" or "ValueTask" } named &&
+				named.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks")
+			{
+				return false;
+			}
+
+			return HasGetAwaiter(type);
 		}
 
 		static bool MentionsTypeParameter(ITypeSymbol type, int depth)

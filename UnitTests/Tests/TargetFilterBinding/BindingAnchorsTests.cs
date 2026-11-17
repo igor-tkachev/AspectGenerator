@@ -30,7 +30,9 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			Assert.AreEqual("name Append*",                 Anchors("method: Append*"));
 			Assert.AreEqual("name *Async",                  Anchors("method: *Async"));
 			Assert.AreEqual("name Get*Async",               Anchors("method: Get*Async"));
-			Assert.AreEqual("name Get*Async",               Anchors("method: Get*By*Async"));
+			Assert.AreEqual("name Get*By*Async",            Anchors("method: Get*By*Async"));
+			Assert.AreEqual("name *Internal*",              Anchors("method: *Internal*"));
+			Assert.AreEqual("name *Get*By*",                Anchors("method: *Get*By*"));
 			Assert.AreEqual("name Save",                    Anchors("method: *Repository.Save"));
 			Assert.AreEqual("name Save*",                   Anchors("method: **.*Service.Save*"));
 			Assert.AreEqual("name Add",                     Anchors("method: List<int>.Add"));
@@ -44,8 +46,7 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			Assert.AreEqual("name Save*",                   Anchors("Save*"));
 			Assert.AreEqual("name Save*",                   Anchors("Save*(int): Task"));
 
-			// No literal text at either end of the method's own name, or a name that alternatives split over segments.
-			Assert.AreEqual("every call",                   Anchors("method: *Internal*"));
+			// No literal text in the method's own name, or a name that alternatives split over segments.
 			Assert.AreEqual("every call",                   Anchors("method: *"));
 			Assert.AreEqual("every call",                   Anchors("method: **"));
 			Assert.AreEqual("every call",                   Anchors("method: Shop.**"));
@@ -110,21 +111,23 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			Assert.AreEqual("name Append*",                 Anchors("type: *Builder\nmethod: Append*"));
 			Assert.AreEqual("name Save*",                   Anchors("method: Save*\n- method: SaveInternal"));
 			Assert.AreEqual("name Save*, root MyApp",       Anchors("namespace: MyApp.**\nmethod: Save*"));
-			Assert.AreEqual("name Save*Async",              Anchors("method: Save* and method: *Async"));
-			Assert.AreEqual("name SaveAsync",               Anchors("method: Save* and method: SaveAsync"));
+			Assert.AreEqual("name Save*, name *Async",      Anchors("method: Save* and method: *Async"));
+			Assert.AreEqual("name Save*, name SaveAsync",   Anchors("method: Save* and method: SaveAsync"));
 			Assert.AreEqual("name Save* | name Get*",       Anchors("method: Save* or Get*"));
 			Assert.AreEqual("name Save*, root A | name Save*, root B", Anchors("namespace: {A,B}.** and method: Save*"));
 			Assert.AreEqual("name Save*",                   Anchors("method: Save* and (static or method: *Async)"));
-			Assert.AreEqual("name Save*Async | name Save*Core", Anchors("method: Save* and (method: *Async or method: *Core)"));
+			Assert.AreEqual("name Save*, name *Async | name Save*, name *Core", Anchors("method: Save* and (method: *Async or method: *Core)"));
 
 			// An alternative without an anchor leaves every call to bind.
 			Assert.AreEqual("every call",                   Anchors("method: Save* or public"));
-			Assert.AreEqual("every call",                   Anchors("method: Save* or *Internal*"));
+			Assert.AreEqual("every call",                   Anchors("method: Save* or *"));
 			Assert.AreEqual("project",                      Anchors("method: Save* or assembly.method", CascadeLevel.Type));
 
-			// Conditions no method satisfies together.
+			// Conditions no method satisfies together, where that is plain: a whole name that another condition refuses, two
+			// roots. Two globs are kept as they are: whether a name meets both is asked of the name.
 			Assert.AreEqual("no call",                      Anchors("method: Save and method: Load"));
-			Assert.AreEqual("no call",                      Anchors("method: Save* and method: Get*"));
+			Assert.AreEqual("no call",                      Anchors("method: Save and method: Get*"));
+			Assert.AreEqual("name Save*, name Get*",        Anchors("method: Save* and method: Get*"));
 			Assert.AreEqual("no call",                      Anchors("namespace: A.** and method: global::B.**"));
 		}
 
@@ -170,9 +173,22 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			foreach (var name in new[] { "Appen", "append", "AsyncRun", "GetCor", "Getore", "SaveAll", "Sav", "" })
 				Assert.IsFalse(anchors.MayBindName(name), name);
 
-			// The two ends of an anchor do not share characters.
-			Assert.IsFalse(new NameAnchor("Get", "tCore", false).Matches("GetCore"));
-			Assert.IsTrue (new NameAnchor("Get", "tCore", false).Matches("GettCore"));
+			// The two ends of one name do not share characters; two conditions on the name may.
+			var ends = FilterBlockBuilder.Build(CascadeLevel.Assembly, ["method: Get*tCore"]).Anchors;
+			var both = FilterBlockBuilder.Build(CascadeLevel.Assembly, ["method: Get* and method: *tCore"]).Anchors;
+
+			Assert.IsFalse(ends.MayBindName("GetCore"));
+			Assert.IsTrue (ends.MayBindName("GettCore"));
+			Assert.IsFalse(both.MayBindName("GeCore"));
+			Assert.IsTrue (both.MayBindName("GetCore"));
+
+			// The text in the middle of a name, in its order.
+			var middle = FilterBlockBuilder.Build(CascadeLevel.Assembly, ["method: *Get*By*"]).Anchors;
+
+			Assert.IsTrue (middle.MayBindName("TryGetItemByKey"));
+			Assert.IsTrue (middle.MayBindName("GetBy"));
+			Assert.IsFalse(middle.MayBindName("ByGet"));
+			Assert.IsFalse(middle.MayBindName("GetB"));
 
 			// A term without a name anchor says nothing of the name.
 			Assert.IsTrue(FilterBlockBuilder.Build(CascadeLevel.Assembly, ["namespace: MyApp.**"]).Anchors.MayBindName("Anything"));
@@ -189,6 +205,7 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 				"namespace: {Shop,Other}.**", "type: global::Shop.Services.*", "public", "method: Save* or public", "method: Save* and public",
 				"namespace: Shop.** and method: *Async", "method: Save* and (static or method: *Async)", "not method: Save*", "project and method: Get*",
 				"type: *Service and method: {Save,Load}*", "method: *Service.Save*\n- method: *Async", "Save*(int)", "method: Save and method: Load",
+				"method: Save* and method: *ave", "method: *a*e*", "method: *Async and method: Save*", "method: S*c and method: *ave*",
 			];
 
 			var facts = from type in new[] { "Shop.Services.OrderService", "Shop.Repo", "Other.Service", "System.Text.StringBuilder", "Service" }
@@ -215,7 +232,7 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 
 					Assert.IsTrue(
 						block.Anchors.Terms.Any(t =>
-							(t.Name is not { } anchor || anchor.Matches(name)) &&
+							t.MatchesName(name) &&
 							(t.Root is null || t.Root == root) &&
 							(!t.IsProjectOnly || fact.IsProject)),
 						$"'{filter}' selects {fact.ContainingType}.{name} (project: {fact.IsProject}) outside its anchors: {block.Anchors}");

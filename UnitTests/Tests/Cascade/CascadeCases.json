@@ -3751,6 +3751,139 @@
    }
   },
   {
+   "id": "three-includes-of-one-property-one-ag0225-per-repeat",
+   "description": "three includes of one property: one AG0225 per repeat",
+   "input": {
+    "default": "- attribute: NoLog",
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "method: A*\nmethod: B*\nmethod: C*"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.A",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "A",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.A": false
+    },
+    "settings": {},
+    "errors": [
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0225"
+     },
+     {
+      "block": "type:Shop.Services.OrderService#0",
+      "id": "AG0225"
+     }
+    ]
+   }
+  },
+  {
+   "id": "attribute-x-matches-class-x-or-xattribute-as-c-looks-it-up",
+   "description": "attribute: X matches class X or XAttribute, as C# looks it up",
+   "input": {
+    "default": null,
+    "types": [
+     {
+      "type": "Shop.Services.OrderService",
+      "filter": "attribute: NoLogAttribute"
+     },
+     {
+      "type": "Shop.Data.Repo",
+      "filter": "attribute: Audit"
+     }
+    ],
+    "facts": [
+     {
+      "id": "Shop.Services.OrderService.A",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "A",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLog"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Services.OrderService.B",
+      "namespace": "Shop.Services",
+      "type": "Shop.Services.OrderService",
+      "name": "B",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "NoLogAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Data.Repo.C",
+      "namespace": "Shop.Data",
+      "type": "Shop.Data.Repo",
+      "name": "C",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "AuditAttribute"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     },
+     {
+      "id": "Shop.Data.Repo.D",
+      "namespace": "Shop.Data",
+      "type": "Shop.Data.Repo",
+      "name": "D",
+      "accessibility": "public",
+      "static": false,
+      "async": false,
+      "attributes": [
+       "Audit"
+      ],
+      "returns": "System.Void",
+      "project": true,
+      "modifiers": []
+     }
+    ]
+   },
+   "expected": {
+    "selected": {
+     "Shop.Services.OrderService.A": false,
+     "Shop.Services.OrderService.B": true,
+     "Shop.Data.Repo.C": true,
+     "Shop.Data.Repo.D": true
+    },
+    "settings": {},
+    "errors": []
+   }
+  },
+  {
    "id": "log-targetfilter-attribute-any-nolog-ping-vs-bare-log-nolog",
    "description": "[Log(TargetFilter = attribute: any)] [NoLog] Ping vs bare [Log] [NoLog]",
    "input": {

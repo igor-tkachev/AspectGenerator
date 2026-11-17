@@ -68,7 +68,7 @@ namespace AspectGenerator.Tests.Cascade
 		{
 			var ids = _cases.Value.Select(c => c["id"]!.GetValue<string>()).ToList();
 
-			Assert.AreEqual(66, ids.Count, "The number of cascade cases changed; update this count with the table.");
+			Assert.AreEqual(68, ids.Count, "The number of cascade cases changed; update this count with the table.");
 			Assert.AreEqual(ids.Count, ids.Distinct().Count(), "Case ids are not unique.");
 
 			var alternatives = _cases.Value.SelectMany(c => c["alternatives"]?.AsObject().Select(a => a.Key) ?? []).Distinct().ToList();

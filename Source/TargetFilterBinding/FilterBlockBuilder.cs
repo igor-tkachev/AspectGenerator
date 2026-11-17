@@ -145,10 +145,11 @@ namespace AspectGenerator.TargetFilterBinding
 			IReadOnlyDictionary<string,object?>? settings       = null,
 			string?                              label          = null,
 			object?                              source         = null,
-			bool                                 overridesIsKey = FilterV2Language.OverridesIsKey,
-			AssemblyFilterReach                  assemblyReach  = CascadeDefaults.AssemblyReach)
+			bool                                 overridesIsKey   = FilterV2Language.OverridesIsKey,
+			AssemblyFilterReach                  assemblyReach    = CascadeDefaults.AssemblyReach,
+			ParameterModifierMatching            modifierMatching = PatternDefaults.ModifierMatching)
 		{
-			var state = new State(level, overridesIsKey);
+			var state = new State(level, overridesIsKey, modifierMatching);
 
 			for (var i = 0; i < items.Count; i++)
 				state.ReadItem(i, items[i]);
@@ -260,19 +261,11 @@ namespace AspectGenerator.TargetFilterBinding
 		{
 			public bool Test(FilterTarget target)
 			{
-				try
-				{
-					return target.Settle(match(target));
-				}
-				catch (InsufficientExecutionStackException)
-				{
-					// A type nested deeper than the stack can follow matches nothing.
-					return false;
-				}
+				return target.Settle(match(target));
 			}
 		}
 
-		sealed class State(CascadeLevel level, bool overridesIsKey)
+		sealed class State(CascadeLevel level, bool overridesIsKey, ParameterModifierMatching modifierMatching)
 		{
 			readonly Dictionary<CascadeCondition<FilterTarget>, Origin>         _origins = [];
 			readonly Dictionary<CascadeCondition<FilterTarget>, BindingAnchors> _anchors = [];
@@ -314,6 +307,12 @@ namespace AspectGenerator.TargetFilterBinding
 					catch (InsufficientExecutionStackException)
 					{
 						Diagnostics.Add(new FilterBlockDiagnostic(FilterV2DiagnosticID.NestedTooDeeply, index, line.Span, "The filter is nested too deeply to be read."));
+						continue;
+					}
+					catch (PatternException refused)
+					{
+						// A pattern refused for what it is as a whole: its line is no declaration.
+						Diagnostics.Add(new FilterBlockDiagnostic(refused.Id, index, refused.Span, refused.Message));
 						continue;
 					}
 
@@ -687,7 +686,13 @@ namespace AspectGenerator.TargetFilterBinding
 
 					case FilterKey.Param when condition.Value is ParameterPatternSyntax parameter:
 					{
-						var pattern = PatternCompiler.CompileParameter(parameter);
+						if (parameter.Kind == ParameterPatternKind.AnyRun)
+						{
+							throw new PatternException(FilterV2DiagnosticID.InvalidPattern, parameter.Span,
+								"'..' stands for a run of parameters in a parameter list ('params: (int, ..)'); 'param: _' is a method with at least one parameter.");
+						}
+
+						var pattern = PatternCompiler.CompileParameter(parameter, modifierMatching);
 
 						return Test(property, FactProperty.Param, condition.Span, null, t =>
 						{
@@ -741,13 +746,18 @@ namespace AspectGenerator.TargetFilterBinding
 
 					case FilterKey.Implements when condition.Value is NamePatternSyntax name:
 					{
-						var pattern = PatternCompiler.CompileName(name, PatternCompiler.Anchoring.Trailing);
+						var pattern = PatternCompiler.CompileName(name, PatternCompiler.Anchoring.Trailing, isMethodPath: true);
 
-						// Where `overrides:` is no key of its own, `implements:` covers the members the method overrides too.
+						// The method itself counts, whatever it is. Where `overrides:` is no key of its own, `implements:`
+						// covers the members the method overrides too (the first of which is the method).
 						if (overridesIsKey)
 						{
-							return Test(property, FactProperty.Implements, condition.Span, null,
-								t => MatchAny(pattern, t.Facts.ImplementedMembers, t.Phase));
+							return Test(property, FactProperty.Implements | FactProperty.Method, condition.Span, null, t =>
+							{
+								var itself = pattern.Match(new SegmentPath(t.Facts.ContainingType.Segments, t.Facts.Method), t.Phase);
+
+								return itself == Tri.True ? itself : itself.Or(MatchAny(pattern, t.Facts.ImplementedMembers, t.Phase));
+							});
 						}
 
 						return Test(property, FactProperty.Implements | FactProperty.Overrides, condition.Span, null, t =>
@@ -760,7 +770,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 					case FilterKey.Overrides when overridesIsKey && condition.Value is NamePatternSyntax name:
 					{
-						var pattern = PatternCompiler.CompileName(name, PatternCompiler.Anchoring.Trailing);
+						var pattern = PatternCompiler.CompileName(name, PatternCompiler.Anchoring.Trailing, isMethodPath: true);
 
 						return Test(property, FactProperty.Overrides, condition.Span, null,
 							t => MatchAny(pattern, t.Facts.OverrideChain, t.Phase));
@@ -788,7 +798,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 			CascadeCondition<FilterTarget> Method(NamePatternSyntax name, TextSpan span)
 			{
-				var pattern = PatternCompiler.CompileName(name, PatternCompiler.Anchoring.Trailing);
+				var pattern = PatternCompiler.CompileName(name, PatternCompiler.Anchoring.Trailing, isMethodPath: true);
 
 				return Test(CascadeProperty.Method, FactProperty.Method, span, BindingAnchors.OfMethod(name),
 					t => pattern.Match(new SegmentPath(t.Facts.ContainingType.Segments, t.Facts.Method), t.Phase));
@@ -796,7 +806,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 			CascadeCondition<FilterTarget> Parameters(ParameterListPatternSyntax list, TextSpan span)
 			{
-				var pattern = PatternCompiler.CompileParameters(list);
+				var pattern = PatternCompiler.CompileParameters(list, modifierMatching);
 
 				return Test(CascadeProperty.Params, FactProperty.Params, span, null,
 					t => pattern.Match(t.Facts.Parameters, t.Phase));
