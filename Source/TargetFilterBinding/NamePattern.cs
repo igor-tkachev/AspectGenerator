@@ -376,19 +376,32 @@ namespace AspectGenerator.TargetFilterBinding
 			public int            PendingCount;
 		}
 
+		// A match inside a match (a type argument that is a pattern of this kind) has a scratch of its own: one for each
+		// depth of matches the thread has been in, kept for the next match at that depth.
 		[ThreadStatic]
-		static Scratch? _scratch;
+		static Scratch?[]? _scratches;
+
+		[ThreadStatic]
+		static int _depth;
 
 		Tri Follow(SegmentPath path, MatchPhase phase)
 		{
-			// A match inside a match (a type argument that is a pattern of this kind) finds the scratch taken and makes
-			// its own.
-			var scratch = _scratch;
+			var scratches = _scratches ??= new Scratch?[4];
+			var depth     = _depth;
 
-			_scratch = null;
+			if (depth == scratches.Length)
+			{
+				Array.Resize(ref scratches, depth * 2);
+
+				_scratches = scratches;
+			}
+
+			var scratch = scratches[depth];
 
 			if (scratch is null || scratch.Size < _stepCount)
-				scratch = new Scratch(Math.Max(_stepCount, 64));
+				scratches[depth] = scratch = new Scratch(Math.Max(_stepCount, 64));
+
+			_depth = depth + 1;
 
 			try
 			{
@@ -401,7 +414,7 @@ namespace AspectGenerator.TargetFilterBinding
 				scratch.NextSegment.Clear();
 				scratch.PendingCount = 0;
 
-				_scratch = scratch;
+				_depth = depth;
 			}
 		}
 

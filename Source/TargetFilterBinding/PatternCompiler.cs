@@ -468,6 +468,10 @@ namespace AspectGenerator.TargetFilterBinding
 
 		static TypePattern CompileType(TypePatternSyntax syntax, int depth)
 		{
+			// Every rank and the `?` wrap the type once more, as a type argument does: a pattern is matched by following
+			// its wrappers one into the other.
+			depth += syntax.Suffixes.Length;
+
 			if (depth > MaxDepth)
 				throw TooDeep(syntax.Span);
 

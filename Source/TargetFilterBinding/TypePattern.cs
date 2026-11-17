@@ -277,6 +277,11 @@ namespace AspectGenerator.TargetFilterBinding
 	/// Quoted text where a type stands, and nothing else: a type whose name is that text, as quoted text in any name,
 	/// or a type whose whole text it is. That names the types no pattern spells: <c>"System.Int32*"</c> is a pointer.
 	/// The text of a type is its full name with its type arguments, written as C# writes them without spaces.
+	/// <para>
+	/// On the definition of a method the text of a type that names a type parameter is not the text any call has:
+	/// <c>T[]</c> is <c>System.Int32[]</c> in one call and not in another. Whether the text is the pattern's is then
+	/// for the call to say.
+	/// </para>
 	/// </summary>
 	sealed class QuotedTypePattern : TypePattern
 	{
@@ -293,7 +298,13 @@ namespace AspectGenerator.TargetFilterBinding
 		{
 			var named = _name.MatchCore(type, phase);
 
-			return named == Tri.True || type is NamedTypeShape ? named : (type.ToString() == _text).ToTri();
+			if (named == Tri.True)
+				return named;
+
+			if (type.MentionsTypeParameter)
+				return phase == MatchPhase.Definition ? Tri.Depends : named;
+
+			return named.Or((type.ToString() == _text).ToTri());
 		}
 
 		public override bool MatchAttribute(NamedTypeShape attribute)

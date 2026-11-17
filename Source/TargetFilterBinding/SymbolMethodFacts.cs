@@ -20,7 +20,33 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public TypeShape Get(ITypeSymbol type)
 		{
-			return _types.TryGetValue(type, out var shape) ? shape : _types.GetOrAdd(type, Create(type));
+			if (_types.TryGetValue(type, out var shape))
+				return shape;
+
+			// Arrays of arrays and pointers to pointers are taken off one by one and put back from the inside, so that a
+			// type wrapped by the thousand is not followed down by calls.
+			List<ITypeSymbol>? wrappers = null;
+			var core                    = type;
+
+			while (core is IArrayTypeSymbol or IPointerTypeSymbol && !_types.ContainsKey(core))
+			{
+				(wrappers ??= []).Add(core);
+				core = core is IArrayTypeSymbol array ? array.ElementType : ((IPointerTypeSymbol)core).PointedAtType;
+			}
+
+			shape = _types.TryGetValue(core, out var known) ? known : _types.GetOrAdd(core, Create(core));
+
+			if (wrappers is not null)
+			{
+				for (var i = wrappers.Count - 1; i >= 0; i--)
+				{
+					var inner = shape;
+
+					shape = _types.GetOrAdd(wrappers[i], wrappers[i] is IArrayTypeSymbol array ? new ArrayTypeShape(inner, array.Rank) : new PointerTypeShape(inner));
+				}
+			}
+
+			return shape;
 		}
 
 		public NamedTypeShape GetNamed(INamedTypeSymbol type)
@@ -62,16 +88,11 @@ namespace AspectGenerator.TargetFilterBinding
 			return shapes.MoveToImmutable();
 		}
 
+		/// <summary>The shape of a type that is no array and no pointer; those are made in <see cref="Get"/>.</summary>
 		TypeShape Create(ITypeSymbol type)
 		{
 			switch (type)
 			{
-				case IArrayTypeSymbol array:
-					return new ArrayTypeShape(Get(array.ElementType), array.Rank);
-
-				case IPointerTypeSymbol pointer:
-					return new PointerTypeShape(Get(pointer.PointedAtType));
-
 				case ITypeParameterSymbol parameter:
 					return new TypeParameterShape(parameter.Name);
 

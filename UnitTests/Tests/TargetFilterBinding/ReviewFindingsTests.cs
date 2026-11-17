@@ -53,12 +53,19 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 					public string[]?[,] Mixed() { return null!; }
 					public void Convention(delegate* unmanaged[Cdecl, SuppressGCTransition]<int, void> p) { }
 					public void Other() { }
+					public static T[] Arr<T>() { return null!; }
+					public static T* Ptr<T>() where T : unmanaged { return null; }
+					public static System.Collections.Generic.List<T> Lst<T>() { return null!; }
+					public static int[] Plain() { return null!; }
 
 					public static void Calls()
 					{
 						Make<A>();
 						Make<B>();
 						int.Parse("1");
+						Arr<int>();
+						Ptr<int>();
+						Lst<int>();
 					}
 				}
 			}
@@ -270,6 +277,130 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			CollectionAssert.AreEqual(Array.Empty<string>(), Errors("method: any # every method"));
 			CollectionAssert.AreEqual(Array.Empty<string>(), Errors("(method: any)"));
 			CollectionAssert.AreEqual(Array.Empty<string>(), Errors("method: any*"));
+		}
+
+		[TestMethod]
+		public void EveryWrapperOfATypeCountsTowardsTheDepthTest()
+		{
+			// Ranks wrap a type one in another like type arguments do.
+			CollectionAssert.AreEqual(new[] { "AG0227" }, Errors("returns: int" + string.Concat(Enumerable.Repeat("[]", 12_000))));
+			CollectionAssert.AreEqual(new[] { "AG0227" }, Errors("returns: int" + string.Concat(Enumerable.Repeat("[]", 40))));
+			CollectionAssert.AreEqual(new[] { "AG0227" }, Errors("returns: List<int" + string.Concat(Enumerable.Repeat("[]", 20)) + ">" + string.Concat(Enumerable.Repeat("[,]", 20))));
+			CollectionAssert.AreEqual(Array.Empty<string>(), Errors("returns: int?" + string.Concat(Enumerable.Repeat("[]", 20))));
+		}
+
+		[TestMethod]
+		public void ATypeNestedByTheThousandIsMatchedOnASmallStackTest()
+		{
+			// A pattern is no deeper than its limit, so no match goes deeper into a type than that, however deep the type.
+			TypeShape deep = ShapeText.Parse("int");
+
+			for (var i = 0; i < 12_000; i++)
+				deep = new ArrayTypeShape(deep, 1);
+
+			TypeShape pointers = ShapeText.Parse("int");
+
+			for (var i = 0; i < 12_000; i++)
+				pointers = new PointerTypeShape(pointers);
+
+			var twenty  = string.Concat(Enumerable.Repeat("[]", 20));
+			var results = new System.Collections.Generic.List<string>();
+			Exception? failure = null;
+
+			var thread = new System.Threading.Thread(() =>
+			{
+				try
+				{
+					foreach (var type in new[] { deep, pointers })
+					{
+						var facts = new RecordFacts(ShapeText.ParseNamed("Shop.C"), new NameSegment("M"), type, [new ParameterShape(type, ParameterModifiers.None)]);
+
+						foreach (var filter in new[] { "returns: *", "returns: *[]", "returns: *" + twenty, "returns: int" + twenty, "returns: List<*>", "returns: \"System.Int32[]\"", "params: (*[]?)", "returns: {int[], *[][]}" })
+						{
+							results.Add($"{filter.Replace(twenty, "[]x20")} = {FilterProbe.Answer(filter, facts)}/{FilterProbe.Answer(filter, facts, MatchPhase.Definition)}");
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					failure = ex;
+				}
+			}, 256 * 1024);
+
+			thread.Start();
+			thread.Join();
+
+			Assert.IsNull(failure, failure?.ToString());
+
+			CollectionAssert.AreEqual(
+				new[]
+				{
+					"returns: * = True/True", "returns: *[] = True/True", "returns: *[]x20 = True/True", "returns: int[]x20 = False/False",
+					"returns: List<*> = False/False", "returns: \"System.Int32[]\" = False/False", "params: (*[]?) = True/True", "returns: {int[], *[][]} = True/True",
+					"returns: * = True/True", "returns: *[] = False/False", "returns: *[]x20 = False/False", "returns: int[]x20 = False/False",
+					"returns: List<*> = False/False", "returns: \"System.Int32[]\" = False/False", "params: (*[]?) = False/False", "returns: {int[], *[][]} = False/False",
+				},
+				results);
+
+			// The same for a type the compiler holds: its shape is made without following it down by calls.
+			var probe = new ProbeCompilation("public class Deep { public int" + string.Concat(Enumerable.Repeat("[]", 300)) + " M() { return null!; } }");
+
+			Assert.AreEqual(T, FilterProbe.Answer("returns: *" + twenty, probe.Definition("Deep", "M")));
+			Assert.AreEqual(F, FilterProbe.Answer("returns: int" + twenty, probe.Definition("Deep", "M")));
+		}
+
+		[TestMethod]
+		public void QuotedTextOfATypeWithATypeParameterIsForTheCallToSayTest()
+		{
+			(string Filter, string Call, Tri Definition, Tri OnCall)[] rows =
+			[
+				("returns: \"System.Int32[]\"",                                    "Arr<int>()", D, T),
+				("returns: \"System.Int64[]\"",                                    "Arr<int>()", D, F),
+				("not returns: \"System.Int32[]\"",                                "Arr<int>()", D, F),
+				("returns: \"System.Int32*\"",                                     "Ptr<int>()", D, T),
+				("not returns: \"System.Int32*\"",                                 "Ptr<int>()", D, F),
+				("returns: \"System.Collections.Generic.List<System.Int32>\"",     "Lst<int>()", D, T),
+				("returns: \"System.Collections.Generic.List<System.Int64>\"",     "Lst<int>()", D, F),
+				("returns: \"List\"",                                              "Lst<int>()", T, T),
+				("returns: {\"System.Int32[]\", void}",                            "Arr<int>()", D, T),
+			];
+
+			foreach (var (filter, call, definition, onCall) in rows)
+			{
+				var (syntax, method) = _probe.Value.Calls().First(c => c.Syntax.ToString() == call);
+
+				Assert.AreEqual(definition, FilterProbe.Answer(filter, _probe.Value.Definition(method), MatchPhase.Definition), filter + " on the definition");
+				Assert.AreEqual(onCall,     FilterProbe.Answer(filter, _probe.Value.Call(syntax, method)),                     filter + " on " + call);
+			}
+
+			// A type that names no type parameter is decided where it is declared.
+			Assert.AreEqual(T, FilterProbe.Answer("returns: \"System.Int32[]\"", _probe.Value.Definition("N.Shapes", "Plain"), MatchPhase.Definition));
+			Assert.AreEqual(F, FilterProbe.Answer("returns: \"System.Int64[]\"", _probe.Value.Definition("N.Shapes", "Plain"), MatchPhase.Definition));
+		}
+
+		[TestMethod]
+		public void AlternativesInsideAlternativesAllocateNothingTest()
+		{
+			var facts = new RecordFacts("Shop.C<Shop.A>", "M");
+
+			foreach (var (filter, expected) in new[] { ("type: {C,D}<{A,B}*>", T), ("type: {C,D}<{X,Y}<{A,B}*>>", F), ("type: {C,D}<{A,Shop.{A,B}}>", T) })
+			{
+				var block  = FilterBlockBuilder.Build(CascadeLevel.Aspect, [filter]);
+				var target = FilterTarget.Call(facts);
+
+				Assert.AreEqual(expected, FilterProbe.Answer(filter, facts), filter);
+
+				block.Block.Declarations[0].IsSatisfied(target, null!);
+
+				var bytes = GC.GetAllocatedBytesForCurrentThread();
+
+				for (var i = 0; i < 10_000; i++)
+					block.Block.Declarations[0].IsSatisfied(target, null!);
+
+				bytes = GC.GetAllocatedBytesForCurrentThread() - bytes;
+
+				Assert.AreEqual(0, bytes / 10_000, $"{filter}: {bytes / 10_000} bytes a decision");
+			}
 		}
 	}
 }

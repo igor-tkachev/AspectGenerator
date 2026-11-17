@@ -37,6 +37,12 @@ namespace AspectGenerator.TargetFilterBinding
 		/// ignored.
 		/// </summary>
 		public virtual bool IsReferenceType => false;
+
+		/// <summary>
+		/// A type parameter stands somewhere in the type: on the definition of a method the type is then another in
+		/// every call. Known when the shape is made, so that asking does not follow the type down.
+		/// </summary>
+		public abstract bool MentionsTypeParameter { get; }
 	}
 
 	/// <summary>
@@ -55,7 +61,13 @@ namespace AspectGenerator.TargetFilterBinding
 			IsReferenceType    = isReferenceType;
 			NullableUnderlying = nullableUnderlying;
 			TupleElements      = tupleElements;
+
+			foreach (var segment in segments)
+				foreach (var argument in segment.TypeArguments)
+					MentionsTypeParameter |= argument.MentionsTypeParameter;
 		}
+
+		public override bool MentionsTypeParameter { get; }
 
 		public ImmutableArray<NameSegment> Segments { get; }
 
@@ -77,9 +89,12 @@ namespace AspectGenerator.TargetFilterBinding
 	{
 		public ArrayTypeShape(TypeShape element, int rank)
 		{
-			Element = element;
-			Rank    = rank;
+			Element               = element;
+			Rank                  = rank;
+			MentionsTypeParameter = element.MentionsTypeParameter;
 		}
+
+		public override bool MentionsTypeParameter { get; }
 
 		public TypeShape Element { get; }
 		public int       Rank    { get; }
@@ -89,16 +104,16 @@ namespace AspectGenerator.TargetFilterBinding
 		public override string ToString()
 		{
 			// The rank specifiers follow the element type in C# order: an array of int[,] is int[][,].
-			var specifiers    = "";
+			var specifiers    = new System.Text.StringBuilder();
 			TypeShape current = this;
 
 			while (current is ArrayTypeShape array)
 			{
-				specifiers += "[" + new string(',', array.Rank - 1) + "]";
-				current     = array.Element;
+				specifiers.Append('[').Append(',', array.Rank - 1).Append(']');
+				current = array.Element;
 			}
 
-			return current + specifiers;
+			return current + specifiers.ToString();
 		}
 	}
 
@@ -107,14 +122,27 @@ namespace AspectGenerator.TargetFilterBinding
 	{
 		public PointerTypeShape(TypeShape pointedAt)
 		{
-			PointedAt = pointedAt;
+			PointedAt             = pointedAt;
+			MentionsTypeParameter = pointedAt.MentionsTypeParameter;
 		}
 
 		public TypeShape PointedAt { get; }
 
+		public override bool MentionsTypeParameter { get; }
+
 		public override string ToString()
 		{
-			return PointedAt + "*";
+			// A pointer to a pointer, however long the run, is written without following it by calls.
+			var stars         = 0;
+			TypeShape current = this;
+
+			while (current is PointerTypeShape pointer)
+			{
+				stars++;
+				current = pointer.PointedAt;
+			}
+
+			return current + new string('*', stars);
 		}
 	}
 
@@ -130,6 +158,8 @@ namespace AspectGenerator.TargetFilterBinding
 		}
 
 		public string Name { get; }
+
+		public override bool MentionsTypeParameter => true;
 
 		public override string ToString()
 		{
@@ -165,7 +195,14 @@ namespace AspectGenerator.TargetFilterBinding
 			Conventions = conventions;
 			Parameters  = parameters;
 			Return      = @return;
+
+			MentionsTypeParameter = @return.Type.MentionsTypeParameter;
+
+			foreach (var parameter in parameters)
+				MentionsTypeParameter |= parameter.Type.MentionsTypeParameter;
 		}
+
+		public override bool MentionsTypeParameter { get; }
 
 		public bool IsManaged { get; }
 
