@@ -1,0 +1,316 @@
+// The grammar of target filters, version 2: one item (a whole string, or one element of a string[]) in, the tree of
+// FilterV2Syntax.cs out. The generated parser is the internal FilterV2Parser; regenerate it with
+// Source/TargetFilter/regenerate.sh after any change to this file.
+//
+// It reads the syntax only. Which property a line declares, whether a property is included twice, and which levels a
+// reference may name in its block need more than one condition and are decided over the tree.
+//
+// Layout:
+//   - At depth 0, spaces and tabs separate tokens, and a line break ends the line unless the next line that is not
+//     blank or a comment begins with `and` or `or`.
+//   - Inside parentheses a line break or a comment may stand between any two tokens of the expression: the expression
+//     in brackets is read with the trivia rebound. Patterns keep their own spacing: no line break inside `<…>`, a
+//     parameter list, `{…}` or a compact signature.
+//   - A pattern is one lexeme at its top level: white space only inside `<…>`, `(…)`, `{…}` and `[…]`.
+//   - The tail of every list is atomic. Nothing after a list is ever helped by giving a turn back, and an unclosed list
+//     that gives its turns back one by one costs the square of its length.
+//
+// Error productions read the forms of the 1.1 language and the forms the language refuses, into nodes that carry the
+// error and what to write instead.
+
+@using System;
+@using System.Collections.Immutable;
+@using Microsoft.CodeAnalysis.Text;
+
+trivia       = { [' ' | '\t']* }
+wordboundary = [\p{L} | \p{Nd} | \p{Nl} | \p{Mn} | \p{Mc} | \p{Pc} | \p{Cf}]
+
+// ---- an item -----------------------------------------------------------------------------------------------------
+
+// A bad line is stepped over to its logical end, so the other lines still report.
+Item : @FilterItemSyntax = Lex.Blank & lead: LeadingOperator? & Lex.Blank & lines: Lines & eof => @(Item(parserSpan, lead, lines))
+
+Lines : @FilterLineSyntax[] = LineItem* recover Lex.Sync => @(BadLine(parserSpan, parserInput, parserExpected, parserFailurePosition))
+
+LineItem : @FilterLineSyntax = line: Line & Lex.LineEnd => line
+
+// A string[] element that begins with `and` or `or` would continue a line of another element. The operator is
+// reported, and what follows it is read as a line.
+LeadingOperator : @FilterSyntaxError = ("and" | "or") => @(LeadingOperator(parserSpan))
+
+// ---- a line ------------------------------------------------------------------------------------------------------
+
+Line : @FilterLineSyntax
+	= minus: Minus & expr: Or         => @(Line(parserSpan, minus, expr))
+	| legacy: LegacyLineOperator      => @(Line(parserSpan, null, legacy))
+	| expr: Or                        => @(Line(parserSpan, null, expr))
+
+Minus : @TextSpan = '-' => @(Span(parserSpan))
+
+// 1.1's `&` and `|` before a line.
+LegacyLineOperator : @FilterExpressionSyntax = op: ('&' | '|') & Lex.RestOfLine => @(LegacyLine(parserSpan, op))
+
+Or : @FilterExpressionSyntax = first: And & { (OrOp & more: And)* } => @(Or(parserSpan, first, more))
+
+And : @FilterExpressionSyntax = first: Unary & { (op: AndOp & more: Unary)* } => @(And(parserSpan, first, op, more))
+
+OrOp = Lex.Join? & "or"
+
+// 1.1 joined conditions with `;` and values with `&` and `|`.
+AndOp : @OperatorToken
+	= Lex.Join? & "and"             => @(OperatorToken.And)
+	| op: (';' | '&' | '|')         => @(LegacyOperator(parserSpan, op))
+
+Unary : @FilterExpressionSyntax
+	= "not" & group: Group          => @(NotBeforeGroup(parserSpan, group))
+	| "not" & ?="not" & inner: Unary => @(NotBeforeGroup(parserSpan, inner))
+	| "not" & atom: Atom            => @(Not(parserSpan, atom))
+	| group: Group                  => group
+	| atom: Atom                    => atom
+
+// Inside parentheses the trivia takes line breaks and comments between the tokens of the expression.
+Group : @FilterExpressionSyntax = '(' & Lex.InGap & expr: Or with (trivia = Lex.InGap) & Lex.InGap & ')'
+	=> @(Group(parserSpan, expr))
+
+// ---- conditions --------------------------------------------------------------------------------------------------
+
+Atom : @FilterExpressionSyntax
+	= c: KeyCondition           => c
+	| r: Reference              => @(new ReferenceExpressionSyntax(r))
+	| w: WordsOrSignature       => w
+	| x: ReservedLiteral        => x
+	| "any" & ?!Lex.PartStart   => @(BareAny(parserSpan))
+
+KeyCondition : @FilterExpressionSyntax
+	= key: NameKey      & ':' & value: NameValue      => @(Condition(parserSpan, key, value))
+	| key: TypeKey      & ':' & value: TypeValue      => @(Condition(parserSpan, key, value))
+	| key: MethodKey    & ':' & value: NameValue      => @(Condition(parserSpan, key, value))
+	| key: ReturnsKey   & ':' & value: ReturnsValue   => @(Condition(parserSpan, key, value))
+	| key: ParamsKey    & ':' & value: ParamsValue    => @(Condition(parserSpan, key, value))
+	| key: ParamKey     & ':' & value: ParamValue     => @(Condition(parserSpan, key, value))
+	| key: PropertyKey  & ':' & value: CommonValue    => @(Condition(parserSpan, key, value))
+	| key: PropertyKey  & ':' & Lex.RestOfAtom        => @(WrongValue(parserSpan, key))
+	| legacy: LegacyKey & ':' & rest: Lex.RestOfLine  => @(LegacyKey(parserSpan, legacy, rest))
+	| reserved: ReservedKey & ':' & Lex.RestOfLine    => @(ReservedKey(parserSpan, reserved))
+	| unknown: UnknownKey & ':' & Lex.RestOfAtom      => @(UnknownKey(parserSpan, unknown))
+
+NameKey     : @KeyToken = k: "namespace" => @(Key(k, parserSpan))
+TypeKey     : @KeyToken = k: ("type" | "attribute" | "inherits") => @(Key(k, parserSpan))
+MethodKey   : @KeyToken = k: ("method" | "implements" | "overrides") => @(Key(k, parserSpan))
+ReturnsKey  : @KeyToken = k: "returns" => @(Key(k, parserSpan))
+ParamsKey   : @KeyToken = k: "params" => @(Key(k, parserSpan))
+ParamKey    : @KeyToken = k: "param" => @(Key(k, parserSpan))
+
+// The properties written with words take their property name as a key, for `any` and references only.
+PropertyKey : @KeyToken = k: ("accessibility" | "static" | "async" | "virtuality" | "extern" | "extension" | "location" | "origin" | "generated")
+	=> @(Key(k, parserSpan))
+
+LegacyKey   : @NameToken = k: ("contains" | "regex" | "pattern" | "fulltype" | "fullmethod" | "path" | "attributes" | "signature")
+	=> @(new NameToken(k, Span(parserSpan)))
+
+ReservedKey : @NameToken = k: ("within" | "assembly") => @(new NameToken(k, Span(parserSpan)))
+
+// Keys are lowercase: `Save: Task` is a compact signature with a return type, `save: x` an unknown key. A known key
+// whose value cannot be read is a syntax error in its value, not an unknown key.
+UnknownKey  : @NameToken = ?!KnownKey & k: { ['a'..'z']+ } & ?!Lex.IdChar & ?=(':' & ?!':') => @(new NameToken(k, Span(parserSpan)))
+
+KnownKey = NameKey | TypeKey | MethodKey | ReturnsKey | ParamsKey | ParamKey | PropertyKey | LegacyKey | ReservedKey
+
+NameValue     : @FilterValueSyntax = v: CommonValue => v | p: Lex.NamePattern => p | k: Lex.KeywordName => k
+TypeValue     : @FilterValueSyntax = v: CommonValue => v | p: Lex.TypePattern => p | k: Lex.KeywordName => k
+ReturnsValue  : @FilterValueSyntax = v: CommonValue => v | p: Lex.Returns     => p
+ParamsValue   : @FilterValueSyntax = v: CommonValue => v | p: Lex.ParamList   => p
+ParamValue    : @FilterValueSyntax = v: CommonValue => v | p: Lex.Param       => p
+
+CommonValue : @FilterValueSyntax
+	= "any" & ?!Lex.PartStart => @(new AnyValueSyntax(Span(parserSpan)))
+	| r: Reference            => r
+
+// `aspect.p` and `assembly.p`. What follows the dot is read as any pattern: a name that is no property is the reader's
+// error, not a method pattern (`@assembly.Save*` names one).
+Reference : @ReferenceSyntax = level: LevelWord ~ '.' ~ target: Lex.ReferenceTarget => @(Reference(parserSpan, level, target))
+
+LevelWord = "aspect" | "assembly"
+
+// A run of words is their conjunction; a method pattern after them makes it a compact signature.
+WordsOrSignature : @FilterExpressionSyntax
+	= first: Word & more: Word* & signature: Signature? => @(Words(parserSpan, first, more, signature))
+	| signature: Signature                             => @(Words(parserSpan, null, null, signature))
+
+Word : @WordSyntax
+	= "protected" & "internal"   => @(new WordSyntax(Span(parserSpan), FilterWord.ProtectedInternal))
+	| "internal" & "protected"   => @(new WordSyntax(Span(parserSpan), FilterWord.ProtectedInternal))
+	| "private" & "protected"    => @(new WordSyntax(Span(parserSpan), FilterWord.PrivateProtected))
+	| "protected" & "private"    => @(new WordSyntax(Span(parserSpan), FilterWord.PrivateProtected))
+	| w: ("public" | "internal" | "protected" | "private"
+	  | "static" | "instance" | "async" | "virtual" | "override" | "abstract" | "sealed" | "extern"
+	  | "extension" | "project" | "generated")
+	                             => @(new WordSyntax(Span(parserSpan), FilterV2Language.Word(w)))
+	| w: ("iterator" | "unsafe" | "partial" | "readonly" | "exposed")
+	                             => @(ReservedWord(parserSpan, w))
+
+// The parts of a compact signature stand on one line, whatever the trivia around it.
+Signature : @SignatureSyntax
+	= ?!(LevelWord ~ '.') & name: Lex.NamePattern ~ parameters: SignatureParameters? ~ returns: SignatureReturns?
+	=> @(new SignatureSyntax(Span(parserSpan), name, parameters, returns))
+
+SignatureParameters : @ParameterListPatternSyntax = Lex.Sp ~ list: Lex.ParamList => list
+
+SignatureReturns : @TypePatternSyntax = Lex.Sp ~ ':' ~ Lex.Sp ~ type: Lex.TypePattern => type
+
+// `/…/` is reserved for a later version.
+ReservedLiteral : @FilterExpressionSyntax = '/' & Lex.RestOfAtom => @(ReservedLiteral(parserSpan))
+
+// ---- lexemes -----------------------------------------------------------------------------------------------------
+
+namespace Lex
+{
+	trivia       = none
+	wordboundary = [\p{L} | \p{Nd} | \p{Nl} | \p{Mn} | \p{Mc} | \p{Pc} | \p{Cf}]
+
+	Eol     = "\r\n" | '\r' | '\n'
+	Comment = '#' & [^ '\r' | '\n']*
+	Blank   = { ([' ' | '\t'] | Comment | Eol)* }
+	InGap   = { ([' ' | '\t'] | Comment | Eol)* }
+	Sp      = { [' ' | '\t']* }
+	Sp1     = { [' ' | '\t']+ }
+
+	// The end of a line at depth 0: a comment, a line break and the blank lines after it, or the end of the item.
+	LineEnd = { [' ' | '\t']* & Comment? & (Eol & Blank | ?=eof) }
+
+	// A line break inside a line: only before `and` or `or`.
+	Join = { [' ' | '\t']* & Comment? & Eol & Blank & ?=("and" | "or") }
+
+	// Where a bad line ends: its logical end, counting parentheses and quotes; an open one runs to the end of the item.
+	Sync       = { RestOfLine & (Join & RestOfLine)* & LineEnd }
+	RestOfLine = { (SkipQuoted | SkipParen | [^ '\r' | '\n' | '(' | '"' | '#'])* }
+	RestOfAtom = { (SkipQuoted | SkipParen | [^ '\r' | '\n' | '(' | ')' | '"' | '#' | ' ' | '\t'])* }
+	SkipQuoted = '"' & { ('\\' & any | [^ '"' | '\\'])* } & ('"' | eof)
+	SkipParen  = '(' & { (SkipQuoted | SkipParen | [^ '(' | ')' | '"'])* } & (')' | eof)
+
+	IdChar     = [\p{L} | \p{Nd} | \p{Nl} | \p{Mn} | \p{Mc} | \p{Pc} | \p{Cf}]
+
+	// What may continue a name segment.
+	PartStart = IdChar | '*' | '{' | '"' | '@'
+
+	// A keyword is never a name segment on its own; `@` makes one a name. C#'s type aliases are no keywords.
+	Keyword = ("and" | "or" | "not" | "any" | "aspect" | "assembly"
+		| "namespace" | "type" | "method" | "returns" | "params" | "param" | "attribute" | "inherits" | "implements" | "overrides"
+		| "accessibility" | "virtuality" | "location" | "origin"
+		| "public" | "internal" | "protected" | "private" | "static" | "instance" | "async" | "virtual" | "override"
+		| "abstract" | "sealed" | "extern" | "extension" | "project" | "generated"
+		| "iterator" | "unsafe" | "partial" | "readonly" | "exposed" | "within" | "signature"
+		| "ref" | "out" | "in" | "this")
+		& ?!PartStart
+
+	// What a reference names: a property name, which is a keyword, or anything else the reader refuses as one.
+	ReferenceTarget : @NameToken = t: { (IdChar | ['*' | '.' | '@' | '{' | '}' | ',' | '<' | '>' | '"'])+ } => @(new NameToken(t, Span(parserSpan)))
+
+	// A name where no type stands: a `?` after it is no nullable.
+	NamePattern : @NamePatternSyntax
+		= name: Dotted & '?' => @(QuestionAfterName(parserSpan, name))
+		| name: Dotted       => name
+
+	Dotted : @NamePatternSyntax = global: Global? & first: Segment & { ('.' & more: NextSegment)* } => @(Name(parserSpan, global, first, more))
+
+	// After a dot a keyword can only be meant as a name.
+	NextSegment : @NameSegmentSyntax
+		= segment: Segment     => segment
+		| word: Keyword        => @(KeywordSegment(parserSpan, word))
+
+	// A keyword where a key's value stands can only be meant as a name.
+	KeywordName : @FilterValueSyntax = word: Keyword => @(KeywordName(parserSpan, word))
+
+	Global : @SpanToken = "global::" => @(new SpanToken(Span(parserSpan)))
+
+	Segment : @NameSegmentSyntax
+		= "**" & ?!PartStart & ?!'<'                 => @(new NameSegmentSyntax(Span(parserSpan), true, ImmutableArray<NamePartSyntax>.Empty, null))
+		| ?!Keyword & parts: Part+ & args: TypeArgs?  => @(Segment(parserSpan, parts, args))
+
+	Part : @NamePartSyntax
+		= name: { IdChar+ }                           => @(NamePartSyntax.Name(Span(parserSpan), name))
+		| '@' & name: { IdChar+ }                     => @(NamePartSyntax.Name(Span(parserSpan), name))
+		| '*' & ?!'*'                                 => @(NamePartSyntax.Star(Span(parserSpan)))
+		| "**"                                        => @(GlobstarInSegment(parserSpan))
+		| alt: NameAlternatives                       => alt
+		| q: Quoted                                   => q
+		| '\\' & any                                  => @(LegacyEscape(parserSpan))
+		| '?' & ?=PartStart                           => @(QuestionInName(parserSpan))
+
+	NameAlternatives : @NamePartSyntax
+		= '{' & Sp & first: Dotted & { (Sp & ',' & Sp & more: Dotted)* } & Sp & '}' => @(Alternatives(parserSpan, first, more))
+		| '{' & Sp & '}'                                                           => @(EmptyAlternatives(parserSpan))
+
+	Quoted : @NamePartSyntax = '"' & text: { ('\\' & [^ '\r' | '\n'] | [^ '"' | '\\' | '\r' | '\n'])* } & '"' => @(Quoted(parserSpan, text))
+
+	TypeArgs : @TypeArgumentsSyntax
+		= '<' & Sp & first: TypePattern & { (Sp & ',' & Sp & more: TypePattern)* } & Sp & '>' => @(TypeArguments(parserSpan, first, more))
+		| '<' & Sp & (',' & Sp)* & '>'                                                       => @(OpenGeneric(parserSpan, parserText))
+
+	// Ranks and `?` in C# order: `int?[]` is an array of nullable int, `int[]?` an array that may be null.
+	TypePattern : @TypePatternSyntax = core: TypeCore & suffixes: TypeSuffix* => @(new TypePatternSyntax(Span(parserSpan), core, Array(suffixes)))
+
+	TypeSuffix : @TypeSuffixSyntax
+		= '[' & Sp & commas: { (',' & Sp)* } & ']' => @(Rank(parserSpan, commas))
+		| '?'                                      => @(new TypeSuffixSyntax(Span(parserSpan), 0))
+
+	TypeCore : @TypeCoreSyntax
+		= f: FunctionPointer  => f
+		| t: Tuple            => t
+		| d: Dotted           => @(new NamedTypeSyntax(d))
+		| a: TypeAlternatives => a
+
+	TypeAlternatives : @TypeCoreSyntax
+		= '{' & Sp & first: TypePattern & { (Sp & ',' & Sp & more: TypePattern)* } & Sp & '}' => @(new TypeAlternativesSyntax(Span(parserSpan), List(first, more)))
+
+	Tuple : @TypeCoreSyntax
+		= '(' & Sp & first: TypePattern & { (Sp & ',' & Sp & more: TypePattern)+ } & Sp & ')' => @(new TupleTypeSyntax(Span(parserSpan), List(first, more)))
+
+	// `delegate* unmanaged[Stdcall, SuppressGCTransition]<int, void>`: one type; the commas in `[…]` and `<…>` are its own.
+	FunctionPointer : @TypeCoreSyntax
+		= "delegate" & '*' & Sp & convention: CallingConvention? & Sp
+		  & '<' & Sp & first: FunctionPointerParameter & { (Sp & ',' & Sp & more: FunctionPointerParameter)* } & Sp & '>'
+		=> @(FunctionPointer(parserSpan, convention, first, more))
+
+	CallingConvention : @CallingConventionToken
+		= kind: "unmanaged" & Sp & '[' & Sp & first: ConventionName & { (Sp & ',' & Sp & more: ConventionName)* } & Sp & ']'
+		                                  => @(Convention(kind, first, more))
+		| kind: ("managed" | "unmanaged") => @(Convention(kind, null, null))
+
+	ConventionName : @string = name: { IdChar+ } => @(name)
+
+	FunctionPointerParameter : @FunctionPointerParameterSyntax
+		= modifier: FunctionPointerModifier & Sp1 & type: TypePattern => @(new FunctionPointerParameterSyntax(Span(parserSpan), modifier, type))
+		| type: TypePattern                                           => @(new FunctionPointerParameterSyntax(Span(parserSpan), null, type))
+
+	FunctionPointerModifier : @FilterParameterModifier
+		= "ref" & Sp1 & "readonly" => @(FilterParameterModifier.RefReadonly)
+		| "ref"                    => @(FilterParameterModifier.Ref)
+		| "in"                     => @(FilterParameterModifier.In)
+		| "out"                    => @(FilterParameterModifier.Out)
+
+	Returns : @ReturnsPatternSyntax
+		= "ref" & Sp1 & "readonly" & Sp1 & type: TypePattern => @(new ReturnsPatternSyntax(Span(parserSpan), FilterRefKind.RefReadonly, type))
+		| "ref" & Sp1 & type: TypePattern                    => @(new ReturnsPatternSyntax(Span(parserSpan), FilterRefKind.Ref, type))
+		| type: TypePattern                                  => @(new ReturnsPatternSyntax(Span(parserSpan), FilterRefKind.Any, type))
+
+	ParamList : @ParameterListPatternSyntax
+		= '(' & Sp & first: Param & { (Sp & ',' & Sp & more: Param)* } & Sp & ')' => @(Parameters(parserSpan, first, more))
+		| '(' & Sp & ')'                                                         => @(Parameters(parserSpan, null, null))
+
+	Param : @ParameterPatternSyntax
+		= "..." & ?!'.'                          => @(LegacyAnyRun(parserSpan))
+		| ".." & ?!'.'                           => @(new ParameterPatternSyntax(Span(parserSpan), ParameterPatternKind.AnyRun, default, null))
+		| '_' & ?!IdChar                         => @(new ParameterPatternSyntax(Span(parserSpan), ParameterPatternKind.AnyOne, default, null))
+		| modifiers: ParamModifier* & type: TypePattern => @(new ParameterPatternSyntax(Span(parserSpan), ParameterPatternKind.Typed, Array(modifiers), type))
+
+	ParamModifier : @FilterParameterModifier
+		= "ref" & Sp1 & "readonly" & Sp1 => @(FilterParameterModifier.RefReadonly)
+		| "ref" & Sp1                    => @(FilterParameterModifier.Ref)
+		| "out" & Sp1                    => @(FilterParameterModifier.Out)
+		| "in" & Sp1                     => @(FilterParameterModifier.In)
+		| "params" & Sp1                 => @(FilterParameterModifier.Params)
+		| "this" & Sp1                   => @(FilterParameterModifier.This)
+}
+
+parse Item

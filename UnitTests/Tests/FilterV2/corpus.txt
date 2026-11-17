@@ -1,0 +1,238 @@
+// The inputs the version 2 grammar was first written against, with the reading recorded then (group, input, reading).
+// A record that the grammar now reads otherwise on purpose has two more fields: the reading now, and why.
+// Inputs escape \\n, \\r, \\t and \\\\. A reading lists the lines (Bad: stepped over), the conditions of each and the kinds of error inside it.
+empty		
+empty	# only a comment	
+empty	\n\n	
+empty	  # comment\n\n   # another\n	
+empty	\t\n \r\n	
+keys	namespace: Shop	Line@0+15 [Condition@0+15] !{}
+keys	namespace: Shop.**	Line@0+18 [Condition@0+18] !{}
+keys	namespace: ""	Line@0+13 [Condition@0+13] !{}
+keys	namespace: global::MyApp.**	Line@0+27 [Condition@0+27] !{}
+keys	type: OrderService	Line@0+18 [Condition@0+18] !{}
+keys	type: *Service	Line@0+14 [Condition@0+14] !{}
+keys	type: Data.*Repository	Line@0+22 [Condition@0+22] !{}
+keys	type: global::Shop.OrderService	Line@0+31 [Condition@0+31] !{}
+keys	method: Save	Line@0+12 [Condition@0+12] !{}
+keys	method: Save*	Line@0+13 [Condition@0+13] !{}
+keys	method: *Repository.Save	Line@0+24 [Condition@0+24] !{}
+keys	method: **.*Service.Save*	Line@0+25 [Condition@0+25] !{}
+keys	method: List<int>.Add	Line@0+21 [Condition@0+21] !{}
+keys	method: Get<*>	Line@0+14 [Condition@0+14] !{}
+keys	returns: Task	Line@0+13 [Condition@0+13] !{}
+keys	returns: Task<*>	Line@0+16 [Condition@0+16] !{}
+keys	returns: ref int	Line@0+16 [Condition@0+16] !{}
+keys	returns: ref readonly Span<int>	Line@0+31 [Condition@0+31] !{}
+keys	returns: {void,Task}	Line@0+20 [Condition@0+20] !{}
+keys	params: ()	Line@0+10 [Condition@0+10] !{}
+keys	params: (..)	Line@0+12 [Condition@0+12] !{}
+keys	params: (int, ..)	Line@0+17 [Condition@0+17] !{}
+keys	params: (.., CancellationToken)	Line@0+31 [Condition@0+31] !{}
+keys	params: (_, out bool)	Line@0+21 [Condition@0+21] !{}
+keys	params: (this string)	Line@0+21 [Condition@0+21] !{}
+keys	params: (ref readonly int, in Guid, params int[])	Line@0+49 [Condition@0+49] !{}
+keys	param: CancellationToken	Line@0+24 [Condition@0+24] !{}
+keys	param: out bool	Line@0+15 [Condition@0+15] !{}
+keys	param: this IEnumerable<*>	Line@0+26 [Condition@0+26] !{}
+keys	attribute: Obsolete	Line@0+19 [Condition@0+19] !{}
+keys	attribute: ObsoleteAttribute	Line@0+28 [Condition@0+28] !{}
+keys	attribute: System.ObsoleteAttribute	Line@0+35 [Condition@0+35] !{}
+keys	inherits: DataConnection	Line@0+24 [Condition@0+24] !{}
+keys	implements: ICommandHandler<*>.Handle	Line@0+37 [Condition@0+37] !{}
+keys	overrides: Base.Save	Line@0+20 [Condition@0+20] !{}
+keys	namespace : Shop	Line@0+16 [Condition@0+16] !{}
+keys	method:Save	Line@0+11 [Condition@0+11] !{}
+words	public	Line@0+6 [Words@0+6] !{}
+words	internal	Line@0+8 [Words@0+8] !{}
+words	protected	Line@0+9 [Words@0+9] !{}
+words	private	Line@0+7 [Words@0+7] !{}
+words	protected internal	Line@0+18 [Words@0+18] !{}
+words	internal protected	Line@0+18 [Words@0+18] !{}
+words	private protected	Line@0+17 [Words@0+17] !{}
+words	protected private	Line@0+17 [Words@0+17] !{}
+words	static	Line@0+6 [Words@0+6] !{}
+words	instance	Line@0+8 [Words@0+8] !{}
+words	async	Line@0+5 [Words@0+5] !{}
+words	virtual	Line@0+7 [Words@0+7] !{}
+words	override	Line@0+8 [Words@0+8] !{}
+words	abstract	Line@0+8 [Words@0+8] !{}
+words	sealed	Line@0+6 [Words@0+6] !{}
+words	extern	Line@0+6 [Words@0+6] !{}
+words	extension	Line@0+9 [Words@0+9] !{}
+words	project	Line@0+7 [Words@0+7] !{}
+words	generated	Line@0+9 [Words@0+9] !{}
+words	public static	Line@0+13 [Words@0+13] !{}
+words	public static async	Line@0+19 [Words@0+19] !{}
+words	not public	Line@0+10 [Not@0+10 Words@4+6] !{}
+words	not static	Line@0+10 [Not@0+10 Words@4+6] !{}
+words	private protected static	Line@0+24 [Words@0+24] !{}
+signatures	Save	Line@0+4 [Signature@0+4] !{}
+signatures	Save*	Line@0+5 [Signature@0+5] !{}
+signatures	public Save*	Line@0+12 [Words@0+12 Signature@7+5] !{}
+signatures	public static **.*Service.Save*(.., CancellationToken) : Task*	Line@0+62 [Words@0+62 Signature@14+48] !{}
+signatures	*Service.Save*(int)	Line@0+19 [Signature@0+19] !{}
+signatures	Save* : Task<*>	Line@0+15 [Signature@0+15] !{}
+signatures	Save*(int, string) : void	Line@0+25 [Signature@0+25] !{}
+signatures	public Get*() : int?	Line@0+20 [Words@0+20 Signature@7+13] !{}
+signatures	global::MyApp.Save	Line@0+18 [Signature@0+18] !{}
+signatures	Save: Task	Line@0+10 [Signature@0+10] !{}
+signatures	Save*(..)	Line@0+9 [Signature@0+9] !{}
+operators	method: Save* and public	Line@0+24 [Condition@0+13 Words@18+6] !{}
+operators	method: Save* or public	Line@0+23 [Condition@0+13 Words@17+6] !{}
+operators	method: Save* and (method: *A or public)	Line@0+40 [Condition@0+13 Group@18+22 Condition@19+10 Words@33+6] !{}
+operators	public and static or internal	Line@0+29 [Words@0+7 Words@11+7 Words@21+8] !{}
+operators	not public and not static	Line@0+25 [Not@0+11 Words@4+7 Not@15+10 Words@19+6] !{}
+operators	method: Save* and not method: SaveAll	Line@0+37 [Condition@0+13 Not@18+19 Condition@22+15] !{}
+operators	(public)	Line@0+8 [Group@0+8 Words@1+6] !{}
+operators	((public))	Line@0+10 [Group@0+10 Group@1+8 Words@2+6] !{}
+operators	(public or internal) and static	Line@0+31 [Group@0+20 Words@1+7 Words@11+8 Words@25+6] !{}
+operators	method: Save* and (public or internal) and not static	Line@0+53 [Condition@0+13 Group@18+20 Words@19+7 Words@29+8 Not@43+10 Words@47+6] !{}
+operators	a and b	Line@0+7 [Signature@0+2 Signature@6+1] !{}	Line@0+7 [Signature@0+1 Signature@6+1] !{}	a compact signature ends at its last character; the space before the operator belongs to the line
+operators	Save* or Get*	Line@0+13 [Signature@0+6 Signature@9+4] !{}	Line@0+13 [Signature@0+5 Signature@9+4] !{}	a compact signature ends at its last character; the space before the operator belongs to the line
+minus	- method: *Internal*	Line@0+20 [Condition@2+18] !{}
+minus	- public	Line@0+8 [Words@2+6] !{}
+minus	- method: X or public	Line@0+21 [Condition@2+9 Words@15+6] !{}
+minus	- method: *Internal* and public	Line@0+31 [Condition@2+18 Words@25+6] !{}
+minus	- (public or internal)	Line@0+22 [Group@2+20 Words@3+7 Words@13+8] !{}
+minus	-public	Line@0+7 [Words@1+6] !{}
+minus	- not static	Line@0+12 [Not@2+10 Words@6+6] !{}
+multiline	method: Save*\nor method: Get*	Line@0+29 [Condition@0+13 Condition@17+12] !{}
+multiline	method: Save*\n  and public	Line@0+26 [Condition@0+13 Words@20+6] !{}
+multiline	method: Save* # saves\nor method: Get*	Line@0+37 [Condition@0+13 Condition@25+12] !{}
+multiline	method: Save*\n\n# comment\nor method: Get*	Line@0+40 [Condition@0+13 Condition@28+12] !{}
+multiline	namespace: Shop.**\n- method: *Internal*	Line@0+18 [Condition@0+18] !{} | Line@19+20 [Condition@21+18] !{}
+multiline	namespace: Shop.**\r\n- method: *Internal*\r\n	Line@0+18 [Condition@0+18] !{} | Line@20+20 [Condition@22+18] !{}
+multiline	method: Save* and (public\n or internal)	Line@0+39 [Condition@0+13 Group@18+21 Words@19+8 Words@30+8] !{}
+multiline	method: Save* and (\n  public # a comment\n  or internal\n)	Line@0+56 [Condition@0+13 Group@18+38 Words@22+21 Words@46+9] !{}
+multiline	(\npublic\n)	Line@0+10 [Group@0+10 Words@2+7] !{}
+multiline	public\nstatic	Line@0+6 [Words@0+6] !{} | Line@7+6 [Words@7+6] !{}
+multiline	\n\nmethod: Save*\n\n\n- public\n\n	Line@2+13 [Condition@2+13] !{} | Line@18+8 [Words@20+6] !{}
+multiline	method: Save*\r\nor public	Line@0+24 [Condition@0+13 Words@18+6] !{}
+multiline	method: Save* and\npublic	Bad@0+0 [] !{Line} | Line@18+6 [Words@18+6] !{}	Bad@0+17 [] !{Line} | Line@18+6 [Words@18+6] !{}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+multiline	not\npublic	Bad@0+0 [] !{Line} | Line@4+6 [Words@4+6] !{}	Bad@0+3 [] !{Line} | Line@4+6 [Words@4+6] !{}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+references	assembly.method	Line@0+15 [Reference@0+15] !{}
+references	aspect.attribute	Line@0+16 [Reference@0+16] !{}
+references	method: assembly.method	Line@0+23 [Condition@0+23 Reference@8+15] !{}
+references	method: Save* and assembly.method	Line@0+33 [Condition@0+13 Reference@18+15] !{}
+references	method: Save* or assembly.method	Line@0+32 [Condition@0+13 Reference@17+15] !{}
+references	attribute: aspect.attribute	Line@0+27 [Condition@0+27 Reference@11+16] !{}
+references	attribute: Audited and aspect.attribute	Line@0+39 [Condition@0+18 Reference@23+16] !{}
+references	- assembly.method	Line@0+17 [Reference@2+15] !{}
+references	method: Save* and not assembly.method	Line@0+37 [Condition@0+13 Not@18+19 Reference@22+15] !{}
+references	assembly.Save*	Line@0+14 [Reference@0+14] !{}
+references	method: assembly.returns	Line@0+24 [Condition@0+24 Reference@8+16] !{}
+references	@assembly.Save*	Line@0+15 [Signature@0+15] !{}
+references	assembly.method or public	Line@0+25 [Reference@0+15 Words@19+6] !{}
+references	accessibility: assembly.accessibility	Line@0+37 [Condition@0+37 Reference@15+22] !{}
+any	method: any	Line@0+11 [Condition@0+11 AnyValue@8+3] !{}
+any	attribute: any	Line@0+14 [Condition@0+14 AnyValue@11+3] !{}
+any	accessibility: any	Line@0+18 [Condition@0+18 AnyValue@15+3] !{}
+any	static: any	Line@0+11 [Condition@0+11 AnyValue@8+3] !{}
+any	async: any	Line@0+10 [Condition@0+10 AnyValue@7+3] !{}
+any	virtuality: any	Line@0+15 [Condition@0+15 AnyValue@12+3] !{}
+any	location: any	Line@0+13 [Condition@0+13 AnyValue@10+3] !{}
+any	origin: any	Line@0+11 [Condition@0+11 AnyValue@8+3] !{}
+any	extern: any	Line@0+11 [Condition@0+11 AnyValue@8+3] !{}
+any	extension: any	Line@0+14 [Condition@0+14 AnyValue@11+3] !{}
+any	generated: any	Line@0+14 [Condition@0+14 AnyValue@11+3] !{}
+any	method: @any	Line@0+12 [Condition@0+12] !{}
+any	method: Save* or any	Line@0+20 [Condition@0+13] !{Any}
+any	- method: any	Line@0+13 [Condition@2+11 AnyValue@10+3] !{}
+any	method: anyThing	Line@0+16 [Condition@0+16] !{}
+any	method: any*	Line@0+12 [Condition@0+12] !{}
+patterns	method: {Get,Find}*	Line@0+19 [Condition@0+19] !{}
+patterns	method: {Get, Find}*	Line@0+20 [Condition@0+20] !{}
+patterns	type: {Order,Invoice}Service	Line@0+28 [Condition@0+28] !{}
+patterns	method: "<Main>$"	Line@0+17 [Condition@0+17] !{}
+patterns	method: "a\\"b"	Line@0+14 [Condition@0+14] !{}
+patterns	method: @and	Line@0+12 [Condition@0+12] !{}
+patterns	method: @namespace.X	Line@0+20 [Condition@0+20] !{}
+patterns	method: Shop.**.Save	Line@0+20 [Condition@0+20] !{}
+patterns	type: List<*>	Line@0+13 [Condition@0+13] !{}
+patterns	type: Dictionary<*,*>	Line@0+21 [Condition@0+21] !{}
+patterns	type: Dictionary<string, List<int>>	Line@0+35 [Condition@0+35] !{}
+patterns	param: int[]	Line@0+12 [Condition@0+12] !{}
+patterns	param: int[,]	Line@0+13 [Condition@0+13] !{}
+patterns	param: int[][,]	Line@0+15 [Condition@0+15] !{}
+patterns	param: int?	Line@0+11 [Condition@0+11] !{}
+patterns	param: int?[]	Line@0+13 [Condition@0+13] !{}
+patterns	param: *?	Line@0+9 [Condition@0+9] !{}
+patterns	param: (int, string)	Line@0+20 [Condition@0+20] !{}
+patterns	param: (int, (string, bool))	Line@0+28 [Condition@0+28] !{}
+patterns	returns: {int[], string}	Line@0+24 [Condition@0+24] !{}
+patterns	param: "System.Int32*"	Line@0+22 [Condition@0+22] !{}
+patterns	param: System.Nullable<*>	Line@0+25 [Condition@0+25] !{}
+patterns	type: *.static	Bad@0+0 [] !{Line}	Line@0+14 [Condition@0+14] !{KeywordAsName}	a keyword where a name stands is reported with the '@' spelling to write instead
+patterns	method: public*	Line@0+15 [Condition@0+15] !{}
+patterns	method: Save.*	Line@0+14 [Condition@0+14] !{}
+patterns	type: ***	Line@0+9 [Condition@0+9] !{GlobstarInSegment}
+patterns	method: Save**	Line@0+14 [Condition@0+14] !{GlobstarInSegment}
+patterns	method: a**b	Line@0+12 [Condition@0+12] !{GlobstarInSegment}
+errors-1-1	contains: Save	Line@0+14 [] !{Legacy}
+errors-1-1	regex: ^Save.*$	Line@0+15 [] !{Legacy}
+errors-1-1	pattern: public Save*	Line@0+21 [] !{Legacy}
+errors-1-1	fulltype: Shop.OrderService	Line@0+27 [] !{Legacy}
+errors-1-1	fullmethod: Shop.OrderService.Save	Line@0+34 [] !{Legacy}
+errors-1-1	path: Shop/OrderService	Line@0+23 [] !{Legacy}
+errors-1-1	attributes: Obsolete	Line@0+20 [] !{Legacy}
+errors-1-1	& method: Save*	Line@0+15 [] !{Legacy}
+errors-1-1	| method: Save*	Line@0+15 [] !{Legacy}
+errors-1-1	method: Save*; static	Line@0+21 [Condition@0+13 Words@15+6] !{Legacy}
+errors-1-1	method: Get* | Find*	Line@0+20 [Condition@0+12 Signature@15+5] !{Legacy}
+errors-1-1	method: Get*|Find*	Line@0+18 [Condition@0+12 Signature@13+5] !{Legacy}
+errors-1-1	method: Get* & Find*	Line@0+20 [Condition@0+12 Signature@15+5] !{Legacy}
+errors-1-1	params: (int, ...)	Line@0+18 [Condition@0+18] !{Legacy}
+errors-1-1	method: Sa\\ve	Line@0+13 [Condition@0+13] !{Legacy}
+errors-1-1	method: Get?	Bad@0+0 [] !{Line}	Line@0+12 [Condition@0+12] !{QuestionOutsideType}	'?' after a name where no type stands is reported as an invalid pattern, with '*' to write instead
+errors-1-1	signature: public Save*	Line@0+23 [] !{Reserved}	Line@0+23 [] !{Legacy}	'signature:' is reported as 1.1 syntax, with the compact signature to write
+errors-reserved	within: Shop	Line@0+12 [] !{Reserved}
+errors-reserved	assembly: Shop	Line@0+14 [] !{Reserved}
+errors-reserved	iterator	Line@0+8 [Words@0+8] !{Reserved}
+errors-reserved	unsafe	Line@0+6 [Words@0+6] !{Reserved}
+errors-reserved	partial	Line@0+7 [Words@0+7] !{Reserved}
+errors-reserved	readonly	Line@0+8 [Words@0+8] !{Reserved}
+errors-reserved	exposed	Line@0+7 [Words@0+7] !{Reserved}
+errors-reserved	public readonly	Line@0+15 [Words@0+15] !{Reserved}
+errors-reserved	/Save.*/	Line@0+8 [] !{Reserved}
+errors-reserved	foo: bar	Line@0+8 [] !{UnknownKey}
+errors-reserved	custom: x and public	Line@0+20 [Words@14+6] !{UnknownKey}
+errors-syntax	method: "a"b"	Bad@0+0 [] !{Line}	Bad@0+13 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	params: int	Bad@0+0 [] !{Line}	Bad@0+11 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	method: Get?	Bad@0+0 [] !{Line}	Line@0+12 [Condition@0+12] !{QuestionOutsideType}	'?' after a name where no type stands is reported as an invalid pattern, with '*' to write instead
+errors-syntax	param: int?? 	Line@0+13 [Condition@0+12] !{}
+errors-syntax	not (public or internal)	Line@0+24 [] !{NotGroup}	Line@0+24 [Group@4+20 Words@5+7 Words@15+8] !{NotGroup}	a refused 'not' keeps what it stands before, so the errors inside are reported too
+errors-syntax	not not public	Line@0+14 [] !{NotGroup}	Line@0+14 [Not@4+10 Words@8+6] !{NotGroup}	a refused 'not' keeps what it stands before, so the errors inside are reported too
+errors-syntax	type: Task<>	Line@0+12 [Condition@0+12] !{OpenGeneric}
+errors-syntax	type: Dictionary<,>	Line@0+19 [Condition@0+19] !{OpenGeneric}
+errors-syntax	method: {}	Line@0+10 [Condition@0+10] !{EmptyAlternatives}
+errors-syntax	method: Save* and	Bad@0+0 [] !{Line}	Bad@0+17 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	method: Save* or	Bad@0+0 [] !{Line}	Bad@0+16 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	and public	lead | Bad@0+0 [] !{Line}	lead | Line@4+6 [Words@4+6] !{}	a leading 'and' or 'or' is reported, and the rest of the item is read as a line
+errors-syntax	or public	lead | Bad@0+0 [] !{Line}	lead | Line@3+6 [Words@3+6] !{}	a leading 'and' or 'or' is reported, and the rest of the item is read as a line
+errors-syntax	method:	Bad@0+0 [] !{Line}	Bad@0+7 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	public static Save*(	Bad@0+0 [] !{Line}	Bad@0+20 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	(public	Bad@0+0 [] !{Line}	Bad@0+7 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	public)	Bad@0+0 [] !{Line}	Bad@0+7 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	method: Save* and (public or	Bad@0+0 [] !{Line}	Bad@0+28 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	returns: ref	Bad@0+0 [] !{Line}	Bad@0+12 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	params: (int	Bad@0+0 [] !{Line}	Bad@0+12 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	publik Save	Bad@0+0 [] !{Line}	Bad@0+11 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	method: Save*\nand	Line@0+13 [Condition@0+13] !{} | Bad@14+0 [] !{Line}	Line@0+13 [Condition@0+13] !{} | Bad@14+3 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	method: "unclosed	Bad@0+0 [] !{Line}	Bad@0+17 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	type: List<int	Bad@0+0 [] !{Line}	Bad@0+14 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	-	Bad@0+0 [] !{Line}	Bad@0+1 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	-	Bad@0+0 [] !{Line}	Bad@0+1 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+errors-syntax	method: Save* and (public or internal))	Bad@0+0 [] !{Line}	Bad@0+39 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+recovery	method: Save*\nbad (\nstatic	Line@0+13 [Condition@0+13] !{} | Bad@14+0 [] !{Line}	Line@0+13 [Condition@0+13] !{} | Bad@14+5 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+recovery	method: Save*\nfoo bar\n- public	Line@0+13 [Condition@0+13] !{} | Bad@14+0 [] !{Line} | Line@22+8 [Words@24+6] !{}	Line@0+13 [Condition@0+13] !{} | Bad@14+7 [] !{Line} | Line@22+8 [Words@24+6] !{}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+recovery	foo bar\nmethod: Save*	Bad@0+0 [] !{Line} | Line@8+13 [Condition@8+13] !{}	Bad@0+7 [] !{Line} | Line@8+13 [Condition@8+13] !{}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+recovery	method: Save*\nmethod: (\nor public\nstatic	Line@0+13 [Condition@0+13] !{} | Bad@14+0 [] !{Line}	Line@0+13 [Condition@0+13] !{} | Bad@14+9 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+recovery	public\n(unclosed\nstatic	Line@0+6 [Words@0+6] !{} | Bad@7+0 [] !{Line}	Line@0+6 [Words@0+6] !{} | Bad@7+16 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+recovery	method: Save*\n- \nstatic	Line@0+13 [Condition@0+13] !{} | Bad@14+0 [] !{Line} | Line@17+6 [Words@17+6] !{}	Line@0+13 [Condition@0+13] !{} | Bad@14+2 [] !{Line} | Line@17+6 [Words@17+6] !{}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+recovery	not (a)\nmethod: Save*	Line@0+7 [] !{NotGroup} | Line@8+13 [Condition@8+13] !{}	Line@0+7 [Group@4+3 Signature@5+1] !{NotGroup} | Line@8+13 [Condition@8+13] !{}	a refused 'not' keeps what it stands before, so the errors inside are reported too
+recovery	type: Task<>\nmethod: Get*	Line@0+12 [Condition@0+12] !{OpenGeneric} | Line@13+12 [Condition@13+12] !{}
+recovery	method: Save*\nand\npublic	Line@0+13 [Condition@0+13] !{} | Bad@14+0 [] !{Line} | Line@18+6 [Words@18+6] !{}	Line@0+13 [Condition@0+13] !{} | Bad@14+3 [] !{Line} | Line@18+6 [Words@18+6] !{}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+recovery	a b c\nd e f\ng h i	Bad@0+0 [] !{Line} | Bad@6+0 [] !{Line} | Bad@12+0 [] !{Line}	Bad@0+5 [] !{Line} | Bad@6+5 [] !{Line} | Bad@12+5 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+recovery	method: "unclosed\nstatic	Bad@0+0 [] !{Line}	Bad@0+17 [] !{Line}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent
+recovery	method: Save* # ok\npublik Save # bad\n- public # ok	Line@0+14 [Condition@0+13] !{} | Bad@19+0 [] !{Line} | Line@37+9 [Words@39+7] !{}	Line@0+14 [Condition@0+13] !{} | Bad@19+17 [] !{Line} | Line@37+9 [Words@39+7] !{}	a line stepped over now stands from where it begins to the end of the text line where reading stopped; the first reading recorded no extent

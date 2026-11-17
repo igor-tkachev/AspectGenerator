@@ -1,0 +1,550 @@
+[empty] 
+  
+[empty] # only a comment
+  
+[empty] \n\n
+  
+[empty]   # comment\n\n   # another\n
+  
+[empty] \t\n \r\n
+  
+[keys] namespace: Shop
+  Namespace: Shop
+[keys] namespace: Shop.**
+  Namespace: Shop.**
+[keys] namespace: ""
+  Namespace: ""
+[keys] namespace: global::MyApp.**
+  Namespace: global::MyApp.**
+[keys] type: OrderService
+  Type: OrderService
+[keys] type: *Service
+  Type: *Service
+[keys] type: Data.*Repository
+  Type: Data.*Repository
+[keys] type: global::Shop.OrderService
+  Type: global::Shop.OrderService
+[keys] method: Save
+  Method: Save
+[keys] method: Save*
+  Method: Save*
+[keys] method: *Repository.Save
+  Method: *Repository.Save
+[keys] method: **.*Service.Save*
+  Method: **.*Service.Save*
+[keys] method: List<int>.Add
+  Method: List<int>.Add
+[keys] method: Get<*>
+  Method: Get<*>
+[keys] returns: Task
+  Returns: Task
+[keys] returns: Task<*>
+  Returns: Task<*>
+[keys] returns: ref int
+  Returns: ref int
+[keys] returns: ref readonly Span<int>
+  Returns: ref readonly Span<int>
+[keys] returns: {void,Task}
+  Returns: {void,Task}
+[keys] params: ()
+  Params: ()
+[keys] params: (..)
+  Params: (..)
+[keys] params: (int, ..)
+  Params: (int, ..)
+[keys] params: (.., CancellationToken)
+  Params: (.., CancellationToken)
+[keys] params: (_, out bool)
+  Params: (_, out bool)
+[keys] params: (this string)
+  Params: (this string)
+[keys] params: (ref readonly int, in Guid, params int[])
+  Params: (ref readonly int, in Guid, params int[])
+[keys] param: CancellationToken
+  Param: CancellationToken
+[keys] param: out bool
+  Param: out bool
+[keys] param: this IEnumerable<*>
+  Param: this IEnumerable<*>
+[keys] attribute: Obsolete
+  Attribute: Obsolete
+[keys] attribute: ObsoleteAttribute
+  Attribute: ObsoleteAttribute
+[keys] attribute: System.ObsoleteAttribute
+  Attribute: System.ObsoleteAttribute
+[keys] inherits: DataConnection
+  Inherits: DataConnection
+[keys] implements: ICommandHandler<*>.Handle
+  Implements: ICommandHandler<*>.Handle
+[keys] overrides: Base.Save
+  Overrides: Base.Save
+  AG0221 0+9 Unknown key 'overrides:': 'implements:' matches a method that overrides a matching member as well as one that implements it.
+[keys] namespace : Shop
+  Namespace: Shop
+[keys] method:Save
+  Method: Save
+[words] public
+  [Public]
+[words] internal
+  [Internal]
+[words] protected
+  [Protected]
+[words] private
+  [Private]
+[words] protected internal
+  [ProtectedInternal]
+[words] internal protected
+  [ProtectedInternal]
+[words] private protected
+  [PrivateProtected]
+[words] protected private
+  [PrivateProtected]
+[words] static
+  [Static]
+[words] instance
+  [Instance]
+[words] async
+  [Async]
+[words] virtual
+  [Virtual]
+[words] override
+  [Override]
+[words] abstract
+  [Abstract]
+[words] sealed
+  [Sealed]
+[words] extern
+  [Extern]
+[words] extension
+  [Extension]
+[words] project
+  [Project]
+[words] generated
+  [Generated]
+[words] public static
+  [Public Static]
+[words] public static async
+  [Public Static Async]
+[words] not public
+  not [Public]
+[words] not static
+  not [Static]
+[words] private protected static
+  [PrivateProtected Static]
+[signatures] Save
+  [sig Save]
+[signatures] Save*
+  [sig Save*]
+[signatures] public Save*
+  [Public sig Save*]
+[signatures] public static **.*Service.Save*(.., CancellationToken) : Task*
+  [Public Static sig **.*Service.Save*(.., CancellationToken) : Task*]
+[signatures] *Service.Save*(int)
+  [sig *Service.Save*(int)]
+[signatures] Save* : Task<*>
+  [sig Save* : Task<*>]
+[signatures] Save*(int, string) : void
+  [sig Save*(int, string) : void]
+[signatures] public Get*() : int?
+  [Public sig Get*() : int?]
+[signatures] global::MyApp.Save
+  [sig global::MyApp.Save]
+[signatures] Save: Task
+  [sig Save : Task]
+[signatures] Save*(..)
+  [sig Save*(..)]
+[operators] method: Save* and public
+  and{Method: Save*, [Public]}
+[operators] method: Save* or public
+  or{Method: Save*, [Public]}
+[operators] method: Save* and (method: *A or public)
+  and{Method: Save*, (or{Method: *A, [Public]})}
+[operators] public and static or internal
+  or{and{[Public], [Static]}, [Internal]}
+[operators] not public and not static
+  and{not [Public], not [Static]}
+[operators] method: Save* and not method: SaveAll
+  and{Method: Save*, not Method: SaveAll}
+[operators] (public)
+  ([Public])
+[operators] ((public))
+  (([Public]))
+[operators] (public or internal) and static
+  and{(or{[Public], [Internal]}), [Static]}
+[operators] method: Save* and (public or internal) and not static
+  and{Method: Save*, (or{[Public], [Internal]}), not [Static]}
+[operators] a and b
+  and{[sig a], [sig b]}
+[operators] Save* or Get*
+  or{[sig Save*], [sig Get*]}
+[minus] - method: *Internal*
+  - Method: *Internal*
+[minus] - public
+  - [Public]
+[minus] - method: X or public
+  - or{Method: X, [Public]}
+[minus] - method: *Internal* and public
+  - and{Method: *Internal*, [Public]}
+[minus] - (public or internal)
+  - (or{[Public], [Internal]})
+[minus] -public
+  - [Public]
+[minus] - not static
+  - not [Static]
+[multiline] method: Save*\nor method: Get*
+  or{Method: Save*, Method: Get*}
+[multiline] method: Save*\n  and public
+  and{Method: Save*, [Public]}
+[multiline] method: Save* # saves\nor method: Get*
+  or{Method: Save*, Method: Get*}
+[multiline] method: Save*\n\n# comment\nor method: Get*
+  or{Method: Save*, Method: Get*}
+[multiline] namespace: Shop.**\n- method: *Internal*
+  Namespace: Shop.** | - Method: *Internal*
+[multiline] namespace: Shop.**\r\n- method: *Internal*\r\n
+  Namespace: Shop.** | - Method: *Internal*
+[multiline] method: Save* and (public\n or internal)
+  and{Method: Save*, (or{[Public], [Internal]})}
+[multiline] method: Save* and (\n  public # a comment\n  or internal\n)
+  and{Method: Save*, (or{[Public], [Internal]})}
+[multiline] (\npublic\n)
+  ([Public])
+[multiline] public\nstatic
+  [Public] | [Static]
+[multiline] \n\nmethod: Save*\n\n\n- public\n\n
+  Method: Save* | - [Public]
+[multiline] method: Save*\r\nor public
+  or{Method: Save*, [Public]}
+[multiline] method: Save* and\npublic
+  !Syntax | [Public]
+  AG0220 17+0 Syntax error at the end of the line: expected a condition.
+[multiline] not\npublic
+  !Syntax | [Public]
+  AG0220 3+0 Syntax error at the end of the line: expected '(' or ':'.
+[references] assembly.method
+  assembly->method
+[references] aspect.attribute
+  aspect->attribute
+[references] method: assembly.method
+  Method: assembly->method
+[references] method: Save* and assembly.method
+  and{Method: Save*, assembly->method}
+[references] method: Save* or assembly.method
+  or{Method: Save*, assembly->method}
+[references] attribute: aspect.attribute
+  Attribute: aspect->attribute
+[references] attribute: Audited and aspect.attribute
+  and{Attribute: Audited, aspect->attribute}
+[references] - assembly.method
+  - assembly->method
+[references] method: Save* and not assembly.method
+  and{Method: Save*, not assembly->method}
+[references] assembly.Save*
+  assembly->Save*
+  AG0233 9+5 'assembly.Save*' names no property. A name that begins with 'assembly.' is written '@assembly.Save*'.
+[references] method: assembly.returns
+  Method: assembly->returns
+  AG0233 17+7 A reference names the property it stands in: write 'assembly.method' here, or a condition on 'returns' of its own.
+[references] @assembly.Save*
+  [sig assembly.Save*]
+[references] assembly.method or public
+  or{assembly->method, [Public]}
+[references] accessibility: assembly.accessibility
+  Accessibility: assembly->accessibility
+[any] method: any
+  Method: any
+[any] attribute: any
+  Attribute: any
+[any] accessibility: any
+  Accessibility: any
+[any] static: any
+  Static: any
+[any] async: any
+  Async: any
+[any] virtuality: any
+  Virtuality: any
+[any] location: any
+  Location: any
+[any] origin: any
+  Origin: any
+[any] extern: any
+  Extern: any
+[any] extension: any
+  Extension: any
+[any] generated: any
+  Generated: any
+[any] method: @any
+  Method: any
+[any] method: Save* or any
+  or{Method: Save*, !InvalidAny}
+  AG0234 17+3 'any' is a whole value of a key ('method: any'), never a condition of its own or a part of one.
+[any] - method: any
+  - Method: any
+  AG0234 10+3 '- p: any' subtracts nothing: 'any' removes every restriction on the property and stands only in an include.
+[any] method: anyThing
+  Method: anyThing
+[any] method: any*
+  Method: any*
+[patterns] method: {Get,Find}*
+  Method: {Get,Find}*
+[patterns] method: {Get, Find}*
+  Method: {Get,Find}*
+[patterns] type: {Order,Invoice}Service
+  Type: {Order,Invoice}Service
+[patterns] method: "<Main>$"
+  Method: "<Main>$"
+[patterns] method: "a\\"b"
+  Method: "a"b"
+[patterns] method: @and
+  Method: and
+[patterns] method: @namespace.X
+  Method: namespace.X
+[patterns] method: Shop.**.Save
+  Method: Shop.**.Save
+[patterns] type: List<*>
+  Type: List<*>
+[patterns] type: Dictionary<*,*>
+  Type: Dictionary<*,*>
+[patterns] type: Dictionary<string, List<int>>
+  Type: Dictionary<string,List<int>>
+[patterns] param: int[]
+  Param: int[]
+[patterns] param: int[,]
+  Param: int[,]
+[patterns] param: int[][,]
+  Param: int[][,]
+[patterns] param: int?
+  Param: int?
+[patterns] param: int?[]
+  Param: int?[]
+[patterns] param: *?
+  Param: *?
+[patterns] param: (int, string)
+  Param: tuple(int,string)
+[patterns] param: (int, (string, bool))
+  Param: tuple(int,tuple(string,bool))
+[patterns] returns: {int[], string}
+  Returns: either{int[],string}
+[patterns] param: "System.Int32*"
+  Param: "System.Int32*"
+[patterns] param: System.Nullable<*>
+  Param: System.Nullable<*>
+[patterns] type: *.static
+  Type: *.!KeywordAsName
+  AG0220 8+6 'static' is a keyword: a name equal to it is written '@static'.
+[patterns] method: public*
+  Method: public*
+[patterns] method: Save.*
+  Method: Save.*
+[patterns] type: ***
+  Type: !GlobstarInSegment*
+  AG0224 6+2 '**' stands only as a whole segment ('Shop.**.Save'); within a segment write '*'.
+[patterns] method: Save**
+  Method: Save!GlobstarInSegment
+  AG0224 12+2 '**' stands only as a whole segment ('Shop.**.Save'); within a segment write '*'.
+[patterns] method: a**b
+  Method: a!GlobstarInSegmentb
+  AG0224 9+2 '**' stands only as a whole segment ('Shop.**.Save'); within a segment write '*'.
+[errors-1-1] contains: Save
+  !Legacy
+  AG0225 0+14 'contains:' is version 1.1 syntax: it was removed; name the target with 'namespace:', 'type:' and 'method:' patterns.
+[errors-1-1] regex: ^Save.*$
+  !Legacy
+  AG0225 0+15 'regex:' is version 1.1 syntax: it was removed; name the target with 'namespace:', 'type:' and 'method:' patterns.
+[errors-1-1] pattern: public Save*
+  !Legacy
+  AG0225 0+21 'pattern:' is version 1.1 syntax: write the compact signature without it: 'public Save*'.
+[errors-1-1] fulltype: Shop.OrderService
+  !Legacy
+  AG0225 0+27 'fulltype:' is version 1.1 syntax: write 'type: global::Shop.OrderService'.
+[errors-1-1] fullmethod: Shop.OrderService.Save
+  !Legacy
+  AG0225 0+34 'fullmethod:' is version 1.1 syntax: write 'method: global::Shop.OrderService.Save'.
+[errors-1-1] path: Shop/OrderService
+  !Legacy
+  AG0225 0+23 'path:' is version 1.1 syntax: write 'type: global::Shop/OrderService'.
+[errors-1-1] attributes: Obsolete
+  !Legacy
+  AG0225 0+20 'attributes:' is version 1.1 syntax: write 'attribute: Obsolete'.
+[errors-1-1] & method: Save*
+  !Legacy
+  AG0225 0+15 '&' before a line is version 1.1 syntax: continue the line before with 'and' (a line that begins with 'and' continues the one above it).
+[errors-1-1] | method: Save*
+  !Legacy
+  AG0225 0+15 '|' before a line is version 1.1 syntax: continue the line before with 'or' (a line that begins with 'or' continues the one above it).
+[errors-1-1] method: Save*; static
+  and{Method: Save*, [Static]} !Legacy
+  AG0225 13+1 ';' between conditions is version 1.1 syntax: write 'and'.
+[errors-1-1] method: Get* | Find*
+  and{Method: Get*, [sig Find*]} !Legacy
+  AG0225 13+1 '|' between conditions is version 1.1 syntax: write 'or' (or alternatives in one pattern, '{Get,Find}*').
+[errors-1-1] method: Get*|Find*
+  and{Method: Get*, [sig Find*]} !Legacy
+  AG0225 12+1 '|' between conditions is version 1.1 syntax: write 'or' (or alternatives in one pattern, '{Get,Find}*').
+[errors-1-1] method: Get* & Find*
+  and{Method: Get*, [sig Find*]} !Legacy
+  AG0225 13+1 '&' between conditions is version 1.1 syntax: write 'and'.
+[errors-1-1] params: (int, ...)
+  Params: (int, !Legacy)
+  AG0225 14+3 '...' is version 1.1 syntax: write '..' for any run of parameters.
+[errors-1-1] method: Sa\\ve
+  Method: Sa!Legacye
+  AG0225 10+2 Backslash escapes are version 1.1 syntax: write exact text in quotes ("<Main>$"), and a name equal to a keyword with '@' (@static).
+[errors-1-1] method: Get?
+  Method: Get!QuestionOutsideType
+  AG0224 11+1 '?' means nullable and stands only after a type; for any characters in a name write '*'.
+[errors-1-1] signature: public Save*
+  !Legacy
+  AG0225 0+23 'signature:' is version 1.1 syntax: write the compact signature without it: 'public Save*'.
+[errors-reserved] within: Shop
+  !Reserved
+  AG0221 0+12 'within:' is reserved for a later version.
+[errors-reserved] assembly: Shop
+  !Reserved
+  AG0221 0+14 'assembly:' is reserved for a later version.
+[errors-reserved] iterator
+  [!Reserved]
+  AG0221 0+8 'iterator' is reserved for a later version.
+[errors-reserved] unsafe
+  [!Reserved]
+  AG0221 0+6 'unsafe' is reserved for a later version.
+[errors-reserved] partial
+  [!Reserved]
+  AG0221 0+7 'partial' is reserved for a later version.
+[errors-reserved] readonly
+  [!Reserved]
+  AG0221 0+8 'readonly' is reserved for a later version.
+[errors-reserved] exposed
+  [!Reserved]
+  AG0221 0+7 'exposed' is reserved for a later version.
+[errors-reserved] public readonly
+  [Public !Reserved]
+  AG0221 7+8 'readonly' is reserved for a later version.
+[errors-reserved] /Save.*/
+  !Reserved
+  AG0221 0+8 '/…/' literals are reserved for a later version.
+[errors-reserved] foo: bar
+  !UnknownKey
+  AG0221 0+3 Unknown key 'foo:'. A compact signature of a method whose name is lowercase is written '@foo: …' or 'foo(): …'.
+[errors-reserved] custom: x and public
+  and{!UnknownKey, [Public]}
+  AG0221 0+6 Unknown key 'custom:'. A compact signature of a method whose name is lowercase is written '@custom: …' or 'custom(): …'.
+[errors-syntax] method: "a"b"
+  !Syntax
+  AG0220 13+0 Syntax error at the end of the line: expected quoted text.
+[errors-syntax] params: int
+  !Syntax
+  AG0220 8+3 Syntax error: expected a condition.
+[errors-syntax] method: Get?
+  Method: Get!QuestionOutsideType
+  AG0224 11+1 '?' means nullable and stands only after a type; for any characters in a name write '*'.
+[errors-syntax] param: int?? 
+  Param: int??
+  AG0224 11+1 '?' stands once after a type: a nullable type is not made nullable again.
+[errors-syntax] not (public or internal)
+  !NotBeforeGroup((or{[Public], [Internal]}))
+  AG0220 0+24 'not' stands before a single condition only: write 'not a and not b' for 'not (a or b)', and 'not a or not b' for 'not (a and b)'.
+[errors-syntax] not not public
+  !NotBeforeGroup(not [Public])
+  AG0220 0+14 'not' stands before a single condition only: write 'not a and not b' for 'not (a or b)', and 'not a or not b' for 'not (a and b)'.
+[errors-syntax] type: Task<>
+  Type: Task<!OpenGeneric>
+  AG0220 10+2 '<>' is no pattern: write '<*>' for any type arguments of that arity.
+[errors-syntax] type: Dictionary<,>
+  Type: Dictionary<!OpenGeneric>
+  AG0220 16+3 '<,>' is no pattern: write '<*,*>' for any type arguments of that arity.
+[errors-syntax] method: {}
+  Method: !EmptyAlternatives
+  AG0224 8+2 '{}' holds no alternative.
+[errors-syntax] method: Save* and
+  !Syntax
+  AG0220 17+0 Syntax error at the end of the line: expected '(', a key, a word, a name pattern or quoted text.
+[errors-syntax] method: Save* or
+  !Syntax
+  AG0220 16+0 Syntax error at the end of the line: expected '(', a key, a word, a name pattern or quoted text.
+[errors-syntax] and public
+  !LeadingOperator [Public]
+  AG0231 0+3 An item cannot begin with 'and' or 'or': a line continues only within its own item, so write the whole line in one item.
+[errors-syntax] or public
+  !LeadingOperator [Public]
+  AG0231 0+2 An item cannot begin with 'and' or 'or': a line continues only within its own item, so write the whole line in one item.
+[errors-syntax] method:
+  !Syntax
+  AG0220 7+0 Syntax error at the end of the line: expected 'any', a reference, a name pattern or quoted text.
+[errors-syntax] public static Save*(
+  !Syntax
+  AG0220 20+0 Syntax error at the end of the line: expected a parameter pattern, a name pattern, '(', quoted text or ')'.
+[errors-syntax] (public
+  !Syntax
+  AG0220 7+0 Syntax error at the end of the line: expected ')'.
+[errors-syntax] public)
+  !Syntax
+  AG0220 6+1 Syntax error: expected ':' or the end of the line.
+[errors-syntax] method: Save* and (public or
+  !Syntax
+  AG0220 28+0 Syntax error at the end of the line: expected '(', a key, a word, a name pattern or quoted text.
+[errors-syntax] returns: ref
+  !Syntax
+  AG0220 12+0 Syntax error at the end of the line: expected a space.
+[errors-syntax] params: (int
+  !Syntax
+  AG0220 12+0 Syntax error at the end of the line: expected a name pattern, quoted text or ')'.
+[errors-syntax] publik Save
+  !Syntax
+  AG0220 7+4 Syntax error: expected '(', ':' or the end of the line.
+[errors-syntax] method: Save*\nand
+  Method: Save* | !Syntax
+  AG0220 17+0 Syntax error at the end of the line: expected ':'.
+[errors-syntax] method: "unclosed
+  !Syntax
+  AG0220 17+0 Syntax error at the end of the line: expected quoted text.
+[errors-syntax] type: List<int
+  !Syntax
+  AG0220 14+0 Syntax error at the end of the line: expected a name pattern, quoted text or '>'.
+[errors-syntax] -
+  !Syntax
+  AG0220 1+0 Syntax error at the end of the line: expected 'not', '(', a key, a reference, a word, a name pattern, quoted text or 'any'.
+[errors-syntax] -
+  !Syntax
+  AG0220 1+0 Syntax error at the end of the line: expected 'not', '(', a key, a reference, a word, a name pattern, quoted text or 'any'.
+[errors-syntax] method: Save* and (public or internal))
+  !Syntax
+  AG0220 38+1 Syntax error: expected 'and' or the end of the line.
+[recovery] method: Save*\nbad (\nstatic
+  Method: Save* | !Syntax
+  AG0220 19+0 Syntax error at the end of the line: expected a name pattern or ')'.
+[recovery] method: Save*\nfoo bar\n- public
+  Method: Save* | !Syntax | - [Public]
+  AG0220 18+3 Syntax error: expected '(', ':' or the end of the line.
+[recovery] foo bar\nmethod: Save*
+  !Syntax | Method: Save*
+  AG0220 4+3 Syntax error: expected '(', ':' or the end of the line.
+[recovery] method: Save*\nmethod: (\nor public\nstatic
+  Method: Save* | !Syntax
+  AG0220 22+1 Syntax error: expected 'any' or a reference.
+[recovery] public\n(unclosed\nstatic
+  [Public] | !Syntax
+  AG0220 17+6 Syntax error: expected ')'.
+[recovery] method: Save*\n- \nstatic
+  Method: Save* | !Syntax | [Static]
+  AG0220 16+0 Syntax error at the end of the line: expected 'any'.
+[recovery] not (a)\nmethod: Save*
+  !NotBeforeGroup(([sig a])) | Method: Save*
+  AG0220 0+7 'not' stands before a single condition only: write 'not a and not b' for 'not (a or b)', and 'not a or not b' for 'not (a and b)'.
+[recovery] type: Task<>\nmethod: Get*
+  Type: Task<!OpenGeneric> | Method: Get*
+  AG0220 10+2 '<>' is no pattern: write '<*>' for any type arguments of that arity.
+[recovery] method: Save*\nand\npublic
+  Method: Save* | !Syntax | [Public]
+  AG0220 17+0 Syntax error at the end of the line: expected ':'.
+[recovery] a b c\nd e f\ng h i
+  !Syntax | !Syntax | !Syntax
+  AG0220 2+3 Syntax error: expected '(', ':' or the end of the line.
+  AG0220 8+3 Syntax error: expected '(', ':' or the end of the line.
+  AG0220 14+3 Syntax error: expected '(', ':' or the end of the line.
+[recovery] method: "unclosed\nstatic
+  !Syntax
+  AG0220 17+0 Syntax error at the end of the line: expected quoted text.
+[recovery] method: Save* # ok\npublik Save # bad\n- public # ok
+  Method: Save* | !Syntax | - [Public]
+  AG0220 26+10 Syntax error: expected '(', ':' or the end of the line.

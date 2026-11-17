@@ -36,6 +36,7 @@
 	-->
 	<ItemGroup>
 		<AdditionalFiles Include="TargetFilter\TargetFilter.gram" />
+		<AdditionalFiles Include="FilterV2\FilterV2.gram" />
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(DotGramLocal)' == 'true'">
