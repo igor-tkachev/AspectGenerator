@@ -1,0 +1,104 @@
+name: publish
+
+# A release is a tag. Pushing `v1.2.3` builds the repository at that commit, checks that the tag is the
+# version in Source/AspectGenerator.csproj, packs the package and publishes it to nuget.org. A manual run
+# does everything except the push, so a dry run is the same run with the last job left off.
+#
+# Nothing here holds a nuget.org key. The `publish` job asks GitHub for a short-lived OIDC token, nuget.org
+# checks it against a trusted publishing policy naming this repository, this file and the `release`
+# environment, and hands back an API key that lives one hour.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # The build workflow as it stands (both configurations on both systems, the minimum-SDK consumers,
+  # the generated parser check), so that a release never skips what a pull request has to pass.
+  checks:
+    uses: ./.github/workflows/dotnet.yml
+
+  pack:
+    needs: checks
+    runs-on: ubuntu-latest
+    env:
+      MSBUILDDISABLENODEREUSE: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - run: dotnet restore AspectGenerator.slnx
+
+      - name: Build
+        run: dotnet build AspectGenerator.slnx --no-restore --configuration Release -warnaserror -nodeReuse:false
+
+      - name: Test
+        run: dotnet test AspectGenerator.slnx --no-build --configuration Release
+
+      # A tag that says one version and a package that says another cannot be taken back,
+      # so it is checked before anything is packed.
+      - name: The tag is the version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          tagged="${GITHUB_REF_NAME#v}"
+          packed="$(grep -oP '(?<=<Version>)[^<]+' Source/AspectGenerator.csproj | head -n 1)"
+          if [ "$tagged" != "$packed" ]; then
+            echo "The tag says $tagged and Source/AspectGenerator.csproj says $packed."; exit 1
+          fi
+
+      - name: Pack
+        run: dotnet pack Source/AspectGenerator.csproj --no-build --configuration Release --output artifacts -warnaserror -nodeReuse:false
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: artifacts/*.nupkg
+          if-no-files-found: error
+
+  # The only job that sends the package anywhere. It runs only for a tag, and the `release` environment
+  # is the second gate: required reviewers can be added to it in the repository's settings.
+  # It packs nothing: it takes the file the job above checked, byte for byte.
+  publish:
+    needs: pack
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    environment: release
+
+    permissions:
+      contents: read
+      id-token: write   # lets this job ask GitHub for the OIDC token nuget.org will verify
+
+    steps:
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: artifacts
+
+      # Pinned by commit rather than by tag: a tag can be moved, and this action mints a credential
+      # able to publish under our name.
+      - name: NuGet login (OIDC, for a key that lives an hour)
+        id: login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841   # v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      # `--skip-duplicate` makes a re-run of a finished release harmless.
+      - name: Push to nuget.org
+        run: >
+          dotnet nuget push 'artifacts/*.nupkg'
+          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate

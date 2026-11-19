@@ -371,6 +371,12 @@ Supported values are `Off`, `Hidden`, `Info`, `Warning`, and `Error`. Set `Off` 
 
 The package adds `AG0300` to `WarningsNotAsErrors`, so projects using `TreatWarningsAsErrors` do not fail when the marker severity is configured as `Warning`.
 
+## Releasing
+
+A release is a tag: pushing `vX.Y.Z`, where `X.Y.Z` is the `<Version>` in `Source/AspectGenerator.csproj`, runs `.github/workflows/publish.yml`, which builds, tests, packs and publishes the package to nuget.org. A manual run of the workflow does everything except the publish.
+
+Publishing uses nuget.org trusted publishing, so the repository holds no API key. It needs a trusted publishing policy on nuget.org (the owner of the `AspectGenerator` package, repository `igor-tkachev/AspectGenerator`, workflow file `publish.yml`, environment `release`), a `release` environment in the repository settings and the `NUGET_USER` secret (the nuget.org user name that owns the policy).
+
 ## Documentation And Wiki
 
 The README is the concise entry point. The wiki should contain expanded pages with the same current terminology:
