@@ -5,29 +5,176 @@
 [![NuGet downloads](https://img.shields.io/nuget/dt/AspectGenerator?logo=nuget&style=flat-square)](https://www.nuget.org/packages/AspectGenerator)
 [![License](https://img.shields.io/github/license/igor-tkachev/AspectGenerator?style=flat-square)](LICENSE.txt)
 
-AspectGenerator provides AOP-like method aspects for C# using compile-time call-site rewriting with source generators and C# interceptors. It lets you run code around method calls without runtime proxies, dynamic dispatch wrappers, or IL weaving.
+Compile-time method aspects for C#: your code runs before, after and around calls to the methods you mark. No runtime proxies, no IL weaving: a source generator rewrites the call sites with C# interceptors.
 
-AspectGenerator is not traditional runtime AOP. Aspects are applied to call sites visible to the current compilation.
+Define an aspect:
 
-> [!IMPORTANT]
-> **Projects that use AspectGenerator must be built with .NET SDK 9.0.100 or later (Roslyn 4.12), which Visual Studio 2022 has shipped since version 17.12 (November 2024).**
->
-> This is a build-toolchain requirement, not a target-framework requirement. AspectGenerator itself targets `netstandard2.0`, and your project target framework is a separate decision. The project must be compiled with a Roslyn 4.12 or newer compiler (the .NET 9 SDK or later) because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data and the `InterceptorsNamespaces` property. Projects that target `net8.0` are supported when they are built with such an SDK. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
->
-> This does not mean the newest Visual Studio. Any Visual Studio 2022 from 17.12 on builds it, including the 17.14 Long-Term Servicing Channel release; so do Visual Studio 2026, JetBrains Rider 2024.3 or later, and the `dotnet` CLI with the .NET 9 or 10 SDK. An existing Visual Studio 2022 installation needs only an update, not a new major version, and the SDK installs side by side with older ones.
->
-> An older compiler, such as SDK 8.0.x or Visual Studio 2022 before 17.12, cannot load the generator: the build reports `CS9057` (the analyzer references a newer compiler version) and the aspects are silently not applied.
+```csharp
+using System.Diagnostics;
+using AspectGenerator;
 
-> [!IMPORTANT]
-> This is not runtime AOP. Aspects are applied by rewriting call sites visible to the current compilation. Calls made through reflection, delegates, already-compiled external assemblies, or unsupported C# constructs are outside the interception model.
+[Aspect(
+    OnBeforeCall = nameof(OnBeforeCall),
+    OnAfterCall  = nameof(OnAfterCall),
+    OnCatch      = nameof(OnCatch))]
+[AttributeUsage(AttributeTargets.Method)]
+sealed class LogAttribute : Attribute
+{
+    public static void OnBeforeCall(InterceptInfo info)
+    {
+        Console.WriteLine($"-> {info.MemberInfo.Name}");
+        info.Tag = Stopwatch.StartNew();
+    }
 
-## Quick Start
+    public static void OnAfterCall(InterceptInfo info)
+    {
+        var time = (Stopwatch)info.Tag!;
+        Console.WriteLine($"<- {info.MemberInfo.Name} took {time.ElapsedMilliseconds} ms");
+    }
 
-Install the package:
+    public static void OnCatch(InterceptInfo info)
+    {
+        Console.WriteLine($"!! {info.MemberInfo.Name} threw: {info.Exception!.Message}");
+    }
+}
+```
+
+Mark a method and call it:
+
+```csharp
+var orders = new OrderService();
+
+orders.Save(42);
+
+try { orders.Save(-1); } catch (ArgumentException) { }
+
+class OrderService
+{
+    [Log]
+    public void Save(int id)
+    {
+        if (id < 0)
+            throw new ArgumentException("bad id");
+
+        Thread.Sleep(20); // some work
+        Console.WriteLine($"   saved order {id}");
+    }
+}
+```
+
+Output:
+
+```text
+-> Save
+   saved order 42
+<- Save took 23 ms
+-> Save
+!! Save threw: bad id
+```
+
+The generator finds both calls to `Save` and redirects them to a generated method. Simplified, it looks like this:
+
+```csharp
+[InterceptsLocation(1, "fawaHq6u...")] // orders.Save(42)
+[InterceptsLocation(1, "fawaHq6u...")] // orders.Save(-1)
+public static void Save_Interceptor(this OrderService __this__, int id)
+{
+    var info = new InterceptInfo<Void> { MemberInfo = ..., Aspect = ... };
+
+    try
+    {
+        LogAttribute.OnBeforeCall(info);
+
+        if (info.InterceptResult != InterceptResult.Return)
+        {
+            __this__.Save(id);
+            LogAttribute.OnAfterCall(info);
+        }
+    }
+    catch (Exception ex)
+    {
+        info.Exception       = ex;
+        info.InterceptResult = InterceptResult.ReThrow;
+
+        LogAttribute.OnCatch(info);
+
+        if (info.InterceptResult == InterceptResult.ReThrow)
+            throw;
+    }
+}
+```
+
+The method itself is not changed. The aspect is plain code in your project, and the generated source can be read and debugged like any other.
+
+## What you can do with it
+
+- Trace calls with OpenTelemetry: start an activity per call, set its status on exit ([example](https://github.com/igor-tkachev/AspectGenerator/tree/master/Examples/OpenTelemetryAspect)).
+- Run a method in a database transaction: commit on success, roll back on exception ([example](https://github.com/igor-tkachev/AspectGenerator/tree/master/Examples/TransactionAspect)).
+- Swallow or replace exceptions, or replace the call entirely (`OnCatch` with `InterceptResult.IgnoreThrow`, `OnCall`); async hooks for `Task` and `ValueTask` methods (see [Hooks](#hooks)).
+- Apply an aspect to many methods at once with a [target filter](#target-filters), for example every `public **.*Service.Save*(...)` in the assembly.
+- Ship aspects in a library ([aspect library](https://github.com/igor-tkachev/AspectGenerator/tree/master/Examples/AspectLibrary), [multi-project](https://github.com/igor-tkachev/AspectGenerator/tree/master/Examples/MultiProject)).
+
+A transaction aspect, shortened from the example (`DataConnection` is from [linq2db](https://github.com/linq2db/linq2db)):
+
+```csharp
+[Aspect(
+    PassArguments = true,
+    OnBeforeCall  = nameof(OnBeforeCall),
+    OnFinally     = nameof(OnFinally))]
+[AttributeUsage(AttributeTargets.Method)]
+sealed class TransactionAttribute : Attribute
+{
+    public static void OnBeforeCall(InterceptInfo info)
+    {
+        if (info.MethodArguments!.OfType<DataConnection>().FirstOrDefault() is { Transaction: null } db)
+        {
+            db.BeginTransaction();
+            info.Tag = db;
+        }
+    }
+
+    public static void OnFinally(InterceptInfo info)
+    {
+        if (info.Tag is DataConnection db)
+        {
+            if (info.Exception is null)
+                db.CommitTransaction();
+            else
+                db.RollbackTransaction();
+        }
+    }
+}
+
+[Transaction]
+public static void Transfer(DataConnection db, int from, int to, decimal amount)
+{
+    // Both updates are committed together, or neither is.
+}
+```
+
+## Install
 
 ```bash
 dotnet add package AspectGenerator
 ```
+
+It is a development dependency: the reference is added with `PrivateAssets="all"`, and nothing is deployed with your application. See [Installation details](#installation-details).
+
+## Requirements
+
+Build with .NET SDK 9.0.100 or later: Visual Studio 2022 17.12 or later, Rider 2024.3 or later, or the `dotnet` CLI. This is about the compiler, not the target framework: `net8.0` works, and so does `netstandard2.0` with `<LangVersion>latest</LangVersion>`. An older compiler cannot load the generator; the build reports `CS9057` and the aspects are not applied.
+
+This is not runtime AOP. Only calls compiled in the project that references AspectGenerator are rewritten. Calls through reflection, delegates or already-compiled external assemblies are not intercepted. See [Requirements in detail](#requirements-in-detail) and [Supported Scenarios](#supported-scenarios).
+
+## Why AspectGenerator?
+
+| Approach | Strengths | Trade-offs |
+| --- | --- | --- |
+| AspectGenerator | Compile-time call-site rewriting, no runtime proxy dispatch, generated code, better fit for AOT/trimming-oriented applications | Requires the .NET 9 SDK or later (Roslyn 4.12) to build, intercepts only visible call sites, method-call syntax only |
+| Runtime proxies | Mature and familiar; no compiler interceptor requirement | Calls must go through the proxy, runtime dispatch overhead, AOT/trimming concerns |
+| IL weaving | Can cover broader code patterns | Rewrites assemblies, harder debugging and deployment model |
+
+## Installation details
 
 The package is a development dependency, so `dotnet add package` adds it with `PrivateAssets="all"`. If you edit the project file by hand, write the same thing:
 
@@ -35,9 +182,19 @@ The package is a development dependency, so `dotnet add package` adds it with `P
 <PackageReference Include="AspectGenerator" Version="1.1.2" PrivateAssets="all" />
 ```
 
-AspectGenerator is a build-time generator, not a runtime reference. The package ships only the analyzer and the MSBuild props and targets that configure it; it has no assembly your code references and nothing is deployed with your application. Because the analyzer needs the package's MSBuild wiring (`InterceptorsNamespaces` and the generator options) to produce interceptors that compile, it must run only in the project that references the package directly. Marking the package private keeps it from flowing to the consumers of your library. A library that wants its consumers to get the generator opts in with `PrivateAssets="none"`; the wiring flows with it (see [Using AspectGenerator in libraries](#using-aspectgenerator-in-libraries)).
+AspectGenerator is a build-time generator, not a runtime reference. The package ships only the analyzer and the MSBuild props and targets that configure it; it has no assembly your code references and nothing is deployed with your application. The package imports the required MSBuild wiring automatically for projects that reference it directly. Because the analyzer needs that wiring (`InterceptorsNamespaces` and the generator options) to produce interceptors that compile, it must run only in the project that references the package directly. Marking the package private keeps it from flowing to the consumers of your library. A library that wants its consumers to get the generator opts in with `PrivateAssets="none"`; the wiring flows with it (see [Using AspectGenerator in libraries](#using-aspectgenerator-in-libraries)).
 
-Build the consuming project with .NET SDK 9.0.100 or later. This requirement is about the build tools used by `dotnet build`, MSBuild, or Visual Studio, not about forcing a specific `TargetFramework`.
+## Requirements in detail
+
+Projects that use AspectGenerator must be built with .NET SDK 9.0.100 or later (Roslyn 4.12), which Visual Studio 2022 has shipped since version 17.12 (November 2024).
+
+This is a build-toolchain requirement, not a target-framework requirement: it is about the build tools used by `dotnet build`, MSBuild, or Visual Studio. AspectGenerator itself targets `netstandard2.0`, and your project target framework is a separate decision. The project must be compiled with a Roslyn 4.12 or newer compiler (the .NET 9 SDK or later) because the generator uses the stable Roslyn interceptor API based on opaque `InterceptableLocation` data and the `InterceptorsNamespaces` property. Projects that target `net8.0` are supported when they are built with such an SDK. Older SDKs and the legacy `InterceptsLocation(filePath, line, character)` preview API are not supported.
+
+The generated code uses nullable annotations and newer C# features, so a project whose default C# version is older, such as `netstandard2.0`, sets `<LangVersion>latest</LangVersion>`.
+
+This does not mean the newest Visual Studio. Any Visual Studio 2022 from 17.12 on builds it, including the 17.14 Long-Term Servicing Channel release; so do Visual Studio 2026, JetBrains Rider 2024.3 or later, and the `dotnet` CLI with the .NET 9 or 10 SDK. An existing Visual Studio 2022 installation needs only an update, not a new major version, and the SDK installs side by side with older ones.
+
+An older compiler, such as SDK 8.0.x or Visual Studio 2022 before 17.12, cannot load the generator: the build reports `CS9057` (the analyzer references a newer compiler version) and the aspects are silently not applied.
 
 If the repository uses a `global.json`, require at least 9.0.100 and let newer feature bands roll forward:
 
@@ -50,58 +207,7 @@ If the repository uses a `global.json`, require at least 9.0.100 and let newer f
 }
 ```
 
-The AspectGenerator NuGet package imports the required MSBuild wiring automatically for projects that reference the package directly.
-
-Define an aspect:
-
-```csharp
-using AspectGenerator;
-
-namespace Aspects;
-
-[Aspect(OnBeforeCall = nameof(OnBeforeCall))]
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-sealed class LogAttribute : Attribute
-{
-    public static void OnBeforeCall(InterceptInfo info)
-    {
-        Console.WriteLine($"Calling {info.MemberInfo.Name}");
-    }
-}
-```
-
-Use it on a method:
-
-```csharp
-using Aspects;
-
-class Service
-{
-    [Log]
-    public static void DoWork()
-    {
-    }
-}
-
-Service.DoWork();
-```
-
-AspectGenerator finds interceptable call sites to `DoWork` in the current compilation and emits interceptor methods for those locations.
-
-## Why AspectGenerator?
-
-| Approach | Strengths | Trade-offs |
-| --- | --- | --- |
-| AspectGenerator | Compile-time call-site rewriting, no runtime proxy dispatch, generated code, better fit for AOT/trimming-oriented applications | Requires the .NET 9 SDK or later (Roslyn 4.12) to build, intercepts only visible call sites, method-call syntax only |
-| Runtime proxies | Mature and familiar; no compiler interceptor requirement | Calls must go through the proxy, runtime dispatch overhead, AOT/trimming concerns |
-| IL weaving | Can cover broader code patterns | Rewrites assemblies, harder debugging and deployment model |
-
-## Examples
-
-- [Aspect library mode](Examples/AspectLibrary)
-- [Multi-project usage](Examples/MultiProject)
-- [OpenTelemetry aspect](Examples/OpenTelemetryAspect)
-- [Transaction aspect](Examples/TransactionAspect)
+Aspects are applied by rewriting call sites visible to the current compilation. AspectGenerator finds interceptable call sites to the target methods and emits interceptor methods for those locations. Calls made through reflection, delegates, already-compiled external assemblies, or unsupported C# constructs are outside the interception model; [Supported Scenarios](#supported-scenarios) lists them.
 
 ## Configuration
 
