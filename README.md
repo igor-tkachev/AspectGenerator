@@ -64,7 +64,7 @@ class OrderService
 
 Output:
 
-```text
+```console
 -> Save
    saved order 42
 <- Save took 23 ms
