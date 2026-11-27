@@ -46,13 +46,13 @@ namespace AspectGenerator
 
 		public static List<AttributeInfo> GetOrderedAttributes(List<AttributeInfo> attributes)
 		{
-			if (!attributes.Any(static a => a.AppliedAttributeData?.NamedArguments.Any(static na => na.Key == "Order") is true))
+			if (!attributes.Any(static a => AspectSymbols.GetOrderNamedArguments(a).Any(static na => na.Key == "Order")))
 				return attributes;
 
 			return
 			(
 				from a in attributes
-				let o = a.AppliedAttributeData?.NamedArguments.Select(static na => (KeyValuePair<string,TypedConstant>?)na).FirstOrDefault(static na => na!.Value.Key == "Order")
+				let o = AspectSymbols.GetOrderNamedArguments(a).Select(static na => (KeyValuePair<string,TypedConstant>?)na).FirstOrDefault(static na => na!.Value.Key == "Order")
 				let n = o is null ? int.MaxValue : o.Value.Value.Value switch
 				{
 					string s => int.TryParse(s, out var n) ? n : null,

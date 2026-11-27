@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 using Microsoft.CodeAnalysis;
@@ -32,6 +33,55 @@ namespace AspectGenerator
 					return typeAttribute;
 
 			return null;
+		}
+
+		/// <summary>
+		/// The constructor and the arguments the generated code builds an applied aspect with: those of its effective
+		/// application when the target filters decided its settings (the constructor arguments of one attribute, each named
+		/// argument of the attribute that writes it), otherwise those of the one attribute the aspect is applied with.
+		/// <see langword="null"/> when the arguments are only known from syntax. <c>TargetFilter</c> is never one of them.
+		/// </summary>
+		public static AppliedArguments? GetAppliedArguments(AttributeInfo attribute)
+		{
+			if (attribute.EffectiveApplication is {} effective)
+			{
+				var named = ImmutableArray.CreateBuilder<KeyValuePair<string, TypedConstant>>(effective.NamedArguments.Length);
+
+				foreach (var argument in effective.NamedArguments)
+					if (argument.Name != "TargetFilter")
+						named.Add(new KeyValuePair<string, TypedConstant>(argument.Name, argument.Value));
+
+				return new AppliedArguments(effective.Constructor, effective.ConstructorArguments, named.ToImmutable());
+			}
+
+			if (GetAppliedAttributeData(attribute) is not {} data)
+				return null;
+
+			return new AppliedArguments(
+				data.AttributeConstructor,
+				data.ConstructorArguments,
+				[..data.NamedArguments.Where(static argument => argument.Key != "TargetFilter")]);
+		}
+
+		/// <summary>
+		/// The named arguments an applied aspect is ordered by: those of its effective application, otherwise those of the
+		/// attribute it is applied with (none for an aspect known only from syntax).
+		/// </summary>
+		public static ImmutableArray<KeyValuePair<string, TypedConstant>> GetOrderNamedArguments(AttributeInfo attribute)
+		{
+			if (attribute.EffectiveApplication is {} effective)
+				return [..effective.NamedArguments.Select(static argument => new KeyValuePair<string, TypedConstant>(argument.Name, argument.Value))];
+
+			return attribute.AppliedAttributeData?.NamedArguments ?? ImmutableArray<KeyValuePair<string, TypedConstant>>.Empty;
+		}
+
+		/// <summary>
+		/// The attribute diagnostics about an applied aspect stand on: the most specific attribute of its effective
+		/// application, otherwise the one it is applied with.
+		/// </summary>
+		public static AttributeData? GetReportingAttribute(AttributeInfo attribute)
+		{
+			return attribute.EffectiveApplication?.ReportAt ?? attribute.AppliedAttributeData;
 		}
 
 		/// <summary>
@@ -173,4 +223,10 @@ namespace AspectGenerator
 				string.Equals(System.IO.Path.GetFileName(directory), typeof(AspectSourceGenerator).FullName, StringComparison.Ordinal);
 		}
 	}
+
+	/// <summary>The constructor and arguments an applied aspect is built with (see <see cref="AspectSymbols.GetAppliedArguments"/>).</summary>
+	readonly record struct AppliedArguments(
+		IMethodSymbol?                                      Constructor,
+		ImmutableArray<TypedConstant>                       ConstructorArguments,
+		ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments);
 }

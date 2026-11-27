@@ -931,18 +931,17 @@ namespace AspectGenerator
 			diagnostics.Add(new DiagnosticInfo(id, message, location));
 		}
 
-		static string GetAppliedAspectConstruction(AttributeInfo attribute)
+		internal static string GetAppliedAspectConstruction(AttributeInfo attribute)
 		{
 			var attributeType = attribute.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-			if (AspectSymbols.GetAppliedAttributeData(attribute) is {} data)
+			if (AspectSymbols.GetAppliedArguments(attribute) is {} data)
 			{
 				// A null keeps its type here even when it is object: the constructor overload depends on it.
 				var constructorArguments = data.ConstructorArguments
 					.Select(static c => c is { Kind: TypedConstantKind.Primitive, Value: null, Type.SpecialType: SpecialType.System_Object } ? "(object)null" : PrintTypedConstant(c))
 					.ToArray();
 				var namedArguments = data.NamedArguments
-					.Where(static arg => arg.Key != "TargetFilter")
 					.Select(static arg => $"{arg.Key} = {PrintTypedConstant(arg.Value)}")
 					.ToArray();
 
@@ -1384,7 +1383,7 @@ namespace AspectGenerator
 					onCallValue is string onCall &&
 					!string.IsNullOrWhiteSpace(onCall))
 				{
-					if (attribute.AppliedAttributeData?.ApplicationSyntaxReference is {} asr)
+					if (AspectSymbols.GetReportingAttribute(attribute)?.ApplicationSyntaxReference is {} asr)
 					{
 						ReportDiagnostic(
 							diagnostics,
@@ -1567,7 +1566,7 @@ namespace AspectGenerator
 
 			// An aspect applied in source is reported where it is applied; one applied in a referenced assembly, at the call.
 			var isApplied = InterceptorShape.IsAppliedToTarget(targetMethod, [attribute]);
-			var location  = isApplied && attribute.AppliedAttributeData?.ApplicationSyntaxReference is {} asr
+			var location  = isApplied && AspectSymbols.GetReportingAttribute(attribute)?.ApplicationSyntaxReference is {} asr
 				? Location.Create(asr.SyntaxTree, asr.Span)
 				: invocationExpression.GetLocation();
 			// The declaration, not the constructed or reduced form the call binds: one attribute, one warning.
@@ -1743,7 +1742,7 @@ namespace AspectGenerator
 			if (attribute.AspectDefinitionData?.ApplicationSyntaxReference is {} aspectSyntaxReference)
 				return Location.Create(aspectSyntaxReference.SyntaxTree, aspectSyntaxReference.Span);
 
-			if (attribute.AppliedAttributeData?.ApplicationSyntaxReference is {} attributeSyntaxReference)
+			if (AspectSymbols.GetReportingAttribute(attribute)?.ApplicationSyntaxReference is {} attributeSyntaxReference)
 				return Location.Create(attributeSyntaxReference.SyntaxTree, attributeSyntaxReference.Span);
 
 			return invocationExpression.GetLocation();
@@ -2082,7 +2081,7 @@ namespace AspectGenerator
 				if (needInfo)
 				{
 					sb
-						.Append(indent).AppendLine($"// {SingleLine(((object?)attributes[idx].AppliedAttributeData ?? attributes[idx].AttributeClass).ToString())}")
+						.Append(indent).AppendLine($"// {SingleLine(((object?)AspectSymbols.GetReportingAttribute(attributes[idx]) ?? attributes[idx].AttributeClass).ToString())}")
 						.Append(indent).AppendLine("//")
 						;
 
