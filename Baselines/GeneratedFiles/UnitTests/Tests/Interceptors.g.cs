@@ -714,7 +714,7 @@ namespace MyAspectGenerator
 		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string AssemblyFilterTarget_Interceptor()
 		{
-			// Aspects.LogAttribute(TargetFilter = {"regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.AssemblyFilterTarget\\(\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedMethod\\(System.String\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedGenericMethod<System.String>\\(System.String\\)$", "regex: ^public System.String System.String.Substring\\(System.Int32\\)$"})
+			// Aspects.LogAttribute
 			//
 			var __targetMethod__ = AssemblyFilterTarget_Interceptor_State.TargetMethod;
 
@@ -1176,7 +1176,7 @@ namespace MyAspectGenerator
 		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string InterceptedGenericMethod_Interceptor(string p)
 		{
-			// Aspects.LogAttribute(TargetFilter = {"regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.AssemblyFilterTarget\\(\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedMethod\\(System.String\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedGenericMethod<System.String>\\(System.String\\)$", "regex: ^public System.String System.String.Substring\\(System.Int32\\)$"})
+			// Aspects.LogAttribute
 			//
 			var __targetMethod__ = InterceptedGenericMethod_Interceptor_State.TargetMethod;
 
@@ -1216,7 +1216,7 @@ namespace MyAspectGenerator
 		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string InterceptedMethod_Interceptor(string str)
 		{
-			// Aspects.LogAttribute(TargetFilter = {"regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.AssemblyFilterTarget\\(\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedMethod\\(System.String\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedGenericMethod<System.String>\\(System.String\\)$", "regex: ^public System.String System.String.Substring\\(System.Int32\\)$"})
+			// Aspects.LogAttribute
 			//
 			var __targetMethod__ = InterceptedMethod_Interceptor_State.TargetMethod;
 
@@ -1701,7 +1701,7 @@ namespace MyAspectGenerator
 		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string Substring_Interceptor(this string __this__, int startIndex)
 		{
-			// Aspects.LogAttribute(TargetFilter = {"regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.AssemblyFilterTarget\\(\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedMethod\\(System.String\\)$", "regex: ^public static System.String AspectGenerator\\.Tests\\.UnitTests\\.InterceptedGenericMethod<System.String>\\(System.String\\)$", "regex: ^public System.String System.String.Substring\\(System.Int32\\)$"})
+			// Aspects.LogAttribute(TargetFilter = {"method: {global::AspectGenerator.Tests.UnitTests.AssemblyFilterTarget, global::AspectGenerator.Tests.UnitTests.InterceptedMethod, global::AspectGenerator.Tests.UnitTests.InterceptedGenericMethod<string>, global::System.String.Substring}\n- method: global::System.String.Substring and params: (_, _)"})
 			//
 			var __targetMethod__ = Substring_Interceptor_State.TargetMethod;
 
