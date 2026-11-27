@@ -30,12 +30,12 @@
 | `AG0231` | a `string[]` item of a filter begins with `and` or `or` | Put the operator on the line it continues, in the same item. |
 | `AG0232` | warning: an aspect attribute on a method is not applied to it (build only; fails the build under TreatWarningsAsErrors) | Read the explanation in the build report; change the filters or remove the attribute. |
 | `AG0233` | invalid `aspect.p` / `assembly.p` reference | Name the property being declared, a level above the block, outside a compound line. |
-| `AG0234` | invalid use of `any` | Write `p: any` as a whole value, once, as an include. |
+| `AG0234` | invalid use of `any` | Write `p: any` alone on its line, as the only include of that property. |
 | `AG0235` | two selecting attributes write different values of one setting (build only; the method still gets the aspect) | Write the value on the more specific level, usually the class. |
-| `AG0236` | a filter read from a referenced assembly cannot be read (the aspect selects nothing; the message names the assembly) | Rebuild that assembly with this version of AspectGenerator. |
+| `AG0236` | a filter read from a referenced assembly cannot be read (the aspect selects nothing; the message names the assembly; live in the editor for a referenced aspect's default filter, otherwise build only) | Rebuild that assembly with this version of AspectGenerator. |
 | `AG0300` | optional intercepted-call marker | No fix needed; set AspectGeneratorAspectDiagnosticSeverity=Off to disable markers. |
 
-The ids of the 1.1 filter language (`AG0201`, `AG0202`, `AG0204`-`AG0206`, `AG0208`, `AG0210`, `AG0211`) are retired and never reused; a 1.1 filter is reported as `AG0225` with the 1.2 spelling.
+The ids of the 1.1 filter language (`AG0201`, `AG0202`, `AG0204`-`AG0206`, `AG0208`, and `AG0210`, `AG0211`, which no release carried) are retired and never reused; a 1.1 filter is reported as `AG0225` with the 1.2 spelling.
 
 A missing hook in a referenced assembly can also mean an inaccessible hook: metadata does not expose internal members without `InternalsVisibleTo`. Invalid hooks whose generated calls cannot compile are left out for that target, while other aspects remain; a synchronous hook returning a value still runs as a statement despite `AG0104`. An unresolved return type is left to the compiler's own error rather than adding `AG0104`.
 

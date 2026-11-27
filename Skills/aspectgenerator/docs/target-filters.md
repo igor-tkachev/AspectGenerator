@@ -27,6 +27,7 @@ The aspect attribute exposes `public string? TargetFilter { get; set; }` or `pub
 
 - A filter is a list of lines: an include (`expr`) or a subtraction (`- expr`). `#` starts a comment.
 - A line continues on the next only when that line begins with `and` or `or`, or while a `(` is open. In a `string[]`, every item holds whole lines.
+- After `and` or `or`, a bare pattern is a compact signature, that is a method name, not another value of the previous key: `type: *Service or *Job` means `type: *Service or method: *Job`, and `returns: int or string` means `returns: int or method: string`, with no error. Give one key several values with a set, `type: {*Service,*Job}`, or repeat the key, `type: *Service or type: *Job`.
 - `and`, `or`, `not` follow C# precedence. `not` stands before one condition only: `not public`, `not method: Get*`; write `not a and not b`, not `not (a or b)`.
 - Keys and words are lowercase. A name equal to a keyword is written with `@` (`method: @any`). Anything before `:` that is not a key is a compact signature: `public **.*Service.Save*(.., CancellationToken) : Task*`.
 
@@ -50,12 +51,12 @@ namespace: Shop.Services.**
 
 Patterns: `*` is any characters within one segment, `**` whole segments, `{A,B}` alternatives, `List<*>` a generic with one argument (`List` alone is any arity), `"text"` exact text. `?` means nullable. Types are structural: arrays carry their rank (`int[]` is not `int[,]`), tuples match by element list, `*` is any type. `global::` roots a name. In a parameter list `_` is one parameter and `..` any run, at most once.
 
-## Properties, declarations and the cascade
+## Declarations and the cascade
 
-- A line declares the properties it mentions. An include splits at a top-level `and` between different properties; a subtraction at a top-level `or`. A filter includes each property once: `method: Save*` and `method: Get*` on two lines is an error (`AG0225`); write `method: Save* or Get*`.
+- A line declares the properties it mentions. An include splits at a top-level `and` between different properties; a subtraction at a top-level `or`. A filter includes each property once: `method: Save*` and `method: Get*` on two lines is an error (`AG0225`); write `method: {Save*,Get*}` or `method: Save* or method: Get*`.
 - Blocks, from the most specific: the aspect attribute on the method, on its type, `[assembly: ...]`, and the aspect's `DefaultTargetFilter`. For each property the most specific block that declares it decides; what it does not declare comes from above. A method is considered only when an assembly, type or method block covers it.
 - A bare method-level `[Log]` declares only `location` and `method`, so the author's default still applies. A `TargetFilter` on a method is an ordinary block for that method.
-- Keep or reuse a value from above with `aspect.p` and `assembly.p`: `method: Save* and assembly.method` narrows, `method: Save* or assembly.method` widens, `attribute: aspect.attribute` returns to the author's value. `p: any` removes every restriction on `p` (`attribute: any`, `origin: any`).
+- Keep or reuse a value from above with `aspect.p` and `assembly.p`: `method: Save* and assembly.method` narrows, `method: Save* or assembly.method` widens, `attribute: aspect.attribute` returns to the author's value. `p: any` removes every restriction on `p` (`attribute: any`, `origin: any`); it stands alone on its line, as the only include of `p`, so `origin: any and async` is an error and `origin: any` with `async` on the next line is not.
 - `DefaultTargetFilter` is the weakest block; a user declaration of the same property replaces it. Authors write subtractions only: `- attribute: NoLog`.
 
 ```csharp
@@ -85,7 +86,9 @@ A condition describes the call with its type arguments (`method: List<int>.Add` 
 
 ## From 1.1
 
-The 1.1 language is gone: `contains:`, `regex:`, `signature:`, `pattern:`, `fulltype:`, `fullmethod:`, `path:`, `attributes:`, `;`, `&`, `|`, `...` and backslash escapes are errors (`AG0225`) that show the 1.2 spelling. Rules are no longer ordered and later ones do not win; two lines with the same key are not OR (write `method: Save* or Get*`); `attributes:` is `attribute:`; `?` means nullable; `TargetFilter` on a method filters that method. The wiki page has the full migration table.
+The 1.1 language is gone: `contains:`, `regex:`, `signature:`, `pattern:`, `fulltype:`, `fullmethod:`, `path:`, `attributes:`, `;`, `&`, `|`, `...` and backslash escapes are errors (`AG0225`) that show the 1.2 spelling, and `params:` without parentheses is `AG0220` (write `params: (.., CancellationToken)`). Two lines with the same key are not OR (write `method: {Save*,Get*}`); `attributes:` is `attribute:`.
+
+Some 1.1 filters still read without an error and select differently: rules are no longer ordered and later ones do not win, `TargetFilter` on a method filters that method, a method-level aspect attribute is filtered, an assembly filter that names no place (`public`) stays in the project, names match trailing segments, accessibility words are exact, `Load<T>` is now `Load<*>`, `**` as a type is a name and no longer matches arrays and tuples, `?` means nullable. Check these; the wiki page has the full migration table, with the ones that do not give an error marked.
 
 ```target-filter error=AG0225
 signature: public * MyApp.Services.*

@@ -29,6 +29,9 @@ namespace AspectGenerator.Tests
 	[TestClass]
 	public class DocDriftTests
 	{
+		/// <summary>The languages a fenced block of the checked pages may have: a block of another language is probably a misspelt <c>target-filter</c> and would be left unread.</summary>
+		static readonly string[] _fenceLanguages = ["", "bash", "bat", "console", "csharp", "ebnf", "json", "sh", "target-filter", "text", "xml"];
+
 		static readonly string[] _retiredIds = ["AG0201", "AG0202", "AG0204", "AG0205", "AG0206", "AG0208", "AG0210", "AG0211"];
 
 		static string Root => TargetFilterCuratedInputs.RepositoryRoot;
@@ -76,6 +79,7 @@ namespace AspectGenerator.Tests
 					body.Add(lines[i]);
 
 				Assert.IsLessThan(lines.Length, i, $"{Relative(file)}:{start}: a fenced block is not closed.");
+				CollectionAssert.Contains(_fenceLanguages, open.Groups["language"].Value, $"{Relative(file)}:{start}: unknown language of a fenced block ('{open.Groups["language"].Value}'); a filter is written in a 'target-filter' block.");
 
 				var options = new Dictionary<string,string>(StringComparer.Ordinal);
 
@@ -289,9 +293,10 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void TheThreeKindsOfPageHoldExamples()
 		{
-			Assert.IsGreaterThan(0, Examples(Path.Combine(Root, "docs", "wiki", "Target-filters.md")).Count, "wiki");
-			Assert.IsGreaterThan(0, Examples(Path.Combine(Root, "Skills", "aspectgenerator", "docs", "target-filters.md")).Count, "skill");
-			Assert.IsGreaterThan(0, Examples(Path.Combine(Root, "README.md")).Count, "README");
+			// A count per page: an example that is dropped from a page, by a misspelt fence or otherwise, is noticed here.
+			Assert.IsGreaterThan(55, Examples(Path.Combine(Root, "docs", "wiki", "Target-filters.md")).Count, "wiki");
+			Assert.IsGreaterThan(3, Examples(Path.Combine(Root, "Skills", "aspectgenerator", "docs", "target-filters.md")).Count, "skill");
+			Assert.IsGreaterThan(1, Examples(Path.Combine(Root, "README.md")).Count, "README");
 		}
 
 		[TestMethod]
@@ -304,6 +309,27 @@ namespace AspectGenerator.Tests
 			var fine = new Example("x", 1, CascadeLevel.Assembly, ["public"], ["AG0220"]);
 
 			Assert.IsFalse(Read(fine).SequenceEqual(fine.ExpectedIds));
+		}
+
+		[TestMethod]
+		public void AMisspeltFenceLanguageIsRefused()
+		{
+			var file = Path.GetTempFileName();
+
+			try
+			{
+				File.WriteAllText(file, "```target-filtr error=AG0220\nnot (public or static)\n```\n");
+
+				Assert.ThrowsExactly<AssertFailedException>(() => Blocks(file));
+
+				File.WriteAllText(file, "```target-filter error=AG0220\nnot (public or static)\n```\n");
+
+				Assert.AreEqual(1, Blocks(file).Count);
+			}
+			finally
+			{
+				File.Delete(file);
+			}
 		}
 
 		static string DocumentText(params string[] path)

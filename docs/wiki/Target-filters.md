@@ -97,7 +97,20 @@ atom     = key ":" ( value | "any" | level "." property ) | word | signature | l
 ```
 
 - `and`, `or`, `not` have C#'s precedence (`not` > `and` > `or`).
+- **After `and` or `or`, a bare pattern is a compact signature, that is a method name, not another value of the key before it.** `method: Save* or Get*` reads as two method conditions only because the key is `method:`. `type: *Service or *Job` means `type: *Service or method: *Job`, and `returns: int or string` means `returns: int or method: string`; neither is an error, and a `method:` condition names a place, so such an assembly filter also reaches methods of referenced assemblies. To give one key several values write a set, `type: {*Service,*Job}`, or repeat the key, `type: *Service or type: *Job`.
 - `not` stands only before a single condition: `not public`, `not method: Get*`. `not (a or b)` is an error; write `not a and not b`. A run of words or a compact signature is several conditions, so `not public static` and `not public Save*()` are errors too. Write what is meant: `not public and not static` (neither), or `not public or not static` (not both).
+
+```target-filter
+type: {*Service,*Job}
+```
+
+```target-filter
+type: *Service or type: *Job
+```
+
+```target-filter
+returns: int or returns: string
+```
 
 ```target-filter
 not public and not static
@@ -159,13 +172,17 @@ A line **declares** the properties it mentions. Within one filter:
 - An include splits at a top-level `and` between conditions on **different** properties: `method: Save* and public` declares `method: Save*` and `public`. A subtraction splits at a top-level `or`: `- method: X or public` is `- method: X` and `- public`.
 - Conditions on one property stay together: `namespace: Shop and type: Service` is one `location` declaration. More generally, a line splits only where its parts share no property: `method: Save* and (method: *A or public)` stays one line about `method` and `accessibility`.
 - A line that does not split and mentions several properties (`method: Save* or public`, `- method: *Internal* and public`) is a **compound line**; it belongs to all of its properties at once.
-- A filter may include each property **once**, and a compound line counts as an include of each of its properties. `method: Save*` and `method: Get*` as two lines is an error (write `method: Save* or Get*`), and so is `method: Save* or public` beside `method: Get*`. Subtractions may repeat.
+- A filter may include each property **once**, and a compound line counts as an include of each of its properties. `method: Save*` and `method: Get*` as two lines is an error (write `method: {Save*,Get*}`, or `method: Save* or method: Get*` in one line), and so is `method: Save* or public` beside `method: Get*`. Subtractions may repeat.
 - The value of a property in one filter is its include (if any) and not any of its subtractions.
 
 The split is syntactic: lines declare properties, not alternatives. `method: Save* and public` followed by `method: Get*` is an error, not `(Save* and public) or Get*`.
 
 ```target-filter
-method: Save* or Get*
+method: {Save*,Get*}
+```
+
+```target-filter
+method: Save* or method: Get*
 ```
 
 ```target-filter error=AG0225
@@ -190,7 +207,7 @@ Each aspect attribute is a **block**. For a method, the blocks that can speak ab
 | assembly | each `[assembly: Log(...)]` | every method called in the compilation | `project`, unless it declares `origin` (`project`, `origin: any`) or includes a `location` or `method` condition |
 | aspect | `DefaultTargetFilter` of the aspect | every method | nothing |
 
-**The assembly level stays inside the project by default — a deliberate safeguard.** `[assembly: Log]`, `[assembly: Log(TargetFilter = "public")]` or `"async"` select only methods declared in your project, never the thousands of public methods of the .NET libraries and packages you call (`string.Join`, `Console.WriteLine`), which would slow the build and log far more than intended. To reach methods of other assemblies, name them: a `namespace:`, `type:` or `method:` condition (`method: System.Console.WriteLine`, `namespace: Newtonsoft.**`), or `origin: any` for everything. Methods a library marked with the aspect itself are not affected by this default (see [Aspects applied inside libraries](#aspects-applied-inside-libraries)).
+**The assembly level stays inside the project by default — a deliberate safeguard.** `[assembly: Log]`, `[assembly: Log(TargetFilter = "public")]` or `"async"` select only methods declared in your project, never the thousands of public methods of the .NET libraries and packages you call (`string.Join`, `Console.WriteLine`), which would slow the build and log far more than intended. To reach methods of other assemblies, name them: a `namespace:`, `type:` or `method:` condition (`method: System.Console.WriteLine`, `namespace: Newtonsoft.**`), or `origin: any` for everything. (A `namespace:`, `type:` or `method:` condition already lifts the project-only default; `origin: any` is for filters that name no place, such as `async`.) Methods a library marked with the aspect itself are not affected by this default (see [Aspects applied inside libraries](#aspects-applied-inside-libraries)).
 
 ```csharp
 // Project methods only.
@@ -199,10 +216,10 @@ Each aspect attribute is a **block**. For a method, the blocks that can speak ab
 // One method of a library, named.
 [assembly: Log(TargetFilter = "method: System.Console.WriteLine")]
 
-// Everything that is called, the libraries included, narrowed by a method name. See the cost section below.
+// Every awaitable method that is called, the libraries included. See the cost section below.
 [assembly: Log(TargetFilter = """
     origin: any
-    method: Save*
+    async
     """)]
 ```
 
@@ -294,7 +311,7 @@ assembly.method or public
 
 `p: any` removes every restriction on `p` from above, the aspect author's included: `method: any`, `attribute: any`, `accessibility: any`. Properties written with words use their property name as the key (`accessibility: any`, `static: any`, `async: any`, `virtuality: any`, `extern: any`, `extension: any`, `generated: any`, `location: any`, `origin: any`); these property names are keys only for `any`. A reference uses the property name too: the property of `namespace:` and `type:` is `location`, so it is `assembly.location` (`assembly.namespace` is an error). `location: any` resets both `namespace:` and `type:`; `origin: any` lets an assembly filter reach referenced methods without naming them.
 
-- `any` is a whole value only (`method: Save* or any` is an error) and stands alone on its line, as the only include of that property in the filter: `origin: any and method: Save*` is an error, `origin: any` and `method: Save*` on two lines are not.
+- `any` is a whole value only (`method: Save* or any` is an error) and stands alone on its line, as the only include of that property in the filter: `origin: any and async` is an error, `origin: any` and `async` on two lines are not.
 - `- p: any` is an error.
 - A method or attribute named `any` is written `@any`.
 
@@ -304,11 +321,11 @@ attribute: any
 
 ```target-filter
 origin: any
-method: Save*
+async
 ```
 
 ```target-filter error=AG0234
-origin: any and method: Save*
+origin: any and async
 ```
 
 ```target-filter error=AG0234
@@ -560,7 +577,7 @@ protected internal
 
 ### Compact signature
 
-`public **.*Service.Save*(.., CancellationToken) : Task*` is shorthand for its words with `method:`, `params:` and `returns:`, and it splits by property like any `and` line. The return type follows `:`.
+`public **.*Service.Save*(.., CancellationToken) : Task*` is shorthand for its words with `method:`, `params:` and `returns:`, and it splits by property like any `and` line. The return type follows `:`. A bare pattern after `and` or `or` is a compact signature too, which is why `type: *Service or *Job` does not mean what it seems to (see [Expressions](#expressions)).
 
 ```target-filter
 public **.*Service.Save*(.., CancellationToken) : Task*
@@ -636,18 +653,31 @@ Conditional aspect attributes are evaluated against project/tree preprocessor sy
 
 ## Migrating from 1.1
 
-Version 1.2 reads target filters in a new language. A filter written in 1.1 is reported as an error with the 1.2 spelling (`AG0225`) where it can be recognised, and its aspect selects nothing until the filter is rewritten. This is what each 1.1 construct becomes:
+Version 1.2 reads target filters in a new language. Rewrite every 1.1 filter, and read the second group below even for filters that build: **some 1.1 filters keep reading without any error in 1.2 and select different methods.**
+
+### 1.1 text that is now an error
+
+A filter with one of these has an error, and its aspect selects nothing until the filter is rewritten. Where the construct is recognised as 1.1 syntax the error is `AG0225` and shows the 1.2 spelling.
 
 | 1.1 | 1.2 |
 | --- | --- |
 | `contains:`, `regex:`, `signature:`, `pattern:`, `fulltype:`, `fullmethod:`, `path:`, `attributes:`, `;`, `&`, `\|`, `...`, backslash escapes | removed; AG0225 shows the v2 spelling |
-| two lines with the same key meant OR | a property is included once: `method: Save* or Get*` |
-| `a` / `& b` / `c` on one key: a line that repeats the key joins the latest bucket of that key, so it meant `a and (b or c)` | write it as one declaration: `method: Save* and (method: *Async or method: Update*)` |
+| `params:..., *CancellationToken` (a parameter list without parentheses) | `AG0220`, not `AG0225`; write `params: (.., CancellationToken)` |
+| two lines with the same key meant OR | a property is included once: `method: {Save*,Get*}` or `method: Save* or method: Get*` |
+| three lines on one key, `method: Save*`, `& method: *Async`, `method: Update*`: a line that repeats the key joins the latest bucket of that key, so they meant `Save*` and (`*Async` or `Update*`) | write it as one declaration: `method: Save* and (method: *Async or method: Update*)` |
+| `param: a & b` meant one parameter matching both patterns | `param: a and param: b` may be met by two different parameters; one parameter matching two type patterns has no spelling |
+| text 1.1 read without an error could be meaningless (`;` alone, `pub:lic`, unbalanced `<`) | it is an error (AG0220–AG0225) and the aspect selects nothing |
+
+### 1.1 text that still reads but selects differently
+
+These filters build in 1.2 without a diagnostic, so check each of them. `public`, `method: Load<T>`, `returns: **`, `protected and internal` and `- attribute: NoLog` on a method are examples.
+
+| 1.1 | 1.2 |
+| --- | --- |
 | rules ordered, the last match decides | no order; each property is decided by the most specific attribute |
-| an aspect attribute on a method was never filtered | filtered like any attribute: `[Log] [NoLog]` is not logged under a `- attribute: NoLog` default |
+| an aspect attribute on a method was never filtered | filtered like any attribute: `[Log] [NoLog]` is not logged under a `- attribute: NoLog` default (the build warns, `AG0232`, when the attribute is not applied) |
 | `TargetFilter` on a method was ignored (AG0208) | it filters that method |
 | an assembly filter and a type filter of one aspect selected the union (`method: Save` on the assembly, `method: Load` on the type: both) | a property the type declares replaces the assembly's for that type's methods (only `Load`); keep both with `method: Load or assembly.method` |
-| text 1.1 read without an error could be meaningless (`;` alone, `pub:lic`, unbalanced `<`) | it is an error (AG0220–AG0225) and the aspect selects nothing |
 | a filter of subtractions only (`-attributes: NoLog`) selected nothing | subtractions start from the level's default: `- attribute: NoLog` on the assembly selects every project method without `[NoLog]` |
 | an assembly filter without a place (`public`, `returns: string`, `param: int`) reached referenced methods too | it selects only methods of the project; name a place or write `origin: any` to go further |
 | a name pattern matched the full name (`Task` meant only `Task`) | names match trailing whole segments (`Task` matches `System.Threading.Tasks.Task`); `global::` roots |
@@ -657,11 +687,10 @@ Version 1.2 reads target filters in a new language. A filter written in 1.1 is r
 | array ranks were ignored (1.1.2) | `int[]` ≠ `int[,]` |
 | tuples, generic attributes (`GenericMarker<int>`) and `attribute: System.Obsolete` (without `Attribute`) did not match | they match: tuple element lists, attribute type arguments, `X` or `XAttribute` as in C# |
 | `extern` did not cover runtime-implemented methods (`Math.Sqrt`) | `extern` includes `InternalCall` methods |
-| `param: a & b` meant one parameter matching both patterns | `param: a and param: b` may be met by two different parameters; one parameter matching two type patterns has no spelling |
 | `DefaultTargetFilter` rules could be overridden by later rules | it is the weakest level; a user declaration of the same property replaces it |
 | settings came from the first including attribute (the assembly's) | from the most specific attribute that writes them; conflicts are errors |
 | library type and assembly filters were ignored for aspects the library placed | they apply |
-| `?` matched one character | `?` means nullable |
+| `?` matched one character | `?` means nullable (outside a type position it is an error, `AG0224`) |
 | `int?` matched `int` | `int?` is `Nullable<int>` |
 | generic methods declared in the project were judged by their definition, sometimes by the call depending on other filters | a condition describes the call with its type arguments, always; the result never depends on other filters |
 

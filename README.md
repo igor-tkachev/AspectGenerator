@@ -359,7 +359,7 @@ sealed class LogAttribute : Attribute
 }
 ```
 
-For each property, the most specific attribute that declares it decides (method, then type, then assembly, then the aspect's default), and `assembly.method`, `aspect.attribute` keep a value from above. An assembly filter stays inside the project unless it names a namespace, type or method or writes `origin: any`, so `[assembly: Log(TargetFilter = "public")]` never reaches the .NET libraries. The property is always called `TargetFilter` and is a `string?` or a `string[]?` on the aspect attribute. Filters select target methods; AspectGenerator still rewrites only call sites visible to the current compilation. The full language, the migration from the 1.1 filters and the diagnostics are on the [Target filters](https://github.com/igor-tkachev/AspectGenerator/wiki/Target-filters) wiki page.
+For each property the most specific attribute that declares it decides (method, then type, then assembly, then the aspect's default). An assembly filter stays inside the project unless it names a namespace, type or method, so `[assembly: Log(TargetFilter = "public")]` never reaches the .NET libraries. The language, the migration from 1.1 and the diagnostics are on the [Target filters](https://github.com/igor-tkachev/AspectGenerator/wiki/Target-filters) wiki page.
 
 ## Conditional Aspects
 

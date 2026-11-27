@@ -41,13 +41,13 @@ The language of target filters is described in [Target filters](Target-filters).
 | `AG0233` | error | invalid level reference (`aspect.p` or `assembly.p` naming another property, a level that is not above the block, or standing in a compound line) |
 | `AG0234` | error | invalid use of `any` |
 | `AG0235` | error | two selecting attributes give a method different settings. The method still gets the aspect, and the conflicting setting takes the aspect's default. Build only |
-| `AG0236` | error | a filter read from a referenced assembly cannot be read (for example 1.1 syntax in a library built with AspectGenerator 1.1); the aspect selects nothing in this compilation. The message names the assembly, which has to be rebuilt with this version. Build only |
+| `AG0236` | error | a filter read from a referenced assembly cannot be read (for example 1.1 syntax in a library built with AspectGenerator 1.1); the aspect selects nothing in this compilation. The message names the assembly, which has to be rebuilt with this version. For the `DefaultTargetFilter` of an aspect defined in a referenced assembly it is reported live in the editor as well; for the library's own type and assembly filters it needs the selection, so builds report it |
 
-Errors point at the characters of the filter inside the string literal (each `string[]` item separately). This works for regular, verbatim and raw literals (single- and multi-line), interpolated strings of constants, concatenations and `const` references declared in the project. A filter built from constants of a referenced assembly, from `nameof`, or from text that spans two items is reported on the attribute instead. A `DefaultTargetFilter` of an aspect declared in the project is reported in the aspect's `[Aspect]` attribute, once; one of an aspect from a referenced assembly is reported on each attribute that applies it. An error in a filter read from a referenced assembly has no source location of its own and is reported with `AG0236`.
+Errors point at the characters of the filter inside the string literal (each `string[]` item separately). This works for regular, verbatim and raw literals (single- and multi-line), interpolated strings of constants, concatenations and `const` references declared in the project. A filter built from constants of a referenced assembly, from `nameof`, or from text that spans two items is reported on the attribute instead. A `DefaultTargetFilter` of an aspect declared in the project is reported in the aspect's `[Aspect]` attribute, once. An error in a filter read from a referenced assembly has no source location of its own and is reported once, with `AG0236`, on the attribute.
 
 ### Retired ids
 
-The ids of the 1.1 filter language are retired and are not reused: `AG0201`, `AG0202`, `AG0204`, `AG0205`, `AG0206`, `AG0208`, `AG0210` and `AG0211`. A filter that uses 1.1 syntax is reported as `AG0225` with the 1.2 spelling; see [Migrating from 1.1](Target-filters#migrating-from-11). `TargetFilter` on a method-level aspect attribute (`AG0208` in 1.1) is no longer an error: it filters that method. Suppressions of a retired id have no effect.
+The ids of the 1.1 filter language are retired and are not reused: `AG0201`, `AG0202`, `AG0204`, `AG0205`, `AG0206` and `AG0208`, and also `AG0210` and `AG0211`, which no release carried. A filter that uses 1.1 syntax is reported as `AG0225` with the 1.2 spelling; see [Migrating from 1.1](Target-filters#migrating-from-11). `TargetFilter` on a method-level aspect attribute (`AG0208` in 1.1) is no longer an error: it filters that method. Suppressions of a retired id have no effect.
 
 ## Design-Time Builds
 
@@ -56,13 +56,14 @@ The IDE runs the generator on every edit in a design-time build. A design-time b
 Reported live, in design-time builds and in builds:
 
 - `AG0101` and `AG0102` for aspects declared in the project;
-- the target filter errors `AG0220`, `AG0221`, `AG0224`, `AG0225`, `AG0227`, `AG0231`, `AG0233` and `AG0234`, for the target filters of aspect attributes at every level, including an aspect's `DefaultTargetFilter` (checked at each type-level application);
+- the target filter errors `AG0220`, `AG0221`, `AG0224`, `AG0225`, `AG0227`, `AG0231`, `AG0233` and `AG0234`, for the target filters of aspect attributes at every level, including the `DefaultTargetFilter` of an aspect declared in the project, which is reported once, in its `[Aspect]` attribute;
+- `AG0236` for the `DefaultTargetFilter` of an aspect defined in a referenced assembly;
 - `AG0209`.
 
 Reported by builds only, because they need a selected target method or a bound call:
 
 - `AG0001` and `AG0002`;
-- `AG0232`, `AG0235` and `AG0236`, which need the selection of target methods (`AG0232` is a warning: with `TreatWarningsAsErrors` it fails the build);
+- `AG0232` and `AG0235`, and `AG0236` for a library's own type and assembly filters, which need the selection of target methods (`AG0232` is a warning: with `TreatWarningsAsErrors` it fails the build);
 - `AG0103` through `AG0108`;
 - `AG0101` and `AG0102` for aspects declared in referenced assemblies, which are checked against each intercepted target;
 - `AG0003`, `AG0006` and `AG0007`, for calls that are left as they are;
