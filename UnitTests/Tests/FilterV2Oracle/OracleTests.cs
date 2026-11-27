@@ -19,7 +19,7 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 	{
 		public TestContext TestContext { get; set; } = null!;
 
-		/// <summary>The size of the generated set; <c>AG_ORACLE_FILTERS</c> raises it for a long run.</summary>
+		/// <summary>The size of the generated set; <c>AG_ORACLE_FILTERS</c> raises it for a long run (5,000 by default).</summary>
 		static int GeneratedCount
 		{
 			get
@@ -28,7 +28,16 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 			}
 		}
 
-		const ulong Seed = 0x4F5241434C450001UL;
+		const ulong DefaultSeed = 0x4F5241434C450001UL;
+
+		/// <summary>The seed of the generated set; <c>AG_ORACLE_SEED</c> (hexadecimal) chooses another.</summary>
+		static ulong Seed
+		{
+			get
+			{
+				return ulong.TryParse(Environment.GetEnvironmentVariable("AG_ORACLE_SEED"), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out var seed) ? seed : DefaultSeed;
+			}
+		}
 
 		[TestMethod]
 		public void FixtureRendersTheFrozenHeadersTest()
@@ -97,7 +106,7 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 			var filters   = Enumerable.Range(0, GeneratedCount).Select(_ => generator.Next()).ToList();
 			var report    = Compare(filters.Select(static f => (f.Render(), (OracleGenerator.Filter?)f)), shrink: true);
 
-			TestContext.WriteLine(report.Summary);
+			TestContext.WriteLine($"seed {Seed:x16}: " + report.Summary);
 			Assert.AreEqual(0, report.Mismatches.Count, report.Text);
 		}
 

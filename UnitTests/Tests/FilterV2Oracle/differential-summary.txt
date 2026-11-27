@@ -8,11 +8,11 @@ class	3252	same
 class	2201	no comparison: 1.1 compiled no rule
 class	362	not expressible (contains:, regex: or signature:)
 class	282	predicted, row 'backslash escapes: removed'
-class	192	outside the table: version 2 rejects pattern text 1.1 read without an error
+class	186	outside the table: version 2 rejects text 1.1 read without an error (stricter patterns, reserved words)
 class	80	outside the table: subtractions alone start from the level's default (1.1 selected nothing without an include)
 class	72	outside the table: an assembly filter stays inside the project
+class	46	predicted, row '`?` matched one character'
 class	41	predicted, row 'backslash escapes: removed' + predicted, row 'generic methods declared in the project were judged by their definition'
-class	40	predicted, row '`?` matched one character'
 class	19	outside the table: type and method patterns match trailing segments (1.1 matched the full name) + predicted, row 'generic methods declared in the project were judged by their definition'
 class	19	predicted, row 'rules ordered, the last match decides'
 class	17	outside the table: a name without <...> matches any arity; a type parameter's name is an ordinary name + predicted, row 'generic methods declared in the project were judged by their definition'
@@ -270,8 +270,7 @@ mutations:5243	publi**c static\nmethod: Run	method: Run	targets apart: 118,175
 mutations:5443	public *.*.*()	public *.*.*()	targets apart: 8,10,13,14,24,26,27,33,35,36,37,38,... (76)
 mutations:5531	static *.*	static *.*	targets apart: 26,43,77,78,79,80,81,87,103,114,119,120,... (73)
 
-# records outside the table: version 2 rejects pattern text 1.1 read without an error: file:line TAB 1.1 input TAB version 2 rewrite TAB detail
-curated:434	method: *?	method: *?	targets apart: 0,1,2,3,4,5,6,7,8,9,10,11,... (235); '?' stands only after a type.
+# records outside the table: version 2 rejects text 1.1 read without an error (stricter patterns, reserved words): file:line TAB 1.1 input TAB version 2 rewrite TAB detail
 curated:497	unsafe	unsafe	targets apart: 61,62,63; 'unsafe' is reserved.
 curated:508	public unsafe	public unsafe	targets apart: 61,62,63; 'unsafe' is reserved.
 curated:730	namespace: Acme.Core\n-| method: Save	namespace: Acme.Core\n- (| method: Save)	targets apart: 8,9,10,11,12,13,14,15,16,17,18,19,... (168); Unexpected '|'.
@@ -304,7 +303,6 @@ mutations:1502	method:**Async; returns:System.Threading.Tasks.Task*	method: **As
 mutations:1511	params:..., *Ca**ncellationToken	params: (.., *Ca**ncellationToken)	targets apart: 9,12,34,165; '**' inside a segment.
 mutations:1517	params:..., *Cancellatio**nToken	params: (.., *Cancellatio**nToken)	targets apart: 9,12,34,165; '**' inside a segment.
 mutations:1644	method: Save*\n& method: *A**sync	method: Save* and method: *A**sync	targets apart: 33,34; '**' inside a segment.
-mutations:1663	method: Save*?\n& method: *Async\nmethod: Update*	method: Save*? and (method: *Async or method: Update*)	targets apart: 33,34; '?' stands only after a type.
 mutations:1664	method: Save*\n& method: *Asyn**c\nmethod: Update*	method: Save* and (method: *Asyn**c or method: Update*)	targets apart: 33,34; '**' inside a segment.
 mutations:1699	method: Save* & *Async | Update* & *Asy,nc	((method: Save* and method: *Async) or (method: Update* and method: *Asy,nc))	targets apart: 33,34; ')' expected.
 mutations:1701	method: Save* & *Async | Updat,e* & *Async	((method: Save* and method: *Async) or (method: Updat,e* and method: *Async))	targets apart: 33,34; ')' expected.
@@ -350,8 +348,6 @@ mutations:3050	Save(***, ..., *)	Save(***, .., *)	targets apart: 19,20; '**' is 
 mutations:3239	Acme.Core.Outer*>.Inner<*>.Run(*, *)	Acme.Core.Outer*>.Inner<*>.Run(*, *)	targets apart: 117,174; Unexpected '>.Inner<*>.Run(*, *)' after a signature.
 mutations:3280	**.*<*	**.*<*	targets apart: 40,41,42,43,99,118,121,166,167,168,170,175,... (26); '>' expected.
 mutations:3284	**.*>*	**.*>*	targets apart: 40,41,42,43,99,118,121,166,167,168,170,175,... (26); Unexpected '>*' after a signature.
-mutations:3291	*?	*?	targets apart: 0,1,2,3,4,5,6,7,8,9,10,11,... (235); '?' stands only after a type.
-mutations:3351	Load<*>?	Load<*>?	targets apart: 168; '?' stands only after a type.
 mutations:3616	method: *Asy**nc	method: *Asy**nc	targets apart: 7,9,12,33,34,35,36,37,38,86,93,160; '**' inside a segment.
 mutations:3619	method: **Async	method: **Async	targets apart: 7,9,12,33,34,35,36,37,38,86,93,160; '**' is a whole segment.
 mutations:3627	method: Save | Load .| Run	(method: Save or method: Load . or method: Run)	targets apart: 0,8,13,14,15,16,18,19,20,111,112,113,... (18); ')' expected.
@@ -397,7 +393,6 @@ mutations:5056	- method: Ping\n| method: R,un\nmethod: Save	method: Save\n- (met
 mutations:5058	- method: Ping\n| method: Run.\nmethod: Save	method: Save\n- (method: Ping)\n- (method: Run.)	targets apart: 14,15,16,18,19,20; A name is expected at ')'.
 mutations:5063	- method: Ping\n| method: Run,\nmethod: Save	method: Save\n- (method: Ping)\n- (method: Run,)	targets apart: 14,15,16,18,19,20; ')' expected.
 mutations:5066	method: Save\n- method: Ping**\n| method: Run	method: Save\n- (method: Ping**)\n- (method: Run)	targets apart: 14,15,16,18,19,20; '**' inside a segment.
-mutations:5070	method: Save?\n- method: Ping\n| method: Run	method: Save?\n- (method: Ping)\n- (method: Run)	targets apart: 69; '?' stands only after a type.
 mutations:5072	method: Save\n- method: Ping\n| method: >Run	method: Save\n- (method: Ping)\n- (method: >Run)	targets apart: 14,15,16,18,19,20; A name is expected at '>Run)'.
 mutations:5073	method: Save\n- method: P**ing\n| method: Run	method: Save\n- (method: P**ing)\n- (method: Run)	targets apart: 14,15,16,18,19,20; '**' inside a segment.
 mutations:5084	namespace: Acme.Cor>e\n| method: Save\n| method: Load	(namespace: Acme.Cor>e) or (method: Save) or (method: Load)	targets apart: 14,15,16,18,19,20; ')' expected.
@@ -460,7 +455,6 @@ mutations:5391	namespace: Acme.Core\n- namespace>: Acme.Core	namespace: Acme.Cor
 mutations:5395	names>pace: Acme.Core\n- type: Service\ntype: Service	(names>pace: Acme.Core) or (type: Service)\n- (type: Service)	targets apart: 14,15,16,17,18,19,20,21,22,23,24,25,... (71); Unexpected '>pace: Acme.Core) or (type: Service)' after a signature.
 mutations:5398	namespace: Acme.Cor<e\n- type: Service\ntype: Service	(namespace: Acme.Cor<e) or (type: Service)\n- (type: Service)	targets apart: 14,15,16,17,18,19,20,21,22,23,24,25,... (71); A namespace has no type arguments.
 mutations:5402	namespace: Acme.Core\n- type: Ser)vice\ntype: Service	(namespace: Acme.Core) or (type: Service)\n- (type: Ser)vice)	targets apart: 8,9,10,11,12,13,14,15,16,17,18,19,... (168); Unexpected 'vice)'.
-mutations:5422	- **.*?\n**.*	**.*\n- (**.*?)	targets apart: 0,1,2,3,4,5,6,7,8,9,10,11,... (235); '?' stands only after a type.
 mutations:5455	public **.*(...) : *>*	public **.*(..) : *>*	targets apart: 9,24,35,36,38,44,45,58,59,101,103,104,... (30); Unexpected '>*' after a signature.
 mutations:5542	unsafe **.*?	unsafe **.*?	targets apart: 61,62,63; 'unsafe' is reserved.
 
