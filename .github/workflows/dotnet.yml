@@ -124,8 +124,8 @@ jobs:
         }
 
         // Applied to a type with a TargetFilter, so that the packed generator reads a filter on the oldest toolchain: the filter
-        // parser is generated, and this runs it in the SDK 9.0.100 compiler. The filter has a condition rule, a compact method
-        // pattern and an exclusion, so that the grammar's main readings are taken.
+        // parser is generated, and this runs it in the SDK 9.0.100 compiler. The filter has a compound condition, a parameter
+        // list and an exclusion, so that the grammar's main readings are taken.
         [Aspect(OnBeforeCall = nameof(OnBeforeCall))]
         [AttributeUsage(AttributeTargets.Class)]
         sealed class FilteredAttribute : Attribute
@@ -140,7 +140,7 @@ jobs:
             [Count] public static int Twice(int x) { return x * 2; }
         }
 
-        [Filtered(TargetFilter = "namespace: Consumer*; method: Sel*ed\npublic static Consumer*.FilteredService.Sel*(int) : int\n- **.Other(...)")]
+        [Filtered(TargetFilter = "namespace: Consumer* and type: FilteredService and method: Sel*ed and params: (int) and returns: int\n- method: Other")]
         static class FilteredService
         {
             public static int Selected(int x) { return x + 1; }

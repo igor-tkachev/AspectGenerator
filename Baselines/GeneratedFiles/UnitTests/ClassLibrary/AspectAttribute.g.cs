@@ -90,10 +90,11 @@
 		/// </summary>
 		public AspectInstanceLifetime Lifetime { get; set; } = AspectInstanceLifetime.Auto;
 		/// <summary>
-		/// Gets or sets default target filter rules supplied by the aspect author.
+		/// Gets or sets the default target filter supplied by the aspect author.
 		/// </summary>
 		/// <remarks>
-		/// These rules are prepended to the <c>TargetFilter</c> supplied when the aspect is applied. The resulting effective filter is evaluated using normal TargetFilter rule ordering.
+		/// The default is the weakest level of the filter: a <c>TargetFilter</c> that declares the same property on any level (assembly, type or method) replaces what the default says about it, and the other properties the default declares still apply.
+		/// Write subtractions only: an include in the default restricts every application that does not declare that property itself.
 		/// TargetFilter is compile-time selection metadata and is not copied to the runtime aspect instance.
 		/// </remarks>
 		public string? DefaultTargetFilter { get; set; }

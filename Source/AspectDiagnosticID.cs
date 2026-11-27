@@ -19,15 +19,7 @@ namespace AspectGenerator
 		public const string HookRequiresInterceptData           = "AG0106";
 		public const string AsyncHookRequiresTask               = "AG0107";
 		public const string IteratorBodyNotCovered              = "AG0108";
-		public const string InvalidAspectFilterRegex            = "AG0201";
-		public const string InvalidAspectFilterRule             = "AG0202";
-		public const string UnknownAspectFilterConditionKey     = "AG0204";
-		public const string InvalidAspectFilterParameterPattern = "AG0205";
-		public const string InvalidAspectFilterDottedPattern    = "AG0206";
-		public const string MethodLevelTargetFilter             = "AG0208";
 		public const string InvalidAspectDiagnosticSeverity     = "AG0209";
-		public const string AspectFilterRuleMatchesNothing      = "AG0210";
-		public const string AspectFilterNameWithWhiteSpace      = "AG0211";
 		public const string FilterSyntaxError                   = "AG0220";
 		public const string FilterUnknownKeyOrWord              = "AG0221";
 		public const string FilterInvalidPattern                = "AG0224";

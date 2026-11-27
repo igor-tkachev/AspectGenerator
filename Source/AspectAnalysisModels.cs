@@ -180,10 +180,6 @@ namespace AspectGenerator
 		}
 	}
 
-	record AspectFilterSet(
-		AttributeInfo                 Attribute,
-		AspectFilters.TargetFilterSet Filters);
-
 	sealed class AspectSelectionPlan
 	{
 		public AspectSelectionPlan(

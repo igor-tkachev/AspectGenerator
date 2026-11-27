@@ -887,7 +887,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void AspectFiltersUseCanonicalMethodSignatureTest()
+		public void FiltersUseCanonicalMethodSignatureTest()
 		{
 			var result = RunGenerator(FilterCanonicalSignatureSource);
 

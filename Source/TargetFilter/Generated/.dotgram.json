@@ -4,7 +4,6 @@
   "generator": "0.3.0",
   "files": [
     { "name": "AspectGenerator.FilterV2.FilterV2Parser.g.cs" },
-    { "name": "AspectGenerator.TargetFilterParser.g.cs" },
     { "name": "DotGram.Attributes.g.cs" },
     { "name": "Microsoft.CodeAnalysis.EmbeddedAttribute.cs" }
   ]

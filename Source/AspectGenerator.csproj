@@ -35,7 +35,6 @@
 	  That output is not pinned, so this mode never packs: automatic packaging is off and an explicit pack fails.
 	-->
 	<ItemGroup>
-		<AdditionalFiles Include="TargetFilter\TargetFilter.gram" />
 		<AdditionalFiles Include="FilterV2\FilterV2.gram" />
 	</ItemGroup>
 

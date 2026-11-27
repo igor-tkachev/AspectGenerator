@@ -31,7 +31,7 @@ namespace AspectGenerator.Tests.TargetFilters
 		[TestMethod]
 		public void EveryCharacterIsTracedToTheSourceThatMakesItTest()
 		{
-			var random = new TargetFilterCorpus.SplitMix64(0x4147_5446_534D_0001UL);
+			var random = new SplitMix64(0x4147_5446_534D_0001UL);
 			var traced = new Dictionary<string,int>(StringComparer.Ordinal);
 
 			for (var n = 0; n < Count; n++)
@@ -197,7 +197,7 @@ namespace AspectGenerator.Tests.TargetFilters
 				var source = text.ToString(location.SourceSpan);
 				var means  = value.Substring(i, length);
 
-				Assert.IsTrue(Means(source, means), $"{kind}: character {i} '{TargetFilterProbe.Escape(means)}' is traced to '{TargetFilterProbe.Escape(source)}': {literal}");
+				Assert.IsTrue(Means(source, means), $"{kind}: character {i} '{Escape(means)}' is traced to '{Escape(source)}': {literal}");
 
 				i += length - 1;
 			}
@@ -219,7 +219,7 @@ namespace AspectGenerator.Tests.TargetFilters
 		}
 
 		/// <summary>The value as each kind of literal it can be written as, with escapes chosen at random.</summary>
-		static IEnumerable<(string Kind, string Literal)> Literals(string value, TargetFilterCorpus.SplitMix64 random)
+		static IEnumerable<(string Kind, string Literal)> Literals(string value, SplitMix64 random)
 		{
 			yield return ("regular", "\"" + Escaped(value, random, braces: false) + "\"");
 			yield return ("verbatim", "@\"" + value.Replace("\"", "\"\"", StringComparison.Ordinal) + "\"");
@@ -241,7 +241,7 @@ namespace AspectGenerator.Tests.TargetFilters
 			}
 		}
 
-		static string Escaped(string value, TargetFilterCorpus.SplitMix64 random, bool braces)
+		static string Escaped(string value, SplitMix64 random, bool braces)
 		{
 			var sb = new StringBuilder();
 
@@ -309,6 +309,55 @@ namespace AspectGenerator.Tests.TargetFilters
 			var constant   = (string)compilation.GetSemanticModel(tree).GetConstantValue(expression).Value!;
 
 			return (expression, compilation, constant);
+		}
+
+		/// <summary>Reversible escaping of a text for a message: backslash, TAB, CR, LF, other control characters and non-ASCII.</summary>
+		static string Escape(string text)
+		{
+			var sb = new StringBuilder(text.Length + 8);
+
+			foreach (var ch in text)
+			{
+				switch (ch)
+				{
+					case '\\': sb.Append("\\\\"); break;
+					case '\t': sb.Append("\\t");  break;
+					case '\r': sb.Append("\\r");  break;
+					case '\n': sb.Append("\\n");  break;
+					default:
+						if (ch < 0x20 || ch >= 0x7f)
+							sb.Append("\\u").Append(((int)ch).ToString("x4", CultureInfo.InvariantCulture));
+						else
+							sb.Append(ch);
+						break;
+				}
+			}
+
+			return sb.ToString();
+		}
+
+		/// <summary>The SplitMix64 generator: a fixed algorithm, so seeds mean the same on every runtime.</summary>
+		sealed class SplitMix64(ulong seed)
+		{
+			ulong _state = seed;
+
+			public ulong NextUInt64()
+			{
+				unchecked
+				{
+					var z = _state += 0x9E3779B97F4A7C15UL;
+
+					z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
+					z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
+
+					return z ^ (z >> 31);
+				}
+			}
+
+			public int Next(int exclusiveMax)
+			{
+				return (int)(NextUInt64() % (ulong)exclusiveMax);
+			}
 		}
 	}
 }
