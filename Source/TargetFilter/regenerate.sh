@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerates Source/TargetFilter/Generated from TargetFilter.gram with the DotGram commit and the .NET SDK in dotgram.pin.
+# Regenerates Source/TargetFilter/Generated from FilterV2.gram with the DotGram commit and the .NET SDK in dotgram.pin.
 #
 #     Source/TargetFilter/regenerate.sh
 #
