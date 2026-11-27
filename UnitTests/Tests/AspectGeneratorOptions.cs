@@ -12,10 +12,10 @@ using AspectGenerator;
 [assembly: Aspects.Log(
 	TargetFilter =
 	[
-		"""
-		method: {global::AspectGenerator.Tests.UnitTests.AssemblyFilterTarget, global::AspectGenerator.Tests.UnitTests.InterceptedMethod, global::AspectGenerator.Tests.UnitTests.InterceptedGenericMethod<string>, global::System.String.Substring}
-		- method: global::System.String.Substring and params: (_, _)
-		"""
+		// Written with an explicit line break: a raw literal takes the line endings of the checkout, and the generated
+		// comment above each interceptor shows the value, which the baseline compares.
+		"method: {global::AspectGenerator.Tests.UnitTests.AssemblyFilterTarget, global::AspectGenerator.Tests.UnitTests.InterceptedMethod, global::AspectGenerator.Tests.UnitTests.InterceptedGenericMethod<string>, global::System.String.Substring}\n" +
+		"- method: global::System.String.Substring and params: (_, _)"
 	])]
 
 [assembly: AspectGenerator.Tests.OnCall(
