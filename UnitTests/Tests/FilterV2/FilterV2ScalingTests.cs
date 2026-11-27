@@ -27,6 +27,9 @@ namespace AspectGenerator.Tests.FilterV2
 		/// <summary>How many times a measurement past its bar is taken again before it counts as past it.</summary>
 		const int Remeasures = 4;
 
+		/// <summary>How many rounds over the sizes of a shape are taken, and the least time of each size counts.</summary>
+		const int Rounds = 3;
+
 		/// <summary>Times below this are compared as this: a ratio of two sub-microsecond reads says nothing.</summary>
 		const double FloorMs = 0.05;
 
@@ -149,18 +152,31 @@ namespace AspectGenerator.Tests.FilterV2
 
 			foreach (var (shape, make, sizes) in Shapes())
 			{
-				var times = new List<double>();
+				// The least of several rounds over all the sizes: a round that a loaded machine slowed is not the cost of the
+				// reading, and rounds that take turns over the sizes do not slow one size alone.
+				var times    = new double[sizes.Length];
+				var readings = new FilterItemReading[sizes.Length];
+				var lengths  = new int[sizes.Length];
 
-				foreach (var size in sizes)
+				Array.Fill(times, double.MaxValue);
+
+				for (var round = 0; round < Rounds; round++)
 				{
-					var input          = make(size);
-					var (ms, reading)  = Time(input, size >= 100_000 ? 5 : 9);
+					for (var i = 0; i < sizes.Length; i++)
+					{
+						var input   = make(sizes[i]);
+						var (ms, r) = Time(input, sizes[i] >= 100_000 ? 5 : 9);
 
-					times.Add(ms);
-					TestContext.WriteLine($"{shape,-28} {size,7} {input.Length,8} chars {ms,9:0.000} ms  {Outcome(reading)}");
+						times[i]    = Math.Min(times[i], ms);
+						readings[i] = r;
+						lengths[i]  = input.Length;
+					}
 				}
 
-				for (var i = 1; i < times.Count; i++)
+				for (var i = 0; i < sizes.Length; i++)
+					TestContext.WriteLine($"{shape,-28} {sizes[i],7} {lengths[i],8} chars {times[i],9:0.000} ms  {Outcome(readings[i])}");
+
+				for (var i = 1; i < times.Length; i++)
 				{
 					var ratio = Math.Max(times[i], FloorMs) / Math.Max(times[i - 1], FloorMs);
 
