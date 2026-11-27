@@ -19,6 +19,9 @@ namespace AspectGenerator.Tests.FilterV2Contract
 	[TestClass]
 	public class WholeTypeDoubleStarTests
 	{
+		// A copy of the constant, so that what is asserted about it is not folded away at compile time.
+		static readonly bool DefaultReading = PatternDefaults.WholeTypeDoubleStarIsAnyType;
+
 		const bool Name = false;
 		const bool Any  = true;
 
@@ -121,8 +124,8 @@ namespace AspectGenerator.Tests.FilterV2Contract
 		public void TheDefaultIsTheReadingAsANameTest()
 		{
 			// Igor has not answered; the default stays what the language did before the question was asked.
-			Assert.IsFalse(PatternDefaults.WholeTypeDoubleStarIsAnyType);
-			Assert.AreEqual(Matches("**", "int[]", Name), Matches("**", "int[]", PatternDefaults.WholeTypeDoubleStarIsAnyType));
+			Assert.IsFalse(DefaultReading);
+			Assert.AreEqual(Matches("**", "int[]", Name), Matches("**", "int[]", DefaultReading));
 		}
 
 		static TypePatternSyntax Syntax(string pattern)

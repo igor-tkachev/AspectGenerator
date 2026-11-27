@@ -74,6 +74,9 @@ namespace AspectGenerator.Tests
 			}
 			""";
 
+		// A copy of the constant, so that the branches below stay reachable whichever value it has.
+		static readonly bool OverridesIsKeyToday = FilterV2Language.OverridesIsKey;
+
 		static readonly string[] HierarchyCalls = ["derived.Save()", "derived.Load()", "concrete.Handle(\"x\")", "concrete.Other()", "ints.Handle(1)", "job.Run()", "handler.Handle(\"x\")"];
 
 		/// <summary>The calls of <see cref="HierarchySource"/> that the assembly filter selects, in the order of <see cref="HierarchyCalls"/>.</summary>
@@ -122,7 +125,7 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void OverridesAreCoveredAsTheChoiceSaysTest()
 		{
-			var coversOverrides = HierarchyKeys.ImplementsCoversOverrides(FilterV2Language.OverridesIsKey);
+			var coversOverrides = HierarchyKeys.ImplementsCoversOverrides(OverridesIsKeyToday);
 
 			AssertHierarchy(HierarchyKeys.ImplementsFilter("Base.Save"), coversOverrides ? ["derived.Save()"] : []);
 
@@ -130,7 +133,7 @@ namespace AspectGenerator.Tests
 			// error, and the aspect selects nothing.
 			var selected = HierarchySelected(HierarchyKeys.OverridesFilter("Base.Save"), out var diagnostics);
 
-			if (FilterV2Language.OverridesIsKey)
+			if (OverridesIsKeyToday)
 			{
 				Assert.AreEqual("derived.Save()", selected, diagnostics);
 			}
