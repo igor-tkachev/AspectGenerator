@@ -2,10 +2,10 @@
 
 AspectGenerator diagnostics are intended to report user mistakes before generated code fails to compile.
 
-## Existing Diagnostics
+## General Diagnostics
 
-- `AG0001`: `OnCall` aspect must be last when the aspect is applied directly.
-- `AG0002`: `OnCall` aspect must be last when the aspect is inferred from method metadata.
+- `AG0001`: `OnCall` aspect must be last when the aspect is applied directly. It is reported on the aspect attribute, also when the aspect reaches the method through a type-level or assembly-level target filter (1.1 reported that case as `AG0002`, at the call).
+- `AG0002`: `OnCall` aspect must be last when the aspect is inferred from method metadata: an aspect that a referenced library applied to the method. It is reported at the intercepted call.
 - `AG0003` (warning): a call to a method that carries the aspect itself is not intercepted, because the compiler cannot intercept it or because generated code cannot express it. The message gives the reason; see [Limitations](Limitations).
 - `AG0004`: generated interceptor namespace is not listed in `InterceptorsNamespaces`.
 - `AG0006` (information, **off by default**): the same, for a call that only a target filter selected, reported at the call. A broad filter is expected to skip what it cannot rewrite, so this is not a warning. It is off because a broad filter can skip thousands of calls, and the compiler pays several milliseconds for every diagnostic reported at a source location (it binds the enclosing method again to look for `[SuppressMessage]`); on a large project that added tens of seconds to a build. Turn it on in `.editorconfig` to get the list with locations: `dotnet_diagnostic.AG0006.severity = suggestion` shows it in the IDE and in a binary log (`-bl`), but information and suggestion diagnostics are not printed by a command-line build; use `warning` to see the list on the console.
@@ -22,18 +22,32 @@ AspectGenerator diagnostics are intended to report user mistakes before generate
 - `AG0106`: `UseInterceptData=true` requires `ref InterceptData<T>`.
 - `AG0107`: async hook requires a supported async target.
 - `AG0108`: the aspect has `OnAfterCall`, `OnCatch`, `OnFinally` or `OnUsing` hooks on an iterator method, whose body runs only while the returned sequence is enumerated, after those hooks; see [Hook lifecycle](Hook-lifecycle#iterators). A warning at the aspect applied to the method, information at the call when only a target filter selected it.
-- `AG0201`: invalid aspect filter regex.
-- `AG0202`: invalid target filter rule.
-- `AG0204`: unknown target filter condition key.
-- `AG0205`: invalid target filter parameter pattern.
-- `AG0206`: invalid target filter dotted pattern.
-- `AG0208`: `TargetFilter` is used on a method-level aspect attribute, including one applied to a local function.
 - `AG0209`: invalid `AspectGeneratorAspectDiagnosticSeverity` or `AspectGeneratorOptions.AspectDiagnosticSeverity` value.
-- `AG0210` (warning): a target filter rule that can match no method. The rule is valid and kept, but its accessibility words cannot all hold for one method: they are combined with AND, so `public private` matches nothing, while `protected internal` and `private protected` do match. The rule selected nothing before this warning existed either, so a build with `TreatWarningsAsErrors` fails on it only where a filter already holds a rule that never worked.
-- `AG0211` (information): a target filter rule names a namespace, type or method with white space outside `<…>`, which a C# name never has, so the rule probably holds a typo: `publik Save` is read as the method name `publik Save`, not as an accessibility word and a name. Names written in other languages (F# double-backtick names, IL) can hold such white space and the rule matches them, so this is information only and never fails a build. Only the part of a name segment before its first wildcard is looked at, since a wildcard can stand for a `<` and C# names hold white space inside type arguments (`Empty<delegate* unmanaged<System.Void>[]>`); white space inside `<…>`, around the commas of a parameter list, after a parameter modifier and in type patterns is not reported.
 - `AG0300`: marks a call where AspectGenerator applies aspects. Controlled by `AspectGeneratorAspectDiagnosticSeverity`; default severity is `Info`.
 
-The target filter diagnostics (`AG0201`, `AG0202`, `AG0204`–`AG0206`, `AG0210`, `AG0211`) point at the characters of the filter they are about, inside the string literal: the unknown key, the word that is not a modifier, the invalid regex, the whole rule (across lines where it spans them) for `AG0210` and `AG0211`. This works for regular, verbatim and raw literals (single- and multi-line), interpolated strings of constants, concatenations and `const` references declared in the project. Where the characters cannot be traced exactly (`nameof`, a `const` of a referenced assembly, a rule that continues from one element of a `TargetFilter` array into the next), the diagnostic is reported on the attribute instead. A `DefaultTargetFilter` of an aspect declared in the project is reported in the aspect's `[Aspect]` attribute, once; one of an aspect from a referenced assembly is reported on each attribute that applies it.
+## Target Filter Diagnostics
+
+The language of target filters is described in [Target filters](Target-filters). Every filter error makes the aspect select nothing in the compilation, and the reader reports every error it finds.
+
+| Id | Severity | When |
+| --- | --- | --- |
+| `AG0220` | error | syntax error, with the expected input; `not (…)`; `Task<>` |
+| `AG0221` | error | unknown or reserved key or word, wrong kind of value |
+| `AG0224` | error | invalid pattern (`**` inside a segment, `..` twice, `?` outside a type, empty `{}`) |
+| `AG0225` | error | 1.1 syntax, with the v2 spelling; a property included twice in one filter, with the rewrite |
+| `AG0227` | error | nested too deeply; a pattern with more than 256 wildcards and alternatives, or type arguments nested deeper than 32 |
+| `AG0231` | error | a `string[]` item begins with `and` or `or` |
+| `AG0232` | warning | an aspect attribute on a method is not applied to it, because the target filters of the aspect do not select the method. Build only. A warning, so under `TreatWarningsAsErrors` it fails the build |
+| `AG0233` | error | invalid level reference (`aspect.p` or `assembly.p` naming another property, a level that is not above the block, or standing in a compound line) |
+| `AG0234` | error | invalid use of `any` |
+| `AG0235` | error | two selecting attributes give a method different settings. The method still gets the aspect, and the conflicting setting takes the aspect's default. Build only |
+| `AG0236` | error | a filter read from a referenced assembly cannot be read (for example 1.1 syntax in a library built with AspectGenerator 1.1); the aspect selects nothing in this compilation. The message names the assembly, which has to be rebuilt with this version. Build only |
+
+Errors point at the characters of the filter inside the string literal (each `string[]` item separately). This works for regular, verbatim and raw literals (single- and multi-line), interpolated strings of constants, concatenations and `const` references declared in the project. A filter built from constants of a referenced assembly, from `nameof`, or from text that spans two items is reported on the attribute instead. A `DefaultTargetFilter` of an aspect declared in the project is reported in the aspect's `[Aspect]` attribute, once; one of an aspect from a referenced assembly is reported on each attribute that applies it. An error in a filter read from a referenced assembly has no source location of its own and is reported with `AG0236`.
+
+### Retired ids
+
+The ids of the 1.1 filter language are retired and are not reused: `AG0201`, `AG0202`, `AG0204`, `AG0205`, `AG0206`, `AG0208`, `AG0210` and `AG0211`. A filter that uses 1.1 syntax is reported as `AG0225` with the 1.2 spelling; see [Migrating from 1.1](Target-filters#migrating-from-11). `TargetFilter` on a method-level aspect attribute (`AG0208` in 1.1) is no longer an error: it filters that method. Suppressions of a retired id have no effect.
 
 ## Design-Time Builds
 
@@ -42,13 +56,13 @@ The IDE runs the generator on every edit in a design-time build. A design-time b
 Reported live, in design-time builds and in builds:
 
 - `AG0101` and `AG0102` for aspects declared in the project;
-- `AG0201`, `AG0202`, `AG0204`, `AG0205`, `AG0206`, `AG0210`, `AG0211` for assembly-level and type-level target filters, including an aspect's `DefaultTargetFilter` (checked at each type-level application);
-- `AG0208`;
+- the target filter errors `AG0220`, `AG0221`, `AG0224`, `AG0225`, `AG0227`, `AG0231`, `AG0233` and `AG0234`, for the target filters of aspect attributes at every level, including an aspect's `DefaultTargetFilter` (checked at each type-level application);
 - `AG0209`.
 
 Reported by builds only, because they need a selected target method or a bound call:
 
 - `AG0001` and `AG0002`;
+- `AG0232`, `AG0235` and `AG0236`, which need the selection of target methods (`AG0232` is a warning: with `TreatWarningsAsErrors` it fails the build);
 - `AG0103` through `AG0108`;
 - `AG0101` and `AG0102` for aspects declared in referenced assemblies, which are checked against each intercepted target;
 - `AG0003`, `AG0006` and `AG0007`, for calls that are left as they are;
@@ -93,6 +107,10 @@ The report is limited to 1,024 KB by default (`AspectGeneratorReportSizeLimit`, 
   <AspectGeneratorReportSizeLimit>0</AspectGeneratorReportSizeLimit>
 </PropertyGroup>
 ```
+
+### Explaining a selection
+
+For an aspect attribute on a method that is not applied (`AG0232`), the report lists, per combination of blocks, each property, the block that decided it (file and line) and its value, the expansion of any `aspect.`/`assembly.` reference, and where each setting came from. With `AspectGeneratorTrace=true` the same table is written for every method a filter considered. These tables count towards `AspectGeneratorReportSizeLimit`, like the lists. See [Levels and the cascade](Target-filters#levels-and-the-cascade) for how the decision is made.
 
 ## Build Report Trace
 
