@@ -80,7 +80,11 @@ namespace AspectGenerator.Tests
 
 				Assert.IsTrue(location.IsInSource, items);
 				Assert.AreEqual(second, location.SourceTree!.GetText().ToString(location.SourceSpan), items);
-				Assert.IsTrue(location.SourceSpan.Start > source.LastIndexOf('{', source.IndexOf(second, StringComparison.Ordinal)), items);
+
+				// Exactly the characters of the last item, which is the second occurrence of the property: not of the first item with the same text.
+				var expectedStart = source.IndexOf("new[] { ", StringComparison.Ordinal) + "new[] { ".Length + items.LastIndexOf("\"" + second + "\"", StringComparison.Ordinal) + 1;
+
+				Assert.AreEqual(expectedStart, location.SourceSpan.Start, items);
 
 				// With the spelling that says it in one line.
 				StringAssert.Contains(found[0].GetMessage(), hint, items);
