@@ -118,7 +118,7 @@ namespace AspectGenerator.Tests
 			""";
 
 		[TestMethod]
-		public void GenericMethodOfTheProjectIsDecidedPerCallOnlyWhenItsDefinitionIsNotSelectedTest()
+		public void GenericMethodOfTheProjectIsDecidedPerCallWhereAPatternNamesAConcreteTypeTest()
 		{
 			const string log   = "AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = \"FILTER\")";
 			const string trace = "AspectGenerator.Tests.GeneratorDriver.Trace(TargetFilter = \"FILTER\")";
@@ -148,23 +148,25 @@ namespace AspectGenerator.Tests
 					"Helper.Get<Int32>;Trace;1a2b3",
 					2),
 
-				// A call in a generic caller is described by the caller's type parameter name: a rule naming it selects
-				// that call site, and its generic interceptor runs the aspect for every type argument of the caller.
-				(Assembly(log, "param: TItem"), "", "Helper.Get<Int32>;Helper.Get<String>;1a2b3", 1),
+				// A call in a generic caller is described with the caller's own type parameter, which only * matches: the
+				// concrete type arguments are excluded to reach those sites alone. Both generic callers (Generic and Other)
+				// have such a site, and one generic interceptor runs the aspect for every type argument of the caller.
+				(Assembly(log, "param: * and not param: System.Int32 and not param: System.String"), "", "Helper.Get<Int32>;Helper.Get<String>;Helper.Get<Int32>;1a2b3", 1),
 
-				// Two call sites in generic callers with different lists share the generic shape but not the interceptor.
+				// Two aspects: one selects the call with a concrete type argument, the other the call sites of the generic callers.
 				(
-					Assembly(log, "param: TItem") + Environment.NewLine + Assembly(trace, "param: TOther"),
+					Assembly(log, "param: System.Int32") + Environment.NewLine + Assembly(trace, "param: * and not param: System.Int32 and not param: System.String"),
 					"",
-					"Helper.Get<Int32>;Helper.Get<String>;Trace;1a2b3",
+					"Helper.Get<Int32>;Trace;Trace;Trace;1a2b3",
 					2),
 
-				// A type-level rule only sees the definition, Get<T>(T), which does not name System.Int32.
-				("", Type(log, "param: System.Int32"), "1a2b3", 0),
+				// A type-level rule decides the same way: the pattern names a concrete type where the definition has a type
+				// parameter, so each call decides.
+				("", Type(log, "param: System.Int32"), "Helper.Get<Int32>;1a2b3", 1),
 
-				// Once the definition is selected, its list is the list of every call: the per-call rule is not consulted,
-				// so Get(1) gets Trace alone. The calls in generic callers share one generic interceptor.
-				(Assembly(log, "param: System.Int32"), Type(trace, "method: Get<*>"), "Trace;Trace;Trace;Trace;Trace;1a2b3", 3),
+				// An aspect whose definition is selected as a whole (the type's method: Get<*>) and another that selects one
+				// call: each decides for itself, and the calls of the generic callers share one generic interceptor.
+				(Assembly(log, "param: System.Int32"), Type(trace, "method: Get<*>"), "Helper.Get<Int32>;Trace;Trace;Trace;Trace;Trace;1a2b3", 3),
 			})
 			{
 				var result = AssertRunsWithResult(

@@ -22,8 +22,8 @@ namespace AspectGenerator.Tests
 			// Log selects every List<*>.Add. Both calls need a generic interceptor and share one.
 			Breaker(
 				"""
-				[assembly: AspectGenerator.Tests.GeneratorDriver.Tag(TargetFilter = "contains: Hidden>.Add")]
-				[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "regex: List<[^>]+>\\.Add\\(")]
+				[assembly: AspectGenerator.Tests.GeneratorDriver.Tag(TargetFilter = "method: List<Hidden>.Add")]
+				[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "method: List<*>.Add")]
 
 				static class Calls
 				{

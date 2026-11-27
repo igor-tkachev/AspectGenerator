@@ -215,6 +215,78 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
+		public void ConflictingConstructorArgumentsAreReportedWhetherOrNotTheAspectHasAParameterlessConstructorTest()
+		{
+			const string aspect =
+				"""
+				using System;
+				using AspectGenerator;
+
+				[assembly: AspectGenerator.Tests.GeneratorDriver.Tag("a", TargetFilter = "method: Save")]
+				[assembly: AspectGenerator.Tests.GeneratorDriver.Tag("b", TargetFilter = "method: Save")]
+
+				namespace AspectGenerator.Tests.GeneratorDriver
+				{
+					[Aspect(OnBeforeCall = nameof(Before))]
+					[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+					sealed class TagAttribute : Attribute
+					{
+						/*PARAMETERLESS*/
+						public TagAttribute(string text)
+						{
+							Text = text;
+						}
+
+						public string  Text         { get; }
+						public string? TargetFilter { get; set; }
+
+						public static void Before(InterceptInfo info)
+						{
+						}
+					}
+
+					static class Calls
+					{
+						public static void Save()
+						{
+						}
+
+						public static void Run()
+						{
+							Save();
+						}
+					}
+				}
+				""";
+
+			foreach (var parameterless in new[] { true, false })
+			{
+				var source = aspect.Replace("/*PARAMETERLESS*/", parameterless ? "public TagAttribute() { Text = \"default\"; }" : "", StringComparison.Ordinal);
+				var result = RunGenerator(source);
+				var kind   = parameterless ? "with a parameterless constructor" : "without one";
+
+				// Two attributes of one level select Save with different constructor arguments: an error either way.
+				var conflicts = result.Diagnostics.Where(static d => d.Id == AspectDiagnosticID.AspectSettingsConflict).ToList();
+
+				Assert.AreEqual(1, conflicts.Count, kind + Environment.NewLine + DescribeDiagnostics(result));
+				Assert.AreEqual(DiagnosticSeverity.Error, conflicts[0].Severity, kind);
+				StringAssert.Contains(conflicts[0].GetMessage(), "the constructor arguments", kind);
+
+				// The method keeps the aspect; the conflicting constructor arguments fall back to the parameterless constructor
+				// where the aspect has one.
+				Assert.AreEqual(1, CountIntercepted(result, "Save()"), kind + Environment.NewLine + DescribeDiagnostics(result));
+
+				if (parameterless)
+				{
+					var interceptors = GetGeneratedSource(result, "Interceptors.g.cs");
+
+					StringAssert.Contains(interceptors, "= new global::AspectGenerator.Tests.GeneratorDriver.TagAttribute();", kind);
+					Assert.IsFalse(interceptors.Contains("= new global::AspectGenerator.Tests.GeneratorDriver.TagAttribute(\"", StringComparison.Ordinal), kind + Environment.NewLine + interceptors);
+				}
+			}
+		}
+
+		[TestMethod]
 		public void AspectWrittenOnAMethodThatIsNotAppliedIsReportedTest()
 		{
 			var result = RunSelection(
@@ -471,6 +543,9 @@ namespace AspectGenerator.Tests
 				Assert.AreEqual(0, CountIntercepted(bare, "new SelectionLib.Service().Write()"), kind);
 				Assert.AreEqual(0, CountIntercepted(bare, "SelectionLib.Service.Plain()"),      kind);
 
+				// The library's settings apply to the method its chain selected.
+				StringAssert.Contains(GetGeneratedSource(bare, "Interceptors.g.cs"), "{ Level = 7 }", kind);
+
 				// The consumer's assembly filter decides Write as any referenced method; it does not change Read.
 				var consumer = RunGenerator(
 					[SelectionLibraryConsumerSource.Replace("/*ASSEMBLY*/", "[assembly: SelectionLib.LibLog(TargetFilter = \"method: Write or Read\", Level = 3)]", StringComparison.Ordinal)],
@@ -480,6 +555,12 @@ namespace AspectGenerator.Tests
 				Assert.AreEqual(1, CountIntercepted(consumer, "new SelectionLib.Service().Write()"), kind + Environment.NewLine + DescribeDiagnostics(consumer));
 				Assert.AreEqual(0, CountIntercepted(consumer, "SelectionLib.Service.Plain()"),      kind);
 				AssertNoDiagnostic(consumer, AspectDiagnosticID.AspectSettingsConflict);
+
+				// The library's settings win for Read, and the consumer's for Write: each interceptor is built with its own.
+				var interceptors = GetGeneratedSource(consumer, "Interceptors.g.cs");
+
+				Assert.AreEqual(1, CountOccurrences(interceptors, "{ Level = 7 }"), kind + Environment.NewLine + interceptors);
+				Assert.AreEqual(1, CountOccurrences(interceptors, "{ Level = 3 }"), kind + Environment.NewLine + interceptors);
 			}
 		}
 
