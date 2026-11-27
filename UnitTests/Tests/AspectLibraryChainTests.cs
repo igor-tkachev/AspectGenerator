@@ -180,6 +180,70 @@ namespace AspectGenerator.Tests
 				$"Expected {AspectDiagnosticID.UnreadableReferencedFilter} in a design-time build. Actual: {string.Join(", ", designTime.Diagnostics.Select(static d => d.Id))}");
 		}
 
+		const string ChainOnCallNotLastSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			namespace ChainOnCall
+			{
+				[Aspect(OnCall = nameof(Call))]
+				[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+				public sealed class ChainCallAttribute : Attribute
+				{
+					public static int Call()
+					{
+						return 1;
+					}
+				}
+
+				[Aspect(OnAfterCall = nameof(After))]
+				[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+				public sealed class ChainAfterAttribute : Attribute
+				{
+					public static void After(InterceptInfo<int> info)
+					{
+					}
+				}
+
+				public static class Service
+				{
+					/*APPLICATIONS*/
+					public static int Get()
+					{
+						return 0;
+					}
+				}
+			}
+			""";
+
+		const string ChainOnCallNotLastAppSource =
+			"""
+			static class Calls
+			{
+				public static int Run()
+				{
+					return ChainOnCall.Service.Get();
+				}
+			}
+			""";
+
+		[TestMethod]
+		[DataRow("[ChainCall][ChainAfter]", 1)]
+		[DataRow("[ChainAfter][ChainCall]", 0)]
+		public void OnCallNotLastInAspectFromMetadataIsReportedAtTheCallTest(string applications, int expected)
+		{
+			// The attributes of a library's method have no syntax in the application, so the diagnostic cannot point at the
+			// attribute and is reported at the intercepted call as AG0002.
+			var api     = CompileChainLibrary("ChainApi",    ChainApiSource,    new() { ["build_property.AspectGeneratorPublicApi"] = "true" });
+			var library = CompileChainLibrary("ChainOnCall", ChainOnCallNotLastSource.Replace("/*APPLICATIONS*/", applications, StringComparison.Ordinal), new(), api.Reference);
+
+			var result = RunChainApp([ChainOnCallNotLastAppSource], new(), out _, api.Reference, library.Reference);
+
+			Assert.AreEqual(expected, result.Diagnostics.Count(static d => d.Id == AspectDiagnosticID.OnCallNotLastMethod), string.Join(", ", result.Diagnostics.Select(static d => d.Id)));
+			Assert.AreEqual(0, result.Diagnostics.Count(static d => d.Id == AspectDiagnosticID.OnCallNotLastAspect));
+		}
+
 		static (MetadataReference Reference, byte[] Image) CompileChainLibrary(string name, string source, Dictionary<string,string> properties, params MetadataReference[] references)
 		{
 			var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview).WithFeatures([new("InterceptorsNamespaces", "AspectGenerator")]);

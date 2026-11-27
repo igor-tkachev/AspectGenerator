@@ -1712,7 +1712,7 @@ namespace AspectGenerator.Tests
 
 			StringAssert.Contains(source, "SaveAsync_Interceptor");
 			Assert.IsFalse(source.Contains("Save_Interceptor", StringComparison.Ordinal));
-			Assert.IsFalse(source.Contains("UpdateAsync_Interceptor", StringComparison.Ordinal));
+			StringAssert.Contains(source, "UpdateAsync_Interceptor");
 		}
 
 		[TestMethod]
@@ -4963,7 +4963,7 @@ namespace AspectGenerator.Tests
 
 			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(
 				TargetFilter = @"
-				method: Save* and method: *Async
+				(method: Save* and method: *Async) or method: Update*
 				")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
