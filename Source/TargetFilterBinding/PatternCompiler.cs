@@ -37,8 +37,8 @@ namespace AspectGenerator.TargetFilterBinding
 
 		/// <summary>
 		/// What <c>**</c> means where it is the whole of a type pattern (<c>returns: **</c>, <c>: **</c>, a type argument
-		/// <c>List&lt;**&gt;</c>), also with <c>?</c>. <see langword="false"/>: a name pattern, which matches no array,
-		/// tuple or pointer (a type name is matched by its trailing segments, and <c>**</c> is any number of them).
+		/// <c>List&lt;**&gt;</c>), also with <c>?</c>. <see langword="false"/>: a name pattern, which matches no array and no
+		/// pointer, as they are no names (a tuple is the named type ValueTuple, so it does match).
 		/// <see langword="true"/>: any type, like <c>*</c>. <c>System.**.Task</c> is a name either way. This is the one
 		/// place that chooses it; the tests run the other choice as well.
 		/// </summary>
@@ -597,7 +597,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 			var named = new NamedTypePattern(CompileOneName(name, Anchoring.Trailing, false, depth, doubleStarIsAnyType));
 
-			// `**` as a whole type: a name pattern that matches no array, tuple or pointer, or any type like `*`.
+			// `**` as a whole type: a name pattern, which no array or pointer matches, or any type like `*`.
 			if (doubleStarIsAnyType && name.Global is null && name.Segments.Length == 1 && name.Segments[0] is { IsGlobstar: true, TypeArguments: null })
 				return AnyTypePattern.Instance;
 
