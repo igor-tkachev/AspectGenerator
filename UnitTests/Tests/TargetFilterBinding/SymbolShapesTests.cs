@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using AspectGenerator.TargetFilterBinding;
 
@@ -205,6 +206,93 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			}
 
 			Assert.AreEqual(0, failures.Count, string.Join(Environment.NewLine, failures));
+		}
+
+		[TestMethod]
+		public void TypesNestedByTheThousandAreShapedOnASmallStackTest()
+		{
+			const int Depth = 1_000;
+
+			string Repeat(string text)
+			{
+				return string.Concat(Enumerable.Repeat(text, Depth));
+			}
+
+			var generic  = Repeat("Box<") + "int" + Repeat(">");
+			var tuple    = Repeat("(int, ") + "int" + Repeat(")");
+			var function = Repeat("delegate*<") + "int" + Repeat(", void>");
+			var mixed    = Repeat("Box<") + "int[]" + Repeat(">[]");
+			var outer    = "Outer" + string.Concat(Enumerable.Range(0, Depth).Select(i => ".I" + i));
+
+			var source =
+				"""
+				public class Box<T> { }
+				""" + "\n" +
+				"public class Outer { " + string.Concat(Enumerable.Range(0, Depth).Select(i => "public class I" + i + " { ")) + string.Concat(Enumerable.Repeat("}", Depth)) + " }\n" +
+				"public unsafe class Deep\n{\n" +
+				"\tpublic " + generic + " Generic(" + generic + " p) { return default!; }\n" +
+				"\tpublic " + tuple + " Tuple(" + tuple + " p) { return default; }\n" +
+				"\tpublic " + function + " Function(" + function + " p) { return default; }\n" +
+				"\tpublic " + mixed + " Mixed(" + mixed + " p) { return default!; }\n" +
+				"\tpublic " + outer + " Outer(" + outer + " p) { return default!; }\n" +
+				"}\n";
+
+			var probe     = new ProbeCompilation(source);
+			var symbols   = new[] { "Generic", "Tuple", "Function", "Mixed", "Outer" }.ToDictionary(name => name, name => probe.Method("Deep", name));
+			var shapes    = new TypeShapes();
+			var results   = new List<string>();
+			Exception? failure = null;
+
+			var thread = new System.Threading.Thread(() =>
+			{
+				try
+				{
+					foreach (var (name, method) in symbols)
+					{
+						var shape = shapes.Get(method.ReturnType);
+
+						results.Add($"{name}: {shapes.Get(method.Parameters[0].Type).ToString() == shape.ToString()} {shape.ToString()!.Length > Depth}");
+
+						// The facts of the method read the same shapes.
+						var facts = probe.Definition(method);
+
+						results.Add($"{name}: {FilterProbe.Answer("returns: *", facts, MatchPhase.Definition)}/{FilterProbe.Answer("params: (*)", facts, MatchPhase.Definition)}");
+					}
+				}
+				catch (Exception ex)
+				{
+					failure = ex;
+				}
+			}, 256 * 1024);
+
+			thread.Start();
+			thread.Join();
+
+			Assert.IsNull(failure, failure?.ToString());
+
+			CollectionAssert.AreEqual(
+				new[]
+				{
+					"Generic: True True", "Generic: True/True", "Tuple: True True", "Tuple: True/True", "Function: True True", "Function: True/True",
+					"Mixed: True True", "Mixed: True/True", "Outer: True True", "Outer: True/True",
+				},
+				results, string.Join("; ", results));
+
+			// The shapes are whole: a generic type nested by the thousand has every level, and so has a tuple.
+			var shape = (NamedTypeShape)shapes.Get(symbols["Generic"].ReturnType);
+
+			Assert.AreEqual(Repeat("Box<") + "System.Int32" + Repeat(">"), shape.ToString());
+
+			var tupleShape = (NamedTypeShape)shapes.Get(symbols["Tuple"].ReturnType);
+			var levels     = 0;
+
+			while (!tupleShape.TupleElements.IsDefaultOrEmpty && tupleShape.TupleElements[1] is NamedTypeShape inner)
+			{
+				levels++;
+				tupleShape = inner;
+			}
+
+			Assert.AreEqual(Depth, levels);
 		}
 	}
 }

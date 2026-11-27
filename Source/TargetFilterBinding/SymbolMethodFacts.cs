@@ -15,38 +15,152 @@ namespace AspectGenerator.TargetFilterBinding
 	/// </summary>
 	sealed class TypeShapes
 	{
+		/// <summary>How deep, and how wide, a type may be for the compiler's own hash code and equality to be called on it.</summary>
+		const int MaxKeyDepth = 24;
+		const int MaxKeyNodes = 256;
+
 		readonly ConcurrentDictionary<ITypeSymbol, TypeShape>                        _types      = new(SymbolEqualityComparer.Default);
+		readonly ConcurrentDictionary<ITypeSymbol, TypeShape>                        _deepTypes  = new(ByReference.Instance);
 		readonly ConcurrentDictionary<INamespaceSymbol, ImmutableArray<NameSegment>> _namespaces = new(SymbolEqualityComparer.Default);
 
+		/// <summary>
+		/// The shape of a type. A type is nested as deep as its source nests it (type arguments, tuple elements, the
+		/// parameters of a function pointer, outer types, array and pointer wrappers), so the shapes it is made of are
+		/// made first, innermost first, from a stack of the types still to make and not by calls that follow it down.
+		/// </summary>
 		public TypeShape Get(ITypeSymbol type)
 		{
-			if (_types.TryGetValue(type, out var shape))
+			if (TryGetKnown(type, out var shape))
 				return shape;
 
-			// Arrays of arrays and pointers to pointers are taken off one by one and put back from the inside, so that a
-			// type wrapped by the thousand is not followed down by calls.
-			List<ITypeSymbol>? wrappers = null;
-			var core                    = type;
+			var pending      = new Stack<ITypeSymbol>();
+			var dependencies = new List<ITypeSymbol>();
 
-			while (core is IArrayTypeSymbol or IPointerTypeSymbol && !_types.ContainsKey(core))
+			pending.Push(type);
+
+			while (pending.Count > 0)
 			{
-				(wrappers ??= []).Add(core);
-				core = core is IArrayTypeSymbol array ? array.ElementType : ((IPointerTypeSymbol)core).PointedAtType;
-			}
+				var current = pending.Peek();
 
-			shape = _types.TryGetValue(core, out var known) ? known : _types.GetOrAdd(core, Create(core));
-
-			if (wrappers is not null)
-			{
-				for (var i = wrappers.Count - 1; i >= 0; i--)
+				if (TryGetKnown(current, out _))
 				{
-					var inner = shape;
-
-					shape = _types.GetOrAdd(wrappers[i], wrappers[i] is IArrayTypeSymbol array ? new ArrayTypeShape(inner, array.Rank) : new PointerTypeShape(inner));
+					pending.Pop();
+					continue;
 				}
+
+				dependencies.Clear();
+				AddDependencies(current, dependencies);
+
+				var waiting = false;
+
+				foreach (var dependency in dependencies)
+				{
+					if (!TryGetKnown(dependency, out _))
+					{
+						pending.Push(dependency);
+						waiting = true;
+					}
+				}
+
+				if (waiting)
+					continue;
+
+				pending.Pop();
+
+				// Everything it is made of is made: Create finds it by lookups.
+				Cache(current).GetOrAdd(current, Create(current));
 			}
 
-			return shape;
+			return Cache(type)[type];
+		}
+
+		sealed class ByReference : IEqualityComparer<ITypeSymbol>
+		{
+			public static readonly ByReference Instance = new();
+
+			public bool Equals(ITypeSymbol? x, ITypeSymbol? y)
+			{
+				return ReferenceEquals(x, y);
+			}
+
+			public int GetHashCode(ITypeSymbol obj)
+			{
+				return System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
+			}
+		}
+
+		bool TryGetKnown(ITypeSymbol type, out TypeShape shape)
+		{
+			return Cache(type).TryGetValue(type, out shape!);
+		}
+
+		/// <summary>
+		/// The compiler hashes and compares a constructed type by following its type arguments down by calls, so a type
+		/// nested by the thousand is no key it can be asked about on a small stack. A type nested deeper than a pattern
+		/// can be is kept by reference: the same shape is made again where the compiler gives another symbol for it.
+		/// </summary>
+		ConcurrentDictionary<ITypeSymbol, TypeShape> Cache(ITypeSymbol type)
+		{
+			return IsShallow(type) ? _types : _deepTypes;
+		}
+
+		static bool IsShallow(ITypeSymbol type)
+		{
+			var pending      = new Stack<(ITypeSymbol Type, int Depth)>();
+			var dependencies = new List<ITypeSymbol>();
+			var nodes        = 0;
+
+			pending.Push((type, 0));
+
+			while (pending.Count > 0)
+			{
+				var (current, depth) = pending.Pop();
+
+				if (depth > MaxKeyDepth || ++nodes > MaxKeyNodes)
+					return false;
+
+				dependencies.Clear();
+				AddDependencies(current, dependencies);
+
+				foreach (var dependency in dependencies)
+					pending.Push((dependency, depth + 1));
+			}
+
+			return true;
+		}
+
+		/// <summary>The types whose shapes <see cref="Create"/> reads.</summary>
+		static void AddDependencies(ITypeSymbol type, List<ITypeSymbol> dependencies)
+		{
+			switch (type)
+			{
+				case IArrayTypeSymbol array:
+					dependencies.Add(array.ElementType);
+					break;
+
+				case IPointerTypeSymbol pointer:
+					dependencies.Add(pointer.PointedAtType);
+					break;
+
+				case IFunctionPointerTypeSymbol function:
+					foreach (var parameter in function.Signature.Parameters)
+						dependencies.Add(parameter.Type);
+
+					dependencies.Add(function.Signature.ReturnType);
+					break;
+
+				case INamedTypeSymbol named:
+					if (named.ContainingType is { } outer)
+						dependencies.Add(outer);
+
+					dependencies.AddRange(named.TypeArguments);
+
+					if (named.IsTupleType)
+						foreach (var element in named.TupleElements)
+							dependencies.Add(element.Type);
+
+					break;
+			}
 		}
 
 		public NamedTypeShape GetNamed(INamedTypeSymbol type)
@@ -56,13 +170,31 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public ImmutableArray<NameSegment> GetNamespace(INamespaceSymbol @namespace)
 		{
-			if (@namespace.IsGlobalNamespace)
-				return ImmutableArray<NameSegment>.Empty;
+			// The namespaces above the first one made are taken off one by one and put back from the outside, as nested
+			// as the source nests them.
+			var missing = new Stack<INamespaceSymbol>();
+			var current = @namespace;
+			var known   = ImmutableArray<NameSegment>.Empty;
 
-			if (_namespaces.TryGetValue(@namespace, out var segments))
-				return segments;
+			while (!current.IsGlobalNamespace)
+			{
+				if (_namespaces.TryGetValue(current, out known))
+					break;
 
-			return _namespaces.GetOrAdd(@namespace, GetNamespace(@namespace.ContainingNamespace).Add(new NameSegment(@namespace.Name)));
+				missing.Push(current);
+				current = current.ContainingNamespace;
+			}
+
+			var segments = current.IsGlobalNamespace ? ImmutableArray<NameSegment>.Empty : known;
+
+			while (missing.Count > 0)
+			{
+				var next = missing.Pop();
+
+				segments = _namespaces.GetOrAdd(next, segments.Add(new NameSegment(next.Name)));
+			}
+
+			return segments;
 		}
 
 		public NameSegment GetMethodSegment(IMethodSymbol method)
@@ -88,11 +220,17 @@ namespace AspectGenerator.TargetFilterBinding
 			return shapes.MoveToImmutable();
 		}
 
-		/// <summary>The shape of a type that is no array and no pointer; those are made in <see cref="Get"/>.</summary>
+		/// <summary>The shape of a type whose parts have their shapes made, which it finds by lookups; <see cref="Get"/> makes them first.</summary>
 		TypeShape Create(ITypeSymbol type)
 		{
 			switch (type)
 			{
+				case IArrayTypeSymbol array:
+					return new ArrayTypeShape(Get(array.ElementType), array.Rank);
+
+				case IPointerTypeSymbol pointer:
+					return new PointerTypeShape(Get(pointer.PointedAtType));
+
 				case ITypeParameterSymbol parameter:
 					return new TypeParameterShape(parameter.Name);
 
