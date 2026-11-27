@@ -319,11 +319,13 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 
 		public static CSharpCompilation Compile(string source, string name = "Probe", params MetadataReference[] references)
 		{
+			// Not concurrent: the compiler then binds on the calling thread, so a test that compiles a deeply nested source gives it
+			// the stack it chose, not that of a pool thread (1 MB on Windows).
 			var compilation = CSharpCompilation.Create(
 				name,
 				[CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview), name + ".cs")],
 				Framework().Concat(references),
-				new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable, allowUnsafe: true));
+				new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable, allowUnsafe: true, concurrentBuild: false));
 
 			var errors = compilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error).Select(static d => d.ToString()).ToList();
 
