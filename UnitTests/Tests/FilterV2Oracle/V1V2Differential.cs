@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using Microsoft.CodeAnalysis;
+
 namespace AspectGenerator.Tests.FilterV2Oracle
 {
 	/// <summary>
@@ -257,12 +259,35 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 		public const string RowGeneric  = "predicted, row 'generic methods declared in the project were judged by their definition'";
 		public const string RowRemoved  = "predicted, row 'backslash escapes: removed'";
 
-		public const string OutsideProject       = "outside the table: an assembly filter stays inside the project";
-		public const string OutsideExcludeOnly   = "outside the table: subtractions alone start from the level's default (1.1 selected nothing without an include)";
-		public const string OutsideAccessibility = "outside the table: accessibility words are exact (1.1 'private' matched 'private protected', 'protected' and 'internal' matched 'protected internal')";
-		public const string OutsideAnchoring     = "outside the table: type and method patterns match trailing segments (1.1 matched the full name)";
-		public const string OutsideArity         = "outside the table: a name without <...> matches any arity; a type parameter's name is an ordinary name";
-		public const string OutsideStrict        = "outside the table: version 2 rejects text 1.1 read without an error (stricter patterns, reserved words)";
+		public const string RowProject       = "predicted, row 'an assembly filter without a place reached referenced methods too'";
+		public const string RowExcludeOnly   = "predicted, row 'a filter of subtractions only selected nothing'";
+		public const string RowAccessibility = "predicted, row 'accessibility words are exact (`private` also matched `private protected`)'";
+		public const string RowAnchoring     = "predicted, row 'a name pattern matched the full name'";
+		public const string RowArity         = "predicted, row '`Load<T>` named the arity and the type parameter'";
+		public const string RowStrict        = "predicted, row 'text 1.1 read without an error could be meaningless'";
+		public const string RowStructural    = "predicted, row 'a name pattern in a type position matched arrays and tuples by their text'";
+		public const string RowMoreMatches   = "predicted, row 'tuples, generic attributes and `attribute: System.Obsolete` did not match'";
+		public const string RowExtern        = "predicted, row '`extern` did not cover runtime-implemented methods'";
+
+		/// <summary>
+		/// <c>**</c> written as a whole type pattern (<c>returns: **</c>) is not decided yet: it matches any type like
+		/// <c>*</c>, or stays a name pattern. Its records are counted apart until it is.
+		/// </summary>
+		public const string PendingAnyType = "pending: `**` as a whole type pattern (matches any type like `*`, or stays a name pattern)";
+
+		/// <summary>
+		/// A record whose frozen decisions differ from the 1.1.2 package's own, because the baselines were written by the
+		/// 1.1 parser regenerated on master. The class is followed by what differs.
+		/// </summary>
+		public const string BaselineAfter112 = "baseline after 1.1.2";
+
+		// The three records known to differ from 1.1.2: the baseline reads them as the later 1.1 code does.
+		static readonly Dictionary<(string File, string Input), string> _afterBaseline = new()
+		{
+			[("curated", @"method: *a\*")] = "the `\\*` escape",
+			[("curated", "returns: int[]")]  = "array ranks are ignored in 1.1.2",
+			[("curated", "Load<T>")]         = "a generic definition and a call of it",
+		};
 
 		public const string Unexplained = "unexplained";
 
@@ -286,9 +311,27 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 			return _decisions[filter] = result;
 		}
 
+		// An explicit interface implementation (`void IJob.Run()`) is not a target: a filter names the member of the
+		// interface, and a call goes through the interface, never to a method no source can name. 1.1 selected it by its
+		// compiled name (`Run`, `Ru*n`); version 2 has no such target, and the baselines keep its index.
+		static bool IsExplicitImplementation(int target)
+		{
+			return OracleTargets.Entries[target].Symbol.MethodKind == MethodKind.ExplicitInterfaceImplementation;
+		}
+
 		static readonly Regex _questionInName = new(@"\?[\w*<.]", RegexOptions.CultureInvariant);
 
 		public Result Classify(FrozenBaseline.Record record)
+		{
+			var result = ClassifyRecord(record);
+
+			if (!_afterBaseline.TryGetValue((record.File, record.Input), out var reason))
+				return result;
+
+			return result with { Class = BaselineAfter112 + ": " + reason, Detail = result.Detail.Length == 0 ? result.Class : $"{result.Class}; {result.Detail}" };
+		}
+
+		Result ClassifyRecord(FrozenBaseline.Record record)
 		{
 			if (V1Rewrite.IsNotExpressible(record.Input))
 				return new Result(record, NotExpressible, null, "");
@@ -300,7 +343,7 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 
 			var rewrite = V1Rewrite.Filter(rules);
 			var v2      = Decide(rewrite);
-			var apart   = Enumerable.Range(0, v2.Length).Where(t => record.Included(t) != (v2[t] == true)).ToList();
+			var apart   = Enumerable.Range(0, v2.Length).Where(t => !IsExplicitImplementation(t) && record.Included(t) != (v2[t] == true)).ToList();
 
 			if (apart.Count == 0)
 				return new Result(record, Same, rewrite, "");
@@ -317,7 +360,7 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 				if (rules.Any(static r => r.UsesEscapes))
 					return new Result(record, RowRemoved, rewrite, detail + "; " + error);
 
-				return new Result(record, OutsideStrict, rewrite, detail + "; " + error);
+				return new Result(record, RowStrict, rewrite, detail + "; " + error);
 			}
 
 			var anywhere = Decide(rewrite + "\norigin: any");
@@ -328,6 +371,7 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 			List<bool?[]>? withoutQuestion = null;
 			List<bool?[]>? widened         = null;
 			List<bool?[]>? rooted          = null;
+			List<bool?[]>? anyType         = null;
 
 			foreach (var t in apart)
 			{
@@ -336,9 +380,9 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 				var symbol = entry.Symbol.ReducedFrom ?? entry.Symbol;
 
 				if (anywhere[t] == v1)
-					causes.Add(OutsideProject);
+					causes.Add(RowProject);
 				else if (!rules.Any(static r => r.Include))
-					causes.Add(OutsideExcludeOnly);
+					causes.Add(RowExcludeOnly);
 				else if (Ordered(rules, perRule, t) == v1)
 					causes.Add(RowOrder);
 				else if (entry.Label is "constructed" or "constructed type" or "reduced extension" || entry.Symbol.ReducedFrom is not null)
@@ -346,13 +390,23 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 				else if (rules.Any(static r => r.V2!.Contains('?')) && Ordered(rules, withoutQuestion ??= Matches(rules, static r => [r.V2!.Replace("?", "")]), t) == v1)
 					causes.Add(RowNullable);
 				else if (Ordered(rules, widened ??= Matches(rules, static r => Widen(r.V2!)), t) == v1)
-					causes.Add(OutsideAccessibility);
+					causes.Add(RowAccessibility);
 				else if (Ordered(rules, rooted ??= Matches(rules, static r => [Root(r.V2!)]), t) == v1)
-					causes.Add(OutsideAnchoring);
+					causes.Add(RowAnchoring);
 				else if (rules.Any(static r => r.UsesEscapes))
 					causes.Add(RowRemoved);
+				else if (rules.Any(static r => WholeTypeAnyPatterns(r.V2!).Any()) && Ordered(rules, anyType ??= Matches(rules, static r => [AnyTypeAsStar(r.V2!)]), t) == v1)
+					causes.Add(PendingAnyType);
+				else if (rules.Any(static r => ReturnsPatterns(r.V2!).Any(static p => p.StartsWith("*.*", StringComparison.Ordinal))) && HasStructuralType(symbol))
+					causes.Add(RowStructural);
+				else if (!v1 && rules.Any(static r => r.V2!.Contains("attribute:", StringComparison.Ordinal)))
+					causes.Add(RowMoreMatches);
+				else if (!v1 && symbol.ReturnType.IsTupleType)
+					causes.Add(RowMoreMatches);
+				else if (!v1 && (symbol.IsExtern || (symbol.MethodImplementationFlags & System.Reflection.MethodImplAttributes.InternalCall) != 0) && rules.Any(static r => r.V2!.Contains("extern", StringComparison.Ordinal)))
+					causes.Add(RowExtern);
 				else if (symbol.IsGenericMethod || symbol.ContainingType.IsGenericType)
-					causes.Add(OutsideArity);
+					causes.Add(RowArity);
 				else
 				{
 					causes.Add(Unexplained);
@@ -360,9 +414,54 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 				}
 			}
 
-			var name = causes.Contains(Unexplained) ? Unexplained : string.Join(" + ", causes);
+			// A pending question keeps its records together, whatever else explains some of their targets.
+			var name = causes.Contains(Unexplained) ? Unexplained : causes.Contains(PendingAnyType) ? PendingAnyType : string.Join(" + ", causes);
 
 			return new Result(record, name, rewrite, detail + (hints.Count > 0 ? "; " + string.Join("; ", hints.Take(3)) : ""));
+		}
+
+		// The type patterns a rule writes after `returns:`, or after the colon of a compact signature (which has no key
+		// before it: `Save(int) : **`, `*:*.**`).
+		static readonly Regex _colon = new(@"(?<key>[\w*.>)]*)[ \t]*(?<!:):(?!:)[ \t]*(?<value>[^\s)]+)", RegexOptions.CultureInvariant);
+
+		static readonly HashSet<string> _propertyKeys = ["namespace", "type", "method", "param", "params", "attribute", "inherits", "implements", "overrides"];
+
+		static IEnumerable<string> ReturnsPatterns(string rule)
+		{
+			foreach (Match match in _colon.Matches(rule))
+			{
+				if (!_propertyKeys.Contains(match.Groups["key"].Value))
+					yield return match.Groups["value"].Value;
+			}
+		}
+
+		static readonly Regex _wholeAny = new(@"^[*.]*\*\*\??$", RegexOptions.CultureInvariant);
+
+		// A returns pattern that is `**`, or `**` after only wildcard segments, as a whole.
+		static IEnumerable<string> WholeTypeAnyPatterns(string rule)
+		{
+			return ReturnsPatterns(rule).Where(static p => _wholeAny.IsMatch(p));
+		}
+
+		static string AnyTypeAsStar(string rule)
+		{
+			var result = rule;
+
+			foreach (var pattern in WholeTypeAnyPatterns(rule).Distinct())
+				result = result.Replace(pattern, "*");
+
+			return result;
+		}
+
+		// The types a name pattern cannot be: an array, a pointer, a tuple or a type parameter, in the returns or a parameter.
+		static bool HasStructuralType(IMethodSymbol method)
+		{
+			static bool Structural(ITypeSymbol type)
+			{
+				return type.TypeKind is TypeKind.Array or TypeKind.Pointer or TypeKind.FunctionPointer or TypeKind.TypeParameter || type.IsTupleType;
+			}
+
+			return Structural(method.ReturnType) || method.Parameters.Any(static p => Structural(p.Type));
 		}
 
 		// Each rule decided alone wherever the method is declared; a rule given as several texts matches where any does.
@@ -400,6 +499,8 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 		static IEnumerable<string> Widen(string rule)
 		{
 			yield return rule;
+			yield return rule.Replace("protected and internal", "protected internal").Replace("internal and protected", "internal protected");
+			yield return rule.Replace("private and protected", "private protected").Replace("protected and private", "protected private");
 			yield return _private.Replace(rule, "private protected");
 			yield return _protected.Replace(rule, "protected internal");
 			yield return _protected.Replace(rule, "private protected");
