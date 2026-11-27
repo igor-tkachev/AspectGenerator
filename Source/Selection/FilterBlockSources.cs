@@ -109,6 +109,19 @@ namespace AspectGenerator.Selection
 			var data = definition.AspectDefinitionData ??
 				FindApplication(definition.AspectDefinitionSyntax, definition.AspectDefinitionSemanticModel);
 
+			// The generated aspect API is output of this generator, so the compilation it reads does not hold it and an [Aspect]
+			// written in the source does not bind: its attribute data has no arguments. Its default is then read as the
+			// registry read it, from the written argument.
+			if ((data is null || data.AttributeClass is null or { TypeKind: TypeKind.Error }) &&
+				definition is { AspectDefinitionSyntax: {} written, DefaultTargetFilter: {} text })
+			{
+				var label  = $"DefaultTargetFilter of {AspectName(definition.AttributeClass)}";
+				var items  = ImmutableArray.Create(NamedArgumentExpression(written, DefaultTargetFilterArgument));
+				var source = new FilterBlockSource(CascadeLevel.Aspect, definition.AttributeClass, definition.AttributeClass.OriginalDefinition, null, written, [text], items);
+
+				return FilterBlockBuilder.Build(CascadeLevel.Aspect, [text], null, label, source);
+			}
+
 			return AspectDefault(definition.AttributeClass, data);
 		}
 
