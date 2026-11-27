@@ -50,14 +50,15 @@ namespace AspectGenerator
 
 		/// <summary>
 		/// The AG0235 message: the attributes that select a method write different values of one setting. The method keeps the
-		/// aspect; the setting takes the aspect's default.
+		/// aspect, and the message says what the conflicting setting is until the value is written on a more specific attribute.
 		/// </summary>
 		/// <param name="values">Each value with the attributes that write it.</param>
-		public static string GetAspectSettingsConflictMessage(string aspect, string method, string setting, IEnumerable<string> values)
+		/// <param name="consequence">What is used meanwhile, as a clause that follows "until then", for example <c>'Level' takes the aspect's default</c>.</param>
+		public static string GetAspectSettingsConflictMessage(string aspect, string method, string setting, IEnumerable<string> values, string consequence)
 		{
 			return
 				$"The attributes that select '{method}' for [{aspect}] write different values of {setting}: {string.Join("; ", values)}. " +
-				$"Write the value on a more specific attribute; until then {setting} takes the aspect's default.";
+				$"Write the value on a more specific attribute; until then {consequence}.";
 		}
 
 		/// <summary>

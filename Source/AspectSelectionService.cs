@@ -890,7 +890,8 @@ namespace AspectGenerator
 		/// <summary>
 		/// The aspect as a selected method gets it: its settings from the decision, the attribute that stands for it the most
 		/// specific one that selects the method. A settings conflict is reported (AG0235); the method keeps the aspect, and the
-		/// conflicting setting is left to the aspect's default.
+		/// conflicting setting is left to the aspect's default (the constructor arguments: to the parameterless constructor, or,
+		/// where the aspect has none, to those of the most specific attribute).
 		/// </summary>
 		AttributeInfo Apply(AspectScope scope, CascadeDecision decision, IMethodFacts consumer, IMethodFacts? library, MatchPhase phase, IMethodSymbol method)
 		{
@@ -900,14 +901,23 @@ namespace AspectGenerator
 
 			foreach (var conflict in decision.Conflicts)
 			{
-				ReportConflict(aspect, method, conflict);
+				var isConstructor = conflict.Name == FilterBlockSources.ConstructorSetting;
+				var parameterless = isConstructor && ConflictingConstructorUsesParameterlessConstructor
+					? aspect.AspectClass.InstanceConstructors.FirstOrDefault(static c => c.Parameters.IsEmpty)
+					: null;
 
-				if (ConflictingConstructorUsesParameterlessConstructor &&
-					conflict.Name == FilterBlockSources.ConstructorSetting &&
-					aspect.AspectClass.InstanceConstructors.FirstOrDefault(static c => c.Parameters.IsEmpty) is {} parameterless)
-				{
+				ReportConflict(
+					aspect,
+					method,
+					conflict,
+					!isConstructor
+						? $"'{conflict.Name}' takes the aspect's default"
+						: parameterless is not null
+							? "the aspect is built with its parameterless constructor"
+							: "the aspect is built with the constructor arguments of the most specific attribute that selects the method");
+
+				if (parameterless is not null)
 					application = new EffectiveApplication(reportAt, parameterless, ImmutableArray<TypedConstant>.Empty, reportAt, application.NamedArguments);
-				}
 			}
 
 			_trace?.IncrementCounter(reportAt.ApplicationSyntaxReference is not null && IsOnMethod(scope, reportAt) ? "Selected aspect applications" : "Applied target filter matches");
@@ -993,7 +1003,7 @@ namespace AspectGenerator
 			}
 		}
 
-		void ReportConflict(AspectCascade aspect, IMethodSymbol method, CascadeSettingConflict conflict)
+		void ReportConflict(AspectCascade aspect, IMethodSymbol method, CascadeSettingConflict conflict, string consequence)
 		{
 			var setting  = conflict.Name == FilterBlockSources.ConstructorSetting ? "the constructor arguments" : $"'{conflict.Name}'";
 			var values   = new List<string>();
@@ -1024,7 +1034,7 @@ namespace AspectGenerator
 
 			_diagnostics.Report(
 				AspectDiagnosticID.AspectSettingsConflict,
-				AspectDiagnostics.GetAspectSettingsConflictMessage(aspect.Name, method.OriginalDefinition.ToDisplayString(), setting, values),
+				AspectDiagnostics.GetAspectSettingsConflictMessage(aspect.Name, method.OriginalDefinition.ToDisplayString(), setting, values, consequence),
 				location);
 		}
 

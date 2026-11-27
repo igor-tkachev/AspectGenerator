@@ -210,6 +210,7 @@ namespace AspectGenerator.Tests
 			Assert.AreEqual(DiagnosticSeverity.Error, conflicts[0].Severity);
 			StringAssert.Contains(conflicts[0].GetMessage(), "SaveOrder()");
 			StringAssert.Contains(conflicts[0].GetMessage(), "'Level'");
+			StringAssert.Contains(conflicts[0].GetMessage(), "until then 'Level' takes the aspect's default.");
 			Assert.AreEqual(1, CountIntercepted(result, "SaveOrder()"));
 			Assert.AreEqual(1, CountIntercepted(result, "SaveUser()"));
 		}
@@ -271,6 +272,14 @@ namespace AspectGenerator.Tests
 				Assert.AreEqual(1, conflicts.Count, kind + Environment.NewLine + DescribeDiagnostics(result));
 				Assert.AreEqual(DiagnosticSeverity.Error, conflicts[0].Severity, kind);
 				StringAssert.Contains(conflicts[0].GetMessage(), "the constructor arguments", kind);
+
+				// The message says what is used meanwhile.
+				StringAssert.Contains(
+					conflicts[0].GetMessage(),
+					parameterless
+						? "until then the aspect is built with its parameterless constructor."
+						: "until then the aspect is built with the constructor arguments of the most specific attribute that selects the method.",
+					kind);
 
 				// The method keeps the aspect; the conflicting constructor arguments fall back to the parameterless constructor
 				// where the aspect has one.
