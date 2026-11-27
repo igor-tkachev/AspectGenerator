@@ -36,6 +36,12 @@ class	1	predicted, row '`int?` matched `int`' + predicted, row 'an assembly filt
 class	1	predicted, row 'a name pattern in a type position matched arrays and tuples by their text' + predicted, row 'a name pattern matched the full name' + predicted, row 'generic methods declared in the project were judged by their definition'
 class	1	predicted, row 'a name pattern in a type position matched arrays and tuples by their text' + predicted, row 'rules ordered, the last match decides'
 
+# records that write ** as a whole type pattern: 4; targets apart from 1.1 with ** read as a name (the default) and as any type; what is left with any type is the project-only default of an assembly filter
+curated:625	returns: **	as a name: 65	as any type: 51	as any type, reaching referenced methods: 0
+curated:764	public **.*(...) : **	as a name: 19	as any type: 0	as any type, reaching referenced methods: 0
+mutations:3288	*:*.**	as a name: 19	as any type: 0	as any type, reaching referenced methods: 0
+mutations:4087	returns: **?	as a name: 189	as any type: 51	as any type, reaching referenced methods: 0
+
 # records baseline after 1.1.2: a generic definition and a call of it: file:line TAB 1.1 input TAB version 2 rewrite TAB detail
 curated:553	Load<T>	Load<T>	predicted, row '`Load<T>` named the arity and the type parameter'; targets apart: 40,41
 

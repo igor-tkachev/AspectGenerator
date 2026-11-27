@@ -34,6 +34,15 @@ namespace AspectGenerator.TargetFilterBinding
 		/// it; the tests run the other choice as well.
 		/// </summary>
 		public const ParameterModifierMatching ModifierMatching = ParameterModifierMatching.PerKind;
+
+		/// <summary>
+		/// What <c>**</c> means where it is the whole of a type pattern (<c>returns: **</c>, <c>: **</c>, a type argument
+		/// <c>List&lt;**&gt;</c>), also with <c>?</c>. <see langword="false"/>: a name pattern, which matches no array,
+		/// tuple or pointer (a type name is matched by its trailing segments, and <c>**</c> is any number of them).
+		/// <see langword="true"/>: any type, like <c>*</c>. <c>System.**.Task</c> is a name either way. This is the one
+		/// place that chooses it; the tests run the other choice as well.
+		/// </summary>
+		public const bool WholeTypeDoubleStarIsAnyType = false;
 	}
 
 	/// <summary>A pattern the language refuses for what it is as a whole: where, under which id, and what to write.</summary>
@@ -116,7 +125,7 @@ namespace AspectGenerator.TargetFilterBinding
 			var patterns = ImmutableArray.CreateBuilder<NamePattern>(whole.Count);
 
 			foreach (var alternative in whole)
-				patterns.Add(CompileOneName(alternative, anchoring, isMethodPath, 0));
+				patterns.Add(CompileOneName(alternative, anchoring, isMethodPath, 0, PatternDefaults.WholeTypeDoubleStarIsAnyType));
 
 			return new NamePatternSet(patterns.MoveToImmutable());
 		}
@@ -158,7 +167,7 @@ namespace AspectGenerator.TargetFilterBinding
 			return result;
 		}
 
-		static NamePattern CompileOneName(NamePatternSyntax syntax, Anchoring anchoring, bool isMethodPath, int depth)
+		static NamePattern CompileOneName(NamePatternSyntax syntax, Anchoring anchoring, bool isMethodPath, int depth, bool doubleStarIsAnyType)
 		{
 			if (IsEmptyName(syntax))
 				return NamePattern.EmptyPath;
@@ -189,12 +198,12 @@ namespace AspectGenerator.TargetFilterBinding
 				}
 
 				for (var i = first; i < syntax.Segments.Length; i++)
-					segments.Add(SimpleSegment(syntax.Segments[i], depth));
+					segments.Add(SimpleSegment(syntax.Segments[i], depth, doubleStarIsAnyType));
 
 				return new NamePattern(segments.ToImmutable(), isRooted);
 			}
 
-			var builder = new Builder(depth);
+			var builder = new Builder(depth, doubleStarIsAnyType);
 			var accept  = builder.Add(NamePattern.StepKind.Accept, null);
 			var step    = accept;
 
@@ -311,7 +320,7 @@ namespace AspectGenerator.TargetFilterBinding
 			}
 		}
 
-		static NamePattern.Segment SimpleSegment(NameSegmentSyntax segment, int depth)
+		static NamePattern.Segment SimpleSegment(NameSegmentSyntax segment, int depth, bool doubleStarIsAnyType)
 		{
 			if (segment.IsGlobstar)
 				return new NamePattern.Segment(null, default);
@@ -339,10 +348,10 @@ namespace AspectGenerator.TargetFilterBinding
 
 			pieces.Add(piece);
 
-			return new NamePattern.Segment(new SegmentGlob(pieces.ToImmutable()), Arguments(segment.TypeArguments, depth));
+			return new NamePattern.Segment(new SegmentGlob(pieces.ToImmutable()), Arguments(segment.TypeArguments, depth, doubleStarIsAnyType));
 		}
 
-		static ImmutableArray<TypePattern> Arguments(TypeArgumentsSyntax? typeArguments, int depth)
+		static ImmutableArray<TypePattern> Arguments(TypeArgumentsSyntax? typeArguments, int depth, bool doubleStarIsAnyType)
 		{
 			if (typeArguments is null)
 				return default;
@@ -350,12 +359,12 @@ namespace AspectGenerator.TargetFilterBinding
 			var arguments = ImmutableArray.CreateBuilder<TypePattern>(typeArguments.Arguments.Length);
 
 			foreach (var argument in typeArguments.Arguments)
-				arguments.Add(CompileType(argument, depth + 1));
+				arguments.Add(CompileType(argument, depth + 1, doubleStarIsAnyType));
 
 			return arguments.MoveToImmutable();
 		}
 
-		sealed class Builder(int depth)
+		sealed class Builder(int depth, bool doubleStarIsAnyType)
 		{
 			readonly List<NamePattern.Step> _steps = [];
 
@@ -394,7 +403,7 @@ namespace AspectGenerator.TargetFilterBinding
 			{
 				var step = next;
 
-				if (Arguments(segment.TypeArguments, depth + nesting) is { IsDefault: false } arguments)
+				if (Arguments(segment.TypeArguments, depth + nesting, doubleStarIsAnyType) is { IsDefault: false } arguments)
 				{
 					step           = Add(NamePattern.StepKind.Arguments, step);
 					step.Arguments = arguments;
@@ -475,12 +484,12 @@ namespace AspectGenerator.TargetFilterBinding
 
 		// ---- types -----------------------------------------------------------------------------------------------
 
-		public static TypePattern CompileType(TypePatternSyntax syntax)
+		public static TypePattern CompileType(TypePatternSyntax syntax, bool doubleStarIsAnyType = PatternDefaults.WholeTypeDoubleStarIsAnyType)
 		{
-			return CompileType(syntax, 0);
+			return CompileType(syntax, 0, doubleStarIsAnyType);
 		}
 
-		static TypePattern CompileType(TypePatternSyntax syntax, int depth)
+		static TypePattern CompileType(TypePatternSyntax syntax, int depth, bool doubleStarIsAnyType)
 		{
 			// Every rank and the `?` wrap the type once more, as a type argument does: a pattern is matched by following
 			// its wrappers one into the other.
@@ -489,7 +498,7 @@ namespace AspectGenerator.TargetFilterBinding
 			if (depth > MaxDepth)
 				throw TooDeep(syntax.Span);
 
-			var pattern = CompileCore(syntax.Core, depth);
+			var pattern = CompileCore(syntax.Core, depth, doubleStarIsAnyType);
 
 			// Ranks stand in C# order, the outermost first: `int[][,]` is an array of `int[,]`. A `?` closes what stands
 			// before it, as it does for the compiler: `int?[]` is an array of nullable int, and `int[]?[,]` an array of
@@ -520,25 +529,25 @@ namespace AspectGenerator.TargetFilterBinding
 			return pattern;
 		}
 
-		static TypePattern CompileCore(TypeCoreSyntax core, int depth)
+		static TypePattern CompileCore(TypeCoreSyntax core, int depth, bool doubleStarIsAnyType)
 		{
 			switch (core)
 			{
 				case NamedTypeSyntax named:
-					return CompileNamedType(named.Name, depth);
+					return CompileNamedType(named.Name, depth, doubleStarIsAnyType);
 
 				case TupleTypeSyntax tuple:
-					return new TupleTypePattern(CompileTypes(tuple.Elements, depth));
+					return new TupleTypePattern(CompileTypes(tuple.Elements, depth, doubleStarIsAnyType));
 
 				case TypeAlternativesSyntax alternatives:
-					return new AlternativesTypePattern(CompileTypes(alternatives.Alternatives, depth));
+					return new AlternativesTypePattern(CompileTypes(alternatives.Alternatives, depth, doubleStarIsAnyType));
 
 				case FunctionPointerTypeSyntax pointer:
 				{
 					var parameters = ImmutableArray.CreateBuilder<(ParameterModifiers?, TypePattern)>(pointer.Parameters.Length);
 
 					foreach (var parameter in pointer.Parameters)
-						parameters.Add((parameter.Modifier is { } modifier ? Modifiers(modifier) : null, CompileType(parameter.Type, depth + 1)));
+						parameters.Add((parameter.Modifier is { } modifier ? Modifiers(modifier) : null, CompileType(parameter.Type, depth + 1, doubleStarIsAnyType)));
 
 					return new FunctionPointerTypePattern(
 						isManaged: pointer.CallingConvention != "unmanaged",
@@ -551,32 +560,32 @@ namespace AspectGenerator.TargetFilterBinding
 			}
 		}
 
-		static ImmutableArray<TypePattern> CompileTypes(ImmutableArray<TypePatternSyntax> types, int depth)
+		static ImmutableArray<TypePattern> CompileTypes(ImmutableArray<TypePatternSyntax> types, int depth, bool doubleStarIsAnyType)
 		{
 			var patterns = ImmutableArray.CreateBuilder<TypePattern>(types.Length);
 
 			foreach (var type in types)
-				patterns.Add(CompileType(type, depth + 1));
+				patterns.Add(CompileType(type, depth + 1, doubleStarIsAnyType));
 
 			return patterns.MoveToImmutable();
 		}
 
-		static TypePattern CompileNamedType(NamePatternSyntax name, int depth)
+		static TypePattern CompileNamedType(NamePatternSyntax name, int depth, bool doubleStarIsAnyType)
 		{
 			var whole = WholeAlternatives(name);
 
 			if (whole.Count == 1)
-				return CompileOneNamedType(whole[0], depth);
+				return CompileOneNamedType(whole[0], depth, doubleStarIsAnyType);
 
 			var patterns = ImmutableArray.CreateBuilder<TypePattern>(whole.Count);
 
 			foreach (var alternative in whole)
-				patterns.Add(CompileOneNamedType(alternative, depth));
+				patterns.Add(CompileOneNamedType(alternative, depth, doubleStarIsAnyType));
 
 			return new AlternativesTypePattern(patterns.MoveToImmutable());
 		}
 
-		static TypePattern CompileOneNamedType(NamePatternSyntax name, int depth)
+		static TypePattern CompileOneNamedType(NamePatternSyntax name, int depth, bool doubleStarIsAnyType)
 		{
 			if (name.Global is null && name.Segments.Length == 1 && AliasGluedToStar(name.Segments[0]) is { } glued)
 			{
@@ -586,7 +595,11 @@ namespace AspectGenerator.TargetFilterBinding
 					$"Pointer types have no pattern form: write '\"System.{glued}*\"'; for a name write '{glued}*'.");
 			}
 
-			var named = new NamedTypePattern(CompileOneName(name, Anchoring.Trailing, false, depth));
+			var named = new NamedTypePattern(CompileOneName(name, Anchoring.Trailing, false, depth, doubleStarIsAnyType));
+
+			// `**` as a whole type: a name pattern that matches no array, tuple or pointer, or any type like `*`.
+			if (doubleStarIsAnyType && name.Global is null && name.Segments.Length == 1 && name.Segments[0] is { IsGlobstar: true, TypeArguments: null })
+				return AnyTypePattern.Instance;
 
 			if (name.Global is null && name.Segments.Length == 1 && name.Segments[0] is { IsGlobstar: false, TypeArguments: null } segment && segment.Parts.Length == 1)
 			{
@@ -614,29 +627,29 @@ namespace AspectGenerator.TargetFilterBinding
 
 		// ---- parameters and returns ------------------------------------------------------------------------------
 
-		public static ParameterPattern CompileParameter(ParameterPatternSyntax syntax, ParameterModifierMatching matching = PatternDefaults.ModifierMatching)
+		public static ParameterPattern CompileParameter(ParameterPatternSyntax syntax, ParameterModifierMatching matching = PatternDefaults.ModifierMatching, bool doubleStarIsAnyType = PatternDefaults.WholeTypeDoubleStarIsAnyType)
 		{
 			var modifiers = ParameterModifiers.None;
 
 			foreach (var modifier in syntax.Modifiers)
 				modifiers |= Modifiers(modifier);
 
-			return new ParameterPattern(syntax.Kind, modifiers, syntax.Type is null ? null : CompileType(syntax.Type), matching);
+			return new ParameterPattern(syntax.Kind, modifiers, syntax.Type is null ? null : CompileType(syntax.Type, doubleStarIsAnyType), matching);
 		}
 
-		public static ParameterListPattern CompileParameters(ParameterListPatternSyntax syntax, ParameterModifierMatching matching = PatternDefaults.ModifierMatching)
+		public static ParameterListPattern CompileParameters(ParameterListPatternSyntax syntax, ParameterModifierMatching matching = PatternDefaults.ModifierMatching, bool doubleStarIsAnyType = PatternDefaults.WholeTypeDoubleStarIsAnyType)
 		{
 			var parameters = ImmutableArray.CreateBuilder<ParameterPattern>(syntax.Parameters.Length);
 
 			foreach (var parameter in syntax.Parameters)
-				parameters.Add(CompileParameter(parameter, matching));
+				parameters.Add(CompileParameter(parameter, matching, doubleStarIsAnyType));
 
 			return new ParameterListPattern(parameters.MoveToImmutable());
 		}
 
-		public static ReturnsPattern CompileReturns(ReturnsPatternSyntax syntax)
+		public static ReturnsPattern CompileReturns(ReturnsPatternSyntax syntax, bool doubleStarIsAnyType = PatternDefaults.WholeTypeDoubleStarIsAnyType)
 		{
-			return new ReturnsPattern(syntax.RefKind, CompileType(syntax.Type));
+			return new ReturnsPattern(syntax.RefKind, CompileType(syntax.Type, doubleStarIsAnyType));
 		}
 
 		static ParameterModifiers Modifiers(FilterParameterModifier modifier)

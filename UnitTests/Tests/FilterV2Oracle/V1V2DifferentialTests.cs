@@ -30,7 +30,7 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 			var watch        = Stopwatch.StartNew();
 			var differential = new V1V2Differential();
 			var results      = _files.SelectMany(static f => FrozenBaseline.Read(f).Records).Select(differential.Classify).ToList();
-			var lines        = Summary(results);
+			var lines        = Summary(results, differential);
 
 			TestContext.WriteLine($"{results.Count} records classified in {watch.Elapsed.TotalSeconds:0.0} s.");
 
@@ -54,7 +54,7 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 				+ string.Join(Environment.NewLine, missing.Select(static l => "- " + l).Concat(extra.Select(static l => "+ " + l))));
 		}
 
-		static List<string> Summary(List<V1V2Differential.Result> results)
+		static List<string> Summary(List<V1V2Differential.Result> results, V1V2Differential differential)
 		{
 			var lines = new List<string>
 			{
@@ -68,6 +68,16 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 
 			foreach (var group in results.GroupBy(static r => r.Class).OrderByDescending(static g => g.Count()).ThenBy(static g => g.Key, StringComparer.Ordinal))
 				lines.Add($"class\t{group.Count()}\t{group.Key}");
+
+			// The records that write `**` as a whole type: counted again under the reading as any type, which is not the
+			// default; with the reading as a name (the default) they are the class above.
+			var doubleStar = results.Where(V1V2Differential.WritesWholeTypeDoubleStar).ToList();
+
+			lines.Add("");
+			lines.Add($"# records that write ** as a whole type pattern: {doubleStar.Count}; targets apart from 1.1 with ** read as a name (the default) and as any type; what is left with any type is the project-only default of an assembly filter");
+
+			foreach (var r in doubleStar)
+				lines.Add($"{r.Record.File}:{r.Record.Line}\t{FrozenBaseline.Escape(r.Record.Input)}\tas a name: {differential.TargetsApart(r, false).Count}\tas any type: {differential.TargetsApart(r, true).Count}\tas any type, reaching referenced methods: {differential.TargetsApart(r, true, true).Count}");
 
 			foreach (var group in results.Where(static r => r.Class != V1V2Differential.Same && r.Class != V1V2Differential.NotExpressible && r.Class != V1V2Differential.NoRules && !r.Class.StartsWith("predicted", StringComparison.Ordinal)).GroupBy(static r => r.Class).OrderBy(static g => g.Key, StringComparer.Ordinal))
 			{

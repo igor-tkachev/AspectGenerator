@@ -443,6 +443,25 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 			return ReturnsPatterns(rule).Where(static p => _wholeAny.IsMatch(p));
 		}
 
+		/// <summary>The records that write <c>**</c> as a whole type pattern, as the differential classed them.</summary>
+		public static bool WritesWholeTypeDoubleStar(Result result)
+		{
+			return result.Class == PendingAnyType;
+		}
+
+		/// <summary>
+		/// The targets on which version 2 decides otherwise than 1.1 did. With <paramref name="doubleStarIsAnyType"/> a
+		/// whole type pattern <c>**</c> reads as any type: the rewrite is decided with each such pattern written as
+		/// <c>*</c>, which the type-pattern tests pin as the same pattern. <paramref name="beyondProject"/> lets the filter
+		/// reach methods of referenced assemblies too (<c>origin: any</c>), which takes the other migration row out of the count.
+		/// </summary>
+		public List<int> TargetsApart(Result result, bool doubleStarIsAnyType, bool beyondProject = false)
+		{
+			var v2 = Decide((doubleStarIsAnyType ? AnyTypeAsStar(result.Rewrite!) : result.Rewrite!) + (beyondProject ? "\norigin: any" : ""));
+
+			return Enumerable.Range(0, v2.Length).Where(t => !IsExplicitImplementation(t) && result.Record.Included(t) != (v2[t] == true)).ToList();
+		}
+
 		static string AnyTypeAsStar(string rule)
 		{
 			var result = rule;
