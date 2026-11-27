@@ -349,6 +349,105 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 			Assert.AreEqual(F, FilterProbe.Answer("returns: int" + twenty, probe.Definition("Deep", "M")));
 		}
 
+		static NamedTypeShape Generic(TypeShape argument)
+		{
+			return new NamedTypeShape([new NameSegment("N"), new NameSegment("G", [argument])], isReferenceType: true);
+		}
+
+		[TestMethod]
+		public void ATypeNestedByTheThousandIsComparedWithQuotedTextOnASmallStackTest()
+		{
+			// Generic arguments, arrays, pointers, nullables and function pointers nest in one another; the text of the type
+			// is written without following them down, and no further than the quoted text could reach.
+			TypeShape generic  = ShapeText.Parse("int");
+			TypeShape mixed    = ShapeText.Parse("int");
+			TypeShape pointer  = ShapeText.Parse("int");
+			TypeShape nullable = ShapeText.Parse("int");
+
+			for (var i = 0; i < 1_000; i++)
+			{
+				generic  = Generic(generic);
+				mixed    = i % 2 == 0 ? new ArrayTypeShape(Generic(mixed), 2) : Generic(new PointerTypeShape(mixed));
+				pointer  = new FunctionPointerTypeShape(isManaged: true, [], [new FunctionPointerParameterShape(pointer, ParameterModifiers.Ref)], new FunctionPointerParameterShape(ShapeText.Parse("void"), ParameterModifiers.None));
+				nullable = new NamedTypeShape([new NameSegment("System"), new NameSegment("Nullable", [nullable])], isReferenceType: false, nullableUnderlying: nullable);
+			}
+
+			var filters = new[]
+			{
+				"returns: \"Other\"", "returns: {\"Other\", int}", "returns: \"Other\"?", "returns: \"Other\"[]", "returns: List<\"Other\">",
+				"returns: \"N.G<N.G<int>>\"", "returns: {List<\"Other\">, \"Other\"[]}", "params: (\"Other\")", "params: (\"Other\", ..)", "params: (.., ref \"Other\")",
+			};
+
+			var results = new System.Collections.Generic.List<string>();
+			Exception? failure = null;
+
+			var thread = new System.Threading.Thread(() =>
+			{
+				try
+				{
+					foreach (var type in new[] { generic, mixed, pointer, nullable })
+					{
+						var facts = new RecordFacts(ShapeText.ParseNamed("Shop.C"), new NameSegment("M"), type, [new ParameterShape(type, ParameterModifiers.None)]);
+
+						foreach (var filter in filters)
+							results.Add($"{FilterProbe.Answer(filter, facts)}/{FilterProbe.Answer(filter, facts, MatchPhase.Definition)}");
+
+						// An attribute class is a named type; a generic attribute nests as deep as any type does.
+						if (type is NamedTypeShape named)
+						{
+							var attributed = new RecordFacts(ShapeText.ParseNamed("Shop.C"), new NameSegment("M"), ShapeText.Parse("void"), []) { Attributes = [named] };
+
+							foreach (var filter in new[] { "attribute: \"Other\"", "attribute: {\"Other\", Marker}" })
+								results.Add($"{filter} = {FilterProbe.Answer(filter, attributed)}");
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					failure = ex;
+				}
+			}, 256 * 1024);
+
+			thread.Start();
+			thread.Join();
+
+			Assert.IsNull(failure, failure?.ToString());
+			Assert.IsFalse(results.Any(r => r.Contains("True")), string.Join("; ", results));
+			Assert.IsTrue(results.Count >= 4 * filters.Length, results.Count.ToString());
+
+			// The text of such a type is whole, and a text the length of the type is found.
+			string text = "System.Int32";
+
+			for (var i = 0; i < 1_000; i++)
+				text = "N.G<" + text + ">";
+
+			Assert.AreEqual(text, generic.ToString());
+			Assert.AreEqual(F, FilterProbe.Answer("returns: \"" + text + "x\"", new RecordFacts(ShapeText.ParseNamed("Shop.C"), new NameSegment("M"), generic, [])));
+			Assert.AreEqual(T, FilterProbe.Answer("returns: \"" + text + "\"", new RecordFacts(ShapeText.ParseNamed("Shop.C"), new NameSegment("M"), generic, [])));
+		}
+
+		[TestMethod]
+		public void QuotedFullyQualifiedNameOfAnAttributeIsMatchedTest()
+		{
+			var facts = new RecordFacts("Shop.C", "M") { Attributes = [ShapeText.ParseNamed("N.MarkerAttribute")] };
+
+			foreach (var (filter, expected) in new[]
+			{
+				("attribute: N.MarkerAttribute",          T),
+				("attribute: \"N.MarkerAttribute\"",      T),
+				("attribute: \"N.Marker\"",               T),
+				("attribute: \"Marker\"",                 T),
+				("attribute: {\"N.MarkerAttribute\", X}", T),
+				("attribute: \"N.Marke\"",                F),
+				("attribute: \"N.MarkerAttributes\"",     F),
+				("attribute: \"M.Marker\"",               F),
+				("attribute: \"Attribute\"",              F),
+			})
+			{
+				Assert.AreEqual(expected, FilterProbe.Answer(filter, facts), filter);
+			}
+		}
+
 		[TestMethod]
 		public void QuotedTextOfATypeWithATypeParameterIsForTheCallToSayTest()
 		{

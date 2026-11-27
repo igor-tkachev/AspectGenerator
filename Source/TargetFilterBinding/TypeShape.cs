@@ -25,7 +25,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public override string ToString()
 		{
-			return TypeArguments.IsEmpty ? Name : $"{Name}<{string.Join(",", TypeArguments)}>";
+			return TypeShapeText.Write(this)!;
 		}
 	}
 
@@ -81,7 +81,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public override string ToString()
 		{
-			return string.Join(".", Segments);
+			return TypeShapeText.Write(this)!;
 		}
 	}
 
@@ -103,17 +103,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public override string ToString()
 		{
-			// The rank specifiers follow the element type in C# order: an array of int[,] is int[][,].
-			var specifiers    = new System.Text.StringBuilder();
-			TypeShape current = this;
-
-			while (current is ArrayTypeShape array)
-			{
-				specifiers.Append('[').Append(',', array.Rank - 1).Append(']');
-				current = array.Element;
-			}
-
-			return current + specifiers.ToString();
+			return TypeShapeText.Write(this)!;
 		}
 	}
 
@@ -132,17 +122,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public override string ToString()
 		{
-			// A pointer to a pointer, however long the run, is written without following it by calls.
-			var stars         = 0;
-			TypeShape current = this;
-
-			while (current is PointerTypeShape pointer)
-			{
-				stars++;
-				current = pointer.PointedAt;
-			}
-
-			return current + new string('*', stars);
+			return TypeShapeText.Write(this)!;
 		}
 	}
 
@@ -217,29 +197,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public override string ToString()
 		{
-			var convention = IsManaged ? "" : Conventions.IsEmpty ? " unmanaged" : $" unmanaged[{string.Join(",", Conventions)}]";
-			var types      = new System.Collections.Generic.List<string>();
-
-			foreach (var parameter in Parameters)
-				types.Add(Write(parameter));
-
-			types.Add(Write(Return));
-
-			return $"delegate*{convention}<{string.Join(",", types)}>";
-
-			static string Write(FunctionPointerParameterShape parameter)
-			{
-				var passing = parameter.Modifiers switch
-				{
-					ParameterModifiers.Ref         => "ref ",
-					ParameterModifiers.RefReadOnly => "ref readonly ",
-					ParameterModifiers.In          => "in ",
-					ParameterModifiers.Out         => "out ",
-					_                              => "",
-				};
-
-				return passing + parameter.Type;
-			}
+			return TypeShapeText.Write(this)!;
 		}
 	}
 
@@ -270,7 +228,151 @@ namespace AspectGenerator.TargetFilterBinding
 
 		public override string ToString()
 		{
-			return ContainingType + "." + Method;
+			return TypeShapeText.Write(this)!;
+		}
+	}
+
+	/// <summary>
+	/// The text of a type as C# writes it, without spaces after commas. A type is nested as deep as its source nests it,
+	/// so the text is written from a stack of what is still to write and not by calls that follow the type down.
+	/// </summary>
+	static class TypeShapeText
+	{
+		/// <summary>The text of a shape, of a name segment or of a method; <see langword="null"/> where it is longer than <paramref name="limit"/>.</summary>
+		public static string? Write(object root, int limit = int.MaxValue)
+		{
+			var text    = new System.Text.StringBuilder();
+			var pending = new System.Collections.Generic.Stack<object>();
+
+			pending.Push(root);
+
+			while (pending.Count > 0)
+			{
+				switch (pending.Pop())
+				{
+					case string literal:
+						text.Append(literal);
+						break;
+
+					case NameSegment segment:
+						text.Append(segment.Name);
+
+						if (!segment.TypeArguments.IsEmpty)
+						{
+							pending.Push(">");
+							PushList(pending, segment.TypeArguments);
+							text.Append('<');
+						}
+
+						break;
+
+					case NamedTypeShape named:
+						for (var i = named.Segments.Length - 1; i >= 0; i--)
+						{
+							pending.Push(named.Segments[i]);
+
+							if (i > 0)
+								pending.Push(".");
+						}
+
+						break;
+
+					case ArrayTypeShape array:
+					{
+						// The rank specifiers follow the element type in C# order: an array of int[,] is int[][,].
+						var specifiers    = new System.Text.StringBuilder();
+						TypeShape current = array;
+
+						while (current is ArrayTypeShape inner)
+						{
+							specifiers.Append('[').Append(',', inner.Rank - 1).Append(']');
+							current = inner.Element;
+						}
+
+						pending.Push(specifiers.ToString());
+						pending.Push(current);
+						break;
+					}
+
+					case PointerTypeShape pointer:
+					{
+						var stars         = 0;
+						TypeShape current = pointer;
+
+						while (current is PointerTypeShape inner)
+						{
+							stars++;
+							current = inner.PointedAt;
+						}
+
+						pending.Push(new string('*', stars));
+						pending.Push(current);
+						break;
+					}
+
+					case TypeParameterShape parameter:
+						text.Append(parameter.Name);
+						break;
+
+					case FunctionPointerTypeShape function:
+					{
+						text.Append("delegate*");
+
+						if (!function.IsManaged)
+							text.Append(function.Conventions.IsEmpty ? " unmanaged" : $" unmanaged[{string.Join(",", function.Conventions)}]");
+
+						text.Append('<');
+
+						// The parameters and, last, the return, each after the one before and a comma.
+						pending.Push(">");
+						PushParameter(pending, function.Return);
+
+						for (var i = function.Parameters.Length - 1; i >= 0; i--)
+						{
+							pending.Push(",");
+							PushParameter(pending, function.Parameters[i]);
+						}
+
+						break;
+					}
+
+					case MethodShape method:
+						pending.Push(method.Method);
+						pending.Push(".");
+						pending.Push(method.ContainingType);
+						break;
+				}
+
+				if (text.Length > limit)
+					return null;
+			}
+
+			return text.ToString();
+		}
+
+		static void PushList(System.Collections.Generic.Stack<object> pending, ImmutableArray<TypeShape> types)
+		{
+			for (var i = types.Length - 1; i >= 0; i--)
+			{
+				pending.Push(types[i]);
+
+				if (i > 0)
+					pending.Push(",");
+			}
+		}
+
+		static void PushParameter(System.Collections.Generic.Stack<object> pending, FunctionPointerParameterShape parameter)
+		{
+			pending.Push(parameter.Type);
+
+			pending.Push(parameter.Modifiers switch
+			{
+				ParameterModifiers.Ref         => "ref ",
+				ParameterModifiers.RefReadOnly => "ref readonly ",
+				ParameterModifiers.In          => "in ",
+				ParameterModifiers.Out         => "out ",
+				_                              => "",
+			});
 		}
 	}
 }

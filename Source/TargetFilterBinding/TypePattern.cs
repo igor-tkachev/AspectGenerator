@@ -285,6 +285,8 @@ namespace AspectGenerator.TargetFilterBinding
 	/// </summary>
 	sealed class QuotedTypePattern : TypePattern
 	{
+		const string AttributeSuffix = "Attribute";
+
 		readonly string           _text;
 		readonly NamedTypePattern _name;
 
@@ -304,12 +306,35 @@ namespace AspectGenerator.TargetFilterBinding
 			if (type.MentionsTypeParameter)
 				return phase == MatchPhase.Definition ? Tri.Depends : named;
 
-			return named.Or((type.ToString() == _text).ToTri());
+			return named.Or(IsText(type).ToTri());
 		}
 
 		public override bool MatchAttribute(NamedTypeShape attribute)
 		{
-			return _name.MatchAttribute(attribute);
+			if (_name.MatchAttribute(attribute))
+				return true;
+
+			// As for a name, the quoted text may leave out the suffix of the class: "N.Marker" is N.MarkerAttribute.
+			return IsText(attribute) || IsText(attribute, AttributeSuffix.Length) && attribute.Segments[attribute.Segments.Length - 1].TypeArguments.IsEmpty;
+		}
+
+		/// <summary>
+		/// Whether the type is written as the quoted text, less the end of it that <paramref name="dropped"/> counts. The
+		/// text is written no further than the length it could have, so a type nested by the thousand costs no more than
+		/// the text does, and not by calls that follow it down.
+		/// </summary>
+		bool IsText(TypeShape type, int dropped = 0)
+		{
+			var written = TypeShapeText.Write(type, _text.Length + dropped);
+
+			if (written is null)
+				return false;
+
+			return dropped == 0
+				? written == _text
+				: written.Length == _text.Length + dropped &&
+					written.EndsWith(AttributeSuffix, StringComparison.Ordinal) &&
+					string.CompareOrdinal(written, 0, _text, 0, _text.Length) == 0;
 		}
 	}
 
