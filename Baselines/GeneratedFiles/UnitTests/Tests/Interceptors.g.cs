@@ -714,7 +714,7 @@ namespace MyAspectGenerator
 		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string AssemblyFilterTarget_Interceptor()
 		{
-			// Aspects.LogAttribute
+			// Aspects.LogAttribute(TargetFilter = {"method: TypeFilterTarget or assembly.method"})
 			//
 			var __targetMethod__ = AssemblyFilterTarget_Interceptor_State.TargetMethod;
 
@@ -1176,7 +1176,7 @@ namespace MyAspectGenerator
 		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string InterceptedGenericMethod_Interceptor(string p)
 		{
-			// Aspects.LogAttribute
+			// Aspects.LogAttribute(TargetFilter = {"method: TypeFilterTarget or assembly.method"})
 			//
 			var __targetMethod__ = InterceptedGenericMethod_Interceptor_State.TargetMethod;
 
@@ -1216,7 +1216,7 @@ namespace MyAspectGenerator
 		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string InterceptedMethod_Interceptor(string str)
 		{
-			// Aspects.LogAttribute
+			// Aspects.LogAttribute(TargetFilter = {"method: TypeFilterTarget or assembly.method"})
 			//
 			var __targetMethod__ = InterceptedMethod_Interceptor_State.TargetMethod;
 
@@ -1821,7 +1821,7 @@ namespace MyAspectGenerator
 		[global::System.Diagnostics.DebuggerStepThrough]
 		public static string TypeFilterTarget_Interceptor()
 		{
-			// Aspects.LogAttribute
+			// Aspects.LogAttribute(TargetFilter = {"method: TypeFilterTarget or assembly.method"})
 			//
 			var __targetMethod__ = TypeFilterTarget_Interceptor_State.TargetMethod;
 
