@@ -376,7 +376,6 @@ namespace AspectGenerator.Selection
 				: name;
 		}
 
-		/// <summary>The assembly of an attribute read from metadata, for the label; nothing for one in the source.</summary>
 		/// <summary>
 		/// Where a block of the cascade was written, for an explanation: the file and line of its attribute, or, for one read
 		/// from a referenced assembly, that assembly. <see langword="null"/> for anything that is not such a block.
@@ -396,6 +395,7 @@ namespace AspectGenerator.Selection
 				: null;
 		}
 
+		/// <summary>The assembly of an attribute read from metadata, for the label; nothing for one in the source.</summary>
 		static string Where(ISymbol target, AttributeSyntax? syntax)
 		{
 			if (syntax is not null)

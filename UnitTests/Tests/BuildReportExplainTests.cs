@@ -509,6 +509,10 @@ namespace AspectGenerator.Tests
 			Assert.AreEqual("", designTime);
 			Assert.AreEqual(before, AspectSelectionService.ExplainCalls, "A design-time build explains nothing.");
 
+			// An editor host writes no report, so it has no use for an explanation either.
+			Assert.IsFalse(AspectBuildReport.WillWrite(ResolveFor(GeneratorHostKind.Editor, null, true, "report.md")));
+			Assert.IsTrue(AspectBuildReport.WillWrite(ResolveFor(GeneratorHostKind.Compiler, null, true, "report.md")));
+
 			// A method that is not applied: that one is explained, the other is not.
 			before = AspectSelectionService.ExplainCalls;
 			report = ExplainReport([ExplainAspect("- attribute: NoLog"), ExplainNoLogSource]);
