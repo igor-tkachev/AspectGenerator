@@ -131,7 +131,7 @@ namespace AspectGenerator.Cascade
 	/// assembly blocks and the blocks of one type) and reused for every method of that context.
 	/// </para>
 	/// </remarks>
-	sealed class CascadeEvaluator<TFact>
+	sealed partial class CascadeEvaluator<TFact>
 	{
 		readonly CascadeBlock<TFact>                 _default;
 		readonly ImmutableArray<CascadeBlock<TFact>> _assembly;
@@ -312,7 +312,7 @@ namespace AspectGenerator.Cascade
 		/// The plan for the methods of one type: the assembly blocks of a family and the blocks of the type, with the parts
 		/// of their chains, planned as methods need them and kept for the next method.
 		/// </summary>
-		internal sealed class CascadeContext
+		internal sealed partial class CascadeContext
 		{
 			readonly CascadeBlock<TFact>                 _default;
 			readonly ImmutableArray<CascadeBlock<TFact>> _assembly;
@@ -553,7 +553,7 @@ namespace AspectGenerator.Cascade
 			}
 
 			/// <summary>The evaluation of one method: the value of each part and of each level reference, computed once.</summary>
-			sealed class Scope : CascadeScope<TFact>
+			sealed partial class Scope : CascadeScope<TFact>
 			{
 				readonly CascadeContext _context;
 				readonly TFact          _fact;
