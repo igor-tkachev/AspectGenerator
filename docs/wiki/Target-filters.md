@@ -82,7 +82,7 @@ A filter is a list of **lines**. Each line is either an **include** (`expr`) or 
 ```target-filter
 # service methods, except the internal ones
 namespace: Shop.Services.**
-  and method: Save* or Update*
+  and method: {Save*,Update*}
 - method: *Internal*
 ```
 
@@ -671,6 +671,6 @@ namespace: MyApp.Jobs
 ```target-filter
 namespace: {MyApp.Services,MyApp.Jobs}
   and type: {*Service,*Job}
-  and method: Save* or Update*
+  and method: {Save*,Update*}
 - method: HealthCheck
 ```

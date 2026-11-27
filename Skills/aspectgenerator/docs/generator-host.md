@@ -16,7 +16,7 @@ any other host (dotnet watch, test harnesses,
 
 The generator tells the hosts apart by the process (the entry assembly), not by the MSBuild properties alone. Every host that may emit and run the compilation builds; only a known editor skips the expensive work, and only before a build: after one, the editor's compilation feeds Hot Reload and Edit and Continue, whose delta would otherwise drop the aspects of the edited method. The editor reads `DesignTimeBuild` and `BuildingProject` from `obj/.../*.GeneratedMSBuildEditorConfig.editorconfig`, which every real build rewrites with a build's values, so after a build it builds until the next design-time build.
 
-Design-time builds report a reduced set of diagnostics: target filter errors (`AG0201`, `AG0202`, `AG0204`-`AG0206`, `AG0208`), `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project. `AG0001`, `AG0002`, `AG0003`, `AG0006`, `AG0007`, `AG0103`-`AG0108` and `AG0101`/`AG0102` for library aspects need a bound call and appear only after a real build.
+Design-time builds report a reduced set of diagnostics: target filter syntax errors (`AG0220`, `AG0221`, `AG0224`, `AG0225`, `AG0227`, `AG0231`, `AG0233`, `AG0234`), `AG0209`, and `AG0101`/`AG0102` for aspects declared in the project. `AG0001`, `AG0002`, `AG0003`, `AG0006`, `AG0007`, `AG0103`-`AG0108`, `AG0232`, `AG0235`, `AG0236` and `AG0101`/`AG0102` for library aspects need a selected method or a bound call and appear only after a real build.
 
 There is no public `GenerateInterceptors` option.
 

@@ -111,7 +111,7 @@ The method itself is not changed. The aspect is plain code in your project, and 
 - Trace calls with OpenTelemetry: start an activity per call, set its status on exit ([example](https://github.com/igor-tkachev/AspectGenerator/tree/master/Examples/OpenTelemetryAspect)).
 - Run a method in a database transaction: commit on success, roll back on exception ([example](https://github.com/igor-tkachev/AspectGenerator/tree/master/Examples/TransactionAspect)).
 - Swallow or replace exceptions, or replace the call entirely (`OnCatch` with `InterceptResult.IgnoreThrow`, `OnCall`); async hooks for `Task` and `ValueTask` methods (see [Hooks](#hooks)).
-- Apply an aspect to many methods at once with a [target filter](#target-filters), for example every `public **.*Service.Save*(...)` in the assembly.
+- Apply an aspect to many methods at once with a [target filter](#target-filters), for example every `public **.*Service.Save*(.., CancellationToken)` in the assembly.
 - Ship aspects in a library ([aspect library](https://github.com/igor-tkachev/AspectGenerator/tree/master/Examples/AspectLibrary), [multi-project](https://github.com/igor-tkachev/AspectGenerator/tree/master/Examples/MultiProject)).
 
 A transaction aspect, shortened from the example (`DataConnection` is from [linq2db](https://github.com/linq2db/linq2db)):
@@ -297,7 +297,7 @@ Every project whose call sites should be intercepted must reference AspectGenera
 | Instance methods | Supported | Call site must be visible to the current compilation. |
 | Extension methods | Supported | Covered by unit tests. |
 | Generic methods | Supported | Covered by unit tests. |
-| Target filters | Supported | Native condition patterns, compact method patterns, contains, and regex filters apply aspects to matching target methods. |
+| Target filters | Supported | A filter language of conditions on methods (names, signatures, accessibility, attributes) applies aspects to matching target methods at the assembly, type and method level. |
 | `Task`, `Task<T>`, `ValueTask`, and `ValueTask<T>` async methods | Supported | Async hooks are selected for supported async targets. |
 | `ref`, `out`, `in` parameters | Supported | Covered by unit tests. |
 | Constructors | Unsupported | Platform limitation of C# interceptors. |
@@ -332,24 +332,24 @@ Hook names are strings, so prefer `nameof(...)`. Invalid names or signatures sho
 
 ## Target Filters
 
-`TargetFilter` applies an aspect to matching target methods. `DefaultTargetFilter` on `[Aspect]` lets the aspect author prepend default rules to every assembly-level or type-level application of that aspect. Unprefixed rules and `pattern:` use the native AspectGenerator target pattern syntax; `contains:` and `regex:` match the canonical method signature.
+`TargetFilter` applies an aspect to matching target methods. It is written on an aspect attribute placed on the assembly, a type or a method; `DefaultTargetFilter` on `[Aspect]` lets the aspect author state defaults once. A filter is a list of lines, each a condition on a property of the method (`namespace:`, `type:`, `method:`, `returns:`, `params:`, `attribute:`, `public`, `static`, `async`, ...) or a compact signature, joined with `and`, `or`, `not`; a line starting with `-` subtracts.
 
 ```csharp
 [assembly: Log(
     TargetFilter = """
         # Include service saves and exclude health checks.
-        public **.*Service.Save*(..., *CancellationToken)
-        -contains: HealthCheck
+        public **.*Service.Save*(.., CancellationToken)
+        - method: HealthCheck
         """)]
 
 [Log(
-    TargetFilter = "contains: Save")]
+    TargetFilter = "method: Save*")]
 sealed class UserService
 {
     public void SaveUser() {}
 }
 
-[Aspect(OnAfterCall = nameof(OnAfterCall))]
+[Aspect(OnAfterCall = nameof(OnAfterCall), DefaultTargetFilter = "- attribute: NoLog")]
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
 sealed class LogAttribute : Attribute
 {
@@ -359,21 +359,7 @@ sealed class LogAttribute : Attribute
 }
 ```
 
-Filters are ordered rules. The property name is always `TargetFilter`; only the property type can differ. It can be declared as `string?` or `string[]?` on an aspect attribute. Every string is split into lines, empty lines are ignored, and lines starting with `#` are comments. `string[]` values are processed as a simple concatenation of all rules. A rule starting with `-` excludes the target for that filter set, and the last matching rule wins. `TargetFilter` plays the role of a pointcut-like method selector in AOP terminology; AspectGenerator still rewrites only call sites visible to the current compilation.
-
-`DefaultTargetFilter` belongs to the aspect definition, not to the applied aspect attribute. V1 uses simple concatenation: `DefaultTargetFilter` lines first, applied `TargetFilter` lines second. Later matching rules still win, so a consumer `TargetFilter` can override a default exclusion unless it repeats that exclusion later.
-
-The native `attributes:` condition matches method attributes and containing type attributes, including nested containing types. It accepts short names, short names without the `Attribute` suffix, and fully qualified names. Prefer fully qualified names such as `-attributes: MyCompany.Diagnostics.NoLogAttribute` for shared aspect libraries.
-
-Target filters are only supported on applied aspect attributes at assembly or type level. `[Aspect(TargetFilter = ...)]` is intentionally unsupported to avoid mixing aspect definition settings with aspect application.
-
-The canonical signature format is:
-
-```text
-<accessibility>[ <modifier>...] <return-type> <containing-type>.<method-name>[<type-parameters>](<parameter-types>)
-```
-
-Types are fully qualified without C# aliases, nullable annotations and parameter names are omitted, extension method receivers are formatted with `this`, and generic calls use constructed type arguments.
+For each property, the most specific attribute that declares it decides (method, then type, then assembly, then the aspect's default), and `assembly.method`, `aspect.attribute` keep a value from above. An assembly filter stays inside the project unless it names a namespace, type or method or writes `origin: any`, so `[assembly: Log(TargetFilter = "public")]` never reaches the .NET libraries. The property is always called `TargetFilter` and is a `string?` or a `string[]?` on the aspect attribute. Filters select target methods; AspectGenerator still rewrites only call sites visible to the current compilation. The full language, the migration from the 1.1 filters and the diagnostics are on the [Target filters](https://github.com/igor-tkachev/AspectGenerator/wiki/Target-filters) wiki page.
 
 ## Conditional Aspects
 

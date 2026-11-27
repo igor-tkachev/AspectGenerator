@@ -16,7 +16,7 @@ The skill is available at `<global-packages>/aspectgenerator/<version>/skills/as
 ## Guide index
 
 - [Writing an aspect](docs/writing-an-aspect.md) — static hooks, lifecycle, conditional aspects and instance lifetimes.
-- [Target filters](docs/target-filters.md) — assembly/type applications, ordered rules and canonical signatures.
+- [Target filters](docs/target-filters.md) — the filter language: assembly, type and method applications, properties, the cascade and settings.
 - [Diagnostics and fixes](docs/diagnostics.md) — AGxxxx diagnostics and optional AG0300 markers.
 - [Library mode and PrivateAssets](docs/library-mode.md) — package references and generated API ownership across projects.
 - [Configuration](docs/configuration.md) — MSBuild properties and assembly-level overrides.
