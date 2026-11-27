@@ -28,6 +28,17 @@ namespace AspectGenerator
 		public const string InvalidAspectDiagnosticSeverity     = "AG0209";
 		public const string AspectFilterRuleMatchesNothing      = "AG0210";
 		public const string AspectFilterNameWithWhiteSpace      = "AG0211";
+		public const string FilterSyntaxError                   = "AG0220";
+		public const string FilterUnknownKeyOrWord              = "AG0221";
+		public const string FilterInvalidPattern                = "AG0224";
+		public const string FilterOldSyntaxOrRepeatedProperty   = "AG0225";
+		public const string FilterNestedTooDeeply               = "AG0227";
+		public const string FilterItemStartsWithOperator        = "AG0231";
+		public const string AspectNotAppliedToMethod            = "AG0232";
+		public const string FilterInvalidLevelReference         = "AG0233";
+		public const string FilterInvalidAny                    = "AG0234";
+		public const string AspectSettingsConflict              = "AG0235";
+		public const string UnreadableReferencedFilter          = "AG0236";
 		public const string InterceptedCallMarker               = "AG0300";
 	}
 }

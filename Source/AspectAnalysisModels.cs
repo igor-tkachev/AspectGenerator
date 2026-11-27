@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using AspectGenerator.Selection;
+using AspectGenerator.TargetFilterBinding;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -186,42 +187,39 @@ namespace AspectGenerator
 	sealed class AspectSelectionPlan
 	{
 		public AspectSelectionPlan(
-			HashSet<IMethodSymbol>              selectedTargetMethods,
-			Dictionary<IMethodSymbol,List<AttributeInfo>> selectedTargetAttributes,
-			Dictionary<string,TargetMethodBucket>          targetMethodBuckets,
-			bool                                mayTargetExternalMethods,
-			HashSet<string>                     externalTargetMethodNames)
+			HashSet<IMethodSymbol>                selectedTargetMethods,
+			Dictionary<string,TargetMethodBucket> targetMethodBuckets,
+			bool                                  mayTargetExternalMethods,
+			ImmutableArray<AnchorTerm>            externalTargetTerms)
 		{
-			SelectedTargetMethods      = selectedTargetMethods;
-			SelectedTargetAttributes   = selectedTargetAttributes;
-			TargetMethodBuckets        = targetMethodBuckets;
-			MayTargetExternalMethods   = mayTargetExternalMethods;
-			ExternalTargetMethodNames  = externalTargetMethodNames;
+			SelectedTargetMethods    = selectedTargetMethods;
+			TargetMethodBuckets      = targetMethodBuckets;
+			MayTargetExternalMethods = mayTargetExternalMethods;
+			ExternalTargetTerms      = externalTargetTerms;
 		}
 
-		public HashSet<IMethodSymbol>                       SelectedTargetMethods    { get; }
-		public Dictionary<IMethodSymbol,List<AttributeInfo>> SelectedTargetAttributes { get; }
-		public Dictionary<string,TargetMethodBucket>         TargetMethodBuckets      { get; }
+		/// <summary>The methods declared here that an aspect selects, or may select at some of their calls.</summary>
+		public HashSet<IMethodSymbol>                SelectedTargetMethods { get; }
+		public Dictionary<string,TargetMethodBucket> TargetMethodBuckets   { get; }
+
 		/// <summary>
 		/// Any call site may target a selected method that has no declaration in this compilation, so every call site is bound.
 		/// </summary>
-		public bool                                          MayTargetExternalMethods { get; }
+		public bool MayTargetExternalMethods { get; }
 
 		/// <summary>
-		/// Names of methods without a declaration in this compilation that target filters may still select.
-		/// Call sites with these names are bound and evaluated against the filters.
+		/// What the assembly filters say of the names of the methods without a declaration in this compilation that they may
+		/// still select: a call whose name meets every name condition of one term is bound and decided.
 		/// </summary>
-		public HashSet<string>                               ExternalTargetMethodNames { get; }
+		public ImmutableArray<AnchorTerm> ExternalTargetTerms { get; }
 
-		public bool MayTargetExternalMethod(IMethodSymbol method)
+		public bool MayTargetExternalName(string name)
 		{
-			return MayTargetExternalMethods || ExternalTargetMethodNames.Contains(method.Name);
-		}
+			foreach (var term in ExternalTargetTerms)
+				if (term.MatchesName(name))
+					return true;
 
-		public bool TryGetSelectedAttributes(IMethodSymbol method, out List<AttributeInfo> attributes)
-		{
-			// An instance-form extension call binds to the reduced method; the plan holds the declared static method.
-			return SelectedTargetAttributes.TryGetValue((method.ReducedFrom ?? method).OriginalDefinition, out attributes!);
+			return false;
 		}
 	}
 

@@ -129,29 +129,19 @@ namespace AspectGenerator
 				AddWarning($"unknown AspectGeneratorTraceLevel '{options.InvalidTraceLevelValue}'; using Normal");
 		}
 
-		public void AddTargetFilter(
-			int    index,
-			string classification,
-			bool   declarationFilter,
-			bool   callsitePrefilter,
-			bool   semanticFilter,
-			bool   callsiteSemanticFilter,
-			bool   mayTargetExternalMethods)
+		/// <summary>
+		/// A target filter of an assembly attribute and what limits the calls bound for it: the names a call must have, the
+		/// root its method must be declared under, or the project.
+		/// </summary>
+		public void AddTargetFilter(string filter, string binding)
 		{
 			if (!IsEnabled)
 				return;
 
-			_targetFilters.Add(new TargetFilterTrace(
-				index,
-				classification,
-				declarationFilter,
-				callsitePrefilter,
-				semanticFilter,
-				callsiteSemanticFilter,
-				mayTargetExternalMethods));
-			AddEvent(
-				"target-filter",
-				$"index={index.ToString(CultureInfo.InvariantCulture)}, classification={classification}, declarationFilter={declarationFilter.ToString()}, callsitePrefilter={callsitePrefilter.ToString()}, semanticFilter={semanticFilter.ToString()}, callsiteSemanticFilter={callsiteSemanticFilter.ToString()}, mayTargetExternal={mayTargetExternalMethods.ToString()}");
+			var index = _targetFilters.Count;
+
+			_targetFilters.Add(new TargetFilterTrace(index, filter, binding));
+			AddEvent("target-filter", $"index={index.ToString(CultureInfo.InvariantCulture)}, filter={filter}, binding={binding}");
 		}
 
 		public void AddResult(string text)
@@ -223,24 +213,20 @@ namespace AspectGenerator
 
 			sb
 				.AppendLine()
-				.AppendLine("### Target filter classification")
+				.AppendLine("### Target filter binding")
 				.AppendLine()
-				.AppendLine("| # | Classification | Declaration filter | Call-site prefilter | Target semantic model | Call-site semantic model | May target external methods |")
-				.AppendLine("| ---: | --- | --- | --- | --- | --- | --- |");
+				.AppendLine("| # | Filter | Calls bound |")
+				.AppendLine("| ---: | --- | --- |");
 
 			if (_targetFilters.Count == 0)
-				AppendTableRow(sb, "", "No target filters recorded.", "", "", "", "", "");
+				AppendTableRow(sb, "", "No assembly target filters recorded.", "");
 			else
 				foreach (var filter in _targetFilters)
 					AppendTableRow(
 						sb,
 						filter.Index.ToString(CultureInfo.InvariantCulture),
-						filter.Classification,
-						filter.DeclarationFilter.ToString(),
-						filter.CallsitePrefilter.ToString(),
-						filter.SemanticFilter.ToString(),
-						filter.CallsiteSemanticFilter.ToString(),
-						filter.MayTargetExternalMethods.ToString());
+						filter.Filter,
+						filter.Binding);
 
 			sb
 				.AppendLine()
@@ -355,31 +341,16 @@ namespace AspectGenerator
 
 		readonly struct TargetFilterTrace
 		{
-			public TargetFilterTrace(
-				int    index,
-				string classification,
-				bool   declarationFilter,
-				bool   callsitePrefilter,
-				bool   semanticFilter,
-				bool   callsiteSemanticFilter,
-				bool   mayTargetExternalMethods)
+			public TargetFilterTrace(int index, string filter, string binding)
 			{
-				Index                    = index;
-				Classification           = classification;
-				DeclarationFilter        = declarationFilter;
-				CallsitePrefilter        = callsitePrefilter;
-				SemanticFilter           = semanticFilter;
-				CallsiteSemanticFilter   = callsiteSemanticFilter;
-				MayTargetExternalMethods = mayTargetExternalMethods;
+				Index   = index;
+				Filter  = filter;
+				Binding = binding;
 			}
 
-			public int    Index                    { get; }
-			public string Classification           { get; }
-			public bool   DeclarationFilter        { get; }
-			public bool   CallsitePrefilter        { get; }
-			public bool   SemanticFilter           { get; }
-			public bool   CallsiteSemanticFilter   { get; }
-			public bool   MayTargetExternalMethods { get; }
+			public int    Index   { get; }
+			public string Filter  { get; }
+			public string Binding { get; }
 		}
 
 		public readonly struct TracePhaseScope : IDisposable

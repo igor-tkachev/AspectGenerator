@@ -13,7 +13,7 @@ namespace AspectGenerator.Tests
 	[Aspects.Log(
 		TargetFilter =
 		[
-			@"regex: ^public static System.String AspectGenerator\.Tests\.UnitTests\.TypeFilterTarget\(\)$"
+			"method: TypeFilterTarget or assembly.method"
 		])]
 	[TestClass]
 	public class UnitTests
