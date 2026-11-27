@@ -173,11 +173,11 @@ namespace AspectGenerator.Tests
 			var designTime = RunChainApp([ChainAppTypeFilterSource], new() { ["build_property.DesignTimeBuild"] = "true" }, out _, api.Reference, aspects.Reference);
 
 			Assert.IsTrue(
-				build.Diagnostics.Any(static d => d.Id == AspectDiagnosticID.UnknownAspectFilterConditionKey),
-				$"Expected {AspectDiagnosticID.UnknownAspectFilterConditionKey} in a build. Actual: {string.Join(", ", build.Diagnostics.Select(static d => d.Id))}");
+				build.Diagnostics.Any(static d => d.Id == AspectDiagnosticID.UnreadableReferencedFilter),
+				$"Expected {AspectDiagnosticID.UnreadableReferencedFilter} in a build. Actual: {string.Join(", ", build.Diagnostics.Select(static d => d.Id))}");
 			Assert.IsTrue(
-				designTime.Diagnostics.Any(static d => d.Id == AspectDiagnosticID.UnknownAspectFilterConditionKey),
-				$"Expected {AspectDiagnosticID.UnknownAspectFilterConditionKey} in a design-time build. Actual: {string.Join(", ", designTime.Diagnostics.Select(static d => d.Id))}");
+				designTime.Diagnostics.Any(static d => d.Id == AspectDiagnosticID.UnreadableReferencedFilter),
+				$"Expected {AspectDiagnosticID.UnreadableReferencedFilter} in a design-time build. Actual: {string.Join(", ", designTime.Diagnostics.Select(static d => d.Id))}");
 		}
 
 		static (MetadataReference Reference, byte[] Image) CompileChainLibrary(string name, string source, Dictionary<string,string> properties, params MetadataReference[] references)

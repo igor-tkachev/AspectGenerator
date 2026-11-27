@@ -14,12 +14,12 @@ namespace AspectGenerator.Tests
 			foreach (var (filter, expected) in new[]
 			{
 				("Host.Peek(ref readonly int)",                          "Host.Peek<>;55"),
-				("contains: Peek(ref readonly System.Int32)",            "Host.Peek<>;55"),
-				("regex: Peek\\\\(ref readonly System\\\\.Int32\\\\)$",  "Host.Peek<>;55"),
+				("Peek(ref readonly System.Int32)",                      "Host.Peek<>;55"),
+				("method: Host.Peek and params: (ref readonly int)",     "Host.Peek<>;55"),
 				("Host.Peek(int)",                                       "Host.Peek<>;55"), // a parameter pattern without a modifier accepts any modifier
 				("Host.Peek(in int)",                                    "55"),
 				("Host.Peek(ref int)",                                   "55"),
-				("contains: Peek(System.Int32)",                         "55"),
+				("Host.Peek(out int)",                                   "55"), // a written kind must match exactly
 			})
 				AssertRunsWithResult(
 					RefReadOnlySource.Replace("FILTER", filter),
@@ -38,9 +38,9 @@ namespace AspectGenerator.Tests
 				("Host.Fill(int[][,], int[,])",      "1"),
 				("Host.Fill(int[,], int[,][])",      "1"),
 				("Host.Fill(int[], int[][])",        "1"),
-				("contains: Matrix()",               "Host.Matrix<>;1"),
-				("contains: Int32[,] Host.Matrix",   "Host.Matrix<>;1"),
-				("contains: Int32[] Host.Matrix",    "1"),
+				("Matrix()",                         "Host.Matrix<>;1"),
+				("Host.Matrix() : int[,]",           "Host.Matrix<>;1"),
+				("Host.Matrix() : int[]",            "1"),
 			})
 				AssertRunsWithResult(
 					MultiDimensionalSource.Replace("FILTER", filter),
@@ -52,11 +52,11 @@ namespace AspectGenerator.Tests
 		{
 			foreach (var (filter, expected) in new[]
 			{
-				("contains: Shout(this System.String)",       "Exts.Shout<>;ab!"),
-				("contains: Exts.Shout(this System.String)",  "Exts.Shout<>;ab!"),
-				("regex: \\\\(this System\\\\.String\\\\)$",   "Exts.Shout<>;ab!"),
-				("contains: Shout(this Exts)",                "ab!"),
-				("regex: \\\\(this Exts[,)]",                  "ab!"),
+				("Shout(this System.String)",                 "Exts.Shout<>;ab!"),
+				("Exts.Shout(this System.String)",            "Exts.Shout<>;ab!"),
+				("params: (this System.String)",              "Exts.Shout<>;ab!"),
+				("Shout(this Exts)",                          "ab!"),
+				("params: (this Exts, ..)",                   "ab!"),
 				("method: Shout",                             "Exts.Shout<>;ab!"),
 			})
 				AssertRunsWithResult(
@@ -68,25 +68,29 @@ namespace AspectGenerator.Tests
 		public void GenericMethodDeclaredInTheProjectIsJudgedByItsDefinitionTest()
 		{
 			const string selected = "Repository`1[String].Get<Int32>;7";
-			const string unrelated = "contains: NoSuchMethodAnywhere";
+			const string unrelated = "namespace: NoSuchNamespace.**";
 
-			// A method declared in the project is judged by its definition, with its type parameters. A call the
-			// definition does not select is judged again by the call's type arguments only when the project's
-			// assembly-level filters can also select methods of referenced assemblies; that is one flag for the whole
-			// project, so a type-level rule depends on the other filters (an unrelated contains: rule turns it on).
+			// A condition describes the call, with its type arguments. Where a pattern names a concrete type and the
+			// definition has a type parameter there, each call decides; otherwise the definition decides once. The result
+			// does not depend on the other filters of the project (an assembly filter on a namespace changes nothing for a
+			// type that declares its own location). A type
+			// parameter's name in a pattern is an ordinary name: Repository<TEntity> names a type TEntity, not the
+			// parameter.
 			foreach (var (typeFilter, assemblyFilter, expected) in new[]
 			{
-				("fulltype: Repository<TEntity>",          "",         selected),
-				("fulltype: Repository<System.String>",    "",         "7"),
-				("fulltype: Repository<System.String>",    unrelated,  selected),
-				("fulltype: Repository<TEntity>",          unrelated,  selected),
-				("fulltype: Repository<System.Int32>",     unrelated,  "7"),
-				("",                                       "Repository<TEntity>.Get<TKey>(TKey)",                                         selected),
-				("",                                       "contains: Repository<TEntity>.Get<TKey>(TKey)",                               selected),
-				("",                                       "contains: Repository<System.String>.Get<System.Int32>(System.Int32)",         selected),
+				("type: Repository<*>",                    "",         selected),
+				("type: Repository<System.String>",        "",         selected),
+				("type: Repository<System.String>",        unrelated,  selected),
+				("type: Repository<*>",                    unrelated,  selected),
+				("type: Repository<System.Int32>",         "",         "7"),
+				("type: Repository<System.Int32>",         unrelated,  "7"),
+				("type: Repository<TEntity>",              "",         "7"),
+				("",                                       "Repository<*>.Get<*>(*)",                                                     selected),
+				("",                                       "method: Repository<*>.Get<*> and params: (*)",                                selected),
+				("",                                       "method: Repository<System.String>.Get<System.Int32> and params: (System.Int32)", selected),
 				("",                                       "System.Collections.Generic.List<System.Int32>.Add(System.Int32)",             "List`1[Int32].Add<>;7"),
-				("",                                       "contains: System.Collections.Generic.List<System.Int32>.Add(System.Int32)",   "List`1[Int32].Add<>;7"),
-				("",                                       "contains: System.Collections.Generic.List<T>.Add(T)",                         "7"),
+				("",                                       "method: System.Collections.Generic.List<System.Int32>.Add",                   "List`1[Int32].Add<>;7"),
+				("",                                       "System.Collections.Generic.List<T>.Add(T)",                                   "7"),
 			})
 				AssertRunsWithResult(
 					GenericSource
@@ -96,20 +100,21 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void ReducedGenericExtensionCallOfAReferencedAssemblyKeepsItsTypeParametersTest()
+		public void ReducedGenericExtensionCallOfAReferencedAssemblyIsJudgedInStaticFormTest()
 		{
-			// Known exception to "a method of a referenced assembly is judged per call": an instance-form call of a generic
-			// extension method is described by the reduced symbol, whose method type parameters are not substituted
-			// (Any<TSource>(this IEnumerable<System.Int32>)), while the static form is constructed (Any<System.Int32>(...)).
+			// Extension methods are judged in their static form, constructed from the call: the instance-form call a.Any() and
+			// Enumerable.Any<int>(a) are one target (version 1.1 described the instance form by the reduced symbol, whose
+			// method type parameters were not substituted).
 			const string instance = "a.Any()";
 			const string @static  = "Enumerable.Any<int>(a)";
 
 			foreach (var (call, filter, expected) in new[]
 			{
-				(instance, "contains: Any<System.Int32>",                                                                   "True"),
-				(@static,  "contains: Any<System.Int32>",                                                                   "Enumerable.Any<Int32>;True"),
-				(instance, "contains: Any<TSource>(this System.Collections.Generic.IEnumerable<System.Int32>)",             "Enumerable.Any<Int32>;True"),
-				(@static,  "contains: Any<TSource>(this System.Collections.Generic.IEnumerable<System.Int32>)",             "True"),
+				(instance, "method: Any<System.Int32>",                                                                          "Enumerable.Any<Int32>;True"),
+				(@static,  "method: Any<System.Int32>",                                                                          "Enumerable.Any<Int32>;True"),
+				(instance, "method: Any<*> and params: (this System.Collections.Generic.IEnumerable<System.Int32>)",             "Enumerable.Any<Int32>;True"),
+				(@static,  "method: Any<*> and params: (this System.Collections.Generic.IEnumerable<System.Int32>)",             "Enumerable.Any<Int32>;True"),
+				(instance, "method: Any<System.String>",                                                                         "True"),
 			})
 				AssertRunsWithResult(
 					ReferencedExtensionSource.Replace("FILTER", filter).Replace("CALL", call),

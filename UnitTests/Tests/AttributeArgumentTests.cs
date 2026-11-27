@@ -189,15 +189,19 @@ namespace AspectGenerator.Tests
 					{
 						public static int FromType() { return 0; }
 
-						public static int FromAssembly() { return 0; }
-
 						public static string Run()
 						{
 							FromType();
-							FromAssembly();
+							Others.FromAssembly();
 
 							return ArgsAttribute.Log.ToString();
 						}
+					}
+
+					// The type's filter declares method, which replaces the assembly's for the methods of that type only.
+					static class Others
+					{
+						public static int FromAssembly() { return 0; }
 					}
 					"""
 				],

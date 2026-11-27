@@ -131,30 +131,27 @@ namespace AspectGenerator.Tests
 
 			var cases = new (string Name, string[] Sources, string? Id, MetadataReference? Reference)[]
 			{
-				("assembly regex",                Files(FilterInvalidRegexSource),                                                                    AspectDiagnosticID.InvalidAspectFilterRegex,            null),
-				("assembly rule",                 Files(FilterInvalidConditionPrefixSource),                                                          AspectDiagnosticID.InvalidAspectFilterRule,             null),
-				("assembly unknown key",          Files(InvalidUnknownConditionKeyFilterSource),                                                      AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
-				("assembly parameter pattern",    Files(FilterRuleDiagnosticSource.Replace("FILTER_RULE", "params: this string", StringComparison.Ordinal)), AspectDiagnosticID.InvalidAspectFilterParameterPattern, null),
-				("assembly dotted pattern",       Files(FilterInvalidPatternSource),                                                                  AspectDiagnosticID.InvalidAspectFilterDottedPattern,    null),
-				("type regex",                    Files(typeFilter.Replace("FILTER_RULE", "regex: [", StringComparison.Ordinal)),                    AspectDiagnosticID.InvalidAspectFilterRegex,            null),
-				("type rule",                     Files(typeFilter.Replace("FILTER_RULE", "& method: Save", StringComparison.Ordinal)),              AspectDiagnosticID.InvalidAspectFilterRule,             null),
-				("type unknown key",              Files(typeFilter.Replace("FILTER_RULE", "foo: bar", StringComparison.Ordinal)),                    AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
-				("type parameter pattern",        Files(typeFilter.Replace("FILTER_RULE", "Save(..., ...)", StringComparison.Ordinal)),              AspectDiagnosticID.InvalidAspectFilterParameterPattern, null),
-				("type dotted pattern",           Files(typeFilter.Replace("FILTER_RULE", "A.**.B.**", StringComparison.Ordinal)),                   AspectDiagnosticID.InvalidAspectFilterDottedPattern,    null),
-				("assembly rule matches nothing", Files(FilterRuleDiagnosticSource.Replace("FILTER_RULE", "public private", StringComparison.Ordinal)), AspectDiagnosticID.AspectFilterRuleMatchesNothing, null),
-				("type rule names white space",   Files(typeFilter.Replace("FILTER_RULE", "publik Invoke", StringComparison.Ordinal)),               AspectDiagnosticID.AspectFilterNameWithWhiteSpace,      null),
-				("type default filter",           Files(DefaultTargetFilterSingularAttributeSource),                                                  AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
-				("type default filter, alias",    Files(DefaultTargetFilterAliasSource),                                                              AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
-				("library default filter",        Files(LibraryDefaultTargetFilterSource),                                                            AspectDiagnosticID.UnknownAspectFilterConditionKey,     library),
-				("method-level TargetFilter",     Files(FilterMethodLevelTargetFilterSource),                                                         AspectDiagnosticID.MethodLevelTargetFilter,             null),
+				("assembly regex",                Files(FilterInvalidRegexSource),                                                                    AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,   null),
+				("assembly rule",                 Files(FilterInvalidConditionPrefixSource),                                                          AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,   null),
+				("assembly unknown key",          Files(InvalidUnknownConditionKeyFilterSource),                                                      AspectDiagnosticID.FilterUnknownKeyOrWord,              null),
+				("assembly parameter pattern",    Files(FilterRuleDiagnosticSource.Replace("FILTER_RULE", "Save(.., ..)", StringComparison.Ordinal)), AspectDiagnosticID.FilterInvalidPattern,                null),
+				("assembly dotted pattern",       Files(FilterInvalidPatternSource),                                                                  AspectDiagnosticID.FilterInvalidPattern,                null),
+				("type regex",                    Files(typeFilter.Replace("FILTER_RULE", "regex: [", StringComparison.Ordinal)),                    AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,   null),
+				("type rule",                     Files(typeFilter.Replace("FILTER_RULE", "& method: Save", StringComparison.Ordinal)),              AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,   null),
+				("type unknown key",              Files(typeFilter.Replace("FILTER_RULE", "foo: bar", StringComparison.Ordinal)),                    AspectDiagnosticID.FilterUnknownKeyOrWord,              null),
+				("type parameter pattern",        Files(typeFilter.Replace("FILTER_RULE", "Save(.., ..)", StringComparison.Ordinal)),                AspectDiagnosticID.FilterInvalidPattern,                null),
+				("type dotted pattern",           Files(typeFilter.Replace("FILTER_RULE", "method: Sa**ve", StringComparison.Ordinal)),              AspectDiagnosticID.FilterInvalidPattern,                null),
+				("type default filter",           Files(DefaultTargetFilterSingularAttributeSource),                                                  AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,   null),
+				("type default filter, alias",    Files(DefaultTargetFilterAliasSource),                                                              AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,   null),
+				("library default filter",        Files(LibraryDefaultTargetFilterSource),                                                            AspectDiagnosticID.UnreadableReferencedFilter,          library),
 				("diagnostic severity option",    Files(TraceDirectSource),                                                                           AspectDiagnosticID.InvalidAspectDiagnosticSeverity,     null),
 				("hook not found",                Files(HookMethodDiagnosticsSource),                                                                 AspectDiagnosticID.HookMethodNotFound,                  null),
 				("hook not static",               Files(HookMethodDiagnosticsSource),                                                                 AspectDiagnosticID.HookMethodNotStatic,                 null),
-				("default filter, alias with suffix", Files(DefaultTargetFilterAliasSource.Replace("using Logged =", "using LoggedAttribute =", StringComparison.Ordinal)), AspectDiagnosticID.UnknownAspectFilterConditionKey, null),
-				("default filter, alias chain",   Files(DefaultTargetFilterAliasChainUseSource, DefaultTargetFilterAliasChainSource),          AspectDiagnosticID.UnknownAspectFilterConditionKey,     null),
-				("default filter, global::",      Files(DefaultTargetFilterSingularAttributeSource.Replace("[Log]", "[global::AspectGenerator.Tests.GeneratorDriver.Log]", StringComparison.Ordinal)), AspectDiagnosticID.UnknownAspectFilterConditionKey, null),
-				("type filter, no methods",       Files(TypeLevelFilterWithoutMethodsSource),                                                  null,                                                   null),
-				("type filter, methods in a part", Files(TypeLevelFilterWithoutMethodsSource, TypeLevelFilterOtherPartSource),                AspectDiagnosticID.InvalidAspectFilterRegex,            null),
+				("default filter, alias with suffix", Files(DefaultTargetFilterAliasSource.Replace("using Logged =", "using LoggedAttribute =", StringComparison.Ordinal)), AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty, null),
+				("default filter, alias chain",   Files(DefaultTargetFilterAliasChainUseSource, DefaultTargetFilterAliasChainSource),          AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,   null),
+				("default filter, global::",      Files(DefaultTargetFilterSingularAttributeSource.Replace("[Log]", "[global::AspectGenerator.Tests.GeneratorDriver.Log]", StringComparison.Ordinal)), AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty, null),
+				("type filter, no methods",       Files(TypeLevelFilterWithoutMethodsSource),                                                  AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,   null),
+				("type filter, methods in a part", Files(TypeLevelFilterWithoutMethodsSource, TypeLevelFilterOtherPartSource),                AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,   null),
 
 			};
 
@@ -202,7 +199,7 @@ namespace AspectGenerator.Tests
 			var cases = new (string Name, string Source, string Id, MetadataReference? Reference)[]
 			{
 				("OnCall not last, applied",  OnCallNotLastDiagnosticsSource.Replace("/*APPLIED*/", "[CallAspect, TraceAspect]", StringComparison.Ordinal), AspectDiagnosticID.OnCallNotLastAspect,       null),
-				("OnCall not last, filtered", OnCallNotLastDiagnosticsSource.Replace("/*TYPE*/", "[CallAspect(TargetFilter = \"method: Value\"), TraceAspect(TargetFilter = \"method: Value\")]", StringComparison.Ordinal), AspectDiagnosticID.OnCallNotLastMethod, null),
+				("OnCall not last, filtered", OnCallNotLastDiagnosticsSource.Replace("/*TYPE*/", "[CallAspect(TargetFilter = \"method: Value\"), TraceAspect(TargetFilter = \"method: Value\")]", StringComparison.Ordinal), AspectDiagnosticID.OnCallNotLastAspect, null),
 				("invalid parameters",        HookContractDiagnosticsSource,     AspectDiagnosticID.HookInvalidParameters,     null),
 				("invalid return type",       HookContractDiagnosticsSource,     AspectDiagnosticID.HookInvalidReturnType,     null),
 				("OnCall mismatch",           HookContractDiagnosticsSource,     AspectDiagnosticID.OnCallHookMismatch,        null),
@@ -359,14 +356,15 @@ namespace AspectGenerator.Tests
 		[
 			AspectDiagnosticID.HookMethodNotFound,
 			AspectDiagnosticID.HookMethodNotStatic,
-			AspectDiagnosticID.InvalidAspectFilterRegex,
-			AspectDiagnosticID.InvalidAspectFilterRule,
-			AspectDiagnosticID.UnknownAspectFilterConditionKey,
-			AspectDiagnosticID.InvalidAspectFilterParameterPattern,
-			AspectDiagnosticID.InvalidAspectFilterDottedPattern,
-			AspectDiagnosticID.AspectFilterRuleMatchesNothing,
-			AspectDiagnosticID.AspectFilterNameWithWhiteSpace,
-			AspectDiagnosticID.MethodLevelTargetFilter,
+			AspectDiagnosticID.FilterSyntaxError,
+			AspectDiagnosticID.FilterUnknownKeyOrWord,
+			AspectDiagnosticID.FilterInvalidPattern,
+			AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,
+			AspectDiagnosticID.FilterNestedTooDeeply,
+			AspectDiagnosticID.FilterItemStartsWithOperator,
+			AspectDiagnosticID.FilterInvalidLevelReference,
+			AspectDiagnosticID.FilterInvalidAny,
+			AspectDiagnosticID.UnreadableReferencedFilter,
 			AspectDiagnosticID.InvalidAspectDiagnosticSeverity,
 		];
 
@@ -514,11 +512,11 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void InvalidAspectFilterRegexReportsDiagnosticTest()
 		{
+			// regex: belongs to version 1.1: it is reported, with the way to write the target in version 2.
 			var result = RunGenerator(FilterInvalidRegexSource);
-			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InvalidAspectFilterRegex);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InvalidAspectFilterRegex}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
-			StringAssert.Contains(diagnostic.GetMessage(), "Invalid aspect filter regex");
+			AssertFilterDiagnostic(result, AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty, "'regex:' is version 1.1 syntax");
+			AssertNotGenerated(result, "Interceptors.g.cs");
 		}
 
 		[TestMethod]
@@ -526,7 +524,7 @@ namespace AspectGenerator.Tests
 		{
 			var result = RunGenerator(FilterPatternSource);
 
-			AssertNoDiagnostic(result, AspectDiagnosticID.InvalidAspectFilterRule);
+			AssertNoDiagnostic(result, AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty);
 			AssertGeneratedSourceContains(result, "SaveUser_Interceptor");
 			AssertGeneratedSourceDoesNotContain(result, "LoadUser_Interceptor");
 		}
@@ -600,19 +598,19 @@ namespace AspectGenerator.Tests
 		public void InvalidPatternConditionPrefixReportsDiagnosticTest()
 		{
 			var result = RunGenerator(FilterInvalidConditionPrefixSource);
-			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InvalidAspectFilterRule);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InvalidAspectFilterRule}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
-			StringAssert.Contains(diagnostic.GetMessage(), "Leading '&'");
+			AssertFilterDiagnostic(result, AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty, "'&' before a line is version 1.1 syntax");
 		}
 
 		[TestMethod]
 		public void ContainsAndRegexFiltersDoNotParseInlineOperatorsTest()
 		{
+			// contains: and regex: are version 1.1 keys: each is reported, whatever its text holds, and the aspect selects nothing.
 			var result = RunGenerator(FilterContainsRegexRawOperatorsSource);
 
-			AssertNoDiagnostic(result, AspectDiagnosticID.InvalidAspectFilterRule);
-			AssertGeneratedSourceContains(result, "Save_Interceptor");
+			AssertFilterDiagnostic(result, AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty, "'contains:' is version 1.1 syntax");
+			AssertFilterDiagnostic(result, AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty, "'regex:' is version 1.1 syntax");
+			AssertNotGenerated(result, "Interceptors.g.cs");
 		}
 
 		[TestMethod]
@@ -627,12 +625,12 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void PatternRuleSkipSemanticsPreserveLastEffectiveDecisionTest()
 		{
+			// Version 1.1 read the rules in order and let the last one that matched decide. Version 2 has no order: a
+			// property is included once, so repeated includes of method: are an error, and the aspect selects nothing.
 			var result = RunGenerator(FilterPatternRuleSkipSource);
 
-			AssertGeneratedSourceContains(result, "IncludedThenExcludedThenIncluded_Interceptor");
-			AssertGeneratedSourceContains(result, "NegativeBeforeInclude_Interceptor");
-			AssertGeneratedSourceContains(result, "IncludeThenInclude_Interceptor");
-			AssertGeneratedSourceDoesNotContain(result, "IncludedThenExcluded_Interceptor");
+			AssertDiagnostic(result, AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty);
+			AssertNotGenerated(result, "Interceptors.g.cs");
 		}
 
 		[TestMethod]
@@ -676,10 +674,10 @@ namespace AspectGenerator.Tests
 		public void InvalidPatternReportsDiagnosticTest()
 		{
 			var result = RunGenerator(FilterInvalidPatternSource);
-			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.InvalidAspectFilterDottedPattern);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.FilterInvalidPattern);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.InvalidAspectFilterDottedPattern}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
-			StringAssert.Contains(diagnostic.GetMessage(), "'**' cannot be used as the final method segment");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.FilterInvalidPattern}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			StringAssert.Contains(diagnostic.GetMessage(), "**");
 		}
 
 		[TestMethod]
@@ -691,8 +689,8 @@ namespace AspectGenerator.Tests
 
 				AssertFilterDiagnostic(
 					result,
-					AspectDiagnosticID.InvalidAspectFilterRule,
-					"Target filter rule body cannot be empty.");
+					AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,
+					$"'{rule}' is version 1.1 syntax");
 			}
 		}
 
@@ -705,22 +703,23 @@ namespace AspectGenerator.Tests
 
 				AssertFilterDiagnostic(
 					result,
-					AspectDiagnosticID.InvalidAspectFilterRule,
-					"can only be used with native condition rules");
+					AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,
+					"version 1.1 syntax");
 			}
 		}
 
 		[TestMethod]
 		public void InvalidParameterPatternsReportDiagnosticTest()
 		{
-			foreach (var rule in new[] { "params: this string", "Save(..., ...)" })
+			foreach (var (rule, id, fragment) in new[]
+			{
+				("Save(.., ..)", AspectDiagnosticID.FilterInvalidPattern,                "at most once"),
+				("Save(...)",    AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,   "'...' is version 1.1 syntax"),
+			})
 			{
 				var result = RunGenerator(FilterRuleDiagnosticSource.Replace("FILTER_RULE", rule));
 
-				AssertFilterDiagnostic(
-					result,
-					AspectDiagnosticID.InvalidAspectFilterParameterPattern,
-					rule.Contains("this", StringComparison.Ordinal) ? "'this' is not supported" : "can appear at most once");
+				AssertFilterDiagnostic(result, id, fragment);
 			}
 		}
 
@@ -733,26 +732,31 @@ namespace AspectGenerator.Tests
 
 				AssertFilterDiagnostic(
 					result,
-					AspectDiagnosticID.InvalidAspectFilterRule,
-					"Condition value has an empty operand");
+					AspectDiagnosticID.FilterSyntaxError,
+					"Syntax error");
 			}
 		}
 
 		[TestMethod]
 		public void MethodLevelTargetFilterReportsDiagnosticTest()
 		{
+			// A TargetFilter on a method filters that method: Load is not Save, so the aspect is not applied to it, and the
+			// build says so.
 			var result = RunGenerator(FilterMethodLevelTargetFilterSource);
-			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.MethodLevelTargetFilter);
+			var diagnostic = result.Diagnostics.SingleOrDefault(d => d.Id == AspectDiagnosticID.AspectNotAppliedToMethod);
 
-			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.MethodLevelTargetFilter}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
-			StringAssert.Contains(diagnostic.GetMessage(), "assembly-level or type-level");
+			Assert.IsNotNull(diagnostic, $"Expected diagnostic {AspectDiagnosticID.AspectNotAppliedToMethod}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(d => d.Id))}");
+			Assert.AreEqual(DiagnosticSeverity.Warning, diagnostic.Severity);
+			StringAssert.Contains(diagnostic.GetMessage(), "is not applied");
+			AssertNotGenerated(result, "Interceptors.g.cs");
 		}
 
 		[TestMethod]
-		public void LocalFunctionTargetFilterReportsDiagnosticTest()
+		public void LocalFunctionTargetFilterIsDecidedWhenItsCallIsBoundTest()
 		{
-			// A local function has no declaration the generator selects from; AG0208 must not depend on whether another
-			// filter makes the generator bind every call, and a design-time build reports it as a build does.
+			// A local function is not a declaration the generator selects from: its filter is read when a call to it is
+			// bound, whatever the other filters make the generator bind, in a build and in a design-time build alike. A
+			// local function is never intercepted, and nothing about its filter is reported.
 			var cases = new (string Name, string AssemblyFilter)[]
 			{
 				("no other filter",               ""),
@@ -766,16 +770,23 @@ namespace AspectGenerator.Tests
 				foreach (var designTime in new[] { false, true })
 				{
 					var result = RunGenerator(source, designTime ? new() { ["build_property.DesignTimeBuild"] = "true" } : null);
-					var diagnostics = result.Diagnostics.Where(static d => d.Id == AspectDiagnosticID.MethodLevelTargetFilter).ToArray();
-					var mode = designTime ? "design-time build" : "build";
+					var mode   = designTime ? "design-time build" : "build";
 
-					Assert.AreEqual(1, diagnostics.Length, $"{name}, {mode}: expected one {AspectDiagnosticID.MethodLevelTargetFilter}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(static d => d.Id))}");
-					Assert.AreEqual(
-						source.IndexOf("FilterAspect(TargetFilter = \"Save\")", StringComparison.Ordinal),
-						diagnostics[0].Location.SourceSpan.Start,
-						$"{name}, {mode}: AG0208 is reported at the attribute of the local function.");
+					Assert.IsFalse(result.Results.Any(static r => r.Exception is not null), $"{name}, {mode}: the generator threw.");
+					Assert.IsFalse(
+						result.Diagnostics.Any(static d => d.Id.StartsWith("AG02", StringComparison.Ordinal)),
+						$"{name}, {mode}: did not expect a filter diagnostic. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(static d => $"{d.Id}: {d.GetMessage()}"))}");
 				}
 			}
+		}
+
+		[TestMethod]
+		public void BuildAndMarkerAnalyzerAgreeOnATargetFilterOnALocalFunctionTest()
+		{
+			// The assembly's filter selects Outer; the local function's own filters name it (Inner) or something else.
+			// Whatever the local function's filter decides, the build and the marker analyzer see the same calls.
+			foreach (var localFilter in new[] { "method: Inner", "method: Other", "method: Outer", "public" })
+				AssertMarkersMatchInterceptors(LocalFunctionAgreementSource.Replace("LOCAL_FILTER", localFilter, StringComparison.Ordinal));
 		}
 
 		[TestMethod]
@@ -800,8 +811,8 @@ namespace AspectGenerator.Tests
 					var mode   = designTime ? "design-time build" : "build";
 
 					Assert.IsFalse(
-						result.Diagnostics.Any(static d => d.Id == AspectDiagnosticID.MethodLevelTargetFilter),
-						$"{name}, {mode}: did not expect {AspectDiagnosticID.MethodLevelTargetFilter}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(static d => d.Id))}");
+						result.Diagnostics.Any(static d => d.Id == AspectDiagnosticID.AspectNotAppliedToMethod),
+						$"{name}, {mode}: did not expect {AspectDiagnosticID.AspectNotAppliedToMethod}. Actual diagnostics: {string.Join(", ", result.Diagnostics.Select(static d => d.Id))}");
 				}
 			}
 		}
@@ -840,14 +851,14 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void AttributeConditionKeyIsNotSingularTest()
+		public void AttributesKeyOfVersion11IsReportedWithItsReplacementTest()
 		{
 			var result = RunGenerator(DefaultTargetFilterSingularAttributeSource);
 
 			AssertFilterDiagnostic(
 				result,
-				AspectDiagnosticID.UnknownAspectFilterConditionKey,
-				"Unknown target filter condition key 'attribute'");
+				AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty,
+				"'attributes:' is version 1.1 syntax: write 'attribute: NoLogAttribute'");
 		}
 
 		[TestMethod]
@@ -1594,7 +1605,7 @@ namespace AspectGenerator.Tests
 						[$"build_property.AspectGenerator{AspectOptionName.ReportFile}"] = reportFile,
 					});
 
-				AssertDiagnostic(result, AspectDiagnosticID.UnknownAspectFilterConditionKey);
+				AssertDiagnostic(result, AspectDiagnosticID.FilterUnknownKeyOrWord);
 				Assert.AreEqual(0, result.Diagnostics.Count(IsReportDiagnostic));
 				Assert.IsTrue(File.Exists(reportFile), $"Report file was not generated: {reportFile}");
 			}
@@ -1621,7 +1632,7 @@ namespace AspectGenerator.Tests
 		{
 			var result = RunGenerator(InvalidUnknownConditionKeyFilterSource);
 
-			AssertDiagnostic(result, AspectDiagnosticID.UnknownAspectFilterConditionKey);
+			AssertDiagnostic(result, AspectDiagnosticID.FilterUnknownKeyOrWord);
 		}
 
 		[TestMethod]
@@ -1637,10 +1648,7 @@ namespace AspectGenerator.Tests
 			{
 				var result = RunGenerator(InvalidLeadingOrFilterSource.Replace("FILTER_RULE", rule));
 
-				AssertDiagnostic(result, AspectDiagnosticID.InvalidAspectFilterRule);
-				Assert.IsTrue(result.Diagnostics.Any(d =>
-					d.Id == AspectDiagnosticID.InvalidAspectFilterRule &&
-					d.GetMessage().Contains("Leading '|' requires a previous native condition group.", StringComparison.Ordinal)));
+				AssertFilterDiagnostic(result, AspectDiagnosticID.FilterOldSyntaxOrRepeatedProperty, "'|' before a line is version 1.1 syntax");
 			}
 		}
 
@@ -1657,7 +1665,21 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void AssemblyIncludeAndTypeIncludeApplySameAspectTypeTest()
 		{
+			// Version 1.1 applied the union of the assembly's and the type's includes (Save and Load). A property the type
+			// declares now replaces the assembly's for the methods of that type: only Load is selected.
 			var result = RunGenerator(AssemblyIncludeTypeIncludeFilterSource);
+			var source = GetGeneratedSource(result, "Interceptors.g.cs");
+
+			StringAssert.Contains(source, "Load_Interceptor");
+			Assert.IsFalse(source.Contains("Save_Interceptor", StringComparison.Ordinal), source);
+		}
+
+		[TestMethod]
+		public void TypeIncludeThatNamesTheAssemblyIncludeKeepsBothTest()
+		{
+			// The union of the assembly's and the type's includes is written by naming the assembly's value.
+			var result = RunGenerator(
+				AssemblyIncludeTypeIncludeFilterSource.Replace("TargetFilter = \"method: Load\"", "TargetFilter = \"method: Load or assembly.method\"", StringComparison.Ordinal));
 			var source = GetGeneratedSource(result, "Interceptors.g.cs");
 
 			StringAssert.Contains(source, "Save_Interceptor");
@@ -1855,7 +1877,7 @@ namespace AspectGenerator.Tests
 		[TestMethod]
 		public void ConditionNativePatternInterceptsReferencedAssemblyMethodTest()
 		{
-			AssertInterceptedCalls(ExternalTargetSource("fulltype: System.Math; method: Max; params: System.Int32, System.Int32"), 1);
+			AssertInterceptedCalls(ExternalTargetSource("type: global::System.Math and method: Max and params: (System.Int32, System.Int32)"), 1);
 		}
 
 		[TestMethod]
@@ -1877,7 +1899,7 @@ namespace AspectGenerator.Tests
 					ownCalls: "Service.Save();"),
 				ExternalTargetSource("public static System.Math.Max(System.Int32, System.Int32)"),
 				ExternalTargetSource("public static System.Math.Ma*(System.Int32, System.Int32)"),
-				ExternalTargetSource("fulltype: System.Math; method: Max; params: System.Int32, System.Int32"),
+				ExternalTargetSource("type: global::System.Math and method: Max and params: (System.Int32, System.Int32)"),
 				CallSitePrefilterV2TraceSource,
 				TraceDirectSource,
 			};
@@ -1885,32 +1907,37 @@ namespace AspectGenerator.Tests
 			probes = [..probes, AspectLocationSource, CallShapeSource("UserService.Create<Holder>(); UserService? service = new(); service?.Save(); \"a\".Length(); new[] { 1 }.Count();")];
 
 			foreach (var probe in probes)
-			{
-				var result      = RunGeneratorAndGetCompilation(probe, out var compilation);
-				var generated   = GetGeneratedSourceOrEmpty(result, "Interceptors.g.cs");
-				var intercepted = System.Text.RegularExpressions.Regex
-					.Matches(generated, "InterceptsLocationAttribute\\(1, \"(?<data>[^\"]+)\"\\)")
-					.Select(static m => m.Groups["data"].Value)
-					.OrderBy(static d => d, StringComparer.Ordinal)
-					.ToArray();
+				AssertMarkersMatchInterceptors(probe, requireInterceptors: true);
+		}
 
-				var markers = RunAnalyzer(probe)
-					.Where(static d => d.Id == AspectDiagnosticID.InterceptedCallMarker)
-					.Select(d =>
-					{
-						var tree       = compilation.SyntaxTrees.Single(t => t.FilePath == d.Location.SourceTree!.FilePath);
-						var invocation = tree.GetRoot().FindNode(d.Location.SourceSpan).FirstAncestorOrSelf<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()!;
+		static void AssertMarkersMatchInterceptors(string probe, bool requireInterceptors = false)
+		{
+			var result      = RunGeneratorAndGetCompilation(probe, out var compilation);
+			var generated   = GetGeneratedSourceOrEmpty(result, "Interceptors.g.cs");
+			var intercepted = System.Text.RegularExpressions.Regex
+				.Matches(generated, "InterceptsLocationAttribute\\(1, \"(?<data>[^\"]+)\"\\)")
+				.Select(static m => m.Groups["data"].Value)
+				.OrderBy(static d => d, StringComparer.Ordinal)
+				.ToArray();
+
+			var markers = RunAnalyzer(probe)
+				.Where(static d => d.Id == AspectDiagnosticID.InterceptedCallMarker)
+				.Select(d =>
+				{
+					var tree       = compilation.SyntaxTrees.Single(t => t.FilePath == d.Location.SourceTree!.FilePath);
+					var invocation = tree.GetRoot().FindNode(d.Location.SourceSpan).FirstAncestorOrSelf<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()!;
 
 #pragma warning disable RSEXPERIMENTAL002 // experimental before Roslyn 4.14
-						return compilation.GetSemanticModel(tree).GetInterceptableLocation(invocation)!.Data;
+					return compilation.GetSemanticModel(tree).GetInterceptableLocation(invocation)!.Data;
 #pragma warning restore RSEXPERIMENTAL002
-					})
-					.OrderBy(static d => d, StringComparer.Ordinal)
-					.ToArray();
+				})
+				.OrderBy(static d => d, StringComparer.Ordinal)
+				.ToArray();
 
+			if (requireInterceptors)
 				Assert.IsTrue(intercepted.Length > 0, probe);
-				CollectionAssert.AreEqual(intercepted, markers, probe);
-			}
+
+			CollectionAssert.AreEqual(intercepted, markers, probe);
 		}
 
 		[TestMethod]
@@ -1965,7 +1992,7 @@ namespace AspectGenerator.Tests
 		{
 			AssertInterceptedCalls(
 				RecordMembersSource
-					.Replace("[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = \"fulltype: AspectGenerator.Tests.GeneratorDriver.Person\")]", "", StringComparison.Ordinal)
+					.Replace("[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = \"type: global::AspectGenerator.Tests.GeneratorDriver.Person\")]", "", StringComparison.Ordinal)
 					.Replace("/*TYPE-FILTER*/", "[Log(TargetFilter = \"method: *\")]", StringComparison.Ordinal),
 				4);
 		}
@@ -2472,7 +2499,7 @@ namespace AspectGenerator.Tests
 
 			[Aspect(
 				OnAfterCall = nameof(After),
-				DefaultTargetFilter = "attribute: NoLogAttribute")]
+				DefaultTargetFilter = "attributes: NoLogAttribute")]
 			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class LogAttribute : Attribute
 			{
@@ -2502,7 +2529,7 @@ namespace AspectGenerator.Tests
 
 			[Aspect(
 				OnAfterCall = nameof(After),
-				DefaultTargetFilter = "attribute: NoLogAttribute")]
+				DefaultTargetFilter = "attributes: NoLogAttribute")]
 			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class LogAttribute : Attribute
 			{
@@ -2753,7 +2780,7 @@ namespace AspectGenerator.Tests
 
 			[Aspect(
 				OnAfterCall = nameof(After),
-				DefaultTargetFilter = "attribute: NoLogAttribute")]
+				DefaultTargetFilter = "attributes: NoLogAttribute")]
 			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			public sealed class LibraryLogAttribute : Attribute
 			{
@@ -2968,7 +2995,7 @@ namespace AspectGenerator.Tests
 			using System;
 			using AspectGenerator;
 
-			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = [@"regex: .*\.AssemblyTarget\(\)$"])]
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = ["method: AssemblyTarget"])]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
@@ -3008,7 +3035,7 @@ namespace AspectGenerator.Tests
 				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
 			}
 
-			[FilterAspect(TargetFilter = [@"regex: .*\.SaveUser\(\)$"])]
+			[FilterAspect(TargetFilter = ["method: SaveUser"])]
 			sealed class UserService
 			{
 				public void Invoke()
@@ -3040,8 +3067,8 @@ namespace AspectGenerator.Tests
 			[FilterAspect(
 				TargetFilter =
 				[
-					"contains: Save",
-					"-contains: HealthCheck"
+					"method: Save*",
+					"- method: HealthCheck"
 				])]
 			sealed class UserService
 			{
@@ -3074,7 +3101,7 @@ namespace AspectGenerator.Tests
 			}
 
 			[FilterAspect(
-				TargetFilter = "contains: Save")]
+				TargetFilter = "method: Save*")]
 			sealed class UserService
 			{
 				public void Invoke()
@@ -3104,9 +3131,9 @@ namespace AspectGenerator.Tests
 			}
 
 			[FilterAspect(
-				TargetFilter = @"contains: Save
+				TargetFilter = @"method: Save*
 			# Exclude health probes.
-			-contains: HealthCheck")]
+			- method: HealthCheck")]
 			sealed class UserService
 			{
 				public void Invoke()
@@ -3128,7 +3155,7 @@ namespace AspectGenerator.Tests
 			using AspectGenerator;
 
 			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
-				TargetFilter = "contains: SaveUser",
+				TargetFilter = "method: SaveUser",
 				Category = "audit")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
@@ -3169,7 +3196,7 @@ namespace AspectGenerator.Tests
 				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
 			}
 
-			[FilterAspect(TargetFilter = [@"-regex: .*\.Target\(\)$"])]
+			[FilterAspect(TargetFilter = ["- method: Target"])]
 			static class Target
 			{
 				public static void Invoke()
@@ -3248,8 +3275,8 @@ namespace AspectGenerator.Tests
 			using AspectGenerator;
 
 			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
-				TargetFilter = @"namespace:AspectGenerator.Tests.GeneratorDriver; type:*Service; method:*Async; returns:System.Threading.Tasks.Task*
-			-method:HealthCheckAsync")]
+				TargetFilter = @"namespace: AspectGenerator.Tests.GeneratorDriver and type: *Service and method: *Async and returns: System.Threading.Tasks.Task*
+			- method: HealthCheckAsync")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
@@ -3289,9 +3316,12 @@ namespace AspectGenerator.Tests
 			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
 				TargetFilter =
 				[
-					"namespace:AspectGenerator.Tests.GeneratorDriver | AspectGenerator.Tests.GeneratorDriver.Jobs; type:*Service | *Repository; method:Save* | Update*; returns:System.Threading.Tasks.Task* | System.Threading.Tasks.ValueTask*; param:*CancellationToken | out System.Int32",
-					"| namespace:AspectGenerator.Tests.GeneratorDriver; type:*Service; method:TryGet; params:(string, out int)",
-					"-method:Ping | HealthCheck"
+					@"((namespace: AspectGenerator.Tests.GeneratorDriver or namespace: AspectGenerator.Tests.GeneratorDriver.Jobs) and (type: *Service or type: *Repository)
+					and (method: Save* or method: Update*)
+					and (returns: System.Threading.Tasks.Task* or returns: System.Threading.Tasks.ValueTask*)
+					and (param: *CancellationToken or param: out System.Int32))
+					or (namespace: AspectGenerator.Tests.GeneratorDriver and type: *Service and method: TryGet and params: (string, out int))",
+					"- method: Ping or method: HealthCheck"
 				])]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
@@ -3338,10 +3368,9 @@ namespace AspectGenerator.Tests
 
 			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
 				TargetFilter = @"
-				namespace: AspectGenerator.Tests.GeneratorDriver
-				type: *Service
+				namespace: AspectGenerator.Tests.GeneratorDriver and type: *Service
 				method: Save*
-				params: ..., *CancellationToken
+				params: (.., *CancellationToken)
 				")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
@@ -3379,8 +3408,7 @@ namespace AspectGenerator.Tests
 			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
 				TargetFilter =
 				[
-					"method: Save* & *Async",
-					"| param: *CancellationToken & *IDisposable"
+					"method: Save*Async or (param: *CancellationToken and param: *IDisposable)"
 				])]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
@@ -3419,8 +3447,7 @@ namespace AspectGenerator.Tests
 			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
 				TargetFilter = @"
 				type: *Service
-				method: Save*
-				method: Update*
+				method: Save* or method: Update*
 				")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
@@ -3456,16 +3483,9 @@ namespace AspectGenerator.Tests
 
 			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
 				TargetFilter = @"
-				namespace: AspectGenerator.Tests.GeneratorDriver
-				& type: *Service
-				& method: Save*
-
-				| namespace: AspectGenerator.Tests.GeneratorDriver
-				& type: *Job
-				& method: Run*
-
-				- method: HealthCheck
-				| method: Ping
+				namespace: AspectGenerator.Tests.GeneratorDriver and type: *Service and method: Save*
+				or namespace: AspectGenerator.Tests.GeneratorDriver and type: *Job and method: Run*
+				- method: HealthCheck or method: Ping
 				")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
@@ -3570,7 +3590,7 @@ namespace AspectGenerator.Tests
 			using System;
 			using AspectGenerator;
 
-			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "path:AspectGenerator.Tests.GeneratorDriver.*Service; method:Save")]
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "type: global::AspectGenerator.Tests.GeneratorDriver.*Service and method: Save")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
@@ -3648,7 +3668,7 @@ namespace AspectGenerator.Tests
 			using System;
 			using AspectGenerator;
 
-			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "fulltype:AspectGenerator.Tests.GeneratorDriver.UserService; protected internal")]
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "type: global::AspectGenerator.Tests.GeneratorDriver.UserService and protected internal")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
@@ -3680,7 +3700,7 @@ namespace AspectGenerator.Tests
 			using System.Threading;
 			using AspectGenerator;
 
-			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "Save*(..., *CancellationToken)")]
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "Save*(.., *CancellationToken)")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
@@ -3715,8 +3735,7 @@ namespace AspectGenerator.Tests
 			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
 				TargetFilter =
 				[
-					"TryGet(string, out int) : bool",
-					"LoadAsync() : System.Threading.Tasks.Task<string>"
+					"TryGet(string, out int) : bool or LoadAsync() : System.Threading.Tasks.Task<string>"
 				])]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
@@ -3758,7 +3777,7 @@ namespace AspectGenerator.Tests
 			using AspectGenerator;
 
 			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
-				TargetFilter = "fulltype:**.Outer<*>.Inner<*>; method:Save; returns:*Inner<*>")]
+				TargetFilter = "type: Outer<*>.Inner<*> and method: Save and returns: *Inner<*>")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
@@ -3799,7 +3818,7 @@ namespace AspectGenerator.Tests
 			using System;
 			using AspectGenerator;
 
-			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "A.**.B.**")]
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "method: Sa**ve")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
@@ -3910,6 +3929,38 @@ namespace AspectGenerator.Tests
 			}
 			""";
 
+		const string LocalFunctionAgreementSource =
+			"""
+			using System;
+			using AspectGenerator;
+
+			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(TargetFilter = "method: Outer")]
+
+			namespace AspectGenerator.Tests.GeneratorDriver;
+
+			[Aspect(OnAfterCall = nameof(After))]
+			[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+			sealed class FilterAspectAttribute : Attribute
+			{
+				public string? TargetFilter { get; set; }
+
+				public static void After(InterceptInfo<string> info) => info.ReturnValue += " filtered";
+			}
+
+			static class Target
+			{
+				public static string Outer() => "outer";
+
+				public static string Invoke()
+				{
+					return Outer() + Inner();
+
+					[FilterAspect(TargetFilter = "LOCAL_FILTER")]
+					static string Inner() => "inner";
+				}
+			}
+			""";
+
 		const string DefaultTargetFilterTypeNoLogSource =
 			"""
 			using System;
@@ -3919,7 +3970,7 @@ namespace AspectGenerator.Tests
 
 			[Aspect(
 				OnAfterCall = nameof(After),
-				DefaultTargetFilter = "-attributes: NoLogAttribute")]
+				DefaultTargetFilter = "- attribute: NoLogAttribute")]
 			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class LogAttribute : Attribute
 			{
@@ -3955,7 +4006,7 @@ namespace AspectGenerator.Tests
 
 			[Aspect(
 				OnAfterCall = nameof(After),
-				DefaultTargetFilter = "-attributes: NoLogAttribute")]
+				DefaultTargetFilter = "- attribute: NoLogAttribute")]
 			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class LogAttribute : Attribute
 			{
@@ -3994,7 +4045,7 @@ namespace AspectGenerator.Tests
 
 			[Aspect(
 				OnAfterCall = nameof(After),
-				DefaultTargetFilter = "-attributes: AspectGenerator.Tests.GeneratorDriver.NoLogAttribute")]
+				DefaultTargetFilter = "- attribute: AspectGenerator.Tests.GeneratorDriver.NoLogAttribute")]
 			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class LogAttribute : Attribute
 			{
@@ -4033,7 +4084,7 @@ namespace AspectGenerator.Tests
 
 			[Aspect(
 				OnAfterCall = nameof(After),
-				DefaultTargetFilter = "-attributes: NoLogAttribute")]
+				DefaultTargetFilter = "- attribute: NoLogAttribute")]
 			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class LogAttribute : Attribute
 			{
@@ -4047,7 +4098,8 @@ namespace AspectGenerator.Tests
 			{
 			}
 
-			[Log(TargetFilter = "public **.*(...)")]
+			[Log(TargetFilter = @"public **.*(..)
+				attribute: any")]
 			[NoLog]
 			sealed class Service
 			{
@@ -4069,7 +4121,7 @@ namespace AspectGenerator.Tests
 
 			[Aspect(
 				OnAfterCall = nameof(After),
-				DefaultTargetFilter = "-attributes: NoLogAttribute")]
+				DefaultTargetFilter = "- attribute: NoLogAttribute")]
 			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class LogAttribute : Attribute
 			{
@@ -4084,8 +4136,8 @@ namespace AspectGenerator.Tests
 			}
 
 			[Log(TargetFilter = """
-				public **.*(...)
-				-attributes: NoLogAttribute
+				public **.*(..)
+				- attribute: NoLogAttribute
 				""")]
 			[NoLog]
 			sealed class Service
@@ -4108,7 +4160,7 @@ namespace AspectGenerator.Tests
 
 			[Aspect(
 				OnAfterCall = nameof(After),
-				DefaultTargetFilter = "attribute: NoLogAttribute")]
+				DefaultTargetFilter = "attributes: NoLogAttribute")]
 			[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 			sealed class LogAttribute : Attribute
 			{
@@ -4137,20 +4189,19 @@ namespace AspectGenerator.Tests
 			using AspectGenerator;
 
 			[assembly: AspectGenerator.Tests.GeneratorDriver.FilterAspect(
-				TargetFilter =
-				[
-					@"regex: ^public System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.PublicInstance\(System.Int32\)$",
-					@"regex: ^public static System.Void AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.StaticVoid\(\)$",
-					@"regex: ^public System.Threading.Tasks.Task<System.String> AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.TaskResult\(\)$",
-					@"regex: ^public System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.GenericMethod<System.String>\(System.String\)$",
-					@"regex: ^public System.String AspectGenerator\.Tests\.GeneratorDriver\.GenericContainer<System.String>\.GenericContainerMethod\(System.String\)$",
-					@"regex: ^public System.Boolean AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.ByRef\(ref System.Int32,out System.Int32,in System.Int32\)$",
-					@"regex: ^public static System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalExtensions\.ExtensionTarget\(this AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget,System.Int32\)$",
-					@"regex: ^public System.String\[\] AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.ArrayParameter\(System.String\[\]\)$",
-					@"regex: ^public System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalTarget\.NullableIgnored\(System.String\)$",
-					@"regex: ^public virtual System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalBase\.VirtualTarget\(\)$",
-					@"regex: ^public override System.String AspectGenerator\.Tests\.GeneratorDriver\.CanonicalDerived\.OverrideTarget\(\)$"
-				])]
+				TargetFilter = [@"
+				public AspectGenerator.Tests.GeneratorDriver.CanonicalTarget.PublicInstance(System.Int32) : System.String
+				or public static AspectGenerator.Tests.GeneratorDriver.CanonicalTarget.StaticVoid() : System.Void
+				or public AspectGenerator.Tests.GeneratorDriver.CanonicalTarget.TaskResult() : System.Threading.Tasks.Task<System.String>
+				or public AspectGenerator.Tests.GeneratorDriver.CanonicalTarget.GenericMethod<System.String>(System.String) : System.String
+				or public AspectGenerator.Tests.GeneratorDriver.GenericContainer<System.String>.GenericContainerMethod(System.String) : System.String
+				or public AspectGenerator.Tests.GeneratorDriver.CanonicalTarget.ByRef(ref System.Int32, out System.Int32, in System.Int32) : System.Boolean
+				or public static AspectGenerator.Tests.GeneratorDriver.CanonicalExtensions.ExtensionTarget(this AspectGenerator.Tests.GeneratorDriver.CanonicalTarget, System.Int32) : System.String
+				or public AspectGenerator.Tests.GeneratorDriver.CanonicalTarget.ArrayParameter(System.String[]) : System.String[]
+				or public AspectGenerator.Tests.GeneratorDriver.CanonicalTarget.NullableIgnored(System.String) : System.String
+				or public virtual AspectGenerator.Tests.GeneratorDriver.CanonicalBase.VirtualTarget() : System.String
+				or public override AspectGenerator.Tests.GeneratorDriver.CanonicalDerived.OverrideTarget() : System.String
+				"])]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
@@ -4438,7 +4489,7 @@ namespace AspectGenerator.Tests
 			using AspectGenerator;
 
 			[assembly: AspectGenerator.Tests.GeneratorDriver.TraceAspect(
-				TargetFilter = "fulltype:AspectGenerator.Tests.GeneratorDriver.Service")]
+				TargetFilter = "type: global::AspectGenerator.Tests.GeneratorDriver.Service")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 
@@ -4912,9 +4963,7 @@ namespace AspectGenerator.Tests
 
 			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(
 				TargetFilter = @"
-				method: Save*
-				& method: *Async
-				method: Update*
+				method: Save* and method: *Async
 				")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
@@ -5153,7 +5202,7 @@ namespace AspectGenerator.Tests
 			using System;
 			using AspectGenerator;
 
-			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "fulltype: AspectGenerator.Tests.GeneratorDriver.Person")]
+			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(TargetFilter = "type: global::AspectGenerator.Tests.GeneratorDriver.Person")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
 

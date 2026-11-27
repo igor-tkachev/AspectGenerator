@@ -26,37 +26,37 @@ namespace AspectGenerator.Tests
 		static readonly LocatedCase[] AssemblyCases =
 		[
 			// The expression starts at line 5, column 2; the attribute at line 3, column 11.
-			new("regular",                    "\"method: Save; foo: bar\"",                       "AG0204", 5, 17, "foo"),
-			new("regular, escapes before",    "\"method: S\\u0061ve;\\tfoo: bar\"",               "AG0204", 5, 23, "foo"),
-			new("regular, escaped key",       "\"method: Save; \\x66oo: bar\"",                   "AG0204", 5, 17, "\\x66oo"),
-			new("regular, surrogate pair",    "\"method: \\U0001F600; foo: bar\"",                "AG0204", 5, 23, "foo"),
-			new("regular, second line",       "\"method: Save\\nfoo: bar\"",                      "AG0204", 5, 17, "foo"),
-			new("regular, CR LF and blanks",  "\"method: Save\\r\\n\\r\\n   foo: bar\"",          "AG0204", 5, 26, "foo"),
-			new("regular, regex",             "\"regex: [\"",                                      "AG0201", 5, 10, "["),
-			new("verbatim",                   "@\"method: \"\"Save\"\"; foo: bar\"",              "AG0204", 5, 22, "foo"),
-			new("verbatim, two lines",        "@\"method: Save\n\t\t\tfoo: bar\"",                "AG0204", 6, 3,  "foo"),
-			new("raw, one line",              "\"\"\"method: Save; foo: bar\"\"\"",               "AG0204", 5, 19, "foo"),
-			new("raw, lines",                 "\"\"\"\n\t\t\tmethod: Save\n\t\t\t  foo: bar\n\t\t\t\"\"\"", "AG0204", 7, 5, "foo"),
-			new("raw, lines, CR LF",          "\"\"\"\n\t\t\tmethod: Save\n\t\t\t  foo: bar\n\t\t\t\"\"\"", "AG0204", 7, 5, "foo", LineBreaksCrLf: true),
-			new("raw, a rule across lines",   "\"\"\"\n\t\t\tpublic\n\t\t\tprivate\n\t\t\t\"\"\"",   "AG0210", 6, 3,  "public\n\t\t\tprivate"),
-			new("raw, a rule across CR LF",   "\"\"\"\n\t\t\tpublic\n\t\t\tprivate\n\t\t\t\"\"\"",   "AG0210", 6, 3,  "public\r\n\t\t\tprivate", LineBreaksCrLf: true),
-			new("regular, a rule across lines", "\"public\\nprivate\"",                           "AG0210", 5, 3,  "public\\nprivate"),
-			new("interpolated",               "$\"method: {Filters.Name}; foo: bar\"",            "AG0204", 5, 28, "foo", FiltersClass),
-			new("interpolated, in the hole",  "$\"method: Save; {Filters.Bad}\"",                 "AG0204", 34, 50, "foo", FiltersClass),
-			new("interpolated, braces",       "$\"method: Save{{x}}; foo: bar\"",                 "AG0204", 5, 23, "foo"),
-			new("interpolated verbatim",      "$@\"method: {Filters.Name}\n\t\t\tfoo: bar\"",    "AG0204", 6, 3,  "foo", FiltersClass),
-			new("interpolated raw, lines",    "$\"\"\"\n\t\t\tmethod: {Filters.Name}\n\t\t\t  foo: bar\n\t\t\t\"\"\"", "AG0204", 7, 5, "foo", FiltersClass),
-			new("concatenation",              "\"method: Save; \" + \"foo: bar\"",                "AG0204", 5, 22, "foo"),
-			new("concatenation, parenthesized", "(\"method: Save; \") + (string)(\"foo: bar\")",  "AG0204", 5, 33, "foo"),
-			new("concatenation, one rule",    "\"public \" + \"private\"",                        "AG0210", 5, 3,  "public \" + \"private"),
-			new("const",                      "Filters.Bad",                                      "AG0204", 34, 50, "foo", FiltersClass),
-			new("const of consts",            "Filters.Both",                                     "AG0204", 34, 50, "foo", FiltersClass),
-			new("array",                      "new[] { \"method: Save\", \"foo: bar\" }",         "AG0204", 5, 27, "foo"),
-			new("collection expression",      "[\"method: Save\", \"foo: bar\"]",                 "AG0204", 5, 20, "foo"),
+			new("regular",                    "\"method: Save and foo: bar\"",                       "AG0221", 5, 20, "foo"),
+			new("regular, escapes before",    "\"method: S\\u0061ve and\\tfoo: bar\"",               "AG0221", 5, 26, "foo"),
+			new("regular, escaped key",       "\"method: Save and \\x66oo: bar\"",                   "AG0221", 5, 20, "\\x66oo"),
+			new("regular, surrogate pair",    "\"method: \\\"\\U0001F600\\\" and foo: bar\"",          "AG0221", 5, 30, "foo"),
+			new("regular, second line",       "\"method: Save\\nfoo: bar\"",                      "AG0221", 5, 17, "foo"),
+			new("regular, CR LF and blanks",  "\"method: Save\\r\\n\\r\\n   foo: bar\"",          "AG0221", 5, 26, "foo"),
+			new("regular, regex",             "\"regex: [\"",                                      "AG0225", 5, 3,  "regex: ["),
+			new("verbatim",                   "@\"method: \"\"Save\"\" and foo: bar\"",              "AG0221", 5, 25, "foo"),
+			new("verbatim, two lines",        "@\"method: Save\n\t\t\tfoo: bar\"",                "AG0221", 6, 3,  "foo"),
+			new("raw, one line",              "\"\"\"method: Save and foo: bar\"\"\"",               "AG0221", 5, 22, "foo"),
+			new("raw, lines",                 "\"\"\"\n\t\t\tmethod: Save\n\t\t\t  foo: bar\n\t\t\t\"\"\"", "AG0221", 7, 5, "foo"),
+			new("raw, lines, CR LF",          "\"\"\"\n\t\t\tmethod: Save\n\t\t\t  foo: bar\n\t\t\t\"\"\"", "AG0221", 7, 5, "foo", LineBreaksCrLf: true),
+			new("raw, a rule across lines",   "\"\"\"\n\t\t\tnot (method: Save\n\t\t\tor method: Load)\n\t\t\t\"\"\"",   "AG0220", 6, 3,  "not (method: Save\n\t\t\tor method: Load)"),
+			new("raw, a rule across CR LF",   "\"\"\"\n\t\t\tnot (method: Save\n\t\t\tor method: Load)\n\t\t\t\"\"\"",   "AG0220", 6, 3,  "not (method: Save\r\n\t\t\tor method: Load)", LineBreaksCrLf: true),
+			new("regular, a rule across lines", "\"not (method: Save\\nor method: Load)\"",           "AG0220", 5, 3,  "not (method: Save\\nor method: Load)"),
+			new("interpolated",               "$\"method: {Filters.Name} and foo: bar\"",            "AG0221", 5, 31, "foo", FiltersClass),
+			new("interpolated, in the hole",  "$\"method: Save and {Filters.Bad}\"",                 "AG0221", 34, 50, "foo", FiltersClass),
+			new("interpolated, braces",       "$\"method: Save{{x}} and foo: bar\"",                 "AG0221", 5, 26, "foo"),
+			new("interpolated verbatim",      "$@\"method: {Filters.Name}\n\t\t\tfoo: bar\"",    "AG0221", 6, 3,  "foo", FiltersClass),
+			new("interpolated raw, lines",    "$\"\"\"\n\t\t\tmethod: {Filters.Name}\n\t\t\t  foo: bar\n\t\t\t\"\"\"", "AG0221", 7, 5, "foo", FiltersClass),
+			new("concatenation",              "\"method: Save and \" + \"foo: bar\"",                "AG0221", 5, 25, "foo"),
+			new("concatenation, parenthesized", "(\"method: Save and \") + (string)(\"foo: bar\")",  "AG0221", 5, 36, "foo"),
+			new("concatenation, one rule",    "\"method: Sa*\" + \"*ve\"",                        "AG0224", 5, 13, "*\" + \"*"),
+			new("const",                      "Filters.Bad",                                      "AG0221", 34, 50, "foo", FiltersClass),
+			new("const of consts",            "Filters.Both",                                     "AG0221", 34, 50, "foo", FiltersClass),
+			new("array",                      "new[] { \"method: Save\", \"foo: bar\" }",         "AG0221", 5, 27, "foo"),
+			new("collection expression",      "[\"method: Save\", \"foo: bar\"]",                 "AG0221", 5, 20, "foo"),
+			new("array, a property included twice", "new[] { \"public\", \"private\" }",         "AG0225", 5, 21, "private"),
 
 			// What cannot be traced exactly points at the attribute.
-			new("fallback, nameof",           "\"foo: \" + nameof(Target)",                       "AG0204", 3, 11, AttributeText),
-			new("fallback, a rule across filters", "new[] { \"public\", \"private\" }",           "AG0210", 3, 11, AttributeText),
+			new("fallback, nameof",           "\"foo: \" + nameof(Target)",                       "AG0221", 3, 11, AttributeText),
 		];
 
 		/// <summary>A class of constants for the cases that use them, on the last line of the file, line 34: its first constant's text begins at column 50.</summary>
@@ -114,14 +114,14 @@ namespace AspectGenerator.Tests
 			var source = TypeLevelFilterRuleDiagnosticSource.Replace("\"FILTER_RULE\"", "\n\t\"method: Save\\n\\tfoo: bar\"", StringComparison.Ordinal);
 
 			// [FilterAspect(TargetFilter = at line 14, the literal on the next line after a tab.
-			AssertLocated(new LocatedCase("type level", "", "AG0204", 15, 18, "foo"), source);
+			AssertLocated(new LocatedCase("type level", "", "AG0221", 15, 18, "foo"), source);
 		}
 
 		[TestMethod]
 		public void DefaultTargetFilterDiagnosticsPointIntoTheAspectDeclarationTest()
 		{
 			// The default filter of an aspect declared in the compilation: at its literal in the [Aspect] attribute.
-			AssertLocated(new LocatedCase("default filter", "", "AG0204", 7, 24, "attribute"), DefaultTargetFilterSingularAttributeSource);
+			AssertLocated(new LocatedCase("default filter", "", "AG0225", 7, 24, "attributes: NoLogAttribute"), DefaultTargetFilterSingularAttributeSource);
 		}
 
 		[TestMethod]
@@ -129,13 +129,24 @@ namespace AspectGenerator.Tests
 		{
 			var library = GetDesignTimeLibraryReference();
 
-			// The default filter of an aspect of a referenced assembly: at the attribute that applies it.
-			AssertLocated(new LocatedCase("library default filter", "", "AG0204", 5, 1, "LibraryLog"), LibraryDefaultTargetFilterSource, library, all: false);
+			// A default filter of an aspect of a referenced assembly that cannot be read turns the aspect off in the consumer
+			// and is reported on no source text, naming the assembly, in a build and in a design-time build alike.
+			foreach (var designTime in new[] { false, true })
+			{
+				var mode   = designTime ? "design time" : "build";
+				var result = RunGenerator(LibraryDefaultTargetFilterSource, designTime ? new() { ["build_property.DesignTimeBuild"] = "true" } : null, reference: library);
+				var found  = result.Diagnostics.Where(static d => d.Id == AspectDiagnosticID.UnreadableReferencedFilter).ToArray();
+
+				Assert.AreEqual(1, found.Length, $"{mode}: {string.Join(" | ", result.Diagnostics.Select(static d => $"{d.Id}: {d.GetMessage()}"))}");
+				Assert.AreEqual(DiagnosticSeverity.Error, found[0].Severity, mode);
+				Assert.IsFalse(found[0].Location.IsInSource, mode);
+				StringAssert.Contains(found[0].GetMessage(), "AspectGenerator.Tests.DesignTimeAspectLibrary", mode);
+			}
 
 			// A filter that uses a const of a referenced assembly cannot be traced into it: at the attribute.
 			const string expression = "AspectGenerator.Tests.Library.LibraryFilters.Bad";
 
-			AssertLocated(new LocatedCase("library const", expression, "AG0204", 3, 11, AttributeText), LocatedSource(expression, ""), library);
+			AssertLocated(new LocatedCase("library const", expression, "AG0221", 3, 11, AttributeText), LocatedSource(expression, ""), library);
 		}
 
 		[TestMethod]
@@ -159,7 +170,7 @@ namespace AspectGenerator.Tests
 				"[F] sealed class Two { public string Load() { return \"\"; } public void Invoke() { Load(); } }",
 				"");
 
-			AssertLocated(new LocatedCase("untraceable default filter", "", "AG0204", 3, 1, aspect), source);
+			AssertLocated(new LocatedCase("untraceable default filter", "", "AG0221", 3, 1, aspect), source);
 		}
 
 		[TestMethod]
@@ -176,7 +187,7 @@ namespace AspectGenerator.Tests
 
 			var watch = Stopwatch.StartNew();
 
-			AssertLocated(new LocatedCase("doubling constants", "", "AG0204", 5, 3, "foo"), LocatedSource("\"foo: bar\" + E.E30", constants.ToString()));
+			AssertLocated(new LocatedCase("doubling constants", "", "AG0221", 5, 3, "foo"), LocatedSource("\"foo: bar\" + E.E30", constants.ToString()));
 
 			// Two runs (a build and a design-time build) of a generator over a small file; tracing 2^30 references would
 			// take minutes.
@@ -190,7 +201,7 @@ namespace AspectGenerator.Tests
 			const string expression = "\"regex: \" + Filters.Bracket + Filters.Bracket";
 
 			AssertLocated(
-				new LocatedCase("one const twice", expression, "AG0201", 3, 11, AttributeText),
+				new LocatedCase("one const twice", expression, "AG0225", 3, 11, AttributeText),
 				LocatedSource(expression, "static class Filters { public const string Bracket = \"[\"; }"));
 		}
 
