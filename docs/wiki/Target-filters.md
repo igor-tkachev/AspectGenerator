@@ -199,8 +199,11 @@ Each aspect attribute is a **block**. For a method, the blocks that can speak ab
 // One method of a library, named.
 [assembly: Log(TargetFilter = "method: System.Console.WriteLine")]
 
-// Everything that is called, the libraries included. Use with care: see the cost section below.
-[assembly: Log(TargetFilter = "origin: any and method: Save*")]
+// Everything that is called, the libraries included, narrowed by a method name. See the cost section below.
+[assembly: Log(TargetFilter = """
+    origin: any
+    method: Save*
+    """)]
 ```
 
 For each property, **the most specific block that declares it decides**; what it does not declare comes from the levels above. A property nobody declares does not restrict. A method gets the aspect when every declaration that decides is satisfied: each deciding include is true and each deciding subtraction is false.
@@ -213,6 +216,11 @@ For each property, **the most specific block that declares it decides**; what it
 **Example.** The aspect's default is `- attribute: NoLog`; the assembly has `namespace: Shop.**` and `- method: *Internal*`.
 
 ```csharp
+[assembly: Log(TargetFilter = """
+    namespace: Shop.**
+    - method: *Internal*
+    """)]
+
 [Aspect(OnAfterCall = nameof(OnAfterCall), DefaultTargetFilter = "- attribute: NoLog")]
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
 sealed class LogAttribute : Attribute
@@ -221,11 +229,6 @@ sealed class LogAttribute : Attribute
 
     public static void OnAfterCall(InterceptInfo info) { }
 }
-
-[assembly: Log(TargetFilter = """
-    namespace: Shop.**
-    - method: *Internal*
-    """)]
 ```
 
 | On `OrderService` | `SaveOrder` | `[NoLog] SavePassword` | `SaveInternal` | `[Log] RunInternal` | `[Log] [NoLog] Ping` | `Load` |
@@ -291,7 +294,7 @@ assembly.method or public
 
 `p: any` removes every restriction on `p` from above, the aspect author's included: `method: any`, `attribute: any`, `accessibility: any`. Properties written with words use their property name as the key (`accessibility: any`, `static: any`, `async: any`, `virtuality: any`, `extern: any`, `extension: any`, `generated: any`, `location: any`, `origin: any`); these property names are keys only for `any`. A reference uses the property name too: the property of `namespace:` and `type:` is `location`, so it is `assembly.location` (`assembly.namespace` is an error). `location: any` resets both `namespace:` and `type:`; `origin: any` lets an assembly filter reach referenced methods without naming them.
 
-- `any` is a whole value only (`method: Save* or any` is an error) and the only include of that property in the filter.
+- `any` is a whole value only (`method: Save* or any` is an error) and stands alone on its line, as the only include of that property in the filter: `origin: any and method: Save*` is an error, `origin: any` and `method: Save*` on two lines are not.
 - `- p: any` is an error.
 - A method or attribute named `any` is written `@any`.
 
@@ -300,6 +303,11 @@ attribute: any
 ```
 
 ```target-filter
+origin: any
+method: Save*
+```
+
+```target-filter error=AG0234
 origin: any and method: Save*
 ```
 
@@ -473,7 +481,7 @@ type: *Service and returns: Task<*>
 - Pointer types have no pattern form yet: `*` or the quoted canonical text (`"System.Int32*"`) match them.
 
 ```target-filter
-returns: int[,] or (int, string) or int?
+returns: {int[,],(int, string),int?}
 ```
 
 ```target-filter
