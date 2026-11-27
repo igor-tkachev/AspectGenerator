@@ -314,27 +314,32 @@ namespace AspectGenerator.TargetFilterBinding
 			if (_name.MatchAttribute(attribute))
 				return true;
 
+			if (IsText(attribute))
+				return true;
+
 			// As for a name, the quoted text may leave out the suffix of the class: "N.Marker" is N.MarkerAttribute.
-			return IsText(attribute) || IsText(attribute, AttributeSuffix.Length) && attribute.Segments[attribute.Segments.Length - 1].TypeArguments.IsEmpty;
+			if (attribute.Segments.IsEmpty)
+				return false;
+
+			var last = attribute.Segments[attribute.Segments.Length - 1];
+
+			if (last.Name.Length <= AttributeSuffix.Length || !last.Name.EndsWith(AttributeSuffix, StringComparison.Ordinal))
+				return false;
+
+			var segments = attribute.Segments.SetItem(
+				attribute.Segments.Length - 1,
+				new NameSegment(last.Name.Remove(last.Name.Length - AttributeSuffix.Length), last.TypeArguments));
+
+			return IsText(new NamedTypeShape(segments, attribute.IsReferenceType));
 		}
 
 		/// <summary>
-		/// Whether the type is written as the quoted text, less the end of it that <paramref name="dropped"/> counts. The
-		/// text is written no further than the length it could have, so a type nested by the thousand costs no more than
-		/// the text does, and not by calls that follow it down.
+		/// Whether the type is written as the quoted text. The text is written no further than the length it could have,
+		/// so a type nested by the thousand costs no more than the text does, and not by calls that follow it down.
 		/// </summary>
-		bool IsText(TypeShape type, int dropped = 0)
+		bool IsText(TypeShape type)
 		{
-			var written = TypeShapeText.Write(type, _text.Length + dropped);
-
-			if (written is null)
-				return false;
-
-			return dropped == 0
-				? written == _text
-				: written.Length == _text.Length + dropped &&
-					written.EndsWith(AttributeSuffix, StringComparison.Ordinal) &&
-					string.CompareOrdinal(written, 0, _text, 0, _text.Length) == 0;
+			return TypeShapeText.Write(type, _text.Length) == _text;
 		}
 	}
 

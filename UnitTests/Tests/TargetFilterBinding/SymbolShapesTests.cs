@@ -209,6 +209,18 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 		}
 
 		[TestMethod]
+		public void ATupleNestedAFewLevelsIsKeyedByItsSymbolTest()
+		{
+			// A pair nested seven levels is no deeper than a pattern can be: the same type from two places is one shape.
+			var pair   = string.Concat(Enumerable.Repeat("(int, ", 7)) + "int" + string.Concat(Enumerable.Repeat(")", 7));
+			var probe  = new ProbeCompilation("public class T { public " + pair + " M(" + pair + " p) { return default; } }");
+			var method = probe.Method("T", "M");
+			var shapes = new TypeShapes();
+
+			Assert.AreSame(shapes.Get(method.ReturnType), shapes.Get(method.Parameters[0].Type));
+		}
+
+		[TestMethod]
 		public void TypesNestedByTheThousandAreShapedOnASmallStackTest()
 		{
 			const int Depth = 1_000;

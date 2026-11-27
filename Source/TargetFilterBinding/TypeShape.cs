@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 
 using AspectGenerator.TargetFilterFacts;
@@ -287,6 +288,10 @@ namespace AspectGenerator.TargetFilterBinding
 						{
 							specifiers.Append('[').Append(',', inner.Rank - 1).Append(']');
 							current = inner.Element;
+
+							// The text only grows: a run past the limit is no text of that length, however long it is.
+							if (text.Length + specifiers.Length > limit)
+								return null;
 						}
 
 						pending.Push(specifiers.ToString());
@@ -303,6 +308,9 @@ namespace AspectGenerator.TargetFilterBinding
 						{
 							stars++;
 							current = inner.PointedAt;
+
+							if (text.Length + stars > limit)
+								return null;
 						}
 
 						pending.Push(new string('*', stars));
@@ -341,6 +349,9 @@ namespace AspectGenerator.TargetFilterBinding
 						pending.Push(".");
 						pending.Push(method.ContainingType);
 						break;
+
+					case var other:
+						throw new InvalidOperationException($"The text of {other.GetType().Name} is not written.");
 				}
 
 				if (text.Length > limit)

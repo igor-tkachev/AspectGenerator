@@ -442,6 +442,30 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 				("attribute: \"N.MarkerAttributes\"",     F),
 				("attribute: \"M.Marker\"",               F),
 				("attribute: \"Attribute\"",              F),
+				("attribute: \"N.\"",                     F),
+			})
+			{
+				Assert.AreEqual(expected, FilterProbe.Answer(filter, facts), filter);
+			}
+		}
+
+		[TestMethod]
+		public void QuotedNameOfAGenericAttributeIsMatchedLikeTheUnquotedOneTest()
+		{
+			var generic = new RecordFacts("Shop.C", "M") { Attributes = [ShapeText.ParseNamed("N.MarkerAttribute<int>")] };
+			var plain   = new RecordFacts("Shop.C", "M") { Attributes = [ShapeText.ParseNamed("N.Attribute")] };
+
+			foreach (var (filter, facts, expected) in new[]
+			{
+				("attribute: N.Marker<int>",                                      generic, T),
+				("attribute: \"N.Marker<System.Int32>\"",                         generic, T),
+				("attribute: \"N.MarkerAttribute<System.Int32>\"",                generic, T),
+				("attribute: \"N.Marker<System.Int64>\"",                         generic, F),
+				("attribute: \"N.Marker\"",                                       generic, F),
+				("attribute: \"N.MarkerAttribute\"",                              generic, F),
+				("attribute: \"N.\"",                                             plain,   F),
+				("attribute: \"N.Attribute\"",                                    plain,   T),
+				("attribute: \"Attribute\"",                                      plain,   T),
 			})
 			{
 				Assert.AreEqual(expected, FilterProbe.Answer(filter, facts), filter);

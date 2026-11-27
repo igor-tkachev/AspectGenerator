@@ -120,7 +120,7 @@ namespace AspectGenerator.TargetFilterBinding
 					return false;
 
 				dependencies.Clear();
-				AddDependencies(current, dependencies);
+				AddDependencies(current, dependencies, tupleElements: false);
 
 				foreach (var dependency in dependencies)
 					pending.Push((dependency, depth + 1));
@@ -130,7 +130,11 @@ namespace AspectGenerator.TargetFilterBinding
 		}
 
 		/// <summary>The types whose shapes <see cref="Create"/> reads.</summary>
-		static void AddDependencies(ITypeSymbol type, List<ITypeSymbol> dependencies)
+		/// <param name="tupleElements">
+		/// Whether a tuple's elements are added beside its type arguments, which hold the same types: <see cref="Create"/>
+		/// reads the elements; a measure of how deep a type is would count them twice.
+		/// </param>
+		static void AddDependencies(ITypeSymbol type, List<ITypeSymbol> dependencies, bool tupleElements = true)
 		{
 			switch (type)
 			{
@@ -155,7 +159,7 @@ namespace AspectGenerator.TargetFilterBinding
 
 					dependencies.AddRange(named.TypeArguments);
 
-					if (named.IsTupleType)
+					if (tupleElements && named.IsTupleType)
 						foreach (var element in named.TupleElements)
 							dependencies.Add(element.Type);
 
