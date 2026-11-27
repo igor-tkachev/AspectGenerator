@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+
+using AspectGenerator.Selection;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -59,7 +62,122 @@ namespace AspectGenerator
 		AttributeData?   AspectDefinitionData,
 		AttributeSyntax? AspectDefinitionSyntax,
 		SemanticModel?   AspectDefinitionSemanticModel,
-		string?          DefaultTargetFilter);
+		string?          DefaultTargetFilter)
+	{
+		/// <summary>
+		/// What the call gets the aspect with once the target filters have decided its settings; <see langword="null"/>
+		/// while the aspect is applied as written (<see cref="AppliedAttributeData"/>, <see cref="AppliedAttributeSyntax"/>).
+		/// </summary>
+		public EffectiveApplication? EffectiveApplication { get; init; }
+	}
+
+	/// <summary>
+	/// An aspect as a selected method gets it: its settings, each taken from the most specific attribute of the selection
+	/// that writes it. All constructor arguments together are one setting; each named argument except <c>TargetFilter</c> is
+	/// one of its own. The aspect instance is built from this: the constructor with its arguments, then the named arguments
+	/// in order.
+	/// <para>
+	/// Two applications are equal when they build the same aspect from the same attributes: the same constructor, equal
+	/// arguments (<see cref="TypedConstants"/>), the same attributes (by reference) and the same named arguments in the same
+	/// order. Calls are grouped into one interceptor by this equality, so two applications built separately for two calls
+	/// must compare equal whenever their settings are.
+	/// </para>
+	/// </summary>
+	internal sealed record EffectiveApplication
+	{
+		public EffectiveApplication(
+			AttributeData                          reportAt,
+			IMethodSymbol?                         constructor,
+			ImmutableArray<TypedConstant>          constructorArguments,
+			AttributeData                          constructorSource,
+			ImmutableArray<EffectiveNamedArgument> namedArguments)
+		{
+			ReportAt             = reportAt;
+			Constructor          = constructor;
+			ConstructorArguments = constructorArguments;
+			ConstructorSource    = constructorSource;
+			NamedArguments       = namedArguments;
+		}
+
+		/// <summary>The attribute diagnostics about the application stand on: the most specific one that selects the method.</summary>
+		public AttributeData ReportAt { get; }
+
+		/// <summary>
+		/// The constructor, from the most specific attribute that writes constructor arguments. When none writes any, it is
+		/// the one of <see cref="ReportAt"/>, with the arguments its defaults give. <see langword="null"/> only when the
+		/// compiler could not bind the constructor of that attribute.
+		/// </summary>
+		public IMethodSymbol?                Constructor          { get; }
+		public ImmutableArray<TypedConstant> ConstructorArguments { get; }
+
+		/// <summary>The attribute <see cref="Constructor"/> and <see cref="ConstructorArguments"/> were taken from.</summary>
+		public AttributeData ConstructorSource { get; }
+
+		/// <summary>
+		/// The named arguments, except <c>TargetFilter</c>: from the least specific level that the selection takes one from to
+		/// the most specific, and on each as its attribute writes them.
+		/// </summary>
+		public ImmutableArray<EffectiveNamedArgument> NamedArguments { get; }
+
+		public bool Equals(EffectiveApplication? other)
+		{
+			if (ReferenceEquals(this, other))
+				return true;
+
+			if (other is null ||
+				!ReferenceEquals(ReportAt, other.ReportAt) ||
+				!ReferenceEquals(ConstructorSource, other.ConstructorSource) ||
+				!SymbolEqualityComparer.Default.Equals(Constructor, other.Constructor) ||
+				!TypedConstants.SequenceEqual(ConstructorArguments, other.ConstructorArguments) ||
+				NamedArguments.Length != other.NamedArguments.Length)
+				return false;
+
+			for (var i = 0; i < NamedArguments.Length; i++)
+				if (!NamedArguments[i].Equals(other.NamedArguments[i]))
+					return false;
+
+			return true;
+		}
+
+		public override int GetHashCode()
+		{
+			var hash = unchecked(SymbolEqualityComparer.Default.GetHashCode(Constructor) * 31 + TypedConstants.GetHashCode(ConstructorArguments));
+
+			foreach (var argument in NamedArguments)
+				hash = unchecked(hash * 31 + argument.GetHashCode());
+
+			return hash;
+		}
+	}
+
+	/// <summary>A named argument of an <see cref="EffectiveApplication"/> and the attribute it was taken from.</summary>
+	internal sealed record EffectiveNamedArgument
+	{
+		public EffectiveNamedArgument(string name, TypedConstant value, AttributeData source)
+		{
+			Name   = name;
+			Value  = value;
+			Source = source;
+		}
+
+		public string        Name   { get; }
+		public TypedConstant Value  { get; }
+		public AttributeData Source { get; }
+
+		public bool Equals(EffectiveNamedArgument? other)
+		{
+			return
+				other is not null &&
+				string.Equals(Name, other.Name, StringComparison.Ordinal) &&
+				ReferenceEquals(Source, other.Source) &&
+				TypedConstants.Equals(Value, other.Value);
+		}
+
+		public override int GetHashCode()
+		{
+			return unchecked(StringComparer.Ordinal.GetHashCode(Name) * 31 + TypedConstants.GetHashCode(Value));
+		}
+	}
 
 	record AspectFilterSet(
 		AttributeInfo                 Attribute,
