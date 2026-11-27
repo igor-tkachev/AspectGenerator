@@ -65,7 +65,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void GenericMethodDeclaredInTheProjectIsJudgedByItsDefinitionTest()
+		public void GenericMethodDeclaredInTheProjectIsJudgedPerCallTest()
 		{
 			const string selected = "Repository`1[String].Get<Int32>;7";
 			const string unrelated = "namespace: NoSuchNamespace.**";

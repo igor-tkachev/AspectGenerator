@@ -462,7 +462,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void ContainsTargetFilterAppliesAspectTest()
+		public void ArrayTargetFilterAppliesAspectTest()
 		{
 			var result = RunGenerator(FilterContainsSource);
 
@@ -472,7 +472,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void StringTargetFilterAppliesAspectTest()
+		public void MethodNameFilterOnTypeAppliesAspectTest()
 		{
 			var result = RunGenerator(FilterStringContainsSource);
 
@@ -510,7 +510,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void InvalidAspectFilterRegexReportsDiagnosticTest()
+		public void RegexKeyIsReportedAsOldSyntaxTest()
 		{
 			// regex: belongs to version 1.1: it is reported, with the way to write the target in version 2.
 			var result = RunGenerator(FilterInvalidRegexSource);
@@ -562,7 +562,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void PatternConditionRepeatedKeysUseOrAcrossLinesTest()
+		public void RepeatedKeyJoinedByOrAppliesAspectTest()
 		{
 			var result = RunGenerator(FilterPatternRepeatedKeyOrSource);
 
@@ -583,7 +583,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void PatternConditionLinePrefixesCreateAlternativeAndExcludeGroupsTest()
+		public void AlternativeAndExcludeLinesApplyAspectTest()
 		{
 			var result = RunGenerator(FilterPatternLinePrefixSource);
 
@@ -595,7 +595,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void InvalidPatternConditionPrefixReportsDiagnosticTest()
+		public void LinePrefixOperatorIsReportedAsOldSyntaxTest()
 		{
 			var result = RunGenerator(FilterInvalidConditionPrefixSource);
 
@@ -603,7 +603,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void ContainsAndRegexFiltersDoNotParseInlineOperatorsTest()
+		public void ContainsAndRegexKeysAreReportedAsOldSyntaxTest()
 		{
 			// contains: and regex: are version 1.1 keys: each is reported, whatever its text holds, and the aspect selects nothing.
 			var result = RunGenerator(FilterContainsRegexRawOperatorsSource);
@@ -614,7 +614,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void PatternPathAliasAppliesAspectTest()
+		public void GlobalTypePathFilterAppliesAspectTest()
 		{
 			var result = RunGenerator(FilterPatternPathAliasSource);
 
@@ -623,7 +623,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void PatternRuleSkipSemanticsPreserveLastEffectiveDecisionTest()
+		public void RepeatedMethodIncludesAreAnErrorAndSelectNothingTest()
 		{
 			// Version 1.1 read the rules in order and let the last one that matched decide. Version 2 has no order: a
 			// property is included once, so repeated includes of method: are an error, and the aspect selects nothing.
@@ -695,7 +695,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void LinePrefixOnNonPatternMatcherReportsDiagnosticTest()
+		public void LinePrefixOperatorBeforeOldKeysIsReportedAsOldSyntaxTest()
 		{
 			foreach (var rule in new[] { "& regex: .*Save.*", "| contains: Save" })
 			{
@@ -738,7 +738,7 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void MethodLevelTargetFilterReportsDiagnosticTest()
+		public void MethodLevelFilterThatDoesNotSelectTheMethodReportsNotAppliedTest()
 		{
 			// A TargetFilter on a method filters that method: Load is not Save, so the aspect is not applied to it, and the
 			// build says so.
@@ -1705,14 +1705,16 @@ namespace AspectGenerator.Tests
 		}
 
 		[TestMethod]
-		public void SameKeyAndOrConditionGroupSemanticsTest()
+		public void OrGroupInsideAndOnOneKeyIsSelectedByEitherBranchTest()
 		{
 			var result = RunGenerator(SameKeyAndOrFilterSource);
 			var source = GetGeneratedSource(result, "Interceptors.g.cs");
 
+			// The earlier language joined a line that repeats a key to the group of the latest line of that key: Save* and
+			// (*Async or Update*). A method has to be a Save* one, so UpdateAsync is not selected.
 			StringAssert.Contains(source, "SaveAsync_Interceptor");
 			Assert.IsFalse(source.Contains("Save_Interceptor", StringComparison.Ordinal));
-			StringAssert.Contains(source, "UpdateAsync_Interceptor");
+			Assert.IsFalse(source.Contains("UpdateAsync_Interceptor", StringComparison.Ordinal));
 		}
 
 		[TestMethod]
@@ -4963,7 +4965,7 @@ namespace AspectGenerator.Tests
 
 			[assembly: AspectGenerator.Tests.GeneratorDriver.Log(
 				TargetFilter = @"
-				(method: Save* and method: *Async) or method: Update*
+				method: Save* and (method: *Async or method: Update*)
 				")]
 
 			namespace AspectGenerator.Tests.GeneratorDriver;
