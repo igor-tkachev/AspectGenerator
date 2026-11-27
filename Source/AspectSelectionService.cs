@@ -61,9 +61,25 @@ namespace AspectGenerator
 		readonly Dictionary<IMethodSymbol,SymbolMethodFacts>   _definitionFacts = new(SymbolEqualityComparer.Default);
 		readonly Dictionary<IAssemblySymbol,LibraryFacts>      _libraries = new(SymbolEqualityComparer.Default);
 		readonly HashSet<FilterBlock>                          _reportedBlocks = new();
+		readonly bool                                          _explainNotApplied;
+		readonly bool                                          _explainAll;
+		readonly List<Explained>                               _explained = new();
+		readonly Dictionary<AspectChoice,Explained>            _explainedChoices = new();
+		readonly Dictionary<AspectScope,HashSet<string>>       _explainedCalls = new();
 		List<INamedTypeSymbol>? _sourceTypes;
 		HashSet<string>?        _defaultFilterAspectNames;
 		int                     _traceFilters;
+
+		static long _explainCalls;
+
+		/// <summary>
+		/// The number of explanations any selection service has asked the cascade for. An explanation is asked for only when the
+		/// build report is written and has a use for it: a test reads this to prove a build that has none asks for none.
+		/// </summary>
+		internal static long ExplainCalls
+		{
+			get { return Interlocked.Read(ref _explainCalls); }
+		}
 
 		public AspectSelectionService(
 			Compilation              compilation,
@@ -78,6 +94,14 @@ namespace AspectGenerator
 			_diagnostics = diagnostics;
 			_trace       = trace;
 			_facts       = new FactContext(compilation);
+
+			// The report explains a method an aspect is written on and its filters do not select; with the trace on it explains
+			// every method a filter considered. Without a report nothing is explained.
+			_explainNotApplied = AspectBuildReport.WillWrite(options);
+			_explainAll        = _explainNotApplied && options.Trace;
+
+			if (_explainAll)
+				_trace?.SetCounter("Explained methods", 0);
 
 			lock (_cacheGate)
 			{
@@ -467,10 +491,14 @@ namespace AspectGenerator
 				if (choice.Applied is not null || choice.DependsOnCall || choice.Aspect.IsOff || choice.Scope.Library is not null)
 					continue;
 
+				var locations = ImmutableArray.CreateBuilder<Location>();
+
 				foreach (var block in choice.Scope.MethodBlocks)
 				{
 					if (block.Block.Source is not FilterBlockSource { Syntax: {} syntax })
 						continue;
+
+					locations.Add(syntax.GetLocation());
 
 					_diagnostics.Report(
 						AspectDiagnosticID.AspectNotAppliedToMethod,
@@ -478,6 +506,91 @@ namespace AspectGenerator
 						syntax.GetLocation(),
 						DiagnosticSeverity.Warning);
 				}
+
+				if (_explainNotApplied && locations.Count > 0)
+				{
+					var explained = ExplainChoice(method, choice, GetDefinitionFacts(method), null);
+
+					explained.NotApplied = true;
+					explained.Attributes = locations.ToImmutable();
+				}
+			}
+		}
+
+		/// <summary>One aspect's explanation of one method, as the service collects it for the build report.</summary>
+		sealed class Explained
+		{
+			public string                   Method      { get; init; } = "";
+			public string                   Aspect      { get; init; } = "";
+			public bool                     PerCall     { get; init; }
+			public CascadeExplanation       Explanation { get; init; } = null!;
+			public bool                     NotApplied  { get; set; }
+			public ImmutableArray<Location> Attributes  { get; set; } = ImmutableArray<Location>.Empty;
+		}
+
+		static string DisplayMethod(IMethodSymbol method)
+		{
+			return method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
+		}
+
+		/// <summary>Whether the cascade had a block to go through, here or in the library.</summary>
+		static bool Ran(CascadeExplanation explanation)
+		{
+			return !explanation.Combinations.IsEmpty || explanation.Library is { Combinations.IsEmpty: false };
+		}
+
+		/// <summary>
+		/// The explanation of a definition's decision by one aspect, asked for once however many reports want it. Callers
+		/// hold <see cref="_cacheGate"/>.
+		/// </summary>
+		Explained ExplainChoice(IMethodSymbol definition, AspectChoice choice, IMethodFacts consumer, IMethodFacts? library)
+		{
+			if (_explainedChoices.TryGetValue(choice, out var explained))
+				return explained;
+
+			explained = new Explained
+			{
+				Method      = DisplayMethod(definition),
+				Aspect      = choice.Aspect.Name,
+				Explanation = ExplainOn(choice.Scope, consumer, library, MatchPhase.Definition)
+			};
+
+			_explained.Add(explained);
+			_explainedChoices.Add(choice, explained);
+
+			return explained;
+		}
+
+		/// <summary>Explains <see cref="DecideOn"/> for the same arguments.</summary>
+		CascadeExplanation ExplainOn(AspectScope scope, IMethodFacts consumer, IMethodFacts? library, MatchPhase phase)
+		{
+			var evaluator = scope.Aspect.Evaluator;
+
+			Interlocked.Increment(ref _explainCalls);
+			_trace?.IncrementCounter("Explained methods");
+
+			if (scope.Library is {} libraryScope)
+				return evaluator.ExplainLibraryMethod(Target(library!, phase), libraryScope.Context, libraryScope.MethodCascadeBlocks, Target(consumer, phase));
+
+			return evaluator.Explain(Target(consumer, phase), scope.Context, scope.MethodCascadeBlocks);
+		}
+
+		/// <summary>
+		/// What the build report explains, in a stable order: the method as written, then the aspect. A method the cascade had
+		/// no block for is not in it.
+		/// </summary>
+		public ImmutableArray<ExplainedMethod> GetExplanations()
+		{
+			lock (_cacheGate)
+			{
+				return
+				[
+					.._explained
+						.Where(static e => e.NotApplied || Ran(e.Explanation))
+						.OrderBy(static e => e.Method, StringComparer.Ordinal)
+						.ThenBy (static e => e.Aspect, StringComparer.Ordinal)
+						.Select (static e => new ExplainedMethod(e.Method, e.Aspect, e.NotApplied, e.PerCall, e.Attributes, e.Explanation))
+				];
 			}
 		}
 
@@ -726,12 +839,35 @@ namespace AspectGenerator
 						library = new SymbolMethodFacts(facts.Definition(definition, _shapes).Record.ForCall(method, invocation), facts.Context, _shapes);
 					}
 
+					if (_explainAll)
+						ExplainCall(choice, consumer, library, method);
+
 					if (Decide(choice.Scope, consumer, library, MatchPhase.Call, method) is {} applied && !attributes.Contains(applied))
 						attributes.Add(applied);
 				}
 
 				return attributes;
 			}
+		}
+
+		/// <summary>Explains an aspect's decision for one constructed method, once however many calls bind to it.</summary>
+		void ExplainCall(AspectChoice choice, IMethodFacts consumer, IMethodFacts? library, IMethodSymbol method)
+		{
+			var display = DisplayMethod(method);
+
+			if (!_explainedCalls.TryGetValue(choice.Scope, out var seen))
+				_explainedCalls.Add(choice.Scope, seen = new HashSet<string>(StringComparer.Ordinal));
+
+			if (!seen.Add(display))
+				return;
+
+			_explained.Add(new Explained
+			{
+				Method      = display,
+				Aspect      = choice.Aspect.Name,
+				PerCall     = true,
+				Explanation = ExplainOn(choice.Scope, consumer, library, MatchPhase.Call)
+			});
 		}
 
 		/// <summary>The selection of a method by every aspect that can speak about it, decided on its definition once.</summary>
@@ -765,6 +901,9 @@ namespace AspectGenerator
 				}
 
 				choices.Add(choice);
+
+				if (_explainAll && !dependsOnCall)
+					ExplainChoice(definition, choice, consumer, library);
 			}
 
 			var selection = new MethodSelection(choices.ToImmutable(), applied);

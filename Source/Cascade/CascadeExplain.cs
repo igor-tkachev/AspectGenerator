@@ -75,12 +75,22 @@ namespace AspectGenerator.Cascade
 		/// </summary>
 		public string ToTable(int maxLength)
 		{
+			return ToTable(maxLength, null);
+		}
+
+		/// <summary>
+		/// As <see cref="ToTable(int)"/>, with the origin <paramref name="origin"/> gives for a block (where it was written)
+		/// after each mention of the block; <paramref name="origin"/> gets the block as the explanation holds it and may
+		/// return <see langword="null"/> for one it knows nothing about.
+		/// </summary>
+		public string ToTable(int maxLength, Func<object, string?>? origin)
+		{
 			if (maxLength < CascadeExplainText.MinLength)
 				throw new ArgumentOutOfRangeException(nameof(maxLength), maxLength, $"The table needs at least {CascadeExplainText.MinLength} characters.");
 
 			var text = new StringBuilder();
 
-			CascadeExplainText.Write(text, this);
+			CascadeExplainText.Write(text, this, origin);
 
 			return CascadeExplainText.Truncate(text.ToString(), maxLength);
 		}
@@ -471,12 +481,12 @@ namespace AspectGenerator.Cascade
 	{
 		public const int MinLength = 128;
 
-		public static void Write(StringBuilder text, CascadeExplanation explanation)
+		public static void Write(StringBuilder text, CascadeExplanation explanation, Func<object, string?>? origin)
 		{
 			if (explanation.Library is { } library)
 			{
 				text.Append("library blocks:\n");
-				Write(text, library);
+				Write(text, library, origin);
 				text.Append("then the assembly blocks of the compilation:\n");
 			}
 
@@ -502,11 +512,11 @@ namespace AspectGenerator.Cascade
 			var count = explanation.Combinations.Length;
 
 			for (var i = 0; i < count; i++)
-				WriteCombination(text, explanation.Combinations[i], i + 1, count);
+				WriteCombination(text, explanation.Combinations[i], i + 1, count, origin);
 
 			foreach (var setting in explanation.Settings.OrderBy(s => s.Key, StringComparer.Ordinal))
 				text.Append("setting ").Append(Ascii(setting.Key)).Append(" = ").Append(Value(setting.Value.Value))
-					.Append(" from ").Append(Ascii(setting.Value.Block.ToString() ?? "")).Append('\n');
+					.Append(" from ").Append(BlockText(setting.Value.Block, setting.Value.Block.ToString() ?? "", origin)).Append('\n');
 
 			foreach (var conflict in explanation.Conflicts.OrderBy(c => c.Name, StringComparer.Ordinal))
 			{
@@ -515,7 +525,7 @@ namespace AspectGenerator.Cascade
 				foreach (var (value, blocks) in conflict.Values)
 				{
 					text.Append(' ').Append(Value(value)).Append(" from ");
-					text.Append(string.Join(", ", blocks.Select(b => Ascii(b.ToString() ?? ""))));
+					text.Append(string.Join(", ", blocks.Select(b => BlockText(b, b.ToString() ?? "", origin))));
 					text.Append(';');
 				}
 
@@ -524,10 +534,10 @@ namespace AspectGenerator.Cascade
 			}
 		}
 
-		static void WriteCombination(StringBuilder text, CascadeCombination combination, int number, int count)
+		static void WriteCombination(StringBuilder text, CascadeCombination combination, int number, int count, Func<object, string?>? origin)
 		{
 			text.Append("combination ").Append(number).Append('/').Append(count).Append(": ")
-				.Append(string.Join(" > ", combination.Blocks.Select(b => Ascii(b.Label))))
+				.Append(string.Join(" > ", combination.Blocks.Select(b => BlockText(b, origin))))
 				.Append(" -> ").Append(combination.Selected ? "selected" : "not selected").Append('\n');
 
 			var rows = new List<(string Property, CascadeDeclarationExplanation Declaration)>();
@@ -537,7 +547,7 @@ namespace AspectGenerator.Cascade
 					rows.Add((p.Property.ToFilterName(), d));
 
 			var propertyWidth = Math.Max("property".Length, rows.Count == 0 ? 0 : rows.Max(r => r.Property.Length));
-			var blockWidth    = Math.Max("block".Length,    rows.Count == 0 ? 0 : rows.Max(r => Ascii(r.Declaration.Block.Label).Length));
+			var blockWidth    = Math.Max("block".Length,    rows.Count == 0 ? 0 : rows.Max(r => BlockText(r.Declaration.Block, origin).Length));
 
 			if (rows.Count == 0)
 			{
@@ -550,23 +560,23 @@ namespace AspectGenerator.Cascade
 
 				foreach (var (property, d) in rows)
 				{
-					text.Append("  ").Append(property.PadRight(propertyWidth)).Append("  ").Append(Ascii(d.Block.Label).PadRight(blockWidth)).Append("  ");
-					WriteDeclaration(text, d, withBlock: false);
+					text.Append("  ").Append(property.PadRight(propertyWidth)).Append("  ").Append(BlockText(d.Block, origin).PadRight(blockWidth)).Append("  ");
+					WriteDeclaration(text, d, withBlock: false, origin);
 
 					foreach (var r in d.References)
-						WriteReference(text, r, 6 + propertyWidth + blockWidth);
+						WriteReference(text, r, 6 + propertyWidth + blockWidth, origin);
 				}
 			}
 
 			foreach (var s in combination.Settings)
 				text.Append("  setting ").Append(Ascii(s.Name)).Append(" = ")
-					.Append(s.Block is null ? "the aspect's default" : Value(s.Value) + " from " + Ascii(s.Block.Label)).Append('\n');
+					.Append(s.Block is null ? "the aspect's default" : Value(s.Value) + " from " + BlockText(s.Block, origin)).Append('\n');
 		}
 
-		static void WriteDeclaration(StringBuilder text, CascadeDeclarationExplanation d, bool withBlock)
+		static void WriteDeclaration(StringBuilder text, CascadeDeclarationExplanation d, bool withBlock, Func<object, string?>? origin)
 		{
 			if (withBlock)
-				text.Append(Ascii(d.Block.Label)).Append(": ");
+				text.Append(BlockText(d.Block, origin)).Append(": ");
 
 			text.Append(Level(d.Block.Level).PadRight(8)).Append("  ").Append((d.Satisfied ? "ok" : "fails").PadRight(6)).Append("  ")
 				.Append(Ascii(d.Text));
@@ -577,7 +587,7 @@ namespace AspectGenerator.Cascade
 			text.Append('\n');
 		}
 
-		static void WriteReference(StringBuilder text, CascadeReferenceExplanation r, int indent)
+		static void WriteReference(StringBuilder text, CascadeReferenceExplanation r, int indent, Func<object, string?>? origin)
 		{
 			text.Append(' ', indent).Append(Ascii(r.Text)).Append(" = ").Append(r.Value ? "true" : "false");
 
@@ -592,11 +602,24 @@ namespace AspectGenerator.Cascade
 			foreach (var d in r.Declarations)
 			{
 				text.Append(' ', indent + 2);
-				WriteDeclaration(text, d, withBlock: true);
+				WriteDeclaration(text, d, withBlock: true, origin);
 
 				foreach (var inner in d.References)
-					WriteReference(text, inner, indent + 4);
+					WriteReference(text, inner, indent + 4, origin);
 			}
+		}
+
+		/// <summary>A block's label and, when <paramref name="origin"/> knows it, where the block was written.</summary>
+		static string BlockText(CascadeBlockRef block, Func<object, string?>? origin)
+		{
+			return BlockText(block.Block, block.Label, origin);
+		}
+
+		static string BlockText(object block, string label, Func<object, string?>? origin)
+		{
+			return origin?.Invoke(block) is { Length: > 0 } where
+				? Ascii(label) + " (" + Ascii(where) + ")"
+				: Ascii(label);
 		}
 
 		static string Level(CascadeLevel level)

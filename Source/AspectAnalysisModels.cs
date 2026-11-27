@@ -318,6 +318,21 @@ namespace AspectGenerator
 		List<AttributeInfo>        Attributes,
 		IMethodSymbol?             GenericShape = null);
 
+	/// <summary>
+	/// Why one aspect does or does not apply to one method, for the build report.
+	/// </summary>
+	/// <param name="Method">The method as the report names it: its definition, or for a decision per call the constructed method.</param>
+	/// <param name="NotApplied">The aspect is written on the method and its filters do not select it (AG0232).</param>
+	/// <param name="PerCall">The decision depends on the call: it is the one of this constructed method.</param>
+	/// <param name="Attributes">Where the attributes the aspect is written on the method are; empty when it is not written on the method.</param>
+	internal sealed record ExplainedMethod(
+		string                             Method,
+		string                             Aspect,
+		bool                               NotApplied,
+		bool                               PerCall,
+		ImmutableArray<Location>           Attributes,
+		AspectGenerator.Cascade.CascadeExplanation Explanation);
+
 	internal record DiagnosticInfo(
 		string             Id,
 		string             Message,

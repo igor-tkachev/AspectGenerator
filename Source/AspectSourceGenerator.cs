@@ -403,7 +403,8 @@ namespace AspectGenerator
 			GeneratorExecutionOptions          Options,
 			ImmutableArray<AnalyzedInvocation> AspectedMethods,
 			ImmutableArray<DiagnosticInfo>     Diagnostics,
-			GeneratorTraceReport               Trace);
+			GeneratorTraceReport               Trace,
+			ImmutableArray<ExplainedMethod>    Explanations = default);
 
 		public void Initialize(IncrementalGeneratorInitializationContext context)
 		{
@@ -468,6 +469,7 @@ namespace AspectGenerator
 			var reportedDiagnostics = new HashSet<string>();
 			var options = AspectOptionsResolver.Resolve(compilation, data.Left.Left.Left.Left.Right, diagnosticSink);
 			var trace = GeneratorTraceReport.Create(options);
+			var explanations = ImmutableArray<ExplainedMethod>.Empty;
 			trace.AddCompilation(compilation, options);
 			trace.AddOptions(options);
 			var attrs               = data.Left.Left.Left.Right;
@@ -611,6 +613,8 @@ namespace AspectGenerator
 					{
 					}
 				}
+
+				explanations = selection.GetExplanations();
 			}
 
 			aspectedMethods = [..aspectedMethods.Select(static m => m with { Attributes = InterceptorNamingService.GetOrderedAttributes(m.Attributes) })];
@@ -668,7 +672,7 @@ namespace AspectGenerator
 
 			trace.SetCounter("Diagnostics reported", diagnostics.Count);
 
-			return new AnalysisResult(compilation, options, aspectedMethods, [..diagnostics], trace);
+			return new AnalysisResult(compilation, options, aspectedMethods, [..diagnostics], trace, explanations);
 		}
 
 		/// <summary>

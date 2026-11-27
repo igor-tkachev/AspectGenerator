@@ -377,6 +377,25 @@ namespace AspectGenerator.Selection
 		}
 
 		/// <summary>The assembly of an attribute read from metadata, for the label; nothing for one in the source.</summary>
+		/// <summary>
+		/// Where a block of the cascade was written, for an explanation: the file and line of its attribute, or, for one read
+		/// from a referenced assembly, that assembly. <see langword="null"/> for anything that is not such a block.
+		/// </summary>
+		public static string? Origin(object block)
+		{
+			if (block is not CascadeBlock<FilterTarget> { Source: FilterBlockSource source })
+				return null;
+
+			if (source.Syntax is null)
+				return $"assembly {source.Assembly.Name} (metadata)";
+
+			var span = source.Syntax.GetLocation().GetLineSpan();
+
+			return span.IsValid
+				? $"{System.IO.Path.GetFileName(span.Path)}:{(span.StartLinePosition.Line + 1).ToString(System.Globalization.CultureInfo.InvariantCulture)}"
+				: null;
+		}
+
 		static string Where(ISymbol target, AttributeSyntax? syntax)
 		{
 			if (syntax is not null)

@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+
+using AspectGenerator.Cascade;
+using AspectGenerator.Selection;
 
 using Microsoft.CodeAnalysis;
 
@@ -13,13 +17,21 @@ namespace AspectGenerator
 	{
 		#pragma warning disable RS1035 // Build reports are an explicit source-generator output channel for this package.
 
+		/// <summary>
+		/// Whether a build with these options writes a report. An editor builds after a real build (Hot Reload needs its
+		/// interceptors), but its report would overwrite the compiler's with the state of an edit in progress; only the
+		/// compiler and unknown hosts write one.
+		/// </summary>
+		public static bool WillWrite(GeneratorExecutionOptions options)
+		{
+			return !options.DesignTimeBuild &&
+				options.Host != GeneratorHostKind.Editor &&
+				!string.IsNullOrWhiteSpace(options.ReportFile);
+		}
+
 		public static void Write(AspectSourceGenerator.AnalysisResult analysis)
 		{
-			// An editor builds after a real build (Hot Reload needs its interceptors), but its report would overwrite the
-			// compiler's with the state of an edit in progress; only the compiler and unknown hosts write one.
-			if (analysis.Options.DesignTimeBuild ||
-				analysis.Options.Host == GeneratorHostKind.Editor ||
-				string.IsNullOrWhiteSpace(analysis.Options.ReportFile))
+			if (!WillWrite(analysis.Options))
 				return;
 
 			try
@@ -182,10 +194,110 @@ namespace AspectGenerator
 				AppendOmittedNote(sb, analysis.Options, callSiteCount - listed, callSiteCount, "call sites");
 			}
 
+			var explanations = analysis.Explanations.IsDefault ? ImmutableArray<ExplainedMethod>.Empty : analysis.Explanations;
+
+			// Not applied: always, as the lists. Explained methods: with the trace on. Both take what the lists left.
+			AppendExplanations(
+				sb,
+				analysis.Options,
+				"Not Applied Aspects",
+				"An aspect attribute is written on each of these methods, and its target filters do not select the method.",
+				explanations.Where(static e => e.NotApplied).ToList(),
+				ref remaining);
+
+			if (analysis.Trace.IsEnabled)
+				AppendExplanations(
+					sb,
+					analysis.Options,
+					"Explained Methods",
+					"Every method a target filter considered, with the aspect that was decided for it.",
+					explanations,
+					ref remaining);
+
 			if (trace.Length > 0)
 				sb.AppendLine().Append(trace);
 
 			return sb.ToString();
+		}
+
+		/// <summary>
+		/// Appends a section of explanation tables, one per method and aspect, while they fit in <paramref name="remaining"/>;
+		/// a table is cut at a line end when it is longer than what is left or than <see cref="CascadeExplanation.DefaultTableLength"/>,
+		/// and the tables after the last that fits are counted in a note. Nothing is written for an empty list.
+		/// </summary>
+		static void AppendExplanations(
+			StringBuilder              sb,
+			GeneratorExecutionOptions  options,
+			string                     heading,
+			string                     intro,
+			IReadOnlyList<ExplainedMethod> explanations,
+			ref long                   remaining)
+		{
+			if (explanations.Count == 0)
+				return;
+
+			sb
+				.AppendLine()
+				.Append("## ").AppendLine(heading)
+				.AppendLine()
+				.AppendLine(intro);
+
+			var unlimited = options.ReportSizeLimit <= 0;
+			var listed    = 0;
+
+			foreach (var item in explanations)
+			{
+				var head = new StringBuilder()
+					.AppendLine()
+					.Append("### `").Append(FormatMarkdownCode(item.Method)).Append("` - `").Append(FormatMarkdownCode(item.Aspect)).AppendLine("`")
+					.AppendLine();
+
+				if (item.Attributes.Length > 0)
+					head.Append("Attribute at ").Append(string.Join(", ", item.Attributes.Select(FormatMarkdownLocation))).AppendLine().AppendLine();
+
+				if (item.PerCall)
+					head.AppendLine("The decision depends on the call, on the type arguments it binds: this is the decision for this constructed method.").AppendLine();
+
+				// A fence longer than any run of backticks in the table keeps a filter that contains backticks inside it.
+				string  table;
+				var     overhead = Encoding.UTF8.GetByteCount(head.ToString()) + 16;
+				var     room     = unlimited ? int.MaxValue : (int)Math.Min(CascadeExplanation.DefaultTableLength, remaining - overhead);
+
+				if (room < CascadeExplainText.MinLength)
+					break;
+
+				table = item.Explanation.ToTable(room, FilterBlockSources.Origin);
+
+				var fence = new string('`', Math.Max(3, LongestRun(table, '`') + 1));
+
+				head.Append(fence).AppendLine("text").Append(table);
+
+				if (!table.EndsWith("\n", StringComparison.Ordinal))
+					head.AppendLine();
+
+				head.AppendLine(fence);
+
+				var text = head.ToString();
+
+				sb.Append(text);
+				remaining -= Encoding.UTF8.GetByteCount(text);
+				listed++;
+			}
+
+			AppendOmittedNote(sb, options, explanations.Count - listed, explanations.Count, "explanations");
+
+			static int LongestRun(string text, char c)
+			{
+				int longest = 0, run = 0;
+
+				foreach (var ch in text)
+				{
+					run     = ch == c ? run + 1 : 0;
+					longest = Math.Max(longest, run);
+				}
+
+				return longest;
+			}
 		}
 
 		/// <summary>
