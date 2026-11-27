@@ -602,7 +602,7 @@ For a large project prefer an assembly filter anchored on a method name (`method
 
 ## Explaining a selection
 
-For an aspect attribute on a method that is not applied, the build report lists, per combination of blocks, each property, the block that decided it (file and line) and its value, the expansion of any `aspect.`/`assembly.` reference, and where each setting came from. With `AspectGeneratorTrace=true` the same table is written for every method a filter considered; the report size limit (`AspectGeneratorReportSizeLimit`) applies to these tables. See [Diagnostics](Diagnostics#build-report).
+For an aspect attribute on a method that is not applied, the "Not Applied Aspects" section of the build report lists, per combination of blocks, each property, the block that decided it (file and line) and its value, the expansion of any `aspect.`/`assembly.` reference, and where each setting came from. With `AspectGeneratorTrace=true` the "Explained Methods" section gives the same table for every method a filter considered; for a decision that depends on the call there is one table per constructed method. The report size limit (`AspectGeneratorReportSizeLimit`) applies to these tables. See [Diagnostics](Diagnostics#explaining-a-selection).
 
 ## Highlighting
 

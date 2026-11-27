@@ -110,7 +110,7 @@ The report is limited to 1,024 KB by default (`AspectGeneratorReportSizeLimit`, 
 
 ### Explaining a selection
 
-For an aspect attribute on a method that is not applied (`AG0232`), the report lists, per combination of blocks, each property, the block that decided it (file and line) and its value, the expansion of any `aspect.`/`assembly.` reference, and where each setting came from. With `AspectGeneratorTrace=true` the same table is written for every method a filter considered. These tables count towards `AspectGeneratorReportSizeLimit`, like the lists. See [Levels and the cascade](Target-filters#levels-and-the-cascade) for how the decision is made.
+For an aspect attribute on a method that is not applied (`AG0232`), the "Not Applied Aspects" section of the report lists, per combination of blocks, each property, the block that decided it (file and line) and its value, the expansion of any `aspect.`/`assembly.` reference, and where each setting came from. With `AspectGeneratorTrace=true` the "Explained Methods" section gives the same table for every method a filter considered, one per constructed method for a decision that depends on the call. These tables count towards `AspectGeneratorReportSizeLimit`, like the lists: a table is cut at a line end when it does not fit, and the report says how many it left out. See [Levels and the cascade](Target-filters#levels-and-the-cascade) for how the decision is made.
 
 ## Build Report Trace
 
