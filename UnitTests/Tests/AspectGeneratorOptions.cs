@@ -12,14 +12,14 @@ using AspectGenerator;
 [assembly: Aspects.Log(
 	TargetFilter =
 	[
-		@"regex: ^public static System.String AspectGenerator\.Tests\.UnitTests\.AssemblyFilterTarget\(\)$",
-		@"regex: ^public static System.String AspectGenerator\.Tests\.UnitTests\.InterceptedMethod\(System.String\)$",
-		@"regex: ^public static System.String AspectGenerator\.Tests\.UnitTests\.InterceptedGenericMethod<System.String>\(System.String\)$",
-		@"regex: ^public System.String System.String.Substring\(System.Int32\)$"
+		"""
+		method: {global::AspectGenerator.Tests.UnitTests.AssemblyFilterTarget, global::AspectGenerator.Tests.UnitTests.InterceptedMethod, global::AspectGenerator.Tests.UnitTests.InterceptedGenericMethod<string>, global::System.String.Substring}
+		- method: global::System.String.Substring and params: (_, _)
+		"""
 	])]
 
 [assembly: AspectGenerator.Tests.OnCall(
 	TargetFilter =
 	[
-		@"regex: ^public System.Int32 AspectGenerator\.Tests\.OnCallObject\.OnCall\(System.Int32\)$"
+		"public global::AspectGenerator.Tests.OnCallObject.OnCall(int): int"
 	])]

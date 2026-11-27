@@ -553,13 +553,15 @@ namespace AspectGenerator
 
 				trace.AddDecision("target-selection: declaration-first enabled");
 
-				selection.ReportLocalFunctionTargetFilters(appliedAttributes, cancellationToken);
+				// Every filter written on a type, a method or a local function is read before any method is selected: an error in
+				// one turns its aspect off in the whole compilation.
+				selection.ReadFilters(appliedAttributes, cancellationToken);
 
 				AspectSelectionPlan selectionPlan;
 				using (trace.TimePhase("Collect target methods"))
 					selectionPlan = selection.BuildSelectionPlan(methodDeclarations, externalAspectDefinitionsPossible, cancellationToken);
 
-				if (selectionPlan.SelectedTargetMethods.Count == 0 && !selectionPlan.MayTargetExternalMethods && selectionPlan.ExternalTargetMethodNames.Count == 0)
+				if (selectionPlan.SelectedTargetMethods.Count == 0 && !selectionPlan.MayTargetExternalMethods && selectionPlan.ExternalTargetTerms.IsEmpty)
 				{
 					trace.AddDecision("scan-call-sites: skipped reason=no-selected-target-methods");
 					trace.AddDecision("resolve-call-symbols: skipped reason=no-selected-target-methods");
@@ -579,7 +581,7 @@ namespace AspectGenerator
 					else if (selectionPlan.SelectedTargetMethods.Count == 0)
 					{
 						trace.AddDecision("scan-call-sites: required reason=external-target-names");
-						trace.AddDecision("callsite-prefilter: enabled kind=method-name-set");
+						trace.AddDecision("callsite-prefilter: enabled kind=method-name-anchors");
 						trace.AddDecision("resolve-call-symbols: required reason=external-target-names");
 					}
 					else

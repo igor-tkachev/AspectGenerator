@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 using Microsoft.CodeAnalysis;
 
 namespace AspectGenerator
@@ -38,6 +40,35 @@ namespace AspectGenerator
 			return count == 1
 				? $"1 call selected by a target filter was not intercepted ({reason}). Enable {AspectDiagnosticID.FilterSelectedCallNotIntercepted} to list it."
 				: $"{calls} calls selected by a target filter were not intercepted ({reason}). Enable {AspectDiagnosticID.FilterSelectedCallNotIntercepted} to list them.";
+		}
+
+		/// <summary>The AG0232 message: an aspect attribute written on a method that its target filters do not select.</summary>
+		public static string GetAspectNotAppliedToMethodMessage(string aspect, string method)
+		{
+			return $"[{aspect}] on '{method}' is not applied to it: the target filters of the aspect do not select the method.";
+		}
+
+		/// <summary>
+		/// The AG0235 message: the attributes that select a method write different values of one setting. The method keeps the
+		/// aspect; the setting takes the aspect's default.
+		/// </summary>
+		/// <param name="values">Each value with the attributes that write it.</param>
+		public static string GetAspectSettingsConflictMessage(string aspect, string method, string setting, IEnumerable<string> values)
+		{
+			return
+				$"The attributes that select '{method}' for [{aspect}] write different values of {setting}: {string.Join("; ", values)}. " +
+				$"Write the value on a more specific attribute; until then {setting} takes the aspect's default.";
+		}
+
+		/// <summary>
+		/// The AG0236 message: a filter read from a referenced assembly cannot be read, so the aspect selects nothing in the
+		/// compilation.
+		/// </summary>
+		public static string GetUnreadableReferencedFilterMessage(string filter, string assembly, string aspect, string error)
+		{
+			return
+				$"The target filter of {filter} read from the referenced assembly '{assembly}' cannot be read: {error} " +
+				$"[{aspect}] selects nothing in this compilation; rebuild '{assembly}' with this version of AspectGenerator.";
 		}
 
 		/// <summary>The page every diagnostic of the generator links to.</summary>
