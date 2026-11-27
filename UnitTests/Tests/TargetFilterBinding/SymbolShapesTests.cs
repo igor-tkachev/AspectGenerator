@@ -4,6 +4,7 @@ using System.Linq;
 
 using AspectGenerator.TargetFilterBinding;
 
+using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AspectGenerator.Tests.TargetFilterBinding
@@ -249,8 +250,31 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 				"\tpublic " + outer + " Outer(" + outer + " p) { return default!; }\n" +
 				"}\n";
 
-			var probe     = new ProbeCompilation(source);
-			var symbols   = new[] { "Generic", "Tuple", "Function", "Mixed", "Outer" }.ToDictionary(name => name, name => probe.Method("Deep", name));
+			// The compiler binds a type nested by the thousand recursively, which needs more than a test thread's stack
+			// (1 MB on Windows), so the compilation and its symbols are made on a thread of their own with room for it;
+			// only the shapes are then built on the small stack.
+			ProbeCompilation? probe = null;
+			Dictionary<string, IMethodSymbol>? symbols = null;
+
+			var binder = new System.Threading.Thread(() =>
+			{
+				probe   = new ProbeCompilation(source);
+				symbols = new[] { "Generic", "Tuple", "Function", "Mixed", "Outer" }.ToDictionary(name => name, name => probe.Method("Deep", name));
+
+				foreach (var method in symbols.Values)
+				{
+					_ = method.ReturnType.ToDisplayString();
+					_ = method.Parameters[0].Type.ToDisplayString();
+					_ = probe.Definition(method);
+				}
+			}, 256 * 1024 * 1024);
+
+			binder.Start();
+			binder.Join();
+
+			Assert.IsNotNull(probe);
+			Assert.IsNotNull(symbols);
+
 			var shapes    = new TypeShapes();
 			var results   = new List<string>();
 			Exception? failure = null;
