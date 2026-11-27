@@ -592,7 +592,7 @@ namespace AspectGenerator
 			if (info.Symbol is not IMethodSymbol method)
 				return false;
 
-			var attributes = GetSelectedAttributes(method, invocation);
+			var attributes = DropAspectsTurnedOff(GetSelectedAttributes(method, invocation));
 
 			if (attributes.Count == 0)
 				return false;
@@ -609,6 +609,21 @@ namespace AspectGenerator
 
 			analyzedInvocation = new AnalyzedInvocation(invocation, method, attributes, genericShape);
 			return true;
+		}
+
+		/// <summary>
+		/// Leaves out the aspects an error in a filter has turned off, whichever call read that filter first: a decision that
+		/// was cached before the aspect went off still lists it. The list is returned as it is when no aspect of it is off.
+		/// </summary>
+		List<AttributeInfo> DropAspectsTurnedOff(List<AttributeInfo> attributes)
+		{
+			lock (_cacheGate)
+			{
+				if (!attributes.Any(a => _aspects.TryGetValue(a.AttributeClass, out var aspect) && aspect is { IsOff: true }))
+					return attributes;
+
+				return attributes.Where(a => !(_aspects.TryGetValue(a.AttributeClass, out var aspect) && aspect is { IsOff: true })).ToList();
+			}
 		}
 
 		/// <summary>

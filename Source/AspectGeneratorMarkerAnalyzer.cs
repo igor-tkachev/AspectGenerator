@@ -149,6 +149,10 @@ namespace AspectGenerator
 				registry,
 				NullDiagnosticSink.Instance);
 
+			// As in a build, every filter on a type, a method or a local function is read before any method is selected: an
+			// error in one turns its aspect off, and no call of that aspect is marked.
+			service.ReadFilters(AspectDefinitionRegistry.FindAttributes(compilation, cancellationToken), cancellationToken);
+
 			return (service, service.BuildSelectionPlan(methodDeclarations, externalAspectDefinitionsPossible, cancellationToken));
 		}
 

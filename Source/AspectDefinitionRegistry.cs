@@ -93,6 +93,23 @@ namespace AspectGenerator
 			}
 		}
 
+		/// <summary>
+		/// Every attribute written in the source, for the callers that read the filters of applied aspects (<see cref="AspectSelectionService.ReadFilters"/>)
+		/// without a syntax provider: one pass over the trees, made once per compilation.
+		/// </summary>
+		public static ImmutableArray<AttributeSyntax> FindAttributes(Compilation compilation, CancellationToken cancellationToken)
+		{
+			var attributes = ImmutableArray.CreateBuilder<AttributeSyntax>();
+
+			foreach (var tree in compilation.SyntaxTrees)
+				if (!AspectSymbols.IsGeneratedInterceptorsTree(tree))
+					foreach (var node in tree.GetRoot(cancellationToken).DescendantNodes())
+						if (node is AttributeSyntax attribute)
+							attributes.Add(attribute);
+
+			return attributes.ToImmutable();
+		}
+
 		public static bool IsAspectDeclarationCandidate(SyntaxNode node)
 		{
 			return node is ClassDeclarationSyntax { AttributeLists.Count: > 0 } declaration && declaration.AttributeLists
