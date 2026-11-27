@@ -182,7 +182,7 @@ namespace AspectGenerator
 		/// The interceptor names the aspect type, the constructor of the applied attribute, the types of its enum and
 		/// <c>typeof</c> arguments and the hook methods. Returns why one of them cannot be named, or <c>null</c>.
 		/// </summary>
-		static string? GetInaccessibleAspectReason(AttributeInfo attribute, Compilation compilation, bool generateAsync)
+		internal static string? GetInaccessibleAspectReason(AttributeInfo attribute, Compilation compilation, bool generateAsync)
 		{
 			var aspectClass = attribute.AttributeClass;
 
@@ -225,8 +225,8 @@ namespace AspectGenerator
 
 			static IMethodSymbol? GetAppliedConstructor(AttributeInfo attribute)
 			{
-				if (AspectSymbols.GetAppliedAttributeData(attribute) is {} data)
-					return data.AttributeConstructor;
+				if (AspectSymbols.GetAppliedArguments(attribute) is {} data)
+					return data.Constructor;
 
 				if (attribute is { AppliedAttributeSyntax: {} syntax, AppliedSemanticModel: {} semanticModel })
 					return semanticModel.GetSymbolInfo(syntax).Symbol as IMethodSymbol;
@@ -242,16 +242,15 @@ namespace AspectGenerator
 		/// </summary>
 		static IEnumerable<ITypeSymbol> GetAppliedArgumentTypes(AttributeInfo attribute)
 		{
-			if (AspectSymbols.GetAppliedAttributeData(attribute) is {} data)
+			if (AspectSymbols.GetAppliedArguments(attribute) is {} data)
 			{
 				foreach (var constant in data.ConstructorArguments)
 					foreach (var type in GetConstantTypes(constant))
 						yield return type;
 
 				foreach (var argument in data.NamedArguments)
-					if (argument.Key != "TargetFilter")
-						foreach (var type in GetConstantTypes(argument.Value))
-							yield return type;
+					foreach (var type in GetConstantTypes(argument.Value))
+						yield return type;
 			}
 			else if (attribute is { AppliedAttributeSyntax: {} syntax, AppliedSemanticModel: {} semanticModel })
 			{
@@ -423,7 +422,9 @@ namespace AspectGenerator
 		{
 			var targetAttributes = (method.ReducedFrom ?? method).OriginalDefinition.GetAttributes();
 
-			return attributes.Any(a => a.AppliedAttributeData is {} data && targetAttributes.Contains(data));
+			// With an effective application the attribute that selects the method most specifically stands for the aspect: the
+			// aspect is applied to the target when that one is. Otherwise it is the attribute the aspect is applied with.
+			return attributes.Any(a => AspectSymbols.GetReportingAttribute(a) is {} data && targetAttributes.Contains(data));
 		}
 
 		/// <summary>
