@@ -541,6 +541,15 @@ namespace AspectGenerator.Tests.FilterV2
 			Reads("global::MyApp.Save", "[sig global::MyApp.Save]");
 			Reads("public Get*() : int?", "[Public sig Get*() : int?]");
 
+			// A word glued to a wildcard is one name pattern, as in `method: public*`; a word is a whole token.
+			Reads("sealed*", "[sig sealed*]");
+			Reads("public*", "[sig public*]");
+			Reads("static*(..)", "[sig static*(..)]");
+			Reads("partial*", "[sig partial*]");
+			Reads("public sealed*", "[Public sig sealed*]");
+			Reads("protected internal*", "[Protected sig internal*]");
+			Reads("private protected*", "[Private sig protected*]");
+
 			var text      = "Save* (int) : Task";
 			var signature = Only<WordRunSyntax>(Reads(text, "[sig Save*(int) : Task]")).Signature!;
 

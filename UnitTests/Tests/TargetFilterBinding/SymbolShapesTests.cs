@@ -116,10 +116,10 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 				("returns: *",                            Shapes, "Dyn",               T),
 				("returns: *?",                           Shapes, "Dyn",               T),
 
-				// No pattern but `*` is a pointer: `int*` is a name that begins with int.
+				// No pattern but `*` is a pointer: `Int32*` is a name that begins with Int32 (`int*` is refused).
 				("returns: *",                            Shapes, "Pointer",           T),
 				("returns: int",                          Shapes, "Pointer",           F),
-				("returns: int*",                         Shapes, "Pointer",           F),
+				("returns: Int32*",                       Shapes, "Pointer",           F),
 				("returns: **",                           Shapes, "Pointer",           F),
 				("returns: *?",                           Shapes, "Pointer",           F),
 

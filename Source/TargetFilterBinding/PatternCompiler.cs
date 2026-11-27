@@ -251,6 +251,20 @@ namespace AspectGenerator.TargetFilterBinding
 			return null;
 		}
 
+		/// <summary>A segment that begins with C#'s word for a System type and goes on with a wildcard: <c>int*</c>, <c>string*b</c>.</summary>
+		static string? AliasGluedToStar(NameSegmentSyntax segment)
+		{
+			if (segment is { IsGlobstar: false } && segment.Parts.Length >= 2 && segment.Parts[1].Kind == NamePartKind.Star)
+			{
+				var part = segment.Parts[0];
+
+				if (part.Kind == NamePartKind.Text && !part.IsQuoted && part.Span.Length == part.Text!.Length && _aliases.TryGetValue(part.Text, out var clrName))
+					return clrName;
+			}
+
+			return null;
+		}
+
 		/// <summary>What a name holds, read off its syntax before it is compiled.</summary>
 		sealed class Shape
 		{
@@ -564,6 +578,14 @@ namespace AspectGenerator.TargetFilterBinding
 
 		static TypePattern CompileOneNamedType(NamePatternSyntax name, int depth)
 		{
+			if (name.Global is null && name.Segments.Length == 1 && AliasGluedToStar(name.Segments[0]) is { } glued)
+			{
+				// `int*` reads as a pointer to int or as a name that begins with "int", and is neither: a type pattern has
+				// no pointer form, and an alias is never part of a name.
+				throw new PatternException(FilterV2DiagnosticID.InvalidPattern, name.Segments[0].Span,
+					$"Pointer types have no pattern form: write '\"System.{glued}*\"'; for a name write '{glued}*'.");
+			}
+
 			var named = new NamedTypePattern(CompileOneName(name, Anchoring.Trailing, false, depth));
 
 			if (name.Global is null && name.Segments.Length == 1 && name.Segments[0] is { IsGlobstar: false, TypeArguments: null } segment && segment.Parts.Length == 1)

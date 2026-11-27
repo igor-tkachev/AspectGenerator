@@ -117,6 +117,33 @@ namespace AspectGenerator.Tests.TargetFilterBinding
 		}
 
 		[TestMethod]
+		public void AnAliasGluedToAWildcardInATypePositionIsRefusedTest()
+		{
+			foreach (var filter in new[]
+			{
+				"param: int*", "returns: string*", "params: (int*, int)", "System.Math.Max(int*, int)", "Max(int, long*) : void",
+				"returns: List<int*>", "param: ref int*", "returns: {int*,string}", "param: int*[]",
+			})
+			{
+				CollectionAssert.AreEqual(new[] { "AG0224" }, Errors(filter), filter);
+			}
+
+			var diagnostic = FilterBlockBuilder.Build(CascadeLevel.Assembly, ["param: int*"]).Diagnostics.Single();
+
+			StringAssert.Contains(diagnostic.Message, "Pointer types have no pattern form: write '\"System.Int32*\"'; for a name write 'Int32*'.");
+			Assert.AreEqual("int*", "param: int*".Substring(diagnostic.Span.Start, diagnostic.Span.Length));
+
+			// Names that merely look alike, and an alias that is no glob, are as before.
+			foreach (var filter in new[] { "param: Int32*", "param: *int", "param: int", "param: int?", "param: @int*", "param: \"int\"*", "param: System.int*", "method: int*", "returns: *" })
+				CollectionAssert.AreEqual(Array.Empty<string>(), Errors(filter), filter);
+
+			var facts = new RecordFacts("N.C", "M", "System.Int32");
+
+			Assert.AreEqual(T, FilterProbe.Answer("returns: Int32*", facts));
+			Assert.AreEqual(T, FilterProbe.Answer("returns: *32", facts));
+		}
+
+		[TestMethod]
 		public void GlobalRootsAWholeAlternativeHoweverDeepTest()
 		{
 			var nested = _probe.Value.Definition("N.C", "Save");

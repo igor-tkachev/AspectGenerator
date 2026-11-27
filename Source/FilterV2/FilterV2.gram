@@ -144,16 +144,18 @@ WordsOrSignature : @FilterExpressionSyntax
 	= first: Word & more: Word* & signature: Signature? => @(Words(parserSpan, first, more, signature))
 	| signature: Signature                             => @(Words(parserSpan, null, null, signature))
 
+// A word is a whole token: a word glued to more of a name (`public*`, `sealed{A,B}`) is a name pattern, as it is in
+// `method: public*`.
 Word : @WordSyntax
-	= "protected" & "internal"   => @(new WordSyntax(Span(parserSpan), FilterWord.ProtectedInternal))
-	| "internal" & "protected"   => @(new WordSyntax(Span(parserSpan), FilterWord.ProtectedInternal))
-	| "private" & "protected"    => @(new WordSyntax(Span(parserSpan), FilterWord.PrivateProtected))
-	| "protected" & "private"    => @(new WordSyntax(Span(parserSpan), FilterWord.PrivateProtected))
+	= "protected" & "internal" ~ ?!Lex.PartStart   => @(new WordSyntax(Span(parserSpan), FilterWord.ProtectedInternal))
+	| "internal" & "protected" ~ ?!Lex.PartStart   => @(new WordSyntax(Span(parserSpan), FilterWord.ProtectedInternal))
+	| "private" & "protected" ~ ?!Lex.PartStart    => @(new WordSyntax(Span(parserSpan), FilterWord.PrivateProtected))
+	| "protected" & "private" ~ ?!Lex.PartStart    => @(new WordSyntax(Span(parserSpan), FilterWord.PrivateProtected))
 	| w: ("public" | "internal" | "protected" | "private"
 	  | "static" | "instance" | "async" | "virtual" | "override" | "abstract" | "sealed" | "extern"
-	  | "extension" | "project" | "generated")
+	  | "extension" | "project" | "generated") ~ ?!Lex.PartStart
 	                             => @(new WordSyntax(Span(parserSpan), FilterV2Language.Word(w)))
-	| w: ("iterator" | "unsafe" | "partial" | "readonly" | "exposed")
+	| w: ("iterator" | "unsafe" | "partial" | "readonly" | "exposed") ~ ?!Lex.PartStart
 	                             => @(ReservedWord(parserSpan, w))
 
 // The parts of a compact signature stand on one line, whatever the trivia around it.

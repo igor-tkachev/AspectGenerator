@@ -210,15 +210,11 @@ namespace AspectGenerator.Tests.FilterV2Oracle
 		}
 
 		/// <summary>
-		/// A word glued to a wildcard, standing where a compact signature may stand. In a value (<c>method: public*</c>)
-		/// both readers take <c>public*</c> as one name pattern; standing alone, the product reads <c>sealed*</c> as the
-		/// word <c>sealed</c> followed by the signature <c>*</c>, so it selects every sealed method. The reference text
-		/// allows white space between tokens but none inside a pattern, and says that a keyword used as a name needs
-		/// <c>@</c> only when the name equals the keyword: read literally, <c>sealed*</c> is one pattern, a method whose
-		/// name begins with "sealed". Pinned with the oracle's reading until the text decides.
+		/// A word glued to a wildcard, standing where a compact signature may stand. A word is a whole token: glued to a
+		/// wildcard it is one name pattern, the same as in a value (<c>method: public*</c>), so <c>sealed*</c> selects the
+		/// methods whose name begins with "sealed", not every sealed method.
 		/// </summary>
 		[TestMethod]
-		[Ignore("Open: the reference text does not say whether a word glued to a wildcard is one pattern; the product reads 'sealed*' as 'sealed *'.")]
 		[DataRow("sealed*")]
 		[DataRow("public*")]
 		[DataRow("static*(..)")]
